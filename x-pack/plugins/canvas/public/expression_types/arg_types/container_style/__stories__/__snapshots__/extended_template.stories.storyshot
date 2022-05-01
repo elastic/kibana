@@ -30,7 +30,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -71,7 +71,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -159,7 +159,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -245,7 +245,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -286,7 +286,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -322,7 +322,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -363,7 +363,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow1"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
           style={
             Object {
@@ -448,7 +448,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -489,7 +489,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -577,7 +577,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -662,7 +662,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -703,7 +703,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -739,7 +739,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -780,7 +780,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow1"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
         style={
           Object {
@@ -876,7 +876,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -917,7 +917,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1005,7 +1005,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1091,7 +1091,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1132,7 +1132,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1168,7 +1168,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1209,7 +1209,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow1"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
           style={
             Object {
