@@ -413,48 +413,6 @@ export const KEYID_REQUIRED = i18n.translate(
   }
 );
 
-export const SERVICENOW_ITSM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in ServiceNow ITSM.',
-  }
-);
-
-export const SERVICENOW_SIR_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in ServiceNow SecOps.',
-  }
-);
-
-export const SERVICENOW_ITSM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow ITSM',
-  }
-);
-
-export const SERVICENOW_SIR_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow SecOps',
-  }
-);
-
-export const SERVICENOW_ITOM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow ITOM',
-  }
-);
-
-export const SERVICENOW_ITOM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
-  {
-    defaultMessage: 'Create an event in ServiceNow ITOM.',
-  }
-);
-
 export const IS_OAUTH = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.useOAuth',
   {

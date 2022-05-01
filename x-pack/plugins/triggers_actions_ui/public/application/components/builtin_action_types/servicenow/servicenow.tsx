@@ -6,6 +6,7 @@
  */
 
 import { lazy } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
   ConnectorValidationResult,
@@ -21,14 +22,48 @@ import {
 } from './types';
 import { isValidUrl } from '../../../lib/value_validators';
 import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from './helpers';
-import {
-  SERVICENOW_ITOM_DESC,
-  SERVICENOW_ITOM_TITLE,
-  SERVICENOW_ITSM_DESC,
-  SERVICENOW_ITSM_TITLE,
-  SERVICENOW_SIR_DESC,
-  SERVICENOW_SIR_TITLE,
-} from './translations';
+
+export const SERVICENOW_ITOM_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow ITOM',
+  }
+);
+
+export const SERVICENOW_ITOM_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
+  {
+    defaultMessage: 'Create an event in ServiceNow ITOM.',
+  }
+);
+
+export const SERVICENOW_ITSM_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
+  {
+    defaultMessage: 'Create an incident in ServiceNow ITSM.',
+  }
+);
+
+export const SERVICENOW_SIR_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
+  {
+    defaultMessage: 'Create an incident in ServiceNow SecOps.',
+  }
+);
+
+export const SERVICENOW_ITSM_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow ITSM',
+  }
+);
+
+export const SERVICENOW_SIR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow SecOps',
+  }
+);
 
 const validateConnector = async (
   action: ServiceNowActionConnector
