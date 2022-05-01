@@ -34,6 +34,7 @@ import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
+import { REFERENCES } from '../translations';
 
 const tabs = ['Remediation', 'Resource', 'General', 'JSON'] as const;
 
@@ -124,13 +125,12 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
   );
 };
 
-const getGeneralCards = ({ rule }: CspFinding): Card[] => [
+const getGeneralCards = ({ rule, ...rest }: CspFinding): Card[] => [
   {
     title: TEXT.RULE,
     listItems: [
-      [TEXT.SEVERITY, ''],
-      [TEXT.INDEX, ''],
-      [TEXT.RULE_EVALUATED_AT, ''],
+      [TEXT.INDEX, 'rule._index'],
+      [TEXT.RULE_EVALUATED_AT, moment(rest['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS')],
       [
         TEXT.FRAMEWORK_SOURCES,
         <EuiFlexGroup gutterSize="s">
@@ -142,25 +142,21 @@ const getGeneralCards = ({ rule }: CspFinding): Card[] => [
           </EuiFlexItem>
         </EuiFlexGroup>,
       ],
-      [TEXT.SECTION, ''],
-      [TEXT.PROFILE_APPLICABILITY, ''],
-      [TEXT.AUDIT, ''],
+      [TEXT.CIS_SECTION, rule.section],
+      [
+        TEXT.PROFILE_APPLICABILITY,
+        <EuiMarkdownFormat>{rule.profile_applicability}</EuiMarkdownFormat>,
+      ],
       [TEXT.BENCHMARK, rule.benchmark.name],
       [TEXT.NAME, rule.name],
-      [TEXT.DESCRIPTION, rule.description],
-      [
-        TEXT.TAGS,
-        rule.tags.map((t) => (
-          <EuiBadge key={t} color="default">
-            {t}
-          </EuiBadge>
-        )),
-      ],
+      [TEXT.DESCRIPTION, <EuiMarkdownFormat>{rule.description}</EuiMarkdownFormat>],
+      [TEXT.AUDIT, <EuiMarkdownFormat>{rule.audit}</EuiMarkdownFormat>],
+      [TEXT.REFERENCES, <EuiMarkdownFormat>{rule.references}</EuiMarkdownFormat>],
     ],
   },
 ];
 
-const getRemediationCards = ({ result, ...rest }: CspFinding): Card[] => [
+const getRemediationCards = ({ result, rule, ...rest }: CspFinding): Card[] => [
   {
     title: TEXT.RESULT_DETAILS,
     listItems: [
@@ -177,10 +173,10 @@ const getRemediationCards = ({ result, ...rest }: CspFinding): Card[] => [
   {
     title: TEXT.REMEDIATION,
     listItems: [
-      ['', <EuiMarkdownFormat>{rest.rule.remediation}</EuiMarkdownFormat>],
-      [TEXT.IMPACT, <EuiMarkdownFormat>{rest.rule.impact}</EuiMarkdownFormat>],
-      [TEXT.DEFAULT_VALUE, <EuiMarkdownFormat>{rest.rule.default_value}</EuiMarkdownFormat>],
-      [TEXT.RATIONALE, <EuiMarkdownFormat>{rest.rule.rationale}</EuiMarkdownFormat>],
+      ['', <EuiMarkdownFormat>{rule.remediation}</EuiMarkdownFormat>],
+      [TEXT.IMPACT, <EuiMarkdownFormat>{rule.impact}</EuiMarkdownFormat>],
+      [TEXT.DEFAULT_VALUE, <EuiMarkdownFormat>{rule.default_value}</EuiMarkdownFormat>],
+      [TEXT.RATIONALE, <EuiMarkdownFormat>{rule.rationale}</EuiMarkdownFormat>],
     ],
   },
 ];

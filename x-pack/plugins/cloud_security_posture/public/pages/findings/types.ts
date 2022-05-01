@@ -48,6 +48,10 @@ export interface CspFinding {
 
 interface CspRule {
   benchmark: { name: string; version: string };
+  section: string;
+  audit: string;
+  references: string;
+  profile_applicability: string;
   description: string;
   impact: string;
   default_value: string;
