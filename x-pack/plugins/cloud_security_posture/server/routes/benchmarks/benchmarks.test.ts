@@ -327,28 +327,14 @@ describe('benchmarks API', () => {
       it('should filter enabled rules', async () => {
         const packagePolicy = createPackagePolicyMock();
         mockSoClient.find.mockResolvedValueOnce({
+          aggregations: { enabled_status: { doc_count: 2 } },
+          page: 1,
+          per_page: 10000,
           total: 3,
           saved_objects: [
             {
               type: 'csp_rule',
-              attributes: {
-                enabled: true,
-                rego_rule_id: 'cis_1_1_1',
-              },
-            },
-            {
-              type: 'csp_rule',
-              attributes: {
-                enabled: true,
-                rego_rule_id: 'cis_1_1_2',
-              },
-            },
-            {
-              type: 'csp_rule',
-              attributes: {
-                enabled: false,
-                rego_rule_id: 'cis_1_1_3',
-              },
+              id: '0af387d0-c933-11ec-b6c8-4f8afc058cc3',
             },
           ],
         } as unknown as SavedObjectsFindResponse);
