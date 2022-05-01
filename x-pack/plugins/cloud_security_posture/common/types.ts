@@ -21,7 +21,7 @@ export interface Stats extends FindingsEvaluation {
   postureScore: Score;
 }
 
-export interface ResourceType extends FindingsEvaluation {
+export interface GroupedFindingsEvaluation extends FindingsEvaluation {
   name: string;
 }
 
@@ -36,13 +36,13 @@ export interface Cluster {
     lastUpdate: number; // unix epoch time
   };
   stats: Stats;
-  resourcesTypes: ResourceType[];
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   trend: PostureTrend[];
 }
 
 export interface ComplianceDashboardData {
   stats: Stats;
-  resourcesTypes: ResourceType[];
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   clusters: Cluster[];
   trend: PostureTrend[];
 }

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type { FormattedLangIdentResp } from './lang_ident_inference';
+export type { FormattedLangIdentResponse, LangIdentResponse } from './lang_ident_inference';
 export { LangIdentInference } from './lang_ident_inference';
-export { LangIdentOutput } from './lang_ident_output';
+export { getLangIdentOutputComponent } from './lang_ident_output';
