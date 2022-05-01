@@ -5,19 +5,45 @@
  * 2.0.
  */
 import React from 'react';
+import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
-import { allNavigationItems } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { FindingsContainer } from './findings_container';
+import { allNavigationItems, findingsNavigation } from '../../common/navigation/constants';
 import { CspPageTemplate } from '../../components/csp_page_template';
+import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
+import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { UnknownRoute } from '../../components/unknown_route';
 
 export const Findings = () => {
+  const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView();
-  useCspBreadcrumbs([allNavigationItems.findings]);
+
+  if (!dataViewQuery.data) return <CspPageTemplate paddingSize="none" query={dataViewQuery} />;
 
   return (
     <CspPageTemplate paddingSize="none" query={dataViewQuery}>
-      {dataViewQuery.data && <FindingsContainer dataView={dataViewQuery.data} />}
+      <Switch>
+        <Route
+          exact
+          path={allNavigationItems.findings.path}
+          component={() => (
+            <Redirect
+              to={{
+                pathname: findingsNavigation.findings_default.path,
+                search: location.search,
+              }}
+            />
+          )}
+        />
+        <Route
+          path={findingsNavigation.findings_default.path}
+          render={() => <LatestFindingsContainer dataView={dataViewQuery.data} />}
+        />
+        <Route
+          path={findingsNavigation.findings_by_resource.path}
+          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data} />}
+        />
+        <Route path={'*'} component={UnknownRoute} />
+      </Switch>
     </CspPageTemplate>
   );
 };
