@@ -28,16 +28,7 @@ export { ServiceNowConnectorFields as default };
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({
-  action,
-  editActionSecrets,
-  editActionConfig,
-  errors,
-  consumer,
-  readOnly,
-  setCallbacks,
-  isEdit,
-}) => {
+> = ({ action, editActionSecrets, editActionConfig, errors, readOnly, setCallbacks }) => {
   const {
     http,
     notifications: { toasts },
@@ -97,7 +88,7 @@ const ServiceNowConnectorFields: React.FC<
         connector: {
           name: action.name,
           config: { ...config, usesTableApi: false },
-          secrets: secrets as Record<string, unknown>,
+          secrets: { ...secrets },
         },
         id: action.id,
       });

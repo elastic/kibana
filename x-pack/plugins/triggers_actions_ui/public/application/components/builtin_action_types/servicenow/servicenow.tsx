@@ -35,97 +35,79 @@ const validateConnector = async (
 ): Promise<ConnectorValidationResult<Omit<ServiceNowConfig, 'isOAuth'>, ServiceNowSecrets>> => {
   const translations = await import('./translations');
 
-  const configErrorsCommon = {
+  const configErrors = {
     apiUrl: new Array<string>(),
     usesTableApi: new Array<string>(),
-  };
-
-  const configErrorsOAuth = {
     clientId: new Array<string>(),
     userIdentifierValue: new Array<string>(),
     jwtKeyId: new Array<string>(),
   };
 
-  const secretsErrorsBasicAuth = {
+  const secretsErrors = {
     username: new Array<string>(),
     password: new Array<string>(),
-  };
-
-  const secretsErrorsOAuth = {
     clientSecret: new Array<string>(),
     privateKey: new Array<string>(),
     privateKeyPassword: new Array<string>(),
   };
 
   if (!action.config.apiUrl) {
-    configErrorsCommon.apiUrl = [...configErrorsCommon.apiUrl, translations.API_URL_REQUIRED];
+    configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRED];
   }
 
   if (action.config.apiUrl) {
     if (!isValidUrl(action.config.apiUrl)) {
-      configErrorsCommon.apiUrl = [...configErrorsCommon.apiUrl, translations.API_URL_INVALID];
+      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_INVALID];
     } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
-      configErrorsCommon.apiUrl = [
-        ...configErrorsCommon.apiUrl,
-        translations.API_URL_REQUIRE_HTTPS,
-      ];
+      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRE_HTTPS];
     }
   }
 
   if (action.config.isOAuth) {
     if (!action.config.clientId) {
-      configErrorsOAuth.clientId = [...configErrorsOAuth.clientId, translations.CLIENTID_REQUIRED];
+      configErrors.clientId = [...configErrors.clientId, translations.CLIENTID_REQUIRED];
     }
 
     if (!action.config.userIdentifierValue) {
-      configErrorsOAuth.userIdentifierValue = [
-        ...configErrorsOAuth.userIdentifierValue,
+      configErrors.userIdentifierValue = [
+        ...configErrors.userIdentifierValue,
         translations.USER_EMAIL_REQUIRED,
       ];
     }
 
     if (!action.config.jwtKeyId) {
-      configErrorsOAuth.jwtKeyId = [...configErrorsOAuth.jwtKeyId, translations.KEYID_REQUIRED];
+      configErrors.jwtKeyId = [...configErrors.jwtKeyId, translations.KEYID_REQUIRED];
     }
 
     if (!action.secrets.clientSecret) {
-      secretsErrorsOAuth.clientSecret = [
-        ...secretsErrorsOAuth.clientSecret,
+      secretsErrors.clientSecret = [
+        ...secretsErrors.clientSecret,
         translations.CLIENTSECRET_REQUIRED,
       ];
     }
 
     if (!action.secrets.privateKey) {
-      secretsErrorsOAuth.privateKey = [
-        ...secretsErrorsOAuth.privateKey,
-        translations.PRIVATE_KEY_REQUIRED,
-      ];
+      secretsErrors.privateKey = [...secretsErrors.privateKey, translations.PRIVATE_KEY_REQUIRED];
     }
 
     if (!action.secrets.privateKeyPassword) {
-      secretsErrorsOAuth.privateKeyPassword = [
-        ...secretsErrorsOAuth.privateKeyPassword,
+      secretsErrors.privateKeyPassword = [
+        ...secretsErrors.privateKeyPassword,
         translations.PRIVATE_KEY_PASSWORD_REQUIRED,
       ];
     }
   } else {
     if (!action.secrets.username) {
-      secretsErrorsBasicAuth.username = [
-        ...secretsErrorsBasicAuth.username,
-        translations.USERNAME_REQUIRED,
-      ];
+      secretsErrors.username = [...secretsErrors.username, translations.USERNAME_REQUIRED];
     }
     if (!action.secrets.password) {
-      secretsErrorsBasicAuth.password = [
-        ...secretsErrorsBasicAuth.password,
-        translations.PASSWORD_REQUIRED,
-      ];
+      secretsErrors.password = [...secretsErrors.password, translations.PASSWORD_REQUIRED];
     }
   }
 
   return {
-    config: { errors: { ...configErrorsCommon, ...configErrorsOAuth } },
-    secrets: { errors: { ...secretsErrorsBasicAuth, ...secretsErrorsOAuth } },
+    config: { errors: configErrors },
+    secrets: { errors: secretsErrors },
   };
 };
 
