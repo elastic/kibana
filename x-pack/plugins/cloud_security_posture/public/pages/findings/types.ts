@@ -50,6 +50,8 @@ interface CspRule {
   benchmark: { name: string; version: string };
   description: string;
   impact: string;
+  default_value: string;
+  rationale: string;
   name: string;
   remediation: string;
   tags: string[];
@@ -57,6 +59,7 @@ interface CspRule {
 
 interface CspFindingResult {
   evaluation: 'passed' | 'failed';
+  expected: Record<string, unknown>;
   evidence: {
     filemode: string;
   };

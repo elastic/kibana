@@ -23,8 +23,10 @@ import {
   EuiFlexGroup,
   EuiIcon,
   type PropsOf,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
+import moment from 'moment';
 import type { CspFinding } from '../types';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
@@ -33,10 +35,10 @@ import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
 
-const tabs = ['remediation', 'resource', 'general', 'json'] as const;
+const tabs = ['Remediation', 'Resource', 'General', 'JSON'] as const;
 
 const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
-  <EuiCodeBlock {...props} isCopyable paddingSize="s" />
+  <EuiCodeBlock {...props} isCopyable paddingSize="s" overflowHeight={300} />
 );
 
 type FindingsTab = typeof tabs[number];
@@ -75,13 +77,13 @@ const Cards = ({ data }: { data: Card[] }) => (
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
   switch (tab) {
-    case 'remediation':
+    case 'Remediation':
       return <Cards data={getRemediationCards(findings)} />;
-    case 'resource':
+    case 'Resource':
       return <ResourceTab data={findings} />;
-    case 'general':
+    case 'General':
       return <Cards data={getGeneralCards(findings)} />;
-    case 'json':
+    case 'JSON':
       return <JsonTab data={findings} />;
     default:
       assertNever(tab);
@@ -89,7 +91,7 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
 };
 
 export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
-  const [tab, setTab] = useState<FindingsTab>('remediation');
+  const [tab, setTab] = useState<FindingsTab>('Remediation');
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -109,12 +111,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
-            <EuiTab
-              key={v}
-              isSelected={tab === v}
-              onClick={() => setTab(v)}
-              style={{ textTransform: 'capitalize' }}
-            >
+            <EuiTab key={v} isSelected={tab === v} onClick={() => setTab(v)}>
               {v}
             </EuiTab>
           ))}
@@ -167,18 +164,23 @@ const getRemediationCards = ({ result, ...rest }: CspFinding): Card[] => [
   {
     title: TEXT.RESULT_DETAILS,
     listItems: [
-      [TEXT.EXPECTED, ''],
+      result.expected
+        ? [TEXT.EXPECTED, <CodeBlock>{JSON.stringify(result.expected, null, 2)}</CodeBlock>]
+        : ['', ''],
       [TEXT.EVIDENCE, <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>],
-      [TEXT.TIMESTAMP, <CodeBlock>{rest['@timestamp']}</CodeBlock>],
+      [
+        TEXT.TIMESTAMP,
+        <span>{moment(rest['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS')}</span>,
+      ],
     ],
   },
   {
     title: TEXT.REMEDIATION,
     listItems: [
-      ['', <CodeBlock>{rest.rule.remediation}</CodeBlock>],
-      [TEXT.IMPACT, rest.rule.impact],
-      [TEXT.DEFAULT_VALUE, ''],
-      [TEXT.RATIONALE, ''],
+      ['', <EuiMarkdownFormat>{rest.rule.remediation}</EuiMarkdownFormat>],
+      [TEXT.IMPACT, <EuiMarkdownFormat>{rest.rule.impact}</EuiMarkdownFormat>],
+      [TEXT.DEFAULT_VALUE, <EuiMarkdownFormat>{rest.rule.default_value}</EuiMarkdownFormat>],
+      [TEXT.RATIONALE, <EuiMarkdownFormat>{rest.rule.rationale}</EuiMarkdownFormat>],
     ],
   },
 ];
