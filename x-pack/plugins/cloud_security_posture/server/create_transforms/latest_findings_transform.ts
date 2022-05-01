@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { FINDINGS_INDEX_PATTERN, LATEST_FINDINGS_INDEX_PATTERN } from '../../common/constants';
+import { FINDINGS_INDEX_PATTERN, LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../common/constants';
 
 export const latestFindingsTransform: TransformPutTransformRequest = {
   transform_id: 'cloud_security_posture.findings_latest-default-0.0.1',
@@ -14,7 +14,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
     index: FINDINGS_INDEX_PATTERN,
   },
   dest: {
-    index: LATEST_FINDINGS_INDEX_PATTERN,
+    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   },
   frequency: '5m',
   sync: {

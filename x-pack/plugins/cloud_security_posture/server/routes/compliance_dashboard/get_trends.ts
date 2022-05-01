@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { BENCHMARK_SCORE_INDEX_PATTERN } from '../../../common/constants';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import { Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';
 
@@ -26,7 +26,7 @@ export interface ScoreTrendDoc {
 }
 
 export const getTrendsQuery = () => ({
-  index: BENCHMARK_SCORE_INDEX_PATTERN,
+  index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   size: 5,
   sort: '@timestamp:desc',
 });

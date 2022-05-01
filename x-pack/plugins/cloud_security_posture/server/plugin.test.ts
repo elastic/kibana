@@ -24,7 +24,7 @@ import {
   FleetStartContract,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
@@ -131,7 +131,7 @@ describe('Cloud Security Posture Plugin', () => {
       );
 
       const packageMock = createPackagePolicyMock();
-      packageMock.package!.name = CIS_KUBERNETES_PACKAGE_NAME;
+      packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {

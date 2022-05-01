@@ -8,7 +8,7 @@
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
 import { onPackagePolicyPostCreateCallback } from './fleet_integration';
 
 describe('create CSP rules with post package create callback', () => {
@@ -40,7 +40,7 @@ describe('create CSP rules with post package create callback', () => {
   });
   it('should create stateful rules based on rule template', async () => {
     const mockPackagePolicy = createPackagePolicyMock();
-    mockPackagePolicy.package!.name = CIS_KUBERNETES_PACKAGE_NAME;
+    mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
     mockSoClient.find.mockResolvedValueOnce({
       saved_objects: [
         {

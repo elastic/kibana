@@ -17,7 +17,7 @@ import {
   cloudSecurityPostureRuleTemplateSavedObjectType,
   CloudSecurityPostureRuleTemplateSchema,
 } from '../../common/schemas/csp_rule_template';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
 import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../common/schemas/csp_rule';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
@@ -29,7 +29,7 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends Read
 const isCspPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
 ): boolean => {
-  return packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME;
+  return packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 };
 
 /**
