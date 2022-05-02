@@ -8,6 +8,13 @@ exports[`<ToolbarButton /> is rendered 1`] = `
       "navigateToUrl": [Function],
     }
   }
+  data={
+    Object {
+      "hasDataView": [Function],
+      "hasESData": [Function],
+      "hasUserDataView": [Function],
+    }
+  }
   docLinks={
     Object {
       "dataViewsDocLink": "dummy link",

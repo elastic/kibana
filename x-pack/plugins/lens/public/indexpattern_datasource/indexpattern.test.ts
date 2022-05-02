@@ -6,16 +6,22 @@
  */
 
 import React, { ReactElement } from 'react';
+import { SavedObjectReference } from '@kbn/core/public';
 import { isFragment } from 'react-is';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
-import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { TinymathAST } from '@kbn/tinymath';
+import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
+import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../types';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
   operationDefinitionMap,
@@ -29,11 +35,6 @@ import {
   FiltersIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { TinymathAST } from '@kbn/tinymath';
-import { SavedObjectReference } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
 import { DatatableColumn } from '@kbn/expressions-plugin';
 
@@ -186,6 +187,7 @@ describe('IndexPattern Data Source', () => {
 
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),

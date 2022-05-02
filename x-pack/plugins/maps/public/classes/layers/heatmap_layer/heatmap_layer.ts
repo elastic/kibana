@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Map as MbMap, VectorSource as MbVectorSource } from '@kbn/mapbox-gl';
+import type { Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
@@ -89,7 +89,8 @@ export class HeatmapLayer extends AbstractLayer {
         this.getSource().getFieldNames(),
         syncContext.dataFilters,
         this.getQuery(),
-        syncContext.isForceRefresh
+        syncContext.isForceRefresh,
+        syncContext.isFeatureEditorOpenForLayer
       ),
       source: this.getSource() as IMvtVectorSource,
       syncContext,
@@ -97,7 +98,7 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
-    const mbSource = mbMap.getSource(this.getMbSourceId()) as MbVectorSource;
+    const mbSource = mbMap.getSource(this.getMbSourceId()) as VectorTileSource;
     if (!mbSource) {
       return false;
     }
