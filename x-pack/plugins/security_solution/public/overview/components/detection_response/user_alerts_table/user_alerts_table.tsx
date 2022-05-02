@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import {
   EuiBasicTable,
@@ -40,6 +41,10 @@ type GetTableColumns = (params: {
 
 const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuery';
 
+const StyledEuiPanel = styled(EuiPanel)`
+  height: fit-content;
+`;
+
 export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(
@@ -62,7 +67,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
-      <EuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
+      <StyledEuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID}
           title={i18n.USER_ALERTS_SECTION_TITLE}
@@ -89,7 +94,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
             </EuiButton>
           </>
         )}
-      </EuiPanel>
+      </StyledEuiPanel>
     </HoverVisibilityContainer>
   );
 });

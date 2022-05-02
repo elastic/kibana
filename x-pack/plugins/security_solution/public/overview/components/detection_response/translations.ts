@@ -170,7 +170,7 @@ export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
 export const VIEW_ALL_USER_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewAllUserAlerts',
   {
-    defaultMessage: 'View all other user alerts',
+    defaultMessage: 'View all users',
   }
 );
 
@@ -184,7 +184,7 @@ export const VIEW_RECENT_CASES = i18n.translate(
 export const VIEW_ALL_HOST_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewAllHostAlerts',
   {
-    defaultMessage: 'View all other host alerts',
+    defaultMessage: 'View all hosts',
   }
 );
 

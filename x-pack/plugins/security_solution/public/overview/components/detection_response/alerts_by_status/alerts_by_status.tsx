@@ -49,6 +49,10 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
   padding-top: 45px;
 `;
 
+const StyledEuiPanel = styled(EuiPanel)`
+  height: fit-content;
+`;
+
 interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
@@ -119,7 +123,10 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
   return (
     <>
       <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
-        <EuiPanel hasBorder data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}>
+        <StyledEuiPanel
+          hasBorder
+          data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}
+        >
           {loading && (
             <EuiProgress
               data-test-subj="initialLoadingPanelMatrixOverTime"
@@ -204,7 +211,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
               <EuiSpacer size="m" />
             </>
           )}
-        </EuiPanel>
+        </StyledEuiPanel>
       </HoverVisibilityContainer>
     </>
   );
