@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -uo pipefail
+set -euo pipefail
 
-source .buildkite/scripts/steps/test/jest_env.sh
+source .buildkite/scripts/steps/test/test_group_env.sh
 
 export JOB=$BUILDKITE_PARALLEL_JOB
 
@@ -26,7 +26,10 @@ configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | 
 
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
+  # prevent non-zero exit code from breaking the loop
+  set +e;
   NODE_OPTIONS="--max-old-space-size=14336" node ./scripts/jest --config="$config" "$parallelism" --coverage=false --passWithNoTests
+  set -e;
   lastCode=$?
 
   if [ $lastCode -ne 0 ]; then
