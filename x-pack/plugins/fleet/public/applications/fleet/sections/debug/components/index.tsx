@@ -6,3 +6,4 @@
  */
 
 export * from './agent_policy_debugger';
+export * from './integration_debugger';
