@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 REMOTE_CACHE_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/bazel-remote-cache-test)"
 
 cat << EOF >> .bazelrc
