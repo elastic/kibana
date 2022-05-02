@@ -6,7 +6,12 @@
  */
 
 import { API_BASE_PATH } from '../../../../common/constants';
-import { SlmPolicy, SlmPolicyPayload, PolicyIndicesResponse, PolicyFeaturesResponse } from '../../../../common/types';
+import {
+  SlmPolicy,
+  SlmPolicyPayload,
+  PolicyIndicesResponse,
+  PolicyFeaturesResponse,
+} from '../../../../common/types';
 import {
   UIM_POLICY_EXECUTE,
   UIM_POLICY_DELETE,

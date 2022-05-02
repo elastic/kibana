@@ -31,17 +31,14 @@ interface Props {
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
-export const IncludeGlobalStateField: FunctionComponent<Props> = ({
-  policy,
-  onUpdate,
-}) => {
+export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUpdate }) => {
   const { config = {} } = policy;
   const { error: errorLoadingFeatures, isLoading: isLoadingFeatures, data } = useLoadFeatures();
 
   const features = useMemo(() => {
     if (!isLoadingFeatures && !errorLoadingFeatures) {
       const featuresList = data?.features.map((feature) => ({
-        label: feature.name
+        label: feature.name,
       }));
 
       return sortBy(featuresList, 'label');
@@ -51,15 +48,15 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({
   }, [isLoadingFeatures, errorLoadingFeatures, data]);
 
   const [selectedOptions, setSelected] = useState(
-    config?.featureStates?.map(feature => ({ label: feature })) as FeaturesOption[]
+    config?.featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[]
   );
 
-  const onChange = ((selectedOptions: FeaturesOption[]) => {
-    setSelected(selectedOptions);
+  const onChange = (selected: FeaturesOption[]) => {
+    setSelected(selected);
     onUpdate({
-      featureStates: selectedOptions.map(option => option.label),
+      featureStates: selected.map((option) => option.label),
     });
-  });
+  };
 
   return (
     <EuiDescribedFormGroup

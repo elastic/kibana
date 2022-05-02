@@ -25,7 +25,11 @@ import {
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
-import { FormattedDateTime, CollapsibleIndicesList, CollapsibleFeatureStatesList } from '../../../../../components';
+import {
+  FormattedDateTime,
+  CollapsibleIndicesList,
+  CollapsibleFeatureStatesList,
+} from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
 interface Props {

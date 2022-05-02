@@ -14,5 +14,5 @@ export interface PolicyFeaturesResponse {
   features: Array<{
     name: string;
     description: string;
-  }>
+  }>;
 }

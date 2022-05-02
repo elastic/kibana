@@ -198,7 +198,11 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                 <>
                   <EuiSpacer size="m" />
                   <EuiFormRow>
-                    <EuiCallOut title="System indices will be included" color="warning" iconType="alert">
+                    <EuiCallOut
+                      title="System indices will be included"
+                      color="warning"
+                      iconType="alert"
+                    >
                       <p>
                         <FormattedMessage
                           id="xpack.snapshotRestore.policyForm.stepSettings.indicesWithGlobalStateEnabled"

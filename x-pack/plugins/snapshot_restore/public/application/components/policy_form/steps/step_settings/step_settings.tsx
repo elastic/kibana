@@ -127,7 +127,6 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
     </EuiDescribedFormGroup>
   );
 
-
   return (
     <div className="snapshotRestore__policyForm__stepSettings">
       {/* Step title and doc link */}
@@ -172,11 +171,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       {renderIgnoreUnavailableField()}
       {renderPartialField()}
 
-      <IncludeGlobalStateField
-        errors={errors}
-        policy={policy}
-        onUpdate={updatePolicyConfig}
-      />
+      <IncludeGlobalStateField errors={errors} policy={policy} onUpdate={updatePolicyConfig} />
     </div>
   );
 };
