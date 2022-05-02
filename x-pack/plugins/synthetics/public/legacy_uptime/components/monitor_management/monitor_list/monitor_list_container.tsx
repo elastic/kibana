@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, Dispatch } from 'react';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { ConfigKey } from '../../../../../common/runtime_types';
-import { getMonitors } from '../../../state/actions';
 import { monitorManagementListSelector } from '../../../state/selectors';
-import { MonitorManagementListPageState } from './monitor_list';
 import { MonitorAsyncError } from './monitor_async_error';
 import { useInlineErrors } from '../hooks/use_inline_errors';
 import { MonitorListTabs } from './list_tabs';
 import { AllMonitors } from './all_monitors';
 import { InvalidMonitors } from './invalid_monitors';
 import { useInvalidMonitors } from '../hooks/use_invalid_monitors';
+import { MonitorManagementListPageState } from './monitor_list';
+import { MonitorManagementPageAction } from '../hooks/use_monitor_list';
 
-export const MonitorListContainer: React.FC = () => {
-  const [pageState, dispatchPageAction] = useReducer<typeof monitorManagementPageReducer>(
-    monitorManagementPageReducer,
-    {
-      pageIndex: 1, // saved objects page index is base 1
-      pageSize: 10,
-      sortOrder: 'asc',
-      sortField: `${ConfigKey.NAME}.keyword`,
-    }
-  );
-
+export const MonitorListContainer = ({
+  isEnabled,
+  pageState,
+  dispatchPageAction,
+}: {
+  isEnabled?: boolean;
+  pageState: MonitorManagementListPageState;
+  dispatchPageAction: Dispatch<MonitorManagementPageAction>;
+}) => {
   const onPageStateChange = useCallback(
     (state) => {
       dispatchPageAction({ type: 'update', payload: state });
@@ -45,10 +42,7 @@ export const MonitorListContainer: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
   useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
 
-  const dispatch = useDispatch();
   const monitorList = useSelector(monitorManagementListSelector);
-
-  const { pageIndex, pageSize, sortField, sortOrder } = pageState as MonitorManagementListPageState;
 
   const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
   const { errorSummaries, loading, count } = useInlineErrors({
@@ -57,13 +51,11 @@ export const MonitorListContainer: React.FC = () => {
     sortOrder: pageState.sortOrder,
   });
 
-  useEffect(() => {
-    if (viewType === 'all') {
-      dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortField, sortOrder }));
-    }
-  }, [dispatch, pageState, pageIndex, pageSize, sortField, sortOrder, viewType]);
-
   const { data: monitorSavedObjects, loading: objectsLoading } = useInvalidMonitors(errorSummaries);
+
+  if (!isEnabled && monitorList.list.total === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -94,28 +86,4 @@ export const MonitorListContainer: React.FC = () => {
       )}
     </>
   );
-};
-
-type MonitorManagementPageAction =
-  | {
-      type: 'update';
-      payload: MonitorManagementListPageState;
-    }
-  | { type: 'refresh' };
-
-const monitorManagementPageReducer: Reducer<
-  MonitorManagementListPageState,
-  MonitorManagementPageAction
-> = (state: MonitorManagementListPageState, action: MonitorManagementPageAction) => {
-  switch (action.type) {
-    case 'update':
-      return {
-        ...state,
-        ...action.payload,
-      };
-    case 'refresh':
-      return { ...state };
-    default:
-      throw new Error(`Action "${(action as MonitorManagementPageAction)?.type}" not recognizable`);
-  }
 };
