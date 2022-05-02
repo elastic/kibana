@@ -217,6 +217,23 @@ export const getServiceNowConnector = () => ({
   },
 });
 
+export const getServiceNowOAuthConnector = () => ({
+  name: 'ServiceNow OAuth Connector',
+  connector_type_id: '.servicenow',
+  secrets: {
+    clientSecret: 'xyz',
+    privateKey: '-----BEGIN RSA PRIVATE KEY-----\nddddddd\n-----END RSA PRIVATE KEY-----',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
+    isOAuth: true,
+    clientId: 'abc',
+    userIdentifierValue: 'elastic',
+    jwtKeyId: 'def',
+  },
+});
+
 export const getJiraConnector = () => ({
   name: 'Jira Connector',
   connector_type_id: '.jira',
@@ -262,7 +279,7 @@ export const getResilientConnector = () => ({
 });
 
 export const getServiceNowSIRConnector = () => ({
-  name: 'ServiceNow Connector',
+  name: 'ServiceNow SIR Connector',
   connector_type_id: '.servicenow-sir',
   secrets: {
     username: 'admin',
@@ -286,6 +303,19 @@ export const getWebhookConnector = () => ({
       'Content-Type': 'text/plain',
     },
     url: 'http://some.non.existent.com',
+  },
+});
+
+export const getEmailConnector = () => ({
+  name: 'An email action',
+  connector_type_id: '.email',
+  config: {
+    service: '__json',
+    from: 'bob@example.com',
+  },
+  secrets: {
+    user: 'bob',
+    password: 'supersecret',
   },
 });
 
@@ -1215,4 +1245,25 @@ export const createCaseAndBulkCreateAttachments = async ({
   });
 
   return { theCase: patchedCase, attachments };
+};
+
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const calculateDuration = (closedAt: string | null, createdAt: string | null): number => {
+  if (closedAt == null || createdAt == null) {
+    throw new Error('Dates are null');
+  }
+
+  const createdAtMillis = new Date(createdAt).getTime();
+  const closedAtMillis = new Date(closedAt).getTime();
+
+  if (isNaN(createdAtMillis) || isNaN(closedAtMillis)) {
+    throw new Error('Dates are invalid');
+  }
+
+  if (closedAtMillis < createdAtMillis) {
+    throw new Error('Closed date is earlier than created date');
+  }
+
+  return Math.floor(Math.abs((closedAtMillis - createdAtMillis) / 1000));
 };
