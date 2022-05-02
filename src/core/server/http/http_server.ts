@@ -91,6 +91,7 @@ export class HttpServer {
   private server?: Server;
   private config?: HttpConfig;
   private registeredRouters = new Set<IRouter>();
+  private registeredRoutersAfterListening = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
   private handleServerResponseEvent?: (req: Request) => void;
@@ -118,8 +119,14 @@ export class HttpServer {
   }
 
   private registerRouter(router: IRouter) {
-    if (this.isListening()) {
-      throw new Error('Routers can be registered only when HTTP server is stopped.');
+    if (this.isListening()) {      
+      console.log('called registerRouter!')
+      for (const route of router.getRoutes()) {
+        console.log('updating route::', route)
+        this.configureRoute(route);
+      }
+      this.registeredRoutersAfterListening.add(router);
+      return;
     }
 
     this.registeredRouters.add(router);
@@ -162,6 +169,7 @@ export class HttpServer {
       registerOnPreRouting: this.registerOnPreRouting.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerAuth: this.registerAuth.bind(this),
+      reloadRoutes: this.reloadRoutes.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
@@ -209,6 +217,24 @@ export class HttpServer {
         : '';
 
     this.log.info(`http server running at ${this.server.info.uri}${serverPath}`);
+  }
+
+  public async reloadRoutes() {
+    if (this.server === undefined) {
+      throw new Error('Http server is not setup up yet');
+    }
+    if (this.stopping || this.stopped) {
+      this.log.warn(`start called after stop`);
+      return;
+    }
+    this.log.debug('starting http server');
+    console.log('reloading, calling stop!!');
+    
+    
+    console.log('reloading, calling start!!');
+
+    console.log('reloading, done!!');
+    
   }
 
   public async stop() {
@@ -480,6 +506,7 @@ export class HttpServer {
       this.log.warn(`registerStaticDir called after stop`);
     }
 
+
     this.server.route({
       path,
       method: 'GET',
@@ -512,7 +539,17 @@ export class HttpServer {
     };
 
     this.server!.route({
-      handler: route.handler,
+      handler: (...args) => {
+        for (const router of this.registeredRoutersAfterListening) {
+          for (const newRoute of router.getRoutes()) {
+            if (route.path === newRoute.path) {
+              return newRoute.handler(...args)
+            }
+          }
+        }
+
+        return route.handler(...args)
+      },
       method: route.method,
       path: route.path,
       options: {

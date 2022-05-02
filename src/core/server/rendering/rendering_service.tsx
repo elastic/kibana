@@ -59,18 +59,19 @@ export class RenderingService {
   public async setup({
     http,
     status,
-    uiPlugins,
+    getUiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter(''),
       renderer: bootstrapRendererFactory({
-        uiPlugins,
+        getUiPlugins,
         serverBasePath: http.basePath.serverBasePath,
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
       }),
     });
 
+    const uiPlugins = getUiPlugins();
     return {
       render: this.render.bind(this, { http, uiPlugins, status }),
     };

@@ -15,6 +15,7 @@ import { IRouter } from '../../http';
 import { UiPlugins } from '../../plugins';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
+import { REPO_ROOT } from '@kbn/utils';
 
 /**
  *  Creates the routes that serves files from `bundlesPath`.
@@ -66,12 +67,35 @@ export function registerBundleRoutes({
   });
 
   [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
-    registerRouteForBundle(router, {
-      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
-      routePath: `/${buildNum}/bundles/plugin/${id}/${version}/`,
-      bundlesPath: publicTargetDir,
-      fileHashCache,
-      isDist,
-    });
+    if (id === 'console') {
+      console.log('registering for console!', __dirname)
+
+      const public_8_3_0 = join(REPO_ROOT, 'src/AAA_temp/public_8_3_0/target/public');
+      const public_8_3_1 = join(REPO_ROOT, 'src/AAA_temp/public_8_3_1/target/public');
+      
+      registerRouteForBundle(router, {
+        publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/8.3.0/`,
+        routePath: `/${buildNum}/bundles/plugin/${id}/8.3.0/`,
+        bundlesPath: public_8_3_0,
+        fileHashCache,
+        isDist,
+      });
+
+      registerRouteForBundle(router, {
+        publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/8.3.1/`,
+        routePath: `/${buildNum}/bundles/plugin/${id}/8.3.1/`,
+        bundlesPath: public_8_3_1,
+        fileHashCache,
+        isDist,
+      });
+    } else {
+      registerRouteForBundle(router, {
+        publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
+        routePath: `/${buildNum}/bundles/plugin/${id}/${version}/`,
+        bundlesPath: publicTargetDir,
+        fileHashCache,
+        isDist,
+      });
+    }
   });
 }

@@ -204,7 +204,7 @@ export class Server {
     // Configuration could have changed after preboot.
     await ensureValidConfiguration(this.configService);
 
-    const { uiPlugins, pluginPaths, pluginTree } = this.discoveredPlugins!.standard;
+    const { uiPlugins, pluginPaths, pluginTree, getUiPlugins } = this.discoveredPlugins!.standard;
     const contextServiceSetup = this.context.setup({
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
@@ -265,6 +265,7 @@ export class Server {
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
+      getUiPlugins,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -273,11 +274,7 @@ export class Server {
     });
 
     const loggingSetup = this.logging.setup();
-    const pluginsManagmentSetup = this.pluginsManagment.setup({
-      http: httpSetup,
-      plugins: this.plugins,
-    });
-
+    
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
@@ -297,8 +294,13 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
-      pluginsManagment: pluginsManagmentSetup,
     };
+
+    const pluginsManagmentSetup = this.pluginsManagment.setup({
+      http: httpSetup,
+      plugins: this.plugins,
+      coreSetup,
+    });
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
@@ -337,6 +339,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+    
     const pluginsManagmentStart = this.pluginsManagment.start();
 
     this.status.start();
@@ -353,7 +356,6 @@ export class Server {
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
-      pluginsManagment: pluginsManagmentStart,
     };
 
     await this.plugins.start(this.coreStart);

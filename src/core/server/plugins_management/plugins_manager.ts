@@ -3,67 +3,48 @@ import { promisify } from 'util';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import type { PluginDescriptor, AllowedPluginSource } from './types';
+import type { PluginsService } from '../plugins';
 
 export class PluginsManager {
-  private pluginDescriptors: PluginDescriptor[];
-  constructor() {
-    this.pluginDescriptors = [
-      {
-        pluginName: 'Console',
-        source: 'verified',
-        version: '8.3.0',
-        upgradeAvailable: true,
-      },
-      {
-        pluginName: 'Home',
-        source: 'verified',
-        version: '8.3.0',
-        upgradeAvailable: false,
-      },
-    ];
+  private pluginDescriptors: Map<string, PluginDescriptor>;
+  private plugins: PluginsService;
+  private coreSetup: any;
+  private httpSetup: any;
+
+  constructor(plugins: PluginsService, httpSetup: any, coreSetup: any) {
+    this.plugins = plugins;
+    this.coreSetup = coreSetup;
+    this.httpSetup = httpSetup;
+    this.pluginDescriptors = new Map();
+    this.pluginDescriptors.set('console', {
+      pluginName: 'Console',
+      source: 'verified',
+      version: '8.3.0',
+      upgradeAvailable: true,
+    });
+    this.pluginDescriptors.set('home', {
+      pluginName: 'Home',
+      source: 'verified',
+      version: '8.3.0',
+      upgradeAvailable: false,
+    });
   }
-
-  registerPlugins = () => {
-    this.pluginDescriptors.push();
-  };
-
-  private async linkConsolePublic(p: string) {
-    /*
-     PUBLIC UPGRADE HACK
-     This should probably be more like:
-
-     1. Either have downloaded or download upgrade now
-     2. Ensure that network requests are paused for the plugin
-     3. Maybe broadcast upgrade event?
-     4. Switch the public assets
-     5. Done!
-     */
-    const liveDir = path.resolve(REPO_ROOT, 'src/plugins/console/public');
-    console.log('delete live public files...');
-    await fs.rm(liveDir, { force: true, recursive: true });
-    console.log('successfully deleted.');
-    const pathToCopy = path.resolve(REPO_ROOT, p);
-    console.log(`copying: ${pathToCopy} -> ${liveDir}...`);
-    await fs.cp(pathToCopy, liveDir, { force: true, recursive: true });
-    console.log('sucessfully copied.');
-  }
-
-  resetConsole = async () => {
-    // Put the original console code back
-    await this.linkConsolePublic('src/AAA_temp/public');
-  };
 
   upgrade = async () => {
-    await this.linkConsolePublic('src/AAA_temp/public_8_3_0');
-    this.pluginDescriptors = this.pluginDescriptors.map((desc) => {
-      return { ...desc, upgradeAvailable: false };
+    this.pluginDescriptors.set('console', {
+      ...this.pluginDescriptors.get('console')!,
+      upgradeAvailable: false,
+      version: '8.3.1',
     });
+    const descriptor = this.pluginDescriptors.get('console');
 
     // TODO: Server side upgrade
+    await this.plugins.reloadPlugin('console', { coreSetup: this.coreSetup, descriptor })
+    await this.httpSetup.reloadRoutes()
   };
 
   getPluginDescriptors = (): PluginDescriptor[] => {
-    return this.pluginDescriptors;
+    return [...this.pluginDescriptors.values()];
   };
 
   getAllowedPluginSources = async (): Promise<AllowedPluginSource[]> => {

@@ -23,7 +23,7 @@ export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererRe
 interface FactoryOptions {
   serverBasePath: string;
   packageInfo: PackageInfo;
-  uiPlugins: UiPlugins;
+  getUiPlugins: () => UiPlugins;
   auth: HttpAuth;
 }
 
@@ -41,7 +41,7 @@ interface RendererResult {
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
   serverBasePath,
-  uiPlugins,
+  getUiPlugins,
   auth,
 }) => {
   const isAuthenticated = (request: KibanaRequest) => {
@@ -51,6 +51,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   };
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
+    const uiPlugins = getUiPlugins();
     let darkMode = false;
     const themeVersion: ThemeVersion = 'v8';
 
@@ -73,7 +74,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       regularBundlePath,
       isAnonymousPage,
     });
-
+    
     const jsDependencyPaths = getJsDependencyPaths(regularBundlePath, bundlePaths);
 
     // These paths should align with the bundle routes configured in

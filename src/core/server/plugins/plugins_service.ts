@@ -93,7 +93,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
   private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
-  private readonly standardPluginsSystem: PluginsSystem<PluginType.standard>;
+  public readonly standardPluginsSystem: PluginsSystem<PluginType.standard>;
   private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
@@ -133,6 +133,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         },
       },
       standard: {
+        getUiPlugins: () => {
+          const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
+          return {
+            internal: this.standardUiPluginInternalInfo,
+            public: standardUiPlugins,
+            browserConfigs: this.generateUiPluginsConfigs(standardUiPlugins),
+          };
+        },
         pluginPaths: this.standardPluginsSystem.getPlugins().map((plugin) => plugin.path),
         pluginTree: this.standardPluginsSystem.getPluginDependencies(),
         uiPlugins: {
@@ -144,6 +152,23 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     };
   }
 
+  public async reloadPlugin(pluginId: string, { coreSetup, descriptor }: any) {
+    const plugin = this.standardPluginsSystem.getPlugins().find(plugin => plugin.name === pluginId);
+    if (!plugin) {
+      throw new Error(`unable to fine plugin ${plugin} to reload in plugins service`);
+    }
+
+    await this.standardPluginsSystem.reloadPlugin('console', { coreSetup, descriptor });
+
+    if (plugin.includesUiPlugin) {
+      this.standardUiPluginInternalInfo.set(plugin.name, {
+        requiredBundles: plugin.requiredBundles,
+        version: descriptor.version,
+        publicTargetDir: Path.resolve(plugin.path, 'target/public'),
+        publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
+      });
+    }
+  }
   public getExposedPluginConfigsToUsage() {
     return this.pluginConfigUsageDescriptors;
   }

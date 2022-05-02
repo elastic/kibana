@@ -76,7 +76,7 @@ export interface RenderingPrebootDeps {
 export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
-  uiPlugins: UiPlugins;
+  getUiPlugins: () => UiPlugins;
 }
 
 /** @public */

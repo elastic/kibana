@@ -49,6 +49,22 @@ export class PluginsSystem<T extends PluginType> {
     return [...this.plugins.values()];
   }
 
+  public async reloadPlugin(pluginId: string, { coreSetup, descriptor }: any) {
+    const plugin = this.plugins.get(pluginId);
+    if (!plugin) {
+      throw new Error(`unable to find plugin ${pluginId}`);
+    }
+    await plugin.stop();
+
+    // @ts-ignore
+    plugin.manifest.version = descriptor.version;
+
+    this.plugins.set(pluginId, plugin);
+    console.log('updating plugin: ', plugin.name)
+
+    await this.setupPlugins(coreSetup, [ pluginId ]);
+  }
+
   /**
    * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
    * @internal
@@ -81,7 +97,8 @@ export class PluginsSystem<T extends PluginType> {
   }
 
   public async setupPlugins(
-    deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps
+    deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps,
+    filterPlugins?: string[],
   ): Promise<Map<string, unknown>> {
     const contracts = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
@@ -92,7 +109,9 @@ export class PluginsSystem<T extends PluginType> {
       [...this.getTopologicallySortedPluginNames()]
         .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
         .filter(([pluginName, plugin]) => plugin.includesServerPlugin)
+        .filter(([pluginName, plugin]) => filterPlugins? filterPlugins.some(f => f === pluginName): true)
     );
+
     this.log.info(
       `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
     );
@@ -128,11 +147,11 @@ export class PluginsSystem<T extends PluginType> {
       let contract: unknown;
       const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {
-        if (this.coreContext.env.mode.dev) {
-          this.log.warn(
-            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
-          );
-        }
+        // if (this.coreContext.env.mode.dev) {
+        //   this.log.warn(
+        //     `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+        //   );
+        // }
         const contractMaybe = await withTimeout<any>({
           promise: contractOrPromise,
           timeoutMs: 10 * Sec,

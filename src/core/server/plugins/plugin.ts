@@ -97,11 +97,11 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public setup(
+  public async setup(
     setupContext: CoreSetup<TPluginsStart> | CorePreboot,
     plugins: TPluginsSetup
-  ): TSetup | Promise<TSetup> {
-    this.instance = this.createPluginInstance();
+  ): Promise<TSetup> {
+    this.instance = await this.createPluginInstance();
 
     if (this.isPrebootPluginInstance(this.instance)) {
       if (this.manifest.upgradable) {
@@ -111,9 +111,9 @@ export class PluginWrapper<
     }
     if (this.manifest.upgradable) {
       console.log('running setup');
+      return this.instance.call('setup', setupContext as CoreSetup, plugins)
     }
 
-    console.log('running setup FOR ', this.manifest.id);
     return this.instance.setup(setupContext as CoreSetup, plugins);
   }
 
@@ -129,11 +129,18 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    if (this.manifest.upgradable) {
-      console.log('running start!');
-    }
     if (this.isPrebootPluginInstance(this.instance)) {
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
+    }
+
+    if (this.manifest.upgradable) {
+      console.log('running start!');
+      
+      const startContract = this.instance.call('start', startContext, plugins);
+      return startContract.then((resolvedContract) => {
+        this.startDependencies$.next([startContext, plugins, resolvedContract]);
+        return resolvedContract;
+      });
     }
 
     const startContract = this.instance.start(startContext, plugins);
@@ -188,32 +195,31 @@ export class PluginWrapper<
     return configDescriptor;
   }
 
-  private createPluginInstance() {
+  private async createPluginInstance() {
     this.log.debug('Initializing plugin');
-    let isolatePath: string;
-    let activeVersion: string;
+    
     if (this.manifest.upgradable) {
-      activeVersion = this.manifest.version.replace(/\./g, '_');
-      isolatePath = join(this.path, '..', `${this.manifest.id}_${activeVersion}`);
-      // isolatePath = join(this.path)
+      const activeVersion = this.manifest.version.replace(/\./g, '_');
+      console.log('activeVersion::', activeVersion)
+      const isolatePath = join(this.path, '..', `${this.manifest.id}_${activeVersion}.zip`);
+      const isolateModule = await requireIsolate(`${this.manifest.id}_${activeVersion!}`, isolatePath!, this.initializerContext);
+
+      const { isolateInstance, isolateTeardown } = isolateModule;
+      this.isolateTeardown = isolateTeardown;
+
+      if (!isolateInstance.hasMethod('setup')) {
+        throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
+      }
+
+      console.log('instance complete::');
+
+      return isolateInstance;
     }
 
-    // const isolateInstance = this.manifest.upgradable
-    const isolateInstance = false
-      ? requireIsolate<
-          | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-          | PrebootPlugin<TSetup, TPluginsSetup>
-          | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-        >(join(isolatePath!, 'server'))
-      : // eslint-disable-next-line @typescript-eslint/no-var-requires
-        { isolateModule: require(join(this.path, 'server')), isolateTeardown: undefined };
 
-    if (this.manifest.upgradable) {
-      console.log('isolateInstance::', isolateInstance);
-    }
+    // Non upgradable plugins
+    const pluginDefinition = require(join(this.path, 'server'));
 
-    const { isolateModule: pluginDefinition, isolateTeardown } = isolateInstance;
-    this.isolateTeardown = isolateTeardown;
     if (!('plugin' in pluginDefinition)) {
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
     }

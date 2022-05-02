@@ -12,11 +12,12 @@ import { CoreContext } from '../core_context';
 import { InternalHttpServiceSetup } from '../http';
 import { registerRoutes } from './routes';
 import { PluginsManager } from './plugins_manager';
-// import type { PluginsService } from '../plugins';
+import type { PluginsService } from '../plugins';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
-  // plugins: PluginsService;
+  plugins: PluginsService;
+  coreSetup: any;
 }
 
 /**
@@ -35,17 +36,9 @@ export class PluginsManagementService {
     this.configService = coreContext.configService;
   }
 
-  public setup({ http }: SetupDeps): PluginsManagementServiceSetup {
+  public setup({ http, plugins, coreSetup }: SetupDeps): PluginsManagementServiceSetup {
     const router = http.createRouter('/api/plugins/');
-    this.pluginsManager = new PluginsManager();
-    this.pluginsManager
-      .resetConsole()
-      .then(() => {
-        console.log('sucessfully reset console!');
-      })
-      .catch((e) => {
-        console.log(`failed reset console ${e}`);
-      });
+    this.pluginsManager = new PluginsManager(plugins, http, coreSetup);
 
     registerRoutes({
       router,

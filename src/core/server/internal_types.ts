@@ -84,7 +84,6 @@ export interface InternalCoreSetup {
   metrics: InternalMetricsServiceSetup;
   deprecations: InternalDeprecationsServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
-  pluginsManagment: PluginsManagementServiceSetup;
 }
 
 /**
@@ -102,7 +101,6 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
-  pluginsManagment: PluginsManagementServiceStart;
 }
 
 /**
