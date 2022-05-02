@@ -18,6 +18,8 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import { RuleAction } from '@kbn/alerting-plugin/common';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
@@ -86,6 +88,7 @@ export interface RuleStepProps {
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
   setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
+  kibanaDataViews?: { [x: string]: DataViewListItem };
 }
 
 export interface AboutStepRule {

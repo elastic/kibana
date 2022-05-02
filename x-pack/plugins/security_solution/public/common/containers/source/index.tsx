@@ -108,7 +108,7 @@ const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
 const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
 
-interface FetchIndexReturn {
+export interface FetchIndexReturn {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   indexes: string[];
@@ -122,8 +122,10 @@ interface FetchIndexReturn {
  */
 export const useFetchIndex = (
   indexNames: string[],
-  onlyCheckIfIndicesExist: boolean = false
-): [boolean, FetchIndexReturn] => {
+  onlyCheckIfIndicesExist: boolean = false,
+  onlyWorkWithSearchCallback: boolean = false
+): [boolean, FetchIndexReturn, (indices: string[]) => void] => {
+  // console.error('indexNames', indexNames);
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -155,17 +157,20 @@ export const useFetchIndex = (
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
+                console.error('SEARCH STRATEGY INDEX PATTERNS', response);
+
                 const stringifyIndices = response.indicesExist.sort().join();
 
                 previousIndexesName.current = response.indicesExist;
-                setLoading(false);
+                const indexPatterns = getIndexFields(stringifyIndices, response.indexFields);
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
                   indexes: response.indicesExist,
                   indexExists: response.indicesExist.length > 0,
-                  indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                  indexPatterns,
                 });
+                setLoading(false);
 
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
@@ -183,22 +188,31 @@ export const useFetchIndex = (
             },
           });
       };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
+      if (!isEqual(previousIndexesName.current, iNames)) {
+        searchSubscription$.current.unsubscribe();
+        abortCtrl.current.abort();
+        asyncSearch();
+      }
     },
     [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
+    // console.error('FETCH', indexNames, previousIndexesName.current);
+    if (
+      onlyWorkWithSearchCallback === false &&
+      !isEmpty(indexNames) &&
+      !isEqual(previousIndexesName.current, indexNames)
+    ) {
+      console.error('executing another search', indexNames);
       indexFieldsSearch(indexNames);
     }
     return () => {
+      console.error('CANCELLED FETCH');
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [indexNames, indexFieldsSearch, previousIndexesName]);
+  }, [indexNames, indexFieldsSearch, onlyWorkWithSearchCallback]);
 
-  return [isLoading, state];
+  return [isLoading, state, indexFieldsSearch];
 };

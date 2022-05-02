@@ -5,38 +5,65 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
-import { sourcererModel } from '../../../../common/store/sourcerer';
+import { FetchIndexReturn } from '../../../../common/containers/source';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface DataViewSelectorProps {
-  kibanaDataViews: sourcererModel.SourcererDataView[];
+  kibanaDataViews: { [x: string]: DataViewListItem };
   field: FieldHook;
   dataViewId?: string;
+  useFetchIndex: (
+    indexNames: string[],
+    onlyCheckIfIndicesExist: boolean,
+    onlyWorkWithSearchCallback: boolean
+  ) => [boolean, FetchIndexReturn, (indices: string[]) => void];
+  setIndexPattern: (indexPattern: DataView) => void;
+  setIsIndexPatternLoading: (b: boolean) => void;
 }
 
 export const DataViewSelector = ({
-  kibanaDataViews = [],
+  kibanaDataViews,
   field,
   dataViewId,
+  useFetchIndex,
+  setIndexPattern,
+  setIsIndexPatternLoading,
 }: DataViewSelectorProps) => {
+  const { data } = useKibana().services;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     dataViewId != null && dataViewId.length > 0 ? [{ label: dataViewId }] : []
   );
+  const [selectedDataView, setSelectedDataView] = useState<DataViewListItem>();
+  const [runtimeMappings, setRuntimeMappings] = useState<MappingRuntimeFields>();
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (selectedDataView != null) {
+        const dv = await data.dataViews.get(selectedDataView.id);
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, selectedDataView, setIndexPattern]);
   const onChangeIndexPatterns = useCallback(
     (options: Array<EuiComboBoxOptionOption<string>>) => {
       const dataView = options;
 
       setSelectedOptions(options);
+      setSelectedDataView(kibanaDataViews[dataView[0].label]);
       field.setValue(dataView[0].label);
     },
-    [field]
+    [field, kibanaDataViews]
   );
 
   // sometimes the form isn't loaded before this component renders
@@ -65,7 +92,12 @@ export const DataViewSelector = ({
         isClearable
         singleSelection={{ asPlainText: true }}
         onChange={onChangeIndexPatterns}
-        options={kibanaDataViews.map((dataView) => ({ label: dataView.id, id: dataView.id }))}
+        // TODO: optimize this, pass down array of data view ids
+        // at the same time we grab the data views in the top level form component
+        options={Object.keys(kibanaDataViews).map((dvId) => ({
+          label: dvId,
+          id: dvId,
+        }))}
         selectedOptions={selectedOptions}
         aria-label={i18n.PICK_INDEX_PATTERNS}
         placeholder={i18n.PICK_INDEX_PATTERNS}

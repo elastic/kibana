@@ -78,6 +78,7 @@ export const QueryBarDefineRule = ({
   resizeParentContainer,
   onValidityChange,
 }: QueryBarDefineRuleProps) => {
+  console.error('WHAT IS IN THE QUERY BAR', indexPattern);
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);

@@ -166,6 +166,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearSelected,
 }) => {
   const { navigateToApp } = useKibana().services.application;
+  const { data } = useKibana().services;
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -442,7 +443,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ),
     [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
-  const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
+  const ruleIndices = useMemo(async () => {
+    if (rule?.data_view_id != null && rule?.data_view_id !== '') {
+      const dataView = await data.dataViews.get(rule?.data_view_id);
+      return dataView.title.split(',');
+    }
+
+    return rule?.index ?? DEFAULT_INDEX_PATTERN;
+  }, [rule?.index, rule?.data_view_id, data]);
 
   const lastExecution = rule?.execution_summary?.last_execution;
   const lastExecutionStatus = lastExecution?.status;
