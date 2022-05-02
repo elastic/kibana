@@ -29,7 +29,7 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
     })
     .filter((_) => _) as Array<{
     span: { id: string };
-    trace?: { id: string };
+    trace: { id: string };
   }>;
 }
 
