@@ -97,7 +97,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           'xpack.apm.agentConfig.servicePage.service.fieldLabel',
           { defaultMessage: 'Service name' }
         )}
-        field={SERVICE_NAME}
+        fieldName={SERVICE_NAME}
         value={newConfig.service.name}
         onChange={(name) => {
           setNewConfig((prev) => ({

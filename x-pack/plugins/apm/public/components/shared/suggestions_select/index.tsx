@@ -11,27 +11,33 @@ import React, { useCallback, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface SuggestionsSelectProps {
-  allOption?: EuiComboBoxOptionOption<string>;
+  customOptions?: Array<EuiComboBoxOptionOption<string>>;
   customOptionText?: string;
   defaultValue?: string;
-  field: string;
+  fieldName: string;
+  start: string;
+  end: string;
   onChange: (value?: string) => void;
   isClearable?: boolean;
   isInvalid?: boolean;
   placeholder: string;
   dataTestSubj?: string;
+  prepend?: string;
 }
 
 export function SuggestionsSelect({
-  allOption,
+  customOptions,
   customOptionText,
   defaultValue,
-  field,
+  fieldName,
+  start,
+  end,
   onChange,
   placeholder,
   isInvalid,
   dataTestSubj,
   isClearable = true,
+  prepend,
 }: SuggestionsSelectProps) {
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -48,11 +54,16 @@ export function SuggestionsSelect({
     (callApmApi) => {
       return callApmApi('GET /internal/apm/suggestions', {
         params: {
-          query: { field, string: searchValue },
+          query: {
+            fieldName,
+            fieldValue: searchValue,
+            start,
+            end,
+          },
         },
       });
     },
-    [field, searchValue],
+    [fieldName, searchValue, start, end],
     { preservePreviousData: false }
   );
 
@@ -85,11 +96,7 @@ export function SuggestionsSelect({
   const terms = data?.terms ?? [];
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
-    ...(allOption &&
-    (searchValue === '' ||
-      searchValue.toLowerCase() === allOption.label.toLowerCase())
-      ? [allOption]
-      : []),
+    ...(customOptions ? customOptions : []),
     ...terms.map((name) => {
       return { label: name, value: name };
     }),
@@ -111,6 +118,7 @@ export function SuggestionsSelect({
       style={{ minWidth: '256px' }}
       onCreateOption={handleCreateOption}
       data-test-subj={dataTestSubj}
+      prepend={prepend}
     />
   );
 }

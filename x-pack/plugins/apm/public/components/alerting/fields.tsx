@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -38,16 +38,21 @@ export function ServiceField({
       })}
     >
       <SuggestionsSelect
-        allOption={allowAll ? ENVIRONMENT_ALL : undefined}
-        customOptionText={i18n.translate('xpack.apm.selectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new option',
-        })}
+        customOptions={allowAll ? [ENVIRONMENT_ALL] : undefined}
+        customOptionText={i18n.translate(
+          'xpack.apm.serviceNamesSelectCustomOptionText',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new service name',
+          }
+        )}
         defaultValue={currentValue}
-        field={SERVICE_NAME}
+        fieldName={SERVICE_NAME}
         onChange={onChange}
         placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {
           defaultMessage: 'Select service name',
         })}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
       />
     </PopoverExpression>
   );
@@ -68,16 +73,21 @@ export function EnvironmentField({
       })}
     >
       <SuggestionsSelect
-        allOption={ENVIRONMENT_ALL}
-        customOptionText={i18n.translate('xpack.apm.selectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new option',
-        })}
+        customOptions={[ENVIRONMENT_ALL]}
+        customOptionText={i18n.translate(
+          'xpack.apm.environmentsSelectCustomOptionText',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new environment',
+          }
+        )}
         defaultValue={getEnvironmentLabel(currentValue)}
-        field={SERVICE_ENVIRONMENT}
+        fieldName={SERVICE_ENVIRONMENT}
         onChange={onChange}
         placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
           defaultMessage: 'Select environment',
         })}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
       />
     </PopoverExpression>
   );
@@ -96,12 +106,15 @@ export function TransactionTypeField({
   return (
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
-        allOption={ENVIRONMENT_ALL}
-        customOptionText={i18n.translate('xpack.apm.selectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new option',
-        })}
+        customOptions={[ENVIRONMENT_ALL]}
+        customOptionText={i18n.translate(
+          'xpack.apm.transactionTypesSelectCustomOptionText',
+          {
+            defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
+          }
+        )}
         defaultValue={currentValue}
-        field={TRANSACTION_TYPE}
+        fieldName={TRANSACTION_TYPE}
         onChange={onChange}
         placeholder={i18n.translate(
           'xpack.apm.transactionTypesSelectPlaceholder',
@@ -109,6 +122,8 @@ export function TransactionTypeField({
             defaultMessage: 'Select transaction type',
           }
         )}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
       />
     </PopoverExpression>
   );
