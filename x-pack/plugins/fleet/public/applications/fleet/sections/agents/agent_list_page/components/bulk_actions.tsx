@@ -31,15 +31,16 @@ import type { SelectionMode } from './types';
 const FlexItem = styled(EuiFlexItem)`
   height: ${(props) => props.theme.eui.euiSizeL};
 `;
-
-export const AgentBulkActions: React.FunctionComponent<{
+export interface Props {
   totalAgents: number;
   totalInactiveAgents: number;
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
   refreshAgents: () => void;
-}> = ({
+}
+
+export const AgentBulkActions: React.FunctionComponent<Props> = ({
   totalAgents,
   totalInactiveAgents,
   selectionMode,
@@ -72,6 +73,7 @@ export const AgentBulkActions: React.FunctionComponent<{
           name: (
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.reassignPolicy"
+              data-test-subj="agentBulkActionsReassign"
               defaultMessage="Assign to new policy"
             />
           ),
@@ -86,6 +88,7 @@ export const AgentBulkActions: React.FunctionComponent<{
           name: (
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.unenrollAgents"
+              data-test-subj="agentBulkActionsUnenroll"
               defaultMessage="Unenroll agents"
             />
           ),
@@ -100,6 +103,7 @@ export const AgentBulkActions: React.FunctionComponent<{
           name: (
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.upgradeAgents"
+              data-test-subj="agentBulkActionsUpgrade"
               defaultMessage="Upgrade agents"
             />
           ),
