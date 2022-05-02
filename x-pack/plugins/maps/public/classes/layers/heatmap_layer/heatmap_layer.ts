@@ -11,10 +11,16 @@ import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
 import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { syncBoundsData, MvtSourceData, syncMvtSourceData } from '../vector_layer';
+import {
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+  syncBoundsData,
+  MvtSourceData,
+  syncMvtSourceData,
+} from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { IMvtVectorSource } from '../../sources/vector_source';
+import { getAggsMeta } from '../../util/tile_meta_feature_utils';
 
 export class HeatmapLayer extends AbstractLayer {
   private readonly _style: HeatmapStyle;
@@ -46,6 +52,11 @@ export class HeatmapLayer extends AbstractLayer {
     if (this.getSource()) {
       this.getSource().destroy();
     }
+  }
+
+  getLayerIcon(isTocIcon: boolean) {
+    const { docCount } = getAggsMeta(this._getMetaFromTiles());
+    return docCount === 0 ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT : super.getLayerIcon(isTocIcon);
   }
 
   getSource(): ESGeoGridSource {
