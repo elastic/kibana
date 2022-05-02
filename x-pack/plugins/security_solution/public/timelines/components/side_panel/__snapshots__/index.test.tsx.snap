@@ -193,28 +193,28 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                   data-styled="active"
                   data-styled-version="5.1.0"
                 >
-                  .rfwRz{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex:1;-ms-flex:1;flex:1;overflow:hidden;}
-                  .rfwRz &gt; div{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex:1;-ms-flex:1;flex:1;overflow:hidden;}
-                  .rfwRz &gt; div &gt; .euiFlexGroup:first-of-type{-webkit-flex:0;-ms-flex:0;flex:0;}
-                  .gwrypd{-webkit-flex:1;-ms-flex:1;flex:1;overflow:auto;}
-                  .gwrypd::-webkit-scrollbar{height:16px;width:16px;}
-                  .gwrypd::-webkit-scrollbar-thumb{background-clip:content-box;background-color:rgba(152,162,179,0.5);border:4px solid transparent;}
-                  .gwrypd::-webkit-scrollbar-corner,.gwrypd::-webkit-scrollbar-track{background-color:transparent;}
-                  .gwrypd .eventFieldsTable__fieldIcon{padding-top:6px;}
-                  .gwrypd .eventFieldsTable__fieldName{line-height:1.5;padding:4px;}
-                  .gwrypd .eventFieldsTable__tableRow{font-size:12px;font-family:'Roboto Mono','Consolas','Menlo','Courier',monospace;}
-                  .gwrypd .eventFieldsTable__tableRow .hoverActions-active .timelines__hoverActionButton,.gwrypd .eventFieldsTable__tableRow .hoverActions-active .securitySolution__hoverActionButton{opacity:1;}
-                  .gwrypd .eventFieldsTable__tableRow:hover .timelines__hoverActionButton,.gwrypd .eventFieldsTable__tableRow:hover .securitySolution__hoverActionButton{opacity:1;}
-                  .gwrypd .eventFieldsTable__tableRow .timelines__hoverActionButton,.gwrypd .eventFieldsTable__tableRow .securitySolution__hoverActionButton{opacity:0;}
-                  .gwrypd .eventFieldsTable__actionCell,.gwrypd .eventFieldsTable__fieldNameCell{-webkit-align-items:flex-start;-webkit-box-align:flex-start;-ms-flex-align:flex-start;align-items:flex-start;padding:4px;}
-                  .gwrypd .eventFieldsTable__fieldValue{display:inline-block;word-break:break-all;word-wrap:break-word;white-space:pre-wrap;line-height:1.5;color:#ffffff;vertical-align:top;}
-                  .iIUBWI{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex:1;-ms-flex:1;flex:1;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;overflow:hidden;}
-                  .iIUBWI &gt; [role='tabpanel']{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex:1;-ms-flex:1;flex:1;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;overflow:hidden;overflow-y:auto;}
-                  .iIUBWI &gt; [role='tabpanel']::-webkit-scrollbar{-webkit-appearance:none;width:7px;}
-                  .iIUBWI &gt; [role='tabpanel']::-webkit-scrollbar-thumb{border-radius:4px;background-color:rgba(0,0,0,0.5);-webkit-box-shadow:0 0 1px rgba(255,255,255,0.5);}
+                  .jSqKOs{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex:1;-ms-flex:1;flex:1;overflow:hidden;}
+                  .jSqKOs &gt; div{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex:1;-ms-flex:1;flex:1;overflow:hidden;}
+                  .jSqKOs &gt; div &gt; .euiFlexGroup:first-of-type{-webkit-flex:0;-ms-flex:0;flex:0;}
+                  .fiUrbF{-webkit-flex:1;-ms-flex:1;flex:1;overflow:auto;}
+                  .fiUrbF::-webkit-scrollbar{height:16px;width:16px;}
+                  .fiUrbF::-webkit-scrollbar-thumb{background-clip:content-box;background-color:rgba(152,162,179,0.5);border:4px solid transparent;}
+                  .fiUrbF::-webkit-scrollbar-corner,.fiUrbF::-webkit-scrollbar-track{background-color:transparent;}
+                  .fiUrbF .eventFieldsTable__fieldIcon{padding-top:6px;}
+                  .fiUrbF .eventFieldsTable__fieldName{line-height:1.5;padding:4px;}
+                  .fiUrbF .eventFieldsTable__tableRow{font-size:12px;font-family:'Roboto Mono','Consolas','Menlo','Courier',monospace;}
+                  .fiUrbF .eventFieldsTable__tableRow .hoverActions-active .timelines__hoverActionButton,.fiUrbF .eventFieldsTable__tableRow .hoverActions-active .securitySolution__hoverActionButton{opacity:1;}
+                  .fiUrbF .eventFieldsTable__tableRow:hover .timelines__hoverActionButton,.fiUrbF .eventFieldsTable__tableRow:hover .securitySolution__hoverActionButton{opacity:1;}
+                  .fiUrbF .eventFieldsTable__tableRow .timelines__hoverActionButton,.fiUrbF .eventFieldsTable__tableRow .securitySolution__hoverActionButton{opacity:0;}
+                  .fiUrbF .eventFieldsTable__actionCell,.fiUrbF .eventFieldsTable__fieldNameCell{-webkit-align-items:flex-start;-webkit-box-align:flex-start;-ms-flex-align:flex-start;align-items:flex-start;padding:4px;}
+                  .fiUrbF .eventFieldsTable__fieldValue{display:inline-block;word-break:break-all;word-wrap:break-word;white-space:pre-wrap;line-height:1.5;color:#ffffff;vertical-align:top;}
+                  .lnXtPT{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex:1;-ms-flex:1;flex:1;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;overflow:hidden;}
+                  .lnXtPT &gt; [role='tabpanel']{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex:1;-ms-flex:1;flex:1;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;overflow:hidden;overflow-y:auto;}
+                  .lnXtPT &gt; [role='tabpanel']::-webkit-scrollbar{-webkit-appearance:none;width:7px;}
+                  .lnXtPT &gt; [role='tabpanel']::-webkit-scrollbar-thumb{border-radius:4px;background-color:rgba(0,0,0,0.5);-webkit-box-shadow:0 0 1px rgba(255,255,255,0.5);}
                   .c0{-webkit-flex:0 1 auto;-ms-flex:0 1 auto;flex:0 1 auto;margin-top:8px;}
-                  .hzDNaj{height:100%;}
-                  .hYocVb.euiFlexItem{-webkit-flex:1 0 0;-ms-flex:1 0 0;flex:1 0 0;overflow:hidden;}
+                  .jqkSmy{height:100%;}
+                  .fZwkAx.euiFlexItem{-webkit-flex:1 0 0;-ms-flex:1 0 0;flex:1 0 0;overflow:hidden;}
                 </style>
                 <style
                   data-rbd-always="1"
