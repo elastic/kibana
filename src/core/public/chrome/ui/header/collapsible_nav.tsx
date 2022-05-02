@@ -368,9 +368,7 @@ export function CollapsibleNav({
             }
             onClick={() => {
               onIsLockedUpdate(!isLocked);
-              if (lockRef.current) {
-                lockRef.current.focus();
-              }
+              lockRef.current?.focus();
             }}
             iconType={isLocked ? 'lock' : 'lockOpen'}
           />
