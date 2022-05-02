@@ -6,59 +6,6 @@ Object {
   "prevPagePagination": null,
   "summaries": Array [
     Object {
-      "histogram": Object {
-        "points": Array [
-          Object {
-            "down": 1,
-            "timestamp": 1568172624744,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172677247,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568172729750,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172782253,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172834756,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172887259,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568172939762,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172992265,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173044768,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173097271,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568173149774,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173202277,
-          },
-        ],
-      },
-      "minInterval": 52503,
       "monitor_id": "0010-down",
       "state": Object {
         "monitor": Object {
@@ -186,59 +133,6 @@ Object {
       },
     },
     Object {
-      "histogram": Object {
-        "points": Array [
-          Object {
-            "down": 1,
-            "timestamp": 1568172624744,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172677247,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568172729750,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172782253,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172834756,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172887259,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568172939762,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568172992265,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173044768,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173097271,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 1568173149774,
-          },
-          Object {
-            "down": 2,
-            "timestamp": 1568173202277,
-          },
-        ],
-      },
-      "minInterval": 52503,
       "monitor_id": "0020-down",
       "state": Object {
         "monitor": Object {
