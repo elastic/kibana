@@ -14,6 +14,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSymbolIDs } from './use_symbol_ids';
 import { usePaintServerIDs } from './use_paint_server_ids';
+import { of } from 'rxjs';
 
 const loadingProcessTitle = i18n.translate(
   'xpack.securitySolution.resolver.symbolDefinitions.loadingProcess',
@@ -436,7 +437,7 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
  */
 export const SymbolDefinitions = memo(() => {
   const { services } = useKibana();
-  const theme = useObservable(services.theme.theme$);
+  const theme = useObservable(services.theme?.theme$ || of({ darkMode: false }));
   const isDarkMode = theme?.darkMode || false;
 
   return (
