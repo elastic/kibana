@@ -286,18 +286,7 @@ function PageHeader({
   onTimeRangeRefresh,
 }: PageHeaderProps) {
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
-
-  const guidedSetupButton = useMemo(
-    () => (
-      <EuiButton color="text" iconType="wrench" onClick={handleGuidedSetupClick}>
-        <FormattedMessage
-          id="xpack.observability.overview.guidedSetupButton"
-          defaultMessage="Guided setup"
-        />
-      </EuiButton>
-    ),
-    [handleGuidedSetupClick]
-  );
+  const buttonRef = useRef();
 
   return (
     <EuiFlexGroup wrap gutterSize="s" justifyContent="flexEnd">
@@ -316,8 +305,22 @@ function PageHeader({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
+        <EuiButton
+          // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
+          buttonRef={buttonRef}
+          color="text"
+          iconType="wrench"
+          onClick={handleGuidedSetupClick}
+        >
+          <FormattedMessage
+            id="xpack.observability.overview.guidedSetupButton"
+            defaultMessage="Guided setup"
+          />
+        </EuiButton>
         {showTour ? (
           <EuiTourStep
+            // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
+            anchor={() => buttonRef.current}
             isStepOpen
             title={i18n.translate('xpack.observability.overview.guidedSetupTourTitle', {
               defaultMessage: 'Guided setup is always available',
@@ -342,12 +345,8 @@ function PageHeader({
                 />
               </EuiButtonEmpty>
             }
-          >
-            {guidedSetupButton}
-          </EuiTourStep>
-        ) : (
-          guidedSetupButton
-        )}
+          />
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
