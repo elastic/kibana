@@ -142,8 +142,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/116865
-    describe.skip('tls alert', function () {
+    describe('tls alert', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;

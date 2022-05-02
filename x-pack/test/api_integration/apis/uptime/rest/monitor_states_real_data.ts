@@ -15,8 +15,6 @@ interface ExpectedMonitorStatesPage {
   response: any;
   statesIds: string[];
   statuses: string[];
-  absFrom: number;
-  absTo: number;
   size: number;
   prevPagination: null | string;
   nextPagination: null | string;
@@ -31,8 +29,6 @@ const checkMonitorStatesResponse = ({
   response,
   statesIds,
   statuses,
-  absFrom,
-  absTo,
   size,
   prevPagination,
   nextPagination,
@@ -48,11 +44,6 @@ const checkMonitorStatesResponse = ({
     ).to.eql(statuses);
     (summaries ?? []).forEach((s) => {
       expect(s.state.url.full).to.be.ok();
-      expect(Array.isArray(s.histogram?.points)).to.be(true);
-      (s.histogram?.points ?? []).forEach((point) => {
-        expect(point.timestamp).to.be.greaterThan(absFrom);
-        expect(point.timestamp).to.be.lessThan(absTo);
-      });
     });
     expect(prevPagePagination).to.be(prevPagination);
     expect(nextPagePagination).to.eql(nextPagination);
@@ -61,12 +52,9 @@ const checkMonitorStatesResponse = ({
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/93705
-  describe.skip('monitor states endpoint', () => {
+  describe('monitor states endpoint', () => {
     const from = '2019-09-11T03:30:04.380Z';
     const to = '2019-09-11T03:40:34.410Z';
-    const absFrom = new Date(from).valueOf();
-    const absTo = new Date(to).valueOf();
 
     it('will fetch monitor state data for the given filters and range', async () => {
       const statusFilter = 'up';
@@ -80,8 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
         response: apiResponse.body,
         statesIds: ['0002-up'],
         statuses: ['up'],
-        absFrom,
-        absTo,
         size: 1,
         prevPagination: null,
         nextPagination: null,
@@ -476,8 +462,6 @@ export default function ({ getService }: FtrProviderContext) {
         checkMonitorStatesResponse({
           response: nextData,
           ...expectedNextResults[page - 1],
-          absFrom,
-          absTo,
           size,
         });
 
@@ -489,8 +473,6 @@ export default function ({ getService }: FtrProviderContext) {
           checkMonitorStatesResponse({
             response: prevData,
             ...expectedPrevResults[page - 2],
-            absFrom,
-            absTo,
             size,
           });
         }
@@ -517,8 +499,6 @@ export default function ({ getService }: FtrProviderContext) {
           '0009-up',
         ],
         statuses: ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up'],
-        absFrom,
-        absTo,
         size: LENGTH,
         prevPagination: null,
         nextPagination:
