@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { Suspense } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { AlertsField, AlertsData } from '../../../../types';
+import { AlertsField, AlertsData, AlertsTableConfigurationRegistry } from '../../../../types';
 
 const REASON_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.reason',
@@ -44,16 +44,19 @@ const PREVIOUS_LABEL = i18n.translate(
 
 interface AlertsFlyoutProps {
   alert: AlertsData;
+  alertsTableConfiguration: AlertsTableConfigurationRegistry;
   onClose: () => void;
   onPaginateNext: () => void;
   onPaginatePrevious: () => void;
 }
 export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
+  alertsTableConfiguration,
   onClose,
   onPaginateNext,
   onPaginatePrevious,
 }: AlertsFlyoutProps) => {
+  const FlyoutBody = alertsTableConfiguration.flyoutBody;
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader hasBorder>
@@ -71,6 +74,9 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiHorizontalRule size="full" />
+        <Suspense fallback={null}>
+          <FlyoutBody alert={alert} />
+        </Suspense>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexStart">

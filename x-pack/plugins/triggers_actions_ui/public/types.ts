@@ -428,4 +428,11 @@ export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
+  flyoutBody:
+    | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+    | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+}
+
+export interface AlertsTableFlyoutBaseProps {
+  alert: AlertsData;
 }

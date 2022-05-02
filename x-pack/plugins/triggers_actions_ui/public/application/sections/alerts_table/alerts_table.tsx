@@ -18,7 +18,7 @@ import {
   EuiDataGridStyle,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
-import { AlertsTableProps, AlertsField } from '../../../types';
+import { AlertsTableProps, AlertsField, AlertsTableConfigurationRegistry } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   ALERTS_TABLE_CONF_ERROR_MESSAGE,
@@ -32,9 +32,10 @@ export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
-const emptyConfiguration = {
+const emptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
   columns: [],
+  flyoutBody: null,
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
@@ -125,6 +126,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             onClose={handleFlyoutClose}
             onPaginateNext={onPaginateFlyoutNext}
             onPaginatePrevious={onPaginateFlyoutPrevious}
+            alertsTableConfiguration={alertsTableConfiguration}
           />
         </Suspense>
       )}

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTableConfigurationRegistry } from '../../../../types';
 import { TypeRegistry } from '../../../type_registry';
+
+const AlertsPageFlyoutBody = lazy(() => import('./alerts_page_flyout_body'));
 
 export function registerAlertsTableConfiguration({
   alertsTableConfigurationRegistry,
@@ -37,5 +40,6 @@ export function registerAlertsTableConfiguration({
         displayAsText: 'Reason',
       },
     ],
+    flyoutBody: AlertsPageFlyoutBody,
   });
 }
