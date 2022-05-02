@@ -7,6 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, ReactNode } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiHorizontalRule,
@@ -21,7 +22,7 @@ import {
   useCurrentEuiTheme,
   EuiThemeType,
 } from '../../../../../components/color_range_legend/use_color_range';
-import type { FormattedNerResp } from './ner_inference';
+import type { NerInference } from './ner_inference';
 
 const ICON_PADDING = '2px';
 const PROBABILITY_SIG_FIGS = 3;
@@ -60,10 +61,18 @@ const UNKNOWN_ENTITY_TYPE = {
   borderColor: 'euiColorVis5',
 };
 
-export const NerOutput: FC<{ result: FormattedNerResp }> = ({ result }) => {
+export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
+
+const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
   const { euiTheme } = useCurrentEuiTheme();
+  const result = useObservable(inferrer.inferenceResult$);
+
+  if (!result) {
+    return null;
+  }
+
   const lineSplit: JSX.Element[] = [];
-  result.forEach(({ value, entity }) => {
+  result.response.forEach(({ value, entity }) => {
     if (entity === null) {
       const lines = value
         .split(/(\n)/)
