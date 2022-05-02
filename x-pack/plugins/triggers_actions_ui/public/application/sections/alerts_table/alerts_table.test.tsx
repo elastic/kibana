@@ -7,7 +7,7 @@
 import React from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
-import { AlertsData } from '../../../types';
+import { AlertsData, AlertsField } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { render } from '@testing-library/react';
@@ -50,12 +50,12 @@ describe('AlertsTable', () => {
 
   const alerts: AlertsData[] = [
     {
-      field1: ['one'],
-      field2: ['two'],
+      [AlertsField.name]: ['one'],
+      [AlertsField.reason]: ['two'],
     },
     {
-      field1: ['three'],
-      field2: ['four'],
+      [AlertsField.name]: ['three'],
+      [AlertsField.reason]: ['four'],
     },
   ];
 
@@ -83,13 +83,14 @@ describe('AlertsTable', () => {
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: 1,
-    pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
+    pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
     renderCellValue: jest.fn().mockImplementation((props) => {
       return `${props.colIndex}:${props.rowIndex}`;
     }),
     showCheckboxes: false,
     trailingControlColumns: [],
+    alerts,
     useFetchAlertsData,
     'data-test-subj': 'testTable',
   };
@@ -115,6 +116,73 @@ describe('AlertsTable', () => {
       userEvent.click(renderResult.getByTestId('pagination-button-1'));
       expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
     });
+
+    describe('flyout', () => {
+      it('should show a flyout when selecting an alert', async () => {
+        const wrapper = render(
+          <AlertsTable
+            {...{
+              ...tableProps,
+              pageSize: 10,
+            }}
+          />
+        );
+        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+
+        const result = await wrapper.findAllByTestId('alertsFlyout');
+        expect(result.length).toBe(1);
+
+        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('one');
+        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+
+        // Should paginate too
+        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginateNext')[0]);
+        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('three');
+        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
+
+        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginatePrevious')[0]);
+        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('one');
+        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+      });
+
+      it('should refetch data if flyout pagination exceeds the current page', async () => {
+        const wrapper = render(<AlertsTable {...tableProps} />);
+
+        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+        const result = await wrapper.findAllByTestId('alertsFlyout');
+        expect(result.length).toBe(1);
+
+        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginateNext')[0]);
+        expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+
+        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginatePrevious')[0]);
+        expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 0, pageSize: 1 });
+      });
+    });
+
+    describe('leading control columns', () => {
+      it('should return at least the flyout action control', async () => {
+        const wrapper = render(<AlertsTable {...tableProps} />);
+        expect(wrapper.getByTestId('expandColumnHeaderLabel').textContent).toBe('Actions');
+      });
+
+      it('should render other leading controls', () => {
+        const customTableProps = {
+          ...tableProps,
+          leadingControlColumns: [
+            {
+              id: 'selection',
+              width: 67,
+              headerCellRender: () => <span data-test-subj="testHeader">Test header</span>,
+              rowCellRender: () => <h2 data-test-subj="testCell">Test cell</h2>,
+            },
+          ],
+        };
+        const wrapper = render(<AlertsTable {...customTableProps} />);
+        expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
+        expect(wrapper.queryByTestId('testCell')).not.toBe(null);
+      });
+    });
   });
 
   describe('Alerts table configuration registry', () => {
@@ -127,7 +195,7 @@ describe('AlertsTable', () => {
     it('should render an empty error state when the plugin id owner is not registered', async () => {
       const props = { ...tableProps, configurationId: 'none' };
       const result = render(<AlertsTable {...props} />);
-      expect(result.getByTestId('alerts-table-no-configuration')).toBeTruthy();
+      expect(result.getByTestId('alertsTableNoConfiguration')).toBeTruthy();
     });
   });
 });
