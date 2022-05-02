@@ -68,7 +68,7 @@ export const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
 
 /**
  * Constructs migration failure message and logs message strings when an unsupported cluster routing allocation is configured.
- * // note: "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue." is the left.message from initialize_action
+ * The full errorMessage is "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue."
  */
 export const fatalReasonClusterRoutingAllocationUnsupported = ({
   errorMessage,
