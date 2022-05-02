@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { LazyWrapper } from '../../lazy_wrapper';
 
 const getLazyComponent = () => {
-  return lazy(() => import('./vector_tile_view_component'));
+  return lazy(() => import('./components/vector_tile_inspector'));
 };
 
 export const VectorTileInspectorView = {
   title: i18n.translate('xpack.maps.inspector.vectorTileViewTitle', {
     defaultMessage: 'Vector tiles',
   }),
-  order: 30,
+  order: 10,
   help: i18n.translate('xpack.maps.inspector.vectorTileViewHelpText', {
     defaultMessage: 'View Elasticsearch vector tile requests',
   }),

@@ -9,9 +9,10 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Adapters } from '@kbn/inspector-plugin/public';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiSpacer } from '@elastic/eui';
 import { EmptyPrompt } from './empty_prompt';
-import type { TileRequest } from './types';
+import type { TileRequest } from '../types';
+import { TileRequestView } from './tile_request_view';
 
 interface Props {
   adapters: Adapters;
@@ -23,7 +24,7 @@ interface State {
   layerOptions: Array<EuiComboBoxOptionOption<string>>;
 }
 
-class VectorTileViewComponent extends Component<Props, State> {
+class VectorTileInspector extends Component<Props, State> {
   private _isMounted = false;
 
   state: State = {
@@ -107,6 +108,16 @@ class VectorTileViewComponent extends Component<Props, State> {
             defaultMessage: 'Layer',
           })}
         />
+        <div>
+          {this.state.tileRequests.map((tileRequest) => {
+            return (
+              <div key={tileRequest.tileZXYKey}>
+                <EuiSpacer />
+                <TileRequestView  tileRequest={tileRequest} />
+              </div>
+            );
+          })}
+        </div>
       </>
     );
   }
@@ -114,4 +125,4 @@ class VectorTileViewComponent extends Component<Props, State> {
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export default VectorTileViewComponent;
+export default VectorTileInspector;

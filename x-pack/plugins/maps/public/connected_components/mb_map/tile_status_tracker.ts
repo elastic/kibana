@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { ILayer } from '../../classes/layers/layer';
-import { LAYER_TYPE, SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
+import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 import { getTileKey } from '../../classes/util/geo_tile_utils';
 
 interface MbTile {
@@ -54,19 +54,18 @@ export class TileStatusTracker {
         return layer.ownsMbSourceId(e.sourceId);
       });
       const adapters = this._getInspectorAdapters();
-      if (
-        adapters.vectorTiles &&
-        targetLayer &&
-        targetLayer.getType() === LAYER_TYPE.MVT_VECTOR &&
-        targetLayer.getSource().isESSource()
-      ) {
+      if (adapters.vectorTiles && targetLayer && targetLayer.getSource().isESSource()) {
         const mbSource = this._mbMap.getSource(e.sourceId) as VectorTileSource;
-        if (mbSource && mbSource.tiles && mbSource.tiles.length) {
+        if (mbSource && mbSource.type === 'vector' && mbSource.tiles && mbSource.tiles.length) {
           let tileUrl = mbSource.tiles[0];
           tileUrl = tileUrl.replace('{z}', e.tile.tileID.canonical.z);
           tileUrl = tileUrl.replace('{x}', e.tile.tileID.canonical.x);
           tileUrl = tileUrl.replace('{y}', e.tile.tileID.canonical.y);
-          adapters.vectorTiles.addTileRequest(targetLayer, tileUrl);
+          adapters.vectorTiles.addTileRequest(
+            targetLayer,
+            `${e.tile.tileID.canonical.z}/${e.tile.tileID.canonical.x}/${e.tile.tileID.canonical.y}`,
+            tileUrl
+          );
         }
       }
 

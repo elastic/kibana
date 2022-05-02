@@ -8,4 +8,5 @@
 export interface TileRequest {
   layerId: string;
   tileUrl: string;
+  tileZXYKey: string;
 }

@@ -13,10 +13,11 @@ export class VectorTileAdapter extends EventEmitter {
   private _layerLabels: Record<string, string> = {};
   private _tileRequests: TileRequest[] = [];
 
-  async addTileRequest(layer: ILayer, tileUrl: string) {
+  async addTileRequest(layer: ILayer, tileZXYKey: string, tileUrl: string) {
     this._tileRequests.push({
       layerId: layer.getId(),
       tileUrl,
+      tileZXYKey,
     });
     this._layerLabels[layer.getId()] = await layer.getDisplayName();
     this._onChange();
