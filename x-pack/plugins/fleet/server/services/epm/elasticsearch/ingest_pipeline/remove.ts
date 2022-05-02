@@ -10,7 +10,6 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { appContextService } from '../../..';
 import { ElasticsearchAssetType } from '../../../../types';
 import { IngestManagerError } from '../../../../errors';
-import { getInstallation } from '../../packages/get';
 import type { EsAssetReference } from '../../../../../common';
 import { updateEsAssetReferences } from '../../packages/install';
 
@@ -18,44 +17,28 @@ export const deletePreviousPipelines = async (
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  previousPkgVersion: string
+  previousPkgVersion: string,
+  esReferences: EsAssetReference[]
 ) => {
   const logger = appContextService.getLogger();
-  const installation = await getInstallation({ savedObjectsClient, pkgName });
-  if (!installation) return;
-  const installedEsAssets = installation.installed_es;
-  const installedPipelines = installedEsAssets.filter(
+  const installedPipelines = esReferences.filter(
     ({ type, id }) =>
       type === ElasticsearchAssetType.ingestPipeline && id.includes(previousPkgVersion)
   );
-  const deletePipelinePromises = installedPipelines.map(({ type, id }) => {
-    return deletePipeline(esClient, id);
-  });
   try {
-    await Promise.all(deletePipelinePromises);
+    await Promise.all(
+      installedPipelines.map(({ type, id }) => {
+        return deletePipeline(esClient, id);
+      })
+    );
   } catch (e) {
     logger.error(e);
   }
-  try {
-    await deletePipelineRefs(savedObjectsClient, installedEsAssets, pkgName, previousPkgVersion);
-  } catch (e) {
-    logger.error(e);
-  }
-};
 
-export const deletePipelineRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  installedEsAssets: EsAssetReference[],
-  pkgName: string,
-  pkgVersion: string
-) => {
-  const assetsToRemove = installedEsAssets.filter(({ type, id }) => {
-    return type === ElasticsearchAssetType.ingestPipeline && id.includes(pkgVersion);
-  });
-
-  return updateEsAssetReferences(savedObjectsClient, pkgName, installedEsAssets, {
-    assetsToRemove,
-    refresh: 'wait_for',
+  return await updateEsAssetReferences(savedObjectsClient, pkgName, esReferences, {
+    assetsToRemove: esReferences.filter(({ type, id }) => {
+      return type === ElasticsearchAssetType.ingestPipeline && id.includes(previousPkgVersion);
+    }),
   });
 };
 

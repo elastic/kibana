@@ -86,9 +86,6 @@ export const installPipelines = async (
   pipelineRefs = [...pipelineRefs, ...topLevelPipelineRefs];
 
   esReferences = await updateEsAssetReferences(savedObjectsClient, pkgName, esReferences, {
-    assetsToRemove: esReferences.filter(
-      (ref) => ref.type === ElasticsearchAssetType.ingestPipeline && !ref.id.includes(pkgVersion)
-    ),
     assetsToAdd: pipelineRefs,
   });
 

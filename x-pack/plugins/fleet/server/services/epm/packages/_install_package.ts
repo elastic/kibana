@@ -181,23 +181,25 @@ export async function _installPackage({
       (installType === 'update' || installType === 'reupdate') &&
       installedPkg
     ) {
-      await withPackageSpan('Delete previous ingest pipelines', () =>
+      esReferences = await withPackageSpan('Delete previous ingest pipelines', () =>
         deletePreviousPipelines(
           esClient,
           savedObjectsClient,
           pkgName,
-          installedPkg!.attributes.version
+          installedPkg!.attributes.version,
+          esReferences
         )
       );
     }
     // pipelines from a different version may have installed during a failed update
     if (installType === 'rollback' && installedPkg) {
-      await await withPackageSpan('Delete previous ingest pipelines', () =>
+      esReferences = await withPackageSpan('Delete previous ingest pipelines', () =>
         deletePreviousPipelines(
           esClient,
           savedObjectsClient,
           pkgName,
-          installedPkg!.attributes.install_version
+          installedPkg!.attributes.install_version,
+          esReferences
         )
       );
     }
