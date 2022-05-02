@@ -41,7 +41,7 @@ export const initializeCspTransformsIndices = async (
 
 export const createIndexIfNotExists = async (
   esClient: ElasticsearchClient,
-  indexName: string,
+  indexTemplateName: string,
   indexPattern: string,
   mappings: MappingTypeMapping,
   logger: Logger
@@ -53,7 +53,7 @@ export const createIndexIfNotExists = async (
 
     if (!isLatestIndexExists) {
       await esClient.indices.putIndexTemplate({
-        name: indexName,
+        name: indexTemplateName,
         index_patterns: indexPattern,
         template: { mappings },
         priority: 500,
@@ -65,7 +65,7 @@ export const createIndexIfNotExists = async (
     }
   } catch (err) {
     const error = transformError(err);
-    logger.error(`Failed to create ${LATEST_FINDINGS_INDEX_DEFAULT_NS}`);
+    logger.error(`Failed to create the index template: ${indexTemplateName}`);
     logger.error(error.message);
   }
 };
