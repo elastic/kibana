@@ -42,7 +42,6 @@ import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
 import { ContextService } from './context';
-import { RequestHandlerContext } from '.';
 import {
   InternalCorePreboot,
   InternalCoreSetup,
@@ -316,6 +315,7 @@ export class Server {
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
+      docLinks: docLinkStart,
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
@@ -371,13 +371,9 @@ export class Server {
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerRouteHandlerContext(
-      coreId,
-      'core',
-      (context, req, res): RequestHandlerContext['core'] => {
-        return new CoreRouteHandlerContext(this.coreStart!, req);
-      }
-    );
+    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req, res) => {
+      return new CoreRouteHandlerContext(this.coreStart!, req);
+    });
   }
 
   public setupCoreConfig() {
