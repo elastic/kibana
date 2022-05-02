@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Top values of geo.src + 2 others'
       );
 
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data!.bars![0].bars[0].x).to.eql('PE › US › 19,986');
     });
 
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0]?.name).to.eql('PE › US › 19,986');
     });
 
