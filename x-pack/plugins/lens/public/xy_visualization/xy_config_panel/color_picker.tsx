@@ -44,6 +44,7 @@ export const ColorPicker = ({
   setConfig,
   showAlpha,
   defaultColor,
+  customSwatches,
 }: VisualizationDimensionEditorProps<State> & {
   formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
@@ -53,6 +54,7 @@ export const ColorPicker = ({
   setConfig: (config: { color?: string }) => void;
   showAlpha?: boolean;
   defaultColor?: string;
+  customSwatches?: string[];
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -131,6 +133,7 @@ export const ColorPicker = ({
       })}
       aria-label={inputLabel}
       showAlpha={showAlpha}
+      swatches={customSwatches}
     />
   );
 

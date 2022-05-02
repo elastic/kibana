@@ -19,6 +19,7 @@ import {
   EuiFormControlLayout,
   EuiText,
   transparentize,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 import { pick } from 'lodash';
 import moment from 'moment';
@@ -348,6 +349,7 @@ export const AnnotationsPanel = (
           {...props}
           defaultColor={isRange ? defaultAnnotationRangeColor : defaultAnnotationColor}
           showAlpha={isRange}
+          customSwatches={isRange ? euiPaletteColorBlind().map((c) => `${c}1A`) : undefined}
           setConfig={setAnnotations}
           disableHelpTooltip
           label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
