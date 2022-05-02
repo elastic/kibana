@@ -8,11 +8,11 @@
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
-import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { SubAction } from './types';
-import { ServiceParams } from '../http_framework/types';
+import { ServiceParams } from './types';
+import * as i18n from './translations';
 
 const isObject = (v: unknown): v is Record<string, unknown> => {
   return typeof v === 'object' && v !== null;

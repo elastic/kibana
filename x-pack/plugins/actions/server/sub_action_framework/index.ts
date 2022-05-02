@@ -11,9 +11,10 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 
 import { ActionTypeRegistry } from '../action_type_registry';
 import { register } from './register';
-import { HTTPConnectorType } from './types';
+import { SubActionConnectorType } from './types';
+import { ActionTypeConfig, ActionTypeSecrets } from '../types';
 
-export const createHTTPConnectorFramework = ({
+export const createSubActionConnectorFramework = ({
   actionsConfigUtils: configurationUtilities,
   actionTypeRegistry,
   logger,
@@ -23,7 +24,9 @@ export const createHTTPConnectorFramework = ({
   actionsConfigUtils: ActionsConfigurationUtilities;
 }) => {
   return {
-    registerConnector: <Config, Secrets>(connector: HTTPConnectorType) => {
+    registerConnector: <Config extends ActionTypeConfig, Secrets extends ActionTypeSecrets>(
+      connector: SubActionConnectorType<Config, Secrets>
+    ) => {
       register({ actionTypeRegistry, logger, connector, configurationUtilities });
     },
   };

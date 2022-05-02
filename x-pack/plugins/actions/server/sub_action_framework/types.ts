@@ -8,9 +8,11 @@
 import type { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { BasicConnector } from '../connectors/basic';
 import { ActionTypeParams, Services } from '../types';
+import { BasicConnector } from './basic';
+
 export interface ServiceParams<Config, Secrets> {
   config: Config;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -23,7 +25,7 @@ export type IService<Config, Secrets> = new (
   params: ServiceParams<Config, Secrets>
 ) => BasicConnector<Config, Secrets>;
 
-export interface HTTPConnectorType<Config, Secrets> {
+export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;
   minimumLicenseRequired: LicenseType;
@@ -42,3 +44,31 @@ export interface ExecutorParams extends ActionTypeParams {
 export type ExtractFunctionKeys<T> = {
   [P in keyof T]-?: T[P] extends Function ? P : never;
 }[keyof T];
+
+export interface SubAction {
+  name: string;
+  method: string;
+  schema: Type<unknown> | null;
+}
+
+export interface PushToServiceParams {
+  externalId: string;
+  comments: Array<{ commentId: string; comment: string }>;
+  [x: string]: unknown;
+}
+
+export interface ExternalServiceIncidentResponse {
+  id: string;
+  title: string;
+  url: string;
+  pushedDate: string;
+}
+
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
+}
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
+  comments?: ExternalServiceCommentResponse[];
+}

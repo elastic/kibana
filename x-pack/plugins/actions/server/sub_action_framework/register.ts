@@ -9,11 +9,11 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { BasicConnector } from '../connectors/basic';
-import { CaseConnector } from '../connectors/case';
+import { BasicConnector } from './basic';
+import { CaseConnector } from './case';
 import { ActionTypeConfig, ActionTypeSecrets } from '../types';
 import { buildExecutor } from './executor';
-import { ExecutorParams, HTTPConnectorType, IService } from './types';
+import { ExecutorParams, SubActionConnectorType, IService } from './types';
 import { buildValidators } from './validators';
 
 const validateService = <Config, Secrets>(Service: IService<Config, Secrets>) => {
@@ -35,7 +35,7 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
   actionTypeRegistry: PublicMethodsOf<ActionTypeRegistry>;
-  connector: HTTPConnectorType<Config, Secrets>;
+  connector: SubActionConnectorType<Config, Secrets>;
   logger: Logger;
 }) => {
   validateService(connector.Service);

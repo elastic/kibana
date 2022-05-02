@@ -97,8 +97,8 @@ import {
   isConnectorDeprecated,
   ConnectorWithOptionalDeprecation,
 } from './lib/is_conector_deprecated';
-import { createHTTPConnectorFramework } from './http_framework';
-import { TinesConnector } from './connectors/externals/tines';
+import { createSubActionConnectorFramework } from './sub_action_framework';
+import { SubActionConnectorType } from './sub_action_framework/types';
 
 export interface PluginSetupContract {
   registerType<
@@ -109,7 +109,12 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
-
+  registerSubActionConnectorType<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  >(
+    connector: SubActionConnectorType<Config, Secrets>
+  ): void;
   isPreconfiguredConnector(connectorId: string): boolean;
 }
 
@@ -312,13 +317,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
-    const httpFramework = createHTTPConnectorFramework({
+    const httpFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
       logger: this.logger,
       actionsConfigUtils,
     });
-
-    httpFramework.registerConnector(TinesConnector);
 
     // Routes
     defineRoutes(
@@ -351,6 +354,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
+      },
+      registerSubActionConnectorType: <
+        Config extends ActionTypeConfig = ActionTypeConfig,
+        Secrets extends ActionTypeSecrets = ActionTypeSecrets
+      >(
+        connector: SubActionConnectorType<Config, Secrets>
+      ) => {
+        httpFramework.registerConnector(connector);
       },
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.preconfiguredActions.find(

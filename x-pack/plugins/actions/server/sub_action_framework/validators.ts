@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeConfig, ActionTypeSecrets } from '../types';
-import { HTTPConnectorType } from './types';
+import { SubActionConnectorType } from './types';
 
 export const buildValidators = <
   Config extends ActionTypeConfig,
@@ -18,7 +18,7 @@ export const buildValidators = <
   configurationUtilities,
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
-  connector: HTTPConnectorType<Config, Secrets>;
+  connector: SubActionConnectorType<Config, Secrets>;
 }) => {
   return {
     config: connector.schema.config,

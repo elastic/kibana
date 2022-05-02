@@ -12,7 +12,7 @@ import {
   PushToServiceResponse,
 } from './types';
 import { BasicConnector } from './basic';
-import { ServiceParams } from '../http_framework/types';
+import { ServiceParams } from './types';
 
 export interface CaseConnectorInterface {
   addComment: ({

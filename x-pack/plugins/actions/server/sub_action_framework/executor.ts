@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ExecutorType } from '../types';
-import { ExecutorParams, HTTPConnectorType } from './types';
+import { ExecutorParams, SubActionConnectorType } from './types';
 
 const isFunction = (v: unknown): v is Function => {
   return typeof v === 'function';
@@ -19,7 +19,7 @@ export const buildExecutor = <Config, Secrets>({
   connector,
   logger,
 }: {
-  connector: HTTPConnectorType<Config, Secrets>;
+  connector: SubActionConnectorType<Config, Secrets>;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }): ExecutorType<Config, Secrets, ExecutorParams, unknown> => {
