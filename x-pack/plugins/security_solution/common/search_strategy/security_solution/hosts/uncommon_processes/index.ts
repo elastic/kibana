@@ -54,7 +54,7 @@ export interface HostsUncommonProcessHit extends Hit {
     id: string[] | undefined;
     name: string[] | undefined;
   }>;
-  _source: {
+  fields: {
     '@timestamp': string;
     process: ProcessEcs;
   };

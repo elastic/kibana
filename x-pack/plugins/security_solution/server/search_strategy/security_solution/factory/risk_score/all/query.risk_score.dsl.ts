@@ -50,6 +50,15 @@ export const buildRiskScoreQuery = ({
     body: {
       query: { bool: { filter } },
       sort: getQueryOrder(sort),
+      _source: false,
+      fields: [
+        'host.os.*',
+        'host.name',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
   };
 

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 
-import { mergeFieldsWithHit } from '../../../../../utils/build_query';
 import {
   ProcessHits,
   HostsUncommonProcessesEdges,
@@ -16,6 +15,7 @@ import {
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { HostHits } from '../../../../../../common/search_strategy';
+import { processFieldsMap, userFieldsMap } from '@kbn/security-solution-plugin/common/ecs/ecs_fields';
 
 export const uncommonProcessesFields = [
   '_id',
@@ -35,7 +35,7 @@ export const getHits = (
     _index: bucket.process.hits.hits[0]._index,
     _type: bucket.process.hits.hits[0]._type,
     _score: bucket.process.hits.hits[0]._score,
-    _source: bucket.process.hits.hits[0]._source,
+    fields: bucket.process.hits.hits[0].fields,
     sort: bucket.process.hits.hits[0].sort,
     cursor: bucket.process.hits.hits[0].cursor,
     total: bucket.process.hits.total,
@@ -52,52 +52,61 @@ export interface UncommonProcessBucket {
 
 export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
   buckets.map((bucket) => {
-    const source = get('host.hits.hits[0]._source', bucket);
+    const fields = get('host.hits.hits[0].fields', bucket);
     return {
       id: [bucket.key],
-      name: get('host.name', source),
+      name: get('host.name', fields),
     };
   });
 
-export const formatUncommonProcessesData = (
-  fields: readonly string[],
-  hit: HostsUncommonProcessHit,
-  fieldMap: Readonly<Record<string, string>>
-): HostsUncommonProcessesEdges =>
-  fields.reduce<HostsUncommonProcessesEdges>(
-    (flattenedFields, fieldName) => {
-      const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
-      flattenedFields.node._id = hit._id;
-      flattenedFields.node.instances = instancesCount;
-      flattenedFields.node.hosts = hit.host;
+  export const formatAuthenticationData = (hit: HostsUncommonProcessHit): HostsUncommonProcessesEdges => {
+    const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
 
-      if (hit.cursor) {
-        flattenedFields.cursor.value = hit.cursor;
-      }
-
-      const mergedResult = mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-      let fieldPath = `node.${fieldName}`;
-      let fieldValue = get(fieldPath, mergedResult);
-      if (fieldPath === 'node.hosts.name') {
-        fieldPath = `node.hosts.0.name`;
-        fieldValue = get(fieldPath, mergedResult);
-      }
-      return set(
-        fieldPath,
-        toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
-        mergedResult
-      );
-    },
-    {
+    let flattenedFields = {
       node: {
-        _id: '',
-        instances: 0,
+        _id: hit._id,
+        instances: instancesCount,
+        hosts: hit.host,
         process: {},
-        hosts: [],
       },
       cursor: {
-        value: '',
+        value: hit.cursor,
         tiebreaker: null,
       },
+    };
+  
+    const lastSuccessFields = getFlattenedFields(uncommonProcessesFields, hit, 'lastSuccess');
+    if (Object.keys(lastSuccessFields).length > 0) {
+      flattenedFields = set('node.lastSuccess', lastSuccessFields, flattenedFields);
     }
-  );
+  
+    const lastFailureFields = getFlattenedFields(uncommonProcessesFields, hit, 'lastFailure');
+    if (Object.keys(lastFailureFields).length > 0) {
+      flattenedFields = set('node.lastFailure', lastFailureFields, flattenedFields);
+    }
+  
+    return flattenedFields;
+  };
+
+  const getFlattenedFields = (fields: string[], hit: HostsUncommonProcessHit, parentField: string) => {
+    return fields.reduce((flattenedFields, fieldName) => {
+      const fieldPath = `${fieldName}`;
+      const esField = get(`${parentField}['${fieldName}']`, {
+        ...processFieldsMap,
+        ...userFieldsMap,
+      });
+  
+      if (!isEmpty(esField)) {
+        const fieldValue = get(`${parentField}['${esField}']`, hit.fields);
+        if (!isEmpty(fieldValue)) {
+          return set(
+            fieldPath,
+            toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+            flattenedFields
+          );
+        }
+      }
+  
+      return flattenedFields;
+    }, {});
+  };

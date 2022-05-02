@@ -147,9 +147,9 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
       case 'host.name':
         return get('key', bucket) || null;
       case 'host.os.name':
-        return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
+        return get('os.hits.hits[0].fields.host.os.name', bucket) || null;
       case 'host.os.version':
-        return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
+        return get('os.hits.hits[0].fields.host.os.version', bucket) || null;
       case 'endpoint.id':
         return get('endpoint_id.value.buckets[0].key', bucket) || null;
     }

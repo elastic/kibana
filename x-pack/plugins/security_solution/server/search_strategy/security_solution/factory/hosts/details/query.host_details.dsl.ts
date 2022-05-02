@@ -58,6 +58,16 @@ export const buildHostDetailsQuery = ({
         },
       },
       query: { bool: { filter } },
+      _source: false,
+      fields: [
+        'agent.id',
+        'agent.type',
+        ...esFields,
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

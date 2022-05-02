@@ -18,7 +18,6 @@ import { assertUnreachable } from '../../../../../../common/utility_types';
 
 export const buildHostsQuery = ({
   defaultIndex,
-  docValueFields,
   filterQuery,
   pagination: { querySize },
   sort,
@@ -45,7 +44,6 @@ export const buildHostsQuery = ({
     ignore_unavailable: true,
     track_total_hits: false,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...agg,
         host_data: {
@@ -62,15 +60,22 @@ export const buildHostsQuery = ({
                     },
                   },
                 ],
-                _source: {
-                  includes: ['host.os.*'],
-                },
+                _source: false,
               },
             },
           },
         },
       },
       query: { bool: { filter } },
+      _source: false,
+      fields: [
+        'host.os.*',
+        'host.name',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

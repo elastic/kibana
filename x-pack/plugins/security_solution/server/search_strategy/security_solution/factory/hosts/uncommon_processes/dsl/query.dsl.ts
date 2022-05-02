@@ -75,7 +75,7 @@ export const buildQuery = ({
               top_hits: {
                 size: 1,
                 sort: [{ '@timestamp': { order: 'desc' as const } }],
-                _source: processUserFields,
+                _source: false,
               },
             },
             host_count: {
@@ -91,7 +91,7 @@ export const buildQuery = ({
                 host: {
                   top_hits: {
                     size: 1,
-                    _source: hostFields,
+                    _source: false,
                   },
                 },
               },
@@ -218,6 +218,16 @@ export const buildQuery = ({
           filter,
         },
       },
+      _source: false,
+      fields: [
+        ...processUserFields,
+        ...hostFields,
+        'host.name',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
     size: 0,
     track_total_hits: false,
