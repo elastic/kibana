@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ClearCommand } from '../components/builtin_commands/clear_command';
 import { HelpCommand } from '../components/builtin_commands/help_command';
 import { CommandDefinition } from '../types';
 import { BuiltinCommandServiceInterface } from './types.builtin_command_service';
@@ -27,10 +28,7 @@ export class ConsoleBuiltinCommandsService implements BuiltinCommandServiceInter
         about: i18n.translate('xpack.securitySolution.console.builtInCommands.clearAbout', {
           defaultMessage: 'Clear the console buffer',
         }),
-        // FIXME:PT Implement
-        RenderComponent: () => {
-          return null;
-        },
+        RenderComponent: ClearCommand,
       },
     ];
   }

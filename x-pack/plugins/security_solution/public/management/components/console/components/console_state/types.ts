@@ -26,7 +26,8 @@ export interface ConsoleDataState {
 
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
-  | { type: 'executeCommand'; payload: { input: string } };
+  | { type: 'executeCommand'; payload: { input: string } }
+  | { type: 'clear' };
 
 export interface ConsoleStore {
   state: ConsoleDataState;
