@@ -17,6 +17,9 @@ const chance = new Chance();
 const getFakeFindings = (name: string): CspFinding & { id: string } => ({
   id: chance.word(),
   result: {
+    expected: {
+      source: {},
+    },
     evaluation: chance.weighted(['passed', 'failed'], [0.5, 0.5]),
     evidence: {
       filemode: chance.word(),
@@ -31,6 +34,12 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
       name: 'CIS Kubernetes',
       version: '1.6.0',
     },
+    section: chance.sentence(),
+    audit: chance.paragraph(),
+    references: chance.paragraph(),
+    profile_applicability: chance.sentence(),
+    rationale: chance.paragraph(),
+    default_value: chance.sentence(),
     tags: [],
   },
   agent: {
