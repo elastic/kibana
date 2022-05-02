@@ -80,11 +80,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
 
   const legendSize = layer.legendSize;
 
-  const [hadAutoLegendSize, _] = useState(legendSize === LegendSizes.AUTO);
-
-  // useEffect(() => {
-
-  // }, []);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {

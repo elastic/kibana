@@ -98,7 +98,7 @@ const PieOptions = (props: PieOptionsProps) => {
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
   const legendSize = stateParams.legendSize;
-  const [hadAutoLegendSize, setHadAutoLegendSize] = useState(legendSize === LegendSizes.AUTO);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
 
   const getLegendDisplay = useCallback(
     (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),

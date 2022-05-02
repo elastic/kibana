@@ -43,7 +43,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
 
   const legendSize = stateParams.legendSize;
-  const [hadAutoLegendSize, setHadAutoLegendSize] = useState(legendSize === LegendSizes.AUTO);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
 
   const setValueAxisScale = useCallback(
     <T extends keyof ValueAxis['scale']>(paramName: T, value: ValueAxis['scale'][T]) =>

@@ -296,7 +296,7 @@ export const XyToolbar = memo(function XyToolbar(
 
   const legendSize = state.legend.legendSize;
 
-  const [hadAutoLegendSize, _] = useState(legendSize === LegendSizes.AUTO);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

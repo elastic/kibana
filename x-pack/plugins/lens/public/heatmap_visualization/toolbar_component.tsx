@@ -53,7 +53,7 @@ export const HeatmapToolbar = memo(
 
     const legendSize = state?.legend.legendSize;
 
-    const [hadAutoLegendSize, setHadAutoLegendSize] = useState(legendSize === LegendSizes.AUTO);
+    const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
