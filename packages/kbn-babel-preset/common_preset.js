@@ -51,7 +51,7 @@ module.exports = (_, options = {}) => ({
       ],
     },
 
-    [require.resolve('@babel/preset-react'), { runtime: 'automatic' }],
+    require.resolve('@babel/preset-react'),
 
     [
       require.resolve('@babel/preset-typescript'),
