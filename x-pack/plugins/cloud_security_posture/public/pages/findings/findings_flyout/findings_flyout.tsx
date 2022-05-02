@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 import type { CspFinding } from '../types';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
@@ -133,7 +132,6 @@ const getGeneralCards = ({ rule, ...rest }: CspFinding): Card[] => [
   {
     title: TEXT.RULE,
     listItems: [
-      [TEXT.INDEX, CSP_LATEST_FINDINGS_DATA_VIEW],
       [TEXT.RULE_EVALUATED_AT, moment(rest['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS')],
       [
         TEXT.FRAMEWORK_SOURCES,
