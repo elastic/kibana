@@ -39,17 +39,15 @@ while read -r config; do
   if [[ $timeSec -gt 60 ]]; then
     min=$((timeSec/60))
     sec=$((timeSec-(min*60)))
-    time="${min}m ${sec}s"
+    duration="${min}m ${sec}s"
   else
-    time="${time}s"
+    duration="${timeSec}s"
   fi
 
   results+=("
  - $config
-    duration: ${time}
+    duration: ${duration}
     result: ${lastCode}")
-
-
 
   if [ $lastCode -ne 0 ]; then
     exitCode=10
