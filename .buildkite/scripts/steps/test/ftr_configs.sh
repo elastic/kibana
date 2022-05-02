@@ -76,7 +76,7 @@ i=-1
 while read -r config; do
   i+=1
   echo " - $config";
-  echo "${results[$i]}"
+  echo "${results[i]}"
 done <<< "$configs"
 
 exit $exitCode
