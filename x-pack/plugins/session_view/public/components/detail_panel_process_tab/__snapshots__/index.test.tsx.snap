@@ -1,0 +1,4012 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailPanelProcessTab component When DetailPanelProcessTab is mounted renders DetailPanelProcessTab correctly 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <dl
+        class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+        data-test-subj="sessionView:detail-panel-description-list"
+      >
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            entity_id
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              <span
+                class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+              >
+                8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726
+              </span>
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            args
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              ['bash']
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            executable
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yztcht-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              <div
+                css="[object Object]"
+              >
+                <span
+                  class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                >
+                  /usr/bin/bash
+                </span>
+                <span
+                  class="euiTextColor euiTextColor--subdued css-1717lvx-EuiTextColor"
+                >
+                  (fork)
+                </span>
+              </div>
+              <div
+                css="[object Object]"
+              >
+                <span
+                  class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                >
+                  /usr/bin/vi
+                </span>
+                <span
+                  class="euiTextColor euiTextColor--subdued css-1717lvx-EuiTextColor"
+                >
+                  (exec)
+                </span>
+              </div>
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            interactive
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              <span
+                class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+              >
+                False
+              </span>
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            working_directory
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              <span
+                class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+              >
+                /home/vagrant
+              </span>
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            pid
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              <span
+                class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+              >
+                1
+              </span>
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            start
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              2021-11-23T15:25:04.210Z
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            end
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              -
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            exit_code
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              <span
+                class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+              >
+                137
+              </span>
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            user.name
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              vagrant
+            </span>
+          </div>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+          style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-1yhny8r-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            group.name
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+          style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+        >
+          <div
+            class="euiText euiText--small css-137zats-EuiText"
+            data-test-subj="sessionView:detail-panel-list-item"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              vagrant
+            </span>
+          </div>
+        </dd>
+      </dl>
+      <div
+        class="euiAccordion css-15q5h43"
+        data-test-subj="sessionView:detail-panel-accordion"
+      >
+        <div
+          class="euiAccordion__triggerWrapper"
+        >
+          <button
+            aria-controls="processEntryLeader"
+            aria-expanded="false"
+            class="euiAccordion__button"
+            id="generated-id"
+            type="button"
+          >
+            <span
+              class="euiAccordion__buttonContent"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow css-iwiojf"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <span>
+                    Entry Leader
+                  </span>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  data-test-subj="sessionView:detail-panel-accordion-tooltip"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      data-euiicon-type="questionInCircle"
+                      tabindex="0"
+                    >
+                      Info
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </span>
+          </button>
+          <button
+            aria-controls="processEntryLeader"
+            aria-expanded="false"
+            aria-labelledby="generated-id"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton--right"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowRight"
+            />
+          </button>
+        </div>
+        <div
+          aria-labelledby="generated-id"
+          class="euiAccordion__childWrapper"
+          id="processEntryLeader"
+          role="region"
+          tabindex="-1"
+        >
+          <div>
+            <div
+              class=""
+            >
+              <dl
+                class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+                data-test-subj="sessionView:detail-panel-description-list"
+              >
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    entity_id
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        3d0192c6-7c54-5ee6-a110-3539a7cf42bc
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    args
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    executable
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <div
+                        css="[object Object]"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                        >
+                          /usr/bin/bash
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    interactive
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        True
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    working_directory
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        /home/vagrant
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    pid
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        2442
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    start
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      2021-11-23T15:26:34.859Z
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    end
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    exit_code
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        -
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    user.name
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      vagrant
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    group.name
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      vagrant
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    entry_meta.type
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        -
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    entry_meta.source.ip
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiAccordion css-15q5h43"
+        data-test-subj="sessionView:detail-panel-accordion"
+      >
+        <div
+          class="euiAccordion__triggerWrapper"
+        >
+          <button
+            aria-controls="processSessionLeader"
+            aria-expanded="false"
+            class="euiAccordion__button"
+            id="generated-id"
+            type="button"
+          >
+            <span
+              class="euiAccordion__buttonContent"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow css-iwiojf"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <span>
+                    Session Leader
+                  </span>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  data-test-subj="sessionView:detail-panel-accordion-tooltip"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      data-euiicon-type="questionInCircle"
+                      tabindex="0"
+                    >
+                      Info
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </span>
+          </button>
+          <button
+            aria-controls="processSessionLeader"
+            aria-expanded="false"
+            aria-labelledby="generated-id"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton--right"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowRight"
+            />
+          </button>
+        </div>
+        <div
+          aria-labelledby="generated-id"
+          class="euiAccordion__childWrapper"
+          id="processSessionLeader"
+          role="region"
+          tabindex="-1"
+        >
+          <div>
+            <div
+              class=""
+            >
+              <dl
+                class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+                data-test-subj="sessionView:detail-panel-description-list"
+              >
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    entity_id
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        3d0192c6-7c54-5ee6-a110-3539a7cf42bc
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    args
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    executable
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <div
+                        css="[object Object]"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                        >
+                          /usr/bin/bash
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    interactive
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        True
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    working_directory
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        /home/vagrant
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    pid
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        2442
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    start
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      2021-11-23T15:26:34.859Z
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    end
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    exit_code
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        -
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    user.name
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      vagrant
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    group.name
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      vagrant
+                    </span>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiAccordion css-15q5h43"
+        data-test-subj="sessionView:detail-panel-accordion"
+      >
+        <div
+          class="euiAccordion__triggerWrapper"
+        >
+          <button
+            aria-controls="processGroupLeader"
+            aria-expanded="false"
+            class="euiAccordion__button"
+            id="generated-id"
+            type="button"
+          >
+            <span
+              class="euiAccordion__buttonContent"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow css-iwiojf"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <span>
+                    Group Leader
+                  </span>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  data-test-subj="sessionView:detail-panel-accordion-tooltip"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      data-euiicon-type="questionInCircle"
+                      tabindex="0"
+                    >
+                      Info
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </span>
+          </button>
+          <button
+            aria-controls="processGroupLeader"
+            aria-expanded="false"
+            aria-labelledby="generated-id"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton--right"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowRight"
+            />
+          </button>
+        </div>
+        <div
+          aria-labelledby="generated-id"
+          class="euiAccordion__childWrapper"
+          id="processGroupLeader"
+          role="region"
+          tabindex="-1"
+        >
+          <div>
+            <div
+              class=""
+            >
+              <dl
+                class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+                data-test-subj="sessionView:detail-panel-description-list"
+              >
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    entity_id
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        3d0192c6-7c54-5ee6-a110-3539a7cf42bc
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    args
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    executable
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <div
+                        css="[object Object]"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                        >
+                          /usr/bin/bash
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    interactive
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        True
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    working_directory
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        /home/vagrant
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    pid
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        2442
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    start
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      2021-11-23T15:26:34.859Z
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    end
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    exit_code
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        -
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    user.name
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      vagrant
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    group.name
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      vagrant
+                    </span>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiAccordion css-15q5h43"
+        data-test-subj="sessionView:detail-panel-accordion"
+      >
+        <div
+          class="euiAccordion__triggerWrapper"
+        >
+          <button
+            aria-controls="processParent"
+            aria-expanded="false"
+            class="euiAccordion__button"
+            id="generated-id"
+            type="button"
+          >
+            <span
+              class="euiAccordion__buttonContent"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow css-iwiojf"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <span>
+                    Parent
+                  </span>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  data-test-subj="sessionView:detail-panel-accordion-tooltip"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      data-euiicon-type="questionInCircle"
+                      tabindex="0"
+                    >
+                      Info
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </span>
+          </button>
+          <button
+            aria-controls="processParent"
+            aria-expanded="false"
+            aria-labelledby="generated-id"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton--right"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowRight"
+            />
+          </button>
+        </div>
+        <div
+          aria-labelledby="generated-id"
+          class="euiAccordion__childWrapper"
+          id="processParent"
+          role="region"
+          tabindex="-1"
+        >
+          <div>
+            <div
+              class=""
+            >
+              <dl
+                class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+                data-test-subj="sessionView:detail-panel-description-list"
+              >
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    entity_id
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        3d0192c6-7c54-5ee6-a110-3539a7cf42bc
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    args
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    executable
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <div
+                        css="[object Object]"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                        >
+                          /usr/bin/bash
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    interactive
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        True
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    working_directory
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        /home/vagrant
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    pid
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        2442
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    start
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      2021-11-23T15:26:34.859Z
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    end
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      -
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    exit_code
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        -
+                      </span>
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    user.name
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      vagrant
+                    </span>
+                  </div>
+                </dd>
+                <dt
+                  class="euiDescriptionList__title"
+                  style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-1yhny8r-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    group.name
+                  </div>
+                </dt>
+                <dd
+                  class="euiDescriptionList__description"
+                  style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+                >
+                  <div
+                    class="euiText euiText--small css-137zats-EuiText"
+                    data-test-subj="sessionView:detail-panel-list-item"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      vagrant
+                    </span>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <dl
+      class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+      data-test-subj="sessionView:detail-panel-description-list"
+    >
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          entity_id
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+            >
+              8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726
+            </span>
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          args
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            ['bash']
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          executable
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yztcht-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <div
+              css="[object Object]"
+            >
+              <span
+                class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+              >
+                /usr/bin/bash
+              </span>
+              <span
+                class="euiTextColor euiTextColor--subdued css-1717lvx-EuiTextColor"
+              >
+                (fork)
+              </span>
+            </div>
+            <div
+              css="[object Object]"
+            >
+              <span
+                class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+              >
+                /usr/bin/vi
+              </span>
+              <span
+                class="euiTextColor euiTextColor--subdued css-1717lvx-EuiTextColor"
+              >
+                (exec)
+              </span>
+            </div>
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          interactive
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+            >
+              False
+            </span>
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          working_directory
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+            >
+              /home/vagrant
+            </span>
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          pid
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+            >
+              1
+            </span>
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          start
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            2021-11-23T15:25:04.210Z
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          end
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            -
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          exit_code
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+            >
+              137
+            </span>
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          user.name
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            vagrant
+          </span>
+        </div>
+      </dd>
+      <dt
+        class="euiDescriptionList__title"
+        style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-1yhny8r-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          group.name
+        </div>
+      </dt>
+      <dd
+        class="euiDescriptionList__description"
+        style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+      >
+        <div
+          class="euiText euiText--small css-137zats-EuiText"
+          data-test-subj="sessionView:detail-panel-list-item"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            vagrant
+          </span>
+        </div>
+      </dd>
+    </dl>
+    <div
+      class="euiAccordion css-15q5h43"
+      data-test-subj="sessionView:detail-panel-accordion"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="processEntryLeader"
+          aria-expanded="false"
+          class="euiAccordion__button"
+          id="generated-id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__buttonContent"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow css-iwiojf"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span>
+                  Entry Leader
+                </span>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                data-test-subj="sessionView:detail-panel-accordion-tooltip"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <span
+                    data-euiicon-type="questionInCircle"
+                    tabindex="0"
+                  >
+                    Info
+                  </span>
+                </span>
+              </div>
+            </div>
+          </span>
+        </button>
+        <button
+          aria-controls="processEntryLeader"
+          aria-expanded="false"
+          aria-labelledby="generated-id"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton--right"
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </div>
+      <div
+        aria-labelledby="generated-id"
+        class="euiAccordion__childWrapper"
+        id="processEntryLeader"
+        role="region"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <dl
+              class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+              data-test-subj="sessionView:detail-panel-description-list"
+            >
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  entity_id
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      3d0192c6-7c54-5ee6-a110-3539a7cf42bc
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  args
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  executable
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <div
+                      css="[object Object]"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        /usr/bin/bash
+                      </span>
+                    </div>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  interactive
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      True
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  working_directory
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      /home/vagrant
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  pid
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      2442
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  start
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    2021-11-23T15:26:34.859Z
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  end
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  exit_code
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      -
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  user.name
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    vagrant
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  group.name
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    vagrant
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  entry_meta.type
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      -
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  entry_meta.source.ip
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiAccordion css-15q5h43"
+      data-test-subj="sessionView:detail-panel-accordion"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="processSessionLeader"
+          aria-expanded="false"
+          class="euiAccordion__button"
+          id="generated-id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__buttonContent"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow css-iwiojf"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span>
+                  Session Leader
+                </span>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                data-test-subj="sessionView:detail-panel-accordion-tooltip"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <span
+                    data-euiicon-type="questionInCircle"
+                    tabindex="0"
+                  >
+                    Info
+                  </span>
+                </span>
+              </div>
+            </div>
+          </span>
+        </button>
+        <button
+          aria-controls="processSessionLeader"
+          aria-expanded="false"
+          aria-labelledby="generated-id"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton--right"
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </div>
+      <div
+        aria-labelledby="generated-id"
+        class="euiAccordion__childWrapper"
+        id="processSessionLeader"
+        role="region"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <dl
+              class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+              data-test-subj="sessionView:detail-panel-description-list"
+            >
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  entity_id
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      3d0192c6-7c54-5ee6-a110-3539a7cf42bc
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  args
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  executable
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <div
+                      css="[object Object]"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        /usr/bin/bash
+                      </span>
+                    </div>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  interactive
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      True
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  working_directory
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      /home/vagrant
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  pid
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      2442
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  start
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    2021-11-23T15:26:34.859Z
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  end
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  exit_code
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      -
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  user.name
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    vagrant
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  group.name
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    vagrant
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiAccordion css-15q5h43"
+      data-test-subj="sessionView:detail-panel-accordion"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="processGroupLeader"
+          aria-expanded="false"
+          class="euiAccordion__button"
+          id="generated-id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__buttonContent"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow css-iwiojf"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span>
+                  Group Leader
+                </span>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                data-test-subj="sessionView:detail-panel-accordion-tooltip"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <span
+                    data-euiicon-type="questionInCircle"
+                    tabindex="0"
+                  >
+                    Info
+                  </span>
+                </span>
+              </div>
+            </div>
+          </span>
+        </button>
+        <button
+          aria-controls="processGroupLeader"
+          aria-expanded="false"
+          aria-labelledby="generated-id"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton--right"
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </div>
+      <div
+        aria-labelledby="generated-id"
+        class="euiAccordion__childWrapper"
+        id="processGroupLeader"
+        role="region"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <dl
+              class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+              data-test-subj="sessionView:detail-panel-description-list"
+            >
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  entity_id
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      3d0192c6-7c54-5ee6-a110-3539a7cf42bc
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  args
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  executable
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <div
+                      css="[object Object]"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        /usr/bin/bash
+                      </span>
+                    </div>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  interactive
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      True
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  working_directory
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      /home/vagrant
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  pid
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      2442
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  start
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    2021-11-23T15:26:34.859Z
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  end
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  exit_code
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      -
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  user.name
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    vagrant
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  group.name
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    vagrant
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiAccordion css-15q5h43"
+      data-test-subj="sessionView:detail-panel-accordion"
+    >
+      <div
+        class="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="processParent"
+          aria-expanded="false"
+          class="euiAccordion__button"
+          id="generated-id"
+          type="button"
+        >
+          <span
+            class="euiAccordion__buttonContent"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow css-iwiojf"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span>
+                  Parent
+                </span>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                data-test-subj="sessionView:detail-panel-accordion-tooltip"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <span
+                    data-euiicon-type="questionInCircle"
+                    tabindex="0"
+                  >
+                    Info
+                  </span>
+                </span>
+              </div>
+            </div>
+          </span>
+        </button>
+        <button
+          aria-controls="processParent"
+          aria-expanded="false"
+          aria-labelledby="generated-id"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton--right"
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </div>
+      <div
+        aria-labelledby="generated-id"
+        class="euiAccordion__childWrapper"
+        id="processParent"
+        role="region"
+        tabindex="-1"
+      >
+        <div>
+          <div
+            class=""
+          >
+            <dl
+              class="euiDescriptionList euiDescriptionList--column css-13kecx0-EuiDescriptionList"
+              data-test-subj="sessionView:detail-panel-description-list"
+            >
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  entity_id
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      3d0192c6-7c54-5ee6-a110-3539a7cf42bc
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  args
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  executable
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <div
+                      css="[object Object]"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                      >
+                        /usr/bin/bash
+                      </span>
+                    </div>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  interactive
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      True
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  working_directory
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      /home/vagrant
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  pid
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      2442
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  start
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    2021-11-23T15:26:34.859Z
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  end
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    -
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  exit_code
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <span
+                      class="euiTextColor euiTextColor--subdued css-uueutj-EuiTextColor"
+                    >
+                      -
+                    </span>
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  user.name
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    vagrant
+                  </span>
+                </div>
+              </dd>
+              <dt
+                class="euiDescriptionList__title"
+                style="width: 40%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-1yhny8r-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  group.name
+                </div>
+              </dt>
+              <dd
+                class="euiDescriptionList__description"
+                style="width: 60%; display: flex; align-items: baseline; margin-top: 0px;"
+              >
+                <div
+                  class="euiText euiText--small css-137zats-EuiText"
+                  data-test-subj="sessionView:detail-panel-list-item"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    vagrant
+                  </span>
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

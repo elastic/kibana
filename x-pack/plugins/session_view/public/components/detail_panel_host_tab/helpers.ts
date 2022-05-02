@@ -6,24 +6,25 @@
  */
 
 import { ProcessEventHost } from '../../../common/types/process_tree';
+import { DASH } from '../../constants';
 import { DetailPanelHost } from '../../types';
 import { dataOrDash } from '../../utils/data_or_dash';
 
 export const getHostData = (host: ProcessEventHost | undefined): DetailPanelHost => {
   const detailPanelHost: DetailPanelHost = {
-    architecture: '-',
-    hostname: '-',
-    id: '-',
-    ip: '-',
-    mac: '-',
-    name: '-',
+    architecture: DASH,
+    hostname: DASH,
+    id: DASH,
+    ip: DASH,
+    mac: DASH,
+    name: DASH,
     os: {
-      family: '-',
-      full: '-',
-      kernel: '-',
-      name: '-',
-      platform: '-',
-      version: '-',
+      family: DASH,
+      full: DASH,
+      kernel: DASH,
+      name: DASH,
+      platform: DASH,
+      version: DASH,
     },
   };
 
@@ -33,8 +34,8 @@ export const getHostData = (host: ProcessEventHost | undefined): DetailPanelHost
 
   detailPanelHost.hostname = dataOrDash(host.hostname).toString();
   detailPanelHost.id = dataOrDash(host.id).toString();
-  detailPanelHost.ip = host.ip?.map?.((ip) => dataOrDash(ip)).join(', ') ?? '-';
-  detailPanelHost.mac = host.mac?.map?.((mac) => dataOrDash(mac)).join(', ') ?? '-';
+  detailPanelHost.ip = host.ip?.map?.((ip) => dataOrDash(ip)).join(', ') ?? DASH;
+  detailPanelHost.mac = host.mac?.map?.((mac) => dataOrDash(mac)).join(', ') ?? DASH;
   detailPanelHost.name = dataOrDash(host.name).toString();
   detailPanelHost.architecture = dataOrDash(host.architecture).toString();
   detailPanelHost.os.family = dataOrDash(host.os?.family).toString();
