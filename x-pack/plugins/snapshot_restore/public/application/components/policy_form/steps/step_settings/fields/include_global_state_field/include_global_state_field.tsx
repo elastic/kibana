@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../../../../common/types';
@@ -65,7 +66,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
           <h3>
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescriptionTitle"
-              defaultMessage="Include global state and system indices"
+              defaultMessage="Include global state and feature states"
             />
           </h3>
         </EuiTitle>
@@ -73,7 +74,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescription"
-          defaultMessage="Stores the global cluster state and system indices as part of the snapshot. This will capture all system indices in addition to any specific indices that have been selected for capture."
+          defaultMessage="Stores the global cluster state and the state for all the features as part of the snapshot. This will capture all system indices and other required indices and data streams in addition to any specific indices that have been selected for capture."
         />
       }
       fullWidth
@@ -84,7 +85,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.policyIncludeGlobalStateLabel"
-              defaultMessage="Include global state and system indices"
+              defaultMessage="Include global state and feature states"
             />
           }
           checked={config.includeGlobalState === undefined || config.includeGlobalState}
@@ -101,24 +102,38 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
           <EuiFormRow
             fullWidth
             label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepSettings.featureStates"
-                defaultMessage="Include system indices from"
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepSettings.featureStatesTitle"
+                  defaultMessage="Include feature states from"
+                />{' '}
+                <EuiIconTip
+                  type="questionInCircle"
+                  content={
+                    <span>
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.stepSettings.featureStatesTooltip"
+                        defaultMessage="A feature state contains the indices, system indices and data streams used to store configurations, history, and other data for an Elastic feature."
+                      />
+                    </span>
+                  }
+                  iconProps={{
+                    className: 'eui-alignTop',
+                  }}
+                />
+              </>
             }
           >
-            <>
-              <EuiComboBox
-                aria-label="Select features you want to include in the snapshot"
-                placeholder="All features"
-                options={features}
-                selectedOptions={selectedOptions}
-                onChange={onChange}
-                isLoading={isLoadingFeatures}
-                isClearable={true}
-                data-test-subj="demoComboBox"
-              />
-            </>
+            <EuiComboBox
+              aria-label="Select features you want to include in the snapshot"
+              placeholder="All features"
+              options={features}
+              selectedOptions={selectedOptions}
+              onChange={onChange}
+              isLoading={isLoadingFeatures}
+              isClearable={true}
+              data-test-subj="demoComboBox"
+            />
           </EuiFormRow>
         </>
       )}

@@ -329,7 +329,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.featureStatesLabel"
-                defaultMessage="Include system indices from"
+                defaultMessage="Include feature states from"
               />
             </EuiDescriptionListTitle>
 

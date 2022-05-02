@@ -241,7 +241,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             <EuiDescriptionListTitle>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.featureStatesLabel"
-                defaultMessage="Include system indices from"
+                defaultMessage="Include feature states from"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>

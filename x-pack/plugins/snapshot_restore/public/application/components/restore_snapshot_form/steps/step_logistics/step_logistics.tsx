@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  EuiIconTip,
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -578,7 +579,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateTitle"
-                defaultMessage="Restore global state"
+                defaultMessage="Restore global state and feature states"
               />
             </h3>
           </EuiTitle>
@@ -588,7 +589,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <FormattedMessage
               id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
               defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings and all system indices. {learnMoreLink}"
+              templates with the same name. Also restores persistent settings and all system indices from all features. {learnMoreLink}"
               values={{
                 learnMoreLink: (
                   <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
@@ -627,7 +628,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateLabel"
-                defaultMessage="Restore global state"
+                defaultMessage="Restore global state and feature states"
               />
             }
             checked={includeGlobalState === undefined ? false : includeGlobalState}
@@ -643,21 +644,35 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <EuiFormRow
               fullWidth
               label={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepSettings.featureStates"
-                  defaultMessage="Include system indices from"
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.restoreForm.stepLogistics.featureStatesTitle"
+                    defaultMessage="Include feature states from"
+                  />{' '}
+                  <EuiIconTip
+                    type="questionInCircle"
+                    content={
+                      <span>
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.restoreForm.stepLogistics.featureStatesTooltip"
+                          defaultMessage="A feature state contains the indices, system indices and data streams used to store configurations, history, and other data for an Elastic feature."
+                        />
+                      </span>
+                    }
+                    iconProps={{
+                      className: 'eui-alignTop',
+                    }}
+                  />
+                </>
               }
             >
               <>
                 <EuiComboBox
-                  aria-label="Select features you want to include in the snapshot"
                   placeholder="All features"
                   options={featureStates.map((feature) => ({ label: feature }))}
                   selectedOptions={selectedFeatureStateOptions}
                   onChange={onFeatureStatesChange}
                   isClearable={true}
-                  data-test-subj="demoComboBox"
                 />
               </>
             </EuiFormRow>

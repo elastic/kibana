@@ -195,7 +195,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.featureStatesLabel"
-                    defaultMessage="Include system indices from"
+                    defaultMessage="Include feature states from"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
