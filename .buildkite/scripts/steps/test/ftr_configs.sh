@@ -49,8 +49,10 @@ while read -r config; do
     --config="$config"
   lastCode=$?
   set -e;
-  results[$config]=$((($(date +%s)-start)/60))
-  results["${config}_code"]=$lastCode
+  results+=("
+   duration: $((($(date +%s)-start)/60)) minutes
+   result: ${lastCode}
+")
 
   if [ $lastCode -ne 0 ]; then
     exitCode=10
@@ -70,10 +72,11 @@ if [[ "$failedConfigs" ]]; then
 fi
 
 echo "--- FTR configs complete"
+i=-1
 while read -r config; do
+  i+=1
   echo " - $config";
-  echo "   duration: ${results[$config]} minutes"
-  echo "   exitcode: ${results["${config}_code"]}"
+  echo "${results[$i]}"
 done <<< "$configs"
 
 exit $exitCode
