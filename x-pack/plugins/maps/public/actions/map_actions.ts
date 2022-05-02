@@ -58,6 +58,7 @@ import {
   autoFitToBounds,
   syncDataForAllLayers,
   syncDataForLayerDueToDrawing,
+  syncDataForLayerId,
 } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
@@ -394,7 +395,7 @@ export function setEditLayerToSelectedLayer() {
 }
 
 export function updateEditLayer(layerId: string | null) {
-  return (dispatch: Dispatch) => {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     if (layerId !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
     }
@@ -406,6 +407,7 @@ export function updateEditLayer(layerId: string | null) {
       type: UPDATE_EDIT_STATE,
       editState: layerId ? { layerId } : undefined,
     });
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 
