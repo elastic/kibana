@@ -8,6 +8,7 @@
 import { get, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 
+import { processFieldsMap, userFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import {
   ProcessHits,
   HostsUncommonProcessesEdges,
@@ -15,7 +16,6 @@ import {
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { HostHits } from '../../../../../../common/search_strategy';
-import { processFieldsMap, userFieldsMap } from '@kbn/security-solution-plugin/common/ecs/ecs_fields';
 
 export const uncommonProcessesFields = [
   '_id',
@@ -59,54 +59,60 @@ export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>
     };
   });
 
-  export const formatAuthenticationData = (hit: HostsUncommonProcessHit): HostsUncommonProcessesEdges => {
-    const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
+export const formatAuthenticationData = (
+  hit: HostsUncommonProcessHit
+): HostsUncommonProcessesEdges => {
+  const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
 
-    let flattenedFields = {
-      node: {
-        _id: hit._id,
-        instances: instancesCount,
-        hosts: hit.host,
-        process: {},
-      },
-      cursor: {
-        value: hit.cursor,
-        tiebreaker: null,
-      },
-    };
-  
-    const lastSuccessFields = getFlattenedFields(uncommonProcessesFields, hit, 'lastSuccess');
-    if (Object.keys(lastSuccessFields).length > 0) {
-      flattenedFields = set('node.lastSuccess', lastSuccessFields, flattenedFields);
-    }
-  
-    const lastFailureFields = getFlattenedFields(uncommonProcessesFields, hit, 'lastFailure');
-    if (Object.keys(lastFailureFields).length > 0) {
-      flattenedFields = set('node.lastFailure', lastFailureFields, flattenedFields);
-    }
-  
-    return flattenedFields;
+  let flattenedFields = {
+    node: {
+      _id: hit._id,
+      instances: instancesCount,
+      hosts: hit.host,
+      process: {},
+    },
+    cursor: {
+      value: hit.cursor,
+      tiebreaker: null,
+    },
   };
 
-  const getFlattenedFields = (fields: string[], hit: HostsUncommonProcessHit, parentField: string) => {
-    return fields.reduce((flattenedFields, fieldName) => {
-      const fieldPath = `${fieldName}`;
-      const esField = get(`${parentField}['${fieldName}']`, {
-        ...processFieldsMap,
-        ...userFieldsMap,
-      });
-  
-      if (!isEmpty(esField)) {
-        const fieldValue = get(`${parentField}['${esField}']`, hit.fields);
-        if (!isEmpty(fieldValue)) {
-          return set(
-            fieldPath,
-            toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
-            flattenedFields
-          );
-        }
+  const lastSuccessFields = getFlattenedFields(uncommonProcessesFields, hit, 'lastSuccess');
+  if (Object.keys(lastSuccessFields).length > 0) {
+    flattenedFields = set('node.lastSuccess', lastSuccessFields, flattenedFields);
+  }
+
+  const lastFailureFields = getFlattenedFields(uncommonProcessesFields, hit, 'lastFailure');
+  if (Object.keys(lastFailureFields).length > 0) {
+    flattenedFields = set('node.lastFailure', lastFailureFields, flattenedFields);
+  }
+
+  return flattenedFields;
+};
+
+const getFlattenedFields = (
+  fields: string[],
+  hit: HostsUncommonProcessHit,
+  parentField: string
+) => {
+  return fields.reduce((flattenedFields, fieldName) => {
+    const fieldPath = `${fieldName}`;
+    const esField = get(`${parentField}['${fieldName}']`, {
+      ...processFieldsMap,
+      ...userFieldsMap,
+    });
+
+    if (!isEmpty(esField)) {
+      const fieldValue = get(`${parentField}['${esField}']`, hit.fields);
+      if (!isEmpty(fieldValue)) {
+        return set(
+          fieldPath,
+          toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+          flattenedFields
+        );
       }
-  
-      return flattenedFields;
-    }, {});
-  };
+    }
+
+    return flattenedFields;
+  }, {});
+};
