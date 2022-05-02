@@ -68,6 +68,12 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._source = args.source as IMvtVectorSource;
   }
 
+  isInitialDataLoadComplete(): boolean {
+    return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
+      ? false
+      : super.isInitialDataLoadComplete();
+  }
+
   async getBounds(syncContext: DataRequestContext) {
     // Add filter to narrow bounds to features with matching join keys
     let joinKeyFilter;
