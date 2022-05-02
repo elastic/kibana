@@ -25,7 +25,7 @@ import {
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
-import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
+import { FormattedDateTime, CollapsibleIndicesList, CollapsibleFeatureStatesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
 interface Props {
@@ -48,8 +48,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
     retention,
     isManagedPolicy,
   } = policy;
-  const { includeGlobalState, ignoreUnavailable, indices, partial } = config || {
+  const { includeGlobalState, featureStates, ignoreUnavailable, indices, partial } = config || {
     includeGlobalState: undefined,
+    featureStates: [],
     ignoreUnavailable: undefined,
     indices: undefined,
     partial: undefined,
@@ -315,6 +316,21 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                   defaultMessage="Yes"
                 />
               )}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="indices">
+            <EuiDescriptionListTitle data-test-subj="title">
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyDetails.featureStatesLabel"
+                defaultMessage="Include system indices from"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+              <CollapsibleFeatureStatesList featureStates={featureStates} />
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         </EuiFlexGroup>

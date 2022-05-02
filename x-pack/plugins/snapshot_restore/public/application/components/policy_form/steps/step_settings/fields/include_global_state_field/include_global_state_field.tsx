@@ -31,17 +31,12 @@ interface Props {
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
-/**
- * In future we may be able to split data streams to its own field, but for now
- * they share an array "indices" in the snapshot lifecycle policy config. See
- * this github issue for progress: https://github.com/elastic/elasticsearch/issues/58474
- */
 export const IncludeGlobalStateField: FunctionComponent<Props> = ({
   policy,
   onUpdate,
 }) => {
   const { config = {} } = policy;
-  const {error: errorLoadingFeatures, isLoading: isLoadingFeatures, data } = useLoadFeatures();
+  const { error: errorLoadingFeatures, isLoading: isLoadingFeatures, data } = useLoadFeatures();
 
   const features = useMemo(() => {
     if (!isLoadingFeatures && !errorLoadingFeatures) {
@@ -55,7 +50,9 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({
     return [];
   }, [isLoadingFeatures, errorLoadingFeatures, data]);
 
-  const [selectedOptions, setSelected] = useState<FeaturesOption[]>();
+  const [selectedOptions, setSelected] = useState(
+    config?.featureStates?.map(feature => ({ label: feature })) as FeaturesOption[]
+  );
 
   const onChange = ((selectedOptions: FeaturesOption[]) => {
     setSelected(selectedOptions);

@@ -15,6 +15,7 @@ const snapshotConfigSchema = schema.object({
   indices: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   ignoreUnavailable: schema.maybe(schema.boolean()),
   includeGlobalState: schema.maybe(schema.boolean()),
+  featureStates: schema.maybe(schema.arrayOf(schema.string())),
   partial: schema.maybe(schema.boolean()),
   metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
