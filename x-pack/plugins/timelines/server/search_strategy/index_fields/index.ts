@@ -33,7 +33,7 @@ export const indexFieldsProvider = (
 ): ISearchStrategy<
   IndexFieldsStrategyRequest<'indices' | 'dataView'>,
   IndexFieldsStrategyResponse
-> => {
+  > => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -209,7 +209,7 @@ const missingFields: FieldSpec[] = [
 ];
 
 /**
- * Creates a single field item.
+ * Creates a single field item with category and indexes (index alias)
  *
  * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
  * in size at a time calling this function repeatedly. This function should be as optimized as possible
@@ -248,6 +248,8 @@ export const createFieldItem = (
 };
 
 /**
+ * Iterates over each field, adds description, category, and indexes (index alias)
+ *
  * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
  * in size at a time when being called. This function should be as optimized as possible
  * and should avoid any and all creation of new arrays, iterating over the arrays or performing
@@ -257,10 +259,11 @@ export const createFieldItem = (
  * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
  * has already consumed a lot of the event loop processing up to this function and we want to give
  * I/O opportunity to occur by scheduling this on the next loop.
+ * @param beatFields: BeatFields,
  * @param responsesFieldSpec The response index fields to loop over
  * @param indexesAlias The index aliases such as filebeat-*
  */
-export const formatFirstFields = async (
+export const formatIndexFields = async (
   beatFields: BeatFields,
   responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
@@ -295,21 +298,4 @@ export const formatFirstFields = async (
       );
     });
   });
-};
-
-/**
- * Formats the index fields into a format the UI wants.
- *
- * NOTE: This will have array sizes up to 4.7 megs in size at a time when being called.
- * This function should be as optimized as possible and should avoid any and all creation
- * of new arrays, iterating over the arrays or performing any n^2 operations.
- * @param responsesFieldSpec  The response index fields to format
- * @param indexesAlias The index alias
- */
-export const formatIndexFields = async (
-  beatFields: BeatFields,
-  responsesFieldSpec: FieldSpec[][],
-  indexesAlias: string[]
-): Promise<IndexField[]> => {
-  return formatFirstFields(beatFields, responsesFieldSpec, indexesAlias);
 };
