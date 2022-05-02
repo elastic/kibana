@@ -21,17 +21,17 @@ export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
 
   const matchedRoute = useRef(match?.route);
 
-  if (matchedRoute.current && matchedRoute.current !== match?.route) {
-    api.unset(matchedRoute.current);
-  }
-
-  matchedRoute.current = match?.route;
-
-  if (matchedRoute.current) {
-    api.set(matchedRoute.current, castArray(breadcrumb));
-  }
-
   useEffect(() => {
+    if (matchedRoute.current && matchedRoute.current !== match?.route) {
+      api.unset(matchedRoute.current);
+    }
+
+    matchedRoute.current = match?.route;
+
+    if (matchedRoute.current) {
+      api.set(matchedRoute.current, castArray(breadcrumb));
+    }
+
     return () => {
       if (matchedRoute.current) {
         api.unset(matchedRoute.current);
