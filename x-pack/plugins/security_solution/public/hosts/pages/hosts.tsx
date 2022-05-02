@@ -198,7 +198,6 @@ const HostsComponent = () => {
               <HeaderPage
                 subtitle={
                   <LastEventTime
-                    docValueFields={docValueFields}
                     indexKey={LastEventIndexKey.hosts}
                     indexNames={selectedPatterns}
                   />

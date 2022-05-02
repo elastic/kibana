@@ -141,7 +141,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 border
                 subtitle={
                   <LastEventTime
-                    docValueFields={docValueFields}
                     indexKey={LastEventIndexKey.hostDetails}
                     hostName={detailName}
                     indexNames={selectedPatterns}

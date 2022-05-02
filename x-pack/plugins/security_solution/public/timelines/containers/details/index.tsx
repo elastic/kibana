@@ -7,24 +7,22 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
-import type {
-  DocValueFields,
+import {
   TimelineEventsDetailsItem,
+  TimelineEventsQueries,
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import type { Ecs } from '../../../../common/ecs';
+import { Ecs } from '../../../../common/ecs';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -33,7 +31,6 @@ export interface EventsArgs {
 
 export interface UseTimelineEventsDetailsProps {
   entityType?: EntityType;
-  docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
   runtimeMappings: MappingRuntimeFields;
@@ -42,7 +39,6 @@ export interface UseTimelineEventsDetailsProps {
 
 export const useTimelineEventsDetails = ({
   entityType = EntityType.EVENTS,
-  docValueFields,
   indexName,
   eventId,
   runtimeMappings,
@@ -91,15 +87,11 @@ export const useTimelineEventsDetails = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                Promise.resolve().then(() => {
-                  ReactDOM.unstable_batchedUpdates(() => {
-                    setLoading(false);
-                    setTimelineDetailsResponse(response.data || []);
-                    setRawEventData(response.rawResponse.hits.hits[0]);
-                    setEcsData(response.ecs || null);
-                    searchSubscription$.current.unsubscribe();
-                  });
-                });
+                setLoading(false);
+                setTimelineDetailsResponse(response.data || []);
+                setRawEventData(response.rawResponse.hits.hits[0]);
+                setEcsData(response.ecs || null);
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.FAIL_TIMELINE_DETAILS);
@@ -125,7 +117,6 @@ export const useTimelineEventsDetails = ({
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        docValueFields,
         entityType,
         indexName,
         eventId,
@@ -137,7 +128,7 @@ export const useTimelineEventsDetails = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, entityType, eventId, indexName, runtimeMappings]);
+  }, [entityType, eventId, indexName, runtimeMappings]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);

@@ -11,40 +11,21 @@ import { buildLastEventTimeQuery } from './query.events_last_event_time.dsl';
 describe('buildLastEventTimeQuery', () => {
   it('should return ip details query if index key is ipDetails', () => {
     const defaultIndex = ['.siem-signals-default'];
-    const docValueFields = [
-      { field: '@timestamp' },
-      { field: 'agent.ephemeral_id' },
-      { field: 'agent.id' },
-      { field: 'agent.name' },
-    ];
-
     const query = buildLastEventTimeQuery({
       indexKey: LastEventIndexKey.ipDetails,
       details: { ip: '12345567' },
       defaultIndex,
-      docValueFields,
     });
     expect(query).toMatchInlineSnapshot(`
       Object {
         "allow_no_indices": true,
         "body": Object {
           "_source": false,
-          "docvalue_fields": Array [
+          "fields": Array [
             Object {
               "field": "@timestamp",
-            },
-            Object {
-              "field": "agent.ephemeral_id",
-            },
-            Object {
-              "field": "agent.id",
-            },
-            Object {
-              "field": "agent.name",
-            },
-          ],
-          "fields": Array [
-            "@timestamp",
+              "format": "strict_date_optional_time",
+            }
           ],
           "query": Object {
             "bool": Object {

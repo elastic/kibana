@@ -187,7 +187,6 @@ const UsersComponent = () => {
             <HeaderPage
               subtitle={
                 <LastEventTime
-                  docValueFields={docValueFields}
                   indexKey={LastEventIndexKey.users}
                   indexNames={selectedPatterns}
                 />

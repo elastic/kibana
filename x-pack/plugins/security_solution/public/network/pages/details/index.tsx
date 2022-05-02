@@ -141,7 +141,6 @@ const NetworkDetailsComponent: React.FC = () => {
               draggableArguments={headerDraggableArguments}
               subtitle={
                 <LastEventTime
-                  docValueFields={docValueFields}
                   indexKey={LastEventIndexKey.ipDetails}
                   indexNames={selectedPatterns}
                   ip={ip}

@@ -9,13 +9,16 @@ import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
 
+<<<<<<< HEAD
 import type { DocValueFields, LastEventIndexKey } from '../../../../common/search_strategy';
+=======
+import { LastEventIndexKey } from '../../../../common/search_strategy';
+>>>>>>> 438edfc81dd (removed docvalueFields props and deps)
 import { useTimelineLastEventTime } from '../../containers/events/last_event_time';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 
 export interface LastEventTimeProps {
-  docValueFields: DocValueFields[];
   hostName?: string;
   userName?: string;
   indexKey: LastEventIndexKey;
@@ -24,9 +27,8 @@ export interface LastEventTimeProps {
 }
 
 export const LastEventTime = memo<LastEventTimeProps>(
-  ({ docValueFields, hostName, userName, indexKey, ip, indexNames }) => {
+  ({ hostName, userName, indexKey, ip, indexNames }) => {
     const [loading, { lastSeen, errorMessage }] = useTimelineLastEventTime({
-      docValueFields,
       indexKey,
       indexNames,
       details: {

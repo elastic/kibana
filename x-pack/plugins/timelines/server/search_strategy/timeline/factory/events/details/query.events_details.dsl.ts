@@ -7,7 +7,6 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DocValueFields } from '../../../../../../common/search_strategy';
 
 export const buildTimelineDetailsQuery = ({
   authFilter,
@@ -50,9 +49,18 @@ export const buildTimelineDetailsQuery = ({
           field: '@timestamp',
           format: 'strict_date_optional_time',
         },
+        {
+          field: 'code_signature.timestamp',
+          format: 'strict_date_optional_time',
+        },
+        {
+          field: 'dll.code_signature.timestamp',
+          format: 'strict_date_optional_time',
+        },
       ],
       // Remove and instead pass index_pattern.id once issue resolved: https://github.com/elastic/kibana/issues/111762
       runtime_mappings: runtimeMappings,
+      stored_fields: ['*'],
       _source: false,
     },
     size: 1,

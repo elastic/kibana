@@ -21,7 +21,10 @@ import type {
 } from '../../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
+<<<<<<< HEAD
 import type { DocValueFields } from '../../../../../common/search_strategy';
+=======
+>>>>>>> 438edfc81dd (removed docvalueFields props and deps)
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 
 export interface UseTimelineLastEventTimeArgs {
@@ -31,14 +34,12 @@ export interface UseTimelineLastEventTimeArgs {
 }
 
 interface UseTimelineLastEventTimeProps {
-  docValueFields: DocValueFields[];
   indexKey: LastEventIndexKey;
   indexNames: string[];
   details: LastTimeDetails;
 }
 
 export const useTimelineLastEventTime = ({
-  docValueFields,
   indexKey,
   indexNames,
   details,
@@ -51,7 +52,6 @@ export const useTimelineLastEventTime = ({
   const [TimelineLastEventTimeRequest, setTimelineLastEventTimeRequest] =
     useState<TimelineEventsLastEventTimeRequestOptions>({
       defaultIndex: indexNames,
-      docValueFields,
       factoryQueryType: TimelineEventsQueries.lastEventTime,
       indexKey,
       details,
@@ -119,7 +119,6 @@ export const useTimelineLastEventTime = ({
       const myRequest = {
         ...prevRequest,
         defaultIndex: indexNames,
-        docValueFields,
         indexKey,
         details,
       };
@@ -128,7 +127,7 @@ export const useTimelineLastEventTime = ({
       }
       return prevRequest;
     });
-  }, [indexNames, details, docValueFields, indexKey]);
+  }, [indexNames, details, indexKey]);
 
   useEffect(() => {
     timelineLastEventTimeSearch(TimelineLastEventTimeRequest);

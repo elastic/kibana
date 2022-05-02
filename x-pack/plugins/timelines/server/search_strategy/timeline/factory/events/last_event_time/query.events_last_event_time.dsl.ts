@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import {
   TimelineEventsLastEventTimeRequestOptions,
@@ -45,7 +44,12 @@ export const buildLastEventTimeQuery = ({
             body: {
               query: { bool: { filter: { bool: { should: getIpDetailsFilter(details.ip) } } } },
               _source: false,
-              fields: ['@timestamp'],
+              fields: [
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
               size: 1,
               sort: [
                 {
@@ -68,7 +72,12 @@ export const buildLastEventTimeQuery = ({
             body: {
               query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
               _source: false,
-              fields: ['@timestamp'],
+              fields: [
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
               size: 1,
               sort: [
                 {
@@ -91,7 +100,12 @@ export const buildLastEventTimeQuery = ({
             body: {
               query: { bool: { filter: getUserDetailsFilter(details.userName) } },
               _source: false,
-              fields: ['@timestamp'],
+              fields: [
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
               size: 1,
               sort: [
                 {
@@ -115,7 +129,12 @@ export const buildLastEventTimeQuery = ({
           body: {
             query: { match_all: {} },
             _source: false,
-            fields: ['@timestamp'],
+            fields: [
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
             size: 1,
             sort: [
               {
