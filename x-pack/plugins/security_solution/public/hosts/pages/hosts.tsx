@@ -197,10 +197,7 @@ const HostsComponent = () => {
             <Display show={!globalFullScreen}>
               <HeaderPage
                 subtitle={
-                  <LastEventTime
-                    indexKey={LastEventIndexKey.hosts}
-                    indexNames={selectedPatterns}
-                  />
+                  <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={selectedPatterns} />
                 }
                 title={i18n.PAGE_TITLE}
                 border
