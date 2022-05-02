@@ -21,7 +21,7 @@ export const NoPrivilegesPage = React.memo(({ pageName }: NoPrivilegesPageProps)
   return (
     <EuiEmptyPrompt
       iconColor="default"
-      iconType="addDataApp"
+      iconType="casesApp"
       title={<h2>{i18n.NO_PRIVILEGES_TITLE}</h2>}
       titleSize="xs"
       body={<p>{i18n.NO_PRIVILEGES_MSG(pageName)}</p>}
