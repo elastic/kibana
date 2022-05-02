@@ -6,7 +6,6 @@
  */
 import { ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { Teletype } from '../common/types/process_tree';
 
 export type SessionViewServices = CoreStart;
 
