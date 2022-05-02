@@ -10,6 +10,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidV4 } from 'uuid';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
 import { ConsoleDataAction, ConsoleDataState, ConsoleStoreReducer } from '../types';
 import { parseCommandInput } from '../../../service/parsed_command_input';
@@ -62,7 +63,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (!commandDefinition) {
     return updateStateWithNewCommandHistoryItem(
       state,
-      <HistoryItem>
+      <HistoryItem key={uuidV4()}>
         <UnknownCommand input={parsedInput.input} />
       </HistoryItem>
     );
@@ -81,7 +82,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     if (parsedInput.hasArg('help')) {
       return updateStateWithNewCommandHistoryItem(
         state,
-        <HistoryItem>
+        <HistoryItem key={uuidV4()}>
           <CommandExecutionOutput
             command={{
               ...command,
@@ -100,7 +101,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     if (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0) {
       return updateStateWithNewCommandHistoryItem(
         state,
-        <HistoryItem>
+        <HistoryItem key={uuidV4()}>
           <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
             {i18n.translate(
               'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
@@ -117,7 +118,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     if (parsedInput.unknownArgs && parsedInput.unknownArgs.length) {
       return updateStateWithNewCommandHistoryItem(
         state,
-        <HistoryItem>
+        <HistoryItem key={uuidV4()}>
           <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
             {i18n.translate('xpack.securitySolution.console.commandValidation.unknownArgument', {
               defaultMessage: 'unknown argument(s): {unknownArgs}',
@@ -135,7 +136,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       if (!parsedInput.args[requiredArg]) {
         return updateStateWithNewCommandHistoryItem(
           state,
-          <HistoryItem>
+          <HistoryItem key={uuidV4()}>
             <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
               {i18n.translate(
                 'xpack.securitySolution.console.commandValidation.missingRequiredArg',
@@ -161,7 +162,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       if (!argDefinition) {
         return updateStateWithNewCommandHistoryItem(
           state,
-          <HistoryItem>
+          <HistoryItem key={uuidV4()}>
             <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
               {i18n.translate('xpack.securitySolution.console.commandValidation.unsupportedArg', {
                 defaultMessage: 'unsupported argument: {argName}',
@@ -180,7 +181,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       ) {
         return updateStateWithNewCommandHistoryItem(
           state,
-          <HistoryItem>
+          <HistoryItem key={uuidV4()}>
             <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
               {i18n.translate(
                 'xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce',
@@ -200,7 +201,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         if (validationResult !== true) {
           return updateStateWithNewCommandHistoryItem(
             state,
-            <HistoryItem>
+            <HistoryItem key={uuidV4()}>
               <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
                 {i18n.translate(
                   'xpack.securitySolution.console.commandValidation.invalidArgValue',
@@ -218,7 +219,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   } else if (requiredArgs.length > 0) {
     return updateStateWithNewCommandHistoryItem(
       state,
-      <HistoryItem>
+      <HistoryItem key={uuidV4()}>
         <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
           {i18n.translate('xpack.securitySolution.console.commandValidation.mustHaveArgs', {
             defaultMessage: 'missing required arguments: {requiredArgs}',
@@ -232,7 +233,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   } else if (commandDefinition.mustHaveArgs) {
     return updateStateWithNewCommandHistoryItem(
       state,
-      <HistoryItem>
+      <HistoryItem key={uuidV4()}>
         <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
           {i18n.translate('xpack.securitySolution.console.commandValidation.oneArgIsRequired', {
             defaultMessage: 'at least one argument must be used',
@@ -245,7 +246,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   // All is good. Execute the command
   return updateStateWithNewCommandHistoryItem(
     state,
-    <HistoryItem>
+    <HistoryItem key={uuidV4()}>
       <CommandExecutionOutput command={command} />
     </HistoryItem>
   );

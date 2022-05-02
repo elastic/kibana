@@ -40,11 +40,10 @@ describe('When a Console command is entered by the user', () => {
   });
 
   it('should display custom help output when Command service has `getHelp()` defined', async () => {
-    commandServiceMock.getHelp = async () => {
-      return {
-        result: <div data-test-subj="custom-help">{'help output'}</div>,
-      };
+    commandServiceMock.HelpComponent = () => {
+      return <div data-test-subj="custom-help">{'help output'}</div>;
     };
+    commandServiceMock.HelpComponent.displayName = 'helpContent';
     render();
     enterCommand('help');
 
@@ -73,11 +72,18 @@ describe('When a Console command is entered by the user', () => {
   });
 
   it('should should custom command `--help` output when Command service defines `getCommandUsage()`', async () => {
-    commandServiceMock.getCommandUsage = async () => {
-      return {
-        result: <div data-test-subj="cmd-help">{'command help  here'}</div>,
+    const commandList = commandServiceMock.getCommandList();
+    const cmd2 = commandList.find((command) => command.name === 'cmd2');
+
+    if (cmd2) {
+      cmd2.HelpComponent = () => {
+        return <div data-test-subj="cmd-help">{'command help  here'}</div>;
       };
-    };
+      cmd2.HelpComponent.displayName = 'HelpComponent';
+    }
+
+    commandServiceMock.getCommandList.mockReturnValue(commandList);
+
     render();
     enterCommand('cmd2 --help');
 
