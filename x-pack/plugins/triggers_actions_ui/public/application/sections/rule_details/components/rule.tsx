@@ -122,7 +122,7 @@ export function RuleComponent({
     {
       id: EVENT_LOG_LIST_TAB,
       name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.eventLogTabText', {
-        defaultMessage: 'Execution history',
+        defaultMessage: 'Run history',
       }),
       'data-test-subj': 'eventLogListTab',
       content: suspendedComponentWithProps(
