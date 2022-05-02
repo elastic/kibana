@@ -48,5 +48,5 @@ export function getSpanLinksFromEvents(events: ApmFields[]) {
       const spanId = event['span.id'] || event['transaction.id'];
       return spanId ? { span: { id: spanId }, trace: { id: event['trace.id'] } } : undefined;
     })
-    .filter((_) => _) as Array<{ span: { id: string }; trace?: { id: string } }>;
+    .filter((_) => _) as Array<{ span: { id: string }; trace: { id: string } }>;
 }
