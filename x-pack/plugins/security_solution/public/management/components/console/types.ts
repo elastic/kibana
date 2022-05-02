@@ -29,11 +29,9 @@ export interface CommandDefinition {
    */
   meta?: Record<string, unknown>;
 
-  // FIXME:PT is this being used? is it even needed?
-  validator?: () => Promise<boolean>;
-
   /** If all args are optional, but at least one must be defined, set to true */
   mustHaveArgs?: boolean;
+  /** The list of arguments supported by this command */
   args?: {
     [longName: string]: {
       required: boolean;

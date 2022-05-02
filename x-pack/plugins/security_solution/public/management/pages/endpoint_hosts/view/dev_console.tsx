@@ -204,7 +204,7 @@ export const ShowDevConsole = memo(() => {
       <EuiText>
         <h3>{'Un-managed console'}</h3>
       </EuiText>
-      <EuiPanel>
+      <EuiPanel style={{ height: '600px' }}>
         <Console prompt="$$>" commandService={commandService} data-test-subj="dev" />
       </EuiPanel>
     </EuiPanel>

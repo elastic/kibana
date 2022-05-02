@@ -12,10 +12,14 @@ import { EuiCode } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { act } from '@testing-library/react';
 import { Console } from './console';
-import type { Command, CommandServiceInterface, ConsoleProps } from './types';
+import type {
+  CommandServiceInterface,
+  ConsoleProps,
+  CommandDefinition,
+  CommandExecutionComponent,
+} from './types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { CommandDefinition } from './types';
 
 export interface ConsoleTestSetup {
   renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
@@ -108,16 +112,30 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
 };
 
 export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> => {
+  const RenderComponent: CommandExecutionComponent = ({ command }) => {
+    return (
+      <div data-test-subj="exec-output">
+        <div data-test-subj="exec-output-cmdName">{`${command.commandDefinition.name}`}</div>
+        <div data-test-subj="exec-output-userInput">{`command input: ${command.input}`}</div>
+        <EuiCode data-test-subj="exec-output-argsJson">
+          {JSON.stringify(command.args, null, 2)}
+        </EuiCode>
+      </div>
+    );
+  };
+
   return {
     getCommandList: jest.fn(() => {
       const commands: CommandDefinition[] = [
         {
           name: 'cmd1',
           about: 'a command with no options',
+          RenderComponent,
         },
         {
           name: 'cmd2',
           about: 'runs cmd 2',
+          RenderComponent,
           args: {
             file: {
               about: 'Includes file in the run',
@@ -143,6 +161,7 @@ export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> =>
         {
           name: 'cmd3',
           about: 'allows argument to be used multiple times',
+          RenderComponent,
           args: {
             foo: {
               about: 'foo stuff',
@@ -153,7 +172,8 @@ export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> =>
         },
         {
           name: 'cmd4',
-          about: 'all options optinal, but at least one is required',
+          about: 'all options optional, but at least one is required',
+          RenderComponent,
           mustHaveArgs: true,
           args: {
             foo: {
@@ -171,22 +191,6 @@ export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> =>
       ];
 
       return commands;
-    }),
-
-    executeCommand: jest.fn(async (command: Command) => {
-      await new Promise((r) => setTimeout(r, 1));
-
-      return {
-        result: (
-          <div data-test-subj="exec-output">
-            <div data-test-subj="exec-output-cmdName">{`${command.commandDefinition.name}`}</div>
-            <div data-test-subj="exec-output-userInput">{`command input: ${command.input}`}</div>
-            <EuiCode data-test-subj="exec-output-argsJson">
-              {JSON.stringify(command.args, null, 2)}
-            </EuiCode>
-          </div>
-        ),
-      };
     }),
   };
 };
