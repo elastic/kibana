@@ -1,6 +1,6 @@
 steps:
-  - command: .buildkite/scripts/steps/functional/response_ops_cases.sh
-    label: 'Cases Cypress Tests on Security Solution'
+  - command: .buildkite/scripts/steps/functional/response_ops.sh
+    label: 'Rules, Alerts and Exceptions ResponseOps Cypress Tests on Security Solution'
     agents:
       queue: ci-group-6
     depends_on: build
