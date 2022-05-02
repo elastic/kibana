@@ -57,6 +57,6 @@ while read -r config; do
 done <<< "$configs"
 
 echo "--- Jest configs complete"
-printf "%s\n" "${results[@]}"
+printf "%s" "${results[@]}"
 
 exit $exitCode
