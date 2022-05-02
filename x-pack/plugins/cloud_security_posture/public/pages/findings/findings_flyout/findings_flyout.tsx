@@ -23,7 +23,6 @@ import {
   EuiIcon,
   type PropsOf,
   EuiMarkdownFormat,
-  useEuiTheme,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
@@ -64,29 +63,25 @@ interface FindingFlyoutProps {
   findings: CspFinding;
 }
 
-const Cards = ({ data }: { data: Card[] }) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <EuiFlexGrid direction="column" gutterSize={'l'}>
-      {data.map((card) => (
-        <EuiFlexItem key={card.title} style={{ display: 'block' }}>
-          <EuiCard textAlign="left" title={card.title} hasBorder>
-            <EuiDescriptionList
-              compressed={false}
-              type="column"
-              listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
-              style={{ flexFlow: 'column' }}
-              descriptionProps={{
-                style: { width: '100%' },
-              }}
-            />
-          </EuiCard>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
-  );
-};
+const Cards = ({ data }: { data: Card[] }) => (
+  <EuiFlexGrid direction="column" gutterSize={'l'}>
+    {data.map((card) => (
+      <EuiFlexItem key={card.title} style={{ display: 'block' }}>
+        <EuiCard textAlign="left" title={card.title} hasBorder>
+          <EuiDescriptionList
+            compressed={false}
+            type="column"
+            listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
+            style={{ flexFlow: 'column' }}
+            descriptionProps={{
+              style: { width: '100%' },
+            }}
+          />
+        </EuiCard>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGrid>
+);
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
   switch (tab.id) {
