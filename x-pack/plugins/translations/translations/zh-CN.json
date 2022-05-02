@@ -27736,7 +27736,6 @@
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectAllIndicesLink": "全选",
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesHelpText": "将还原 {indicesCount} 个{indicesCount, plural, other {索引}}和 {dataStreamsCount} 个{dataStreamsCount, plural, other {数据流}}。{deselectAllLink}",
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesLabel": "选择数据流和索引",
-    "xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.title": "还原此快照时，将使用来自快照的数据覆盖系统索引。",
     "xpack.snapshotRestore.restoreForm.stepLogisticsTitle": "还原详情",
     "xpack.snapshotRestore.restoreForm.stepReview.jsonTab.jsonAriaLabel": "还原要执行的设置",
     "xpack.snapshotRestore.restoreForm.stepReview.jsonTabTitle": "JSON",

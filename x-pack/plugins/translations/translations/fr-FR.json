@@ -27527,7 +27527,6 @@
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectAllIndicesLink": "Tout sélectionner",
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesHelpText": "{indicesCount} {indicesCount, plural, other {index}} et {dataStreamsCount} {dataStreamsCount, plural,other {flux de données}} seront restaurés. {deselectAllLink}",
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesLabel": "Sélectionner les flux de données et les index",
-    "xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.title": "Une fois ce snapshot restauré, les index système seront écrasés avec les données du snapshot.",
     "xpack.snapshotRestore.restoreForm.stepLogisticsTitle": "Restaurer les détails",
     "xpack.snapshotRestore.restoreForm.stepReview.jsonTab.jsonAriaLabel": "Restaurer les paramètres à exécuter",
     "xpack.snapshotRestore.restoreForm.stepReview.jsonTabTitle": "JSON",

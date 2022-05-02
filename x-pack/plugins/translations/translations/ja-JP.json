@@ -27702,7 +27702,6 @@
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectAllIndicesLink": "すべて選択",
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesHelpText": "{indicesCount} {indicesCount, plural, other  {個のインデックス}} and {dataStreamsCount} {dataStreamsCount, plural, other  {個のデータストリーム}}が復元されます。{deselectAllLink}",
     "xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesLabel": "データストリームとインデックスを選択",
-    "xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.title": "このスナップショットが復元されるときに、システムインデックスはスナップショットのデータで上書きされます。",
     "xpack.snapshotRestore.restoreForm.stepLogisticsTitle": "詳細を復元",
     "xpack.snapshotRestore.restoreForm.stepReview.jsonTab.jsonAriaLabel": "実行する設定を復元",
     "xpack.snapshotRestore.restoreForm.stepReview.jsonTabTitle": "JSON",
