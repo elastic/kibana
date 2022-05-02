@@ -138,5 +138,4 @@ describe('isInitialDataLoadComplete', () => {
     });
     expect(layer.isInitialDataLoadComplete()).toBe(true);
   });
-
 });
