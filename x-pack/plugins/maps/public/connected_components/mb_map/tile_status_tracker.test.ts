@@ -113,7 +113,7 @@ describe('TileStatusTracker', () => {
 
     expect(loadedMap.get('foo')).toBe(true);
     expect(loadedMap.get('bar')).toBe(false); // still outstanding tile requests
-    expect(loadedMap.has('foobar')).toBe(true); // never received tile requests
+    expect(loadedMap.has('foobar')).toBe(false); // never received tile requests, status should not have been reported for layer
 
     (aa11BarTile as { tile: { aborted: boolean } })!.tile.aborted = true; // abort tile
     mockMbMap.emit('sourcedataloading', createMockMbDataEvent('barsource', 'af1d'));
@@ -125,7 +125,7 @@ describe('TileStatusTracker', () => {
 
     expect(loadedMap.get('foo')).toBe(false); // still outstanding tile requests
     expect(loadedMap.get('bar')).toBe(true); // tiles were aborted or errored
-    expect(loadedMap.has('foobar')).toBe(true); // never received tile requests
+    expect(loadedMap.has('foobar')).toBe(false); // never received tile requests, status should not have been reported for layer
   });
 
   test('should cleanup listeners on destroy', async () => {
