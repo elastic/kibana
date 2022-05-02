@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useEffect } from 'react';
+import React, { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs/operators';
 import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
@@ -22,6 +25,7 @@ import { AppStateSelectedCells } from '../../application/explorer/explorer_utils
 import { MlDependencies } from '../../application/app';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
@@ -52,6 +56,25 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   onLoading,
   onError,
 }) => {
+  const parentExecutionContext = useObservable(
+    embeddableInput.pipe(map((v) => v.executionContext))
+  );
+
+  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
+    const child: KibanaExecutionContext = {
+      type: 'visualization',
+      name: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+      id,
+    };
+
+    return {
+      ...parentExecutionContext,
+      child,
+    };
+  }, [parentExecutionContext, id]);
+
+  useExecutionContext(services[0].executionContext, embeddableExecutionContext);
+
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const [fromPage, setFromPage] = useState<number>(1);
