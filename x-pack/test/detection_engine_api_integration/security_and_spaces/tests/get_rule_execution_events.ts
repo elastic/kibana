@@ -52,11 +52,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
-    afterEach(async () => {
-      await deleteAllAlerts(supertest, log);
-      await deleteAllEventLogExecutionEvents(es, log);
-    });
-
     it('should return an error if rule does not exist', async () => {
       const start = dateMath.parse('now-24h')?.utc().toISOString();
       const end = dateMath.parse('now', { roundUp: true })?.utc().toISOString();
@@ -123,16 +118,15 @@ export default ({ getService }: FtrProviderContext) => {
       ).to.eql(true);
     });
 
-    // TODO: Debug indexing
-    it.skip('should return execution events for a rule that has executed in a failure state with a gap', async () => {
+    it('should return execution events for a rule that has executed in a failure state with a gap', async () => {
       const rule = getRuleForSignalTesting(['auditbeat-*'], uuid.v4(), false);
       const { id } = await createRule(supertest, log, rule);
 
       const start = dateMath.parse('now')?.utc().toISOString();
       const end = dateMath.parse('now+24h', { roundUp: true })?.utc().toISOString();
 
-      // Create 5 timestamps a minute apart to use in the templated data
-      const dateTimes = [...Array(5).keys()].map((i) =>
+      // Create 5 timestamps (failedGapExecution.length) a minute apart to use in the templated data
+      const dateTimes = [...Array(failedGapExecution.length).keys()].map((i) =>
         moment(start)
           .add(i + 1, 'm')
           .toDate()
@@ -144,6 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
         set(e, 'event.start', dateTimes[i]);
         set(e, 'event.end', dateTimes[i]);
         set(e, 'rule.id', id);
+        set(e, 'kibana.saved_objects[0].id', id);
         return e;
       });
 
@@ -155,73 +150,19 @@ export default ({ getService }: FtrProviderContext) => {
         .set('kbn-xsrf', 'true')
         .query({ start, end });
 
-      // console.log(JSON.stringify(response));
-
       expect(response.status).to.eql(200);
       expect(response.body.total).to.eql(1);
-      expect(response.body.events[0].duration_ms).to.eql(4236);
+      expect(response.body.events[0].duration_ms).to.eql(1545);
       expect(response.body.events[0].search_duration_ms).to.eql(0);
-      expect(response.body.events[0].schedule_delay_ms).to.greaterThan(0);
+      expect(response.body.events[0].schedule_delay_ms).to.eql(544808);
       expect(response.body.events[0].indexing_duration_ms).to.eql(0);
-      expect(response.body.events[0].gap_duration_ms).to.greaterThan(0);
+      expect(response.body.events[0].gap_duration_ms).to.eql(245);
       expect(response.body.events[0].security_status).to.eql('failed');
       expect(
         response.body.events[0].security_message.startsWith(
-          'Check privileges failed to execute ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [no-name-index]'
+          '4 minutes (244689ms) were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances.'
         )
       ).to.eql(true);
     });
-
-    // it('should return execution events when providing a status filter', async () => {
-    //   const rule = getRuleForSignalTesting(['auditbeat-*', 'no-name-index']);
-    //   const { id } = await createRule(supertest, log, rule);
-    //   await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus.failed);
-    //   await waitForSignalsToBePresent(supertest, log, 1, [id]);
-    //
-    //   const start = dateMath.parse('now-24h')?.utc().toISOString();
-    //   const end = dateMath.parse('now', { roundUp: true })?.utc().toISOString();
-    //   const response = await supertest
-    //     .get(detectionEngineRuleExecutionEventsUrl(id))
-    //     .set('kbn-xsrf', 'true')
-    //     .query({ start, end });
-    //
-    //   expect(response.status).to.eql(200);
-    //   expect(response.body.total).to.eql(1);
-    //   expect(response.body.events[0].duration_ms).to.greaterThan(0);
-    //   expect(response.body.events[0].search_duration_ms).to.eql(0);
-    //   expect(response.body.events[0].schedule_delay_ms).to.greaterThan(0);
-    //   expect(response.body.events[0].indexing_duration_ms).to.eql(0);
-    //   expect(response.body.events[0].gap_duration_ms).to.eql(0);
-    //   expect(response.body.events[0].security_status).to.eql('failed');
-    //   expect(response.body.events[0].security_message).to.include(
-    //     'were not queried between this rule execution and the last execution, so signals may have been missed. '
-    //   );
-    // });
-
-    // it('should return execution events when providing a status filter and sortField', async () => {
-    //   const rule = getRuleForSignalTesting(['auditbeat-*', 'no-name-index']);
-    //   const { id } = await createRule(supertest, log, rule);
-    //   await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus.failed);
-    //   await waitForSignalsToBePresent(supertest, log, 1, [id]);
-    //
-    //   const start = dateMath.parse('now-24h')?.utc().toISOString();
-    //   const end = dateMath.parse('now', { roundUp: true })?.utc().toISOString();
-    //   const response = await supertest
-    //     .get(detectionEngineRuleExecutionEventsUrl(id))
-    //     .set('kbn-xsrf', 'true')
-    //     .query({ start, end });
-    //
-    //   expect(response.status).to.eql(200);
-    //   expect(response.body.total).to.eql(1);
-    //   expect(response.body.events[0].duration_ms).to.greaterThan(0);
-    //   expect(response.body.events[0].search_duration_ms).to.eql(0);
-    //   expect(response.body.events[0].schedule_delay_ms).to.greaterThan(0);
-    //   expect(response.body.events[0].indexing_duration_ms).to.eql(0);
-    //   expect(response.body.events[0].gap_duration_ms).to.eql(0);
-    //   expect(response.body.events[0].security_status).to.eql('failed');
-    //   expect(response.body.events[0].security_message).to.include(
-    //     'were not queried between this rule execution and the last execution, so signals may have been missed. '
-    //   );
-    // });
   });
 };

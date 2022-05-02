@@ -46,8 +46,14 @@ import { inputsSelectors } from '../../../../../../common/store';
 import {
   setAbsoluteRangeDatePicker,
   setFilterQuery,
+  setRelativeRangeDatePicker,
 } from '../../../../../../common/store/inputs/actions';
-import { AbsoluteTimeRange, RelativeTimeRange } from '../../../../../../common/store/inputs/model';
+import {
+  AbsoluteTimeRange,
+  isAbsoluteTimeRange,
+  isRelativeTimeRange,
+  RelativeTimeRange,
+} from '../../../../../../common/store/inputs/model';
 import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { useRuleExecutionEvents } from '../../../../../containers/detection_engine/rules';
 import { useRuleDetailsContext } from '../rule_details_context';
@@ -134,14 +140,26 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const successToastId = useRef('');
 
   const resetGlobalQueryState = useCallback(() => {
-    dispatch(
-      // TODO: Determine relative vs absolute so `Today` is replaced instead of absolute
-      setAbsoluteRangeDatePicker({
-        id: 'global',
-        from: cachedGlobalQueryState.current.timerange.from,
-        to: cachedGlobalQueryState.current.timerange.to,
-      })
-    );
+    if (isAbsoluteTimeRange(cachedGlobalQueryState.current.timerange)) {
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: cachedGlobalQueryState.current.timerange.from,
+          to: cachedGlobalQueryState.current.timerange.to,
+        })
+      );
+    } else if (isRelativeTimeRange(cachedGlobalQueryState.current.timerange)) {
+      dispatch(
+        setRelativeRangeDatePicker({
+          id: 'global',
+          from: cachedGlobalQueryState.current.timerange.from,
+          fromStr: cachedGlobalQueryState.current.timerange.fromStr,
+          to: cachedGlobalQueryState.current.timerange.to,
+          toStr: cachedGlobalQueryState.current.timerange.toStr,
+        })
+      );
+    }
+
     dispatch(
       setFilterQuery({
         id: 'global',
