@@ -8,12 +8,14 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
+  EuiCode,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -84,6 +86,15 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
       <EuiTitle size="l">
         <h2>Agent Policy Debugger</h2>
       </EuiTitle>
+
+      <EuiSpacer size="m" />
+
+      <EuiText grow={false}>
+        <p>
+          Search for an Agent Policy using its name or <EuiCode>id</EuiCode> value. Use the code
+          block below to diagnose any potential issues with the policy{"'"}s configuration.
+        </p>
+      </EuiText>
 
       <EuiSpacer size="m" />
 
