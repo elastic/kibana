@@ -11948,7 +11948,6 @@
     "xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action": "管理组",
     "xpack.enterpriseSearch.workplaceSearch.groups.newGroupSavedSuccess": "已成功创建 {groupName}",
     "xpack.enterpriseSearch.workplaceSearch.groups.noSourcesMessage": "无组织内容源",
-    "xpack.enterpriseSearch.workplaceSearch.groups.noUsersMessage": "无用户",
     "xpack.enterpriseSearch.workplaceSearch.groups.overview.confirmRemoveButtonText": "删除 {name}",
     "xpack.enterpriseSearch.workplaceSearch.groups.overview.confirmRemoveDescription": "您的组将从 Workplace Search 中删除。确定要移除 {name}？",
     "xpack.enterpriseSearch.workplaceSearch.groups.overview.confirmTitleText": "确认",

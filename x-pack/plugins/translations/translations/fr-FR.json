@@ -11925,7 +11925,6 @@
     "xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action": "Gérer le groupe",
     "xpack.enterpriseSearch.workplaceSearch.groups.newGroupSavedSuccess": "{groupName} créé avec succès",
     "xpack.enterpriseSearch.workplaceSearch.groups.noSourcesMessage": "Aucune source de contenu organisationnelle",
-    "xpack.enterpriseSearch.workplaceSearch.groups.noUsersMessage": "Aucun utilisateur",
     "xpack.enterpriseSearch.workplaceSearch.groups.overview.confirmRemoveButtonText": "Supprimer {name}",
     "xpack.enterpriseSearch.workplaceSearch.groups.overview.confirmRemoveDescription": "Votre groupe sera supprimé de Workplace Search. Voulez-vous vraiment supprimer {name} ?",
     "xpack.enterpriseSearch.workplaceSearch.groups.overview.confirmTitleText": "Confirmer",
