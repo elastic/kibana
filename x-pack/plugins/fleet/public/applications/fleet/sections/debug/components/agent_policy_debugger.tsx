@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -40,6 +39,10 @@ const fetchAgentPolicies = async () => {
     perPage: SO_SEARCH_LIMIT,
     sortOrder: 'asc',
   });
+
+  if (response.error) {
+    throw new Error(response.error.message);
+  }
 
   return response;
 };
@@ -68,10 +71,6 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
     setSelectedPolicyId(undefined);
     queryClient.invalidateQueries('debug-agent-policies');
   };
-
-  if (status === 'loading') {
-    return <EuiLoadingSpinner />;
-  }
 
   if (status === 'error') {
     return (
@@ -112,6 +111,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
             options={comboBoxOptions}
             singleSelection={{ asPlainText: true }}
             selectedOptions={selectedOptions}
+            isLoading={status === 'loading'}
             onChange={(newSelectedOptions) => {
               // Handle "clear" action
               if (!newSelectedOptions.length) {
