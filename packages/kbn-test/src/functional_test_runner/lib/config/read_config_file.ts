@@ -6,26 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-import Fs from 'fs';
-
 import { ToolingLog } from '@kbn/tooling-log';
 import { defaultsDeep } from 'lodash';
-import { REPO_ROOT } from '@kbn/utils';
 import { createFlagError } from '@kbn/dev-utils';
-import JsYaml from 'js-yaml';
 
 import { Config } from './config';
 import { EsVersion } from '../es_version';
+import { FTR_CONFIGS_MANIFEST_REL, FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
 
 const cache = new WeakMap();
-const FTR_MANIFEST_REL = '.buildkite/ftr_configs.yml';
-const ftrConfigsManifest = JsYaml.safeLoad(
-  Fs.readFileSync(Path.resolve(REPO_ROOT, FTR_MANIFEST_REL), 'utf8')
-);
-const VALID_FTR_CONFIG_PATHS = (Object.values(ftrConfigsManifest) as string[][])
-  .flat()
-  .map((rel) => Path.resolve(REPO_ROOT, rel));
 
 async function getSettingsFromFile(
   log: ToolingLog,
@@ -36,9 +25,9 @@ async function getSettingsFromFile(
     primary: boolean;
   }
 ) {
-  if (options.primary && !VALID_FTR_CONFIG_PATHS.includes(options.path)) {
+  if (options.primary && !FTR_CONFIGS_MANIFEST_PATHS.includes(options.path)) {
     throw createFlagError(
-      `Refusing to load FTR Config which is not listed in [${FTR_MANIFEST_REL}]. All FTR Config files must be listed there, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
+      `Refusing to load FTR Config which is not listed in [${FTR_CONFIGS_MANIFEST_REL}]. All FTR Config files must be listed there, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
     );
   }
 

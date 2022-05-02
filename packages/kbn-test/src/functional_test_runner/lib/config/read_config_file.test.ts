@@ -14,36 +14,43 @@ import { EsVersion } from '../es_version';
 const log = new ToolingLog();
 const esVersion = new EsVersion('8.0.0');
 
+jest.mock('./ftr_configs_manifest', () => ({
+  FTR_CONFIGS_MANIFEST_REL: 'rel-path',
+  FTR_CONFIGS_MANIFEST_PATHS: [
+    require.resolve('./__fixtures__/config.1.js'),
+    require.resolve('./__fixtures__/config.2.js'),
+    require.resolve('./__fixtures__/config.invalid.js'),
+  ],
+}));
+
+const [CONFIG_PATH_1, CONFIG_PATH_2, CONFIG_PATH_INVALID] =
+  jest.requireMock('./ftr_configs_manifest').FTR_CONFIGS_MANIFEST_PATHS;
+
 describe('readConfigFile()', () => {
   it('reads config from a file, returns an instance of Config class', async () => {
-    const config = await readConfigFile(log, esVersion, require.resolve('./__fixtures__/config.1'));
+    const config = await readConfigFile(log, esVersion, CONFIG_PATH_1);
     expect(config instanceof Config).toBeTruthy();
     expect(config.get('testFiles')).toEqual(['config.1']);
   });
 
   it('merges setting overrides into log', async () => {
-    const config = await readConfigFile(
-      log,
-      esVersion,
-      require.resolve('./__fixtures__/config.1'),
-      {
-        screenshots: {
-          directory: 'foo.bar',
-        },
-      }
-    );
+    const config = await readConfigFile(log, esVersion, CONFIG_PATH_1, {
+      screenshots: {
+        directory: 'foo.bar',
+      },
+    });
 
     expect(config.get('screenshots.directory')).toBe('foo.bar');
   });
 
   it('supports loading config files from within config files', async () => {
-    const config = await readConfigFile(log, esVersion, require.resolve('./__fixtures__/config.2'));
+    const config = await readConfigFile(log, esVersion, CONFIG_PATH_2);
     expect(config.get('testFiles')).toEqual(['config.1', 'config.2']);
   });
 
   it('throws if settings are invalid', async () => {
     try {
-      await readConfigFile(log, esVersion, require.resolve('./__fixtures__/config.invalid'));
+      await readConfigFile(log, esVersion, CONFIG_PATH_INVALID);
       throw new Error('expected readConfigFile() to fail');
     } catch (err) {
       expect(err.message).toMatch(/"foo"/);
