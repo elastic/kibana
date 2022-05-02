@@ -26,17 +26,32 @@ configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | 
 
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
+  start=$(date +%s)
+
   # prevent non-zero exit code from breaking the loop
   set +e;
   NODE_OPTIONS="--max-old-space-size=14336" node ./scripts/jest --config="$config" "$parallelism" --coverage=false --passWithNoTests
-  set -e;
   lastCode=$?
+  set -e;
+
+    results[${#results[@]}]="
+     duration: $((($(date +%s)-start)/60)) minutes
+     result: ${lastCode}
+"
+
 
   if [ $lastCode -ne 0 ]; then
     exitCode=10
     echo "Jest exited with code $lastCode"
     echo "^^^ +++"
   fi
+done <<< "$configs"
+
+echo "--- Jest configs complete"
+i=-1
+while read -r config; do
+  i+=1
+  echo " - $config${results[i]}";
 done <<< "$configs"
 
 exit $exitCode

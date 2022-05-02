@@ -41,6 +41,7 @@ while read -r config; do
 
   echo "--- $ node scripts/functional_tests --bail --config $config"
   start=$(date +%s)
+
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
@@ -49,6 +50,7 @@ while read -r config; do
     --config="$config"
   lastCode=$?
   set -e;
+
   results[${#results[@]}]="
      duration: $((($(date +%s)-start)/60)) minutes
      result: ${lastCode}
