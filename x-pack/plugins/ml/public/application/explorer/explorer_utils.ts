@@ -496,7 +496,8 @@ export async function loadAnomaliesTableData(
           }
 
           anomaly.isTimeSeriesViewRecord = isChartable;
-          anomaly.isGeoRecord = detector !== undefined && detector.function === ML_JOB_AGGREGATION.LAT_LONG;
+          anomaly.isGeoRecord =
+            detector !== undefined && detector.function === ML_JOB_AGGREGATION.LAT_LONG;
 
           if (mlJobService.customUrlsByJob[jobId] !== undefined) {
             anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
