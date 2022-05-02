@@ -51,7 +51,11 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
   const { data, status } = useQuery('debug-agent-policies', fetchAgentPolicies);
 
   const agentPolicies = data?.data?.items ?? [];
-  const comboBoxOptions = agentPolicies.map((policy) => ({ label: policy.name, value: policy.id }));
+  const comboBoxOptions = agentPolicies.map((policy) => ({
+    label: `${policy.name} - ${policy.id}`,
+    value: policy.id,
+  }));
+
   const selectedOptions = selectedPolicyId
     ? [comboBoxOptions.find((option) => option.value === selectedPolicyId)!]
     : [];
@@ -87,12 +91,13 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
         <EuiFlexItem
           grow={false}
           css={`
-            min-width: 400px;
+            min-width: 600px;
           `}
         >
           <EuiComboBox
             aria-label="Select an Agent Policy"
             placeholder="Select an Agent Policy"
+            fullWidth
             options={comboBoxOptions}
             singleSelection={{ asPlainText: true }}
             selectedOptions={selectedOptions}
