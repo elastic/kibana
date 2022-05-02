@@ -1,15 +1,15 @@
 steps:
-  - command: .buildkite/scripts/steps/bazel_cache/test_clean.sh
-    label: Initial bootstrap with no local cache
-    timeout_in_minutes: 20
-    agents:
-      queue: n2-4-spot
+  # - command: .buildkite/scripts/steps/bazel_cache/test_clean.sh
+  #   label: Initial bootstrap with no local cache
+  #   timeout_in_minutes: 20
+  #   agents:
+  #     queue: n2-4-spot
 
-  - wait
+  # - wait
 
-  - command: .buildkite/scripts/steps/bazel_cache/test_clean.sh
-    label: Bootstrap with no local cache
+  - command: .buildkite/scripts/steps/bazel_cache/test.sh
+    label: Bootstrap with partial cache
     timeout_in_minutes: 20
-    parallelism: 10
+    parallelism: 100
     agents:
       queue: n2-4-spot
