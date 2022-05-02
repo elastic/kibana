@@ -21,7 +21,7 @@ const SAMPLE_ES_FILTERS = `{"bool":{"should":[{"match_phrase":{"monitor.id":"Nod
 describe.skip('useQueryBar', () => {
   let DEFAULT_URL_PARAMS: UptimeUrlParams;
   let wrapper: any;
-  let useUrlParamsSpy: jest.SpyInstance<[URL.AsyncLinkCardParams, URL.UpdateUrlParams]>;
+  let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
   let useGetUrlParamsSpy: jest.SpyInstance<UptimeUrlParams>;
   let updateUrlParamsMock: jest.Mock;
   let useUpdateKueryStringSpy: jest.SpyInstance;
