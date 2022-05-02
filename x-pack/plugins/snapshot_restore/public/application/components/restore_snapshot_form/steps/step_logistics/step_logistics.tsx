@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
-  EuiIconTip,
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -29,6 +28,7 @@ import { EuiSelectableOption } from '@elastic/eui';
 
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
 import { RestoreSettings } from '../../../../../../common/types';
+import { FeatureStatesIconTip } from '../../..';
 
 import { useCore, useServices } from '../../../../app_context';
 
@@ -649,20 +649,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     id="xpack.snapshotRestore.restoreForm.stepLogistics.featureStatesTitle"
                     defaultMessage="Include feature states from"
                   />{' '}
-                  <EuiIconTip
-                    type="questionInCircle"
-                    content={
-                      <span>
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.restoreForm.stepLogistics.featureStatesTooltip"
-                          defaultMessage="A feature state contains the indices, system indices and data streams used to store configurations, history, and other data for an Elastic feature."
-                        />
-                      </span>
-                    }
-                    iconProps={{
-                      className: 'eui-alignTop',
-                    }}
-                  />
+                  <FeatureStatesIconTip />
                 </>
               }
             >

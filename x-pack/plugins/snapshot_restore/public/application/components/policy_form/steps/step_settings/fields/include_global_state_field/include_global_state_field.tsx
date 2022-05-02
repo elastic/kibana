@@ -17,12 +17,12 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiIconTip,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../../../../common/types';
 import { PolicyValidation } from '../../../../../../services/validation';
 import { useLoadFeatures } from '../../../../../../services/http/policy_requests';
+import { FeatureStatesIconTip } from '../../../../..';
 
 interface Props {
   policy: SlmPolicyPayload;
@@ -107,20 +107,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
                   id="xpack.snapshotRestore.policyForm.stepSettings.featureStatesTitle"
                   defaultMessage="Include feature states from"
                 />{' '}
-                <EuiIconTip
-                  type="questionInCircle"
-                  content={
-                    <span>
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.policyForm.stepSettings.featureStatesTooltip"
-                        defaultMessage="A feature state contains the indices, system indices and data streams used to store configurations, history, and other data for an Elastic feature."
-                      />
-                    </span>
-                  }
-                  iconProps={{
-                    className: 'eui-alignTop',
-                  }}
-                />
+                <FeatureStatesIconTip />
               </>
             }
           >
