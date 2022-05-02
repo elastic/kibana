@@ -616,7 +616,7 @@ export async function createInstallation(options: {
       install_source: installSource,
       keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     },
-    { id: pkgName, overwrite: true }
+    { id: pkgName, overwrite: true, refresh: false }
   );
 
   return created;
