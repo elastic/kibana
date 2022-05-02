@@ -35,10 +35,20 @@ while read -r config; do
   lastCode=$?
   set -e;
 
-    results[${#results[@]}]="
-     duration: $((($(date +%s)-start)/60)) minutes
-     result: ${lastCode}
-"
+  timeSec=$(($(date +%s)-start))
+  if [[ $timeSec -gt 60 ]]; then
+    min=$((timeSec/60))
+    sec=$((timeSec-(min*60)))
+    time="${min}m ${sec}s"
+  else
+    time="${time}s"
+  fi
+
+  results+=("
+ - $config
+    duration: ${time}
+    result: ${lastCode}")
+
 
 
   if [ $lastCode -ne 0 ]; then
@@ -49,10 +59,6 @@ while read -r config; do
 done <<< "$configs"
 
 echo "--- Jest configs complete"
-i=-1
-while read -r config; do
-  i+=1
-  echo " - $config${results[i]}";
-done <<< "$configs"
+printf "%s\n" "${results[@]}"
 
 exit $exitCode
