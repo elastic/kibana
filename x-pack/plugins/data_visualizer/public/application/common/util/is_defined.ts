@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export type { ResultLink, GetAsyncLinkCards } from './results_links';
-export { ResultsLinks } from './results_links';
+export function isDefined<T>(argument: T | undefined | null): argument is T {
+  return argument !== undefined && argument !== null;
+}

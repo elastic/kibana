@@ -11,28 +11,31 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { flatten } from 'lodash';
+import { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';
-import { ResultLink } from '../../../common/components/results_links';
+import { GetAsyncLinkCards } from '../../../common/components/results_links';
+import { isDefined } from '../../../common/util/is_defined';
 
 interface Props {
   dataView: DataView;
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
-  additionalLinks: ResultLink[];
+  getAsyncLinkCards?: GetAsyncLinkCards;
 }
 
 export const ActionsPanel: FC<Props> = ({
   dataView,
   searchString,
   searchQueryLanguage,
-  additionalLinks,
+  getAsyncLinkCards,
 }) => {
   const [globalState] = useUrlState('_g');
 
   const [discoverLink, setDiscoverLink] = useState('');
-  const [generatedLinks, setGeneratedLinks] = useState<Record<string, string>>({});
+  const [asyncLinkCards, setAsyncLinkCards] = useState<LinkCardProps[]>();
 
   const {
     services: {
@@ -46,6 +49,7 @@ export const ActionsPanel: FC<Props> = ({
     let unmounted = false;
 
     const indexPatternId = dataView.id;
+    const indexPatternTitle = dataView.title;
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
@@ -68,24 +72,35 @@ export const ActionsPanel: FC<Props> = ({
       setDiscoverLink(discoverUrl);
     };
 
-    Promise.all(
-      additionalLinks.map(async ({ canDisplay, getUrl }) => {
-        if ((await canDisplay({ indexPatternId })) === false) {
-          return null;
-        }
-        return getUrl({ globalState, indexPatternId });
-      })
-    ).then((urls) => {
-      const linksById = urls.reduce((acc, url, i) => {
-        if (url !== null) {
-          acc[additionalLinks[i].id] = url;
-        }
-        return acc;
-      }, {} as Record<string, string>);
-      setGeneratedLinks(linksById);
-    });
+    if (Array.isArray(getAsyncLinkCards) && indexPatternId !== undefined) {
+      Promise.all(
+        getAsyncLinkCards.map(async (asyncCardGetter) => {
+          const results = await asyncCardGetter({
+            dataViewId: indexPatternId,
+            dataViewTitle: indexPatternTitle,
+          });
+          if (Array.isArray(results)) {
+            return await Promise.all(
+              results.map(async (c) => ({
+                ...c,
+                canDisplay: await c.canDisplay(),
+                href: await c.getUrl(),
+              }))
+            );
+          }
 
+          if (results) {
+            const canDisplay = await results.canDisplay();
+            const href = await results.getUrl();
+            return { ...results, canDisplay, href };
+          }
+        })
+      ).then((cards) => {
+        setAsyncLinkCards(flatten(cards).filter(isDefined));
+      });
+    }
     getDiscoverUrl();
+
     return () => {
       unmounted = true;
     };
@@ -96,8 +111,8 @@ export const ActionsPanel: FC<Props> = ({
     globalState,
     capabilities,
     discover,
-    additionalLinks,
     data.query,
+    getAsyncLinkCards,
   ]);
 
   // Note we use display:none for the DataRecognizer section as it needs to be
@@ -105,20 +120,6 @@ export const ActionsPanel: FC<Props> = ({
   // controls whether the recognizer section is ultimately displayed.
   return (
     <div data-test-subj="dataVisualizerActionsPanel">
-      {additionalLinks
-        .filter(({ id }) => generatedLinks[id] !== undefined)
-        .map((link) => (
-          <>
-            <LinkCard
-              href={generatedLinks[link.id]}
-              icon={link.icon}
-              description={link.description}
-              title={link.title}
-              data-test-subj={link.dataTestSubj}
-            />
-            <EuiSpacer size="m" />
-          </>
-        ))}
       {discoverLink && (
         <>
           <EuiTitle size="s">
@@ -147,8 +148,22 @@ export const ActionsPanel: FC<Props> = ({
             }
             data-test-subj="dataVisualizerViewInDiscoverCard"
           />
+          <EuiSpacer />
         </>
       )}
+
+      {Array.isArray(asyncLinkCards) &&
+        asyncLinkCards.map((link) => (
+          <>
+            <LinkCard
+              href={link.href}
+              icon={link.icon}
+              description={link.description}
+              title={link.title}
+            />
+            <EuiSpacer size="m" />
+          </>
+        ))}
     </div>
   );
 };

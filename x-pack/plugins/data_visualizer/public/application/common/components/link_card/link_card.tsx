@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactElement } from 'react';
+import React, { FC } from 'react';
 
 import {
   EuiIcon,
@@ -18,8 +18,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-interface Props {
-  icon: IconType | ReactElement;
+export interface LinkCardProps {
+  icon: IconType;
   iconAreaLabel?: string;
   title: any;
   description: any;
@@ -31,7 +31,7 @@ interface Props {
 
 // Component for rendering a card which links to the Create Job page, displaying an
 // icon, card title, description and link.
-export const LinkCard: FC<Props> = ({
+export const LinkCard: FC<LinkCardProps> = ({
   icon,
   iconAreaLabel,
   title,
