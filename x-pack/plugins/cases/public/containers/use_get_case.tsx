@@ -7,10 +7,12 @@
 
 import { useEffect, useReducer, useCallback, useRef } from 'react';
 
+import { useQuery } from 'react-query';
 import { Case, ResolvedCase } from './types';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
 import { resolveCase } from './api';
+import { ServerError } from '../types';
 
 interface CaseState {
   data: Case | null;
@@ -72,6 +74,24 @@ export interface UseGetCase extends CaseState {
   fetchCase: (silent?: boolean) => Promise<void>;
   updateCase: (newCase: Case) => void;
 }
+
+export const useFetchCase = (caseId: string) => {
+  const toasts = useToasts();
+  return useQuery<ResolvedCase, ServerError>(
+    ['case', caseId],
+    () => {
+      const abortCtrlRef = new AbortController();
+      return resolveCase(caseId, true, abortCtrlRef.signal);
+    },
+    {
+      onError: (error: ServerError) => {
+        toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+          title: i18n.ERROR_TITLE,
+        });
+      },
+    }
+  );
+};
 
 export const useGetCase = (caseId: string): UseGetCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {

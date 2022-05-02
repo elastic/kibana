@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { QueryClientProvider } from 'react-query';
 import { AllCases } from '../all_cases';
 import { CaseView } from '../case_view';
 import { CreateCase } from '../create';
@@ -24,6 +25,7 @@ import {
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
+import { casesQueryClient } from '../cases_context';
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   onComponentInitialized,
@@ -71,15 +73,17 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
       </Route>
 
       <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
-        <CaseView
-          onComponentInitialized={onComponentInitialized}
-          actionsNavigation={actionsNavigation}
-          ruleDetailsNavigation={ruleDetailsNavigation}
-          showAlertDetails={showAlertDetails}
-          useFetchAlertData={useFetchAlertData}
-          refreshRef={refreshRef}
-          timelineIntegration={timelineIntegration}
-        />
+        <QueryClientProvider client={casesQueryClient}>
+          <CaseView
+            onComponentInitialized={onComponentInitialized}
+            actionsNavigation={actionsNavigation}
+            ruleDetailsNavigation={ruleDetailsNavigation}
+            showAlertDetails={showAlertDetails}
+            useFetchAlertData={useFetchAlertData}
+            refreshRef={refreshRef}
+            timelineIntegration={timelineIntegration}
+          />
+        </QueryClientProvider>
       </Route>
 
       <Route path={basePath}>
