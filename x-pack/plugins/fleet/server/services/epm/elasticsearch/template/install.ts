@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import Boom from '@hapi/boom';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type {
@@ -26,7 +26,6 @@ import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
-import { updateEsAssetReferences } from '../../packages/install';
 import {
   FLEET_COMPONENT_TEMPLATES,
   PACKAGE_TEMPLATE_SUFFIX,
@@ -52,11 +51,13 @@ export const installTemplates = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   paths: string[],
-  savedObjectsClient: SavedObjectsClientContract,
   esReferences: EsAssetReference[]
 ): Promise<{
   installedTemplates: IndexTemplateEntry[];
-  installedEsReferences: EsAssetReference[];
+  esReferences: {
+    assetsToAdd: EsAssetReference[];
+    assetsToRemove: EsAssetReference[];
+  };
 }> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
@@ -65,22 +66,16 @@ export const installTemplates = async (
   await installPreBuiltTemplates(paths, esClient, logger);
 
   // remove package installation's references to index templates
-  esReferences = await updateEsAssetReferences(
-    savedObjectsClient,
-    installablePackage.name,
-    esReferences,
-    {
-      assetsToRemove: esReferences.filter(
-        ({ type }) =>
-          type === ElasticsearchAssetType.indexTemplate ||
-          type === ElasticsearchAssetType.componentTemplate
-      ),
-    }
+  const assetsToRemove = esReferences.filter(
+    ({ type }) =>
+      type === ElasticsearchAssetType.indexTemplate ||
+      type === ElasticsearchAssetType.componentTemplate
   );
 
   // build templates per data stream from yml files
   const dataStreams = installablePackage.data_streams;
-  if (!dataStreams) return { installedTemplates: [], installedEsReferences: esReferences };
+  if (!dataStreams)
+    return { installedTemplates: [], esReferences: { assetsToAdd: [], assetsToRemove } };
 
   const installedTemplatesNested = await Promise.all(
     dataStreams.map((dataStream) =>
@@ -97,15 +92,14 @@ export const installTemplates = async (
   // get template refs to save
   const installedIndexTemplateRefs = getAllTemplateRefs(installedTemplates);
 
-  // add package installation's references to index templates
-  esReferences = await updateEsAssetReferences(
-    savedObjectsClient,
-    installablePackage.name,
-    esReferences,
-    { assetsToAdd: installedIndexTemplateRefs }
-  );
-
-  return { installedTemplates, installedEsReferences: esReferences };
+  return {
+    installedTemplates,
+    esReferences: {
+      // add package installation's references to index templates
+      assetsToAdd: installedIndexTemplateRefs,
+      assetsToRemove,
+    },
+  };
 };
 
 const installPreBuiltTemplates = async (

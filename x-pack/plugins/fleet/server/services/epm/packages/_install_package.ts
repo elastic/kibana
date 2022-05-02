@@ -39,7 +39,7 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { packagePolicyService } from '../..';
 
-import { createInstallation } from './install';
+import { createInstallation, updateEsAssetReferences } from './install';
 import { withPackageSpan } from './utils';
 
 // this is only exported for testing
@@ -146,17 +146,31 @@ export async function _installPackage({
       installMlModel(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     );
 
-    // installs versionized pipelines without removing currently installed ones
-    esReferences = await withPackageSpan('Install ingest pipelines', () =>
-      installPipelines(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
-    );
+    // Install index templates and ingest pipelines in parallel since they typically take the longest
+    const [ingestRefs, templateResults] = await Promise.all([
+      // installs versionized pipelines without removing currently installed ones
+      withPackageSpan('Install ingest pipelines', () =>
+        installPipelines(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      ),
+      withPackageSpan('Install index templates', () =>
+        installTemplates(packageInfo, esClient, logger, paths, esReferences)
+      ),
+    ]);
 
-    // install or update the templates referencing the newly installed pipelines
-    const { installedTemplates, installedEsReferences: esReferencesAfterTemplates } =
-      await withPackageSpan('Install index templates', () =>
-        installTemplates(packageInfo, esClient, logger, paths, savedObjectsClient, esReferences)
-      );
-    esReferences = esReferencesAfterTemplates;
+    // Update the references for the templates and ingest pipelines together. Need to be done togther to avoid race
+    // conditions on updating the installed_es field at the same time
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      esReferences,
+      {
+        assetsToRemove: [
+          ...ingestRefs.assetsToRemove,
+          ...templateResults.esReferences.assetsToRemove,
+        ],
+        assetsToAdd: [...ingestRefs.assetsToAdd, ...templateResults.esReferences.assetsToAdd],
+      }
+    );
 
     try {
       await removeLegacyTemplates({ packageInfo, esClient, logger });
@@ -166,7 +180,7 @@ export async function _installPackage({
 
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
-      updateCurrentWriteIndices(esClient, logger, installedTemplates)
+      updateCurrentWriteIndices(esClient, logger, templateResults.installedTemplates)
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
