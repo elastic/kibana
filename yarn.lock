@@ -3016,6 +3016,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ecs-schema@link:bazel-bin/packages/kbn-ecs-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-archiver@link:bazel-bin/packages/kbn-es-archiver":
   version "0.0.0"
   uid ""
@@ -6109,6 +6113,10 @@
   uid ""
 
 "@types/kbn__docs-utils@link:bazel-bin/packages/kbn-docs-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ecs-schema@link:bazel-bin/packages/kbn-ecs-schema/npm_module_types":
   version "0.0.0"
   uid ""
 
