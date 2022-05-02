@@ -65,7 +65,13 @@ import { getLegendAction } from './legend_action';
 import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { XYLayerConfigResult } from '../../common/types';
-import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
+import {
+  Annotations,
+  getAnnotationsGroupedByInterval,
+  getRangeAnnotations,
+  OUTSIDE_RECT_ANNOTATION_WIDTH,
+  OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
+} from './annotations';
 
 import './xy_chart.scss';
 
@@ -265,18 +271,21 @@ export function XYChart({
 
   const xColumnId = firstTable.columns.find((col) => col.id === filteredLayers[0].xAccessor)?.id;
 
-  const groupedAnnotations = getAnnotationsGroupedByInterval(
+  const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
     minInterval,
     xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
     xAxisFormatter
   );
+  const rangeAnnotations = getRangeAnnotations(annotationsLayers);
+
   const visualConfigs = [
     ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
-    ...groupedAnnotations,
+    ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const linesPaddings = getLinesCausedPaddings(visualConfigs, yAxesMap);
+  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].hide : false;
+  const linesPaddings = !shouldHideDetails ? getLinesCausedPaddings(visualConfigs, yAxesMap) : {};
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
     const tickVisible =
@@ -507,7 +516,6 @@ export function XYChart({
               : undefined,
         },
       };
-
   return (
     <Chart ref={chartRef}>
       <Settings
@@ -909,15 +917,24 @@ export function XYChart({
           paddingMap={linesPaddings}
         />
       ) : null}
-      {groupedAnnotations.length ? (
+      {rangeAnnotations.length || groupedLineAnnotations.length ? (
         <Annotations
-          hide={annotationsLayers?.[0].hide}
-          groupedAnnotations={groupedAnnotations}
+          rangeAnnotations={rangeAnnotations}
+          groupedLineAnnotations={groupedLineAnnotations}
           formatter={xAxisFormatter}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
           isBarChart={filteredBarLayers.length > 0}
           minInterval={minInterval}
+          hide={annotationsLayers?.[0].hide}
+          outsideDimension={
+            rangeAnnotations.length && shouldHideDetails
+              ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+              : shouldUseNewTimeAxis
+              ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding || 0) +
+                Number(chartTheme.axes?.tickLabel?.fontSize || 0)
+              : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH
+          }
         />
       ) : null}
     </Chart>
