@@ -12,14 +12,15 @@ import {
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
+import { Link, generatePath } from 'react-router-dom';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
 import type { CspFindingsByResourceResult } from './use_findings_by_resource';
+import { findingsNavigation } from '../../../common/navigation/constants';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
@@ -63,8 +64,9 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
       />
     ),
     render: (resourceId: CspFindingsByResource['resource_id']) => (
-      // TODO: get link
-      <EuiLink href={`/lfe/app/csp/findings/resource/${resourceId}`}>{resourceId}</EuiLink>
+      <Link to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}>
+        {resourceId}
+      </Link>
     ),
   },
   {

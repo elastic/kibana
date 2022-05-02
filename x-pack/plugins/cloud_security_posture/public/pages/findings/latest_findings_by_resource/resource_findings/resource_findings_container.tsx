@@ -7,32 +7,26 @@
 import React from 'react';
 import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import type { DataView } from '@kbn/data-plugin/common';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiTheme } from '@elastic/eui';
+import { generatePath } from 'react-router-dom';
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageWrapper, PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcrumbs';
 import { findingsNavigation } from '../../../../common/navigation/constants';
-import { useKibana } from '../../../../common/hooks/use_kibana';
-import { PLUGIN_ID } from '../../../../../common';
 
 const BackToResourcesButton = () => {
-  const { application } = useKibana().services;
-
   return (
-    <EuiButtonEmpty
-      iconType={'arrowLeft'}
-      href={application.getUrlForApp(PLUGIN_ID, {
-        path: findingsNavigation.findings_by_resource.path,
-      })}
-    >
-      <FormattedMessage
-        id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
-        defaultMessage=" Back to group by resource view"
-      />
-      Back to group by resource view
-    </EuiButtonEmpty>
+    <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
+      <EuiButtonEmpty iconType={'arrowLeft'}>
+        <FormattedMessage
+          id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
+          defaultMessage=" Back to group by resource view"
+        />
+        Back to group by resource view
+      </EuiButtonEmpty>
+    </Link>
   );
 };
 
