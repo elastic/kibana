@@ -8,7 +8,7 @@
 import { get, isObject } from 'lodash';
 import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../common/cti/constants';
 
-import type { SignalSearchResponse, SignalSourceHit } from '../types';
+import type { SignalSourceHit } from '../types';
 import type {
   GetMatchedThreats,
   ThreatEnrichment,
@@ -109,17 +109,16 @@ export const buildEnrichments = ({
   });
 
 export const enrichSignalThreatMatches = async (
-  signals: SignalSearchResponse,
+  signals: SignalSourceHit[],
   getMatchedThreats: GetMatchedThreats,
   indicatorPath: string,
   signalMatchesArg?: SignalMatch[]
-): Promise<SignalSearchResponse> => {
-  const signalHits = signals.hits.hits;
-  if (signalHits.length === 0) {
+): Promise<SignalSourceHit[]> => {
+  if (signals.length === 0) {
     return signals;
   }
 
-  const uniqueHits = groupAndMergeSignalMatches(signalHits);
+  const uniqueHits = groupAndMergeSignalMatches(signals);
   const signalMatches: SignalMatch[] = signalMatchesArg
     ? signalMatchesArg
     : uniqueHits.map((signalHit) => ({
@@ -177,14 +176,5 @@ export const enrichSignalThreatMatches = async (
     };
   });
 
-  return {
-    ...signals,
-    hits: {
-      ...signals.hits,
-      hits: enrichedSignals,
-      total: isObject(signals.hits.total)
-        ? { ...signals.hits.total, value: enrichedSignals.length }
-        : enrichedSignals.length,
-    },
-  };
+  return enrichedSignals;
 };

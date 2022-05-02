@@ -10,7 +10,7 @@ import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import { CreateEventSignalOptions } from './types';
-import { SearchAfterAndBulkCreateReturnType, SignalSearchResponse } from '../types';
+import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { getAllThreatListHits } from './get_threat_list';
 import {
   enrichSignalThreatMatches,
@@ -112,7 +112,7 @@ export const createEventSignal = async ({
       )
     );
 
-    const threatEnrichment = (signals: SignalSearchResponse): Promise<SignalSearchResponse> =>
+    const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> =>
       enrichSignalThreatMatches(
         signals,
         () => Promise.resolve(threatListHits),
