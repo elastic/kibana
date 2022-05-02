@@ -23,14 +23,13 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
   const cached = useMemo(() => {
     const { colors, border, size, font } = euiTheme;
 
+    const ALERT_INDICATOR_WIDTH = '3px';
     const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
     const PROCESS_TREE_LEFT_PADDING = size.s;
 
     const darkText: CSSObject = {
       color: colors.text,
       fontFamily: font.familyCode,
-      paddingLeft: size.xxs,
-      paddingRight: size.xs,
     };
 
     const children: CSSObject = {
@@ -84,7 +83,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       padding: `${size.xs} 0px`,
       '&:hover:before': {
         backgroundColor: hoverColor,
-        transform: `translateY(-${size.xs})`,
+        transform: `translateY(-${ALERT_INDICATOR_WIDTH})`,
       },
       '&:before': {
         position: 'absolute',
@@ -92,10 +91,20 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
         pointerEvents: 'none',
         content: `''`,
         marginLeft: `calc(-${depth} * ${TREE_INDENT} - ${PROCESS_TREE_LEFT_PADDING})`,
-        borderLeft: `${size.xs} solid ${borderColor}`,
+        borderLeft: `${ALERT_INDICATOR_WIDTH} solid ${borderColor}`,
         backgroundColor: bgColor,
         width: `calc(100% + ${depth} * ${TREE_INDENT} + ${PROCESS_TREE_LEFT_PADDING})`,
-        transform: `translateY(-${size.xs})`,
+        transform: `translateY(-${ALERT_INDICATOR_WIDTH})`,
+      },
+    };
+
+    const textSection: CSSObject = {
+      fontSize: 0,
+      verticalAlign: 'middle',
+      marginLeft: size.s,
+      span: {
+        fontSize: '13px',
+        verticalAlign: 'middle',
       },
     };
 
@@ -113,14 +122,16 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       wordBreak: 'break-all',
       minHeight: `calc(${size.l} - ${size.xxs})`,
       lineHeight: `calc(${size.l} - ${size.xxs})`,
+      button: {
+        marginLeft: '6px',
+        marginRight: size.xxs,
+      },
     };
 
     const workingDir: CSSObject = {
       color: colors.successText,
       fontFamily: font.familyCode,
       fontWeight: font.weight.medium,
-      paddingLeft: size.s,
-      paddingRight: size.xxs,
     };
 
     const timeStamp: CSSObject = {
@@ -139,6 +150,11 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       borderRadius: border.radius.medium,
     };
 
+    const textSpacing: CSSObject = {
+      width: '6px',
+      display: 'inline-block',
+    };
+
     return {
       darkText,
       searchHighlight,
@@ -149,6 +165,8 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       timeStamp,
       alertDetails,
       icon,
+      textSection,
+      textSpacing,
     };
   }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars]);
 
