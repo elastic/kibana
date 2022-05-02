@@ -33,7 +33,7 @@ export const indexFieldsProvider = (
 ): ISearchStrategy<
   IndexFieldsStrategyRequest<'indices' | 'dataView'>,
   IndexFieldsStrategyResponse
-  > => {
+> => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
