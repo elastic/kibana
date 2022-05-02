@@ -169,6 +169,18 @@ export const SearchIndices: React.FC = () => {
     </>
   );
 
+  const pageTitle =
+    searchIndices.length !== 0
+      ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
+          defaultMessage: 'Content',
+        })
+      : i18n.translate(
+          'xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle',
+          {
+            defaultMessage: 'Welcome to Enterprise Search',
+          }
+        );
+
   return (
     <>
       <EnterpriseSearchContentPageTemplate
@@ -176,12 +188,7 @@ export const SearchIndices: React.FC = () => {
         pageViewTelemetry="Search indices"
         isLoading={false}
         pageHeader={{
-          pageTitle: i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle',
-            {
-              defaultMessage: 'Content',
-            }
-          ),
+          pageTitle,
           rightSideItems: [createNewIndexButton],
         }}
       >
