@@ -140,7 +140,7 @@ export const EventFiltersList = memo(() => {
       apiClient={eventFiltersApiClient}
       ArtifactFormComponent={EventFiltersForm}
       labels={EVENT_FILTERS_PAGE_LABELS}
-      data-test-subj="EventFiltersList"
+      data-test-subj="EventFiltersListPage"
       searchableFields={SEARCHABLE_FIELDS}
       flyoutSize="l"
     />
