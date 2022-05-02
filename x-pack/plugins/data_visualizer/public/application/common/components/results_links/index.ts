@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { ResultLink, GetAsyncLinkCards } from './results_links';
+export type { ResultLink, AsyncLinkCards, AsyncLinkCardParams } from './results_links';
 export { ResultsLinks } from './results_links';

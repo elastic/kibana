@@ -18,4 +18,8 @@ export type {
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
 } from './application';
-export type { ResultLink, GetAsyncLinkCards } from './application/common/components/results_links';
+export type {
+  AsyncLinkCardParams,
+  ResultLink,
+  AsyncLinkCards,
+} from './application/common/components/results_links';

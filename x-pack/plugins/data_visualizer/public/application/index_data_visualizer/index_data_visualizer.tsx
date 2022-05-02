@@ -29,14 +29,14 @@ import {
   isRisonSerializationRequired,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { GetAsyncLinkCards } from '../common/components/results_links';
+import { AsyncLinkCards } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 
 export interface DataVisualizerUrlStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
-  getAsyncLinkCards?: GetAsyncLinkCards;
+  asyncLinkCards?: AsyncLinkCards;
 }
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
@@ -72,7 +72,7 @@ export const getLocatorParams = (params: {
 
 export const DataVisualizerUrlStateContextProvider: FC<
   DataVisualizerUrlStateContextProviderProps
-> = ({ IndexDataVisualizerComponent, getAsyncLinkCards }) => {
+> = ({ IndexDataVisualizerComponent, asyncLinkCards }) => {
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
@@ -247,7 +247,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
           currentDataView={currentDataView}
           currentSavedSearch={currentSavedSearch}
           currentSessionId={currentSessionId}
-          getAsyncLinkCards={getAsyncLinkCards}
+          asyncLinkCards={asyncLinkCards}
         />
       ) : (
         <div />
@@ -257,8 +257,8 @@ export const DataVisualizerUrlStateContextProvider: FC<
 };
 
 export const IndexDataVisualizer: FC<{
-  getAsyncLinkCards?: GetAsyncLinkCards;
-}> = ({ getAsyncLinkCards }) => {
+  asyncLinkCards?: AsyncLinkCards;
+}> = ({ asyncLinkCards }) => {
   const coreStart = getCoreStart();
   const {
     data,
@@ -295,7 +295,7 @@ export const IndexDataVisualizer: FC<{
       <KibanaContextProvider services={{ ...services }}>
         <DataVisualizerUrlStateContextProvider
           IndexDataVisualizerComponent={IndexDataVisualizerView}
-          getAsyncLinkCards={getAsyncLinkCards}
+          asyncLinkCards={asyncLinkCards}
         />
       </KibanaContextProvider>
     </KibanaThemeProvider>

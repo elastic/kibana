@@ -369,7 +369,7 @@ export class FileDataVisualizerView extends Component {
               hideBottomBar={this.hideBottomBar}
               savedObjectsClient={this.savedObjectsClient}
               fileUpload={this.props.fileUpload}
-              getAsyncLinkCards={this.props.getAsyncLinkCards}
+              asyncLinkCards={this.props.asyncLinkCards}
               capabilities={this.props.capabilities}
             />
 

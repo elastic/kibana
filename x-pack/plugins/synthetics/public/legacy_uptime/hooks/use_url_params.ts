@@ -15,14 +15,14 @@ import { setSelectedFilters } from '../state/actions/selected_filters';
 import { getFiltersFromMap } from './use_selected_filters';
 import { getParsedParams } from '../lib/helper/parse_search';
 
-export type GetUrlParams = () => UptimeUrlParams;
+export type AsyncLinkCardParams = () => UptimeUrlParams;
 export type UpdateUrlParams = (updatedParams: {
   [key: string]: string | number | boolean | undefined;
 }) => void;
 
-export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
+export type UptimeUrlParamsHook = () => [AsyncLinkCardParams, UpdateUrlParams];
 
-export const useGetUrlParams: GetUrlParams = () => {
+export const useGetUrlParams: AsyncLinkCardParams = () => {
   const { search } = useLocation();
 
   return getSupportedUrlParams(getParsedParams(search));

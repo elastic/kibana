@@ -8,7 +8,11 @@
 import React, { FC, Fragment, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileDataVisualizerSpec, ResultLink } from '@kbn/data-visualizer-plugin/public';
+import type {
+  FileDataVisualizerSpec,
+  ResultLink,
+  AsyncLinkCardParams,
+} from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
@@ -18,12 +22,6 @@ import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
-
-interface GetUrlParams {
-  dataViewId: string;
-  dataViewTitle?: string;
-  globalState?: any;
-}
 
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
@@ -41,9 +39,9 @@ export const FileDataVisualizerPage: FC = () => {
 
   const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
 
-  const getAsyncLinkCards = useMemo(
+  const asyncLinkCards = useMemo(
     () => [
-      async ({ dataViewId, globalState }: GetUrlParams) =>
+      async ({ dataViewId, globalState }: AsyncLinkCardParams) =>
         ({
           id: 'create_ml_job',
           title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.anomalyDetectionTitle', {
@@ -75,7 +73,7 @@ export const FileDataVisualizerPage: FC = () => {
             }
           },
         } as ResultLink),
-      async ({ dataViewId, globalState }: GetUrlParams) =>
+      async ({ dataViewId, globalState }: AsyncLinkCardParams) =>
         ({
           id: 'open_in_data_viz',
           title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.dataframeTitle', {
@@ -117,7 +115,7 @@ export const FileDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <FileDataVisualizer getAsyncLinkCards={getAsyncLinkCards} />
+          <FileDataVisualizer asyncLinkCards={asyncLinkCards} />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

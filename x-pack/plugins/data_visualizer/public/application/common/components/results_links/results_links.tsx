@@ -19,14 +19,14 @@ import { isDefined } from '../../util/is_defined';
 
 type LinkType = 'file' | 'index';
 
-export interface GetUrlParams {
+export interface AsyncLinkCardParams {
   dataViewId: string;
   dataViewTitle?: string;
   globalState?: any;
 }
 
-export type GetAsyncLinkCards = Array<
-  (params: GetUrlParams) => Promise<ResultLink | ResultLink[] | undefined>
+export type AsyncLinkCards = Array<
+  (params: AsyncLinkCardParams) => Promise<ResultLink | ResultLink[] | undefined>
 >;
 
 export interface ResultLink {
@@ -37,7 +37,7 @@ export interface ResultLink {
   description: string;
   getUrl(params?: any): Promise<string>;
   canDisplay(params?: any): Promise<boolean>;
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
 }
 
 interface Props {
@@ -47,7 +47,7 @@ interface Props {
   timeFieldName?: string;
   createDataView: boolean;
   showFilebeatFlyout(): void;
-  getAsyncLinkCards?: GetAsyncLinkCards;
+  asyncLinkCards?: AsyncLinkCards;
 }
 
 interface GlobalState {
@@ -64,7 +64,7 @@ export const ResultsLinks: FC<Props> = ({
   timeFieldName,
   createDataView,
   showFilebeatFlyout,
-  getAsyncLinkCards,
+  asyncLinkCards,
 }) => {
   const {
     services: {
@@ -83,7 +83,7 @@ export const ResultsLinks: FC<Props> = ({
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [dataViewsManagementLink, setDataViewsManagementLink] = useState('');
-  const [asyncLinkCards, setAsyncLinkCards] = useState<LinkCardProps[]>();
+  const [asyncHrefCards, setAsyncHrefCards] = useState<LinkCardProps[]>();
 
   useEffect(() => {
     let unmounted = false;
@@ -106,9 +106,9 @@ export const ResultsLinks: FC<Props> = ({
 
     getDiscoverUrl();
 
-    if (Array.isArray(getAsyncLinkCards)) {
+    if (Array.isArray(asyncLinkCards)) {
       Promise.all(
-        getAsyncLinkCards.map(async (asyncCardGetter) => {
+        asyncLinkCards.map(async (asyncCardGetter) => {
           const results = await asyncCardGetter({
             dataViewId,
           });
@@ -129,7 +129,7 @@ export const ResultsLinks: FC<Props> = ({
           }
         })
       ).then((cards) => {
-        setAsyncLinkCards(flatten(cards).filter(isDefined));
+        setAsyncHrefCards(flatten(cards).filter(isDefined));
       });
     }
 
@@ -267,8 +267,8 @@ export const ResultsLinks: FC<Props> = ({
           onClick={showFilebeatFlyout}
         />
       </EuiFlexItem>
-      {Array.isArray(asyncLinkCards) &&
-        asyncLinkCards.map((link) => (
+      {Array.isArray(asyncHrefCards) &&
+        asyncHrefCards.map((link) => (
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={link.icon} />}

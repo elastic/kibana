@@ -11,7 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   IndexDataVisualizerSpec,
   ResultLink,
-  GetAsyncLinkCards,
+  AsyncLinkCards,
+  AsyncLinkCardParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useMlKibana, useTimefilter, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
@@ -19,14 +20,7 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
-
 import { MlPageHeader } from '../../components/page_header';
-
-export interface GetUrlParams {
-  dataViewId: string;
-  dataViewTitle?: string;
-  globalState: any;
-}
 
 interface RecognizerModule {
   id: string;
@@ -64,7 +58,11 @@ export const IndexDataVisualizerPage: FC = () => {
     }
   }, []);
 
-  const getAsyncMLCards = async ({ dataViewId, dataViewTitle, globalState }: GetUrlParams) => {
+  const getAsyncMLCards = async ({
+    dataViewId,
+    dataViewTitle,
+    globalState,
+  }: AsyncLinkCardParams) => {
     return [
       {
         id: 'create_ml_ad_job',
@@ -102,7 +100,7 @@ export const IndexDataVisualizerPage: FC = () => {
             return false;
           }
         },
-        dataTestSubj: 'dataVisualizerCreateAdvancedJobCard',
+        'data-test-subj': 'dataVisualizerCreateAdvancedJobCard',
       } as ResultLink,
       {
         id: 'create_ml_dfa_job',
@@ -131,12 +129,12 @@ export const IndexDataVisualizerPage: FC = () => {
             isFullLicense() && checkPermission('canCreateDataFrameAnalytics') && mlNodesAvailable()
           );
         },
-        dataTestSubj: 'dataVisualizerCreateDataFrameAnalyticsCard',
+        'data-test-subj': 'dataVisualizerCreateDataFrameAnalyticsCard',
       } as ResultLink,
     ];
   };
 
-  const getAsyncRecognizedModuleCards = async (params: GetUrlParams) => {
+  const getAsyncRecognizedModuleCards = async (params: AsyncLinkCardParams) => {
     const { dataViewId, dataViewTitle } = params;
     const modules = await http.fetch<RecognizerModule[]>(
       `/api/ml/modules/recognize/${dataViewTitle}`,
@@ -173,12 +171,12 @@ export const IndexDataVisualizerPage: FC = () => {
               return false;
             }
           },
-          dataTestSubj: m.id,
+          'data-test-subj': m.id,
         } as ResultLink)
     );
   };
 
-  const getAsyncLinkCards: GetAsyncLinkCards = useMemo(
+  const asyncLinkCards: AsyncLinkCards = useMemo(
     () => [getAsyncRecognizedModuleCards, getAsyncMLCards],
     [mlLocator]
   );
@@ -192,7 +190,7 @@ export const IndexDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <IndexDataVisualizer getAsyncLinkCards={getAsyncLinkCards} />
+          <IndexDataVisualizer asyncLinkCards={asyncLinkCards} />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />
