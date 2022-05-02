@@ -10,6 +10,7 @@ REMOTE_CACHE_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issu
 cat << EOF > .bazelrc
 import %workspace%/.bazelrc.common
 build --remote_cache=grpc://test:${REMOTE_CACHE_PASSWORD}@34.121.74.141:9092
+build --experimental_remote_cache_compression
 EOF
 
 echo "--- yarn install and bootstrap"
