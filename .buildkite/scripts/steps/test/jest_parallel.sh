@@ -44,8 +44,7 @@ while read -r config; do
     duration="${timeSec}s"
   fi
 
-  results+=("
- - $config
+  results+=("- $config
     duration: ${duration}
     result: ${lastCode}")
 
@@ -57,6 +56,7 @@ while read -r config; do
 done <<< "$configs"
 
 echo "--- Jest configs complete"
-printf "%s" "${results[@]}"
+printf "%s\n" "${results[@]}"
+echo ""
 
 exit $exitCode
