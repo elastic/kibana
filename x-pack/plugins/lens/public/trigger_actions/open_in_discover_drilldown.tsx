@@ -70,7 +70,7 @@ export class OpenInDiscoverDrilldown
       defaultMessage: 'Open in Discover',
     });
 
-  public readonly euiIcon = 'link';
+  public readonly euiIcon = 'discoverApp';
 
   supportedTriggers(): OpenInDiscoverTrigger[] {
     return [APPLY_FILTER_TRIGGER];
