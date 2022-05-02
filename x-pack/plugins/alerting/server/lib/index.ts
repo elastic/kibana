@@ -26,3 +26,4 @@ export {
 } from './rule_execution_status';
 export { getRecoveredAlerts } from './get_recovered_alerts';
 export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
+export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';

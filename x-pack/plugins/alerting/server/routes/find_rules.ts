@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
+import { ILicenseState, getRuleSnoozeEndTime } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
@@ -17,7 +17,6 @@ import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
-  getRuleSnoozeEndTime,
 } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 

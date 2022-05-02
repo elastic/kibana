@@ -25,6 +25,7 @@ import {
   getRecoveredAlerts,
   ruleExecutionStatusToRaw,
   validateRuleTypeParams,
+  isRuleSnoozed,
 } from '../lib';
 import {
   Rule,
@@ -54,7 +55,6 @@ import {
   MONITORING_HISTORY_LIMIT,
   parseDuration,
   WithoutReservedActionGroups,
-  isRuleSnoozed,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';

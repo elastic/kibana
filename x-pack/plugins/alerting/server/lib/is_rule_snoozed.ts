@@ -6,7 +6,7 @@
  */
 
 import { rrulestr } from 'rrule';
-import { SanitizedRule, RuleTypeParams } from './rule';
+import { SanitizedRule, RuleTypeParams } from '../../common/rule';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
 

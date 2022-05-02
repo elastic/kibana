@@ -22,7 +22,6 @@ export * from './rule_notify_when_type';
 export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
-export * from './is_rule_snoozed';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;

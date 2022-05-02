@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
+import { ILicenseState, getRuleSnoozeEndTime } from '../lib';
 import { verifyAccessAndContext, RewriteResponseCase } from './lib';
 import {
   RuleTypeParams,
@@ -16,7 +16,6 @@ import {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
   SanitizedRule,
-  getRuleSnoozeEndTime,
 } from '../types';
 
 const paramSchema = schema.object({
