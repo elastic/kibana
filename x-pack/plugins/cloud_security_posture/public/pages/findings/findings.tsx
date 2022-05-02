@@ -42,7 +42,10 @@ export const Findings = () => {
           path={findingsNavigation.findings_by_resource.path}
           render={() => <FindingsByResourceContainer dataView={dataViewQuery.data} />}
         />
-        <Route path={'*'} component={UnknownRoute} />
+        <Route
+          path={'*'}
+          component={() => <Redirect to={findingsNavigation.findings_default.path} />}
+        />
       </Switch>
     </CspPageTemplate>
   );
