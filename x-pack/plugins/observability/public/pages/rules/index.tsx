@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { capitalize, sortBy } from 'lodash';
 import {
   EuiButton,
@@ -15,10 +15,8 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiHorizontalRule,
-  EuiAutoRefreshButton,
   EuiTableSortingType,
   EuiFieldSearch,
-  OnRefreshChangeProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,9 +25,9 @@ import {
   RuleTableItem,
   enableRule,
   disableRule,
-  muteRule,
+  snoozeRule,
   useLoadRuleTypes,
-  unmuteRule,
+  unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -40,7 +38,6 @@ import { RulesTable } from './components/rules_table';
 import { Name } from './components/name';
 import { LastResponseFilter } from './components/last_response_filter';
 import { TypeFilter } from './components/type_filter';
-import { StatusContext } from './components/status_context';
 import { ExecutionStatus } from './components/execution_status';
 import { LastRun } from './components/last_run';
 import { EditRuleFlyout } from './components/edit_rule_flyout';
@@ -93,27 +90,18 @@ export function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-  const [refreshInterval, setRefreshInterval] = useState(60000);
-  const [isPaused, setIsPaused] = useState(false);
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
+  const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setCurrentRuleToEdit(ruleItem);
-  };
-
-  const onRefreshChange = ({
-    isPaused: isPausedChanged,
-    refreshInterval: refreshIntervalChanged,
-  }: OnRefreshChangeProps) => {
-    setIsPaused(isPausedChanged);
-    setRefreshInterval(refreshIntervalChanged);
   };
 
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
@@ -160,15 +148,6 @@ export function RulesPage() {
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isPaused) {
-        reload();
-      }
-    }, refreshInterval);
-    return () => clearInterval(interval);
-  }, [refreshInterval, reload, isPaused]);
-
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
@@ -193,6 +172,23 @@ export function RulesPage() {
         render: (name: string, rule: RuleTableItem) => <Name name={name} rule={rule} />,
       },
       {
+        field: 'tags',
+        name: '',
+        sortable: false,
+        width: '50px',
+        'data-test-subj': 'rulesTableCell-tagsPopover',
+        render: (tags: string[], item: RuleTableItem) => {
+          return tags.length > 0
+            ? triggersActionsUi.getRuleTagBadge({
+                isOpen: tagPopoverOpenIndex === item.index,
+                tags,
+                onClick: () => setTagPopoverOpenIndex(item.index),
+                onClose: () => setTagPopoverOpenIndex(-1),
+              })
+            : null;
+        },
+      },
+      {
         field: 'executionStatus.lastExecutionDate',
         name: LAST_RUN_COLUMN_TITLE,
         sortable: true,
@@ -214,17 +210,17 @@ export function RulesPage() {
         name: STATUS_COLUMN_TITLE,
         sortable: true,
         render: (_enabled: boolean, item: RuleTableItem) => {
-          return (
-            <StatusContext
-              disabled={!item.isEditable || !item.enabledInLicense}
-              item={item}
-              onStatusChanged={() => reload()}
-              enableRule={async () => await enableRule({ http, id: item.id })}
-              disableRule={async () => await disableRule({ http, id: item.id })}
-              muteRule={async () => await muteRule({ http, id: item.id })}
-              unMuteRule={async () => await unmuteRule({ http, id: item.id })}
-            />
-          );
+          return triggersActionsUi.getRuleStatusDropdown({
+            rule: item,
+            enableRule: async () => await enableRule({ http, id: item.id }),
+            disableRule: async () => await disableRule({ http, id: item.id }),
+            onRuleChanged: () => reload(),
+            isEditable: item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId),
+            snoozeRule: async (snoozeEndTime: string | -1) => {
+              await snoozeRule({ http, id: item.id, snoozeEndTime });
+            },
+            unsnoozeRule: async () => await unsnoozeRule({ http, id: item.id }),
+          });
         },
       },
       {
@@ -367,14 +363,6 @@ export function RulesPage() {
                 }}
               />
             </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiAutoRefreshButton
-              isPaused={isPaused}
-              refreshInterval={refreshInterval}
-              onRefreshChange={onRefreshChange}
-              shortHand
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />

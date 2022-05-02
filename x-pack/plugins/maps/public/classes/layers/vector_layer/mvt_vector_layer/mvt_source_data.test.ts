@@ -59,6 +59,7 @@ describe('syncMvtSourceData', () => {
         fieldNames: [],
         sourceMeta: {},
         isForceRefresh: false,
+        isFeatureEditorOpenForLayer: false,
       },
       source: mockSource,
       syncContext,
@@ -90,6 +91,7 @@ describe('syncMvtSourceData', () => {
       fieldNames: [],
       sourceMeta: {},
       isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
     };
 
     await syncMvtSourceData({
@@ -131,6 +133,7 @@ describe('syncMvtSourceData', () => {
       fieldNames: [],
       sourceMeta: {},
       isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
     };
 
     await syncMvtSourceData({
@@ -169,6 +172,7 @@ describe('syncMvtSourceData', () => {
       fieldNames: [],
       sourceMeta: {},
       isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
     };
 
     await syncMvtSourceData({
@@ -215,6 +219,7 @@ describe('syncMvtSourceData', () => {
       fieldNames: [],
       sourceMeta: {},
       isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
     };
 
     await syncMvtSourceData({
@@ -253,6 +258,7 @@ describe('syncMvtSourceData', () => {
       fieldNames: [],
       sourceMeta: {},
       isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
     };
 
     await syncMvtSourceData({
@@ -291,6 +297,7 @@ describe('syncMvtSourceData', () => {
       fieldNames: [],
       sourceMeta: {},
       isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
     };
 
     await syncMvtSourceData({
