@@ -46,7 +46,6 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
     const hbKey = key as YamlKeys;
     const configKey = uiToHeartbeatKeyMap[hbKey];
     formattedMonitor[hbKey] = formattedMonitor[configKey];
-    console.warn(formattedMonitor[hbKey]);
     delete formattedMonitor[configKey];
   });
 
