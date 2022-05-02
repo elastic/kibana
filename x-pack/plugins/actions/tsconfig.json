@@ -4,8 +4,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
-    "experimentalDecorators": true
+    "declarationMap": true
   },
   "include": [
     "server/**/*",
