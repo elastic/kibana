@@ -25,6 +25,7 @@ import {
   FormattedDateTime,
   CollapsibleIndicesList,
   CollapsibleDataStreamsList,
+  CollapsibleFeatureStatesList,
 } from '../../../../../components';
 import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
@@ -41,6 +42,7 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
     // TODO: Add a tooltip explaining that: a false value means that the cluster global state
     // is not stored as part of the snapshot.
     includeGlobalState,
+    featureStates,
     dataStreams,
     indices,
     state,
@@ -230,6 +232,21 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         ) : null}
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem data-test-subj="featureStates">
+          <EuiDescriptionListTitle data-test-subj="title">
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotDetails.featureStatesLabel"
+              defaultMessage="Include system indices from"
+            />
+          </EuiDescriptionListTitle>
+
+          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+            <CollapsibleFeatureStatesList featureStates={featureStates} />
+          </EuiDescriptionListDescription>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiDescriptionList>
   );

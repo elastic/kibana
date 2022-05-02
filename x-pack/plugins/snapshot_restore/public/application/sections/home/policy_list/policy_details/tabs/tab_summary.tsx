@@ -325,7 +325,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
         </EuiFlexGroup>
 
         <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="indices">
+          <EuiFlexItem data-test-subj="featureStates">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.featureStatesLabel"

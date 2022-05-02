@@ -199,17 +199,21 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                   <EuiSpacer size="m" />
                   <EuiFormRow>
                     <EuiCallOut
-                      title="System indices will be included"
-                      color="warning"
-                      iconType="alert"
-                    >
-                      <p>
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.policyForm.stepSettings.indicesWithGlobalStateEnabled"
-                          defaultMessage="Given that include global state is enabled, all system indices will be captured as well."
-                        />
-                      </p>
-                    </EuiCallOut>
+                      data-test-subj="systemIndicesInfoCallOut"
+                      title={i18n.translate(
+                        'xpack.snapshotRestore.policyForm.stepSettings.systemIndicesCallOut.title',
+                        {
+                          defaultMessage:
+                            'When this policy creates a snapshot, system indices {featuresCount, plural, =0 {} other {from {features}}} will also be included.',
+                          values: {
+                            featuresCount: config?.featureStates?.length || 0,
+                            features: config?.featureStates?.join(', '),
+                          },
+                        }
+                      )}
+                      iconType="pin"
+                      size="s"
+                    />
                   </EuiFormRow>
                 </>
               )}

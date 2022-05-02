@@ -152,8 +152,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement: '',
   });
 
-  const [selectedFeatureStateOptions, setSelectedFeatureStateOptions] = useState<FeaturesOption[]>(
-    []
+  const [selectedFeatureStateOptions, setSelectedFeatureStateOptions] = useState(
+    restoreSettings?.featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[]
   );
 
   const onFeatureStatesChange = (selected: FeaturesOption[]) => {
@@ -601,14 +601,10 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               }}
             />
 
-            {/* Only display callout if include_global_state is enabled and the snapshot was created by ES 7.12+
-             * Note: Once we support features states in the UI, we will also need to add a check here for that
-             * See https://github.com/elastic/kibana/issues/95128 more details
-             */}
             {includeGlobalState && semverGt(version, '7.12.0') && (
               <>
                 <EuiSpacer size="s" />
-                <SystemIndicesOverwrittenCallOut />
+                <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
               </>
             )}
           </>
