@@ -59,6 +59,9 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({
 
   const onChange = ((selectedOptions: FeaturesOption[]) => {
     setSelected(selectedOptions);
+    onUpdate({
+      featureStates: selectedOptions.map(option => option.label),
+    });
   });
 
   return (
@@ -68,7 +71,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({
           <h3>
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescriptionTitle"
-              defaultMessage="Include global state"
+              defaultMessage="Include global state and system indices"
             />
           </h3>
         </EuiTitle>
@@ -87,7 +90,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.policyIncludeGlobalStateLabel"
-              defaultMessage="Include global state"
+              defaultMessage="Include global state and system indices"
             />
           }
           checked={config.includeGlobalState === undefined || config.includeGlobalState}
@@ -106,14 +109,14 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepSettings.featureStates"
-                defaultMessage="Features"
+                defaultMessage="Include system indices from"
               />
             }
           >
             <>
               <EuiComboBox
                 aria-label="Select features you want to include in the snapshot"
-                placeholder="Select features"
+                placeholder="All features"
                 options={features}
                 selectedOptions={selectedOptions}
                 onChange={onChange}

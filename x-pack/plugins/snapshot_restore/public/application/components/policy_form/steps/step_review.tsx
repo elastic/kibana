@@ -24,7 +24,7 @@ import {
 import { serializePolicy } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
 import { StepProps } from '.';
-import { CollapsibleIndicesList } from '../../collapsible_lists';
+import { CollapsibleIndicesList, CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
 export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   policy,
@@ -32,9 +32,10 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
 }) => {
   const { i18n } = useServices();
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const { indices, includeGlobalState, ignoreUnavailable, partial } = config || {
+  const { indices, includeGlobalState, featureStates, ignoreUnavailable, partial } = config || {
     indices: undefined,
     includeGlobalState: undefined,
+    featureStates: [],
     ignoreUnavailable: undefined,
     partial: undefined,
   };
@@ -228,6 +229,23 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
                   defaultMessage="Yes"
                 />
               )}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.featureStatesLabel"
+                defaultMessage="Include system indices from"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <CollapsibleFeatureStatesList featureStates={featureStates} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
