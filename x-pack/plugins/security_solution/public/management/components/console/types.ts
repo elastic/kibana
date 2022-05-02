@@ -7,7 +7,7 @@
 
 import type { ComponentType, ComponentProps } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { Immutable } from '../../../../common/endpoint/types';
+import type { Immutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
 export interface CommandDefinition {
@@ -16,7 +16,7 @@ export interface CommandDefinition {
   /**
    * The Component that will be used to render the Command
    */
-  Component: CommandExecutionComponent;
+  RenderComponent: CommandExecutionComponent;
   /**
    * If defined, this command's use of `--help` will be displayed using this component instead of
    * the console's built in output.
@@ -28,7 +28,10 @@ export interface CommandDefinition {
    * that will handle it, so this data will be available there
    */
   meta?: Record<string, unknown>;
+
+  // FIXME:PT is this being used? is it even needed?
   validator?: () => Promise<boolean>;
+
   /** If all args are optional, but at least one must be defined, set to true */
   mustHaveArgs?: boolean;
   args?: {
@@ -44,7 +47,7 @@ export interface CommandDefinition {
       // Selector: Idea is that the schema can plugin in a rich component for the
       // user to select something (ex. a file)
       // FIXME: implement selector
-      selector?: () => unknown;
+      selector?: ComponentType;
     };
   };
 }

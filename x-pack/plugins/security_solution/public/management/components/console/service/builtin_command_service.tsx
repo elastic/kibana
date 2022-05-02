@@ -22,7 +22,7 @@ export class ConsoleBuiltinCommandsService implements BuiltinCommandServiceInter
         about: i18n.translate('xpack.securitySolution.console.builtInCommands.helpAbout', {
           defaultMessage: 'View list of available commands',
         }),
-        Component: HelpCommand,
+        RenderComponent: HelpCommand,
       },
       {
         name: 'clear',
@@ -30,7 +30,7 @@ export class ConsoleBuiltinCommandsService implements BuiltinCommandServiceInter
           defaultMessage: 'Clear the console buffer',
         }),
         // FIXME:PT Implement
-        Component: () => {
+        RenderComponent: () => {
           return null;
         },
       },

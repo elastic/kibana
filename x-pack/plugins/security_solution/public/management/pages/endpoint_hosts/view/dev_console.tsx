@@ -19,7 +19,6 @@ import { useIsMounted } from '../../../components/hooks/use_is_mounted';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUrlParams } from '../../../components/hooks/use_url_params';
 import {
-  Command,
   CommandDefinition,
   CommandServiceInterface,
   Console,
@@ -35,7 +34,7 @@ class DevCommandService implements CommandServiceInterface {
       {
         name: 'cmd1',
         about: 'Runs cmd1',
-        Component: ({ command, setStatus }) => {
+        RenderComponent: ({ command, setStatus }) => {
           const isMounted = useIsMounted();
 
           const [response, setResponse] = useState<null | ReactElement>(null);
@@ -47,11 +46,12 @@ class DevCommandService implements CommandServiceInterface {
 
               setStatus('success');
               setResponse(
-                <div>
-                  <div>{`${command.commandDefinition.name}`}</div>
-                  <div>{`command input: ${command.input}`}</div>
+                <EuiText>
+                  <EuiText>{`${command.commandDefinition.name}`}</EuiText>
+                  <EuiText>{`command input: ${command.input}`}</EuiText>
+                  <EuiText>{'Arguments provided:'}</EuiText>
                   <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
-                </div>
+                </EuiText>
               );
             })();
           }, [command.args, command.commandDefinition.name, command.input, isMounted, setStatus]);
