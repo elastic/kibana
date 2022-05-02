@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { defaultsDeep } from 'lodash';
 import { createFlagError } from '@kbn/dev-utils';
@@ -25,7 +26,11 @@ async function getSettingsFromFile(
     primary: boolean;
   }
 ) {
-  if (options.primary && !FTR_CONFIGS_MANIFEST_PATHS.includes(options.path)) {
+  if (
+    options.primary &&
+    !FTR_CONFIGS_MANIFEST_PATHS.includes(options.path) &&
+    !options.path.includes(`${Path.sep}__fixtures__${Path.sep}`)
+  ) {
     throw createFlagError(
       `Refusing to load FTR Config which is not listed in [${FTR_CONFIGS_MANIFEST_REL}]. All FTR Config files must be listed there, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
     );

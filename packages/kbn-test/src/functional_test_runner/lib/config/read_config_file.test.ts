@@ -14,17 +14,9 @@ import { EsVersion } from '../es_version';
 const log = new ToolingLog();
 const esVersion = new EsVersion('8.0.0');
 
-jest.mock('./ftr_configs_manifest', () => ({
-  FTR_CONFIGS_MANIFEST_REL: 'rel-path',
-  FTR_CONFIGS_MANIFEST_PATHS: [
-    require.resolve('./__fixtures__/config.1.js'),
-    require.resolve('./__fixtures__/config.2.js'),
-    require.resolve('./__fixtures__/config.invalid.js'),
-  ],
-}));
-
-const [CONFIG_PATH_1, CONFIG_PATH_2, CONFIG_PATH_INVALID] =
-  jest.requireMock('./ftr_configs_manifest').FTR_CONFIGS_MANIFEST_PATHS;
+const CONFIG_PATH_1 = require.resolve('./__fixtures__/config.1.js');
+const CONFIG_PATH_2 = require.resolve('./__fixtures__/config.2.js');
+const CONFIG_PATH_INVALID = require.resolve('./__fixtures__/config.invalid.js');
 
 describe('readConfigFile()', () => {
   it('reads config from a file, returns an instance of Config class', async () => {
