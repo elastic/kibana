@@ -14,7 +14,7 @@ export const UI_ACTION_NAME = {
 } as const;
 export type UiActionName = typeof UI_ACTION_NAME[keyof typeof UI_ACTION_NAME];
 
-interface StreamState {
+export interface StreamState {
   isCancelled: boolean;
   isRunning: boolean;
   progress: number;

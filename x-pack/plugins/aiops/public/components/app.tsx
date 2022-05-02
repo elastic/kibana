@@ -32,6 +32,7 @@ import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 
+import { Cards, WinCard, CancelCard } from './cards';
 import { streamFetch } from './stream_fetch';
 import {
   initialState,
@@ -47,17 +48,6 @@ interface AiopsAppDeps {
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
 }
-
-const imageUrls = {
-  'The whole army': 'https://i.pinimg.com/originals/d0/d7/8c/d0d78cb1281c2c2cd7705324debdf621.gif',
-  Aragorn:
-    'https://img.wattpad.com/6df513d8d6a58db43669784e195ce7563099ddc1/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f776174747061642d6d656469612d736572766963652f53746f7279496d6167652f766235666d474e4c6c6962452d773d3d2d3638363235323432372e313537656331333361343464623164373732363937343435333239372e676966',
-  Eowyn:
-    'https://img.wattpad.com/dc8cc703540ee83f238e7516d542320dcb57a025/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f776174747061642d6d656469612d736572766963652f53746f7279496d6167652f335a69435758336f4d7a772d34513d3d2d3239383432363537352e313436616530303235393661353238323232373938313737333337352e676966',
-  Frodo: 'https://qph.fs.quoracdn.net/main-qimg-8d65585bb9a4badab1a02e16cfadc466',
-  Galadriel:
-    'https://64.media.tumblr.com/4f9fde5cc4b34cbbd9d8977790395b80/tumblr_pac1qyUO4M1wc15f6o1_540.gifv',
-};
 
 export const AiopsApp = ({ basename, notifications, http, navigation }: AiopsAppDeps) => {
   // Use React hooks to manage state.
@@ -84,28 +74,6 @@ export const AiopsApp = ({ basename, notifications, http, navigation }: AiopsApp
   };
 
   console.log('state', state);
-
-  const entities =
-    !state.isRunning && state.progress === 100
-      ? { 'The whole army': Object.values(state.entities).reduce((p, c) => p + c, 0) }
-      : state.entities;
-
-  const cardNodes = Object.entries(entities).map(function ([entity, value], index) {
-    return (
-      <EuiFlexItem key={entity}>
-        <EuiCard
-          image={
-            <div>
-              <img src={imageUrls[entity]} alt="Nature" />
-            </div>
-          }
-          title={entity}
-          description={`${entity} killed ${value} orcs.`}
-          onClick={() => {}}
-        />
-      </EuiFlexItem>
-    );
-  });
 
   // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
@@ -171,7 +139,18 @@ export const AiopsApp = ({ basename, notifications, http, navigation }: AiopsApp
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiSpacer />
-                    <EuiFlexGroup gutterSize="l">{cardNodes}</EuiFlexGroup>
+                    <EuiFlexGroup gutterSize="l">
+                      {state.isRunning && <Cards cards={state.entities} />}
+                      {!state.isRunning && state.progress === 100 && (
+                        <WinCard
+                          description={`You defeated ${Object.values(state.entities).reduce(
+                            (p, c) => p + c,
+                            0
+                          )} orcs.`}
+                        />
+                      )}
+                      {state.isCancelled && <CancelCard />}
+                    </EuiFlexGroup>
                   </EuiText>
                 </EuiPageContentBody>
               </EuiPageContent>
