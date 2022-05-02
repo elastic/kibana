@@ -12,11 +12,9 @@ export function makeGetMetricIndices(
   savedObjectsService: SavedObjectsServiceStart,
   metricSources: InfraSources
 ) {
-  const getMetricIndices = async (request: KibanaRequest, sourceId: string = 'default') => {
+  return async (request: KibanaRequest, sourceId: string = 'default') => {
     const savedObjectsClient = savedObjectsService.getScopedClient(request);
-    const configuration = await metricSources.getSourceConfiguration(savedObjectsClient, sourceId);
-    return configuration.configuration.metricAlias;
+    const source = await metricSources.getSourceConfiguration(savedObjectsClient, sourceId);
+    return source.configuration.metricAlias;
   };
-
-  return getMetricIndices;
 }
