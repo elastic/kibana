@@ -23,7 +23,9 @@ const FTR_MANIFEST_REL = '.buildkite/ftr_configs.yml';
 const ftrConfigsManifest = JsYaml.safeLoad(
   Fs.readFileSync(Path.resolve(REPO_ROOT, FTR_MANIFEST_REL), 'utf8')
 );
-const VALID_FTR_CONFIG_PATHS = Object.values(ftrConfigsManifest).flat() as string[];
+const VALID_FTR_CONFIG_PATHS = (Object.values(ftrConfigsManifest) as string[][])
+  .flat()
+  .map((rel) => Path.resolve(REPO_ROOT, rel));
 
 async function getSettingsFromFile(
   log: ToolingLog,
