@@ -6,21 +6,29 @@
  */
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiCallOut,
   EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { useQuery } from 'react-query';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendGetAgentPolicies, useLink } from '../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../constants';
+
+import { policyHasFleetServer } from '../../../services';
+import type { AgentPolicy } from '../../../types';
+import { AgentPolicyDeleteProvider } from '../../agent_policy/components';
+
+import { queryClient } from '..';
 
 import { CodeBlock } from './code_block';
 
@@ -40,13 +48,20 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
   // TODO: Depending on the number of agent policies, this might need to be switched to
   // `useInfinite` query with an infinite scrolling approach in the dropdown options.
-  const { data, status } = useQuery('agent-policies', fetchAgentPolicies);
+  const { data, status } = useQuery('debug-agent-policies', fetchAgentPolicies);
 
   const agentPolicies = data?.data?.items ?? [];
   const comboBoxOptions = agentPolicies.map((policy) => ({ label: policy.name, value: policy.id }));
   const selectedOptions = selectedPolicyId
     ? [comboBoxOptions.find((option) => option.value === selectedPolicyId)!]
     : [];
+
+  const selectedAgentPolicy = agentPolicies.find((policy) => policy.id === selectedPolicyId);
+
+  const onDelete = () => {
+    setSelectedPolicyId(undefined);
+    queryClient.invalidateQueries('debug-agent-policies');
+  };
 
   if (status === 'loading') {
     return <EuiLoadingSpinner />;
@@ -68,21 +83,48 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
       <EuiSpacer size="m" />
 
-      <EuiComboBox
-        aria-label="Select an Agent Policy"
-        placeholder="Select an Agent Policy"
-        options={comboBoxOptions}
-        singleSelection={{ asPlainText: true }}
-        selectedOptions={selectedOptions}
-        onChange={(newSelectedOptions) => {
-          // Handle "clear" action
-          if (!newSelectedOptions.length) {
-            setSelectedPolicyId(undefined);
-          } else {
-            setSelectedPolicyId(newSelectedOptions[0].value);
-          }
-        }}
-      />
+      <EuiFlexGroup alignItems="center" justifyContent="flexStart">
+        <EuiFlexItem>
+          <EuiComboBox
+            aria-label="Select an Agent Policy"
+            placeholder="Select an Agent Policy"
+            options={comboBoxOptions}
+            singleSelection={{ asPlainText: true }}
+            selectedOptions={selectedOptions}
+            onChange={(newSelectedOptions) => {
+              // Handle "clear" action
+              if (!newSelectedOptions.length) {
+                setSelectedPolicyId(undefined);
+              } else {
+                setSelectedPolicyId(newSelectedOptions[0].value);
+              }
+            }}
+          />
+        </EuiFlexItem>
+        {selectedPolicyId && (
+          <AgentPolicyDeleteProvider
+            hasFleetServer={policyHasFleetServer(selectedAgentPolicy as AgentPolicy)}
+          >
+            {(deleteAgentPolicyPrompt) => {
+              return (
+                <EuiFlexItem>
+                  <div>
+                    <EuiButton
+                      color="danger"
+                      onClick={() => deleteAgentPolicyPrompt(selectedPolicyId, onDelete)}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.policyForm.deletePolicyActionText"
+                        defaultMessage="Delete policy"
+                      />
+                    </EuiButton>
+                  </div>
+                </EuiFlexItem>
+              );
+            }}
+          </AgentPolicyDeleteProvider>
+        )}
+      </EuiFlexGroup>
 
       {selectedPolicyId && (
         <>
@@ -94,13 +136,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
           <EuiSpacer size="m" />
 
-          <CodeBlock
-            value={JSON.stringify(
-              agentPolicies.find((policy) => policy.id === selectedPolicyId),
-              null,
-              2
-            )}
-          />
+          <CodeBlock value={JSON.stringify(selectedAgentPolicy, null, 2)} />
         </>
       )}
     </>

@@ -14,7 +14,7 @@ import { AgentPolicyDebugger } from './components';
 
 // TODO: Evaluate moving this react-query initialization up to the main Fleet app
 // setup if we end up pursuing wider adoption of react-query.
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 export const DebugPage: React.FunctionComponent = () => {
   return (
