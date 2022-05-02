@@ -65,11 +65,16 @@ export function runBuildApiDocsCli() {
         // Delete all files except the README that warns about the auto-generated nature of
         // the folder.
         const files = Fs.readdirSync(outputFolder);
-        files.forEach((file) => {
-          if (file.indexOf('README.md') < 0) {
-            Fs.rmSync(Path.resolve(outputFolder, file));
-          }
-        });
+        await Promise.all(
+          files
+            .filter((file) => file.indexOf('README.md') < 0)
+            .map(
+              (file) =>
+                new Promise<void>((resolve, reject) =>
+                  Fs.rm(Path.resolve(outputFolder, file), (err) => (err ? reject(err) : resolve()))
+                )
+            )
+        );
       }
       const collectReferences = flags.references as boolean;
 

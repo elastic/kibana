@@ -46,7 +46,11 @@ export function buildParentApiId(parentName: string, parentsParentApiId?: string
 }
 
 export function getOptsForChild(node: Node, parentOpts: BuildApiDecOpts): BuildApiDecOpts {
-  const name = isNamedNode(node) ? node.getName() : 'Unnamed';
+  const name = Node.isConstructSignatureDeclaration(node)
+    ? 'new'
+    : isNamedNode(node)
+    ? node.getName()
+    : 'Unnamed';
   return getOptsForChildWithName(name, parentOpts);
 }
 

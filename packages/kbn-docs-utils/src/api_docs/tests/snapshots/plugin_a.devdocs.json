@@ -714,6 +714,67 @@
       },
       {
         "parentPluginId": "pluginA",
+        "id": "def-public.ClassConstructorWithStaticProperties",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClassConstructorWithStaticProperties",
+        "description": [],
+        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.ClassConstructorWithStaticProperties.staticProperty1",
+            "type": "string",
+            "tags": [],
+            "label": "staticProperty1",
+            "description": [],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.ClassConstructorWithStaticProperties.new",
+            "type": "Function",
+            "tags": [],
+            "label": "new",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "pluginA",
+                "id": "def-public.ClassConstructorWithStaticProperties.new.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "pluginA",
+                    "id": "def-public.ClassConstructorWithStaticProperties.new.$1.foo",
+                    "type": "string",
+                    "tags": [],
+                    "label": "foo",
+                    "description": [],
+                    "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "pluginA",
         "id": "def-public.ExampleInterface",
         "type": "Interface",
         "tags": [],
