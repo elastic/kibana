@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { memo } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import { CommandList } from '../command_list';
 import { useCommandService } from '../../hooks/state_selectors/use_command_service';
 import { CommandExecutionComponentProps } from '../../types';
@@ -17,17 +17,30 @@ export const HelpCommand = memo<CommandExecutionComponentProps>((props) => {
   const builtinCommandService = useBuiltinCommandService();
   const commandService = useCommandService();
 
+  const CustomHelpComponent = props.command.commandDefinition.HelpComponent;
+
+  const allCommands = useMemo(() => {
+    return builtinCommandService.getCommandList().concat(commandService.getCommandList());
+  }, [builtinCommandService, commandService]);
+
+  useEffect(() => {
+    if (!CustomHelpComponent) {
+      props.setStatus('success');
+    }
+  }, [CustomHelpComponent, props]);
+
   return (
     <HelpOutput
-      input={props.command.args.input}
+      command={props.command}
       title={i18n.translate('xpack.securitySolution.console.builtInCommands.allCommands', {
         defaultMessage: 'Available commands',
       })}
     >
-      <CommandList
-        commands={builtinCommandService.getCommandList().concat(commandService.getCommandList())}
-      />
-      {/* TODO:PT need to get help from command service if it defines a method for it.      */}
+      {CustomHelpComponent ? (
+        <CustomHelpComponent {...props} />
+      ) : (
+        <CommandList commands={allCommands} />
+      )}
     </HelpOutput>
   );
 });

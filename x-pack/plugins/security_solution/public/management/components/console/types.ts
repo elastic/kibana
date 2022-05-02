@@ -69,7 +69,7 @@ export interface Command {
  * The component that will handle the Command execution and display the result.
  */
 export type CommandExecutionComponent = ComponentType<{
-  command: Immutable<Command>;
+  command: Command;
   /**
    * A data store for the command execution to store data in, if needed.
    * Because the Console could be closed/opened several times, which will cause this component

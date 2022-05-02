@@ -52,26 +52,13 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   const { commandService, builtinCommandService } = state;
 
-  // Is it an internal command?
-  if (builtinCommandService.isBuiltin(parsedInput.name)) {
-    const commandOutput = builtinCommandService.executeBuiltinCommand(parsedInput, commandService);
-
-    if (commandOutput.clearBuffer) {
-      return {
-        ...state,
-        commandHistory: [],
-      };
-    }
-
-    return updateStateWithNewCommandHistoryItem(state, commandOutput.result);
-  }
-
-  // ----------------------------------------------------
-  // Validate and execute the user defined command
-  // ----------------------------------------------------
-  const commandDefinition = commandService
-    .getCommandList()
-    .find((definition) => definition.name === parsedInput.name);
+  // Get the command definition; first by using the builtin command service (case its an internal command)
+  // if nothing is returned, then try to get it from the command definition provided on input
+  const findDefinitionForCommandName = (definition: CommandDefinition): boolean =>
+    definition.name === parsedInput.name;
+  const commandDefinition: CommandDefinition | undefined =
+    builtinCommandService.getCommandList().find(findDefinitionForCommandName) ??
+    commandService.getCommandList().find(findDefinitionForCommandName);
 
   // Unknown command
   if (!commandDefinition) {
@@ -83,6 +70,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     );
   }
 
+  const command = {
+    input: parsedInput.input,
+    args: parsedInput,
+    commandDefinition,
+  };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
 
   // If args were entered, then validate them
@@ -93,7 +85,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         state,
         <HistoryItem>
           <HelpOutput
-            input={parsedInput.input}
+            command={command}
             title={i18n.translate('xpack.securitySolution.console.commandValidation.cmdHelpTitle', {
               defaultMessage: '{cmdName} command',
               values: { cmdName: parsedInput.name },
@@ -257,13 +249,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   return updateStateWithNewCommandHistoryItem(
     state,
     <HistoryItem>
-      <CommandExecutionOutput
-        command={{
-          input: parsedInput.input,
-          args: parsedInput,
-          commandDefinition,
-        }}
-      />
+      <CommandExecutionOutput command={command} />
     </HistoryItem>
   );
 };
