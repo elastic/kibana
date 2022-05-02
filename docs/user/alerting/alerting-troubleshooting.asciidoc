@@ -56,7 +56,7 @@ Diagnosing these may be difficult - but there may be log messages for error cond
 === Use the REST APIs
 
 There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
-One of the http endpoints available for actions is the POST <<execute-connector-api,_execute API>>.  You can use this to “test” an action.  For instance, if you have a server log action created, you can execute it via curling the endpoint:
+One of the http endpoints available for actions is the POST <<execute-connector-api,_execute API>>. You can use this to “test” an action.  For instance, if you have a server log action created, you can run it via curling the endpoint:
 [source, txt]
 --------------------------------------------------
 curl -X POST -k \
@@ -79,7 +79,7 @@ The same REST POST _execute API command will be:
 kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce ‘{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}’
 --------------------------------------------------
 
-The result of this http request (and printed to stdout by https://github.com/pmuellr/kbn-action[kbn-action]) will be data returned by the action execution, along with error messages if errors were encountered.
+The result of this http request (and printed to stdout by https://github.com/pmuellr/kbn-action[kbn-action]) will be data returned by the action, along with error messages if errors were encountered.
 
 [float]
 [[alerting-error-banners]]
@@ -96,8 +96,8 @@ image::images/rules-details-health.png[Rule details page with the errors banner]
 [[task-manager-diagnostics]]
 === Task Manager diagnostics
 
-Under the hood, Rules and Connectors uses a plugin called Task Manager, which handles the scheduling, execution, and error handling of the tasks.
-This means that failure cases in Rules or Connectors will, at times, be revealed by the Task Manager mechanism, rather than the Rules mechanism.
+Under the hood, {rules-ui} uses a plugin called Task Manager, which handles the scheduling, running, and error handling of the tasks.
+This means that failure cases in {rules-ui} will, at times, be revealed by the Task Manager mechanism, rather than the Rules mechanism.
 
 Task Manager provides a visible status which can be used to diagnose issues and is very well documented <<task-manager-health-monitoring,health monitoring>> and <<task-manager-troubleshooting,troubleshooting>>. 
 Task Manager uses the `.kibana_task_manager` index, an internal index that contains all the saved objects that represent the tasks in the system.
