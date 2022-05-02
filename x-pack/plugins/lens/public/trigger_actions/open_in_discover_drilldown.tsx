@@ -36,7 +36,7 @@ interface EmbeddableQueryInput extends EmbeddableInput {
 export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
-  discover: DiscoverSetup;
+  discover: Pick<DiscoverSetup, 'locator'>;
   hasDiscoverAccess: () => boolean;
 }
 

@@ -18,7 +18,7 @@ interface Context {
   timeRange?: TimeRange;
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
-  discover: DiscoverSetup;
+  discover: Pick<DiscoverSetup, 'locator'>;
 }
 
 function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embeddable {

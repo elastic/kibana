@@ -17,7 +17,10 @@ interface Context {
   embeddable: IEmbeddable;
 }
 
-export const createOpenInDiscoverAction = (discover: DiscoverSetup, hasDiscoverAccess: boolean) =>
+export const createOpenInDiscoverAction = (
+  discover: Pick<DiscoverSetup, 'locator'>,
+  hasDiscoverAccess: boolean
+) =>
   createAction<Context>({
     type: ACTION_OPEN_IN_DISCOVER,
     id: ACTION_OPEN_IN_DISCOVER,
