@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 

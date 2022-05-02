@@ -84,7 +84,12 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={`
+            min-width: 400px;
+          `}
+        >
           <EuiComboBox
             aria-label="Select an Agent Policy"
             placeholder="Select an Agent Policy"
@@ -107,7 +112,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
           >
             {(deleteAgentPolicyPrompt) => {
               return (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <div>
                     <EuiButton
                       color="danger"
