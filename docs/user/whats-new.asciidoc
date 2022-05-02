@@ -127,15 +127,16 @@ image::images/highlights-maps-custom-icon-2.png[custom phone icon added to a map
 === Alerting
 
 [float]
-==== Temporarily pause rules
+==== Snooze rules
 
 *Alerting* introduces the ability to snooze rules to suppress notifications
 and actions for a user-defined duration. You'll never miss an
 action because you forgot to unmute a rule while handling problems that arose
-unexpectedly or during known downtimes.
+unexpectedly or during known downtimes. For more information, check
+{kibana-ref}/create-and-manage-rules.html#controlling-rules[Snooze and disable rules].
 
 [role="screenshot"]
-image::images/highlights-alerting-snooze.png["UI for enabling snooze mode", width=50%]
+image::images/highlights-alerting-snooze.png["UI for enabling snooze mode"]
 
 [float]
 ==== View rule history
@@ -193,6 +194,33 @@ This release brings *Cases* into the Stack,
 so that you can open and track issues outside Elastic Solutions.
 Access *Cases* in *Stack Management* under *Alerts and Insights*.
 For more information, check {kibana-ref}/cases.html[Cases].
+
+
+[float]
+=== Machine learning
+
+[float]
+==== Testing trained models in {kib}
+
+From 8.2, users are able to test certain trained models in {kib}. The new action 
+is introduced under *Machine learning > Trained Models* and it accepts 
+user-specified input to test models. Initially supported models are
+`lang_ident_model_1` (language identification) and third party named entity
+recognition (NER) models.
+
+[role="screenshot"]
+image::images/test-trained-model.gif[Testing trained models in the ML UI]
+
+[float]
+==== Machine learning trained models are now space-aware
+
+Machine learning trained models are space-aware starting in 8.2. Spaces enable 
+you to organize your {kib} saved objects into meaningful categories. Once a 
+trained model is limited to a {kib} space, users only see it if they are 
+assigned to the same space. A warning is shown if any trained models are missing 
+their saved objects; automatic synchronization also occurs periodically to 
+address any missing objects.
+
 
 
 // end::notable-highlights[]

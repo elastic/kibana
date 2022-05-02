@@ -18,12 +18,7 @@ import { migrations730 } from './migrations_730';
 import { SavedDashboardPanel } from '../../common/types';
 import { EmbeddableSetup } from '../../../embeddable/server';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
-import {
-  serializableToRawAttributes,
-  DashboardDoc700To720,
-  DashboardDoc730ToLatest,
-  rawAttributesToSerializable,
-} from '../../common';
+import { DashboardDoc700To720, DashboardDoc730ToLatest } from '../../common';
 import { injectReferences, extractReferences } from '../../common/saved_dashboard_references';
 import {
   convertPanelStateToSavedDashboardPanel,
@@ -37,7 +32,11 @@ import {
   MigrateFunctionsObject,
 } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
-import { CONTROL_GROUP_TYPE } from '../../../controls/common';
+import {
+  CONTROL_GROUP_TYPE,
+  rawControlGroupAttributesToSerializable,
+  serializableToRawControlGroupAttributes,
+} from '../../../controls/common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -221,12 +220,15 @@ const migrateByValuePanels =
     const { attributes } = doc;
 
     if (attributes?.controlGroupInput) {
-      const controlGroupInput = rawAttributesToSerializable(attributes.controlGroupInput);
+      const controlGroupInput = rawControlGroupAttributesToSerializable(
+        attributes.controlGroupInput
+      );
       const migratedControlGroupInput = migrate({
         ...controlGroupInput,
         type: CONTROL_GROUP_TYPE,
       });
-      attributes.controlGroupInput = serializableToRawAttributes(migratedControlGroupInput);
+      attributes.controlGroupInput =
+        serializableToRawControlGroupAttributes(migratedControlGroupInput);
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
