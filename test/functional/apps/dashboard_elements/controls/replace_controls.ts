@@ -11,7 +11,9 @@ import expect from '@kbn/expect';
 import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
+  /** Because the time slider is temporarily disabled as of https://github.com/elastic/kibana/pull/130978,
+   ** I simply commented out the time slider tests for now :) **/
+  // TIME_SLIDER_CONTROL,
 } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -48,12 +50,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardControls.verifyControlType(controlId, 'range-slider-control');
   };
 
-  const replaceWithTimeSlider = async (controlId: string) => {
-    await dashboardControls.controlEditorSetType(TIME_SLIDER_CONTROL);
-    await changeFieldType('@timestamp');
-    await testSubjects.waitForDeleted('timeSlider-loading-spinner');
-    await dashboardControls.verifyControlType(controlId, 'timeSlider');
-  };
+  // const replaceWithTimeSlider = async (controlId: string) => {
+  //   await dashboardControls.controlEditorSetType(TIME_SLIDER_CONTROL);
+  //   await changeFieldType('@timestamp');
+  //   await testSubjects.waitForDeleted('timeSlider-loading-spinner');
+  //   await dashboardControls.verifyControlType(controlId, 'timeSlider');
+  // };
 
   describe('Replacing controls', async () => {
     let controlId: string;
@@ -81,9 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await replaceWithRangeSlider(controlId);
       });
 
-      it('with time slider', async () => {
-        await replaceWithTimeSlider(controlId);
-      });
+      // it('with time slider', async () => {
+      //   await replaceWithTimeSlider(controlId);
+      // });
     });
 
     describe('Replace range slider', async () => {
@@ -103,31 +105,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await replaceWithOptionsList(controlId);
       });
 
-      it('with time slider', async () => {
-        await replaceWithTimeSlider(controlId);
-      });
+      // it('with time slider', async () => {
+      //   await replaceWithTimeSlider(controlId);
+      // });
     });
 
-    describe('Replace time slider', async () => {
-      beforeEach(async () => {
-        await dashboardControls.clearAllControls();
-        await dashboardControls.createControl({
-          controlType: TIME_SLIDER_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: '@timestamp',
-        });
-        await testSubjects.waitForDeleted('timeSlider-loading-spinner');
-        controlId = (await dashboardControls.getAllControlIds())[0];
-        await dashboardControls.editExistingControl(controlId);
-      });
+    // describe('Replace time slider', async () => {
+    //   beforeEach(async () => {
+    //     await dashboardControls.clearAllControls();
+    //     await dashboardControls.createControl({
+    //       controlType: TIME_SLIDER_CONTROL,
+    //       dataViewTitle: 'animals-*',
+    //       fieldName: '@timestamp',
+    //     });
+    //     await testSubjects.waitForDeleted('timeSlider-loading-spinner');
+    //     controlId = (await dashboardControls.getAllControlIds())[0];
+    //     await dashboardControls.editExistingControl(controlId);
+    //   });
 
-      it('with options list', async () => {
-        await replaceWithOptionsList(controlId);
-      });
+    //   it('with options list', async () => {
+    //     await replaceWithOptionsList(controlId);
+    //   });
 
-      it('with range slider', async () => {
-        await replaceWithRangeSlider(controlId);
-      });
-    });
+    //   it('with range slider', async () => {
+    //     await replaceWithRangeSlider(controlId);
+    //   });
+    // });
   });
 }
