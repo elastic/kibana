@@ -83,7 +83,7 @@ describe('ExplorerChart', () => {
     );
 
     // test if the loading indicator is shown
-    expect(wrapper.find('.ml-loading-indicator .euiLoadingChart')).toHaveLength(1);
+    expect(wrapper.find('.ml-loading-indicator .euiLoadingChart')).toHaveLength(2); // Likely caused by className and Emotion class name
   });
 
   // For the following tests the directive needs to be rendered in the actual DOM,
