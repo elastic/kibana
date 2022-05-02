@@ -12,10 +12,10 @@ import expect from '@kbn/expect';
 import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
 import moment from 'moment';
-import { asyncForEach } from '@kbn/std';
-import { HttpConnection } from '@elastic/elasticsearch';
+// import { asyncForEach } from '@kbn/std';
+// import { HttpConnection } from '@elastic/elasticsearch';
 import request from 'superagent';
-import cheerio from 'cheerio';
+// import cheerio from 'cheerio';
 import { FtrService } from '../ftr_provider_context';
 
 interface NavigateProps {
@@ -305,17 +305,32 @@ export class CommonPageObject extends FtrService {
 
   async checkLinks() {
     // let url;
-    const urls = new Set([]);
+    // const urls = new Set([]);
     const linkList = await this.find.allByCssSelector('a', 100);
     this.log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
 
-    await asyncForEach(linkList, async ({ _webElement }) => {
-      const url = await _webElement.getAttribute('href');
-      urls.add(url);
-      const response = await request.head(url);
-      this.log.debug(`${url} response: ${response.status}`);
-      expect(response.status).to.be(200);
-    });
+    const links = await Promise.all(
+      linkList.map(async (link) => {
+        const url = await link.getAttribute('href');
+        const response = await request.head(url);
+        // this.log.debug(`${url} response: ${response.status}`);
+        return { url, code: response.status };
+      })
+    );
+
+    const deadlinks = links.filter((l) => l.code !== 200);
+    if (deadlinks.length > 0) {
+      deadlinks.forEach((l) => this.log.debug(`${l.url} response: is ${l.code} but 200 expected`));
+      throw new Error('Dead links found');
+    }
+
+    // await asyncForEach(linkList, async ({ _webElement }) => {
+    //   const url = await _webElement.getAttribute('href');
+    //   // urls.add(url);
+    //   const response = await request.head(url);
+    //   this.log.debug(`${url} response: ${response.status}`);
+    //   expect(response.status).to.be(200);
+    // });
     // console.log(urls);
     // await asyncForEach(urls, async (myUrl) => {
     // urls.forEach((myUrl) => {
