@@ -40,14 +40,14 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     }
     // Remove trailing slash from the pathname
     const pathnameKey = pathname.replace(/\/$/, '');
-    return routesMap[pathnameKey];
+    return routesMap[pathnameKey] ?? routesMap['/overview'];
   }, [pathname]);
 
   useExecutionContext(executionContext, {
     name: 'Machine Learning',
     type: 'application',
-    page: activeRoute.path,
+    page: activeRoute?.path,
   });
 
-  return activeRoute ?? routesMap['/overview'];
+  return activeRoute;
 };
