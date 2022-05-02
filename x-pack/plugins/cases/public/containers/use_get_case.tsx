@@ -22,9 +22,14 @@ export const useFetchCase = (caseId: string) => {
     },
     {
       onError: (error: ServerError) => {
-        toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: i18n.ERROR_TITLE,
-        });
+        if (error.name !== 'AbortError') {
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            {
+              title: i18n.ERROR_TITLE,
+            }
+          );
+        }
       },
     }
   );
