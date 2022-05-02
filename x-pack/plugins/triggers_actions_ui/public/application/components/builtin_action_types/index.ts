@@ -24,7 +24,6 @@ import {
 import { getJiraActionType } from './jira';
 import { getResilientActionType } from './resilient';
 import { getTeamsActionType } from './teams';
-import { getTinesActionType } from './tines';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -54,5 +53,4 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getJiraActionType());
   actionTypeRegistry.register(getResilientActionType());
   actionTypeRegistry.register(getTeamsActionType());
-  actionTypeRegistry.register(getTinesActionType());
 }
