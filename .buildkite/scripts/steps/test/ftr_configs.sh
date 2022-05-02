@@ -32,6 +32,7 @@ if [[ "$configs" == "" ]]; then
 fi
 
 failedConfigs=""
+results=()
 
 while read -r config; do
   if [[ ! "$config" ]]; then
@@ -39,6 +40,7 @@ while read -r config; do
   fi
 
   echo "--- $ node scripts/functional_tests --bail --config $config"
+  start=$(date +%s)
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
@@ -47,6 +49,8 @@ while read -r config; do
     --config="$config"
   lastCode=$?
   set -e;
+  results[$config]=$((($(date +%s)-start)/60))
+  results["${config}_code"]=$lastCode
 
   if [ $lastCode -ne 0 ]; then
     exitCode=10
@@ -64,5 +68,12 @@ done <<< "$configs"
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
+
+echo "--- FTR configs complete"
+while read -r config; do
+  echo " - $config";
+  echo "   duration: ${results[$config]} minutes"
+  echo "   exitcode: ${results["${config}_code"]}"
+done <<< "$configs"
 
 exit $exitCode
