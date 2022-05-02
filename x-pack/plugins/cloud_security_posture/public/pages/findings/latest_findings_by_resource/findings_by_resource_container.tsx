@@ -95,14 +95,16 @@ const LatestFindingsByResourceContainer = ({ dataView }: { dataView: DataView })
         loading={findingsGroupByResource.isLoading}
       />
       <PageWrapper>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.csp.findings.findingsByResourceTitle"
-              defaultMessage="Findings"
-            />
-          }
-        />
+        <PageTitle>
+          <PageTitleText
+            title={
+              <FormattedMessage
+                id="xpack.csp.findings.findingsByResourceTitle"
+                defaultMessage="Findings"
+              />
+            }
+          />
+        </PageTitle>
         <FindingsGroupBySelector type="resource" />
         <FindingsByResourceTable
           data={findingsGroupByResource.data}
