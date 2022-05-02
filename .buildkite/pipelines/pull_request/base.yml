@@ -7,8 +7,8 @@ steps:
 
   # - wait
 
-  - command: .buildkite/scripts/steps/bazel_cache/test.sh
-    label: Bootstrap with partial cache
+  - command: .buildkite/scripts/steps/bazel_cache/test_clean.sh
+    label: Bootstrap with no disk cache
     timeout_in_minutes: 20
     parallelism: 100
     agents:
