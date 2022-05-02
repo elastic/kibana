@@ -79,11 +79,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
   beforeEach(() => {
     ruleDataService.findIndexByFeature.mockImplementation(() => {
-      return [
-        {
-          baseName: 'test',
-        } as IndexInfo,
-      ];
+      return {
+        baseName: 'test',
+      } as IndexInfo;
     });
 
     data.search.getSearchStrategy.mockImplementation(() => {
@@ -157,11 +155,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     });
 
     ruleDataService.findIndexByFeature.mockImplementation(() => {
-      return [
-        {
-          baseName: 'myTestIndex',
-        } as unknown as IndexInfo,
-      ];
+      return {
+        baseName: 'myTestIndex',
+      } as unknown as IndexInfo;
     });
 
     let searchRequest: RuleRegistrySearchRequest = {} as unknown as RuleRegistrySearchRequest;
@@ -200,7 +196,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     };
 
     ruleDataService.findIndexByFeature.mockImplementationOnce(() => {
-      return [];
+      return null;
     });
 
     const strategy = ruleRegistrySearchStrategyProvider(
