@@ -12,9 +12,9 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { of } from 'rxjs';
 import { useSymbolIDs } from './use_symbol_ids';
 import { usePaintServerIDs } from './use_paint_server_ids';
-import { of } from 'rxjs';
 
 const loadingProcessTitle = i18n.translate(
   'xpack.securitySolution.resolver.symbolDefinitions.loadingProcess',
