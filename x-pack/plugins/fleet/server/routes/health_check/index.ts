@@ -5,28 +5,110 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 import { appContextService } from '../../services';
+
+import { checkConfiguration } from './configuration';
+
+/*
+ * Dev notes:
+ *  This could potentially be a long running operation. Should we advise users
+ *  to increase timeout (Kibana and ES) settings before running?
+ */
+
+type CHECK = 'configuration' | 'fleet_server' | 'packages' | 'agents' | 'policies';
+type STATUS = 'not_started' | 'running' | 'healthy' | 'problem';
+
+export type IHealthCheck = (options: HealthCheckOptions) => Promise<void>;
+export interface HealthCheckOptions {
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  updateReport: (content: string | string[], level?: number) => void;
+  updateStatus: (status: STATUS) => void;
+}
 
 export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, undefined> = async (
   context,
   request,
   response
 ) => {
+  // Dependencies
   const logger = appContextService.getLogger();
   const soClient = (await context.fleet).epm.internalSoClient;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
+
+  // Report content
   const report: string[] = [];
 
+  // Running checks and statuses
+  let currentCheck: CHECK = 'configuration';
+  const checkStatus: Record<CHECK, STATUS> = {
+    configuration: 'not_started',
+    fleet_server: 'not_started',
+    packages: 'not_started',
+    agents: 'not_started',
+    policies: 'not_started',
+  };
+
+  // Helper methods
+  const updateReport = (content: string | string[], level: number = 1) => {
+    const messages = Array.isArray(content) ? content : [content];
+    let prefix = '';
+    let suffix = '';
+    switch (level) {
+      case 0:
+        prefix = '--- ';
+        suffix = ' ---';
+        break;
+      case 1:
+        break;
+      default:
+        prefix = ' '.repeat((level - 1) * 2);
+    }
+    messages.forEach((message) => report.push(prefix + message + suffix));
+  };
+
+  const updateStatus = (check: CHECK) => {
+    return (status: STATUS) => {
+      checkStatus[check] = status;
+      if (status === 'running') {
+        currentCheck = check;
+      }
+    };
+  };
+
   try {
-    // TODO
-    report.push('--- Starting Fleet health check report ---');
-    report.push('--- Finished Fleet health check report ---');
+    // Start
+    updateReport(`Starting Fleet health check report`, 0);
+
+    // Check configuration
+    await checkConfiguration({
+      soClient,
+      esClient,
+      updateReport,
+      updateStatus: updateStatus('configuration'),
+    });
+
+    // Check Fleet Server
+    // Check packages
+    // Check agents
+    // Check policies
+
+    // Finish
+    updateReport(``);
+    updateReport(`Finished Fleet health check report.`, 0);
   } catch (error) {
-    report.push(`‼️ Error finishing health check report, check Kibana logs for more details:`);
-    report.push(error.message);
+    // On error, display and log, but still return 200 reponse with report so far
+    updateReport(``);
+    updateReport(
+      `‼️ Error finishing health check report while checking ${currentCheck}. 
+      Check Kibana logs for more details:`
+    );
+    updateReport(error.message);
     logger.error(error);
   }
 
