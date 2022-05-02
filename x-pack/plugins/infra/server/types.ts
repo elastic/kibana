@@ -10,6 +10,7 @@ import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { InfraServerPluginStartDeps } from './lib/adapters/framework';
+import type { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
 
 export type { InfraConfig } from '../common/plugin_config_types';
@@ -27,6 +28,7 @@ export interface InfraPluginSetup {
 
 export interface InfraPluginStart {
   logViews: LogViewsServiceStart;
+  getMetricIndices: ReturnType<typeof makeGetMetricIndices>;
 }
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
