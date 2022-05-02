@@ -151,6 +151,22 @@ interface ObjectTypeAndId {
   type: string;
 }
 
+type PreGetHook = (objects: ObjectTypeAndId[]) => Promise<void>;
+type PostGetHook = (objects: SavedObject[]) => Promise<void>;
+
+type PreCreateHook = () => Promise<void>;
+type PostCreateHook = () => Promise<void>;
+
+interface PreHooks {
+  get: PreGetHook[];
+  create: PreCreateHook[];
+}
+
+interface PostHooks {
+  get: PostGetHook[];
+  create: PostCreateHook[];
+}
+
 const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
   const objects: ObjectTypeAndId[] = [];
   const inserted = new Set<string>();
@@ -193,6 +209,14 @@ export class SavedObjectsClient {
   private http: HttpSetup;
   private batchGetQueue: BatchGetQueueEntry[];
   private batchResolveQueue: BatchResolveQueueEntry[];
+  private preHooks: PreHooks = {
+    get: [],
+    create: [],
+  };
+  private postHooks: PostHooks = {
+    get: [],
+    create: [],
+  };
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
@@ -473,12 +497,23 @@ export class SavedObjectsClient {
   };
 
   private async performBulkGet(objects: ObjectTypeAndId[]) {
+    for (const preGetHook of this.preHooks.get) {
+      await preGetHook(objects);
+    }
+
     const path = this.getPath(['_bulk_get']);
     const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
       method: 'POST',
       body: JSON.stringify(objects),
     });
-    return request;
+
+    return request.then(async (result) => {
+      for (const postGetHook of this.postHooks.get) {
+        await postGetHook(result.saved_objects);
+      }
+
+      return result;
+    });
   }
 
   /**
@@ -534,12 +569,25 @@ export class SavedObjectsClient {
   };
 
   private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
+    for (const preGetHook of this.preHooks.get) {
+      await preGetHook(objects);
+    }
+
     const path = this.getPath(['_bulk_resolve']);
     const request: Promise<SavedObjectsBulkResolveResponse<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
       body: JSON.stringify(objects),
     });
-    return request;
+
+    return request.then(async (result) => {
+      for (const postGetHook of this.postHooks.get) {
+        await postGetHook(
+          result.resolved_objects.map(({ saved_object: savedObject }) => savedObject)
+        );
+      }
+
+      return result;
+    });
   }
 
   /**
@@ -598,6 +646,22 @@ export class SavedObjectsClient {
         SavedObjectsBatchResponse
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse<T>;
     });
+  }
+
+  public pre<K extends keyof PreHooks, H extends PreHooks[K][number]>(method: K, handler: H) {
+    const hooksArray: PreHooks[K] = this.preHooks[method];
+    if (hooksArray) {
+      // @ts-expect-error "H" is correctly typed but for some reason it fails when used on this line
+      hooksArray.push(handler);
+    }
+  }
+
+  public post<K extends keyof PostHooks, H extends PostHooks[K][number]>(method: K, handler: H) {
+    const hooksArray: PostHooks[K] = this.postHooks[method];
+    if (hooksArray) {
+      // @ts-expect-error "H" is correctly typed but for some reason it fails when used on this line
+      hooksArray.push(handler);
+    }
   }
 
   private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {

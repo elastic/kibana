@@ -57,7 +57,6 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from './services/kibana_react';
-import { DashboardSavedObject } from './saved_dashboards';
 
 import {
   ClonePanelAction,
@@ -405,14 +404,7 @@ export class DashboardPlugin
       embeddableStart: plugins.embeddable,
     });
 
-    plugins.userContent.userContentService.register<DashboardSavedObject>('dashboard', {
-      get(contentId: string) {
-        return savedDashboardLoader.get({
-          id: contentId,
-          useResolve: true,
-        });
-      },
-    });
+    plugins.userContent.userContentService.register('dashboard');
 
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,

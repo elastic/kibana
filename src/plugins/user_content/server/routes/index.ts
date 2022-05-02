@@ -12,6 +12,7 @@ import type { UserContentEventsStream } from '../types';
 import type { MetadataEventsService } from '../services';
 import type { RouteDependencies } from './types';
 import { registerRegisterEventRoute } from './register_event';
+import { registerBulkEventsRoute } from './register_bulk_events';
 import { registerUpdateViewsCountRoute } from './update_views_count';
 
 interface RegisterRouteOptions {
@@ -30,5 +31,6 @@ export function registerRoutes({
   const routeDeps: RouteDependencies = { userContentEventStreamPromise, metadataEventsService };
 
   registerRegisterEventRoute(router, routeDeps);
+  registerBulkEventsRoute(router, routeDeps);
   registerUpdateViewsCountRoute(router, routeDeps);
 }

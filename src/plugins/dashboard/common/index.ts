@@ -21,7 +21,6 @@ export type {
   SavedDashboardPanel630,
   SavedDashboardPanel640To720,
   SavedDashboardPanel730ToLatest,
-  UserContentType,
 } from './types';
 
 export { migratePanelsTo730 } from './migrate_to_730_panels';

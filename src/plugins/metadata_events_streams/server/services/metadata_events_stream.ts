@@ -23,8 +23,12 @@ export class MetadataEventsStream<E extends MetadataEvent = MetadataEvent> {
     this.metadataEventsStreamsIndex = metadataEventsStreamsIndex;
   }
 
-  registerEvent(event: E): void {
+  registerEvent(event: E) {
     return this.metadataEventsStreamsIndex.addEventToStream<E>(this.streamName, event);
+  }
+
+  bulkRegisterEvents(events: E[]) {
+    return this.metadataEventsStreamsIndex.bulkAddEventsToStream<E>(this.streamName, events);
   }
 
   search(searchRequest?: estypes.SearchRequest) {

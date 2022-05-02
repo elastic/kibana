@@ -33,7 +33,6 @@ export const loadSavedDashboardState = async ({
   initializerContext,
   savedObjectsTagging,
   dashboardCapabilities,
-  userContent,
 }: DashboardBuildContext & { savedDashboardId?: string }): Promise<
   LoadSavedDashboardStateReturn | undefined
 > => {
@@ -52,10 +51,10 @@ export const loadSavedDashboardState = async ({
   }
   await dataViews.ensureDefaultDataView();
   try {
-    const savedDashboard = await userContent.get<DashboardSavedObject>(
-      'dashboard',
-      savedDashboardId!
-    );
+    const savedDashboard = (await savedDashboards.get({
+      id: savedDashboardId,
+      useResolve: true,
+    })) as DashboardSavedObject;
 
     const savedDashboardState = savedObjectToDashboardState({
       savedDashboard,

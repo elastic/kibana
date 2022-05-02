@@ -34,22 +34,56 @@ export class MetadataEventsStreamsIndex {
   }
 
   addEventToStream<E extends MetadataEvent>(streamName: string, event: E) {
-    const document: MetadataEventDoc = {
-      ...event,
-      '@timestamp': getTimestamp(),
-      stream: streamName,
-    };
-
     if (!this.esClient) {
       throw new Error(
         `Missing ElasticsearchClient. Make sure that MetadataEventsStreamsIndex is initialized.`
       );
     }
 
-    this.esClient.index({
-      index: indexName,
-      document,
-    });
+    const document: MetadataEventDoc = {
+      ...event,
+      '@timestamp': getTimestamp(),
+      stream: streamName,
+    };
+
+    return this.esClient
+      .index({
+        index: indexName,
+        document,
+      })
+      .catch((e) => {
+        this.logger.error(new Error(`Could not add event to stream [${streamName}]`, { cause: e }));
+      });
+  }
+
+  bulkAddEventsToStream<E extends MetadataEvent>(streamName: string, events: E[]) {
+    if (!this.esClient) {
+      throw new Error(
+        `Missing ElasticsearchClient. Make sure that MetadataEventsStreamsIndex is initialized.`
+      );
+    }
+
+    const docs: MetadataEventDoc[] = events.map((event) => ({
+      ...event,
+      '@timestamp': getTimestamp(),
+      stream: streamName,
+    }));
+
+    // @ts-expect-error BulkRequest['body'] is deprecated, we should use the new "operations"
+    const operations: estypes.BulkRequest<MetadataEventDoc>['operations'] = docs.flatMap((doc) => [
+      { index: { _index: indexName } },
+      doc,
+    ]);
+
+    return this.esClient
+      .bulk({
+        operations,
+      })
+      .catch((e) => {
+        this.logger.error(
+          new Error(`Could not bulk add event to stream [${streamName}]`, { cause: e })
+        );
+      });
   }
 
   search(stream: string, searchRequest?: estypes.SearchRequest) {
