@@ -10,11 +10,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
 import { ConsoleDataAction, ConsoleDataState, ConsoleStoreReducer } from '../types';
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import { HistoryItem } from '../../history_item';
 import { UnknownCommand } from '../../unknow_comand';
-import { HelpOutput } from '../../help_output';
 import { BadArgument } from '../../bad_argument';
 import { CommandExecutionOutput } from '../../command_execution_output';
 import { CommandDefinition } from '../../../types';
@@ -54,11 +54,9 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   // Get the command definition; first by using the builtin command service (case its an internal command)
   // if nothing is returned, then try to get it from the command definition provided on input
-  const findDefinitionForCommandName = (definition: CommandDefinition): boolean =>
-    definition.name === parsedInput.name;
   const commandDefinition: CommandDefinition | undefined =
-    builtinCommandService.getCommandList().find(findDefinitionForCommandName) ??
-    commandService.getCommandList().find(findDefinitionForCommandName);
+    builtinCommandService.getCommandDefinition(parsedInput.name) ??
+    commandService.getCommandList().find((definition) => definition.name === parsedInput.name);
 
   // Unknown command
   if (!commandDefinition) {
@@ -84,17 +82,16 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       return updateStateWithNewCommandHistoryItem(
         state,
         <HistoryItem>
-          <HelpOutput
-            command={command}
-            title={i18n.translate('xpack.securitySolution.console.commandValidation.cmdHelpTitle', {
-              defaultMessage: '{cmdName} command',
-              values: { cmdName: parsedInput.name },
-            })}
-          >
-            {(commandService.getCommandUsage || builtinCommandService.getCommandUsage)(
-              commandDefinition
-            )}
-          </HelpOutput>
+          <CommandExecutionOutput
+            command={{
+              ...command,
+              // We use the original command definition, but replace the RenderComponent for this invocation
+              commandDefinition: {
+                ...commandDefinition,
+                RenderComponent: HelpCommandArgument,
+              },
+            }}
+          />
         </HistoryItem>
       );
     }

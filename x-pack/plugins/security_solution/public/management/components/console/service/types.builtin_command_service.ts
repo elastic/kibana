@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
 import { CommandDefinition, CommandServiceInterface } from '../types';
 
 export interface BuiltinCommandServiceInterface extends CommandServiceInterface {
   isBuiltin(name: string): boolean;
 
-  getCommandUsage(command: CommandDefinition): Promise<{ result: ReactNode }>;
+  getCommandDefinition(commandName: string): CommandDefinition | undefined;
 }

@@ -58,6 +58,13 @@ class DevCommandService implements CommandServiceInterface {
 
           return response;
         },
+        args: {
+          one: {
+            required: false,
+            allowMultiples: false,
+            about: 'just one',
+          },
+        },
       },
       // {
       //   name: 'get-file',

@@ -9,7 +9,6 @@ import React, { memo, PropsWithChildren, ReactNode } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { Command } from '..';
-import { UserCommandInput } from './user_command_input';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 

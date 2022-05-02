@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HelpCommand } from '../components/builtin_commands/help_command';
-import { CommandUsage } from '../components/command_usage';
 import { CommandDefinition } from '../types';
 import { BuiltinCommandServiceInterface } from './types.builtin_command_service';
 
@@ -45,9 +43,9 @@ export class ConsoleBuiltinCommandsService implements BuiltinCommandServiceInter
     return !!this.commandList.find((command) => command.name === name);
   }
 
-  async getCommandUsage(command: CommandDefinition): Promise<{ result: ReactNode }> {
-    return {
-      result: <CommandUsage commandDef={command} />,
-    };
+  getCommandDefinition(commandName: string) {
+    return this.commandList.find(
+      (definition: CommandDefinition): boolean => definition.name === commandName
+    );
   }
 }

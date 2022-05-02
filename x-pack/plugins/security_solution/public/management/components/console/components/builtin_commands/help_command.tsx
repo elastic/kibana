@@ -17,7 +17,7 @@ export const HelpCommand = memo<CommandExecutionComponentProps>((props) => {
   const builtinCommandService = useBuiltinCommandService();
   const commandService = useCommandService();
 
-  const CustomHelpComponent = props.command.commandDefinition.HelpComponent;
+  const CustomHelpComponent = commandService.HelpComponent;
 
   const allCommands = useMemo(() => {
     return builtinCommandService.getCommandList().concat(commandService.getCommandList());
@@ -29,18 +29,16 @@ export const HelpCommand = memo<CommandExecutionComponentProps>((props) => {
     }
   }, [CustomHelpComponent, props]);
 
-  return (
+  return CustomHelpComponent ? (
+    <CustomHelpComponent {...props} />
+  ) : (
     <HelpOutput
       command={props.command}
-      title={i18n.translate('xpack.securitySolution.console.builtInCommands.allCommands', {
+      title={i18n.translate('xpack.securitySolution.console.builtInCommands.help.helpTitle', {
         defaultMessage: 'Available commands',
       })}
     >
-      {CustomHelpComponent ? (
-        <CustomHelpComponent {...props} />
-      ) : (
-        <CommandList commands={allCommands} />
-      )}
+      <CommandList commands={allCommands} />
     </HelpOutput>
   );
 });
