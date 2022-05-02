@@ -8,6 +8,7 @@ export JOB=$BUILDKITE_PARALLEL_JOB
 
 # a jest failure will result in the script returning an exit code of 10
 exitCode=0
+results=()
 
 if [[ "$1" == 'jest.config.js' ]]; then
   # run unit tests in parallel
