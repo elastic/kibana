@@ -23,6 +23,7 @@ import {
   EuiIcon,
   type PropsOf,
   EuiMarkdownFormat,
+  useEuiTheme,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
@@ -38,11 +39,15 @@ const tabs = [
   { title: TEXT.REMEDIATION, id: 'remediation' },
   { title: TEXT.RESOURCE, id: 'resource' },
   { title: TEXT.GENERAL, id: 'general' },
-  { title: 'JSON', id: 'json' },
+  { title: TEXT.JSON, id: 'json' },
 ] as const;
 
 const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
-  <EuiCodeBlock {...props} isCopyable paddingSize="s" overflowHeight={300} />
+  <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
+);
+
+const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
+  <EuiMarkdownFormat textSize="s" {...props} />
 );
 
 type FindingsTab = typeof tabs[number];
@@ -59,25 +64,29 @@ interface FindingFlyoutProps {
   findings: CspFinding;
 }
 
-const Cards = ({ data }: { data: Card[] }) => (
-  <EuiFlexGrid direction="column" gutterSize={'l'}>
-    {data.map((card) => (
-      <EuiFlexItem key={card.title} style={{ display: 'block' }}>
-        <EuiCard textAlign="left" title={card.title} hasBorder>
-          <EuiDescriptionList
-            compressed={false}
-            type="column"
-            listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
-            style={{ flexFlow: 'column' }}
-            descriptionProps={{
-              style: { width: '100%' },
-            }}
-          />
-        </EuiCard>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGrid>
-);
+const Cards = ({ data }: { data: Card[] }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGrid direction="column" gutterSize={'l'}>
+      {data.map((card) => (
+        <EuiFlexItem key={card.title} style={{ display: 'block' }}>
+          <EuiCard textAlign="left" title={card.title} hasBorder>
+            <EuiDescriptionList
+              compressed={false}
+              type="column"
+              listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
+              style={{ flexFlow: 'column' }}
+              descriptionProps={{
+                style: { width: '100%' },
+              }}
+            />
+          </EuiCard>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
+  );
+};
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
   switch (tab.id) {
@@ -145,15 +154,12 @@ const getGeneralCards = ({ rule, ...rest }: CspFinding): Card[] => [
         </EuiFlexGroup>,
       ],
       [TEXT.CIS_SECTION, rule.section],
-      [
-        TEXT.PROFILE_APPLICABILITY,
-        <EuiMarkdownFormat>{rule.profile_applicability}</EuiMarkdownFormat>,
-      ],
+      [TEXT.PROFILE_APPLICABILITY, <Markdown>{rule.profile_applicability}</Markdown>],
       [TEXT.BENCHMARK, rule.benchmark.name],
       [TEXT.NAME, rule.name],
-      [TEXT.DESCRIPTION, <EuiMarkdownFormat>{rule.description}</EuiMarkdownFormat>],
-      [TEXT.AUDIT, <EuiMarkdownFormat>{rule.audit}</EuiMarkdownFormat>],
-      [TEXT.REFERENCES, <EuiMarkdownFormat>{rule.references}</EuiMarkdownFormat>],
+      [TEXT.DESCRIPTION, <Markdown>{rule.description}</Markdown>],
+      [TEXT.AUDIT, <Markdown>{rule.audit}</Markdown>],
+      [TEXT.REFERENCES, <Markdown>{rule.references}</Markdown>],
     ],
   },
 ];
@@ -175,10 +181,10 @@ const getRemediationCards = ({ result, rule, ...rest }: CspFinding): Card[] => [
   {
     title: TEXT.REMEDIATION,
     listItems: [
-      ['', <EuiMarkdownFormat>{rule.remediation}</EuiMarkdownFormat>],
-      [TEXT.IMPACT, <EuiMarkdownFormat>{rule.impact}</EuiMarkdownFormat>],
-      [TEXT.DEFAULT_VALUE, <EuiMarkdownFormat>{rule.default_value}</EuiMarkdownFormat>],
-      [TEXT.RATIONALE, <EuiMarkdownFormat>{rule.rationale}</EuiMarkdownFormat>],
+      ['', <Markdown>{rule.remediation}</Markdown>],
+      [TEXT.IMPACT, <Markdown>{rule.impact}</Markdown>],
+      [TEXT.DEFAULT_VALUE, <Markdown>{rule.default_value}</Markdown>],
+      [TEXT.RATIONALE, <Markdown>{rule.rationale}</Markdown>],
     ],
   },
 ];

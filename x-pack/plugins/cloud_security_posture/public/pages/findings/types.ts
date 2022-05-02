@@ -63,10 +63,8 @@ interface CspRule {
 
 interface CspFindingResult {
   evaluation: 'passed' | 'failed';
-  expected: Record<string, unknown>;
-  evidence: {
-    filemode: string;
-  };
+  expected?: Record<string, unknown>;
+  evidence: Record<string, unknown>;
 }
 
 interface CspFindingResource {

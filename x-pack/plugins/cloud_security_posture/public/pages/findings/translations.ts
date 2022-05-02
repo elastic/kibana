@@ -46,6 +46,10 @@ export const GENERAL = i18n.translate('xpack.csp.findings.findingsFlyout.general
   defaultMessage: 'General',
 });
 
+export const JSON = i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabLabel', {
+  defaultMessage: 'JSON',
+});
+
 export const RESOURCE_ID = i18n.translate(
   'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
   {
