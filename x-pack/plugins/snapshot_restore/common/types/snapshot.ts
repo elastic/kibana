@@ -36,6 +36,7 @@ export interface SnapshotDetails {
   indices: string[];
   dataStreams: string[];
   includeGlobalState: boolean;
+  featureStates: string[];
   state: string;
   /** e.g. '2019-04-05T21:56:40.438Z' */
   startTime: string;

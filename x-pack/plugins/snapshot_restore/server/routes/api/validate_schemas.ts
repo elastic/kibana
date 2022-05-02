@@ -198,6 +198,7 @@ export const restoreSettingsSchema = schema.object({
   renamePattern: schema.maybe(schema.string()),
   renameReplacement: schema.maybe(schema.string()),
   includeGlobalState: schema.maybe(schema.boolean()),
+  featureStates: schema.maybe(schema.arrayOf(schema.string())),
   partial: schema.maybe(schema.boolean()),
   indexSettings: schema.maybe(schema.string()),
   ignoreIndexSettings: schema.maybe(schema.arrayOf(schema.string())),

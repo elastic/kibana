@@ -26,7 +26,7 @@ import { serializeRestoreSettings } from '../../../../../common/lib';
 import { EuiCodeEditor } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import { StepProps } from '.';
-import { CollapsibleIndicesList } from '../../collapsible_lists/collapsible_indices_list';
+import { CollapsibleIndicesList, CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   restoreSettings,
@@ -39,6 +39,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
     renameReplacement,
     partial,
     includeGlobalState,
+    featureStates,
     ignoreIndexSettings,
   } = restoreSettings;
 
@@ -183,6 +184,28 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
           ) : null}
         </EuiFlexGroup>
       ) : null}
+
+      {(includeGlobalState && featureStates) && (
+        <>
+          <EuiSpacer size="s" />
+
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList textStyle="reverse">
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.featureStatesLabel"
+                    defaultMessage="Include system indices from"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <CollapsibleFeatureStatesList featureStates={featureStates} />
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
 
       <EuiSpacer size="m" />
       <EuiTitle size="s">

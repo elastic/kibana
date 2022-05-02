@@ -22,6 +22,7 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
 
@@ -41,6 +42,8 @@ import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_li
 
 import { SystemIndicesOverwrittenCallOut } from './system_indices_overwritten_callout';
 
+export type FeaturesOption = EuiComboBoxOptionOption<string>;
+
 export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = ({
   snapshotDetails,
   restoreSettings,
@@ -54,6 +57,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     dataStreams: snapshotDataStreams = [],
     includeGlobalState: snapshotIncludeGlobalState,
     version,
+    featureStates,
   } = snapshotDetails;
 
   const snapshotIndices = unfilteredSnapshotIndices.filter(
@@ -148,6 +152,15 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement: '',
   });
 
+  const [selectedFeatureStateOptions, setSelectedFeatureStateOptions] = useState<FeaturesOption[]>([]);
+
+  const onFeatureStatesChange = (selected: FeaturesOption[]) => {
+    setSelectedFeatureStateOptions(selected);
+    updateRestoreSettings({
+      featureStates: selected.map((option) => option.label),
+    });
+  };
+
   return (
     <div
       data-test-subj="snapshotRestoreStepLogistics"
@@ -218,7 +231,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepLogistics.allDataStreamsAndIndicesLabel"
-                  defaultMessage="All data streams and indices, including system indices"
+                  defaultMessage="All data streams and indices"
                 />
               }
               checked={isAllIndicesAndDataStreams}
@@ -625,6 +638,33 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             data-test-subj="includeGlobalStateSwitch"
           />
         </EuiFormRow>
+
+        {includeGlobalState && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepSettings.featureStates"
+                  defaultMessage="Include system indices from"
+                />
+              }
+            >
+              <>
+                <EuiComboBox
+                  aria-label="Select features you want to include in the snapshot"
+                  placeholder="All features"
+                  options={featureStates.map((feature) => ({ label: feature }))}
+                  selectedOptions={selectedFeatureStateOptions}
+                  onChange={onFeatureStatesChange}
+                  isClearable={true}
+                  data-test-subj="demoComboBox"
+                />
+              </>
+            </EuiFormRow>
+          </>
+        )}
       </EuiDescribedFormGroup>
 
       {/* Include aliases */}
