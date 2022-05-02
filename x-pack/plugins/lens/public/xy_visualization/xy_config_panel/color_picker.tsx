@@ -6,8 +6,16 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiColorPicker,
+  EuiColorPickerProps,
+  EuiToolTip,
+  EuiIcon,
+  euiPaletteColorBlind,
+} from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State } from '../types';
@@ -44,7 +52,6 @@ export const ColorPicker = ({
   setConfig,
   showAlpha,
   defaultColor,
-  customSwatches,
 }: VisualizationDimensionEditorProps<State> & {
   formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
@@ -54,7 +61,6 @@ export const ColorPicker = ({
   setConfig: (config: { color?: string }) => void;
   showAlpha?: boolean;
   defaultColor?: string;
-  customSwatches?: string[];
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -119,6 +125,8 @@ export const ColorPicker = ({
       defaultMessage: 'Series color',
     });
 
+  const currentColorAlpha = color ? chroma(color).alpha() : 1;
+
   const colorPicker = (
     <EuiColorPicker
       fullWidth
@@ -133,7 +141,11 @@ export const ColorPicker = ({
       })}
       aria-label={inputLabel}
       showAlpha={showAlpha}
-      swatches={customSwatches}
+      swatches={
+        currentColorAlpha === 1
+          ? euiPaletteColorBlind()
+          : euiPaletteColorBlind().map((c) => chroma(c).alpha(currentColorAlpha).hex())
+      }
     />
   );
 

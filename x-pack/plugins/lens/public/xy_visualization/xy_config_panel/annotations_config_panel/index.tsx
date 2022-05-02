@@ -349,7 +349,6 @@ export const AnnotationsPanel = (
           {...props}
           defaultColor={isRange ? defaultAnnotationRangeColor : defaultAnnotationColor}
           showAlpha={isRange}
-          customSwatches={isRange ? euiPaletteColorBlind().map((c) => `${c}1A`) : undefined}
           setConfig={setAnnotations}
           disableHelpTooltip
           label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
