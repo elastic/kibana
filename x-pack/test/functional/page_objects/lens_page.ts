@@ -655,7 +655,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('indexPattern-label-edit', label, { clearWithKeyboard: true });
+      await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
     },
     async editDimensionFormat(format: string) {
       const formatInput = await testSubjects.find('indexPattern-dimension-format');
@@ -906,7 +906,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async getCurrentChartDebugState() {
+    async getCurrentChartDebugState(visType: string) {
+      await this.waitForVisualization(visType);
       return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 
