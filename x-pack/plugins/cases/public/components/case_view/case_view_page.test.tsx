@@ -584,7 +584,9 @@ describe('CaseViewPage', () => {
     beforeEach(() => {
       appMockRender = createAppMockRenderer();
     });
-    it('renders tabs correctly', async () => {
+
+    // unskip when alerts tab is activated
+    it.skip('renders tabs correctly', async () => {
       const result = appMockRender.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
         expect(result.getByTestId('case-view-tab-title-alerts')).toBeTruthy();
@@ -648,7 +650,8 @@ describe('CaseViewPage', () => {
       });
     });
 
-    it('navigates to the alerts tab when the alerts tab is clicked', async () => {
+    // unskip when alerts tab is activated
+    it.skip('navigates to the alerts tab when the alerts tab is clicked', async () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
       const result = appMockRender.render(<CaseViewPage {...caseProps} />);
       userEvent.click(result.getByTestId('case-view-tab-title-alerts'));
@@ -660,7 +663,8 @@ describe('CaseViewPage', () => {
       });
     });
 
-    it('should display the alerts tab when the feature is enabled', async () => {
+    // unskip when alerts tab is activated
+    it.skip('should display the alerts tab when the feature is enabled', async () => {
       appMockRender = createAppMockRenderer({ features: { alerts: { enabled: true } } });
       const result = appMockRender.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
