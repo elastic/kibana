@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Packs', () => {
     let id: string = '';
     describe('create route', () => {
-      it('Create a pack', async () => {
+      it('should return 200 and have a single line query', async () => {
         const resp = await supertest
           .post('/internal/osquery/packs')
           .set('kbn-xsrf', 'true')
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     describe('update route', () => {
-      it('Make sure that we get Timeline data', async () => {
+      it('should return 200 and have a single line query', async () => {
         const resp = await supertest
           .put('/internal/osquery/packs/' + id)
           .set('kbn-xsrf', 'true')
