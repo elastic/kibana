@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IEmbeddable, EmbeddableInput, Embeddable } from '@kbn/embeddable-plugin/public';
+import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import {
   Query,
   Filter,
@@ -21,9 +21,10 @@ import {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverSetup } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { createOpenInDiscoverAction } from './open_in_discover_action';
+import { i18n } from '@kbn/i18n';
+import { execute, isCompatible } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -64,7 +65,10 @@ export class OpenInDiscoverDrilldown
 
   public readonly order = 8;
 
-  public readonly getDisplayName = () => 'Open in Discover';
+  public readonly getDisplayName = () =>
+    i18n.translate('xpack.lens.app.exploreDataInDiscoverDrilldown', {
+      defaultMessage: 'Open in Discover',
+    });
 
   public readonly euiIcon = 'link';
 
@@ -82,7 +86,9 @@ export class OpenInDiscoverDrilldown
         <EuiSwitch
           id="openInNewTab"
           name="openInNewTab"
-          label="Open in new tab"
+          label={i18n.translate('xpack.lens.app.exploreDataInDiscoverDrilldown.newTabConfig', {
+            defaultMessage: 'Open in new tab',
+          })}
           checked={config.openInNewTab}
           onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
           data-test-subj="openInDiscoverDrilldownOpenInNewTab"
@@ -102,26 +108,28 @@ export class OpenInDiscoverDrilldown
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
-    return Boolean(
-      context.embeddable &&
-        (await createOpenInDiscoverAction(
-          this.deps.discover,
-          this.deps.hasDiscoverAccess()
-        ).isCompatible({ embeddable: context.embeddable as Embeddable, trigger: { id: '' } }))
-    );
+    return isCompatible({
+      discover: this.deps.discover,
+      hasDiscoverAccess: this.deps.hasDiscoverAccess(),
+      ...context,
+      embeddable: context.embeddable as IEmbeddable,
+      ...config,
+    });
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } = extractTimeRange(
+    const { restOfFilters: filters, timeRange: timeRange } = extractTimeRange(
       context.filters,
       context.timeFieldName
     );
-    await createOpenInDiscoverAction(this.deps.discover, this.deps.hasDiscoverAccess()).execute({
-      embeddable: context.embeddable as Embeddable,
-      filters: filtersFromEvent,
-      timeRange: timeRangeFromEvent,
-      openInSameTab: !config.openInNewTab,
-      trigger: { id: '' },
+    await execute({
+      discover: this.deps.discover,
+      hasDiscoverAccess: this.deps.hasDiscoverAccess(),
+      ...context,
+      embeddable: context.embeddable as IEmbeddable,
+      ...config,
+      filters,
+      timeRange,
     });
   };
 }

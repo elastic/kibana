@@ -7,22 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
-import type { Embeddable } from '../embeddable';
-import { DOC_TYPE } from '../../common';
+import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { execute, isCompatible } from './open_in_discover_helpers';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
 interface Context {
-  embeddable: Embeddable;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  openInSameTab?: boolean;
+  embeddable: IEmbeddable;
 }
 
-export const createOpenInDiscoverAction = (discover: DiscoverStart, hasDiscoverAccess: boolean) =>
+export const createOpenInDiscoverAction = (discover: DiscoverSetup, hasDiscoverAccess: boolean) =>
   createAction<Context>({
     type: ACTION_OPEN_IN_DISCOVER,
     id: ACTION_OPEN_IN_DISCOVER,
@@ -33,19 +28,9 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart, hasDiscoverA
         defaultMessage: 'Explore data in Discover',
       }),
     isCompatible: async (context: Context) => {
-      if (!hasDiscoverAccess) return false;
-      return (
-        context.embeddable.type === DOC_TYPE &&
-        (await (context.embeddable as Embeddable).canViewUnderlyingData())
-      );
+      return isCompatible({ hasDiscoverAccess, discover, embeddable: context.embeddable });
     },
     execute: async (context: Context) => {
-      const args = context.embeddable.getViewUnderlyingDataArgs()!;
-      const discoverUrl = discover.locator?.getRedirectUrl({
-        ...args,
-        timeRange: context.timeRange || args.timeRange,
-        filters: [...(context.filters || []), ...args.filters],
-      });
-      window.open(discoverUrl, !context.openInSameTab ? '_blank' : '_self');
+      return execute({ ...context, discover, hasDiscoverAccess });
     },
   });
