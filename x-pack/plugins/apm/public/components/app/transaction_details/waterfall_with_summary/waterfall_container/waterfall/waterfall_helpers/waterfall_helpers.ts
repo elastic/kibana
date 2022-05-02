@@ -21,7 +21,7 @@ interface IWaterfallGroup {
 
 const ROOT_ID = 'root';
 
-export interface SpanLinksSize {
+export interface SpanLinksCount {
   incoming: number;
   outgoing: number;
 }
@@ -54,7 +54,7 @@ interface IWaterfallSpanItemBase<TDocument, TDoctype>
    */
   duration: number;
   legendValues: Record<WaterfallLegendType, string>;
-  spanLinksSize: SpanLinksSize;
+  spanLinksCount: SpanLinksCount;
 }
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
@@ -109,7 +109,7 @@ function getLegendValues(transactionOrSpan: Transaction | Span) {
 
 function getTransactionItem(
   transaction: Transaction,
-  outgoingSpanLinksSize: number = 0
+  outgoingSpanLinksCount: number = 0
 ): IWaterfallTransaction {
   return {
     docType: 'transaction',
@@ -121,8 +121,8 @@ function getTransactionItem(
     skew: 0,
     legendValues: getLegendValues(transaction),
     color: '',
-    spanLinksSize: {
-      outgoing: outgoingSpanLinksSize,
+    spanLinksCount: {
+      outgoing: outgoingSpanLinksCount,
       incoming: transaction.span?.links?.length ?? 0,
     },
   };
@@ -130,7 +130,7 @@ function getTransactionItem(
 
 function getSpanItem(
   span: Span,
-  outgoingSpanLinksSize: number = 0
+  outgoingSpanLinksCount: number = 0
 ): IWaterfallSpan {
   return {
     docType: 'span',
@@ -142,8 +142,8 @@ function getSpanItem(
     skew: 0,
     legendValues: getLegendValues(span),
     color: '',
-    spanLinksSize: {
-      outgoing: outgoingSpanLinksSize,
+    spanLinksCount: {
+      outgoing: outgoingSpanLinksCount,
       incoming: span.span.links?.length ?? 0,
     },
   };
@@ -289,20 +289,20 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
 
 const getWaterfallItems = (
   items: TraceAPIResponse['traceDocs'],
-  outgoingSpanLinksSizeMap: TraceAPIResponse['outgoingSpanLinksSizeMap']
+  outgoingSpanLinksCountBySpanId: TraceAPIResponse['outgoingSpanLinksCountBySpanId']
 ) =>
   items.map((item) => {
     const docType: 'span' | 'transaction' = item.processor.event;
     switch (docType) {
       case 'span': {
         const span = item as Span;
-        return getSpanItem(span, outgoingSpanLinksSizeMap[span.span.id]);
+        return getSpanItem(span, outgoingSpanLinksCountBySpanId[span.span.id]);
       }
       case 'transaction':
         const transaction = item as Transaction;
         return getTransactionItem(
           transaction,
-          outgoingSpanLinksSizeMap[transaction.transaction.id]
+          outgoingSpanLinksCountBySpanId[transaction.transaction.id]
         );
     }
   });
@@ -428,7 +428,7 @@ export function getWaterfall(
 
   const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
     apiResponse.traceDocs,
-    apiResponse.outgoingSpanLinksSizeMap
+    apiResponse.outgoingSpanLinksCountBySpanId
   );
 
   const childrenByParentId = getChildrenGroupedByParentId(

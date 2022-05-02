@@ -25,7 +25,7 @@ import { TransactionSummary } from '../../../../../../shared/summary/transaction
 import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/transaction_action_menu';
 import { FlyoutTopLevelProperties } from '../flyout_top_level_properties';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import { SpanLinksSize } from '../waterfall_helpers/waterfall_helpers';
+import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 
 interface Props {
@@ -33,7 +33,7 @@ interface Props {
   transaction?: Transaction;
   errorCount?: number;
   rootTransactionDuration?: number;
-  spanLinksSize: SpanLinksSize;
+  spanLinksCount: SpanLinksCount;
 }
 
 export function TransactionFlyout({
@@ -41,14 +41,14 @@ export function TransactionFlyout({
   onClose,
   errorCount = 0,
   rootTransactionDuration,
-  spanLinksSize,
+  spanLinksCount,
 }: Props) {
   if (!transactionDoc) {
     return null;
   }
 
   const spanLinksTabContent = getSpanLinksTabContent({
-    spanLinksSize,
+    spanLinksCount,
     traceId: transactionDoc.trace.id,
     spanId: transactionDoc.transaction.id,
   });

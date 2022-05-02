@@ -37,7 +37,7 @@ import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import { SpanLinksSize } from '../waterfall_helpers/waterfall_helpers';
+import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
 
@@ -88,7 +88,7 @@ interface Props {
   parentTransaction?: Transaction;
   totalDuration?: number;
   onClose: () => void;
-  spanLinksSize: SpanLinksSize;
+  spanLinksCount: SpanLinksCount;
 }
 
 export function SpanFlyout({
@@ -96,7 +96,7 @@ export function SpanFlyout({
   parentTransaction,
   totalDuration,
   onClose,
-  spanLinksSize,
+  spanLinksCount,
 }: Props) {
   if (!span) {
     return null;
@@ -112,7 +112,7 @@ export function SpanFlyout({
   const spanHttpMethod = span.http?.request?.method || span.span?.http?.method;
 
   const spanLinksTabContent = getSpanLinksTabContent({
-    spanLinksSize,
+    spanLinksCount,
     traceId: span.trace.id,
     spanId: span.span.id,
   });

@@ -16,27 +16,27 @@ import React, { useMemo, useState } from 'react';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { SpanLinksSize } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
 
 interface Props {
-  spanLinksSize: SpanLinksSize;
+  spanLinksCount: SpanLinksCount;
   traceId: string;
   spanId: string;
 }
 
 type LinkType = 'incoming' | 'outgoing';
 
-export function SpanLinks({ spanLinksSize, traceId, spanId }: Props) {
+export function SpanLinks({ spanLinksCount, traceId, spanId }: Props) {
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/transactions/view');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
-    spanLinksSize.incoming ? 'incoming' : 'outgoing'
+    spanLinksCount.incoming ? 'incoming' : 'outgoing'
   );
 
   const [kuery, setKuery] = useState('');
@@ -65,20 +65,20 @@ export function SpanLinks({ spanLinksSize, traceId, spanId }: Props) {
         value: 'incoming',
         text: i18n.translate('xpack.apm.spanLinks.combo.incomingLinks', {
           defaultMessage: 'Incoming links ({incomingLinksSize})',
-          values: { incomingLinksSize: spanLinksSize.incoming },
+          values: { incomingLinksSize: spanLinksCount.incoming },
         }),
-        disabled: !spanLinksSize.incoming,
+        disabled: !spanLinksCount.incoming,
       },
       {
         value: 'outgoing',
         text: i18n.translate('xpack.apm.spanLinks.combo.outgoingLinks', {
           defaultMessage: 'Outgoing links ({outgoingLinksSize})',
-          values: { outgoingLinksSize: spanLinksSize.outgoing },
+          values: { outgoingLinksSize: spanLinksCount.outgoing },
         }),
-        disabled: !spanLinksSize.outgoing,
+        disabled: !spanLinksCount.outgoing,
       },
     ],
-    [spanLinksSize]
+    [spanLinksCount]
   );
 
   if (

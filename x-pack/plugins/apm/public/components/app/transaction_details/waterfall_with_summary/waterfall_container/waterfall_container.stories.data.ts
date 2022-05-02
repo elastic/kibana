@@ -530,7 +530,7 @@ export const simpleTrace = {
   ],
   exceedsMax: false,
   errorDocs: [],
-  outgoingSpanLinksSizeMap: {},
+  outgoingSpanLinksCountBySpanId: {},
 } as TraceAPIResponse;
 
 export const manyChildrenWithSameLength = {
@@ -4127,7 +4127,7 @@ export const manyChildrenWithSameLength = {
       },
     },
   ],
-  outgoingSpanLinksSizeMap: {},
+  outgoingSpanLinksCountBySpanId: {},
 } as TraceAPIResponse;
 
 export const traceWithErrors = {
@@ -4718,7 +4718,7 @@ export const traceWithErrors = {
       },
     },
   ],
-  outgoingSpanLinksSizeMap: {},
+  outgoingSpanLinksCountBySpanId: {},
 } as unknown as TraceAPIResponse;
 
 export const traceChildStartBeforeParent = {
@@ -5214,7 +5214,7 @@ export const traceChildStartBeforeParent = {
   ],
   exceedsMax: false,
   errorDocs: [],
-  outgoingSpanLinksSizeMap: {},
+  outgoingSpanLinksCountBySpanId: {},
 } as TraceAPIResponse;
 
 export const inferredSpans = {
@@ -5869,5 +5869,5 @@ export const inferredSpans = {
   ],
   exceedsMax: false,
   errorDocs: [],
-  outgoingSpanLinksSizeMap: {},
+  outgoingSpanLinksCountBySpanId: {},
 } as TraceAPIResponse;

@@ -17,7 +17,7 @@ const INITIAL_DATA: APIReturnType<'GET /internal/apm/traces/{traceId}'> = {
   errorDocs: [],
   traceDocs: [],
   exceedsMax: false,
-  outgoingSpanLinksSizeMap: {},
+  outgoingSpanLinksCountBySpanId: {},
 };
 
 export function useWaterfallFetcher() {

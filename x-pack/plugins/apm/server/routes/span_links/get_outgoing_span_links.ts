@@ -66,7 +66,7 @@ function getSpanId(source: TransactionRaw | SpanRaw) {
     : (source as TransactionRaw).transaction?.id;
 }
 
-export async function getOutgoingSpanLinksSizeMap({
+export async function getOutgoingSpanLinksCountBySpanId({
   traceId,
   setup,
   start,

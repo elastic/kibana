@@ -86,7 +86,7 @@ export type ApmFields = Fields &
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
     'span.links': Array<{
-      trace?: { id: string };
+      trace: { id: string };
       span: { id: string };
     }>;
     'cloud.provider': string;
