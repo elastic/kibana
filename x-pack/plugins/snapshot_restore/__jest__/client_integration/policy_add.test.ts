@@ -123,6 +123,12 @@ describe('<PolicyAdd />', () => {
       });
 
       describe('snapshot settings (step 2)', () => {
+        beforeAll(() => {
+          httpRequestsMockHelpers.setLoadFeaturesResponse({
+            features: [{ name: 'kibana' }, { name: 'tasks' }],
+          });
+        });
+
         beforeEach(() => {
           const { form, actions } = testBed;
           // Complete step 1
@@ -245,7 +251,9 @@ describe('<PolicyAdd />', () => {
               snapshotName: SNAPSHOT_NAME,
               schedule: DEFAULT_POLICY_SCHEDULE,
               repository: repository.name,
-              config: {},
+              config: {
+                includeGlobalState: true,
+              },
               retention: {
                 expireAfterValue: Number(EXPIRE_AFTER_VALUE),
                 expireAfterUnit: 'd', // default

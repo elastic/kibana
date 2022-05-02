@@ -151,6 +151,7 @@ describe('<PolicyEdit />', () => {
               schedule,
               repository,
               config: {
+                includeGlobalState: true,
                 ignoreUnavailable: true,
               },
               retention: {
@@ -193,7 +194,10 @@ describe('<PolicyEdit />', () => {
               snapshotName,
               schedule,
               repository,
-              config,
+              config: {
+                includeGlobalState: true,
+                ...config,
+              },
               retention: {
                 ...retention,
                 expireAfterUnit: TIME_UNITS.DAY, // default value

@@ -119,6 +119,9 @@ const registerHttpRequestMockHelpers = (
       error
     );
 
+  const setLoadFeaturesResponse = (response: HttpResponse = [], error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}policies/features`, response, error);
+
   return {
     setLoadRepositoriesResponse,
     setLoadRepositoryTypesResponse,
@@ -131,6 +134,7 @@ const registerHttpRequestMockHelpers = (
     setGetPolicyResponse,
     setCleanupRepositoryResponse,
     setRestoreSnapshotResponse,
+    setLoadFeaturesResponse,
   };
 };
 
