@@ -312,9 +312,13 @@ export class CommonPageObject extends FtrService {
     const links = await Promise.all(
       linkList.map(async (link) => {
         const url = await link.getAttribute('href');
-        const response = await request.head(url);
-        // this.log.debug(`${url} response: ${response.status}`);
-        return { url, code: response.status };
+        try {
+          const response = await request.head(url);
+          // this.log.debug(`${url} response: ${response.status}`);
+          return { url, code: response.status };
+        } catch (err) {
+          this.log.debug(err);
+        }
       })
     );
 
