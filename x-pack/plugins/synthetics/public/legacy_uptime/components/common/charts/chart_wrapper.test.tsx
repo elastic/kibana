@@ -46,8 +46,9 @@ describe('ChartWrapper component', () => {
       </ChartWrapper>
     );
 
-    let loadingChart = component.find(`.euiLoadingChart`);
-    expect(loadingChart.length).toBe(2);
+    // Added span because class appears twice with classNames and Emotion
+    let loadingChart = component.find(`span.euiLoadingChart`);
+    expect(loadingChart.length).toBe(1);
 
     component.setProps({
       loading: false,
