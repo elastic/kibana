@@ -19,7 +19,6 @@ import {
   EuiFormControlLayout,
   EuiText,
   transparentize,
-  euiPaletteColorBlind,
 } from '@elastic/eui';
 import { pick } from 'lodash';
 import moment from 'moment';
