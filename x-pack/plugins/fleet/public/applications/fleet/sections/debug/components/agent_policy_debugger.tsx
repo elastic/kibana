@@ -75,7 +75,12 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
         singleSelection={{ asPlainText: true }}
         selectedOptions={selectedOptions}
         onChange={(newSelectedOptions) => {
-          setSelectedPolicyId(newSelectedOptions[0].value);
+          // Handle "clear" action
+          if (!newSelectedOptions.length) {
+            setSelectedPolicyId(undefined);
+          } else {
+            setSelectedPolicyId(newSelectedOptions[0].value);
+          }
         }}
       />
 
