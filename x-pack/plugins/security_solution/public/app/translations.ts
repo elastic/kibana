@@ -26,6 +26,14 @@ export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation
   defaultMessage: 'Getting started',
 });
 
+export const THREAT_HUNTING = i18n.translate('xpack.securitySolution.navigation.threatHunting', {
+  defaultMessage: 'Threat Hunting',
+});
+
+export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dashboards', {
+  defaultMessage: 'Dashboards',
+});
+
 export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {
   defaultMessage: 'Network',
 });
