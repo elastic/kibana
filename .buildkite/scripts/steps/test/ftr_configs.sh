@@ -60,8 +60,7 @@ while read -r config; do
     duration="${timeSec}s"
   fi
 
-  results+=("
- - $config
+  results+=("- $config
     duration: ${duration}
     result: ${lastCode}")
 
@@ -84,5 +83,6 @@ fi
 
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
+echo ""
 
 exit $exitCode
