@@ -165,6 +165,10 @@ export async function indexEndpointHostDocs({
       // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
       hostMetadata = {
         ...hostMetadata,
+        agent: {
+          ...hostMetadata.agent,
+          id: enrolledAgent?.id ?? hostMetadata.agent.id,
+        },
         elastic: {
           ...hostMetadata.elastic,
           agent: {
@@ -201,6 +205,7 @@ export async function indexEndpointHostDocs({
         index: metadataIndex,
         body: hostMetadata,
         op_type: 'create',
+        refresh: 'wait_for',
       })
       .catch(wrapErrorAndRejectPromise);
 
@@ -214,6 +219,7 @@ export async function indexEndpointHostDocs({
         index: policyResponseIndex,
         body: hostPolicyResponse,
         op_type: 'create',
+        refresh: 'wait_for',
       })
       .catch(wrapErrorAndRejectPromise);
 
