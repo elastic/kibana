@@ -11,8 +11,6 @@ import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases security and spaces enabled: trial', function () {
-    this.tags('ciGroup25');
-
     before(async () => {
       await createSpacesAndUsers(getService);
     });
@@ -21,15 +19,23 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpacesAndUsers(getService);
     });
 
-    // Trial
-    loadTestFile(require.resolve('./cases/push_case'));
-    loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
-    loadTestFile(require.resolve('./configure'));
+    describe('', function () {
+      this.tags('ciGroup13');
 
-    // Common
-    loadTestFile(require.resolve('../common'));
+      // Trial
+      loadTestFile(require.resolve('./cases/push_case'));
+      loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
+      loadTestFile(require.resolve('./configure'));
+    });
 
-    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
-    loadTestFile(require.resolve('../common/migrations'));
+    describe('', function () {
+      this.tags('ciGroup25');
+
+      // Common
+      loadTestFile(require.resolve('../common'));
+
+      // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
+      loadTestFile(require.resolve('../common/migrations'));
+    });
   });
 };
