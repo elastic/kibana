@@ -103,7 +103,7 @@ export function deserializeSnapshotDetails(
     indices: snapshotIndicesWithoutSystemIndices,
     dataStreams: [...dataStreams].sort(),
     includeGlobalState,
-    featureStates: featureStates.map(feature => feature.feature_name),
+    featureStates: featureStates.map((feature) => feature.feature_name),
     state,
     startTime,
     startTimeInMillis,

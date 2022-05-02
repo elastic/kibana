@@ -185,7 +185,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
         </EuiFlexGroup>
       ) : null}
 
-      {(includeGlobalState && featureStates) && (
+      {includeGlobalState && featureStates && (
         <>
           <EuiSpacer size="s" />
 

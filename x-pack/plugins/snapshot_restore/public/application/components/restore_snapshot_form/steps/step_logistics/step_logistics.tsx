@@ -152,7 +152,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement: '',
   });
 
-  const [selectedFeatureStateOptions, setSelectedFeatureStateOptions] = useState<FeaturesOption[]>([]);
+  const [selectedFeatureStateOptions, setSelectedFeatureStateOptions] = useState<FeaturesOption[]>(
+    []
+  );
 
   const onFeatureStatesChange = (selected: FeaturesOption[]) => {
     setSelectedFeatureStateOptions(selected);
