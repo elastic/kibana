@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Packs', () => {
-    let id: string = '';
+    let newlyCreatedPackId: string = '';
     describe('create route', () => {
       it('should return 200 and have a single line query', async () => {
         const resp = await supertest
@@ -55,19 +55,19 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send(defaultPack);
 
+        newlyCreatedPackId = resp.body.id;
         expect(resp.body.attributes.queries.testQuery.query).to.be(singleLineQuery);
-        id = resp.body.id;
         expect(resp.status).to.be(200);
       });
     });
     describe('update route', () => {
       it('should return 200 and have a single line query', async () => {
         const resp = await supertest
-          .put('/internal/osquery/packs/' + id)
+          .put('/internal/osquery/packs/' + newlyCreatedPackId)
           .set('kbn-xsrf', 'true')
           .send(defaultPack);
 
-        expect(resp.body.id).to.be(id);
+        expect(resp.body.id).to.be(newlyCreatedPackId);
         expect(resp.body.attributes.queries.testQuery.query).to.be(singleLineQuery);
         expect(resp.status).to.be(200);
       });
