@@ -113,7 +113,7 @@ class VectorTileInspector extends Component<Props, State> {
             return (
               <div key={tileRequest.tileZXYKey}>
                 <EuiSpacer />
-                <TileRequestView  tileRequest={tileRequest} />
+                <TileRequestView tileRequest={tileRequest} />
               </div>
             );
           })}

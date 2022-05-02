@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { EuiAccordion, EuiPanel } from '@elastic/eui';
 import type { TileRequest } from '../types';
+import { getTileRequest } from './get_tile_request';
 
 interface Props {
   tileRequest: TileRequest;
@@ -16,14 +17,20 @@ interface Props {
 
 interface State {
   esPath?: string;
-  esBody?: string;
+  esBody?: object;
 }
 
 export class TileRequestView extends Component<Props, State> {
   state: State = {};
 
   _onToggle = () => {
-    // todo get path and body
+    if (!this.state.esPath || !this.state.esBody) {
+      const { path, body } = getTileRequest(this.props.tileRequest);
+      this.setState({
+        esPath: path,
+        esBody: body
+      });
+    }
   };
 
   render() {
@@ -33,9 +40,13 @@ export class TileRequestView extends Component<Props, State> {
         buttonContent={this.props.tileRequest.tileZXYKey}
         onToggle={this._onToggle}
       >
-        <EuiPanel color="subdued">
-          {this.state.esPath}
-          {this.state.esBody}
+        <EuiPanel>
+          <p>
+            {this.state.esPath}
+          </p>
+          <p>
+            {JSON.stringify(this.state.esBody, null, 2)}
+          </p>
         </EuiPanel>
       </EuiAccordion>
     );
