@@ -13,7 +13,7 @@ import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
