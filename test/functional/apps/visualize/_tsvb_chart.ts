@@ -111,6 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('derivative', 1);
         await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
 
+        await visChart.waitForVisualizationRenderingStabilized();
         const value = await visualBuilder.getMetricValue();
 
         expect(value).to.eql('0');
@@ -197,6 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('derivative', 1);
         await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
 
+        await visChart.waitForVisualizationRenderingStabilized();
         const value = await visualBuilder.getGaugeCount();
 
         expect(value).to.eql('0');
@@ -226,6 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('number');
 
+        await visChart.waitForVisualizationRenderingStabilized();
         const gaugeLabel = await visualBuilder.getGaugeLabel();
         const gaugeCount = await visualBuilder.getGaugeCount();
 
@@ -239,6 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('gauge');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
 
+        await visChart.waitForVisualizationRenderingStabilized();
         const gaugeLabel = await visualBuilder.getGaugeLabel();
         const gaugeCount = await visualBuilder.getGaugeCount();
 
@@ -351,6 +355,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('derivative', 1);
         await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
 
+        await visChart.waitForVisualizationRenderingStabilized();
         const value = await visualBuilder.getTopNCount();
 
         expect(value).to.eql('0');
@@ -579,6 +584,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ];
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('number');
+        await visChart.waitForVisualizationRenderingStabilized();
         const legendItems = await visualBuilder.getLegendItemsContent();
 
         expect(legendItems).to.eql(expectedLegendItems);
@@ -615,6 +621,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.clickTopN();
           await visualBuilder.checkTopNTabIsPresent();
 
+          await visChart.waitForVisualizationRenderingStabilized();
           const topNLabel = await visualBuilder.getTopNLabel();
           const topNCount = await visualBuilder.getTopNCount();
 
@@ -626,6 +633,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.clickGauge();
           await visualBuilder.checkGaugeTabIsPresent();
 
+          await visChart.waitForVisualizationRenderingStabilized();
           const gaugeLabel = await visualBuilder.getGaugeLabel();
           const gaugeCount = await visualBuilder.getGaugeCount();
 
