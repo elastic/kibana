@@ -10,6 +10,21 @@ import { BrowserFields, ConfigKey } from '../../../../common/runtime_types/monit
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
+const throttlingFormatter: Formatter = (fields) => {
+  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return false;
+
+  const getThrottlingValue = (v: string | undefined, suffix: 'd' | 'u' | 'l') =>
+    v !== '' && v !== undefined ? `${v}${suffix}` : null;
+
+  return [
+    getThrottlingValue(fields[ConfigKey.DOWNLOAD_SPEED], 'd'),
+    getThrottlingValue(fields[ConfigKey.UPLOAD_SPEED], 'u'),
+    getThrottlingValue(fields[ConfigKey.LATENCY], 'l'),
+  ]
+    .filter((v) => v !== null)
+    .join('/');
+};
+
 export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.METADATA]: (fields) => objectFormatter(fields[ConfigKey.METADATA]),
   [ConfigKey.URLS]: null,
@@ -32,12 +47,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: null,
   [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: null,
   [ConfigKey.IS_THROTTLING_ENABLED]: null,
-  [ConfigKey.THROTTLING_CONFIG]: (fields) => {
-    if (fields[ConfigKey.IS_THROTTLING_ENABLED] === false) {
-      return false;
-    }
-    return fields[ConfigKey.THROTTLING_CONFIG] ?? false;
-  },
+  [ConfigKey.THROTTLING_CONFIG]: (fields) => throttlingFormatter(fields),
   [ConfigKey.DOWNLOAD_SPEED]: null,
   [ConfigKey.UPLOAD_SPEED]: null,
   [ConfigKey.LATENCY]: null,
