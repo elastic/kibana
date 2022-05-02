@@ -21,6 +21,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_ZIP_PASSWORD]: null,
   [ConfigKey.SOURCE_ZIP_FOLDER]: null,
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: null,
+  [ConfigKey.SOURCE_PUSH]: null,
   [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.PARAMS]: null,
   [ConfigKey.SCREENSHOTS]: null,
@@ -44,5 +45,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_TAGS]: (fields) =>
     arrayFormatter(fields[ConfigKey.JOURNEY_FILTERS_TAGS]),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.IS_PUSH_MONITOR]: null,
   ...commonFormatters,
 };
