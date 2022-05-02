@@ -324,20 +324,22 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="featureStates">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.featureStatesLabel"
-                defaultMessage="Include feature states from"
-              />
-            </EuiDescriptionListTitle>
+        {includeGlobalState && (
+          <EuiFlexGroup>
+            <EuiFlexItem data-test-subj="featureStates">
+              <EuiDescriptionListTitle data-test-subj="title">
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyDetails.featureStatesLabel"
+                  defaultMessage="Includes feature states from"
+                />
+              </EuiDescriptionListTitle>
 
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <CollapsibleFeatureStatesList featureStates={featureStates} />
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+                <CollapsibleFeatureStatesList featureStates={featureStates} />
+              </EuiDescriptionListDescription>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiDescriptionList>
 
       {retention && (

@@ -234,22 +234,26 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiDescriptionList textStyle="reverse">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.featureStatesLabel"
-                defaultMessage="Include feature states from"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <CollapsibleFeatureStatesList featureStates={featureStates} />
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {includeGlobalState && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList textStyle="reverse">
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.featureStatesLabel"
+                    defaultMessage="Includes feature states from"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <CollapsibleFeatureStatesList featureStates={featureStates} />
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
 
       {/* Retention summary */}
       {serializedRetention ? (

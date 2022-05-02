@@ -125,14 +125,12 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
             }
           >
             <EuiComboBox
-              aria-label="Select features you want to include in the snapshot"
               placeholder="All features"
               options={features}
               selectedOptions={selectedOptions}
               onChange={onChange}
               isLoading={isLoadingFeatures}
               isClearable={true}
-              data-test-subj="demoComboBox"
             />
           </EuiFormRow>
         </>

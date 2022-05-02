@@ -185,17 +185,16 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
         </EuiFlexGroup>
       ) : null}
 
-      {includeGlobalState && featureStates && (
+      {includeGlobalState && (
         <>
           <EuiSpacer size="s" />
-
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiDescriptionList textStyle="reverse">
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.featureStatesLabel"
-                    defaultMessage="Include feature states from"
+                    defaultMessage="Includes feature states from"
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>

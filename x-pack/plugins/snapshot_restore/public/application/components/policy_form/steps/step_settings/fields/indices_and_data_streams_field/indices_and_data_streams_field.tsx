@@ -19,7 +19,6 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSelectableOption,
-  EuiCallOut,
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
@@ -194,29 +193,6 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
           )}
           {isAllIndices ? null : (
             <Fragment>
-              {config.includeGlobalState && (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiFormRow>
-                    <EuiCallOut
-                      data-test-subj="systemIndicesInfoCallOut"
-                      title={i18n.translate(
-                        'xpack.snapshotRestore.policyForm.stepSettings.systemIndicesCallOut.title',
-                        {
-                          defaultMessage:
-                            'When this policy creates a snapshot, system indices {featuresCount, plural, =0 {} other {from {features}}} will also be included.',
-                          values: {
-                            featuresCount: config?.featureStates?.length || 0,
-                            features: config?.featureStates?.join(', '),
-                          },
-                        }
-                      )}
-                      iconType="pin"
-                      size="s"
-                    />
-                  </EuiFormRow>
-                </>
-              )}
               <EuiSpacer size="m" />
               <EuiFormRow
                 className="snapshotRestore__policyForm__stepSettings__indicesFieldWrapper"
