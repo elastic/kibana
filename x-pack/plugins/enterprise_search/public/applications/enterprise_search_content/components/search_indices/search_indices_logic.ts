@@ -53,7 +53,7 @@ export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchI
   listeners: ({ actions }) => ({
     loadSearchEngines: async () => {
       try {
-        // TODO replace with actual backend call
+        // TODO replace with actual backend call, add test cases
         const response = await Promise.resolve(searchEnginesMock);
         actions.onSearchEnginesLoad(response);
       } catch (e) {
@@ -62,7 +62,7 @@ export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchI
     },
     loadSearchIndices: async () => {
       try {
-        // TODO replace with actual backend call
+        // TODO replace with actual backend call, add test cases
         const response = await Promise.resolve(searchIndicesMock);
         actions.onSearchIndicesLoad(response);
       } catch (e) {
