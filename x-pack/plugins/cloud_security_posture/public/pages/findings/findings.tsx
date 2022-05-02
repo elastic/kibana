@@ -11,7 +11,6 @@ import { allNavigationItems, findingsNavigation } from '../../common/navigation/
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
-import { UnknownRoute } from '../../components/unknown_route';
 
 export const Findings = () => {
   const location = useLocation();
