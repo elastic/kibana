@@ -192,19 +192,21 @@ export const SearchIndices: React.FC = () => {
           rightSideItems: [createNewIndexButton],
         }}
       >
-        <EuiTitle>
-          <h2>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle',
-              {
-                defaultMessage: 'Search Indices',
-              }
-            )}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="l" />
         {searchIndices.length !== 0 ? (
-          <EuiBasicTable items={searchIndices} columns={columns} />
+          <>
+            <EuiTitle>
+              <h2>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle',
+                  {
+                    defaultMessage: 'Search Indices',
+                  }
+                )}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="l" />
+            <EuiBasicTable items={searchIndices} columns={columns} />
+          </>
         ) : (
           <AddContentEmptyPrompt />
         )}
