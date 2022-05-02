@@ -30,8 +30,6 @@ export interface Group {
   createdAt: string;
   updatedAt: string;
   contentSources: ContentSource[];
-  users: User[];
-  usersCount: number;
   color?: string;
 }
 

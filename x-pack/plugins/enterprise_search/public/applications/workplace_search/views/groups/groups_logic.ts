@@ -18,13 +18,12 @@ import {
   flashSuccessToast,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { ContentSource, Group, User } from '../../types';
+import { ContentSource, Group } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;
 
 interface GroupsServerData {
   contentSources: ContentSource[];
-  users: User[];
 }
 
 interface GroupsSearchResponse {
@@ -37,10 +36,6 @@ interface GroupsActions {
   setSearchResults(data: GroupsSearchResponse): GroupsSearchResponse;
   addFilteredSource(sourceId: string): string;
   removeFilteredSource(sourceId: string): string;
-  addFilteredUser(userId: string): string;
-  removeFilteredUser(userId: string): string;
-  setGroupUsers(allGroupUsers: User[]): User[];
-  setAllGroupLoading(allGroupUsersLoading: boolean): boolean;
   setFilterValue(filterValue: string): string;
   setActivePage(activePage: number): number;
   setNewGroupName(newGroupName: string): string;
@@ -49,22 +44,18 @@ interface GroupsActions {
   openNewGroupModal(): void;
   closeNewGroupModal(): void;
   closeFilterSourcesDropdown(): void;
-  closeFilterUsersDropdown(): void;
   toggleFilterSourcesDropdown(): void;
-  toggleFilterUsersDropdown(): void;
   setGroupsLoading(): void;
   resetGroupsFilters(): void;
   resetGroups(): void;
   initializeGroups(): void;
   getSearchResults(resetPagination?: boolean): { resetPagination: boolean | undefined };
-  fetchGroupUsers(groupId: string): { groupId: string };
   saveNewGroup(): void;
 }
 
 interface GroupsValues {
   groups: Group[];
   contentSources: ContentSource[];
-  users: User[];
   groupsDataLoading: boolean;
   groupListLoading: boolean;
   newGroupModalOpen: boolean;
@@ -73,10 +64,6 @@ interface GroupsValues {
   newGroupNameErrors: string[];
   filterSourcesDropdownOpen: boolean;
   filteredSources: string[];
-  filterUsersDropdownOpen: boolean;
-  filteredUsers: string[];
-  allGroupUsersLoading: boolean;
-  allGroupUsers: User[];
   filterValue: string;
   groupsMeta: Meta;
   hasFiltersSet: boolean;
@@ -89,10 +76,6 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     setSearchResults: (data) => data,
     addFilteredSource: (sourceId) => sourceId,
     removeFilteredSource: (sourceId) => sourceId,
-    addFilteredUser: (userId) => userId,
-    removeFilteredUser: (userId) => userId,
-    setGroupUsers: (allGroupUsers) => allGroupUsers,
-    setAllGroupLoading: (allGroupUsersLoading: boolean) => allGroupUsersLoading,
     setFilterValue: (filterValue) => filterValue,
     setActivePage: (activePage) => activePage,
     setNewGroupName: (newGroupName) => newGroupName,
@@ -101,15 +84,12 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     openNewGroupModal: () => true,
     closeNewGroupModal: () => true,
     closeFilterSourcesDropdown: () => true,
-    closeFilterUsersDropdown: () => true,
     toggleFilterSourcesDropdown: () => true,
-    toggleFilterUsersDropdown: () => true,
     setGroupsLoading: () => true,
     resetGroupsFilters: () => true,
     resetGroups: () => true,
     initializeGroups: () => true,
     getSearchResults: (resetPagination) => ({ resetPagination }),
-    fetchGroupUsers: (groupId) => ({ groupId }),
     saveNewGroup: () => true,
   },
   reducers: {
@@ -123,12 +103,6 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       [],
       {
         onInitializeGroups: (_, { contentSources }) => contentSources,
-      },
-    ],
-    users: [
-      [],
-      {
-        onInitializeGroups: (_, { users }) => users,
       },
     ],
     groupsDataLoading: [
@@ -193,36 +167,6 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
         removeFilteredSource: (state, sourceId) => state.filter((id) => id !== sourceId),
       },
     ],
-    filterUsersDropdownOpen: [
-      false,
-      {
-        toggleFilterUsersDropdown: (state) => !state,
-        closeFilterUsersDropdown: () => false,
-      },
-    ],
-    filteredUsers: [
-      [],
-      {
-        resetGroupsFilters: () => [],
-        setNewGroup: () => [],
-        addFilteredUser: (state, userId) => [...state, userId].sort(),
-        removeFilteredUser: (state, userId) => state.filter((id) => id !== userId),
-      },
-    ],
-    allGroupUsersLoading: [
-      false,
-      {
-        setAllGroupLoading: (_, allGroupUsersLoading) => allGroupUsersLoading,
-        setGroupUsers: () => false,
-      },
-    ],
-    allGroupUsers: [
-      [],
-      {
-        setGroupUsers: (_, allGroupUsers) => allGroupUsers,
-        setAllGroupLoading: () => [],
-      },
-    ],
     filterValue: [
       '',
       {
@@ -248,8 +192,8 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
   },
   selectors: ({ selectors }) => ({
     hasFiltersSet: [
-      () => [selectors.filteredUsers, selectors.filteredSources],
-      (filteredUsers, filteredSources) => filteredUsers.length > 0 || filteredSources.length > 0,
+      () => [selectors.filteredSources],
+      (filteredSources) => filteredSources.length > 0,
     ],
   }),
   listeners: ({ actions, values }) => ({
@@ -275,7 +219,6 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
         },
         filterValue,
         filteredSources,
-        filteredUsers,
       } = values;
 
       // Is the user changes the query while on a different page, we want to start back over at 1.
@@ -286,7 +229,6 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       const search = {
         query: filterValue,
         content_source_ids: filteredSources,
-        user_ids: filteredUsers,
       };
 
       try {
@@ -302,17 +244,6 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
         );
 
         actions.setSearchResults(response);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
-    },
-    fetchGroupUsers: async ({ groupId }) => {
-      actions.setAllGroupLoading(true);
-      try {
-        const response = await HttpLogic.values.http.get<User[]>(
-          `/internal/workplace_search/groups/${groupId}/group_users`
-        );
-        actions.setGroupUsers(response);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -352,9 +283,6 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       clearFlashMessages();
     },
     toggleFilterSourcesDropdown: () => {
-      clearFlashMessages();
-    },
-    toggleFilterUsersDropdown: () => {
       clearFlashMessages();
     },
   }),
