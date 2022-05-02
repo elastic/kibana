@@ -153,11 +153,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         closePopover={handleCloseMenu}
       >
         {title ? <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle> : null}
-        <EuiContextMenuPanel
-          hasFocus={false}
-          {...additionalContextMenuPanelProps}
-          items={menuItems}
-        />
+        <EuiContextMenuPanel {...additionalContextMenuPanelProps} items={menuItems} />
       </EuiPopover>
     );
   }

@@ -7,6 +7,7 @@
 
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import http from 'http';
 
@@ -19,14 +20,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
 
-  const mockServiceNow = {
-    config: {
-      apiUrl: 'www.servicenowisinkibanaactions.com',
-    },
-    secrets: {
-      password: 'elastic',
-      username: 'changeme',
-    },
+  const mockServiceNowCommon = {
     params: {
       subAction: 'addEvent',
       subActionParams: {
@@ -42,6 +36,30 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
         message_key: 'a key',
         time_of_event: '2021-10-13T10:51:44.981Z',
       },
+    },
+  };
+  const mockServiceNowBasic = {
+    ...mockServiceNowCommon,
+    config: {
+      apiUrl: 'www.servicenowisinkibanaactions.com',
+    },
+    secrets: {
+      password: 'elastic',
+      username: 'changeme',
+    },
+  };
+  const mockServiceNowOAuth = {
+    ...mockServiceNowCommon,
+    config: {
+      apiUrl: 'www.servicenowisinkibanaactions.com',
+      isOAuth: true,
+      clientId: 'abc',
+      userIdentifierValue: 'elastic',
+      jwtKeyId: 'def',
+    },
+    secrets: {
+      clientSecret: 'xyz',
+      privateKey: '-----BEGIN RSA PRIVATE KEY-----\nddddddd\n-----END RSA PRIVATE KEY-----',
     },
   };
 
@@ -76,7 +94,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
     });
 
     describe('ServiceNow ITOM - Action Creation', () => {
-      it('should return 200 when creating a servicenow action successfully', async () => {
+      it('should return 200 when creating a servicenow Basic Auth connector successfully', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -86,18 +104,23 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: serviceNowSimulatorURL,
             },
-            secrets: mockServiceNow.secrets,
+            secrets: mockServiceNowBasic.secrets,
           })
           .expect(200);
 
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow-itom',
           is_missing_secrets: false,
           config: {
             apiUrl: serviceNowSimulatorURL,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
         });
 
@@ -108,16 +131,73 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow-itom',
           is_missing_secrets: false,
           config: {
             apiUrl: serviceNowSimulatorURL,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
         });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
+      it('should return 200 when creating a servicenow OAuth connector successfully', async () => {
+        const { body: createdConnector } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            connector_type_id: '.servicenow-itom',
+            config: {
+              ...mockServiceNowOAuth.config,
+              apiUrl: serviceNowSimulatorURL,
+            },
+            secrets: mockServiceNowOAuth.secrets,
+          })
+          .expect(200);
+
+        expect(createdConnector).to.eql({
+          id: createdConnector.id,
+          is_preconfigured: false,
+          is_deprecated: false,
+          name: 'A servicenow action',
+          connector_type_id: '.servicenow-itom',
+          is_missing_secrets: false,
+          config: {
+            apiUrl: serviceNowSimulatorURL,
+            isOAuth: true,
+            clientId: mockServiceNowOAuth.config.clientId,
+            jwtKeyId: mockServiceNowOAuth.config.jwtKeyId,
+            userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
+          },
+        });
+
+        const { body: fetchedConnector } = await supertest
+          .get(`/api/actions/connector/${createdConnector.id}`)
+          .expect(200);
+
+        expect(fetchedConnector).to.eql({
+          id: fetchedConnector.id,
+          is_preconfigured: false,
+          is_deprecated: false,
+          name: 'A servicenow action',
+          connector_type_id: '.servicenow-itom',
+          is_missing_secrets: false,
+          config: {
+            apiUrl: serviceNowSimulatorURL,
+            isOAuth: true,
+            clientId: mockServiceNowOAuth.config.clientId,
+            jwtKeyId: mockServiceNowOAuth.config.jwtKeyId,
+            userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
+          },
+        });
+      });
+
+      it('should respond with a 400 Bad Request when creating a servicenow Basic Auth connector with no apiUrl', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -137,7 +217,30 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action with a not present in allowedHosts apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a servicenow OAuth connector with no apiUrl', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            connector_type_id: '.servicenow-itom',
+            config: {
+              isOAuth: true,
+            },
+            secrets: mockServiceNowOAuth.secrets,
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+            });
+          });
+      });
+
+      it('should respond with a 400 Bad Request when creating a servicenow connector with a not present in allowedHosts apiUrl', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -147,7 +250,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
             },
-            secrets: mockServiceNow.secrets,
+            secrets: mockServiceNowBasic.secrets,
           })
           .expect(400)
           .then((resp: any) => {
@@ -160,7 +263,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action without secrets', async () => {
+      it('should respond with a 400 Bad Request when creating a servicenow Basic Auth connector without secrets', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -177,9 +280,106 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [password]: expected value of type [string] but got [undefined]',
+                'error validating action type secrets: Either basic auth or OAuth credentials must be specified',
             });
           });
+      });
+
+      it('should respond with a 400 Bad Request when creating a servicenow OAuth connector without secrets', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A servicenow action',
+            connector_type_id: '.servicenow-itom',
+            config: {
+              ...mockServiceNowOAuth.config,
+              apiUrl: serviceNowSimulatorURL,
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: Either basic auth or OAuth credentials must be specified',
+            });
+          });
+      });
+
+      it('should respond with a 400 Bad Request when creating a servicenow OAuth connector with missing fields', async () => {
+        const badConfigs = [
+          {
+            config: {
+              ...mockServiceNowOAuth.config,
+              apiUrl: serviceNowSimulatorURL,
+              clientId: null,
+            },
+            secrets: mockServiceNowOAuth.secrets,
+            errorMessage: `error validating action type config: clientId must be provided when isOAuth = true`,
+          },
+          {
+            config: {
+              ...mockServiceNowOAuth.config,
+              apiUrl: serviceNowSimulatorURL,
+              userIdentifierValue: null,
+            },
+            secrets: mockServiceNowOAuth.secrets,
+            errorMessage: `error validating action type config: userIdentifierValue must be provided when isOAuth = true`,
+          },
+          {
+            config: {
+              ...mockServiceNowOAuth.config,
+              apiUrl: serviceNowSimulatorURL,
+              jwtKeyId: null,
+            },
+            secrets: mockServiceNowOAuth.secrets,
+            errorMessage: `error validating action type config: jwtKeyId must be provided when isOAuth = true`,
+          },
+          {
+            config: {
+              ...mockServiceNowOAuth.config,
+              apiUrl: serviceNowSimulatorURL,
+            },
+            secrets: {
+              ...mockServiceNowOAuth.secrets,
+              clientSecret: null,
+            },
+            errorMessage: `error validating action type secrets: clientSecret and privateKey must both be specified`,
+          },
+          {
+            config: {
+              ...mockServiceNowOAuth.config,
+              apiUrl: serviceNowSimulatorURL,
+            },
+            secrets: {
+              ...mockServiceNowOAuth.secrets,
+              privateKey: null,
+            },
+            errorMessage: `error validating action type secrets: clientSecret and privateKey must both be specified`,
+          },
+        ];
+
+        await asyncForEach(badConfigs, async (badConfig) => {
+          await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A servicenow action',
+              connector_type_id: '.servicenow-itom',
+              config: badConfig.config,
+              secrets: badConfig.secrets,
+            })
+            .expect(400)
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: badConfig.errorMessage,
+              });
+            });
+        });
       });
     });
 
@@ -194,7 +394,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: serviceNowSimulatorURL,
             },
-            secrets: mockServiceNow.secrets,
+            secrets: mockServiceNowBasic.secrets,
           });
         simulatedActionId = body.id;
       });
@@ -282,7 +482,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               .post(`/api/actions/connector/${simulatedActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
-                params: mockServiceNow.params,
+                params: mockServiceNowBasic.params,
               })
               .expect(200);
             expect(result.status).to.eql('ok');
