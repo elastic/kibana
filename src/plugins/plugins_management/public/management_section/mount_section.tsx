@@ -27,7 +27,7 @@ interface MountParams {
 let allowedPluginSources: AllowedPluginSource[] | undefined;
 
 const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
-  defaultMessage: 'Saved Objects',
+  defaultMessage: 'Plugins Management',
 });
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
@@ -61,7 +61,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
       <I18nProvider>
         <Router history={history}>
           <Switch>
-            <Route path={'/:type/:id'} exact={true}>
+            <Route path={'/:id'} exact={true}>
               <RedirectToHomeIfUnauthorized>
                 <Suspense fallback={<EuiLoadingSpinner />}>
                   <SavedObjectsEditionPage

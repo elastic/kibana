@@ -80,10 +80,8 @@ const PluginsTablePage = ({
       notifications={coreStart.notifications}
       applications={coreStart.application}
       perPageConfig={itemsPerPage}
-      goInspectObject={(savedObject) => {
-        const savedObjectEditUrl = savedObject.meta.editUrl
-          ? `/app${savedObject.meta.editUrl}`
-          : `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`;
+      goInspectObject={(plugin) => {
+        const savedObjectEditUrl = `/app/management/kibana/plugins/${plugin.pluginName}`;
         coreStart.application.navigateToUrl(coreStart.http.basePath.prepend(savedObjectEditUrl));
       }}
       canGoInApp={() => {

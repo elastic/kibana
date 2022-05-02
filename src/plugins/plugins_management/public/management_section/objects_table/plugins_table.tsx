@@ -28,7 +28,6 @@ import type { PluginManagementSourceInfo } from '../../../common/types';
 import {
   parseQuery,
   getSavedObjectCounts,
-  getRelationships,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
@@ -539,53 +538,6 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
     });
   };
 
-  getRelationships = async (type: string, id: string) => {
-    const { http } = this.props;
-    const allowedTypeNames = this.props.allowedSources.map((t) => t.name);
-    return await getRelationships(http, type, id, allowedTypeNames);
-  };
-
-  renderFlyout() {
-    if (!this.state.isShowingImportFlyout) {
-      return null;
-    }
-    const { applications } = this.props;
-    const newIndexPatternUrl = applications.getUrlForApp('management', {
-      path: 'kibana/indexPatterns',
-    });
-
-    return (
-      <Flyout
-        close={this.hideImportFlyout}
-        done={this.finishImport}
-        http={this.props.http}
-        dataViews={this.props.dataViews}
-        newIndexPatternUrl={newIndexPatternUrl}
-        basePath={this.props.http.basePath}
-        search={this.props.search}
-        allowedSources={this.props.allowedSources}
-      />
-    );
-  }
-
-  renderRelationships() {
-    if (!this.state.isShowingRelationships) {
-      return null;
-    }
-
-    return (
-      <Relationships
-        basePath={this.props.http.basePath}
-        savedObject={this.state.relationshipObject!}
-        getRelationships={this.getRelationships}
-        close={this.onHideRelationships}
-        goInspectObject={this.props.goInspectObject}
-        canGoInApp={this.props.canGoInApp}
-        allowedSources={this.props.allowedSources}
-      />
-    );
-  }
-
   renderDeleteConfirmModal() {
     const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
     const { allowedSources } = this.props;
@@ -609,42 +561,6 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
     );
   }
 
-  renderExportAllOptionsModal() {
-    const {
-      isShowingExportAllOptionsModal,
-      filteredItemCount,
-      exportAllOptions,
-      exportAllSelectedOptions,
-      isIncludeReferencesDeepChecked,
-    } = this.state;
-
-    if (!isShowingExportAllOptionsModal) {
-      return null;
-    }
-
-    return (
-      <ExportModal
-        onExport={this.onExportAll}
-        onCancel={() => {
-          this.setState({ isShowingExportAllOptionsModal: false });
-        }}
-        onSelectedOptionsChange={(newOptions) => {
-          this.setState({
-            exportAllSelectedOptions: newOptions,
-          });
-        }}
-        filteredItemCount={filteredItemCount}
-        options={exportAllOptions}
-        selectedOptions={exportAllSelectedOptions}
-        includeReferences={isIncludeReferencesDeepChecked}
-        onIncludeReferenceChange={(newIncludeReferences) => {
-          this.setState({
-            isIncludeReferencesDeepChecked: newIncludeReferences,
-          });
-        }}
-      />
-    );
-  }
 
   render() {
     const {
@@ -671,10 +587,7 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
 
     return (
       <div>
-        {this.renderFlyout()}
-        {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
-        {this.renderExportAllOptionsModal()}
         <Header onRefresh={this.refreshAllPlugins} />
         <EuiSpacer size="l" />
         <RedirectAppLinks application={applications}>

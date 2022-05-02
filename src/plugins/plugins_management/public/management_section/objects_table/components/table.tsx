@@ -180,11 +180,11 @@ export class Table extends PureComponent<TableProps, TableState> {
         name: i18n.translate('pluginssManagement.objectsTable.table.columnSourceName', {
           defaultMessage: 'Source',
         }),
-        width: '90px',
+        width: '60px',
         align: 'center',
         description: i18n.translate(
           'pluginssManagement.objectsTable.table.columnSourceDescription',
-          { defaultMessage: 'Type of the saved object' }
+          { defaultMessage: 'Source of the plugin' }
         ),
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
@@ -205,18 +205,34 @@ export class Table extends PureComponent<TableProps, TableState> {
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {
+        field: 'version',
+        width: '80px',
+        align: 'center',
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTitleName', {
+          defaultMessage: 'Version',
+        }),
+        description: i18n.translate(
+          'savedObjectsManagement.objectsTable.table.columnTitleDescription',
+          { defaultMessage: 'Current version of the plugin' }
+        ),
+        dataType: 'string',
+        sortable: false,
+        'data-test-subj': 'savedObjectsTableRowTitle',
+      } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      {
         field: 'pluginName',
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTitleName', {
           defaultMessage: 'Title',
         }),
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.table.columnTitleDescription',
-          { defaultMessage: 'Title of the saved object' }
+          { defaultMessage: 'Title of the plugin' }
         ),
         dataType: 'string',
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowTitle',
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      
       {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnActionsName', {
           defaultMessage: 'Actions',

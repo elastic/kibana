@@ -8,12 +8,13 @@
 
 import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
-import { SavedObjectEdition } from './object_view';
+import { EuiDescriptionList, EuiTitle, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import './saved_objects_edition_page.scss';
+import { Inspect } from './object_view/components/inspect'
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const SavedObjectsEditionPage = ({
   coreStart,
@@ -24,49 +25,66 @@ const SavedObjectsEditionPage = ({
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
 }) => {
-  const { type, id } = useParams<{ type: string; id: string }>();
-  const capabilities = coreStart.application.capabilities;
-  const docLinks = coreStart.docLinks.links;
-
-  const { search } = useLocation();
-  const query = parse(search);
-
+  const { id: pluginName } = useParams<{ id: string }>();
+  const { uiSettings } = coreStart;
   useEffect(() => {
     setBreadcrumbs([
       {
         text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
-          defaultMessage: 'Saved objects',
+          defaultMessage: 'Plugins Management',
         }),
         href: '/',
       },
       {
         text: i18n.translate('savedObjectsManagement.breadcrumb.inspect', {
-          defaultMessage: 'Inspect {savedObjectType}',
-          values: { savedObjectType: type },
+          defaultMessage: 'Inspect {pluginName}',
+          values: { pluginName },
         }),
       },
     ]);
-  }, [setBreadcrumbs, type]);
+  }, [setBreadcrumbs, pluginName]);
 
   return (
-    <RedirectAppLinks
-      application={coreStart.application}
-      className="savedObjectsManagementEditionPage"
-    >
-      <SavedObjectEdition
-        id={id}
-        savedObjectType={type}
-        http={coreStart.http}
-        savedObjectsClient={coreStart.savedObjects.client}
-        overlays={coreStart.overlays}
-        notifications={coreStart.notifications}
-        capabilities={capabilities}
-        notFoundType={query.notFound as string}
-        uiSettings={coreStart.uiSettings}
-        history={history}
-        docLinks={docLinks}
-      />
-    </RedirectAppLinks>
+    <KibanaContextProvider services={{ uiSettings }}>
+      <RedirectAppLinks
+        application={coreStart.application}
+        className="savedObjectsManagementEditionPage"
+      >
+        <EuiTitle><h1>{pluginName} Plugin</h1></EuiTitle>
+        <EuiSpacer size='m' />
+        <p>Console plugin enables Kibana users to interact with Elasticsearch and Kibana through APIs with some neat autocomplete features, profiler, and other tools.</p>
+        <EuiSpacer />
+        
+        <EuiTitle><h2>{pluginName} Changelog</h2></EuiTitle>
+        <EuiHorizontalRule />
+        <Inspect
+          object={{
+            "id": "console",
+            "version": "8.3.0",
+            "source": "Elastic Verified",
+            'configs': {
+              'console.autoUpgrade': true,
+              'console.enabled': true,
+            },
+            'meta': { title: 'Console Kibana.yml configs'},
+          }}
+        />
+        <EuiTitle><h2>{pluginName} Changelog</h2></EuiTitle>
+        <EuiHorizontalRule />
+        <EuiDescriptionList
+          listItems={[
+            {
+              title: '8.3.1',
+              description: 'Bug fix - red background color',
+            },
+            {
+              title: '8.3.0',
+              description: 'You can now use the Console to call Kibana APIs! Read the blog post for more info',
+            },
+          ]}
+        />
+      </RedirectAppLinks>
+    </KibanaContextProvider>
   );
 };
 
