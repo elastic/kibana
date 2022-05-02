@@ -62,7 +62,10 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
         defaultMessage="Resource ID"
       />
     ),
-    render: (resourceId: CspFindingsByResource['resource_id']) => <EuiLink>{resourceId}</EuiLink>,
+    render: (resourceId: CspFindingsByResource['resource_id']) => (
+      // TODO: get link
+      <EuiLink href={`/lfe/app/csp/findings/resource/${resourceId}`}>{resourceId}</EuiLink>
+    ),
   },
   {
     field: 'cis_section',

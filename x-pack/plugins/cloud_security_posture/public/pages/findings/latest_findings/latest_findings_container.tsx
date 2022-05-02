@@ -18,10 +18,11 @@ import type { FindingsBaseURLQuery } from '../types';
 import { useFindingsCounter } from '../use_findings_count';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { getBaseQuery } from '../utils';
-import { PageWrapper } from '../layout/findings_layout';
+import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
 import { findingsNavigation } from '../../../common/navigation/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
   query: { language: 'kuery', query: '' },
@@ -57,6 +58,13 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
         loading={findingsGroupByNone.isLoading}
       />
       <PageWrapper>
+        <PageTitle>
+          <PageTitleText
+            title={
+              <FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />
+            }
+          />
+        </PageTitle>
         <FindingsGroupBySelector type="default" />
         <FindingsDistributionBar
           total={findingsGroupByNone.data?.total || 0}
