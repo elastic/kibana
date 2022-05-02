@@ -272,7 +272,6 @@
     "handlebars": "4.7.7",
     "he": "^1.2.0",
     "history": "^4.9.0",
-    "history-extra": "^5.0.1",
     "hjson": "3.2.1",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^5.0.0",
