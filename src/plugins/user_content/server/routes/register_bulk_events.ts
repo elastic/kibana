@@ -10,37 +10,34 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
 import { withApiBaseBath } from '../../common';
-import { eventTypeSchema, savedObjectIdSchema } from './schemas';
+import { streamEvent } from './schemas';
 
 import type { RouteDependencies } from './types';
 
-export const registerRegisterEventRoute = (
+export const registerBulkEventsRoute = (
   router: IRouter,
   { userContentEventStreamPromise }: RouteDependencies
 ) => {
   router.post(
     {
-      path: withApiBaseBath('/event/{eventType}'),
+      path: withApiBaseBath('/event/_bulk'),
       validate: {
-        params: schema.object({
-          eventType: eventTypeSchema,
-        }),
-        body: schema.object({
-          soId: savedObjectIdSchema,
-        }),
+        body: schema.arrayOf(streamEvent),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { body, params } = req;
+      const { body } = req;
 
       const userContentEventStream = await userContentEventStreamPromise;
 
-      userContentEventStream.registerEvent({
-        type: params.eventType,
-        data: {
-          so_id: body.soId,
-        },
-      });
+      userContentEventStream.bulkRegisterEvents(
+        body.map(({ type, soId }) => ({
+          type,
+          data: {
+            so_id: soId,
+          },
+        }))
+      );
 
       return res.ok({
         body: 'ok',

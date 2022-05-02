@@ -8,8 +8,8 @@
 
 import { HttpSetup } from '@kbn/core/public';
 
-import type { UserContentMetadataEvent } from '../../common';
 import { withApiBaseBath } from '../../common';
+import { MetadataEventPayload } from '../types';
 
 interface Dependencies {
   http: HttpSetup;
@@ -28,12 +28,22 @@ export class MetadataEventsService {
     this.http = http;
   }
 
-  registerEvent(event: UserContentMetadataEvent) {
-    this.http
-      ?.post(withApiBaseBath(`/event/${event.type}`), {
+  registerEvent({ type, soId }: MetadataEventPayload) {
+    return this.http
+      ?.post(withApiBaseBath(`/event/${type}`), {
         body: JSON.stringify({
-          soId: event.data.so_id,
+          soId,
         }),
+      })
+      .catch(() => {
+        // silently fail
+      });
+  }
+
+  bulkRegisterEvents(events: MetadataEventPayload[]) {
+    return this.http
+      ?.post(withApiBaseBath(`/event/_bulk`), {
+        body: JSON.stringify(events),
       })
       .catch(() => {
         // silently fail

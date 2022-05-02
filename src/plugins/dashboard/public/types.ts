@@ -133,7 +133,6 @@ export type DashboardBuildContext = Pick<
   | 'initializerContext'
   | 'savedObjectsTagging'
   | 'dashboardCapabilities'
-  | 'userContent'
 > & {
   query: DashboardAppServices['data']['query'];
   search: DashboardAppServices['data']['search'];

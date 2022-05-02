@@ -10,8 +10,10 @@ import type { MetadataEvent } from '@kbn/metadata-events-streams-plugin/common';
 
 import { metadataEventTypes } from './constants';
 
+/** The allowed event types to be registered in the stream */
 export type MetadataEventType = typeof metadataEventTypes[number];
 
+/** The metadata event indexed in the stream */
 export interface UserContentMetadataEvent extends MetadataEvent<MetadataEventType> {
   data: {
     /** The saved object id */

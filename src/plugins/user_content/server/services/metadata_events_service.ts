@@ -54,7 +54,7 @@ export class MetadataEventsService {
 
   private async fetchEventsCount(events: string[], eventStream: UserContentEventsStream) {
     /**
-     * NOTE: This logic is for the POC. We probably want to paginate this search
+     * NOTE: This logic is for the POC. We might want to paginate this search
      * and bulk update the saved object event counter on a limited dataset
      */
 
@@ -107,8 +107,8 @@ export class MetadataEventsService {
       aggs,
     });
 
-    const { buckets } = result.aggregations
-      ?.userContent as estypes.AggregationsStringTermsAggregate;
+    const { buckets } = result.aggregations!
+      .userContent as estypes.AggregationsStringTermsAggregate;
 
     return buckets as estypes.AggregationsStringTermsBucket[];
   }
