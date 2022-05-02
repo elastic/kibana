@@ -78,7 +78,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   const searchStrategySearch = jest.fn().mockImplementation(() => of(response));
 
   beforeEach(() => {
-    ruleDataService.findIndicesByFeature.mockImplementation(() => {
+    ruleDataService.findIndexByFeature.mockImplementation(() => {
       return [
         {
           baseName: 'test',
@@ -108,7 +108,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
   });
 
   afterEach(() => {
-    ruleDataService.findIndicesByFeature.mockClear();
+    ruleDataService.findIndexByFeature.mockClear();
     data.search.getSearchStrategy.mockClear();
     (data.search.searchAsInternalUser.search as jest.Mock).mockClear();
     getAuthzFilterSpy.mockClear();
@@ -156,7 +156,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       };
     });
 
-    ruleDataService.findIndicesByFeature.mockImplementation(() => {
+    ruleDataService.findIndexByFeature.mockImplementation(() => {
       return [
         {
           baseName: 'myTestIndex',
@@ -199,7 +199,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       request: {},
     };
 
-    ruleDataService.findIndicesByFeature.mockImplementationOnce(() => {
+    ruleDataService.findIndexByFeature.mockImplementationOnce(() => {
       return [];
     });
 

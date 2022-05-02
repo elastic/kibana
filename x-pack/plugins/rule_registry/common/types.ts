@@ -114,7 +114,7 @@ interface BucketAggsSchemas {
  * - significant_text
  * - variable_width_histogram
  */
-export const BucketAggsSchemas: t.Type<BucketAggsSchemas> = t.recursion('BucketAggsSchemas', () =>
+export const bucketAggsSchemas: t.Type<BucketAggsSchemas> = t.recursion('BucketAggsSchemas', () =>
   t.exact(
     t.partial({
       filter: t.exact(
@@ -181,7 +181,7 @@ export const BucketAggsSchemas: t.Type<BucketAggsSchemas> = t.recursion('BucketA
           ]),
         })
       ),
-      aggs: t.record(t.string, BucketAggsSchemas),
+      aggs: t.record(t.string, bucketAggsSchemas),
     })
   )
 );
