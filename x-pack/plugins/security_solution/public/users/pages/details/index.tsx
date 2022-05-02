@@ -81,7 +81,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   );
   const getFilters = () => [...usersDetailsPageFilters, ...filters];
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(kibana.services.uiSettings),
@@ -130,7 +130,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               border
               subtitle={
                 <LastEventTime
-                  docValueFields={docValueFields}
                   indexKey={LastEventIndexKey.userDetails}
                   indexNames={selectedPatterns}
                   userName={detailName}
@@ -178,7 +177,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}
-              docValueFields={docValueFields}
               filterQuery={filterQuery}
               from={from}
               indexNames={selectedPatterns}

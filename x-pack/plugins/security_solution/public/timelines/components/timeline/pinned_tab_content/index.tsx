@@ -184,7 +184,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   const [isQueryLoading, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
-      docValueFields,
       endDate: '',
       id: `pinned-${timelineId}`,
       indexNames: selectedPatterns,
@@ -274,7 +273,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
                 browserFields={browserFields}
-                docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.pinned}

@@ -13,7 +13,7 @@ import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBo
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { BrowserFields, DocValueFields } from '../../../common/containers/source';
+import { BrowserFields } from '../../../common/containers/source';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
@@ -23,7 +23,6 @@ import { UserDetailsPanel } from './user_details';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   entityType?: EntityType;
   handleOnPanelClosed?: () => void;
   isFlyoutView?: boolean;
@@ -41,7 +40,6 @@ interface DetailsPanelProps {
 export const DetailsPanel = React.memo(
   ({
     browserFields,
-    docValueFields,
     entityType,
     handleOnPanelClosed,
     isFlyoutView,
@@ -83,7 +81,6 @@ export const DetailsPanel = React.memo(
       visiblePanel = (
         <EventDetailsPanel
           browserFields={browserFields}
-          docValueFields={docValueFields}
           entityType={entityType}
           expandedEvent={currentTabDetail?.params}
           handleOnEventClosed={closePanel}

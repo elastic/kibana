@@ -38,7 +38,7 @@ describe('Last Event Time Stat', () => {
     ]);
     const wrapper = mount(
       <TestProviders>
-        <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
+        <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
     expect(wrapper.html()).toBe(
@@ -55,7 +55,7 @@ describe('Last Event Time Stat', () => {
     ]);
     const wrapper = mount(
       <TestProviders>
-        <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
+        <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
     expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">20 hours ago</span>');
@@ -70,7 +70,7 @@ describe('Last Event Time Stat', () => {
     ]);
     const wrapper = mount(
       <TestProviders>
-        <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
+        <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
 
@@ -86,7 +86,7 @@ describe('Last Event Time Stat', () => {
     ]);
     const wrapper = mount(
       <TestProviders>
-        <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
+        <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
     expect(wrapper.html()).toContain(getEmptyValue());

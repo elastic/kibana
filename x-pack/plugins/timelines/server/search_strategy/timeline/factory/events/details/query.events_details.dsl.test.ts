@@ -28,6 +28,18 @@ describe('buildTimelineDetailsQuery', () => {
               "field": "*",
               "include_unmapped": true,
             },
+            Object {
+              "field": "@timestamp",
+              "format": "strict_date_optional_time",
+            },
+            Object {
+              "field": "code_signature.timestamp",
+              "format": "strict_date_optional_time",
+            },
+            Object {
+              "field": "dll.code_signature.timestamp",
+              "format": "strict_date_optional_time",
+            },
           ],
           "query": Object {
             "terms": Object {

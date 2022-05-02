@@ -192,7 +192,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const {
     browserFields,
     dataViewId,
-    docValueFields,
     loading: loadingSourcerer,
     indexPattern,
     runtimeMappings,
@@ -284,7 +283,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
       dataViewId,
-      docValueFields,
       endDate: end,
       fields: getTimelineQueryFields(),
       filterQuery: combinedQueries?.filterQuery,
@@ -443,7 +441,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
                 browserFields={browserFields}
-                docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}

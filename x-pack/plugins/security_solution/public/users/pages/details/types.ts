@@ -58,7 +58,6 @@ export type UsersDetailsNavTab = Record<KeyUsersDetailsNavTab, NavTab>;
 
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
-    docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;
