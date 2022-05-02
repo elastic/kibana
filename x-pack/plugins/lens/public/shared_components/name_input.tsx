@@ -35,8 +35,9 @@ export const NameInput = ({
       fullWidth
     >
       <EuiFieldText
+        fullWidth
         compressed
-        data-test-subj="indexPattern-label-edit"
+        data-test-subj="column-label-edit"
         value={inputValue}
         onChange={(e) => {
           handleInputChange(e.target.value);

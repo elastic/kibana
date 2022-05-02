@@ -525,7 +525,7 @@ export interface OperationDescriptor extends Operation {
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
   state: T;
 }
 
