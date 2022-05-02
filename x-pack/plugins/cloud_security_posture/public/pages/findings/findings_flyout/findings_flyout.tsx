@@ -15,7 +15,6 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
-  EuiBadge,
   EuiTabs,
   EuiTab,
   EuiFlexGrid,
@@ -27,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 import type { CspFinding } from '../types';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
@@ -34,9 +34,13 @@ import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import { ResourceTab } from './resource_tab';
 import { JsonTab } from './json_tab';
-import { REFERENCES } from '../translations';
 
-const tabs = ['Remediation', 'Resource', 'General', 'JSON'] as const;
+const tabs = [
+  { title: TEXT.REMEDIATION, id: 'remediation' },
+  { title: TEXT.RESOURCE, id: 'resource' },
+  { title: TEXT.GENERAL, id: 'general' },
+  { title: 'JSON', id: 'json' },
+] as const;
 
 const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
   <EuiCodeBlock {...props} isCopyable paddingSize="s" overflowHeight={300} />
@@ -77,14 +81,14 @@ const Cards = ({ data }: { data: Card[] }) => (
 );
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
-  switch (tab) {
-    case 'Remediation':
+  switch (tab.id) {
+    case 'remediation':
       return <Cards data={getRemediationCards(findings)} />;
-    case 'Resource':
+    case 'resource':
       return <ResourceTab data={findings} />;
-    case 'General':
+    case 'general':
       return <Cards data={getGeneralCards(findings)} />;
-    case 'JSON':
+    case 'json':
       return <JsonTab data={findings} />;
     default:
       assertNever(tab);
@@ -92,7 +96,7 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
 };
 
 export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
-  const [tab, setTab] = useState<FindingsTab>('Remediation');
+  const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -112,8 +116,8 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((v) => (
-            <EuiTab key={v} isSelected={tab === v} onClick={() => setTab(v)}>
-              {v}
+            <EuiTab key={v.id} isSelected={tab.id === v.id} onClick={() => setTab(v)}>
+              {v.title}
             </EuiTab>
           ))}
         </EuiTabs>
@@ -129,7 +133,7 @@ const getGeneralCards = ({ rule, ...rest }: CspFinding): Card[] => [
   {
     title: TEXT.RULE,
     listItems: [
-      [TEXT.INDEX, 'rule._index'],
+      [TEXT.INDEX, CSP_LATEST_FINDINGS_DATA_VIEW],
       [TEXT.RULE_EVALUATED_AT, moment(rest['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS')],
       [
         TEXT.FRAMEWORK_SOURCES,
