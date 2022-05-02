@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 
-import { Logger } from '@kbn/core/server';
 import {
-  ExternalServiceCredentials,
   ExternalService,
   ExternalServiceParamsCreate,
   ExternalServiceParamsUpdate,
@@ -17,29 +15,41 @@ import {
   ImportSetApiResponseError,
   ServiceNowIncident,
   GetApplicationInfoResponse,
-  SNProductsConfigValue,
   ServiceFactory,
 } from './types';
 
 import * as i18n from './translations';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { request } from '../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import { createServiceError, getPushedDate, prepareIncident } from './utils';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
-export const createExternalService: ServiceFactory = (
-  { config, secrets }: ExternalServiceCredentials,
-  logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  { table, importSetTable, useImportAPI, appScope }: SNProductsConfigValue
-): ExternalService => {
-  const { apiUrl: url, usesTableApi: usesTableApiConfigValue } =
-    config as ServiceNowPublicConfigurationType;
-  const { username, password } = secrets as ServiceNowSecretConfigurationType;
+export const createExternalService: ServiceFactory = ({
+  credentials,
+  logger,
+  configurationUtilities,
+  serviceConfig,
+  axiosInstance,
+}): ExternalService => {
+  const { config, secrets } = credentials;
+  const { table, importSetTable, useImportAPI, appScope } = serviceConfig;
+  const {
+    apiUrl: url,
+    usesTableApi: usesTableApiConfigValue,
+    isOAuth,
+    clientId,
+    jwtKeyId,
+    userIdentifierValue,
+  } = config as ServiceNowPublicConfigurationType;
+  const { username, password, clientSecret, privateKey } =
+    secrets as ServiceNowSecretConfigurationType;
 
-  if (!url || !username || !password) {
+  if (
+    !url ||
+    (!isOAuth && (!username || !password)) ||
+    (isOAuth && (!clientSecret || !privateKey || !clientId || !jwtKeyId || !userIdentifierValue))
+  ) {
     throw Error(`[Action]${i18n.SERVICENOW}: Wrong configuration.`);
   }
 
@@ -53,10 +63,6 @@ export const createExternalService: ServiceFactory = (
    * x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/api.ts
    */
   const getVersionUrl = () => `${urlWithoutTrailingSlash}/api/${appScope}/elastic_api/health`;
-
-  const axiosInstance = axios.create({
-    auth: { username, password },
-  });
 
   const useTableApi = !useImportAPI || usesTableApiConfigValue;
 
