@@ -27,7 +27,8 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
               index: t.string,
               query: t.object,
               aggs: t.union([
-                t.record(t.string, t.intersection([bucketAggsSchemas, metricsAggsSchemas])),
+                t.record(t.string, bucketAggsSchemas),
+                t.record(t.string, metricsAggsSchemas),
                 t.undefined,
               ]),
               size: t.union([PositiveInteger, t.undefined]),

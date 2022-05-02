@@ -661,7 +661,7 @@ export class AlertsClient {
       const toReturn = validAuthorizedFeatures.map((feature) => {
         const index = this.ruleDataService.findIndexByFeature(feature, Dataset.alerts);
         if (index == null) {
-          throw new Error('A feature id should be associated to an alert index');
+          throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
         return index?.getPrimaryAlias(this.spaceId ?? '*') ?? '';
       });

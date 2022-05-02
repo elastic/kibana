@@ -75,9 +75,6 @@ interface BucketAggsSchemas {
       | { [x: string]: SortOrderSchema }
       | Array<{ [x: string]: SortOrderSchema }>;
   };
-  aggs?: {
-    [x: string]: BucketAggsSchemas;
-  };
 }
 
 /**
@@ -114,77 +111,74 @@ interface BucketAggsSchemas {
  * - significant_text
  * - variable_width_histogram
  */
-export const bucketAggsSchemas: t.Type<BucketAggsSchemas> = t.recursion('BucketAggsSchemas', () =>
-  t.exact(
+export const bucketAggsSchemas: t.Type<BucketAggsSchemas> = t.partial({
+  filter: t.exact(
     t.partial({
-      filter: t.exact(
-        t.partial({
-          term: t.record(t.string, t.union([t.string, t.boolean, t.number])),
-        })
-      ),
-      date_histogram: t.exact(
-        t.partial({
-          field: t.string,
-          fixed_interval: t.string,
-          min_doc_count: t.number,
-          extended_bounds: t.type({
-            min: t.string,
-            max: t.string,
-          }),
-        })
-      ),
-      histogram: t.exact(
-        t.partial({
-          field: t.string,
-          interval: t.number,
-          min_doc_count: t.number,
-          extended_bounds: t.exact(
-            t.type({
-              min: t.number,
-              max: t.number,
-            })
-          ),
-          hard_bounds: t.exact(
-            t.type({
-              min: t.number,
-              max: t.number,
-            })
-          ),
-          missing: t.number,
-          keyed: t.boolean,
-          order: t.exact(
-            t.type({
-              _count: t.string,
-              _key: t.string,
-            })
-          ),
-        })
-      ),
-      nested: t.type({
-        path: t.string,
-      }),
-      terms: t.exact(
-        t.partial({
-          field: t.string,
-          collect_mode: t.string,
-          exclude: t.union([t.string, t.array(t.string)]),
-          include: t.union([t.string, t.array(t.string)]),
-          execution_hint: t.string,
-          missing: t.union([t.number, t.string]),
-          min_doc_count: t.number,
-          size: t.number,
-          show_term_doc_count_error: t.boolean,
-          order: t.union([
-            sortOrderSchema,
-            t.record(t.string, sortOrderSchema),
-            t.array(t.record(t.string, sortOrderSchema)),
-          ]),
-        })
-      ),
-      aggs: t.record(t.string, bucketAggsSchemas),
+      term: t.record(t.string, t.union([t.string, t.boolean, t.number])),
     })
-  )
-);
+  ),
+  date_histogram: t.exact(
+    t.partial({
+      field: t.string,
+      fixed_interval: t.string,
+      min_doc_count: t.number,
+      extended_bounds: t.type({
+        min: t.string,
+        max: t.string,
+      }),
+    })
+  ),
+  histogram: t.exact(
+    t.partial({
+      field: t.string,
+      interval: t.number,
+      min_doc_count: t.number,
+      extended_bounds: t.exact(
+        t.type({
+          min: t.number,
+          max: t.number,
+        })
+      ),
+      hard_bounds: t.exact(
+        t.type({
+          min: t.number,
+          max: t.number,
+        })
+      ),
+      missing: t.number,
+      keyed: t.boolean,
+      order: t.exact(
+        t.type({
+          _count: t.string,
+          _key: t.string,
+        })
+      ),
+    })
+  ),
+  nested: t.type({
+    path: t.string,
+  }),
+  terms: t.exact(
+    t.partial({
+      field: t.string,
+      collect_mode: t.string,
+      exclude: t.union([t.string, t.array(t.string)]),
+      include: t.union([t.string, t.array(t.string)]),
+      execution_hint: t.string,
+      missing: t.union([t.number, t.string]),
+      min_doc_count: t.number,
+      size: t.number,
+      show_term_doc_count_error: t.boolean,
+      order: t.union([
+        sortOrderSchema,
+        t.record(t.string, sortOrderSchema),
+        t.array(t.record(t.string, sortOrderSchema)),
+      ]),
+    })
+  ),
+  aggs: t.undefined,
+  aggregations: t.undefined,
+});
 
 /**
  * Schemas for the metrics Aggregations
@@ -265,6 +259,8 @@ export const metricsAggsSchemas = t.partial({
       missing: t.number,
     }),
   }),
+  aggs: t.undefined,
+  aggregations: t.undefined,
 });
 
 export type PutIndexTemplateRequest = estypes.IndicesPutIndexTemplateRequest & {
