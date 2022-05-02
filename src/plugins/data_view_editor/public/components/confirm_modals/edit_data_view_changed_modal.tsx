@@ -20,8 +20,7 @@ export const editDataViewModal = ({ dataViewName, overlays, onEdit }: EditDataVi
     overlays
       .openConfirm(
         i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.modalDescription', {
-          defaultMessage:
-            'Are you sure you want to edit this data view? Anything that depends upon this might not work as expected.',
+          defaultMessage: 'Changing this data view can break other objects that depend on it.',
         }),
         {
           confirmButtonText: i18n.translate(
@@ -33,7 +32,7 @@ export const editDataViewModal = ({ dataViewName, overlays, onEdit }: EditDataVi
           title: i18n.translate(
             'indexPatternEditor.editDataView.editConfirmationModal.editHeader',
             {
-              defaultMessage: `Edit {name}`,
+              defaultMessage: `Edit '{name}'`,
               values: {
                 name: dataViewName,
               },

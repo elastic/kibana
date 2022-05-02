@@ -128,9 +128,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
       });
-
       it('shows edit confirm message when editing index-pattern', async () => {
-        await PageObjects.settings.editIndexPattern('index-*', '@timestamp', 'Index Star', true);
+        await PageObjects.settings.editIndexPattern(
+          'logstash-2*',
+          '@timestamp',
+          'Index Star',
+          true
+        );
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(`Index Star`);
