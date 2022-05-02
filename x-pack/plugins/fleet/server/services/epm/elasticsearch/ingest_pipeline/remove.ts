@@ -11,8 +11,8 @@ import { appContextService } from '../../..';
 import { ElasticsearchAssetType } from '../../../../types';
 import { IngestManagerError } from '../../../../errors';
 import { getInstallation } from '../../packages/get';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import type { EsAssetReference } from '../../../../../common';
+import { updateEsAssetReferences } from '../../packages/install';
 
 export const deletePreviousPipelines = async (
   esClient: ElasticsearchClient,
@@ -49,20 +49,16 @@ export const deletePipelineRefs = async (
   pkgName: string,
   pkgVersion: string
 ) => {
-  const filteredAssets = installedEsAssets.filter(({ type, id }) => {
-    if (type !== ElasticsearchAssetType.ingestPipeline) return true;
-    if (!id.includes(pkgVersion)) return true;
-    return false;
+  const assetsToRemove = installedEsAssets.filter(({ type, id }) => {
+    return type === ElasticsearchAssetType.ingestPipeline && id.includes(pkgVersion);
   });
-  return savedObjectsClient.update(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    pkgName,
-    {
-      installed_es: filteredAssets,
-    },
-    { refresh: false }
-  );
+
+  return updateEsAssetReferences(savedObjectsClient, pkgName, installedEsAssets, {
+    assetsToRemove,
+    refresh: 'wait_for',
+  });
 };
+
 export async function deletePipeline(esClient: ElasticsearchClient, id: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
   if (id && id !== '*') {

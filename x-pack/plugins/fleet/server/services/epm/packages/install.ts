@@ -17,6 +17,8 @@ import type {
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import pRetry from 'p-retry';
+
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import type {
   BulkInstallPackageInfo,
@@ -29,13 +31,7 @@ import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
 import { licenseService } from '../..';
-import type {
-  Installation,
-  AssetType,
-  EsAssetReference,
-  InstallType,
-  InstallResult,
-} from '../../../types';
+import type { Installation, EsAssetReference, InstallType, InstallResult } from '../../../types';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -632,27 +628,60 @@ export const saveKibanaAssetsRefs = async (
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
   const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
-  await savedObjectsClient.update(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    pkgName,
-    {
-      installed_kibana: assetRefs,
-    },
-    { refresh: false }
+  // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
+  // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
+  // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
+  pRetry(
+    () =>
+      savedObjectsClient.update(
+        PACKAGES_SAVED_OBJECT_TYPE,
+        pkgName,
+        {
+          installed_kibana: assetRefs,
+        },
+        { refresh: false }
+      ),
+    { retries: 20 } // Use a number of retries higher than the number of es asset update operations
   );
+
   return assetRefs;
 };
 
-export const saveInstalledEsRefs = async (
+/**
+ * Utility function for updating the installed_es field of a package
+ */
+export const updateEsAssetReferences = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  installedAssets: EsAssetReference[]
-) => {
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installedAssetsToSave = installedPkg?.attributes.installed_es.concat(installedAssets);
+  currentAssets: EsAssetReference[],
+  {
+    assetsToAdd = [],
+    assetsToRemove = [],
+    refresh = false,
+  }: {
+    assetsToAdd?: EsAssetReference[];
+    assetsToRemove?: EsAssetReference[];
+    /**
+     * Whether or not the update should force a refresh on the SO index.
+     * Defaults to `false` for faster updates, should only be `wait_for` if the update needs to be queried back from ES
+     * immediately.
+     */
+    refresh?: 'wait_for' | false;
+  }
+): Promise<EsAssetReference[]> => {
+  const withAssetsRemoved = currentAssets.filter(({ type, id }) => {
+    if (
+      assetsToRemove.some(
+        ({ type: removeType, id: removeId }) => removeType === type && removeId === id
+      )
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   const deduplicatedAssets =
-    installedAssetsToSave?.reduce((acc, currentAsset) => {
+    [...withAssetsRemoved, ...assetsToAdd].reduce((acc, currentAsset) => {
       const foundAsset = acc.find((asset: EsAssetReference) => asset.id === currentAsset.id);
       if (!foundAsset) {
         return acc.concat([currentAsset]);
@@ -661,32 +690,30 @@ export const saveInstalledEsRefs = async (
       }
     }, [] as EsAssetReference[]) || [];
 
-  await savedObjectsClient.update(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    pkgName,
-    {
-      installed_es: deduplicatedAssets,
-    },
-    { refresh: false }
-  );
-  return installedAssets;
-};
+  const {
+    attributes: { installed_es: updatedAssets },
+  } =
+    // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
+    // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
+    // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
+    await pRetry(
+      () =>
+        savedObjectsClient.update<Installation>(
+          PACKAGES_SAVED_OBJECT_TYPE,
+          pkgName,
+          {
+            installed_es: deduplicatedAssets,
+          },
+          {
+            refresh,
+          }
+        ),
+      // Use a lower number of retries for ES assets since they're installed in serial and can only conflict with
+      // the single Kibana update call.
+      { retries: 5 }
+    );
 
-export const removeAssetTypesFromInstalledEs = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName: string,
-  assetTypes: AssetType[]
-) => {
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installedAssets = installedPkg?.attributes.installed_es;
-  if (!installedAssets?.length) return;
-  const installedAssetsToSave = installedAssets?.filter(
-    (asset) => !assetTypes.includes(asset.type)
-  );
-
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: installedAssetsToSave,
-  });
+  return updatedAssets ?? [];
 };
 
 export async function ensurePackagesCompletedInstall(

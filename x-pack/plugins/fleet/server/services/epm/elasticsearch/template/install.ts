@@ -19,13 +19,14 @@ import type {
   IndexTemplateMappings,
   TemplateMapEntry,
   TemplateMap,
+  EsAssetReference,
 } from '../../../../types';
 
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
-import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/install';
 import {
   FLEET_COMPONENT_TEMPLATES,
   PACKAGE_TEMPLATE_SUFFIX,
@@ -51,8 +52,12 @@ export const installTemplates = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   paths: string[],
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<IndexTemplateEntry[]> => {
+  savedObjectsClient: SavedObjectsClientContract,
+  esReferences: EsAssetReference[]
+): Promise<{
+  installedTemplates: IndexTemplateEntry[];
+  installedEsReferences: EsAssetReference[];
+}> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
@@ -60,13 +65,22 @@ export const installTemplates = async (
   await installPreBuiltTemplates(paths, esClient, logger);
 
   // remove package installation's references to index templates
-  await removeAssetTypesFromInstalledEs(savedObjectsClient, installablePackage.name, [
-    ElasticsearchAssetType.indexTemplate,
-    ElasticsearchAssetType.componentTemplate,
-  ]);
+  esReferences = await updateEsAssetReferences(
+    savedObjectsClient,
+    installablePackage.name,
+    esReferences,
+    {
+      assetsToRemove: esReferences.filter(
+        ({ type }) =>
+          type === ElasticsearchAssetType.indexTemplate ||
+          type === ElasticsearchAssetType.componentTemplate
+      ),
+    }
+  );
+
   // build templates per data stream from yml files
   const dataStreams = installablePackage.data_streams;
-  if (!dataStreams) return [];
+  if (!dataStreams) return { installedTemplates: [], installedEsReferences: esReferences };
 
   const installedTemplatesNested = await Promise.all(
     dataStreams.map((dataStream) =>
@@ -84,13 +98,14 @@ export const installTemplates = async (
   const installedIndexTemplateRefs = getAllTemplateRefs(installedTemplates);
 
   // add package installation's references to index templates
-  await saveInstalledEsRefs(
+  esReferences = await updateEsAssetReferences(
     savedObjectsClient,
     installablePackage.name,
-    installedIndexTemplateRefs
+    esReferences,
+    { assetsToAdd: installedIndexTemplateRefs }
   );
 
-  return installedTemplates;
+  return { installedTemplates, installedEsReferences: esReferences };
 };
 
 const installPreBuiltTemplates = async (
