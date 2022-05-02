@@ -53,12 +53,13 @@ module.exports = (_, options = {}) => {
         exclude: USES_STYLED_COMPONENTS,
         presets: [
           [
-            require.resolve('@emotion/babel-preset-css-prop'),
+            '@babel/preset-react',
             {
-              labelFormat: '[filename]--[local]',
+              runtime: 'automatic',
             },
           ],
         ],
+        plugins: ['@emotion/babel-plugin'],
       },
     ],
   };
