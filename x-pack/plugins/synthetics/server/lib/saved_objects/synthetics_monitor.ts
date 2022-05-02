@@ -44,6 +44,9 @@ export const syntheticsMonitor: SavedObjectsType = {
           },
         },
       },
+      custom_id: {
+        type: 'keyword',
+      },
     },
   },
   management: {

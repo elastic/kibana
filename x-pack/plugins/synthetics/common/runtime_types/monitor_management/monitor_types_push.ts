@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { ScreenshotOptionCodec } from './monitor_configs';
 
-export const PublicThrottlingConfigCodec = t.interface({
+export const PushMonitorThrottlingConfigCodec = t.interface({
   download: t.number,
   upload: t.number,
   latency: t.number,
@@ -18,7 +18,7 @@ export const PushBrowserMonitorCodec = t.intersection([
   t.interface({ id: t.string, name: t.string, schedule: t.string, content: t.string }),
   t.partial({
     locations: t.array(t.string),
-    throttling: PublicThrottlingConfigCodec,
+    throttling: PushMonitorThrottlingConfigCodec,
     screenshots: ScreenshotOptionCodec,
     tags: t.array(t.string),
     ignoreHTTPSErrors: t.boolean,
@@ -27,11 +27,11 @@ export const PushBrowserMonitorCodec = t.intersection([
 ]);
 
 export const PushMonitorsRequestCodec = t.interface({
-  monitors: PushBrowserMonitorCodec,
+  monitors: t.array(PushBrowserMonitorCodec),
 });
 
-export type PublicThrottlingConfig = t.TypeOf<typeof PublicThrottlingConfigCodec>;
+export type PushMonitorThrottlingConfig = t.TypeOf<typeof PushMonitorThrottlingConfigCodec>;
 
-export type PublicBrowserMonitor = t.TypeOf<typeof PushBrowserMonitorCodec>;
+export type PushBrowserMonitor = t.TypeOf<typeof PushBrowserMonitorCodec>;
 
 export type PushMonitorsRequest = t.TypeOf<typeof PushMonitorsRequestCodec>;

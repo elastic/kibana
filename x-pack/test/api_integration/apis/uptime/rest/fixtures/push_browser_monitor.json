@@ -1,0 +1,22 @@
+{
+    "monitors": [{
+        "id": "test-id",
+        "throttling": {
+            "upload": 10,
+            "download": 20,
+            "latency": 30
+        },
+        "schedule": "10m",
+        "tags": [
+        "cookie-test",
+        "browser"
+        ],
+        "screenshots": "off",
+        "content": "test source",
+        "ignoreHTTPSErrors": true,
+        "locations": ["US Central"],
+        "name": "Test Browser push monitor",
+        "apmServiceName": "cart-service"
+    }]
+}
+  

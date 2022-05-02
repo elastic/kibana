@@ -74,6 +74,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
   }),
   t.partial({
+    [ConfigKey.CUSTOM_ID]: t.string,
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
   }),
@@ -201,7 +202,6 @@ export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
 
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.CUSTOM_ID]: t.string,
     [ConfigKey.IS_PUSH_MONITOR]: t.boolean,
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.SOURCE_ZIP_URL]: t.string,
