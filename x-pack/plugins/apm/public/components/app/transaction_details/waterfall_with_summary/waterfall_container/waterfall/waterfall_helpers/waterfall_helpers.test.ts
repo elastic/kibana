@@ -133,7 +133,7 @@ describe('waterfall_helpers', () => {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
-        outgoingSpanLinksCountBySpanIdMap: {},
+        outgoingSpanLinksCountBySpanId: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
       const { apiResponse, ...waterfallRest } = waterfall;
@@ -152,7 +152,7 @@ describe('waterfall_helpers', () => {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
-        outgoingSpanLinksCountBySpanIdMap: {},
+        outgoingSpanLinksCountBySpanId: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
 
@@ -238,7 +238,7 @@ describe('waterfall_helpers', () => {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
-          outgoingSpanLinksCountBySpanIdMap: {},
+          outgoingSpanLinksCountBySpanId: {},
         },
         entryTransactionId
       );
@@ -345,7 +345,7 @@ describe('waterfall_helpers', () => {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
-          outgoingSpanLinksCountBySpanIdMap: {},
+          outgoingSpanLinksCountBySpanId: {},
         },
         entryTransactionId
       );

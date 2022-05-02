@@ -190,35 +190,35 @@ Object {
                 "parent": undefined,
                 "parentId": undefined,
                 "skew": 0,
-                "spanLinksSize": Object {
+                "spanLinksCount": Object {
                   "incoming": 0,
                   "outgoing": 0,
                 },
               },
               "parentId": "myTransactionId1",
               "skew": 0,
-              "spanLinksSize": Object {
+              "spanLinksCount": Object {
                 "incoming": 0,
                 "outgoing": 0,
               },
             },
             "parentId": "mySpanIdD",
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "myTransactionId2",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "mySpanIdA",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -409,35 +409,35 @@ Object {
                 "parent": undefined,
                 "parentId": undefined,
                 "skew": 0,
-                "spanLinksSize": Object {
+                "spanLinksCount": Object {
                   "incoming": 0,
                   "outgoing": 0,
                 },
               },
               "parentId": "myTransactionId1",
               "skew": 0,
-              "spanLinksSize": Object {
+              "spanLinksCount": Object {
                 "incoming": 0,
                 "outgoing": 0,
               },
             },
             "parentId": "mySpanIdD",
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "myTransactionId2",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "mySpanIdA",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -556,21 +556,21 @@ Object {
             "parent": undefined,
             "parentId": undefined,
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "myTransactionId1",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "mySpanIdD",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -648,14 +648,14 @@ Object {
           "parent": undefined,
           "parentId": undefined,
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "myTransactionId1",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -811,28 +811,28 @@ Object {
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
-              "spanLinksSize": Object {
+              "spanLinksCount": Object {
                 "incoming": 0,
                 "outgoing": 0,
               },
             },
             "parentId": "myTransactionId1",
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "mySpanIdD",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -873,7 +873,7 @@ Object {
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -915,7 +915,7 @@ Object {
     "parent": undefined,
     "parentId": undefined,
     "skew": 0,
-    "spanLinksSize": Object {
+    "spanLinksCount": Object {
       "incoming": 0,
       "outgoing": 0,
     },
@@ -991,7 +991,7 @@ Object {
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -1036,7 +1036,7 @@ Object {
       "parent": undefined,
       "parentId": undefined,
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -1112,14 +1112,14 @@ Object {
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "myTransactionId1",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -1236,21 +1236,21 @@ Object {
           "parent": undefined,
           "parentId": undefined,
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "myTransactionId1",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "mySpanIdD",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -1404,28 +1404,28 @@ Object {
             "parent": undefined,
             "parentId": undefined,
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "myTransactionId1",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "mySpanIdD",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "myTransactionId2",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -1616,35 +1616,35 @@ Object {
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
-              "spanLinksSize": Object {
+              "spanLinksCount": Object {
                 "incoming": 0,
                 "outgoing": 0,
               },
             },
             "parentId": "myTransactionId1",
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "mySpanIdD",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "mySpanIdA",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -1835,35 +1835,35 @@ Object {
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
-              "spanLinksSize": Object {
+              "spanLinksCount": Object {
                 "incoming": 0,
                 "outgoing": 0,
               },
             },
             "parentId": "myTransactionId1",
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "mySpanIdD",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "mySpanIdA",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -2037,21 +2037,21 @@ Object {
             "parent": undefined,
             "parentId": "mySpanIdD",
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "myTransactionId2",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "mySpanIdA",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -2174,21 +2174,21 @@ Object {
             "parent": undefined,
             "parentId": "mySpanIdD",
             "skew": 0,
-            "spanLinksSize": Object {
+            "spanLinksCount": Object {
               "incoming": 0,
               "outgoing": 0,
             },
           },
           "parentId": "myTransactionId2",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "mySpanIdA",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -2239,7 +2239,7 @@ Object {
         "parent": undefined,
         "parentId": "mySpanIdD",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -2327,14 +2327,14 @@ Object {
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
@@ -2386,7 +2386,7 @@ Object {
     "parent": undefined,
     "parentId": "mySpanIdD",
     "skew": 0,
-    "spanLinksSize": Object {
+    "spanLinksCount": Object {
       "incoming": 0,
       "outgoing": 0,
     },
@@ -2438,7 +2438,7 @@ Object {
       "parent": undefined,
       "parentId": "mySpanIdD",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -2524,14 +2524,14 @@ Object {
         "parent": undefined,
         "parentId": "mySpanIdD",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "myTransactionId2",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -2654,21 +2654,21 @@ Object {
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "mySpanIdA",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -2791,21 +2791,21 @@ Object {
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "mySpanIdA",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
@@ -2931,7 +2931,7 @@ Array [
     "offset": 0,
     "parent": undefined,
     "skew": 0,
-    "spanLinksSize": Object {
+    "spanLinksCount": Object {
       "incoming": 0,
       "outgoing": 0,
     },
@@ -2988,14 +2988,14 @@ Array [
       "offset": 0,
       "parent": undefined,
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
     },
     "parentId": "a",
     "skew": 0,
-    "spanLinksSize": Object {
+    "spanLinksCount": Object {
       "incoming": 0,
       "outgoing": 0,
     },
@@ -3052,14 +3052,14 @@ Array [
       "offset": 0,
       "parent": undefined,
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
     },
     "parentId": "a",
     "skew": 0,
-    "spanLinksSize": Object {
+    "spanLinksCount": Object {
       "incoming": 0,
       "outgoing": 0,
     },
@@ -3141,21 +3141,21 @@ Array [
         "offset": 0,
         "parent": undefined,
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "a",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
     },
     "parentId": "b",
     "skew": 0,
-    "spanLinksSize": Object {
+    "spanLinksCount": Object {
       "incoming": 0,
       "outgoing": 0,
     },
@@ -3265,28 +3265,28 @@ Array [
           "offset": 0,
           "parent": undefined,
           "skew": 0,
-          "spanLinksSize": Object {
+          "spanLinksCount": Object {
             "incoming": 0,
             "outgoing": 0,
           },
         },
         "parentId": "a",
         "skew": 0,
-        "spanLinksSize": Object {
+        "spanLinksCount": Object {
           "incoming": 0,
           "outgoing": 0,
         },
       },
       "parentId": "b",
       "skew": 0,
-      "spanLinksSize": Object {
+      "spanLinksCount": Object {
         "incoming": 0,
         "outgoing": 0,
       },
     },
     "parentId": "c",
     "skew": 0,
-    "spanLinksSize": Object {
+    "spanLinksCount": Object {
       "incoming": 0,
       "outgoing": 0,
     },
