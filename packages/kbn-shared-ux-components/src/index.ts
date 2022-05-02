@@ -30,40 +30,6 @@ export const ToolbarButton = withSuspense(LazyToolbarButton);
 export { AddFromLibraryButton, ToolbarPopover } from './toolbar';
 
 /**
- * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspense` or the
- * `withSuspense` HOC to load this component.
- */
-export const LazyNoDataViews = React.lazy(() =>
-  import('./empty_state/no_data_views').then(({ NoDataViews }) => ({
-    default: NoDataViews,
-  }))
-);
-
-/**
- * A `NoDataViews` component that is wrapped by the `withSuspense` HOC.  This component can
- * be used directly by consumers and will load the `LazyNoDataViews` component lazily with
- * a predefined fallback and error boundary.
- */
-export const NoDataViews = withSuspense(LazyNoDataViews);
-
-/**
- * A pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspense` or the
- * `withSuspense` HOC to load this component.
- */
-export const LazyNoDataViewsComponent = React.lazy(() =>
-  import('./empty_state/no_data_views').then(({ NoDataViewsComponent }) => ({
-    default: NoDataViewsComponent,
-  }))
-);
-
-/**
- * A pure `NoDataViews` component, with no services hooks. The component is wrapped by the `withSuspense` HOC.
- * This component can be used directly by consumers and will load the `LazyNoDataViewsComponent` lazily with
- * a predefined fallback and error boundary.
- */
-export const NoDataViewsComponent = withSuspense(LazyNoDataViewsComponent);
-
-/**
  * The Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspense` or the
  * `withSuspense` HOC to load this component.
  */
@@ -77,6 +43,23 @@ export const LazyIconButtonGroup = React.lazy(() =>
  * The IconButtonGroup component that is wrapped by the `withSuspence` HOC.
  */
 export const IconButtonGroup = withSuspense(LazyIconButtonGroup);
+
+/**
+ *  A `KibanaNoDataPage` component, with service hooks. Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const KibanaNoDataPageLazy = React.lazy(() =>
+  import('./empty_state').then(({ KibanaNoDataPage }) => ({
+    default: KibanaNoDataPage,
+  }))
+);
+
+/**
+ * A `KibanaNoDataPage` component. The component is wrapped by the `withSuspense` HOC.
+ * This component can be used directly by consumers and will load the `KibanaNoDataPageLazy` lazily with
+ * a predefined fallback and error boundary.
+ */
+export const KibanaNoDataPage = withSuspense(KibanaNoDataPageLazy);
 
 /**
  * The lazily loaded `KibanaPageTemplate` component that is wrapped by the `withSuspense` HOC. Consumers should use
@@ -94,6 +77,11 @@ export const KibanaPageTemplateLazy = React.lazy(() =>
  * a predefined fallback and error boundary.
  */
 export const KibanaPageTemplate = withSuspense(KibanaPageTemplateLazy);
+
+/**
+ * A `KibanaPageTemplateProps` type.
+ */
+export type { KibanaPageTemplateProps } from './page_template';
 
 /**
  * The lazily loaded `KibanaPageTemplateSolutionNav` component that is wrapped by the `withSuspense` HOC. Consumers should use
@@ -128,3 +116,37 @@ export const KibanaSolutionAvatarLazy = React.lazy(() =>
  * a predefined fallback and error boundary.
  */
 export const KibanaSolutionAvatar = withSuspense(KibanaSolutionAvatarLazy);
+
+/**
+ * The Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const NoDataViewsLazy = React.lazy(() =>
+  import('./empty_state/no_data_views').then(({ NoDataViews }) => ({
+    default: NoDataViews,
+  }))
+);
+
+/**
+ * A `NoDataViews` component that is wrapped by the `withSuspense` HOC.  This component can
+ * be used directly by consumers and will load the `LazyNoDataViews` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const NoDataViews = withSuspense(NoDataViewsLazy);
+
+/**
+ * A pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const NoDataViewsComponentLazy = React.lazy(() =>
+  import('./empty_state/no_data_views').then(({ NoDataViewsComponent }) => ({
+    default: NoDataViewsComponent,
+  }))
+);
+
+/**
+ * A pure `NoDataViews` component, with no services hooks. The component is wrapped by the `withSuspense` HOC.
+ * This component can be used directly by consumers and will load the `LazyNoDataViewsComponent` lazily with
+ * a predefined fallback and error boundary.
+ */
+export const NoDataViewsComponent = withSuspense(NoDataViewsComponentLazy);
