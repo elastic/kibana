@@ -11,6 +11,10 @@ import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs/operators';
+import { KibanaExecutionContext } from '@kbn/core/types';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
@@ -27,6 +31,7 @@ import { ANOMALY_THRESHOLD } from '../../../common';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import { MlLocatorParams } from '../../../common/types/locator';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -55,6 +60,25 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   onError,
   onLoading,
 }) => {
+  const parentExecutionContext = useObservable(
+    embeddableInput.pipe(map((v) => v.executionContext))
+  );
+
+  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
+    const child: KibanaExecutionContext = {
+      type: 'visualization',
+      name: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+      id,
+    };
+
+    return {
+      ...parentExecutionContext,
+      child,
+    };
+  }, [parentExecutionContext, id]);
+
+  useExecutionContext(services[0].executionContext, embeddableExecutionContext);
+
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
     optionValueToThreshold(
