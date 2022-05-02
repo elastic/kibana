@@ -6,8 +6,6 @@
  */
 
 import { Capabilities } from '@kbn/core/types';
-import { needsUrlState } from './links';
-import { NavTab } from '../components/navigation/types';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 

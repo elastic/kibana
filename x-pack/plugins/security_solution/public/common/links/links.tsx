@@ -126,21 +126,32 @@ export const getNavLinkItems = (
 };
 
 const flattenLinkItems = (
-  ids: SecurityPageName[],
-  linkItems: LinkItem[]
+  id: SecurityPageName,
+  linkItems: LinkItem[],
+  parentLinkItem?: LinkItem
 ): Array<Omit<LinkItem, 'links'>> =>
   linkItems.reduce((linkItemFound: Array<Omit<LinkItem, 'links'>>, linkItem) => {
     let topLevelItems = [...linkItemFound];
-    if (ids.includes(linkItem.id)) {
+    const parentLinkItems = [];
+    if (id === linkItem.id) {
       // omit links from result
       const { links, ...rest } = linkItem;
-      topLevelItems = [...topLevelItems, rest];
+      topLevelItems = [...topLevelItems, ...(parentLinkItem != null ? [parentLinkItem] : []), rest];
     }
     if (linkItem.links) {
-      topLevelItems = [...topLevelItems, ...flattenLinkItems(ids, linkItem.links)];
+      if (parentLinkItem != null) {
+        parentLinkItems.push(parentLinkItem);
+      }
+      topLevelItems = [...topLevelItems, ...flattenLinkItems(id, linkItem.links, parentLinkItem)];
     }
     return topLevelItems;
   }, []);
+
+export const getNavLinkHierarchy = (id: SecurityPageName): Array<Omit<NavLinkItem, 'links'>> => {
+  const hierarchy = flattenLinkItems(id, appLinks);
+
+  return hierarchy.map((linkItem) => createNavLinkItem(linkItem));
+};
 
 const urlKeys: Array<{ key: UrlStateType; pages: SecurityPageName[] }> = [
   {

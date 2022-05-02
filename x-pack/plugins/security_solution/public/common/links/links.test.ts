@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getDeepLinks, getInitialDeepLinks, getNavLinkItems, needsUrlState } from './links';
+import {
+  getDeepLinks,
+  getInitialDeepLinks,
+  getNavLinkHierarchy,
+  getNavLinkItems,
+  needsUrlState,
+} from './links';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 import { Capabilities } from '@kbn/core/types';
 import { AppDeepLink } from '@kbn/core/public';
@@ -281,6 +287,24 @@ describe('security app link helpers', () => {
       const links = getNavLinkItems(mockExperimentalDefaults, platinumLicense, capabilities);
       nonCasesPages.forEach((page) => expect(findNavLink(page, links)).toBeTruthy());
       casesPages.forEach((page) => expect(findNavLink(page, links)).toBeFalsy());
+    });
+  });
+
+  describe.only('getNavLinkHierarchy', () => {
+    it('returns true when url state exists for page', () => {
+      const hierarchy = getNavLinkHierarchy(SecurityPageName.hosts);
+      expect(hierarchy).toEqual([
+        {
+          id: 'explore',
+          path: 'to do',
+          title: 'Explore',
+        },
+        {
+          id: 'hosts',
+          path: '/hosts',
+          title: 'Hosts',
+        },
+      ]);
     });
   });
 
