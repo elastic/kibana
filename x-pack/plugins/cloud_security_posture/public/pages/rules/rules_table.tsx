@@ -148,7 +148,7 @@ const getColumns = ({
           label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
           checked={enabled}
           onChange={() => toggleRule(rule)}
-          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
+          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
         />
       </EuiToolTip>
     ),
