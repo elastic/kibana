@@ -94,10 +94,7 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
   }
 
   getWriteTarget(document: Record<string, any>): string | null {
-    if (!document.metricset?.name) {
-      throw Error("'metricset.name' is not set on document, can not determine target index");
-    }
-    const eventType = document.metricset.name;
+    const eventType = document.metricset?.name;
     if (eventType === 'service') return 'metrics-apm.service-default';
     return null;
   }
