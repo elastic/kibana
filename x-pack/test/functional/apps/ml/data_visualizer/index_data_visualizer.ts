@@ -6,7 +6,7 @@
  */
 
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
   farequoteDataViewTestData,
