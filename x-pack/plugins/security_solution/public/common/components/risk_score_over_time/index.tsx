@@ -54,6 +54,8 @@ const LoadingChart = styled(EuiLoadingChart)`
   text-align: center;
 `;
 
+export const scoreFormatter = (d: number) => Math.round(d).toString();
+
 const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   from,
   to,
@@ -67,7 +69,6 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   const timeZone = useTimeZone();
 
   const dataTimeFormatter = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
-  const scoreFormatter = useCallback((d: number) => Math.round(d).toString(), []);
   const headerFormatter = useCallback(
     (tooltip: TooltipValue) => <PreferenceFormattedDate value={tooltip.value} />,
     []
@@ -149,7 +150,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
                       }}
                     />
                     <LineSeries
-                      id={'RiskOverTime'}
+                      id="RiskOverTime"
                       name={i18n.RISK_SCORE}
                       xScaleType={ScaleType.Time}
                       yScaleType={ScaleType.Linear}
