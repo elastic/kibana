@@ -3,10 +3,39 @@
 exports[`DetailPanelCopy component When DetailPanelCopy is mounted renders DetailPanelCopy correctly 1`] = `
 Object {
   "asFragment": [Function],
-  "baseElement": <body>
+  "baseElement": .emotion-0 {
+  display: grid;
+  -webkit-align-content: center;
+  -ms-flex-line-pack: center;
+  align-content: center;
+  padding: 4px 8px;
+  width: 100%;
+  font-weight: inherit;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
+  min-height: 24px;
+  letter-spacing: 0px;
+  text-align: left;
+  position: relative;
+  border-radius: 6px;
+}
+
+.emotion-0 .euiToolTipAnchor {
+  width: calc(100% - 32px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emotion-0:hover {
+  background: rgba(0,119,204,0.1);
+}
+
+<body>
     <div>
       <div
-        class="euiText euiText--small css-dx11u5-EuiText"
+        class="euiText euiText--small emotion-0"
         data-test-subj="sessionView:detail-panel-list-item"
       >
         <span
@@ -19,9 +48,38 @@ Object {
       </div>
     </div>
   </body>,
-  "container": <div>
+  "container": .emotion-0 {
+  display: grid;
+  -webkit-align-content: center;
+  -ms-flex-line-pack: center;
+  align-content: center;
+  padding: 4px 8px;
+  width: 100%;
+  font-weight: inherit;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
+  min-height: 24px;
+  letter-spacing: 0px;
+  text-align: left;
+  position: relative;
+  border-radius: 6px;
+}
+
+.emotion-0 .euiToolTipAnchor {
+  width: calc(100% - 32px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emotion-0:hover {
+  background: rgba(0,119,204,0.1);
+}
+
+<div>
     <div
-      class="euiText euiText--small css-dx11u5-EuiText"
+      class="euiText euiText--small emotion-0"
       data-test-subj="sessionView:detail-panel-list-item"
     >
       <span
