@@ -93,6 +93,7 @@ describe('utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "new",
