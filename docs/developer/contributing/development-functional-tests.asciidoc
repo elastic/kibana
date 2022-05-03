@@ -96,7 +96,8 @@ node scripts/functional_test_runner --exclude-tag skipCloud
 
 When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
 
-* `--config test/functional/apps/app-name/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome.
+* `--config test/functional/apps/app-name/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome for a specific app. For example, 
+`--config test/functional/apps/home/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome for the home app.
 * `--config test/functional/config.firefox.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Firefox.
 * `--config test/api_integration/config.js` starts {es} and {kib} servers with the api integration tests configuration.
 * `--config test/accessibility/config.ts` starts {es} and {kib} servers with the WebDriver tests configured to run an accessibility audit using https://www.deque.com/axe/[axe].
