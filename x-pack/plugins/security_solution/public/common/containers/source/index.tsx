@@ -8,7 +8,6 @@
 import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
@@ -156,23 +155,19 @@ export const useFetchIndex = (
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                Promise.resolve().then(() => {
-                  ReactDOM.unstable_batchedUpdates(() => {
-                    const stringifyIndices = response.indicesExist.sort().join();
+                const stringifyIndices = response.indicesExist.sort().join();
 
-                    previousIndexesName.current = response.indicesExist;
-                    setLoading(false);
-                    setState({
-                      browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                      docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
-                      indexes: response.indicesExist,
-                      indexExists: response.indicesExist.length > 0,
-                      indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
-                    });
-
-                    searchSubscription$.current.unsubscribe();
-                  });
+                previousIndexesName.current = response.indicesExist;
+                setLoading(false);
+                setState({
+                  browserFields: getBrowserFields(stringifyIndices, response.indexFields),
+                  docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
+                  indexes: response.indicesExist,
+                  indexExists: response.indicesExist.length > 0,
+                  indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
                 });
+
+                searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.ERROR_BEAT_FIELDS);

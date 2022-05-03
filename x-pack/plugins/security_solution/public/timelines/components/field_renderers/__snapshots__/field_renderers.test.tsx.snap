@@ -60,7 +60,9 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
       },
     }
   }
+  fieldType=""
   hideTopN={false}
+  isAggregatable={false}
   isDraggable={false}
   render={[Function]}
 />
@@ -83,7 +85,9 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
       },
     }
   }
+  fieldType=""
   hideTopN={false}
+  isAggregatable={false}
   isDraggable={false}
   render={[Function]}
 />
