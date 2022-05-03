@@ -159,10 +159,10 @@ enabled:
   - x-pack/test/functional/apps/maps/group2/config.ts
   - x-pack/test/functional/apps/maps/group3/config.ts
   - x-pack/test/functional/apps/maps/group4/config.ts
+  - x-pack/test/functional/apps/ml/data_visualizer/config.ts
   - x-pack/test/functional/apps/ml/group1/config.ts
   - x-pack/test/functional/apps/ml/group2/config.ts
   - x-pack/test/functional/apps/ml/group3/config.ts
-  - x-pack/test/functional/apps/ml/data_visualizer/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
   - x-pack/test/functional/apps/reporting_management/config.ts
