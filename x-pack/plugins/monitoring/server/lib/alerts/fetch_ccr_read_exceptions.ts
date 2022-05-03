@@ -139,7 +139,7 @@ export async function fetchCCRReadExceptions(
   }
 
   // @ts-expect-error declare aggegations type explicitly
-  const { buckets: remoteClusterBuckets = [] } = response.aggregations?.remote_clusters;
+  const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
 
   if (!remoteClusterBuckets?.length) {
     return stats;

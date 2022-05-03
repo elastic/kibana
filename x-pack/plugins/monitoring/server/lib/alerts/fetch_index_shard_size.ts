@@ -122,7 +122,7 @@ export async function fetchIndexShardSize(
   }
 
   // @ts-expect-error declare aggegations type explicitly
-  const { buckets: clusterBuckets } = response.aggregations?.clusters;
+  const { buckets: clusterBuckets } = response.aggregations.clusters;
   if (!clusterBuckets?.length) {
     return stats;
   }

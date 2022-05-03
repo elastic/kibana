@@ -122,7 +122,7 @@ export async function fetchThreadPoolRejectionStats(
   }
 
   // @ts-expect-error declare type for aggregations explicitly
-  const { buckets: clusterBuckets } = response.aggregations?.clusters;
+  const { buckets: clusterBuckets } = response.aggregations.clusters;
 
   if (!clusterBuckets?.length) {
     return stats;
