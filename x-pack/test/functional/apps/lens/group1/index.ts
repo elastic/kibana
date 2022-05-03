@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app', () => {
+  describe('lens app - group 1', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -74,15 +74,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     } else {
       loadTestFile(require.resolve('./smokescreen'));
       loadTestFile(require.resolve('./persistent_context'));
-      loadTestFile(require.resolve('./add_to_dashboard'));
       loadTestFile(require.resolve('./table_dashboard'));
       loadTestFile(require.resolve('./table'));
-      loadTestFile(require.resolve('./runtime_fields'));
-      loadTestFile(require.resolve('./dashboard'));
-      loadTestFile(require.resolve('./multi_terms'));
-      loadTestFile(require.resolve('./epoch_millis'));
-      loadTestFile(require.resolve('./show_underlying_data'));
-      loadTestFile(require.resolve('./show_underlying_data_dashboard'));
     }
   });
 };
