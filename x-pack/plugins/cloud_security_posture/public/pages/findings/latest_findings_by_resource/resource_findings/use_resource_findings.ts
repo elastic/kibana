@@ -12,8 +12,13 @@ import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { CspFinding, FindingsBaseEsQuery, FindingsQueryResult } from '../../types';
 
-interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
+interface UseResourceFindingsOptions extends FindingsBaseEsQuery, ResourceFindingsQuery {
   resourceId: string;
+}
+
+export interface ResourceFindingsQuery {
+  from: number;
+  size: number;
 }
 
 export type ResourceFindingsResult = FindingsQueryResult<
@@ -25,8 +30,12 @@ export const getResourceFindingsQuery = ({
   index,
   query,
   resourceId,
+  size,
+  from,
 }: UseResourceFindingsOptions): estypes.SearchRequest => ({
   index,
+  size,
+  from,
   body: {
     query: {
       ...query,
@@ -38,21 +47,28 @@ export const getResourceFindingsQuery = ({
   },
 });
 
-export const useResourceFindings = ({ index, query, resourceId }: UseResourceFindingsOptions) => {
+export const useResourceFindings = ({
+  index,
+  query,
+  resourceId,
+  size,
+  from,
+}: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
   return useQuery(
-    ['csp_resource_findings', { index, query, resourceId }],
+    ['csp_resource_findings', { index, query, resourceId, size, from }],
     () =>
       lastValueFrom<IEsSearchResponse<CspFinding>>(
         data.search.search({
-          params: getResourceFindingsQuery({ index, query, resourceId }),
+          params: getResourceFindingsQuery({ index, query, resourceId, size, from }),
         })
       ),
     {
+      keepPreviousData: true,
       select: ({ rawResponse: { hits } }) => ({
         page: hits.hits.map((hit) => hit._source!),
         total: hits.total as number,

@@ -15,16 +15,18 @@ import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageWrapper, PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcrumbs';
 import { findingsNavigation } from '../../../../common/navigation/constants';
-import { useResourceFindings } from './use_resource_findings';
+import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery } from '../../types';
-import { getBaseQuery } from '../../utils';
+import { getBaseQuery, getEuiPaginationFromEsSearchSource } from '../../utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 
-const getDefaultQuery = (): FindingsBaseURLQuery => ({
+export const getDefaultQuery = (): FindingsBaseURLQuery & ResourceFindingsQuery => ({
   query: { language: 'kuery', query: '' },
   filters: [],
+  from: 0,
+  size: 10,
 });
 
 const BackToResourcesButton = () => {
@@ -47,8 +49,14 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
 
   const resourceFindings = useResourceFindings({
-    ...getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
+    ...getBaseQuery({
+      dataView,
+      filters: urlQuery.filters,
+      query: urlQuery.query,
+    }),
     resourceId: params.resourceId,
+    size: urlQuery.size,
+    from: urlQuery.from,
   });
 
   return (
@@ -58,7 +66,7 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
         setQuery={setUrlQuery}
         query={urlQuery.query}
         filters={urlQuery.filters}
-        loading={resourceFindings.isLoading}
+        loading={resourceFindings.isFetching}
       />
       <PageWrapper>
         <PageTitle>
@@ -77,9 +85,16 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
         </PageTitle>
         <EuiSpacer />
         <ResourceFindingsTable
-          loading={resourceFindings.isLoading}
+          pagination={getEuiPaginationFromEsSearchSource({
+            ...urlQuery,
+            total: resourceFindings?.data?.total,
+          })}
+          loading={resourceFindings.isFetching}
           data={resourceFindings.data}
           error={resourceFindings.error}
+          setPagination={(pagination) =>
+            setUrlQuery({ from: pagination?.index, size: pagination?.size })
+          }
         />
       </PageWrapper>
     </div>

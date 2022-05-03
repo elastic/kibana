@@ -7,6 +7,7 @@
 
 import { buildEsQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
+import type { EuiBasicTableProps } from '@elastic/eui';
 import type { FindingsBaseEsQuery, FindingsBaseURLQuery } from './types';
 
 export const getBaseQuery = ({
@@ -19,4 +20,20 @@ export const getBaseQuery = ({
   // page will display an error boundary with the JS error
   // will be accounted for before releasing the feature
   query: buildEsQuery(dataView, query, filters),
+});
+
+export const getEuiPaginationFromEsSearchSource = <T extends unknown>({
+  from: pageIndex,
+  size: pageSize,
+  total,
+}: {
+  total?: number | undefined;
+  size: number;
+  from: number;
+}): EuiBasicTableProps<T>['pagination'] => ({
+  pageSize,
+  pageIndex: Math.ceil(pageIndex / pageSize),
+  totalItemCount: total || 0,
+  pageSizeOptions: [10, 25, 100],
+  showPerPageOptions: true,
 });
