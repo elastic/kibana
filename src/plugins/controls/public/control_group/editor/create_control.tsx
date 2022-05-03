@@ -14,7 +14,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
+import { ControlWidth, ControlInput, IEditableControlFactory, DataControlInput } from '../../types';
 import { DEFAULT_CONTROL_WIDTH } from '../../../common/control_group/control_group_constants';
 import { setFlyoutRef } from '../embeddable/control_group_container';
 
@@ -52,7 +52,7 @@ export const CreateControlButton = ({
     const PresentationUtilProvider = pluginServices.getContextProvider();
 
     const initialInputPromise = new Promise<CreateControlResult>((resolve, reject) => {
-      let inputToReturn: Partial<ControlInput> = {};
+      let inputToReturn: Partial<DataControlInput> = {};
 
       const onCancel = (ref: OverlayRef) => {
         if (Object.keys(inputToReturn).length === 0) {
@@ -83,8 +83,10 @@ export const CreateControlButton = ({
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
-              onSave={(type: string) => {
-                const factory = getControlFactory(type) as IEditableControlFactory;
+              onSave={(type: string, factory?: IEditableControlFactory) => {
+                if (!factory) {
+                  factory = getControlFactory(type) as IEditableControlFactory;
+                }
                 if (factory.presaveTransformFunction) {
                   inputToReturn = factory.presaveTransformFunction(inputToReturn);
                 }

@@ -10,7 +10,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { TIME_SLIDER_CONTROL } from '../..';
-import { ControlEmbeddable, IEditableControlFactory } from '../../types';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import {
   createOptionsListExtract,
   createOptionsListInject,
@@ -46,6 +46,12 @@ export class TimesliderEmbeddableFactory
       newInput.value = undefined;
     }
     return newInput;
+  };
+
+  public isFieldCompatible = (dataControlField: DataControlField) => {
+    if (dataControlField.field.type === 'date') {
+      dataControlField.compatibleControlTypes.push(this.type);
+    }
   };
 
   public controlEditorComponent = TimeSliderEditor;

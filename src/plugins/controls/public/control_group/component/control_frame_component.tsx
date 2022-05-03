@@ -58,7 +58,9 @@ export const ControlFrame = ({
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
     }
-    const subscription = embeddable?.getInput$().subscribe((newInput) => setTitle(newInput.title));
+    const subscription = embeddable?.getInput$().subscribe((newInput) => {
+      setTitle(newInput.title);
+    });
     return () => {
       subscription?.unsubscribe();
     };
