@@ -18,29 +18,27 @@ import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery } from '../../types';
-import { getBaseQuery, getEuiPaginationFromEsSearchSource } from '../../utils';
+import { getBaseQuery } from '../../utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 
-export const getDefaultQuery = (): FindingsBaseURLQuery & ResourceFindingsQuery => ({
+const getDefaultQuery = (): FindingsBaseURLQuery & ResourceFindingsQuery => ({
   query: { language: 'kuery', query: '' },
   filters: [],
   from: 0,
   size: 10,
 });
 
-const BackToResourcesButton = () => {
-  return (
-    <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
-      <EuiButtonEmpty iconType={'arrowLeft'}>
-        <FormattedMessage
-          id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
-          defaultMessage="Back to group by resource view"
-        />
-      </EuiButtonEmpty>
-    </Link>
-  );
-};
+const BackToResourcesButton = () => (
+  <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
+    <EuiButtonEmpty iconType={'arrowLeft'}>
+      <FormattedMessage
+        id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
+        defaultMessage="Back to group by resource view"
+      />
+    </EuiButtonEmpty>
+  </Link>
+);
 
 export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
@@ -85,10 +83,8 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
         </PageTitle>
         <EuiSpacer />
         <ResourceFindingsTable
-          pagination={getEuiPaginationFromEsSearchSource({
-            ...urlQuery,
-            total: resourceFindings?.data?.total,
-          })}
+          size={urlQuery.size}
+          from={urlQuery.from}
           loading={resourceFindings.isFetching}
           data={resourceFindings.data}
           error={resourceFindings.error}

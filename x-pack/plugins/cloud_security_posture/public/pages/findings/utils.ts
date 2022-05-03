@@ -22,7 +22,7 @@ export const getBaseQuery = ({
   query: buildEsQuery(dataView, query, filters),
 });
 
-export const getEuiPaginationFromEsSearchSource = <T extends unknown>({
+export const getEuiPaginationFromEs = <T extends unknown>({
   from: pageIndex,
   size: pageSize,
   total,

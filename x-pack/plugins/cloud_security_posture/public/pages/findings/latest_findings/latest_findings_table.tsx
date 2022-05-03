@@ -21,6 +21,7 @@ import type { CspFinding } from '../types';
 import type { FindingsGroupByNoneQuery, CspFindingsResult } from './use_latest_findings';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { getExpandColumn, getFindingsColumns } from '../layout/findings_layout';
+import { getEuiPaginationFromEs } from '../utils';
 
 interface BaseFindingsTableProps extends FindingsGroupByNoneQuery {
   setQuery(query: Partial<FindingsGroupByNoneQuery>): void;
@@ -49,7 +50,7 @@ const FindingsTableComponent = ({
 
   const pagination = useMemo(
     () =>
-      getEuiPaginationFromEsSearchSource({
+      getEuiPaginationFromEs({
         from,
         size,
         total: data?.total,
@@ -99,20 +100,6 @@ const FindingsTableComponent = ({
     </>
   );
 };
-
-const getEuiPaginationFromEsSearchSource = ({
-  from: pageIndex,
-  size: pageSize,
-  total,
-}: Pick<FindingsTableProps, 'from' | 'size'> & {
-  total: number | undefined;
-}): EuiBasicTableProps<CspFinding>['pagination'] => ({
-  pageSize,
-  pageIndex: Math.ceil(pageIndex / pageSize),
-  totalItemCount: total || 0,
-  pageSizeOptions: [10, 25, 100],
-  showPerPageOptions: true,
-});
 
 const getEuiSortFromEsSearchSource = (
   sort: FindingsGroupByNoneQuery['sort']

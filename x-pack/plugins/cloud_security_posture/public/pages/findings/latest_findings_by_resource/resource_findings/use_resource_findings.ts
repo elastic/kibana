@@ -26,7 +26,7 @@ export type ResourceFindingsResult = FindingsQueryResult<
   unknown
 >;
 
-export const getResourceFindingsQuery = ({
+const getResourceFindingsQuery = ({
   index,
   query,
   resourceId,
