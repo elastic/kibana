@@ -30,9 +30,9 @@ describe('useGetCasesStatus', () => {
 
     await act(async () => {
       expect(result.current).toEqual({
-        countClosedCases: null,
-        countOpenCases: null,
-        countInProgressCases: null,
+        countClosedCases: 0,
+        countOpenCases: 0,
+        countInProgressCases: 0,
         isLoading: true,
         isError: false,
         fetchCasesStatus: result.current.fetchCasesStatus,

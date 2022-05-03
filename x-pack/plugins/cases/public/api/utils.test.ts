@@ -23,7 +23,7 @@ describe('utils', () => {
   });
 
   describe('convertToCamelCase', () => {
-    it('converts the object to camel case correctly', () => {
+    it('converts an object to camel case correctly', () => {
       const obj = { bar_test: [{ baz_foo: '1' }], test_bar: '2', obj_pros: { is_valid: true } };
 
       expect(convertToCamelCase(obj)).toEqual({
