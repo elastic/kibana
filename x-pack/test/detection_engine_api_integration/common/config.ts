@@ -47,7 +47,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/import_rules`)],
+      testFiles: [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {
