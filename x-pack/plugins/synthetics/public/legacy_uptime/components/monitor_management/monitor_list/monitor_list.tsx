@@ -120,11 +120,7 @@ export const MonitorManagementList = ({
       }),
       sortable: true,
       render: (name: string, { id }: EncryptedSyntheticsMonitorWithId) => (
-        <EuiLink
-          href={`${basePath}/app/uptime/monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
-        >
-          {name}
-        </EuiLink>
+        <EuiLink href={`${basePath}/app/uptime/monitor/${btoa(id)}`}>{name}</EuiLink>
       ),
     },
     {

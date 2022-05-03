@@ -31,7 +31,7 @@ export const EditMonitorPage: React.FC = () => {
   const { data, status } = useFetcher<
     Promise<DecryptedSyntheticsMonitorSavedObject | undefined>
   >(() => {
-    return getMonitor({ id: Buffer.from(monitorId, 'base64').toString('utf8') });
+    return getMonitor({ id: monitorId });
   }, [monitorId]);
 
   const monitor = data?.attributes as MonitorFields;
