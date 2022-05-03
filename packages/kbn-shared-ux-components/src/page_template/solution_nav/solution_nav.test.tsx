@@ -10,14 +10,18 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
 
-jest.mock('@elastic/eui', () => ({
-  useIsWithinBreakpoints: (args: string[]) => {
-    return args[0] === 'xs';
-  },
-  EuiSideNav: function Component() {
-    // no-op
-  },
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useIsWithinBreakpoints: (args: string[]) => {
+      return args[0] === 'xs';
+    },
+    EuiSideNav: function Component() {
+      // no-op
+    },
+  };
+});
 
 const items: KibanaPageTemplateSolutionNavProps['items'] = [
   {
@@ -59,6 +63,68 @@ const items: KibanaPageTemplateSolutionNavProps['items'] = [
 ];
 
 describe('KibanaPageTemplateSolutionNav', () => {
+  describe('isOpenOnMobile', () => {
+    test('defaults to false', () => {
+      const component = shallow(<KibanaPageTemplateSolutionNav name="Solution" />);
+      expect(component).toMatchSnapshot();
+    });
+
+    test('is rendered when specified as true', () => {
+      const component = shallow(<KibanaPageTemplateSolutionNav name="Solution" isOpenOnMobile />);
+      expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('mobileBreakpoints can be adjusted', () => {
+    test('is rendered', () => {
+      const component = shallow(
+        <KibanaPageTemplateSolutionNav name="Solution" mobileBreakpoints={['xs']} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+
+    test('null is rendered', () => {
+      const component = shallow(
+        <KibanaPageTemplateSolutionNav name="Solution" mobileBreakpoints={undefined} />
+      );
+      expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('heading', () => {
+    test('is rendered', () => {
+      const component = shallow(
+        <KibanaPageTemplateSolutionNav name="Solution" heading="Side Nav Heading" />
+      );
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('is hidden with screenReaderOnly', () => {
+      const component = shallow(
+        <KibanaPageTemplateSolutionNav
+          name="Solution"
+          heading="Side Nav Heading"
+          headingProps={{ screenReaderOnly: true }}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('accepts more headingProps', () => {
+      const component = shallow(
+        <KibanaPageTemplateSolutionNav
+          name="Solution"
+          heading="Side Nav Heading"
+          headingProps={{ id: 'testID', element: 'h3' }}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
+    });
+  });
+
   test('renders', () => {
     const component = shallow(<KibanaPageTemplateSolutionNav name="Solution" items={items} />);
     expect(component).toMatchSnapshot();

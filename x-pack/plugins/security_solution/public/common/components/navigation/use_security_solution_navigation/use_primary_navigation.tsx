@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
+import { SolutionGroupedNav } from '../solution_grouped_nav';
+import { useNavItems } from '../solution_grouped_nav/solution_grouped_nav_item';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
@@ -44,6 +46,8 @@ export const usePrimaryNavigation = ({
     // we do need navTabs in case the selectedTabId appears after initial load (ex. checking permissions for anomalies)
   }, [pageName, navTabs, mapLocationToTab, selectedTabId]);
 
+  const navLinkItems = useNavItems();
+  // const footerNavLinkItems = useFooterNavItems();
   const navItems = usePrimaryNavigationItems({
     navTabs,
     selectedTabId,
@@ -59,5 +63,12 @@ export const usePrimaryNavigation = ({
     name: translatedNavTitle,
     icon: 'logoSecurity',
     items: navItems,
+    children: (
+      <SolutionGroupedNav
+        items={navLinkItems}
+        // footerItems={footerNavLinkItems} // TODO
+        selectedId={selectedTabId}
+      />
+    ),
   };
 };

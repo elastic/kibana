@@ -33,7 +33,7 @@ import {
   FlowTarget,
   FlowTargetSourceDest,
 } from '../../../../common/search_strategy/security_solution/network';
-import { useUiSetting$, useKibana, useNavigation } from '../../lib/kibana';
+import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
@@ -519,20 +519,41 @@ interface SecuritySolutionLinkProps {
   path?: string;
 }
 
-type LinkClickEvent = MouseEvent<HTMLButtonElement | HTMLAnchorElement>;
-type LinkClickEventHandler = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
-
-interface SecuritySolutionInjectedLinkProps {
-  onClick?: LinkClickEventHandler;
-  href?: string;
+interface LinkProps {
+  onClick: MouseEventHandler;
+  href: string;
 }
 
 /**
- * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
- *
- * It injects `onClick` and 'href' into the Link component calculated based on the` deepLinkId` and `path` parameters.
+ * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
  */
-export const withSecuritySolutionLink = <T extends SecuritySolutionInjectedLinkProps>(
+export const useSecuritySolutionLink = ({
+  deepLinkId,
+  path,
+  onClick: onClickProps,
+}: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }): LinkProps => {
+  const { formatUrl } = useFormatUrl(deepLinkId);
+  const { navigateTo } = useNavigateTo();
+
+  return useMemo(() => {
+    const url = formatUrl(path ?? '');
+    return {
+      href: url,
+      onClick: (ev: MouseEvent) => {
+        ev.preventDefault();
+        navigateTo({ url });
+        if (onClickProps) {
+          onClickProps(ev);
+        }
+      },
+    };
+  }, [path, formatUrl, navigateTo, onClickProps]);
+};
+
+/**
+ * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
+ */
+export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
   WrappedComponent: React.FC<T>
 ) => {
   const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
@@ -541,38 +562,22 @@ export const withSecuritySolutionLink = <T extends SecuritySolutionInjectedLinkP
     onClick: onClickProps,
     ...rest
   }) => {
-    const { formatUrl } = useFormatUrl(deepLinkId);
-    const { navigateTo } = useNavigation();
-    const url = useMemo(() => formatUrl(path ?? ''), [formatUrl, path]);
-
-    const onClick = useCallback(
-      (ev: LinkClickEvent) => {
-        ev.preventDefault();
-
-        if (onClickProps) {
-          onClickProps(ev);
-        }
-
-        navigateTo({ url });
-      },
-      [navigateTo, url, onClickProps]
-    );
-
-    return <WrappedComponent onClick={onClick} href={url} {...(rest as unknown as T)} />;
+    const { onClick, href } = useSecuritySolutionLink({ deepLinkId, path, onClick: onClickProps });
+    return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
   };
   return SecuritySolutionLink;
 };
 
 /**
- * Security Solutions internal link.
+ * Security Solutions internal link button.
  *
- * `const example = () => <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} />;`
+ * `<SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} />;`
  */
 export const SecuritySolutionLinkButton = withSecuritySolutionLink(LinkButton);
 
 /**
- * Security Solutions internal link.
+ * Security Solutions internal link anchor.
  *
- * `const example = () => <SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.hosts} />;`
+ * `<SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.hosts} />;`
  */
 export const SecuritySolutionLinkAnchor = withSecuritySolutionLink(LinkAnchor);

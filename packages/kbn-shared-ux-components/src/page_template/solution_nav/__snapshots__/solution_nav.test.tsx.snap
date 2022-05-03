@@ -2,266 +2,1222 @@
 
 exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 <Fragment>
-  <Component
-    aria-hidden={false}
-    className="kbnPageTemplateSolutionNav"
-    data-test-subj="DTS"
-    heading={
-      <React.Fragment>
-        <strong>
-          Solution
-        </strong>
-      </React.Fragment>
-    }
-    isOpenOnMobile={false}
-    items={
+  <EuiShowFor
+    sizes={
       Array [
-        Object {
-          "id": "1",
-          "items": Array [
-            Object {
-              "id": "1.1",
-              "items": undefined,
-              "name": "Ingest Node Pipelines",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "1.2",
-              "items": undefined,
-              "name": "Logstash Pipelines",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "1.3",
-              "items": undefined,
-              "name": "Beats Central Management",
-              "tabIndex": undefined,
-            },
-          ],
-          "name": "Ingest",
-          "tabIndex": undefined,
-        },
-        Object {
-          "id": "2",
-          "items": Array [
-            Object {
-              "id": "2.1",
-              "items": undefined,
-              "name": "Index Management",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "2.2",
-              "items": undefined,
-              "name": "Index Lifecycle Policies",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "2.3",
-              "items": undefined,
-              "name": "Snapshot and Restore",
-              "tabIndex": undefined,
-            },
-          ],
-          "name": "Data",
-          "tabIndex": undefined,
-        },
+        "xs",
+        "s",
       ]
     }
-    mobileTitle={
-      <React.Fragment>
-        <FormattedMessage
-          defaultMessage="{solutionName} Menu"
-          id="sharedUXComponents.solutionNav.mobileTitleText"
-          values={
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      data-test-subj="DTS"
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
             Object {
-              "solutionName": "Solution",
+              "className": "euiSideNav__mobileToggleContent",
             }
           }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      >
+        <Component
+          aria-hidden={false}
+          data-test-subj="DTS"
+          items={
+            Array [
+              Object {
+                "id": "1",
+                "items": Array [
+                  Object {
+                    "id": "1.1",
+                    "items": undefined,
+                    "name": "Ingest Node Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.2",
+                    "items": undefined,
+                    "name": "Logstash Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.3",
+                    "items": undefined,
+                    "name": "Beats Central Management",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Ingest",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2",
+                "items": Array [
+                  Object {
+                    "id": "2.1",
+                    "items": undefined,
+                    "name": "Index Management",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.2",
+                    "items": undefined,
+                    "name": "Index Lifecycle Policies",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.3",
+                    "items": undefined,
+                    "name": "Snapshot and Restore",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Data",
+                "tabIndex": undefined,
+              },
+            ]
+          }
+          mobileBreakpoints={Array []}
         />
-      </React.Fragment>
+      </div>
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
     }
-    toggleOpenOnMobile={[Function]}
-  />
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      data-test-subj="DTS"
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        size="xs"
+      >
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      >
+        <Component
+          aria-hidden={false}
+          data-test-subj="DTS"
+          items={
+            Array [
+              Object {
+                "id": "1",
+                "items": Array [
+                  Object {
+                    "id": "1.1",
+                    "items": undefined,
+                    "name": "Ingest Node Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.2",
+                    "items": undefined,
+                    "name": "Logstash Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.3",
+                    "items": undefined,
+                    "name": "Beats Central Management",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Ingest",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2",
+                "items": Array [
+                  Object {
+                    "id": "2.1",
+                    "items": undefined,
+                    "name": "Index Management",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.2",
+                    "items": undefined,
+                    "name": "Index Lifecycle Policies",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.3",
+                    "items": undefined,
+                    "name": "Snapshot and Restore",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Data",
+                "tabIndex": undefined,
+              },
+            ]
+          }
+          mobileBreakpoints={Array []}
+        />
+      </div>
+    </nav>
+  </EuiHideFor>
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav heading accepts more headingProps 1`] = `
+<Fragment>
+  <EuiShowFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="testID"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      heading="Side Nav Heading"
+    >
+      <h3
+        id="testID"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
+            Object {
+              "className": "euiSideNav__mobileToggleContent",
+            }
+          }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h3>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="testID"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      heading="Side Nav Heading"
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        id="testID"
+        size="xs"
+      >
+        <h3
+          id="testID"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h3>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiHideFor>
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav heading is hidden with screenReaderOnly 1`] = `
+<Fragment>
+  <EuiShowFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      heading="Side Nav Heading"
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
+            Object {
+              "className": "euiSideNav__mobileToggleContent",
+            }
+          }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      heading="Side Nav Heading"
+    >
+      <EuiScreenReaderOnly>
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiScreenReaderOnly>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiHideFor>
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav heading is rendered 1`] = `
+<Fragment>
+  <EuiShowFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      heading="Side Nav Heading"
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
+            Object {
+              "className": "euiSideNav__mobileToggleContent",
+            }
+          }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      heading="Side Nav Heading"
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        size="xs"
+      >
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiHideFor>
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav isOpenOnMobile defaults to false 1`] = `
+<Fragment>
+  <EuiShowFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
+            Object {
+              "className": "euiSideNav__mobileToggleContent",
+            }
+          }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        size="xs"
+      >
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiHideFor>
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav isOpenOnMobile is rendered when specified as true 1`] = `
+<Fragment>
+  <EuiShowFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      isOpenOnMobile={true}
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
+            Object {
+              "className": "euiSideNav__mobileToggleContent",
+            }
+          }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+      isOpenOnMobile={true}
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        size="xs"
+      >
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiHideFor>
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav mobileBreakpoints can be adjusted is rendered 1`] = `
+<Fragment>
+  <EuiShowFor
+    sizes={
+      Array [
+        "xs",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
+            Object {
+              "className": "euiSideNav__mobileToggleContent",
+            }
+          }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        size="xs"
+      >
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiHideFor>
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav mobileBreakpoints can be adjusted null is rendered 1`] = `
+<Fragment>
+  <EuiShowFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
+            Object {
+              "className": "euiSideNav__mobileToggleContent",
+            }
+          }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
+    }
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        size="xs"
+      >
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      />
+    </nav>
+  </EuiHideFor>
 </Fragment>
 `;
 
 exports[`KibanaPageTemplateSolutionNav renders 1`] = `
 <Fragment>
-  <Component
-    aria-hidden={false}
-    className="kbnPageTemplateSolutionNav"
-    heading={
-      <React.Fragment>
-        <strong>
-          Solution
-        </strong>
-      </React.Fragment>
-    }
-    isOpenOnMobile={false}
-    items={
+  <EuiShowFor
+    sizes={
       Array [
-        Object {
-          "id": "1",
-          "items": Array [
-            Object {
-              "id": "1.1",
-              "items": undefined,
-              "name": "Ingest Node Pipelines",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "1.2",
-              "items": undefined,
-              "name": "Logstash Pipelines",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "1.3",
-              "items": undefined,
-              "name": "Beats Central Management",
-              "tabIndex": undefined,
-            },
-          ],
-          "name": "Ingest",
-          "tabIndex": undefined,
-        },
-        Object {
-          "id": "2",
-          "items": Array [
-            Object {
-              "id": "2.1",
-              "items": undefined,
-              "name": "Index Management",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "2.2",
-              "items": undefined,
-              "name": "Index Lifecycle Policies",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "2.3",
-              "items": undefined,
-              "name": "Snapshot and Restore",
-              "tabIndex": undefined,
-            },
-          ],
-          "name": "Data",
-          "tabIndex": undefined,
-        },
+        "xs",
+        "s",
       ]
     }
-    mobileTitle={
-      <React.Fragment>
-        <FormattedMessage
-          defaultMessage="{solutionName} Menu"
-          id="sharedUXComponents.solutionNav.mobileTitleText"
-          values={
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
             Object {
-              "solutionName": "Solution",
+              "className": "euiSideNav__mobileToggleContent",
             }
           }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      >
+        <Component
+          aria-hidden={false}
+          items={
+            Array [
+              Object {
+                "id": "1",
+                "items": Array [
+                  Object {
+                    "id": "1.1",
+                    "items": undefined,
+                    "name": "Ingest Node Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.2",
+                    "items": undefined,
+                    "name": "Logstash Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.3",
+                    "items": undefined,
+                    "name": "Beats Central Management",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Ingest",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2",
+                "items": Array [
+                  Object {
+                    "id": "2.1",
+                    "items": undefined,
+                    "name": "Index Management",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.2",
+                    "items": undefined,
+                    "name": "Index Lifecycle Policies",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.3",
+                    "items": undefined,
+                    "name": "Snapshot and Restore",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Data",
+                "tabIndex": undefined,
+              },
+            ]
+          }
+          mobileBreakpoints={Array []}
         />
-      </React.Fragment>
+      </div>
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
     }
-    toggleOpenOnMobile={[Function]}
-  />
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        size="xs"
+      >
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      >
+        <Component
+          aria-hidden={false}
+          items={
+            Array [
+              Object {
+                "id": "1",
+                "items": Array [
+                  Object {
+                    "id": "1.1",
+                    "items": undefined,
+                    "name": "Ingest Node Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.2",
+                    "items": undefined,
+                    "name": "Logstash Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.3",
+                    "items": undefined,
+                    "name": "Beats Central Management",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Ingest",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2",
+                "items": Array [
+                  Object {
+                    "id": "2.1",
+                    "items": undefined,
+                    "name": "Index Management",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.2",
+                    "items": undefined,
+                    "name": "Index Lifecycle Policies",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.3",
+                    "items": undefined,
+                    "name": "Snapshot and Restore",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Data",
+                "tabIndex": undefined,
+              },
+            ]
+          }
+          mobileBreakpoints={Array []}
+        />
+      </div>
+    </nav>
+  </EuiHideFor>
 </Fragment>
 `;
 
 exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
 <Fragment>
-  <Component
-    aria-hidden={false}
-    className="kbnPageTemplateSolutionNav"
-    heading={
-      <React.Fragment>
-        <KibanaSolutionAvatar
-          className="kbnPageTemplateSolutionNavAvatar"
-          iconType="logoElastic"
-          name="Solution"
-        />
-        <strong>
-          Solution
-        </strong>
-      </React.Fragment>
-    }
-    isOpenOnMobile={false}
-    items={
+  <EuiShowFor
+    sizes={
       Array [
-        Object {
-          "id": "1",
-          "items": Array [
-            Object {
-              "id": "1.1",
-              "items": undefined,
-              "name": "Ingest Node Pipelines",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "1.2",
-              "items": undefined,
-              "name": "Logstash Pipelines",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "1.3",
-              "items": undefined,
-              "name": "Beats Central Management",
-              "tabIndex": undefined,
-            },
-          ],
-          "name": "Ingest",
-          "tabIndex": undefined,
-        },
-        Object {
-          "id": "2",
-          "items": Array [
-            Object {
-              "id": "2.1",
-              "items": undefined,
-              "name": "Index Management",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "2.2",
-              "items": undefined,
-              "name": "Index Lifecycle Policies",
-              "tabIndex": undefined,
-            },
-            Object {
-              "id": "2.3",
-              "items": undefined,
-              "name": "Snapshot and Restore",
-              "tabIndex": undefined,
-            },
-          ],
-          "name": "Data",
-          "tabIndex": undefined,
-        },
+        "xs",
+        "s",
       ]
     }
-    mobileTitle={
-      <React.Fragment>
-        <KibanaSolutionAvatar
-          className="kbnPageTemplateSolutionNavAvatar"
-          iconType="logoElastic"
-          name="Solution"
-        />
-        <FormattedMessage
-          defaultMessage="{solutionName} Menu"
-          id="sharedUXComponents.solutionNav.mobileTitleText"
-          values={
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <h2
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+      >
+        <EuiButtonEmpty
+          aria-controls="KibanaPageTemplateSolutionNav_generated-id_content"
+          aria-expanded={false}
+          className="euiSideNav__mobileToggle"
+          contentProps={
             Object {
-              "solutionName": "Solution",
+              "className": "euiSideNav__mobileToggleContent",
             }
           }
+          iconSide="right"
+          iconType="apps"
+          onClick={[Function]}
+          textProps={
+            Object {
+              "className": "euiSideNav__mobileToggleText",
+            }
+          }
+        >
+          <KibanaSolutionAvatar
+            className="kbnPageTemplateSolutionNavAvatar"
+            iconType="logoElastic"
+            name="Solution"
+          />
+          <FormattedMessage
+            defaultMessage="{solutionName} Menu"
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            values={
+              Object {
+                "solutionName": "Solution",
+              }
+            }
+          />
+        </EuiButtonEmpty>
+      </h2>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      >
+        <Component
+          aria-hidden={false}
+          items={
+            Array [
+              Object {
+                "id": "1",
+                "items": Array [
+                  Object {
+                    "id": "1.1",
+                    "items": undefined,
+                    "name": "Ingest Node Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.2",
+                    "items": undefined,
+                    "name": "Logstash Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.3",
+                    "items": undefined,
+                    "name": "Beats Central Management",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Ingest",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2",
+                "items": Array [
+                  Object {
+                    "id": "2.1",
+                    "items": undefined,
+                    "name": "Index Management",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.2",
+                    "items": undefined,
+                    "name": "Index Lifecycle Policies",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.3",
+                    "items": undefined,
+                    "name": "Snapshot and Restore",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Data",
+                "tabIndex": undefined,
+              },
+            ]
+          }
+          mobileBreakpoints={Array []}
         />
-      </React.Fragment>
+      </div>
+    </nav>
+  </EuiShowFor>
+  <EuiHideFor
+    sizes={
+      Array [
+        "xs",
+        "s",
+      ]
     }
-    toggleOpenOnMobile={[Function]}
-  />
+  >
+    <nav
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      className="euiSideNav kbnPageTemplateSolutionNav"
+    >
+      <EuiTitle
+        className="euiSideNav__heading"
+        size="xs"
+      >
+        <h2
+          id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        >
+          <KibanaSolutionAvatar
+            className="kbnPageTemplateSolutionNavAvatar"
+            iconType="logoElastic"
+            name="Solution"
+          />
+          <strong>
+            Solution
+          </strong>
+        </h2>
+      </EuiTitle>
+      <div
+        className="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        id="KibanaPageTemplateSolutionNav_generated-id_content"
+      >
+        <Component
+          aria-hidden={false}
+          items={
+            Array [
+              Object {
+                "id": "1",
+                "items": Array [
+                  Object {
+                    "id": "1.1",
+                    "items": undefined,
+                    "name": "Ingest Node Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.2",
+                    "items": undefined,
+                    "name": "Logstash Pipelines",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "1.3",
+                    "items": undefined,
+                    "name": "Beats Central Management",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Ingest",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2",
+                "items": Array [
+                  Object {
+                    "id": "2.1",
+                    "items": undefined,
+                    "name": "Index Management",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.2",
+                    "items": undefined,
+                    "name": "Index Lifecycle Policies",
+                    "tabIndex": undefined,
+                  },
+                  Object {
+                    "id": "2.3",
+                    "items": undefined,
+                    "name": "Snapshot and Restore",
+                    "tabIndex": undefined,
+                  },
+                ],
+                "name": "Data",
+                "tabIndex": undefined,
+              },
+            ]
+          }
+          mobileBreakpoints={Array []}
+        />
+      </div>
+    </nav>
+  </EuiHideFor>
 </Fragment>
 `;
