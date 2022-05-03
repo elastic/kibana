@@ -28,6 +28,11 @@ export class ImportResolver {
     for (const dir of discoverBazelPackageLocations(REPO_ROOT)) {
       const relativeBazelPackageDir = Path.relative(REPO_ROOT, dir);
       const repoRootBazelPackageDir = Path.resolve(repoRoot, relativeBazelPackageDir);
+
+      if (!Fs.existsSync(Path.resolve(repoRootBazelPackageDir, 'package.json'))) {
+        continue;
+      }
+
       const pkg = JSON.parse(
         Fs.readFileSync(Path.resolve(repoRootBazelPackageDir, 'package.json'), 'utf8')
       );
