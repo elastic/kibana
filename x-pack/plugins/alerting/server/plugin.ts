@@ -77,8 +77,8 @@ import { AlertingAuthorizationClientFactory } from './alerting_authorization_cli
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
-import { getExecutionConfigForRuleType } from './lib/get_rules_config';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
+import { getActionsConfigMap } from './lib/get_actions_config_map';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -149,7 +149,7 @@ export interface AlertingPluginsStart {
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
   licensing: LicensingPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
 }
@@ -319,10 +319,6 @@ export class AlertingPlugin {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
-        ruleType.config = getExecutionConfigForRuleType({
-          config: this.config.rules,
-          ruleTypeId: ruleType.id,
-        });
         ruleType.ruleTaskTimeout = getRuleTaskTimeout({
           config: this.config.rules,
           ruleTaskTimeout: ruleType.ruleTaskTimeout,
@@ -378,10 +374,10 @@ export class AlertingPlugin {
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getActiveSpace(request);
+        return plugins.spaces.spacesService.getActiveSpace(request);
       },
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
+        return plugins.spaces.spacesService.getSpaceId(request);
       },
       features: plugins.features,
     });
@@ -437,6 +433,7 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
     });
 

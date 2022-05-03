@@ -910,6 +910,32 @@ export const sampleDocSearchResultsNoSortIdNoHits = (
   },
 });
 
+/**
+ *
+ * @param count Total number of hits to create
+ * @param guids List of _id values for the hits. If this array is smaller than count, the remaining hits will receive a default value.
+ * @param ips List of source.ip values for the hits. If this array is smaller than count, the remaining hits will receive a default value.
+ * @param destIps List of destination.ip values for the hits. If this array is smaller than count, the remaining hits will receive a default value.
+ * @param sortIds List of sort IDs. The same list is inserted into every hit.
+ * @returns Array of mock hits
+ */
+export const repeatedHitsWithSortId = (
+  count: number,
+  guids: string[],
+  ips?: Array<string | string[]>,
+  destIps?: Array<string | string[]>,
+  sortIds?: string[]
+): SignalSourceHit[] => {
+  return Array.from({ length: count }).map((x, index) => ({
+    ...sampleDocWithSortId(
+      guids[index],
+      sortIds,
+      ips ? ips[index] : '127.0.0.1',
+      destIps ? destIps[index] : '127.0.0.1'
+    ),
+  }));
+};
+
 export const repeatedSearchResultsWithSortId = (
   total: number,
   pageSize: number,
@@ -929,14 +955,7 @@ export const repeatedSearchResultsWithSortId = (
   hits: {
     total,
     max_score: 100,
-    hits: Array.from({ length: pageSize }).map((x, index) => ({
-      ...sampleDocWithSortId(
-        guids[index],
-        sortIds,
-        ips ? ips[index] : '127.0.0.1',
-        destIps ? destIps[index] : '127.0.0.1'
-      ),
-    })),
+    hits: repeatedHitsWithSortId(pageSize, guids, ips, destIps, sortIds),
   },
 });
 
