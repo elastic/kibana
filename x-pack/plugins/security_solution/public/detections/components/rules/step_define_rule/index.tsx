@@ -240,17 +240,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // TODO: update the logic for browserField stuff.
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
-  console.error('BEFORE INDICES');
   const [
     initIsIndexPatternLoading,
     { browserFields, indexPatterns: initIndexPattern },
     indexFieldsSearch,
-  ] = useFetchIndex([], false, true);
+  ] = useFetchIndex(index, false);
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
   const [isIndexPatternLoading, setIsIndexPatternLoading] = useState(initIsIndexPatternLoading);
 
-  useEffect(() => console.error('WHAT IS IN THE INDEX PATTERN', indexPattern), [indexPattern]);
+  useEffect(() => {
+    if (radioIdSelected === 'indexPatterns') {
+      setIndexPattern(initIndexPattern);
+    }
+  }, [initIndexPattern, radioIdSelected]);
 
   // useEffect(() => {
   //   indexFieldsSearch(index);
@@ -425,7 +428,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           kibanaDataViews,
           dataViewId: formDataViewId,
           setIndexPattern,
-          useFetchIndex,
           setIsIndexPatternLoading,
         }}
       />

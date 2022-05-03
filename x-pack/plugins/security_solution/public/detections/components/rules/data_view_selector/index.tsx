@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
-import { FetchIndexReturn } from '../../../../common/containers/source';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface DataViewSelectorProps {
   kibanaDataViews: { [x: string]: DataViewListItem };
   field: FieldHook;
   dataViewId?: string;
-  useFetchIndex: (
-    indexNames: string[],
-    onlyCheckIfIndicesExist: boolean,
-    onlyWorkWithSearchCallback: boolean
-  ) => [boolean, FetchIndexReturn, (indices: string[]) => void];
   setIndexPattern: (indexPattern: DataView) => void;
   setIsIndexPatternLoading: (b: boolean) => void;
 }
@@ -33,7 +26,6 @@ export const DataViewSelector = ({
   kibanaDataViews,
   field,
   dataViewId,
-  useFetchIndex,
   setIndexPattern,
   setIsIndexPatternLoading,
 }: DataViewSelectorProps) => {
@@ -44,7 +36,6 @@ export const DataViewSelector = ({
     dataViewId != null && dataViewId.length > 0 ? [{ label: dataViewId }] : []
   );
   const [selectedDataView, setSelectedDataView] = useState<DataViewListItem>();
-  const [runtimeMappings, setRuntimeMappings] = useState<MappingRuntimeFields>();
   useEffect(() => {
     const fetchSingleDataView = async () => {
       if (selectedDataView != null) {

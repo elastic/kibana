@@ -122,8 +122,7 @@ export interface FetchIndexReturn {
  */
 export const useFetchIndex = (
   indexNames: string[],
-  onlyCheckIfIndicesExist: boolean = false,
-  onlyWorkWithSearchCallback: boolean = false
+  onlyCheckIfIndicesExist: boolean = false
 ): [boolean, FetchIndexReturn, (indices: string[]) => void] => {
   // console.error('indexNames', indexNames);
   const { data } = useKibana().services;
@@ -157,8 +156,6 @@ export const useFetchIndex = (
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                console.error('SEARCH STRATEGY INDEX PATTERNS', response);
-
                 const stringifyIndices = response.indicesExist.sort().join();
 
                 previousIndexesName.current = response.indicesExist;
@@ -199,11 +196,7 @@ export const useFetchIndex = (
 
   useEffect(() => {
     // console.error('FETCH', indexNames, previousIndexesName.current);
-    if (
-      onlyWorkWithSearchCallback === false &&
-      !isEmpty(indexNames) &&
-      !isEqual(previousIndexesName.current, indexNames)
-    ) {
+    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
       console.error('executing another search', indexNames);
       indexFieldsSearch(indexNames);
     }
@@ -212,7 +205,7 @@ export const useFetchIndex = (
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [indexNames, indexFieldsSearch, onlyWorkWithSearchCallback]);
+  }, [indexNames, indexFieldsSearch]);
 
   return [isLoading, state, indexFieldsSearch];
 };
