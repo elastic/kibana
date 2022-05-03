@@ -96,6 +96,8 @@ export const HostOverview = React.memo<HostSummaryProps>(
           attrName={fieldName}
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
           isDraggable={isDraggable}
+          isAggregatable={true}
+          fieldType={'keyword'}
         />
       ),
       [contextID, isDraggable]
