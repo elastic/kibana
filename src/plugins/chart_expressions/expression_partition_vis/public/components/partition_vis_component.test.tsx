@@ -12,7 +12,8 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
@@ -143,7 +144,7 @@ describe('PartitionVisComponent', function () {
   });
 
   it('renders the legend toggle component', async () => {
-    const component = mount(<PartitionVisComponent {...wrapperProps} />);
+    const component = mountWithIntl(<PartitionVisComponent {...wrapperProps} />);
     await actWithTimeout(async () => {
       await component.update();
     });
@@ -154,7 +155,7 @@ describe('PartitionVisComponent', function () {
   });
 
   it('hides the legend if the legend toggle is clicked', async () => {
-    const component = mount(<PartitionVisComponent {...wrapperProps} />);
+    const component = mountWithIntl(<PartitionVisComponent {...wrapperProps} />);
     await actWithTimeout(async () => {
       await component.update();
     });
@@ -233,7 +234,7 @@ describe('PartitionVisComponent', function () {
       ],
     } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
-    const component = mount(<PartitionVisComponent {...newProps} />);
+    const component = mountWithIntl(<PartitionVisComponent {...newProps} />);
     expect(findTestSubject(component, 'partitionVisEmptyValues').text()).toEqual(
       'No results found'
     );
@@ -264,7 +265,7 @@ describe('PartitionVisComponent', function () {
       ],
     } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
-    const component = mount(<PartitionVisComponent {...newProps} />);
+    const component = mountWithIntl(<PartitionVisComponent {...newProps} />);
     expect(findTestSubject(component, 'partitionVisNegativeValues').text()).toEqual(
       "Pie chart can't render with negative values."
     );
