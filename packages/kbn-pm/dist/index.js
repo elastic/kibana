@@ -1580,6 +1580,8 @@ var _ciStatsCore = __webpack_require__("../../node_modules/@kbn/ci-stats-core/ta
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
 
 function limitMetaStrings(meta) {
   return Object.fromEntries(Object.entries(meta).map(([key, value]) => {
@@ -1753,19 +1755,56 @@ class CiStatsReporter {
       throw new Error('unable to report tests unless buildId is configured and auth config available');
     }
 
-    return await this.req({
+    const groupResp = await this.req({
       auth: true,
-      path: '/v1/test_group',
+      path: '/v2/test_group',
       query: {
         buildId: (_this$config7 = this.config) === null || _this$config7 === void 0 ? void 0 : _this$config7.buildId
       },
-      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
-      body: [JSON.stringify({
-        group
-      }), ...testRuns.map(testRun => JSON.stringify({
-        testRun
-      }))].join('\n')
+      bodyDesc: `[${group.name}/${group.type}] test group`,
+      body: group
     });
+
+    if (!groupResp) {
+      return;
+    }
+
+    let bufferBytes = 0;
+    const buffer = [];
+
+    const flushBuffer = async () => {
+      var _this$config8;
+
+      await this.req({
+        auth: true,
+        path: '/v2/test_runs',
+        query: {
+          buildId: (_this$config8 = this.config) === null || _this$config8 === void 0 ? void 0 : _this$config8.buildId,
+          groupId: groupResp.groupId,
+          groupType: group.type
+        },
+        bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
+        body: buffer.join('\n'),
+        timeout: 5 * MINUTE
+      });
+      buffer.length = 0;
+      bufferBytes = 0;
+    }; // send test runs in chunks of ~500kb
+
+
+    for (const testRun of testRuns) {
+      const json = JSON.stringify(testRun);
+      bufferBytes += json.length;
+      buffer.push(json);
+
+      if (bufferBytes >= 450000) {
+        await flushBuffer();
+      }
+    }
+
+    if (bufferBytes) {
+      await flushBuffer();
+    }
   }
   /**
    * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
@@ -1815,7 +1854,8 @@ class CiStatsReporter {
     body,
     bodyDesc,
     path,
-    query
+    query,
+    timeout = 60 * SECOND
   }) {
     let attempt = 0;
     const maxAttempts = 5;
@@ -1843,7 +1883,8 @@ class CiStatsReporter {
           adapter: _http.default,
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,
-          maxContentLength: Infinity
+          maxContentLength: Infinity,
+          timeout
         });
         return resp.data;
       } catch (error) {
