@@ -108,41 +108,47 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
 
   process(event: ApmFields): Fields[] | null {
     if (!event['@timestamp']) return null;
-
     const service = event['service.name']!;
     const environment = event['service.environment'] ?? 'production';
     const transactionType = event['transaction.type'] ?? 'request';
     const key = `${service}-${environment}-${transactionType}`;
-    if (!this.state[key]) {
-      this.state[key] = {
-        count: 0,
-        min: 0,
-        max: 0,
-        sum: 0,
-        timestamp: event['@timestamp'],
-        'service.name': service,
-        'service.environment': environment,
-        'transaction.type': transactionType,
-      };
+    const addToState = (timestamp: number) => {
+      if (!this.state[key]) {
+        this.state[key] = {
+          timestamp,
+          count: 0,
+          min: 0,
+          max: 0,
+          sum: 0,
+          'service.name': service,
+          'service.environment': environment,
+          'transaction.type': transactionType,
+        };
+      }
+      const duration = Number(event['transaction.duration.us']);
+      const state = this.state[key];
+
+      state.count++;
+      state.sum += duration;
+      if (duration > state.max) state.max = duration;
+      if (duration < state.min) state.min = Math.min(0, duration);
+    };
+
+    // ensure we flush current state first if event falls out of the current max window age
+    const diff = Math.abs(event['@timestamp'] - this.state[key].timestamp);
+    if (diff >= 1000 * 60) {
+      const fields = this.createServiceFields(key);
+      delete this.state[key];
+      addToState(event['@timestamp']);
+      return [fields];
     }
-    const duration = Number(event['transaction.duration.us']);
-    const state = this.state[key];
 
-    state.count++;
-    state.sum += duration;
-    if (duration > state.max) state.max = duration;
-    if (duration < state.min) state.min = Math.min(0, duration);
-
+    addToState(event['@timestamp']);
+    // if cardinality is too high force emit of current state
     if (Object.keys(this.state).length === 1000) {
       return this.flush();
     }
 
-    const diff = Math.abs(event['@timestamp'] - this.state[service].timestamp);
-    if (diff >= 1000 * 60) {
-      const fields = this.createServiceFields(key);
-      delete this.state[key];
-      return [fields];
-    }
     return null;
   }
 
