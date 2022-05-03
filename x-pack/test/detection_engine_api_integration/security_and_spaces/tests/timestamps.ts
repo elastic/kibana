@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { orderBy } from 'lodash';
-import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
-} from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { ALERT_ORIGINAL_TIME } from '../../../../plugins/security_solution/common/field_maps/field_names';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {

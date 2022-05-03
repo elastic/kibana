@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
   height?: number;
@@ -15,10 +15,10 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border, colors } = euiTheme;
+    const { border, colors, size } = euiTheme;
 
     // 118px = Session View Toolbar height + Close Session button height + spacing margin at the bottom
     const sessionView: CSSObject = {
@@ -44,21 +44,17 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       flexGrow: 0,
       alignItems: 'stretch',
     };
-    const searchBar: CSSObject = {
-      position: 'relative',
-      margin: `${euiTheme.size.m} ${euiTheme.size.xs}`,
-    };
-
-    const buttonsEyeDetail: CSSObject = {
-      margin: `${euiTheme.size.m} ${euiTheme.size.xs}`,
-    };
 
     const sessionViewerComponent: CSSObject = {
       border: border.thin,
       borderRadius: border.radius.medium,
+      '.sessionViewerToolbar': {
+        backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+        padding: `${size.m} ${size.base}`,
+      },
     };
 
-    const toolBar: CSSObject = {
+    const betaBadge: CSSObject = {
       backgroundColor: `${colors.emptyShade}`,
     };
 
@@ -67,12 +63,10 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       detailPanel,
       nonGrowGroup,
       resizeHandle,
-      searchBar,
-      buttonsEyeDetail,
       sessionViewerComponent,
-      toolBar,
+      betaBadge,
     };
-  }, [euiTheme, isFullScreen, height]);
+  }, [euiTheme, isFullScreen, height, euiVars]);
 
   return cached;
 };

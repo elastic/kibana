@@ -8,9 +8,9 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ToastsStart } from 'kibana/public';
+import { ToastsStart } from '@kbn/core/public';
 import React from 'react';
-import { themeServiceMock, applicationServiceMock } from '../../../../../src/core/public/mocks';
+import { themeServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
 import { TableListView } from './table_list_view';
 
 const requiredProps = {

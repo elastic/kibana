@@ -9,7 +9,11 @@
 import * as Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { CiStatsReporter, CiStatsReportTestsOptions, CiStatsTestType } from '@kbn/dev-utils';
+import {
+  CiStatsReporter,
+  CiStatsReportTestsOptions,
+  CiStatsTestType,
+} from '@kbn/ci-stats-reporter';
 
 import { Config } from '../../config';
 import { Runner } from '../../../fake_mocha_types';
@@ -76,6 +80,7 @@ export function setupCiStatsFtrTestGroupReporter({
     durationMs: 0,
     type: config.path.startsWith('x-pack') ? 'X-Pack Functional Tests' : 'Functional Tests',
     name: Path.relative(REPO_ROOT, config.path),
+    result: 'skip',
     meta: {
       ciGroup: config.get('suiteTags.include').find((t: string) => t.startsWith('ciGroup')),
       tags: [
@@ -113,6 +118,11 @@ export function setupCiStatsFtrTestGroupReporter({
     errors.set(test, error);
   });
 
+  let passCount = 0;
+  let failCount = 0;
+  runner.on('pass', () => (passCount += 1));
+  runner.on('fail', () => (failCount += 1));
+
   runner.on('hook end', (hook: Runnable) => {
     if (hook.isFailed()) {
       const error = errors.get(hook);
@@ -146,6 +156,7 @@ export function setupCiStatsFtrTestGroupReporter({
 
     // update the durationMs
     group.durationMs = Date.now() - startMs;
+    group.result = failCount ? 'fail' : passCount ? 'pass' : 'skip';
   });
 
   lifecycle.cleanup.add(async () => {

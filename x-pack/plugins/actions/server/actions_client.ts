@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
@@ -18,8 +18,9 @@ import {
   SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
-} from '../../../../src/core/server';
-import { AuditLogger } from '../../security/server';
+} from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
+import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract, validateConnector } from './lib';
@@ -43,8 +44,8 @@ import {
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
-import { RunNowResult } from '../../task_manager/server';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
+import { isConnectorDeprecated } from './lib/is_conector_deprecated';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -187,6 +188,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
 
@@ -270,6 +272,7 @@ export class ActionsClient {
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
+      isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
 
@@ -306,6 +309,7 @@ export class ActionsClient {
         actionTypeId: preconfiguredActionsList.actionTypeId,
         name: preconfiguredActionsList.name,
         isPreconfigured: true,
+        isDeprecated: isConnectorDeprecated(preconfiguredActionsList),
       };
     }
 
@@ -325,6 +329,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
 
@@ -349,7 +354,9 @@ export class ActionsClient {
         perPage: MAX_ACTIONS_RETURNED,
         type: 'action',
       })
-    ).saved_objects.map(actionFromSavedObject);
+    ).saved_objects.map((rawAction) =>
+      actionFromSavedObject(rawAction, isConnectorDeprecated(rawAction.attributes))
+    );
 
     savedObjectsActions.forEach(({ id }) =>
       this.auditLogger?.log(
@@ -367,6 +374,7 @@ export class ActionsClient {
         actionTypeId: preconfiguredAction.actionTypeId,
         name: preconfiguredAction.name,
         isPreconfigured: true,
+        isDeprecated: isConnectorDeprecated(preconfiguredAction),
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
     return await injectExtraFindData(
@@ -435,7 +443,7 @@ export class ActionsClient {
           `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
         );
       }
-      actionResults.push(actionFromSavedObject(action));
+      actionResults.push(actionFromSavedObject(action, isConnectorDeprecated(action.attributes)));
     }
     return actionResults;
   }
@@ -559,11 +567,15 @@ export class ActionsClient {
   }
 }
 
-function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResult {
+function actionFromSavedObject(
+  savedObject: SavedObject<RawAction>,
+  isDeprecated: boolean
+): ActionResult {
   return {
     id: savedObject.id,
     ...savedObject.attributes,
     isPreconfigured: false,
+    isDeprecated,
   };
 }
 

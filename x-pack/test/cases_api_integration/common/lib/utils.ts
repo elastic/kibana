@@ -15,7 +15,6 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 
 import type SuperTest from 'supertest';
-import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
@@ -24,7 +23,7 @@ import {
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
-} from '../../../../plugins/cases/common/constants';
+} from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
@@ -49,18 +48,20 @@ import {
   ConnectorMappings,
   CasesByAlertId,
   CaseResolveResponse,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
   BulkCreateCommentRequest,
   CommentType,
-} from '../../../../plugins/cases/common/api';
-import { getPostCaseRequest, postCaseReq } from './mock';
-import { getCaseUserActionUrl } from '../../../../plugins/cases/common/api/helpers';
-import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
-import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
+  CasesMetricsResponse,
+} from '@kbn/cases-plugin/common/api';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
+import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
+import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
+import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
-import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
-import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
+import { getPostCaseRequest, postCaseReq } from './mock';
+import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 function toArray<T>(input: T | T[]): T[] {
@@ -217,6 +218,23 @@ export const getServiceNowConnector = () => ({
   },
 });
 
+export const getServiceNowOAuthConnector = () => ({
+  name: 'ServiceNow OAuth Connector',
+  connector_type_id: '.servicenow',
+  secrets: {
+    clientSecret: 'xyz',
+    privateKey: '-----BEGIN RSA PRIVATE KEY-----\nddddddd\n-----END RSA PRIVATE KEY-----',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
+    isOAuth: true,
+    clientId: 'abc',
+    userIdentifierValue: 'elastic',
+    jwtKeyId: 'def',
+  },
+});
+
 export const getJiraConnector = () => ({
   name: 'Jira Connector',
   connector_type_id: '.jira',
@@ -262,7 +280,7 @@ export const getResilientConnector = () => ({
 });
 
 export const getServiceNowSIRConnector = () => ({
-  name: 'ServiceNow Connector',
+  name: 'ServiceNow SIR Connector',
   connector_type_id: '.servicenow-sir',
   secrets: {
     username: 'admin',
@@ -286,6 +304,19 @@ export const getWebhookConnector = () => ({
       'Content-Type': 'text/plain',
     },
     url: 'http://some.non.existent.com',
+  },
+});
+
+export const getEmailConnector = () => ({
+  name: 'An email action',
+  connector_type_id: '.email',
+  config: {
+    service: '__json',
+    from: 'bob@example.com',
+  },
+  secrets: {
+    user: 'bob',
+    password: 'supersecret',
   },
 });
 
@@ -982,7 +1013,7 @@ export const getCaseMetrics = async ({
   features: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CaseMetricsResponse> => {
+}): Promise<SingleCaseMetricsResponse> => {
   const { body: metricsResponse } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics/${caseId}`)
     .query({ features: JSON.stringify(features) })
@@ -1215,4 +1246,47 @@ export const createCaseAndBulkCreateAttachments = async ({
   });
 
   return { theCase: patchedCase, attachments };
+};
+
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const calculateDuration = (closedAt: string | null, createdAt: string | null): number => {
+  if (closedAt == null || createdAt == null) {
+    throw new Error('Dates are null');
+  }
+
+  const createdAtMillis = new Date(createdAt).getTime();
+  const closedAtMillis = new Date(closedAt).getTime();
+
+  if (isNaN(createdAtMillis) || isNaN(closedAtMillis)) {
+    throw new Error('Dates are invalid');
+  }
+
+  if (closedAtMillis < createdAtMillis) {
+    throw new Error('Closed date is earlier than created date');
+  }
+
+  return Math.floor(Math.abs((closedAtMillis - createdAtMillis) / 1000));
+};
+
+export const getCasesMetrics = async ({
+  supertest,
+  features,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  features: string[];
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesMetricsResponse> => {
+  const { body: metricsResponse } = await supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics`)
+    .query({ features: JSON.stringify(features), ...query })
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return metricsResponse;
 };

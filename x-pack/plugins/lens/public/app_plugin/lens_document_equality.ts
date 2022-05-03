@@ -6,7 +6,7 @@
  */
 
 import { isEqual, intersection, union } from 'lodash';
-import { FilterManager } from 'src/plugins/data/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import { DatasourceMap } from '../types';
 import { removePinnedFilters } from './save_modal_container';

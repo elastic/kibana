@@ -10,7 +10,7 @@ import React, { PureComponent } from 'react';
 import { shallow } from 'enzyme';
 
 import { FieldFormatEditor } from './field_format_editor';
-import type { FieldFormat } from '../../../../../../field_formats/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 class TestEditor extends PureComponent {
   render() {

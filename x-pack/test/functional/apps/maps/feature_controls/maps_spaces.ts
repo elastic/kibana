@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { APP_ID } from '@kbn/maps-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { APP_ID } from '../../../../../plugins/maps/common/constants';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');

@@ -6,7 +6,7 @@
  */
 
 import { set } from 'lodash';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { RelatedSavedObjects } from './related_saved_objects';
 
 export type Event = Exclude<IEvent, undefined>;

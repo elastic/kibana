@@ -6,13 +6,13 @@
  */
 
 import { getActionRoute } from './get';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { actionsClientMock } from '../actions_client.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
-jest.mock('./verify_access_and_context.ts', () => ({
+jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -38,6 +38,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: false,
     };
 
@@ -58,6 +59,7 @@ describe('getActionRoute', () => {
           "config": Object {},
           "connector_type_id": "2",
           "id": "1",
+          "is_deprecated": false,
           "is_missing_secrets": false,
           "is_preconfigured": false,
           "name": "action name",
@@ -75,6 +77,7 @@ describe('getActionRoute', () => {
         name: 'action name',
         config: {},
         is_preconfigured: false,
+        is_deprecated: false,
         is_missing_secrets: false,
       },
     });
@@ -95,6 +98,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
@@ -129,6 +133,7 @@ describe('getActionRoute', () => {
       name: 'action name',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(

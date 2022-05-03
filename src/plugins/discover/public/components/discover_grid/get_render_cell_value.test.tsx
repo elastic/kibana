@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { flattenHit } from 'src/plugins/data/public';
+import { flattenHit } from '@kbn/data-plugin/public';
 import { ElasticSearchHit } from '../../types';
 
 jest.mock('../../utils/use_discover_services', () => {
