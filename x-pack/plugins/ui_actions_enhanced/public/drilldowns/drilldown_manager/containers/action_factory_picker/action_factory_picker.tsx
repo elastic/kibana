@@ -14,6 +14,9 @@ export const ActionFactoryPicker: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const factory = drilldowns.useActionFactory();
   const context = React.useMemo(() => drilldowns.getActionFactoryContext(), [drilldowns]);
+  const applicableFactories = drilldowns.deps.actionFactories.filter((actionFactory) =>
+    actionFactory.isConfigurable(context)
+  );
 
   if (!!factory) {
     return <ActionFactoryView factory={factory} context={context} />;
@@ -21,7 +24,7 @@ export const ActionFactoryPicker: React.FC = ({}) => {
 
   return (
     <ActionFactoryPickerUi
-      actionFactories={drilldowns.deps.actionFactories}
+      actionFactories={applicableFactories}
       context={context}
       onSelect={(actionFactory) => {
         drilldowns.setActionFactory(actionFactory);

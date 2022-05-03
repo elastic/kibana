@@ -24,7 +24,7 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { DiscoverSetup } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { execute, isCompatible } from './open_in_discover_helpers';
+import { execute, isCompatible, isLensEmbeddable } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -54,12 +54,12 @@ export interface ActionFactoryContext extends BaseActionFactoryContext {
 }
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
-const URL_DRILLDOWN = 'OPEN_IN_DISCOVER_DRILLDOWN';
+const OPEN_IN_DISCOVER_DRILLDOWN = 'OPEN_IN_DISCOVER_DRILLDOWN';
 
 export class OpenInDiscoverDrilldown
   implements Drilldown<Config, ActionContext, ActionFactoryContext>
 {
-  public readonly id = URL_DRILLDOWN;
+  public readonly id = OPEN_IN_DISCOVER_DRILLDOWN;
 
   constructor(private readonly deps: UrlDrilldownDeps) {}
 
@@ -115,6 +115,10 @@ export class OpenInDiscoverDrilldown
       embeddable: context.embeddable as IEmbeddable,
       ...config,
     });
+  };
+
+  public readonly isConfigurable = (context: ActionFactoryContext) => {
+    return this.deps.hasDiscoverAccess() && isLensEmbeddable(context.embeddable as IEmbeddable);
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {

@@ -21,7 +21,7 @@ interface Context {
   discover: Pick<DiscoverSetup, 'locator'>;
 }
 
-function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embeddable {
+export function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embeddable {
   return embeddable.type === DOC_TYPE;
 }
 

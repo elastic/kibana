@@ -63,5 +63,11 @@ export interface ActionFactoryDefinition<
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
   ): ActionDefinition<ExecutionContext>;
 
+  /**
+   * Compatibility check during drilldown creation.
+   * Could be used to filter out a drilldown if it's not compatible with the current context.
+   */
+  isConfigurable?(context: FactoryContext): boolean;
+
   supportedTriggers(): string[];
 }

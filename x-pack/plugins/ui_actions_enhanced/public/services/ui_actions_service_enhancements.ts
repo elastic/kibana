@@ -116,6 +116,7 @@ export class UiActionsServiceEnhancements
     licenseFeatureName,
     supportedTriggers,
     isCompatible,
+    isConfigurable,
     telemetry,
     extract,
     inject,
@@ -136,6 +137,7 @@ export class UiActionsServiceEnhancements
       inject,
       getIconType: () => euiIcon,
       isCompatible: async () => true,
+      isConfigurable: (context) => !isConfigurable || isConfigurable(context),
       create: (serializedAction) => ({
         id: '',
         type: factoryId,
