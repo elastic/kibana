@@ -32,7 +32,6 @@ import { NAV } from '../../../../../constants';
 import { getSourceData } from '../../../source_data';
 import { AddSourceHeader } from '../add_source_header';
 import { ConfigDocsLinks } from '../config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON } from '../constants';
 
 import { ExternalConnectorDocumentation } from './external_connector_documentation';
 import { ExternalConnectorFormFields } from './external_connector_form_fields';
@@ -43,12 +42,11 @@ export const ExternalConnectorConfig: React.FC = () => {
   const sourceData = getSourceData('external', baseServiceType);
   const { saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
 
-  const { formDisabled, buttonLoading, externalConnectorUrl, externalConnectorApiKey, urlValid } =
-    useValues(ExternalConnectorLogic);
+  const { formDisabled, buttonLoading, urlValid } = useValues(ExternalConnectorLogic);
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();
-    saveExternalConnectorConfig({ url: externalConnectorUrl, apiKey: externalConnectorApiKey });
+    saveExternalConnectorConfig();
   };
 
   const { isOrganization } = useValues(AppLogic);
@@ -65,7 +63,12 @@ export const ExternalConnectorConfig: React.FC = () => {
 
   const saveButton = (
     <EuiButton color="primary" fill isLoading={buttonLoading} disabled={formDisabled} type="submit">
-      {OAUTH_SAVE_CONFIG_BUTTON}
+      {i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.registerButtonLabel',
+        {
+          defaultMessage: 'Register deployment',
+        }
+      )}
     </EuiButton>
   );
 

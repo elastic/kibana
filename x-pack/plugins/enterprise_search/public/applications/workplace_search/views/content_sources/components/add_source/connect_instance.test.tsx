@@ -65,6 +65,7 @@ describe('ConnectInstance', () => {
     subdomainValue: 'foo',
     isOrganization: true,
     hasPlatinumLicense: true,
+    sourceConfigData: {},
   };
 
   beforeEach(() => {

@@ -23,13 +23,13 @@ import { SourceIcon } from '../../../../components/shared/source_icon';
 interface AddSourceHeaderProps {
   name: string;
   serviceType: string;
-  categories: string[];
+  categories?: string[];
 }
 
 export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
   name,
   serviceType,
-  categories,
+  categories = [],
 }) => {
   return (
     <>
@@ -55,7 +55,9 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
             </h1>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
-            {categories.map((category) => startCase(category)).join(', ')}
+            {serviceType === 'external'
+              ? 'Externally deployed connector package'
+              : categories.map((category) => startCase(category)).join(', ')}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

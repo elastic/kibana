@@ -239,6 +239,7 @@ export interface Connector {
   serviceType: string;
   name: string;
   configured: boolean;
+  externalConnectorServiceDescribed?: boolean;
   supportedByLicense: boolean;
   accountContextOnly: boolean;
 }

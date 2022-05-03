@@ -17,28 +17,22 @@ import {
 } from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
-// TODO remove Sharepoint-specific content after BYO connector support
 export const staticGenericExternalSourceData: SourceDataItem = {
-  name: SOURCE_NAMES.SHAREPOINT,
-  categories: [],
+  name: SOURCE_NAMES.CUSTOM_CONNECTOR_PACKAGE,
+  categories: ['API', 'Custom'],
   serviceType: 'external',
   configuration: {
     isPublicKey: false,
-    hasOauthRedirect: true,
+    hasOauthRedirect: false,
     needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
-    applicationPortalUrl: 'https://portal.azure.com/',
+    documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+    applicationPortalUrl: '',
   },
-  objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
+  objTypes: [],
   features: {
-    basicOrgContext: [
-      FeatureIds.SyncFrequency,
-      FeatureIds.SyncedItems,
-      FeatureIds.GlobalAccessPermissions,
-    ],
-    basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
-    platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-    platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+    basicOrgContext: [FeatureIds.SyncFrequency, FeatureIds.GlobalAccessPermissions],
+    platinumOrgContext: [],
+    platinumPrivateContext: [],
   },
   accountContextOnly: false,
   isBeta: true,
@@ -537,8 +531,7 @@ export const staticSourceData: SourceDataItem[] = [
     accountContextOnly: false,
   },
   {
-    name: SOURCE_NAMES.SHAREPOINT,
-    categories: [],
+    name: SOURCE_NAMES.SHAREPOINT_CONNECTOR_PACKAGE,
     serviceType: 'external',
     baseServiceType: 'share_point',
     configuration: {

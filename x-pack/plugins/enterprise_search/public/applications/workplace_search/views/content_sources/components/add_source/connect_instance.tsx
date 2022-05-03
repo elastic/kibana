@@ -61,8 +61,14 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { buttonLoading, loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
-    useValues(AddSourceLogic);
+  const {
+    buttonLoading,
+    loginValue,
+    passwordValue,
+    indexPermissionsValue,
+    subdomainValue,
+    sourceConfigData: { connectionRequiresRedirect },
+  } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -71,6 +77,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
+  const doRedirect = hasOauthRedirect || connectionRequiresRedirect;
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
   const onOauthFormSubmit = () => getSourceConnectData(redirectOauth);
@@ -78,7 +85,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const onSubmit = hasOauthRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
+    const onSubmit = doRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
     onSubmit();
   };
 
@@ -134,7 +141,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   const formFields = (
     <>
       {isOrganization && hasPlatinumLicense && permissionField}
-      {!hasOauthRedirect && credentialsFields}
+      {!doRedirect && credentialsFields}
       {needsSubdomain && subdomainField}
       {permissionsExcluded && !hasPlatinumLicense && <DocumentPermissionsCallout />}
 
