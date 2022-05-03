@@ -30,6 +30,8 @@ import {
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import { queryClient } from '..';
 
+import { CodeBlock } from './code_block';
+
 const fetchPreconfiguredPolicies = async () => {
   const kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`;
 
@@ -63,6 +65,10 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
     ? [comboBoxOptions.find(({ value }) => value === selectedPolicyId)!]
     : [];
 
+  const selectedPolicy = preconfiguredPolicies.data?.find(
+    (policy) => policy.id === selectedPolicyId
+  );
+
   const resetOnePolicyMutation = useMutation(async (policyId: string) => {
     const response = await sendResetOnePreconfiguredAgentPolicy(policyId);
 
@@ -76,6 +82,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
     notifications.toasts.addSuccess('Successfully reset policy');
     queryClient.invalidateQueries('debug-preconfigured-policies');
+    setSelectedPolicyId(undefined);
 
     return response.data;
   });
@@ -93,6 +100,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
     notifications.toasts.addSuccess('Successfully reset all policies');
     queryClient.invalidateQueries('debug-preconfigured-policies');
+    setSelectedPolicyId(undefined);
 
     return response.data;
   });
@@ -180,6 +188,9 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
           <EuiLink target="_blank" href={getHref('policy_details', { policyId: selectedPolicyId })}>
             View Agent Policy in Fleet UI
           </EuiLink>
+
+          <EuiSpacer size="m" />
+          <CodeBlock value={JSON.stringify(selectedPolicy, null, 2)} />
         </>
       )}
     </>
