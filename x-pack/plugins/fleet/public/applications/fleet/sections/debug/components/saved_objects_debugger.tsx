@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiButton,
   EuiSelect,
   EuiSpacer,
   EuiTitle,
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendRequest } from '../../../hooks';
 
@@ -72,14 +70,14 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
     refetchOnWindowFocus: false,
   });
 
-  const onClick = async () => {
-    refetch();
-  };
+  useEffect(() => {
+    if (name) refetch();
+  }, [name, refetch]);
 
   return (
     <>
       <EuiTitle size="l">
-        <h2>Saved Objects Debugger</h2>
+        <h2>Saved Objects</h2>
       </EuiTitle>
 
       <EuiSpacer size="m" />
@@ -97,6 +95,7 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiFormRow>
             <EuiSelect
+              prepend="Type"
               id="soType"
               options={types}
               value={type}
@@ -114,13 +113,6 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
               setNamesStatus={setNamesStatus}
               ref={childRef}
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow>
-            <EuiButton onClick={onClick} fill disabled={!name}>
-              <FormattedMessage id="xpack.fleet.debugger.searchText" defaultMessage="Search" />
-            </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
