@@ -7,16 +7,16 @@ steps:
 
   # - wait
 
-  # - command: .buildkite/scripts/steps/bazel_cache/test.sh
-  #   label: Bootstrap with disk cache
-  #   timeout_in_minutes: 20
-  #   parallelism: 100
-  #   agents:
-  #     queue: n2-4-spot
-
-  - command: .buildkite/scripts/steps/bazel_cache/test_clean.sh
-    label: Bootstrap with no disk cache
+  - command: .buildkite/scripts/steps/bazel_cache/test.sh
+    label: Bootstrap with disk cache
     timeout_in_minutes: 20
     parallelism: 100
     agents:
       queue: n2-4-spot
+
+  # - command: .buildkite/scripts/steps/bazel_cache/test_clean.sh
+  #   label: Bootstrap with no disk cache
+  #   timeout_in_minutes: 20
+  #   parallelism: 100
+  #   agents:
+  #     queue: n2-4-spot
