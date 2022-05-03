@@ -5,10 +5,15 @@
  * 2.0.
  */
 import { set } from '@elastic/safer-lodash-set';
-import { toObjectArrayOfStrings } from '@kbn/security-solution-plugin/common/utils/to_array';
 import { get, isEmpty } from 'lodash/fp';
+import { toObjectArrayOfStrings } from '../../../common/utils/to_array';
 
-export function getFlattenedFields<T>(fields: string[], hitFields: T, fieldMap: Readonly<Record<string, unknown>>, parentField?: string) {
+export function getFlattenedFields<T>(
+  fields: string[],
+  hitFields: T,
+  fieldMap: Readonly<Record<string, unknown>>,
+  parentField?: string
+) {
   return fields.reduce((flattenedFields, fieldName) => {
     const fieldPath = `${fieldName}`;
     const esField = get(`${parentField ?? ''}['${fieldName}']`, fieldMap);
@@ -19,11 +24,11 @@ export function getFlattenedFields<T>(fields: string[], hitFields: T, fieldMap: 
         return set(
           flattenedFields,
           fieldPath,
-          toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+          toObjectArrayOfStrings(fieldValue).map(({ str }) => str)
         );
       }
     }
 
     return flattenedFields;
   }, {});
-};
+}
