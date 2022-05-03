@@ -7,18 +7,102 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const STATUS_CRITICAL_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsByStatus.donut.criticalLabel',
+  {
+    defaultMessage: 'Critical',
+  }
+);
+export const STATUS_HIGH_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsByStatus.donut.highLabel',
+  {
+    defaultMessage: 'High',
+  }
+);
+export const STATUS_MEDIUM_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsByStatus.donut.mediumLabel',
+  {
+    defaultMessage: 'Medium',
+  }
+);
+export const STATUS_LOW_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsByStatus.donut.lowLabel',
+  {
+    defaultMessage: 'Low',
+  }
+);
+export const STATUS_ACKNOWLEDGED = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsByStatus.status.acknowledged',
+  {
+    defaultMessage: 'Acknowledged',
+  }
+);
+export const STATUS_OPEN = i18n.translate('xpack.securitySolution.detectionResponse.status.open', {
+  defaultMessage: 'Open',
+});
+export const STATUS_CLOSED = i18n.translate(
+  'xpack.securitySolution.detectionResponse.status.closed',
+  {
+    defaultMessage: 'Closed',
+  }
+);
+export const STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.status.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+export const ALERTS = (totalAlerts: number) =>
+  i18n.translate('xpack.securitySolution.detectionResponse.alertsByStatus.totalAlerts', {
+    values: { totalAlerts },
+    defaultMessage: 'total {totalAlerts, plural, =1 {alert} other {alerts}}',
+  });
+export const ALERTS_TEXT = i18n.translate('xpack.securitySolution.detectionResponse.alerts', {
+  defaultMessage: 'Alerts',
+});
 export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
   defaultMessage: 'Updating...',
 });
 export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
   defaultMessage: 'Updated',
 });
+export const CASES = (totalCases: number) =>
+  i18n.translate('xpack.securitySolution.detectionResponse.casesByStatus.totalCases', {
+    values: { totalCases },
+    defaultMessage: 'total {totalCases, plural, =1 {case} other {cases}}',
+  });
+export const CASES_BY_STATUS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.casesByStatusSectionTitle',
+  {
+    defaultMessage: 'Cases',
+  }
+);
+
+export const VIEW_CASES = i18n.translate('xpack.securitySolution.detectionResponse.viewCases', {
+  defaultMessage: 'View cases',
+});
+
 export const RULE_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.ruleAlertsSectionTitle',
   {
     defaultMessage: 'Open alerts by rule',
   }
 );
+
+export const HOST_ALERTS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.hostAlertsSectionTitle',
+  {
+    defaultMessage: 'Vulnerable hosts by severity',
+  }
+);
+
+export const USER_ALERTS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.userAlertsSectionTitle',
+  {
+    defaultMessage: 'Vulnerable users by severity',
+  }
+);
+
 export const NO_ALERTS_FOUND = i18n.translate(
   'xpack.securitySolution.detectionResponse.noRuleAlerts',
   {
@@ -66,5 +150,33 @@ export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionResponse.openAllAlertsButton',
   {
     defaultMessage: 'View all open alerts',
+  }
+);
+
+export const VIEW_ALL_USER_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.viewAllUserAlerts',
+  {
+    defaultMessage: 'View all other user alerts',
+  }
+);
+
+export const VIEW_ALL_HOST_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.viewAllHostAlerts',
+  {
+    defaultMessage: 'View all other host alerts',
+  }
+);
+
+export const HOST_ALERTS_HOSTNAME_COLUMN = i18n.translate(
+  'xpack.securitySolution.detectionResponse.hostAlertsHostName',
+  {
+    defaultMessage: 'Host name',
+  }
+);
+
+export const USER_ALERTS_USERNAME_COLUMN = i18n.translate(
+  'xpack.securitySolution.detectionResponse.userAlertsUserName',
+  {
+    defaultMessage: 'User name',
   }
 );
