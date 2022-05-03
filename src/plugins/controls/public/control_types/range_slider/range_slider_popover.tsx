@@ -25,6 +25,8 @@ import { RangeValue } from './types';
 
 export interface Props {
   id: string;
+  ignoreValidation?: boolean;
+  isInvalid?: boolean;
   isLoading?: boolean;
   min: string;
   max: string;
@@ -36,6 +38,8 @@ export interface Props {
 
 export const RangeSliderPopover: FC<Props> = ({
   id,
+  ignoreValidation,
+  isInvalid,
   isLoading,
   min,
   max,
@@ -52,6 +56,11 @@ export const RangeSliderPopover: FC<Props> = ({
   let helpText = '';
 
   const hasAvailableRange = min !== '' && max !== '';
+
+  if (!hasAvailableRange) {
+    helpText = RangeSliderStrings.popover.getNoAvailableDataHelpText();
+  }
+
   const hasLowerBoundSelection = value[0] !== '';
   const hasUpperBoundSelection = value[1] !== '';
 
@@ -60,18 +69,11 @@ export const RangeSliderPopover: FC<Props> = ({
   const minValue = parseFloat(min);
   const maxValue = parseFloat(max);
 
-  if (!hasAvailableRange) {
-    helpText = 'There is no data to display. Adjust the time range and filters.';
-  }
-
   // EuiDualRange can only handle integers as min/max
   const roundedMin = hasAvailableRange ? Math.floor(minValue) : minValue;
   const roundedMax = hasAvailableRange ? Math.ceil(maxValue) : maxValue;
 
-  const isLowerSelectionInvalid = hasLowerBoundSelection && lowerBoundValue > roundedMax;
-  const isUpperSelectionInvalid = hasUpperBoundSelection && upperBoundValue < roundedMin;
-  const isSelectionInvalid =
-    hasAvailableRange && (isLowerSelectionInvalid || isUpperSelectionInvalid);
+  const isSelectionInvalid = !ignoreValidation && hasAvailableRange && isInvalid;
 
   if (isSelectionInvalid) {
     helpText = RangeSliderStrings.popover.getNoDataHelpText();
@@ -127,9 +129,7 @@ export const RangeSliderPopover: FC<Props> = ({
             controlOnly
             fullWidth
             className={`rangeSliderAnchor__fieldNumber ${
-              hasLowerBoundSelection && isSelectionInvalid
-                ? 'rangeSliderAnchor__fieldNumber--invalid'
-                : ''
+              hasLowerBoundSelection && isInvalid ? 'rangeSliderAnchor__fieldNumber--invalid' : ''
             }`}
             value={hasLowerBoundSelection ? lowerBoundValue : ''}
             onChange={(event) => {
@@ -137,7 +137,7 @@ export const RangeSliderPopover: FC<Props> = ({
             }}
             disabled={!hasAvailableRange || isLoading}
             placeholder={`${hasAvailableRange ? roundedMin : ''}`}
-            isInvalid={isLowerSelectionInvalid}
+            isInvalid={isInvalid}
             data-test-subj="rangeSlider__lowerBoundFieldNumber"
           />
         </EuiFlexItem>
@@ -151,9 +151,7 @@ export const RangeSliderPopover: FC<Props> = ({
             controlOnly
             fullWidth
             className={`rangeSliderAnchor__fieldNumber ${
-              hasUpperBoundSelection && isSelectionInvalid
-                ? 'rangeSliderAnchor__fieldNumber--invalid'
-                : ''
+              hasUpperBoundSelection && isInvalid ? 'rangeSliderAnchor__fieldNumber--invalid' : ''
             }`}
             value={hasUpperBoundSelection ? upperBoundValue : ''}
             onChange={(event) => {
@@ -161,7 +159,7 @@ export const RangeSliderPopover: FC<Props> = ({
             }}
             disabled={!hasAvailableRange || isLoading}
             placeholder={`${hasAvailableRange ? roundedMax : ''}`}
-            isInvalid={isUpperSelectionInvalid}
+            isInvalid={isInvalid}
             data-test-subj="rangeSlider__upperBoundFieldNumber"
           />
         </EuiFlexItem>
