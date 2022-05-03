@@ -12,7 +12,7 @@ import type { LayoutParams } from '../../../common';
 import { LayoutTypes } from '../../../common';
 import type { Layout } from '../../layouts';
 import type { CaptureMetrics, CaptureOptions, CaptureResult } from '../../screenshots';
-import { Actions, EventLogger } from '../../screenshots/event_logger';
+import { EventLogger, Transactions } from '../../screenshots/event_logger';
 import { pngsToPdf } from './pdf_maker';
 
 /**
@@ -121,7 +121,7 @@ export async function toPdf(
     };
   } catch (error) {
     eventLogger.kbnLogger.error(`Could not generate the PDF buffer!`);
-    eventLogger.error(error, Actions.PDF);
+    eventLogger.error(error, Transactions.PDF);
 
     throw error;
   }

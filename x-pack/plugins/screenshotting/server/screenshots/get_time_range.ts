@@ -8,7 +8,7 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_GETTIMERANGE } from './constants';
-import { Actions, EventLogger } from './event_logger';
+import { Actions, EventLogger, Transactions } from './event_logger';
 
 export const getTimeRange = async (
   browser: HeadlessChromiumDriver,
@@ -18,7 +18,7 @@ export const getTimeRange = async (
   const spanEnd = eventLogger.log(
     'looking for time range',
     Actions.GET_TIMERANGE,
-    'screenshotting',
+    Transactions.SCREENSHOTTING,
     'read'
   );
 

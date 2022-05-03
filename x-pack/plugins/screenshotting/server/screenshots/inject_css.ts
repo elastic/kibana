@@ -10,7 +10,7 @@ import { promisify } from 'util';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_INJECTCSS } from './constants';
-import { Actions, EventLogger } from './event_logger';
+import { Actions, EventLogger, Transactions } from './event_logger';
 
 const fsp = { readFile: promisify(fs.readFile) };
 
@@ -29,7 +29,7 @@ export const injectCustomCss = async (
   const spanEnd = eventLogger.log(
     'inject CSS into the page',
     Actions.INJECT_CSS,
-    'screenshotting',
+    Transactions.SCREENSHOTTING,
     'correction'
   );
 

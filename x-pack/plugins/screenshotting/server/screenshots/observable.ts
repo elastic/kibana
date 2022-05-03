@@ -13,7 +13,7 @@ import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
 import type { Layout } from '../layouts';
-import { Actions, EventLogger } from './event_logger';
+import { Actions, EventLogger, Transactions } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -197,7 +197,7 @@ export class ScreenshotObservableHandler {
       const spanEnd = this.eventLogger.log(
         'get positions of visualization elements',
         Actions.GET_ELEMENT_POSITION_DATA,
-        'screenshotting',
+        Transactions.SCREENSHOTTING,
         'read'
       );
       try {

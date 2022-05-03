@@ -15,7 +15,6 @@ import { ElementPosition } from '../get_element_position_data';
 import { Screenshot } from '../get_screenshots';
 
 export enum Actions {
-  SCREENSHOTTING = 'screenshot-pipeline',
   OPEN_URL = 'open-url',
   GET_ELEMENT_POSITION_DATA = 'get-element-position-data',
   GET_NUMBER_OF_ITEMS = 'get-number-of-items',
@@ -26,12 +25,15 @@ export enum Actions {
   WAIT_RENDER = 'wait-for-render',
   WAIT_VISUALIZATIONS = 'wait-for-visualizations',
   GET_SCREENSHOT = 'get-screenshots',
-  PDF = 'generate-pdf',
   ADD_IMAGE = 'add-pdf-image',
   COMPILE = 'compile-pdf',
 }
 
-export type TransactionType = 'generatePdf' | 'screenshotting';
+export enum Transactions {
+  SCREENSHOTTING = 'screenshot-pipeline',
+  PDF = 'generate-pdf',
+}
+
 export type SpanTypes = 'setup' | 'read' | 'wait' | 'correction' | 'output';
 
 export interface ScreenshottingAction extends LogMeta {
@@ -43,7 +45,7 @@ export interface ScreenshottingAction extends LogMeta {
   message: string;
   kibana: {
     screenshotting: {
-      action: Actions;
+      action: Actions | Transactions;
       session_id: string;
 
       // chromium stats
@@ -82,8 +84,8 @@ type LogAdapter = (
   startTime?: Date | undefined
 ) => void;
 
-type ScreenshottingEndFn = ({ metrics, results }: CaptureResult) => void;
-type GeneratePdfEndFn = (action: Partial<SimpleEvent>) => void;
+type Labels = Record<keyof SimpleEvent, number | string | undefined>;
+type TransactionEndFn = (args: { labels: Partial<Labels> }) => void;
 type LogEndFn = (metricData?: Partial<SimpleEvent>) => void;
 
 function fillLogData(
@@ -138,26 +140,23 @@ function logAdapter(logger: Logger, sessionId: string) {
  */
 export class EventLogger {
   private spans = new Map<Actions, apm.Span | null | undefined>();
-  private transactions: Record<TransactionType, null | apm.Transaction> = {
-    screenshotting: null,
-    generatePdf: null,
+  private transactions: Record<Transactions, null | apm.Transaction> = {
+    'screenshot-pipeline': null,
+    'generate-pdf': null,
   };
 
   private sessionId: string; // identifier to track all logs from one screenshotting flow
   private logEvent: LogAdapter;
-  private timings: Partial<Record<Actions, Date>> = {};
+  private timings: Partial<Record<Actions | Transactions, Date>> = {};
 
   constructor(private readonly logger: Logger, private readonly config: ConfigType) {
     this.sessionId = uuid.v4();
     this.logEvent = logAdapter(logger.get('events'), this.sessionId);
   }
 
-  private startTiming(a: Actions) {
+  private startTiming(a: Actions | Transactions) {
     this.timings[a] = new Date(Date.now());
   }
-
-  private sumScreenshotsByteLength = (byteLength: number, screenshot: Screenshot) =>
-    byteLength + screenshot.data.byteLength;
 
   /**
    * @returns Logger - original logger
@@ -167,56 +166,31 @@ export class EventLogger {
   }
 
   /**
-   * Specific method for logging the beginning of the screenshotting pipeline
+   * General method for logging the beginning of any of this plugin's pipeline
    *
    * @returns {ScreenshottingEndFn}
    */
-  public screenshottingTransaction(): ScreenshottingEndFn {
-    this.transactions.screenshotting = apm.startTransaction(Actions.SCREENSHOTTING, PLUGIN_ID);
-    this.startTiming(Actions.SCREENSHOTTING);
-    this.logEvent('screenshot pipeline', 'start', { action: Actions.SCREENSHOTTING });
+  public startTransaction(
+    action: Transactions.SCREENSHOTTING | Transactions.PDF
+  ): TransactionEndFn {
+    this.transactions[action] = apm.startTransaction(action, PLUGIN_ID);
+    const transaction = this.transactions[action];
 
-    return ({ metrics, results }) => {
-      const cpu = metrics?.cpu;
-      const memory = metrics?.memory;
-      const byteLength = results.reduce(
-        (totals, { screenshots }) => totals + screenshots.reduce(this.sumScreenshotsByteLength, 0),
-        0
-      );
+    this.startTiming(action);
 
-      this.transactions.screenshotting?.setLabel('cpu', cpu, false);
-      this.transactions.screenshotting?.setLabel('memory', memory, false);
-      this.transactions.screenshotting?.setLabel('byte-length', byteLength, false);
-      this.transactions.screenshotting?.end();
-      this.logEvent(
-        'screenshot pipeline',
-        'complete',
-        { action: Actions.SCREENSHOTTING, byte_length: byteLength, cpu, memory },
-        this.timings[Actions.SCREENSHOTTING]
-      );
-    };
-  }
+    this.logEvent(action, 'start', { action });
 
-  /**
-   * Specific method for logging the beginning of the PDF generation pipeline
-   *
-   * @returns {GeneratePdfEndFn}
-   */
-  public pdfTransaction(): GeneratePdfEndFn {
-    this.transactions.generatePdf = apm.startTransaction(Actions.PDF, PLUGIN_ID);
-    this.startTiming(Actions.PDF);
-    this.logEvent('pdf generation', 'start', { action: Actions.PDF });
+    return ({ labels }) => {
+      this.logEvent(action, 'complete', { action });
 
-    return (action) => {
-      this.transactions.generatePdf?.setLabel('byte-length', action.byte_length_pdf, false);
-      this.transactions.generatePdf?.setLabel('pdf-pages', action.pdf_pages, false);
-      this.transactions.generatePdf?.end();
-      this.logEvent(
-        'pdf generation',
-        'complete',
-        { ...action, action: Actions.PDF },
-        this.timings[Actions.PDF]
-      );
+      Object.entries(labels).forEach(([label]) => {
+        const labelField = label as keyof SimpleEvent;
+        const labelValue = labels[labelField];
+        transaction?.setLabel(label, labelValue, false);
+      });
+      transaction?.end();
+
+      this.logEvent(action, 'complete', { action });
     };
   }
 
@@ -235,7 +209,7 @@ export class EventLogger {
   public log(
     message: string,
     action: Actions,
-    transaction: TransactionType,
+    transaction: Transactions,
     type: SpanTypes,
     metricsPre: Partial<SimpleEvent> = {}
   ): LogEndFn {
@@ -258,6 +232,22 @@ export class EventLogger {
   }
 
   /**
+   * Helper function to calculate the byte length of a set of captured PNG images
+   */
+  public getByteLengthFromCaptureResults(results: CaptureResult['results']) {
+    const totalByteLength = results.reduce(
+      (totals, { screenshots }) =>
+        totals +
+        screenshots.reduce(
+          (byteLength: number, screenshot: Screenshot) => byteLength + screenshot.data.byteLength,
+          0
+        ),
+      0
+    );
+    return totalByteLength;
+  }
+
+  /**
    * Helper function to create the "metricPre" data needed to log the start
    * of a screenshot capture event.
    */
@@ -277,7 +267,7 @@ export class EventLogger {
    * @param {Actions} action: The screenshotting action type
    * @returns void
    */
-  public error(error: ErrorAction | string, action: Actions) {
+  public error(error: ErrorAction | string, action: Actions | Transactions) {
     const isError = typeof error === 'object';
     const message = `Error: ${isError ? error.message : error}`;
 

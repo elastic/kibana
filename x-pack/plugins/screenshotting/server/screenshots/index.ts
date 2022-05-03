@@ -44,7 +44,7 @@ import {
 } from '../formats';
 import type { Layout } from '../layouts';
 import { createLayout } from '../layouts';
-import { Actions, EventLogger } from './event_logger';
+import { EventLogger, Transactions } from './event_logger';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
 import { Semaphore } from './semaphore';
@@ -150,7 +150,7 @@ export class Screenshots {
                   screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
                   this.logger.error(error);
-                  eventLogger.error(error, Actions.SCREENSHOTTING);
+                  eventLogger.error(error, Transactions.SCREENSHOTTING);
                   return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
                 }),
                 takeUntil(unexpectedExit$),
@@ -231,14 +231,21 @@ export class Screenshots {
     }
 
     const eventLogger = new EventLogger(this.logger, this.config);
-    const transactionEnd = eventLogger.screenshottingTransaction();
+    const transactionEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
 
     const layout = this.createLayout(options);
     const captureOptions = this.getCaptureOptions(options);
 
     return this.captureScreenshots(eventLogger, layout, captureOptions).pipe(
-      tap((results) => {
-        transactionEnd(results);
+      tap(({ results, metrics }) => {
+        transactionEnd({
+          labels: {
+            cpu: metrics?.cpu,
+            memory: metrics?.memory,
+            memory_mb: metrics?.memoryInMegabytes,
+            byte_length: eventLogger.getByteLengthFromCaptureResults(results),
+          },
+        });
       }),
       mergeMap((result) => {
         switch (options.format) {

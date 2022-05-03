@@ -6,7 +6,7 @@
  */
 
 import type { HeadlessChromiumDriver } from '../browsers';
-import { Actions, EventLogger } from './event_logger';
+import { Actions, EventLogger, Transactions } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 
 export interface Screenshot {
@@ -42,7 +42,7 @@ export const getScreenshots = async (
       const endScreenshot = eventLogger.log(
         'screenshot capture',
         Actions.GET_SCREENSHOT,
-        'screenshotting',
+        Transactions.SCREENSHOTTING,
         'read',
         eventLogger.getPixelsFromElementPosition(item.position)
       );
