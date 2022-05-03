@@ -115,15 +115,15 @@ export const validateThreshold = (rule: ImportRulesSchema): string[] => {
   return errors;
 };
 
-export const importRuleValidateTypeDependents = (schema: ImportRulesSchema): string[] => {
+export const importRuleValidateTypeDependents = (rule: ImportRulesSchema): string[] => {
   return [
-    ...validateAnomalyThreshold(schema),
-    ...validateQuery(schema),
-    ...validateLanguage(schema),
-    ...validateSavedId(schema),
-    ...validateMachineLearningJobId(schema),
-    ...validateTimelineId(schema),
-    ...validateTimelineTitle(schema),
-    ...validateThreshold(schema),
+    ...validateAnomalyThreshold(rule),
+    ...validateQuery(rule),
+    ...validateLanguage(rule),
+    ...validateSavedId(rule),
+    ...validateMachineLearningJobId(rule),
+    ...validateTimelineId(rule),
+    ...validateTimelineTitle(rule),
+    ...validateThreshold(rule),
   ];
 };

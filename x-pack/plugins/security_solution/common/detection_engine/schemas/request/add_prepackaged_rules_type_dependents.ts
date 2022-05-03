@@ -101,6 +101,9 @@ export const validateThreshold = (rule: AddPrepackagedRulesSchema): string[] => 
     if (!rule.threshold) {
       errors.push('when "type" is "threshold", "threshold" is required');
     } else {
+      if (rule.threshold.value <= 0) {
+        errors.push('"threshold.value" has to be bigger than 0');
+      }
       if (
         rule.threshold.cardinality?.length &&
         rule.threshold.field.includes(rule.threshold.cardinality[0].field)
@@ -116,16 +119,16 @@ export const validateThreshold = (rule: AddPrepackagedRulesSchema): string[] => 
 };
 
 export const addPrepackagedRuleValidateTypeDependents = (
-  schema: AddPrepackagedRulesSchema
+  rule: AddPrepackagedRulesSchema
 ): string[] => {
   return [
-    ...validateAnomalyThreshold(schema),
-    ...validateQuery(schema),
-    ...validateLanguage(schema),
-    ...validateSavedId(schema),
-    ...validateMachineLearningJobId(schema),
-    ...validateTimelineId(schema),
-    ...validateTimelineTitle(schema),
-    ...validateThreshold(schema),
+    ...validateAnomalyThreshold(rule),
+    ...validateQuery(rule),
+    ...validateLanguage(rule),
+    ...validateSavedId(rule),
+    ...validateMachineLearningJobId(rule),
+    ...validateTimelineId(rule),
+    ...validateTimelineTitle(rule),
+    ...validateThreshold(rule),
   ];
 };

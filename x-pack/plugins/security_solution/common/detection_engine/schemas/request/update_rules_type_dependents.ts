@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isThresholdRule } from '../../utils';
 import { UpdateRulesSchema } from './rule_schemas';
 
 export const validateTimelineId = (rule: UpdateRulesSchema): string[] => {
@@ -44,10 +43,9 @@ export const validateId = (rule: UpdateRulesSchema): string[] => {
   }
 };
 
-/*
 export const validateThreshold = (rule: UpdateRulesSchema): string[] => {
   const errors: string[] = [];
-  if (isThresholdRule(rule.type)) {
+  if (rule.type === 'threshold') {
     if (!rule.threshold) {
       errors.push('when "type" is "threshold", "threshold" is required');
     } else {
@@ -64,13 +62,12 @@ export const validateThreshold = (rule: UpdateRulesSchema): string[] => {
   }
   return errors;
 };
-*/
 
-export const updateRuleValidateTypeDependents = (schema: UpdateRulesSchema): string[] => {
+export const updateRuleValidateTypeDependents = (rule: UpdateRulesSchema): string[] => {
   return [
-    ...validateId(schema),
-    ...validateTimelineId(schema),
-    ...validateTimelineTitle(schema),
-    // ...validateThreshold(schema),
+    ...validateId(rule),
+    ...validateTimelineId(rule),
+    ...validateTimelineTitle(rule),
+    ...validateThreshold(rule),
   ];
 };

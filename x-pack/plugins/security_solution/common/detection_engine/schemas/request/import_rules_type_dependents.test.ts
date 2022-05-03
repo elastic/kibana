@@ -75,17 +75,4 @@ describe('import_rules_type_dependents', () => {
     const errors = importRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['when "type" is "threshold", "threshold" is required']);
   });
-
-  test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
-    const schema: ImportRulesSchema = {
-      ...getImportRulesSchemaMock(),
-      type: 'threshold',
-      threshold: {
-        field: '',
-        value: -1,
-      },
-    };
-    const errors = importRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
-  });
 });

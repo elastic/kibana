@@ -91,4 +91,36 @@ describe('add_prepackaged_rules_type_dependents', () => {
     const errors = addPrepackagedRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
   });
+
+  test('threshold.field should contain 3 items or less', () => {
+    const schema: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      type: 'threshold',
+      threshold: {
+        field: ['field-1', 'field-2', 'field-3', 'field-4'],
+        value: 1,
+      },
+    };
+    const errors = addPrepackagedRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['Number of fields must be 3 or less']);
+  });
+
+  test('threshold.cardinality[0].field should not be in threshold.field', () => {
+    const schema: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      type: 'threshold',
+      threshold: {
+        field: ['field-1', 'field-2', 'field-3'],
+        value: 1,
+        cardinality: [
+          {
+            field: 'field-1',
+            value: 2,
+          },
+        ],
+      },
+    };
+    const errors = addPrepackagedRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['Cardinality of a field that is being aggregated on is always 1']);
+  });
 });

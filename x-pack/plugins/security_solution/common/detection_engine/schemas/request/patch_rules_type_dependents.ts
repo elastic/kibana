@@ -6,7 +6,6 @@
  */
 
 import { isMlRule } from '../../../machine_learning/helpers';
-import { isThresholdRule } from '../../utils';
 import { PatchRulesSchema } from './patch_rules_schema';
 
 export const validateQuery = (rule: PatchRulesSchema): string[] => {
@@ -69,26 +68,6 @@ export const validateId = (rule: PatchRulesSchema): string[] => {
   }
 };
 
-export const validateThreshold = (rule: PatchRulesSchema): string[] => {
-  const errors: string[] = [];
-  if (isThresholdRule(rule.type)) {
-    if (!rule.threshold) {
-      errors.push('when "type" is "threshold", "threshold" is required');
-    } else {
-      if (
-        rule.threshold.cardinality?.length &&
-        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
-      ) {
-        errors.push('Cardinality of a field that is being aggregated on is always 1');
-      }
-      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
-        errors.push('Number of fields must be 3 or less');
-      }
-    }
-  }
-  return errors;
-};
-
 export const patchRuleValidateTypeDependents = (schema: PatchRulesSchema): string[] => {
   return [
     ...validateId(schema),
@@ -96,6 +75,5 @@ export const patchRuleValidateTypeDependents = (schema: PatchRulesSchema): strin
     ...validateLanguage(schema),
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
-    ...validateThreshold(schema),
   ];
 };
