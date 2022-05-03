@@ -33,6 +33,8 @@ import { AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
 import { KIBANA_DATE_FORMAT } from '../../../common/constants';
 import { useStyles } from './styles';
+import { SplitText } from './split_text';
+import { Nbsp } from './nbsp';
 
 export interface ProcessDeps {
   process: Process;
@@ -255,12 +257,19 @@ export function ProcessTreeNode({
           onClick={onProcessClicked}
         >
           {isSessionLeader ? (
-            <>
-              <EuiIcon type={sessionIcon} css={styles.icon} />{' '}
-              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
-              <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
-              <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
-            </>
+            <span css={styles.sessionLeader}>
+              <EuiIcon type={sessionIcon} css={styles.icon} />
+              <Nbsp />
+              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>
+              <Nbsp />
+              <span>
+                <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />
+              </span>
+              <Nbsp />
+              <EuiIcon type="user" />
+              <Nbsp />
+              <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
+            </span>
           ) : (
             <>
               {showTimestamp && (
@@ -273,10 +282,10 @@ export function ProcessTreeNode({
               </EuiToolTip>
               <span ref={textRef} css={styles.textSection}>
                 <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>
-                <span css={styles.textSpacing}>&nbsp;</span>
+                <Nbsp />
                 <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>
-                <span css={styles.textSpacing}>&nbsp;</span>
-                <span>{args?.slice(1).join(' ')}</span>
+                <Nbsp />
+                <SplitText>{args?.slice(1).join(' ') || ''}</SplitText>
               </span>
             </>
           )}

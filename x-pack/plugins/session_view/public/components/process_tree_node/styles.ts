@@ -31,6 +31,8 @@ export const useStyles = ({
     const { colors, border, size, font } = euiTheme;
 
     const ALERT_INDICATOR_WIDTH = '3px';
+    const LINE_HEIGHT = '21px';
+    const FONT_SIZE = '13px';
     const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
     const PROCESS_TREE_LEFT_PADDING = size.s;
 
@@ -83,15 +85,19 @@ export const useStyles = ({
 
     const { bgColor, borderColor, hoverColor, searchResColor } = getHighlightColors();
 
+    const fontSpacingReset: CSSObject = {
+      fontSize: 0,
+      lineHeight: 0,
+    };
+
     const processNode: CSSObject = {
+      ...fontSpacingReset,
       display: 'block',
       cursor: 'pointer',
       position: 'relative',
-      padding: `${size.xs} 0px`,
       marginBottom: isSessionLeader ? size.s : '0px',
       '&:hover:before': {
         backgroundColor: hoverColor,
-        transform: `translateY(-${ALERT_INDICATOR_WIDTH})`,
       },
       '&:before': {
         position: 'absolute',
@@ -102,16 +108,25 @@ export const useStyles = ({
         borderLeft: `${ALERT_INDICATOR_WIDTH} solid ${borderColor}`,
         backgroundColor: bgColor,
         width: `calc(100% + ${depth} * ${TREE_INDENT} + ${PROCESS_TREE_LEFT_PADDING})`,
-        transform: `translateY(-${ALERT_INDICATOR_WIDTH})`,
       },
     };
 
     const textSection: CSSObject = {
-      fontSize: 0,
-      verticalAlign: 'middle',
       marginLeft: size.s,
       span: {
-        fontSize: '13px',
+        fontSize: FONT_SIZE,
+        lineHeight: LINE_HEIGHT,
+        verticalAlign: 'middle',
+        display: 'inline-block',
+      },
+    };
+
+    const sessionLeader: CSSObject = {
+      ...fontSpacingReset,
+      'span, b': {
+        fontSize: FONT_SIZE,
+        lineHeight: LINE_HEIGHT,
+        display: 'inline-block',
         verticalAlign: 'middle',
       },
     };
@@ -128,8 +143,7 @@ export const useStyles = ({
       verticalAlign: 'middle',
       color: euiVars.euiTextSubduedColor,
       wordBreak: 'break-all',
-      minHeight: `calc(${size.l} - ${size.xxs})`,
-      lineHeight: `calc(${size.l} - ${size.xxs})`,
+      padding: `${size.xs} 0px`,
       button: {
         marginLeft: '6px',
         marginRight: size.xxs,
@@ -150,17 +164,13 @@ export const useStyles = ({
       paddingRight: size.base,
       paddingLeft: size.xxl,
       position: 'relative',
+      lineHeight: LINE_HEIGHT,
     };
 
     const alertDetails: CSSObject = {
       padding: size.s,
       border: border.editable,
       borderRadius: border.radius.medium,
-    };
-
-    const textSpacing: CSSObject = {
-      width: '6px',
-      display: 'inline-block',
     };
 
     return {
@@ -174,7 +184,7 @@ export const useStyles = ({
       alertDetails,
       icon,
       textSection,
-      textSpacing,
+      sessionLeader,
     };
   }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars, isSessionLeader]);
 
