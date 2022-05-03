@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "ml",
+    "name": "Machine Learning UI",
     "githubTeam": "ml-ui"
   },
   "description": "AIOps plugin maintained by ML team.",

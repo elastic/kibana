@@ -185,10 +185,11 @@
 /x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
 /x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
 
-# ML team owns and maintains the transform plugin despite it living in the Data management section.
-/x-pack/plugins/transform/  @elastic/ml-ui
+# Additional plugins maintained by the ML team.
+/x-pack/plugins/aiops/ @elastic/ml-ui
 /x-pack/plugins/data_visualizer/ @elastic/ml-ui
 /x-pack/plugins/file_upload/ @elastic/ml-ui
+/x-pack/plugins/transform/  @elastic/ml-ui
 /x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
