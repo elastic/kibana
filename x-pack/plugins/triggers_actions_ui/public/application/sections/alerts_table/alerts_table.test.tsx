@@ -26,6 +26,8 @@ const columns = [
   },
 ];
 
+const flyoutBody = () => <h2>Test flyout body</h2>;
+
 const hookUseKibanaMock = useKibana as jest.Mock;
 const alertsTableConfigurationRegistryMock =
   hookUseKibanaMock().services.alertsTableConfigurationRegistry;
@@ -34,7 +36,7 @@ alertsTableConfigurationRegistryMock.has.mockImplementation((plugin: string) => 
 });
 alertsTableConfigurationRegistryMock.get.mockImplementation((plugin: string) => {
   if (plugin === PLUGIN_ID) {
-    return { columns };
+    return { columns, flyoutBody };
   }
   return {};
 });

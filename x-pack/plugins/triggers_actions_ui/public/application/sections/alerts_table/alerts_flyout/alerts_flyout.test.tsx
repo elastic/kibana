@@ -18,6 +18,22 @@ const props = {
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
   },
+  alertsTableConfiguration: {
+    id: 'test',
+    columns: [
+      {
+        id: AlertsField.name,
+        displayAsText: 'Name',
+        initialWidth: 150,
+      },
+      {
+        id: AlertsField.reason,
+        displayAsText: 'Reason',
+        initialWidth: 250,
+      },
+    ],
+    flyoutBody: () => <h2>Test flyout body</h2>,
+  },
   onClose,
   onPaginateNext,
   onPaginatePrevious,
