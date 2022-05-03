@@ -301,12 +301,12 @@ export const EXCLUDE_ELASTIC_CLOUD_INDICES = [
 const sortWithExcludesAtEnd = (indices: string[]) => {
   const allSorted = indices.reduce(
     (acc: { includes: string[]; excludes: string[] }, index) =>
-      index.split('').shift() === '-'
-        ? { includes: acc.includes.sort(), excludes: [...acc.excludes, index].sort() }
-        : { includes: [...acc.includes, index].sort(), excludes: acc.excludes.sort() },
+      index.trim().startsWith('-')
+        ? { includes: acc.includes, excludes: [...acc.excludes, index] }
+        : { includes: [...acc.includes, index], excludes: acc.excludes },
     { includes: [], excludes: [] }
   );
-  return [...allSorted.includes, ...allSorted.excludes];
+  return [...allSorted.includes.sort(), ...allSorted.excludes.sort()];
 };
 
 export const useSourcererDataView = (

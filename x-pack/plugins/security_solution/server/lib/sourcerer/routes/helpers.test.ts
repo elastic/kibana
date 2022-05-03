@@ -28,4 +28,19 @@ describe('sourcerer helpers', () => {
     expect(esClient.fieldCaps.mock.calls[0][0].index).toEqual('a');
     expect(esClient.fieldCaps.mock.calls[1][0].index).toEqual('b');
   });
+  it('findExistingIndices removes leading / trailing whitespace, and dashes from exclude patterns', async () => {
+    await findExistingIndices(
+      [
+        '   include-with-leading-and-trailing-whitespace    ',
+        '   -exclude-with-leading-and-trailing-whitespace   ',
+      ],
+      esClient as unknown as ElasticsearchClient
+    );
+    expect(esClient.fieldCaps.mock.calls[0][0].index).toEqual(
+      'include-with-leading-and-trailing-whitespace'
+    );
+    expect(esClient.fieldCaps.mock.calls[1][0].index).toEqual(
+      'exclude-with-leading-and-trailing-whitespace'
+    );
+  });
 });

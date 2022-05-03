@@ -417,7 +417,7 @@ describe('Sourcerer Hooks', () => {
       });
     });
 
-    it('Should put any excludes in the index pattern at the end of the pattern list', async () => {
+    it('Should put any excludes in the index pattern at the end of the pattern list, and sort both the includes and excludes', async () => {
       await act(async () => {
         store = createStore(
           {
@@ -429,13 +429,13 @@ describe('Sourcerer Hooks', () => {
                 [SourcererScopeName.default]: {
                   ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
                   selectedPatterns: [
+                    '-packetbeat-*',
                     'endgame-*',
                     'auditbeat-*',
                     'filebeat-*',
                     'winlogbeat-*',
                     '-filebeat-*',
                     'packetbeat-*',
-                    '-packetbeat-*',
                     'traces-apm*',
                     'apm-*-transaction*',
                   ],
