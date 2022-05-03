@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { AiopsPlugin } from './plugin';
-
-export type AiopsPluginSetup = ReturnType<AiopsPlugin['setup']>;
-export type AiopsPluginStart = ReturnType<AiopsPlugin['start']>;
-
-// eslint-disable-next-line
-export interface AppPluginStartDependencies {}
+export { AiopsSelector } from './aiops_selector';
+export { ExplainLogRateSpikesPage } from './explain_log_rate_spikes';

@@ -217,6 +217,26 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           },
         ],
       },
+      {
+        id: 'aiops',
+        name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
+          defaultMessage: 'AIOps',
+        }),
+        disabled: false,
+        pathId: ML_PAGES.AIOPS,
+        testSubj: 'mlMainTab aiops',
+        items: [
+          {
+            id: 'explainlogratespikes',
+            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES,
+            name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
+              defaultMessage: 'Explain log rate spikes',
+            }),
+            disabled: false,
+            testSubj: 'mlMainTab explainLogRateSpikes',
+          },
+        ],
+      },
     ];
   }, [mlFeaturesDisabled, canViewMlNodes]);
 

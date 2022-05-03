@@ -8,7 +8,6 @@
 import React, { useReducer, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -19,7 +18,6 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
-  EuiPageHeader,
   EuiProgress,
   EuiSpacer,
   EuiTitle,
@@ -27,9 +25,6 @@ import {
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 
 import { Cards, WinCard, CancelCard } from './cards';
 import { streamFetch } from './stream_fetch';
@@ -42,13 +37,10 @@ import {
 } from './stream_reducer';
 
 interface AiopsAppDeps {
-  basename: string;
   notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  navigation: NavigationPublicPluginStart;
 }
 
-export const AiopsApp = ({ basename, notifications, navigation }: AiopsAppDeps) => {
+export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
   // Use React hooks to manage state.
   const [state, dispatch] = useReducer(streamReducer, initialState);
 
@@ -74,91 +66,68 @@ export const AiopsApp = ({ basename, notifications, navigation }: AiopsAppDeps) 
   // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
-    <Router basename={basename}>
-      <I18nProvider>
-        <>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={false}
-            useDefaultBehaviors={false}
-          />
-          <EuiPage restrictWidth="1000px">
-            <EuiPageBody>
-              <EuiPageHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="aiops.helloWorldText"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="aiops.congratulationsTitle"
-                        defaultMessage="Single endpoint streaming demo"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
-                  <EuiText>
-                    <EuiFlexGroup alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                          {!state.isRunning && (
-                            <FormattedMessage
-                              id="aiops.startbuttonText"
-                              defaultMessage="Commence fighting!"
-                            />
-                          )}
-                          {state.isRunning && (
-                            <FormattedMessage
-                              id="aiops.cancelbuttonText"
-                              defaultMessage="Flee from the battle!"
-                            />
-                          )}
-                        </EuiButton>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText>
-                          <p>{state.progress}</p>
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiProgress value={state.progress} max={100} size="xs" />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer />
-                    <EuiFlexGroup gutterSize="l">
-                      {state.isRunning && <Cards cards={state.entities} />}
-                      {!state.isRunning && state.progress === 100 && (
-                        <WinCard
-                          description={i18n.translate('aiops.streamFetch.winCardDescription', {
-                            defaultMessage: 'You defeated {defeatedOrcs} orcs.',
-                            values: {
-                              defeatedOrcs: Object.values(state.entities).reduce(
-                                (p, c) => p + c,
-                                0
-                              ),
-                            },
-                          })}
+    <I18nProvider>
+      <EuiPage restrictWidth="1000px">
+        <EuiPageBody>
+          <EuiPageContent>
+            <EuiPageContentHeader>
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage
+                    id="aiops.congratulationsTitle"
+                    defaultMessage="Single endpoint streaming demo"
+                  />
+                </h2>
+              </EuiTitle>
+            </EuiPageContentHeader>
+            <EuiPageContentBody>
+              <EuiText>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
+                      {!state.isRunning && (
+                        <FormattedMessage
+                          id="aiops.startbuttonText"
+                          defaultMessage="Commence fighting!"
                         />
                       )}
-                      {state.isCancelled && <CancelCard />}
-                    </EuiFlexGroup>
-                  </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
-        </>
-      </I18nProvider>
-    </Router>
+                      {state.isRunning && (
+                        <FormattedMessage
+                          id="aiops.cancelbuttonText"
+                          defaultMessage="Flee from the battle!"
+                        />
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      <p>{state.progress}</p>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiProgress value={state.progress} max={100} size="xs" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+                <EuiFlexGroup gutterSize="l">
+                  {state.isRunning && <Cards cards={state.entities} />}
+                  {!state.isRunning && state.progress === 100 && (
+                    <WinCard
+                      description={i18n.translate('aiops.streamFetch.winCardDescription', {
+                        defaultMessage: 'You defeated {defeatedOrcs} orcs.',
+                        values: {
+                          defeatedOrcs: Object.values(state.entities).reduce((p, c) => p + c, 0),
+                        },
+                      })}
+                    />
+                  )}
+                  {state.isCancelled && <CancelCard />}
+                </EuiFlexGroup>
+              </EuiText>
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </I18nProvider>
   );
 };
