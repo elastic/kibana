@@ -14,19 +14,14 @@ import {
   createServiceError,
   getPushedDate,
   throwIfSubActionIsNotSupported,
-  getAccessToken,
   getAxiosInstance,
 } from './utils';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { actionsConfigMock } from '../../actions_config.mock';
-import { createJWTAssertion } from '../lib/create_jwt_assertion';
-import { requestOAuthJWTToken } from '../lib/request_oauth_jwt_token';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 
-jest.mock('../lib/create_jwt_assertion', () => ({
-  createJWTAssertion: jest.fn(),
-}));
-jest.mock('../lib/request_oauth_jwt_token', () => ({
-  requestOAuthJWTToken: jest.fn(),
+jest.mock('../lib/get_oauth_jwt_access_token', () => ({
+  getOAuthJwtAccessToken: jest.fn(),
 }));
 
 jest.mock('axios', () => ({
@@ -195,7 +190,7 @@ describe('utils', () => {
       });
     });
 
-    test('creates axios instance with interceptor when isOAuth is true and OAuth fields are defined', () => {
+    test('creates axios instance with interceptor when isOAuth is true and OAuth fields are defined', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: {
@@ -235,224 +230,21 @@ describe('utils', () => {
       expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
       expect(createAxiosInstanceMock).toHaveBeenCalledWith();
       expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
-    });
-  });
 
-  describe('getAccessToken', () => {
-    const getAccessTokenOpts = {
-      connectorId: '123',
-      logger,
-      configurationUtilities,
-      credentials: {
-        config: {
-          apiUrl: 'https://servicenow',
-          usesTableApi: true,
-          isOAuth: true,
-          clientId: 'clientId',
-          jwtKeyId: 'jwtKeyId',
-          userIdentifierValue: 'userIdentifierValue',
-        },
-        secrets: {
-          clientSecret: 'clientSecret',
-          privateKey: 'privateKey',
-          privateKeyPassword: 'privateKeyPassword',
-          username: null,
-          password: null,
-        },
-      },
-      snServiceUrl: 'https://dev23432523.service-now.com',
-      connectorTokenClient,
-    };
-    beforeEach(() => {
-      jest.resetAllMocks();
-      jest.clearAllMocks();
-    });
+      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce('Bearer tokentokentoken');
 
-    test('uses stored access token if it exists', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: '1',
-          connectorId: '123',
-          tokenType: 'access_token',
-          token: 'testtokenvalue',
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 10000000000).toISOString(),
-        },
-      });
-      const accessToken = await getAccessToken(getAccessTokenOpts);
-
-      expect(accessToken).toEqual('testtokenvalue');
-      expect(createJWTAssertion as jest.Mock).not.toHaveBeenCalled();
-      expect(requestOAuthJWTToken as jest.Mock).not.toHaveBeenCalled();
-    });
-
-    test('creates new assertion if stored access token does not exist', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: null,
-      });
-      (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-      (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'access_token',
-        accessToken: 'brandnewaccesstoken',
-        expiresIn: 1000,
+      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+        .calls[0][0];
+      expect(await mockRequestCallback({ headers: {} })).toEqual({
+        headers: { Authorization: 'Bearer tokentokentoken' },
       });
 
-      const accessToken = await getAccessToken(getAccessTokenOpts);
-
-      expect(accessToken).toEqual('access_token brandnewaccesstoken');
-      expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
-        logger,
-        'privateKey',
-        'privateKeyPassword',
-        {
-          audience: 'clientId',
-          issuer: 'clientId',
-          subject: 'userIdentifierValue',
-          keyId: 'jwtKeyId',
-        }
-      );
-      expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
-        'https://dev23432523.service-now.com/oauth_token.do',
-        { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
-        logger,
-        configurationUtilities
-      );
-      expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith({
+      expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
         connectorId: '123',
-        token: null,
-        newToken: 'access_token brandnewaccesstoken',
-        expiresInSec: 1000,
-        deleteExisting: false,
-      });
-    });
-
-    test('creates new assertion if stored access token exists but is expired', async () => {
-      const createdAt = new Date().toISOString();
-      const expiresAt = new Date(Date.now() - 100).toISOString();
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: '1',
-          connectorId: '123',
-          tokenType: 'access_token',
-          token: 'testtokenvalue',
-          createdAt,
-          expiresAt,
-        },
-      });
-      (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-      (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'access_token',
-        accessToken: 'brandnewaccesstoken',
-        expiresIn: 1000,
-      });
-
-      const accessToken = await getAccessToken(getAccessTokenOpts);
-
-      expect(accessToken).toEqual('access_token brandnewaccesstoken');
-      expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
-        logger,
-        'privateKey',
-        'privateKeyPassword',
-        {
-          audience: 'clientId',
-          issuer: 'clientId',
-          subject: 'userIdentifierValue',
-          keyId: 'jwtKeyId',
-        }
-      );
-      expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
-        'https://dev23432523.service-now.com/oauth_token.do',
-        { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
-        logger,
-        configurationUtilities
-      );
-      expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith({
-        connectorId: '123',
-        token: {
-          id: '1',
-          connectorId: '123',
-          tokenType: 'access_token',
-          token: 'testtokenvalue',
-          createdAt,
-          expiresAt,
-        },
-        newToken: 'access_token brandnewaccesstoken',
-        expiresInSec: 1000,
-        deleteExisting: false,
-      });
-    });
-
-    test('throws error if createJWTAssertion throws error', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: null,
-      });
-      (createJWTAssertion as jest.Mock).mockImplementationOnce(() => {
-        throw new Error('createJWTAssertion error!!');
-      });
-
-      await expect(getAccessToken(getAccessTokenOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"createJWTAssertion error!!"`
-      );
-    });
-
-    test('throws error if requestOAuthJWTToken throws error', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: null,
-      });
-      (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-      (requestOAuthJWTToken as jest.Mock).mockRejectedValueOnce(
-        new Error('requestOAuthJWTToken error!!')
-      );
-
-      await expect(getAccessToken(getAccessTokenOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"requestOAuthJWTToken error!!"`
-      );
-    });
-
-    test('logs warning if connectorTokenClient.updateOrReplace throws error', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: null,
-      });
-      (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-      (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'access_token',
-        accessToken: 'brandnewaccesstoken',
-        expiresIn: 1000,
-      });
-      connectorTokenClient.updateOrReplace.mockRejectedValueOnce(
-        new Error('updateOrReplace error')
-      );
-
-      const accessToken = await getAccessToken(getAccessTokenOpts);
-
-      expect(accessToken).toEqual('access_token brandnewaccesstoken');
-      expect(logger.warn).toHaveBeenCalledWith(
-        `Not able to update ServiceNow connector token for connectorId: 123 due to error: updateOrReplace error`
-      );
-    });
-
-    test('gets access token if connectorId is not provided', async () => {
-      (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-      (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'access_token',
-        accessToken: 'brandnewaccesstoken',
-        expiresIn: 1000,
-      });
-
-      const accessToken = await getAccessToken({
         logger,
         configurationUtilities,
         credentials: {
           config: {
-            apiUrl: 'https://servicenow',
-            usesTableApi: true,
-            isOAuth: true,
             clientId: 'clientId',
             jwtKeyId: 'jwtKeyId',
             userIdentifierValue: 'userIdentifierValue',
@@ -460,89 +252,12 @@ describe('utils', () => {
           secrets: {
             clientSecret: 'clientSecret',
             privateKey: 'privateKey',
-            privateKeyPassword: 'privateKeyPassword',
-            username: null,
-            password: null,
+            privateKeyPassword: null,
           },
         },
-        snServiceUrl: 'https://dev23432523.service-now.com',
+        tokenUrl: 'https://dev23432523.service-now.com/oauth_token.do',
         connectorTokenClient,
       });
-
-      expect(connectorTokenClient.get).not.toHaveBeenCalled();
-      expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
-      expect(accessToken).toEqual('access_token brandnewaccesstoken');
-      expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
-        logger,
-        'privateKey',
-        'privateKeyPassword',
-        {
-          audience: 'clientId',
-          issuer: 'clientId',
-          subject: 'userIdentifierValue',
-          keyId: 'jwtKeyId',
-        }
-      );
-      expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
-        'https://dev23432523.service-now.com/oauth_token.do',
-        { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
-        logger,
-        configurationUtilities
-      );
-    });
-
-    test('gets access token if connectorTokenClient is not provided', async () => {
-      (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
-      (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
-        tokenType: 'access_token',
-        accessToken: 'brandnewaccesstoken',
-        expiresIn: 1000,
-      });
-
-      const accessToken = await getAccessToken({
-        connectorId: '123',
-        logger,
-        configurationUtilities,
-        credentials: {
-          config: {
-            apiUrl: 'https://servicenow',
-            usesTableApi: true,
-            isOAuth: true,
-            clientId: 'clientId',
-            jwtKeyId: 'jwtKeyId',
-            userIdentifierValue: 'userIdentifierValue',
-          },
-          secrets: {
-            clientSecret: 'clientSecret',
-            privateKey: 'privateKey',
-            privateKeyPassword: 'privateKeyPassword',
-            username: null,
-            password: null,
-          },
-        },
-        snServiceUrl: 'https://dev23432523.service-now.com',
-      });
-
-      expect(connectorTokenClient.get).not.toHaveBeenCalled();
-      expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
-      expect(accessToken).toEqual('access_token brandnewaccesstoken');
-      expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
-        logger,
-        'privateKey',
-        'privateKeyPassword',
-        {
-          audience: 'clientId',
-          issuer: 'clientId',
-          subject: 'userIdentifierValue',
-          keyId: 'jwtKeyId',
-        }
-      );
-      expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
-        'https://dev23432523.service-now.com/oauth_token.do',
-        { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
-        logger,
-        configurationUtilities
-      );
     });
   });
 });

@@ -20,9 +20,8 @@ import { FIELD_PREFIX } from './config';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
 import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ConnectorToken, ConnectorTokenClientContract } from '../../types';
-import { createJWTAssertion } from '../lib/create_jwt_assertion';
-import { requestOAuthJWTToken } from '../lib/request_oauth_jwt_token';
+import { ConnectorTokenClientContract } from '../../types';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 
 export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
   useOldApi
@@ -83,7 +82,7 @@ export const throwIfSubActionIsNotSupported = ({
   }
 };
 
-export interface GetAccessTokenAndAxiosInstanceOpts {
+export interface GetAxiosInstanceOpts {
   connectorId?: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -99,7 +98,7 @@ export const getAxiosInstance = ({
   credentials,
   snServiceUrl,
   connectorTokenClient,
-}: GetAccessTokenAndAxiosInstanceOpts): AxiosInstance => {
+}: GetAxiosInstanceOpts): AxiosInstance => {
   const { config, secrets } = credentials;
   const { isOAuth } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
@@ -114,15 +113,25 @@ export const getAxiosInstance = ({
     axiosInstance = axios.create();
     axiosInstance.interceptors.request.use(
       async (axiosConfig: AxiosRequestConfig) => {
-        const accessToken = await getAccessToken({
+        const accessToken = await getOAuthJwtAccessToken({
           connectorId,
           logger,
           configurationUtilities,
           credentials: {
-            config: config as ServiceNowPublicConfigurationType,
-            secrets,
+            config: {
+              clientId: config.clientId as string,
+              jwtKeyId: config.jwtKeyId as string,
+              userIdentifierValue: config.userIdentifierValue as string,
+            },
+            secrets: {
+              clientSecret: secrets.clientSecret as string,
+              privateKey: secrets.privateKey as string,
+              privateKeyPassword: secrets.privateKeyPassword
+                ? (secrets.privateKeyPassword as string)
+                : null,
+            },
           },
-          snServiceUrl,
+          tokenUrl: `${snServiceUrl}/oauth_token.do`,
           connectorTokenClient,
         });
         axiosConfig.headers.Authorization = accessToken;
@@ -135,86 +144,4 @@ export const getAxiosInstance = ({
   }
 
   return axiosInstance;
-};
-
-export const getAccessToken = async ({
-  connectorId,
-  logger,
-  configurationUtilities,
-  credentials,
-  snServiceUrl,
-  connectorTokenClient,
-}: GetAccessTokenAndAxiosInstanceOpts) => {
-  const { isOAuth, clientId, jwtKeyId, userIdentifierValue } =
-    credentials.config as ServiceNowPublicConfigurationType;
-  const { clientSecret, privateKey, privateKeyPassword } =
-    credentials.secrets as ServiceNowSecretConfigurationType;
-
-  let accessToken: string;
-  let connectorToken: ConnectorToken | null = null;
-  let hasErrors: boolean = false;
-
-  if (connectorId && connectorTokenClient) {
-    // Check if there is a token stored for this connector
-    const { connectorToken: token, hasErrors: errors } = await connectorTokenClient.get({
-      connectorId,
-    });
-    connectorToken = token;
-    hasErrors = errors;
-  }
-
-  if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
-    // generate a new assertion
-    if (
-      !isOAuth ||
-      !clientId ||
-      !clientSecret ||
-      !jwtKeyId ||
-      !privateKey ||
-      !userIdentifierValue
-    ) {
-      return null;
-    }
-
-    const assertion = createJWTAssertion(logger, privateKey, privateKeyPassword, {
-      audience: clientId,
-      issuer: clientId,
-      subject: userIdentifierValue,
-      keyId: jwtKeyId,
-    });
-
-    // request access token with jwt assertion
-    const tokenResult = await requestOAuthJWTToken(
-      `${snServiceUrl}/oauth_token.do`,
-      {
-        clientId,
-        clientSecret,
-        assertion,
-      },
-      logger,
-      configurationUtilities
-    );
-    accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
-
-    // try to update connector_token SO
-    if (connectorId && connectorTokenClient) {
-      try {
-        await connectorTokenClient.updateOrReplace({
-          connectorId,
-          token: connectorToken,
-          newToken: accessToken,
-          expiresInSec: tokenResult.expiresIn,
-          deleteExisting: hasErrors,
-        });
-      } catch (err) {
-        logger.warn(
-          `Not able to update ServiceNow connector token for connectorId: ${connectorId} due to error: ${err.message}`
-        );
-      }
-    }
-  } else {
-    // use existing valid token
-    accessToken = connectorToken.token;
-  }
-  return accessToken;
 };
