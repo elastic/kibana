@@ -355,7 +355,7 @@ describe('date_histogram', () => {
       ).toEqual([expect.objectContaining({ key: 'd' })]);
     });
 
-    it('should render disabled switch and no time interval control for auto interval', () => {
+    it('should render time interval control set to auto for auto interval', () => {
       const thirdLayer: IndexPatternLayer = {
         indexPatternId: '1',
         columnOrder: ['col1'],
@@ -385,8 +385,9 @@ describe('date_histogram', () => {
           indexPattern={indexPattern1}
         />
       );
-      expect(instance.find('[data-test-subj="lensDateHistogramInterval"]').exists()).toBeFalsy();
-      expect(instance.find(EuiSwitch).at(1).prop('checked')).toBe(false);
+      expect(
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('selectedOptions')
+      ).toEqual([expect.objectContaining({ key: 'auto' })]);
     });
 
     it('should allow switching to manual interval', () => {
@@ -463,7 +464,7 @@ describe('date_histogram', () => {
       );
       instance
         .find(EuiSwitch)
-        .at(2)
+        .at(1)
         .simulate('change', {
           target: { checked: false },
         });
@@ -504,16 +505,14 @@ describe('date_histogram', () => {
           indexPattern={{ ...indexPattern1, timeFieldName: undefined }}
         />
       );
-      instance
-        .find(EuiSwitch)
-        .at(1)
-        .simulate('change', {
-          target: { checked: false },
-        });
+      (
+        instance
+          .find('[data-test-subj="lensDateHistogramInterval"]')
+          .prop('onChange') as unknown as (v: Array<{ key: string }>) => void
+      )([{ key: 'auto' }]);
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0];
       expect(newLayer).toHaveProperty('columns.col1.params.ignoreTimeRange', false);
-      expect(newLayer).toHaveProperty('columns.col1.params.interval', 'auto');
     });
 
     it('turns off drop partial bucket on tuning off time range ignore', () => {
@@ -642,7 +641,7 @@ describe('date_histogram', () => {
             .prop('onCreateOption') as (s: string) => void
         )('42d');
       });
-      expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('42d'));
+      expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual(layerWithInterval('42d'));
     });
 
     it('should update the value', () => {
@@ -666,7 +665,7 @@ describe('date_histogram', () => {
             .prop('onCreateOption') as (s: string) => void
         )('9d')
       );
-      expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('9d'));
+      expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual(layerWithInterval('9d'));
     });
 
     it('should not render options if they are restricted', () => {
@@ -751,7 +750,7 @@ describe('date_histogram', () => {
           target: { checked: true },
         });
       expect(updateLayerSpy).toHaveBeenCalled();
-      const newLayer = updateLayerSpy.mock.calls[0][0];
+      const newLayer = updateLayerSpy.mock.calls[0][0](layer);
       expect(newLayer).toHaveProperty('columns.col1.params.dropPartials', true);
     });
   });
