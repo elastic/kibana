@@ -41,14 +41,22 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import {
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
   setupRouteService,
   appRoutesService,
   calculateAuthz,
+  parseExperimentalConfigValue,
 } from '../common';
-import type { CheckPermissionsResponse, PostFleetSetupResponse, FleetAuthz } from '../common';
+import type {
+  CheckPermissionsResponse,
+  PostFleetSetupResponse,
+  FleetAuthz,
+  ExperimentalFeatures,
+} from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
@@ -58,6 +66,7 @@ import { setHttpClient } from './hooks/use_request';
 import { createPackageSearchProvider } from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
+import { ExperimentalFeaturesService } from './services/experimental_features';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
@@ -92,6 +101,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
@@ -110,10 +120,12 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   private config: FleetConfigType;
   private kibanaVersion: string;
   private extensions: UIExtensionsStorage = {};
+  private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
@@ -248,6 +260,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   }
 
   public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
+    ExperimentalFeaturesService.init(this.experimentalFeatures);
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
     const getPermissions = once(() =>
       core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())

@@ -24,6 +24,10 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
     },
     async (context, request, response) => {
       try {
+        const alertingContext = await context.alerting;
+        const infraContext = await context.infra;
+        const actionContext = await context.actions;
+
         const alerts = AlertsFactory.getAll();
         if (alerts.length) {
           const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting
@@ -33,7 +37,7 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
 
           if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
             server.log.info(
-              `Skipping rule creation for "${context.infra.spaceId}" space; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
+              `Skipping rule creation for "${infraContext.spaceId}" space; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
             );
             return response.ok({
               body: {
@@ -44,9 +48,9 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
           }
         }
 
-        const rulesClient = context.alerting?.getRulesClient();
-        const actionsClient = context.actions?.getActionsClient();
-        const types = context.actions?.listTypes();
+        const rulesClient = alertingContext?.getRulesClient();
+        const actionsClient = actionContext?.getActionsClient();
+        const types = actionContext?.listTypes();
         if (!rulesClient || !actionsClient || !types) {
           return response.ok({ body: undefined });
         }
@@ -92,7 +96,7 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
         }
 
         server.log.info(
-          `Created ${createdAlerts.length} alerts for "${context.infra.spaceId}" space`
+          `Created ${createdAlerts.length} alerts for "${infraContext.spaceId}" space`
         );
 
         return response.ok({ body: { createdAlerts, disabledWatcherClusterAlerts } });
