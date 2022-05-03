@@ -88,20 +88,29 @@ export const IconSelect = ({
   value,
   onChange,
   customIconSet = euiIconsSet,
+  defaultIcon = 'empty',
 }: {
   value?: string;
   onChange: (newIcon: string) => void;
   customIconSet?: IconSet;
+  defaultIcon?: string;
 }) => {
   const selectedIcon =
     customIconSet.find((option) => value === option.value) ||
-    customIconSet.find((option) => option.value === 'empty')!;
+    customIconSet.find((option) => option.value === defaultIcon)!;
 
   return (
     <EuiComboBox
+      fullWidth
+      data-test-subj="lns-icon-select"
       isClearable={false}
       options={customIconSet}
-      selectedOptions={[selectedIcon]}
+      selectedOptions={[
+        {
+          label: selectedIcon.label,
+          value: selectedIcon.value,
+        },
+      ]}
       onChange={(selection) => {
         onChange(selection[0].value!);
       }}

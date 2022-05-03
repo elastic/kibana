@@ -105,30 +105,13 @@ async function sendEmailWithExchange(
 
     // try to update connector_token SO
     try {
-      if (connectorToken === null) {
-        if (hasErrors) {
-          // delete existing access tokens
-          await connectorTokenClient.deleteConnectorTokens({
-            connectorId,
-            tokenType: 'access_token',
-          });
-        }
-        await connectorTokenClient.create({
-          connectorId,
-          token: accessToken,
-          // convert MS Exchange expiresIn from seconds to milliseconds
-          expiresAtMillis: new Date(Date.now() + tokenResult.expiresIn * 1000).toISOString(),
-          tokenType: 'access_token',
-        });
-      } else {
-        await connectorTokenClient.update({
-          id: connectorToken.id!.toString(),
-          token: accessToken,
-          // convert MS Exchange expiresIn from seconds to milliseconds
-          expiresAtMillis: new Date(Date.now() + tokenResult.expiresIn * 1000).toISOString(),
-          tokenType: 'access_token',
-        });
-      }
+      await connectorTokenClient.updateOrReplace({
+        connectorId,
+        token: connectorToken,
+        newToken: accessToken,
+        expiresInSec: tokenResult.expiresIn,
+        deleteExisting: hasErrors,
+      });
     } catch (err) {
       logger.warn(
         `Not able to update connector token for connectorId: ${connectorId} due to error: ${err.message}`

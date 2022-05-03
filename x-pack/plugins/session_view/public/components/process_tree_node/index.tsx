@@ -104,7 +104,7 @@ export function ProcessTreeNode({
     [hasAlerts, alerts, investigatedAlertId]
   );
   const isSelected = selectedProcess?.id === process.id;
-  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected });
+  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected, isSessionLeader });
   const buttonStyles = useButtonStyles();
 
   const nodeRef = useVisible({
