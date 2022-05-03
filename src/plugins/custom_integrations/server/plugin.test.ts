@@ -147,7 +147,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'placeholders',
           uiInternalPath:
-            'https://github.com/elastic/elastic-serverless-forwarder/blob/main/docs/README-AWS.md',
+            'https://serverlessrepo.aws.amazon.com/applications/eu-central-1/267093732750/elastic-serverless-forwarder',
           isBeta: false,
           icons: [{ type: 'svg' }],
           categories: ['aws', 'custom'],

@@ -32,7 +32,7 @@ export const integrations: PlaceholderIntegration[] = [
       defaultMessage:
         'Collect logs using AWS Lambda application available in AWS Serverless Application Repository.',
     }),
-    docUrlTemplate: `https://github.com/elastic/elastic-serverless-forwarder/blob/main/docs/README-AWS.md`,
+    docUrlTemplate: `https://serverlessrepo.aws.amazon.com/applications/eu-central-1/267093732750/elastic-serverless-forwarder`,
     categories: ['aws', 'custom'],
   },
 ];
@@ -64,11 +64,7 @@ export function registerPlaceholders(
       description: integration.description,
       type: 'ui_link',
       shipper: 'placeholders',
-      // Documentation for `main` branches is still published at a `master` URL.
-      uiInternalPath: integration.docUrlTemplate.replace(
-        '{branch}',
-        branch === 'main' ? 'master' : branch
-      ),
+      uiInternalPath: integration.docUrlTemplate,
       isBeta: false,
       icons,
       categories: integration.categories,
