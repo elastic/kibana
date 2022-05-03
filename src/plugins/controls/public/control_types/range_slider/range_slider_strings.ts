@@ -42,7 +42,7 @@ export const RangeSliderStrings = {
       }),
     getNoDataHelpText: () =>
       i18n.translate('controls.rangeSlider.popover.noDataHelpText', {
-        defaultMessage: 'Selected range is outside of available data. No filter was applied.',
+        defaultMessage: 'Selected range resulted in no data. No filter was applied.',
       }),
     getNoAvailableDataHelpText: () =>
       i18n.translate('controls.rangeSlider.popover.noAvailableDataHelpText', {
