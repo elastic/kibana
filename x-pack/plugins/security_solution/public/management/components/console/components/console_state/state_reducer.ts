@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ConsoleDataState, ConsoleStoreReducer } from './types';
+import { handleUpdateCommandState } from './state_update_handlers/handle_update_command_state';
+import type { ConsoleDataState, ConsoleStoreReducer } from './types';
 import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
 import { ConsoleBuiltinCommandsService } from '../../service/builtin_command_service';
 
@@ -36,6 +37,9 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
 
     case 'executeCommand':
       return handleExecuteCommand(state, action);
+
+    case 'updateCommandState':
+      return handleUpdateCommandState(state, action);
 
     case 'clear':
       return { ...state, commandHistory: [] };

@@ -6,8 +6,7 @@
  */
 
 import React, { memo, PropsWithChildren, useEffect } from 'react';
-import { EuiCallOut, EuiText } from '@elastic/eui';
-import { UserCommandInput } from './user_command_input';
+import { EuiCallOut } from '@elastic/eui';
 import { ParsedCommandInput } from '../service/parsed_command_input';
 import { CommandDefinition, CommandExecutionComponentProps } from '../types';
 import { CommandInputUsage } from './command_usage';
@@ -31,15 +30,10 @@ export const BadArgument = memo<CommandExecutionComponentProps>(({ command, setS
   }, [setStatus]);
 
   return (
-    <>
-      <EuiText>
-        <UserCommandInput input={command.input} />
-      </EuiText>
-      <EuiCallOut color="danger" data-test-subj={getTestId('badArgument')}>
-        {store.errorMessage}
-        <CommandInputUsage commandDef={command.commandDefinition} />
-      </EuiCallOut>
-    </>
+    <EuiCallOut color="danger" data-test-subj={getTestId('badArgument')}>
+      {store.errorMessage}
+      <CommandInputUsage commandDef={command.commandDefinition} />
+    </EuiCallOut>
   );
 });
 BadArgument.displayName = 'BadArgument';

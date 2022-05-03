@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  memo,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   EuiButton,
   EuiCode,
@@ -34,10 +42,30 @@ class DevCommandService implements CommandServiceInterface {
       {
         name: 'cmd1',
         about: 'Runs cmd1',
-        RenderComponent: ({ command, setStatus }) => {
+        RenderComponent: ({ command, setStatus, store, setStore }) => {
           const isMounted = useIsMounted();
 
           const [response, setResponse] = useState<null | ReactElement>(null);
+
+          useEffect(() => {
+            (async () => {
+              // Emulate an api call
+              if (!store.apiInflight) {
+                setStore({
+                  ...store,
+                  apiInflight: true,
+                });
+
+                window.console.warn('cmd1: doing async work');
+
+                await delay(6000);
+                setStore({
+                  ...store,
+                  apiResponse: `API was called at: ${new Date().toLocaleDateString()}`,
+                });
+              }
+            })();
+          }, [setStore, store]);
 
           useEffect(() => {
             (async () => {
@@ -56,7 +84,16 @@ class DevCommandService implements CommandServiceInterface {
             })();
           }, [command.args, command.commandDefinition.name, command.input, isMounted, setStatus]);
 
-          return response;
+          if (store.apiResponse) {
+            return (
+              <div>
+                {response}
+                <EuiText>{store.apiResponse as ReactNode}</EuiText>
+              </div>
+            );
+          }
+
+          return null;
         },
         args: {
           one: {

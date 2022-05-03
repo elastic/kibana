@@ -31,6 +31,10 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
     /** Updates the Command's status */
     const setCommandStatus = useCallback(
       (status: CommandExecutionState['status']) => {
+        if (status === state.status) {
+          return;
+        }
+
         dispatch({
           type: 'updateCommandState',
           payload: {

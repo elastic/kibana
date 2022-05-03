@@ -78,7 +78,7 @@ export type CommandExecutionComponent = ComponentType<{
    */
   store: Immutable<CommandExecutionState['store']>;
   /** Sets the `store` data above */
-  setStore: (meta: Record<string, unknown>) => void;
+  setStore: (state: CommandExecutionState['store']) => void;
   /**
    * The status of the command execution.
    * Note that the console's UI will show the command as "busy" while the status here is
