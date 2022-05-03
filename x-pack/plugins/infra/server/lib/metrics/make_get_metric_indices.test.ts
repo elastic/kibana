@@ -18,9 +18,7 @@ describe('getMetricIndices', () => {
       configuration: defaultSourceConfiguration,
     };
     const infraSourcesMock = createInfraSourcesMock();
-    infraSourcesMock.getSourceConfiguration.mockReturnValueOnce(
-      Promise.resolve(sourceConfiguration)
-    );
+    infraSourcesMock.getSourceConfiguration.mockResolvedValueOnce(sourceConfiguration);
 
     const getMetricIndices = makeGetMetricIndices(infraSourcesMock);
 
