@@ -19,7 +19,6 @@ export const checkConfiguration: IHealthCheck = async ({
 }) => {
   let hasProblem = false;
   updateStatus('running');
-  updateReport(``);
   updateReport(`Checking Fleet configuration...`);
 
   // Check package registry URL

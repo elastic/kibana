@@ -13,6 +13,7 @@ import type { FleetAuthzRouter } from '../security';
 import { appContextService } from '../../services';
 
 import { checkConfiguration } from './configuration';
+import { checkPackages } from './packages';
 
 /*
  * Dev notes:
@@ -20,7 +21,7 @@ import { checkConfiguration } from './configuration';
  *  to increase timeout (Kibana and ES) settings before running?
  */
 
-type CHECK = 'configuration' | 'fleet_server' | 'packages' | 'agents' | 'policies';
+type CHECK = 'configuration' | 'packages' | 'agents' | 'policies';
 type STATUS = 'not_started' | 'running' | 'healthy' | 'problem';
 
 export type IHealthCheck = (options: HealthCheckOptions) => Promise<void>;
@@ -28,7 +29,7 @@ export interface HealthCheckOptions {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
-  updateReport: (content: string | string[], level?: number) => void;
+  updateReport: (content: string | string[] | Record<string, string>, level?: number) => void;
   updateStatus: (status: STATUS) => void;
 }
 
@@ -49,15 +50,21 @@ export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, un
   let currentCheck: CHECK = 'configuration';
   const checkStatus: Record<CHECK, STATUS> = {
     configuration: 'not_started',
-    fleet_server: 'not_started',
     packages: 'not_started',
     agents: 'not_started',
     policies: 'not_started',
   };
 
   // Helper methods
-  const updateReport = (content: string | string[], level: number = 1) => {
-    const messages = Array.isArray(content) ? content : [content];
+  const updateReport = (content: string | string[] | Record<string, string>, level: number = 1) => {
+    const messages: string[] = [];
+    if (Array.isArray(content)) {
+      messages.push(...content);
+    } else if (typeof content === 'object') {
+      messages.push(...Object.entries(content).map(([key, value]) => `${key}: ${value}`));
+    } else {
+      messages.push(content);
+    }
     let prefix = '';
     let suffix = '';
     switch (level) {
@@ -87,6 +94,7 @@ export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, un
     updateReport(`Starting Fleet health check report`, 0);
 
     // Check configuration
+    updateReport(``);
     await checkConfiguration({
       soClient,
       esClient,
@@ -95,8 +103,22 @@ export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, un
       updateStatus: updateStatus('configuration'),
     });
 
-    // Check Fleet Server
+    updateReport(``);
+    updateReport(`---`);
+
     // Check packages
+    updateReport(``);
+    await checkPackages({
+      soClient,
+      esClient,
+      logger,
+      updateReport,
+      updateStatus: updateStatus('packages'),
+    });
+
+    updateReport(``);
+    updateReport(`---`);
+
     // Check agents
     // Check policies
 
