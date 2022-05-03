@@ -32,9 +32,17 @@ const getWrapper =
   ({ children }) =>
     <TestProvider>{children}</TestProvider>;
 
-const getRuleMock = ({ id = chance.guid(), enabled }: { id?: string; enabled: boolean }) =>
+const getRuleMock = ({
+  savedObjectId = chance.guid(),
+  id = chance.guid(),
+  enabled,
+}: {
+  savedObjectId?: string;
+  id?: string;
+  enabled: boolean;
+}) =>
   ({
-    id,
+    id: savedObjectId,
     updatedAt: chance.date().toISOString(),
     attributes: {
       id,
@@ -101,6 +109,13 @@ describe('<RulesContainer />', () => {
 
     const switchId1 = TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule1.id);
     const switchId2 = TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule2.id);
+
+    expect(screen.getByTestId(switchId1).getAttribute('aria-checked')).toEqual(
+      rule1.attributes.enabled.toString()
+    );
+    expect(screen.getByTestId(switchId2).getAttribute('aria-checked')).toEqual(
+      rule2.attributes.enabled.toString()
+    );
 
     fireEvent.click(screen.getByTestId(switchId1));
     fireEvent.click(screen.getByTestId(switchId2));
