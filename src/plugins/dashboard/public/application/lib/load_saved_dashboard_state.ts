@@ -55,7 +55,6 @@ export const loadSavedDashboardState = async ({
       id: savedDashboardId,
       useResolve: true,
     })) as DashboardSavedObject;
-
     const savedDashboardState = savedObjectToDashboardState({
       savedDashboard,
       usageCollection,
