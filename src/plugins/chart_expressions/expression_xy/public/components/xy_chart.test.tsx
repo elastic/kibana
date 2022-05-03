@@ -51,9 +51,8 @@ import {
 } from '../../common/__mocks__';
 import { XYChart, XYChartRenderProps } from './xy_chart';
 import {
-  AnnotationLayerConfigResult,
+  CommonXYAnnotationLayerConfig,
   ExtendedDataLayerConfig,
-  XYChartProps,
   XYProps,
 } from '../../common/types';
 import { DataLayers } from './data_layers';
@@ -2552,7 +2551,7 @@ describe('XYChart component', () => {
     };
     const createLayerWithAnnotations = (
       annotations: EventAnnotationOutput[] = [defaultLineStaticAnnotation]
-    ): AnnotationLayerConfigResult => ({
+    ): CommonXYAnnotationLayerConfig => ({
       type: 'annotationLayer',
       layerType: LayerTypes.ANNOTATIONS,
       layerId: 'annotation',
@@ -2584,7 +2583,7 @@ describe('XYChart component', () => {
       const { args } = sampleArgsWithAnnotations([
         createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
       ]);
-      (args.layers[1] as AnnotationLayerConfigResult).hide = true;
+      (args.layers[1] as CommonXYAnnotationLayerConfig).hide = true;
       const component = mount(<XYChart {...defaultProps} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
       expect(component.find('RectAnnotation')).toMatchSnapshot();

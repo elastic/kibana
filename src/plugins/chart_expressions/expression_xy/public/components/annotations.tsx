@@ -29,7 +29,6 @@ import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-plugin/public';
-import { AnnotationLayerConfigResult } from '../../common/types';
 import type {
   AnnotationLayerArgs,
   CommonXYAnnotationLayerConfig,
@@ -131,7 +130,7 @@ const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[]) => {
   };
 };
 
-export const getRangeAnnotations = (layers: AnnotationLayerConfigResult[]) => {
+export const getRangeAnnotations = (layers: CommonXYAnnotationLayerConfig[]) => {
   return layers
     .flatMap(({ annotations }) =>
       annotations.filter(
