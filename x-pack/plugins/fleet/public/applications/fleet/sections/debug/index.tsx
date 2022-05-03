@@ -38,6 +38,8 @@ export const DebugPage: React.FunctionComponent = () => {
           <IntegrationDebugger />
           <EuiSpacer size="xl" />
 
+          <EuiHorizontalRule />
+
           <EuiSpacer size="xl" />
           <SavedObjectsDebugger />
           <EuiSpacer size="xl" />
