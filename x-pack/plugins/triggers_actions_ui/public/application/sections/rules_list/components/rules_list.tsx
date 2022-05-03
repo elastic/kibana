@@ -78,6 +78,7 @@ import {
   snoozeRule,
   unsnoozeRule,
   deleteRules,
+  updateAPIKey,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -98,6 +99,7 @@ import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 
 const ENTER_KEY = 13;
 
@@ -208,6 +210,7 @@ export const RulesList: React.FunctionComponent = () => {
     totalItemCount: 0,
   });
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
@@ -865,6 +868,7 @@ export const RulesList: React.FunctionComponent = () => {
                   onRuleChanged={() => loadRulesData()}
                   setRulesToDelete={setRulesToDelete}
                   onEditRule={() => onRuleEdit(item)}
+                  onUpdateAPIKey={setRulesToUpdateAPIKey}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -1274,7 +1278,7 @@ export const RulesList: React.FunctionComponent = () => {
           await loadRulesData();
         }}
         onErrors={async () => {
-          // Refresh the rules from the server, some rules may have beend deleted
+          // Refresh the rules from the server, some rules may have been deleted
           await loadRulesData();
           setRulesToDelete([]);
         }}
@@ -1291,6 +1295,20 @@ export const RulesList: React.FunctionComponent = () => {
         })}
         setIsLoadingState={(isLoading: boolean) => {
           setRulesState({ ...rulesState, isLoading });
+        }}
+      />
+      <UpdateApiKeyModalConfirmation
+        onCancel={() => {
+          setRulesToUpdateAPIKey([]);
+        }}
+        idsToUpdate={rulesToUpdateAPIKey}
+        apiUpdateApiKeyCall={updateAPIKey}
+        setIsLoadingState={(isLoading: boolean) => {
+          setRulesState({ ...rulesState, isLoading });
+        }}
+        onUpdated={async () => {
+          setRulesToUpdateAPIKey([]);
+          await loadRulesData();
         }}
       />
       <EuiSpacer size="xs" />

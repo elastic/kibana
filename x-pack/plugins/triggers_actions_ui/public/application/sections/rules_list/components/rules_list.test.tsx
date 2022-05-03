@@ -6,9 +6,9 @@
  */
 
 import * as React from 'react';
+import { fireEvent, act, render, screen } from '@testing-library/react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList, percentileFields } from './rules_list';
@@ -22,8 +22,10 @@ import {
 import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
 
 import { useKibana } from '../../../../common/lib/kibana';
-jest.mock('../../../../common/lib/kibana');
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { IToasts } from '@kbn/core/public';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
@@ -32,6 +34,7 @@ jest.mock('../../../lib/rule_api', () => ({
   loadRules: jest.fn(),
   loadRuleTypes: jest.fn(),
   loadRuleAggregations: jest.fn(),
+  updateAPIKey: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -59,7 +62,7 @@ jest.mock('../../../lib/capabilities', () => ({
   hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
-const { loadRules, loadRuleTypes, loadRuleAggregations } =
+const { loadRules, loadRuleTypes, loadRuleAggregations, updateAPIKey } =
   jest.requireMock('../../../lib/rule_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -94,6 +97,208 @@ const ruleTypeFromApi = {
 ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+const mockedRulesData = [
+  {
+    id: '1',
+    name: 'test rule',
+    tags: ['tag1'],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '1s' },
+    actions: [],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'active',
+      lastDuration: 500,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: null,
+    },
+    monitoring: {
+      execution: {
+        history: [
+          {
+            success: true,
+            duration: 1000000,
+          },
+          {
+            success: true,
+            duration: 200000,
+          },
+          {
+            success: false,
+            duration: 300000,
+          },
+        ],
+        calculated_metrics: {
+          success_ratio: 0.66,
+          p50: 200000,
+          p95: 300000,
+          p99: 300000,
+        },
+      },
+    },
+  },
+  {
+    id: '2',
+    name: 'test rule ok',
+    tags: ['tag1'],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'ok',
+      lastDuration: 61000,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: null,
+    },
+    monitoring: {
+      execution: {
+        history: [
+          {
+            success: true,
+            duration: 100000,
+          },
+          {
+            success: true,
+            duration: 500000,
+          },
+        ],
+        calculated_metrics: {
+          success_ratio: 1,
+          p50: 0,
+          p95: 100000,
+          p99: 500000,
+        },
+      },
+    },
+  },
+  {
+    id: '3',
+    name: 'test rule pending',
+    tags: ['tag1'],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'pending',
+      lastDuration: 30234,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: null,
+    },
+    monitoring: {
+      execution: {
+        history: [{ success: false, duration: 100 }],
+        calculated_metrics: {
+          success_ratio: 0,
+        },
+      },
+    },
+  },
+  {
+    id: '4',
+    name: 'test rule error',
+    tags: ['tag1'],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'error',
+      lastDuration: 122000,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: {
+        reason: RuleExecutionStatusErrorReasons.Unknown,
+        message: 'test',
+      },
+    },
+  },
+  {
+    id: '5',
+    name: 'test rule license error',
+    tags: [],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'error',
+      lastDuration: 500,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: {
+        reason: RuleExecutionStatusErrorReasons.License,
+        message: 'test',
+      },
+    },
+  },
+  {
+    id: '6',
+    name: 'test rule warning',
+    tags: [],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'warning',
+      lastDuration: 500,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      warning: {
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        message: 'test',
+      },
+    },
+  },
+];
 
 describe('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
@@ -161,208 +366,6 @@ describe('rules_list component empty', () => {
 
 describe('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
-
-  const mockedRulesData = [
-    {
-      id: '1',
-      name: 'test rule',
-      tags: ['tag1'],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '1s' },
-      actions: [],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'active',
-        lastDuration: 500,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: null,
-      },
-      monitoring: {
-        execution: {
-          history: [
-            {
-              success: true,
-              duration: 1000000,
-            },
-            {
-              success: true,
-              duration: 200000,
-            },
-            {
-              success: false,
-              duration: 300000,
-            },
-          ],
-          calculated_metrics: {
-            success_ratio: 0.66,
-            p50: 200000,
-            p95: 300000,
-            p99: 300000,
-          },
-        },
-      },
-    },
-    {
-      id: '2',
-      name: 'test rule ok',
-      tags: ['tag1'],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'ok',
-        lastDuration: 61000,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: null,
-      },
-      monitoring: {
-        execution: {
-          history: [
-            {
-              success: true,
-              duration: 100000,
-            },
-            {
-              success: true,
-              duration: 500000,
-            },
-          ],
-          calculated_metrics: {
-            success_ratio: 1,
-            p50: 0,
-            p95: 100000,
-            p99: 500000,
-          },
-        },
-      },
-    },
-    {
-      id: '3',
-      name: 'test rule pending',
-      tags: ['tag1'],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'pending',
-        lastDuration: 30234,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: null,
-      },
-      monitoring: {
-        execution: {
-          history: [{ success: false, duration: 100 }],
-          calculated_metrics: {
-            success_ratio: 0,
-          },
-        },
-      },
-    },
-    {
-      id: '4',
-      name: 'test rule error',
-      tags: ['tag1'],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'error',
-        lastDuration: 122000,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: {
-          reason: RuleExecutionStatusErrorReasons.Unknown,
-          message: 'test',
-        },
-      },
-    },
-    {
-      id: '5',
-      name: 'test rule license error',
-      tags: [],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'error',
-        lastDuration: 500,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: {
-          reason: RuleExecutionStatusErrorReasons.License,
-          message: 'test',
-        },
-      },
-    },
-    {
-      id: '6',
-      name: 'test rule warning',
-      tags: [],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'warning',
-        lastDuration: 500,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        warning: {
-          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-          message: 'test',
-        },
-      },
-    },
-  ];
 
   async function setup(editable: boolean = true) {
     loadRules.mockResolvedValue({
@@ -1082,5 +1085,88 @@ describe('rules_list with disabled items', () => {
     expect(
       wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().content
     ).toEqual('This rule type requires a Platinum license.');
+  });
+});
+
+describe('Update Api Key', () => {
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  beforeAll(() => {
+    loadRules.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 0,
+      data: mockedRulesData,
+    });
+    loadActionTypes.mockResolvedValue([]);
+    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    loadAllActions.mockResolvedValue([]);
+    useKibanaMock().services.notifications.toasts = {
+      addSuccess,
+      addError,
+    } as unknown as IToasts;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Updates the apiKey successfully', async () => {
+    updateAPIKey.mockResolvedValueOnce(204);
+    render(
+      <IntlProvider locale="en">
+        <RulesList />
+      </IntlProvider>
+    );
+    expect(await screen.findByText('test rule ok')).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update APIKey'));
+    expect(screen.getByText('Confirm Update')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.queryByText('Confirm Update')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update APIKey'));
+    expect(screen.getByText('Confirm Update')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('OK'));
+    });
+    expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
+    expect(loadRules).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('Confirm Update')).not.toBeInTheDocument();
+    expect(addSuccess).toHaveBeenCalledWith('Updated');
+  });
+
+  it('Update apiKey fails', async () => {
+    updateAPIKey.mockRejectedValueOnce(500);
+    render(
+      <IntlProvider locale="en">
+        <RulesList />
+      </IntlProvider>
+    );
+
+    expect(await screen.findByText('test rule ok')).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update APIKey'));
+    expect(screen.getByText('Confirm Update')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('OK'));
+    });
+    expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
+    expect(loadRules).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('Confirm Update')).not.toBeInTheDocument();
+    expect(addError).toHaveBeenCalledWith(500, { title: 'Failed' });
   });
 });
