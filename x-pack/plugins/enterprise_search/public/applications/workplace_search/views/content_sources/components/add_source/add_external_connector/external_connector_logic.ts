@@ -48,7 +48,6 @@ export interface ExternalConnectorValues {
   externalConnectorApiKey: string;
   externalConnectorUrl: string;
   urlValid: boolean;
-  sourceConfigData: SourceConfigData | Pick<SourceConfigData, 'name' | 'categories'>;
   insecureUrl: boolean;
   showInsecureUrlCallout: boolean;
 }
@@ -105,12 +104,6 @@ export const ExternalConnectorLogic = kea<
       {
         fetchExternalSource: () => false,
         setShowInsecureUrlCallout: (_, showCallout) => showCallout,
-      },
-    ],
-    sourceConfigData: [
-      { name: '', categories: [] },
-      {
-        fetchExternalSourceSuccess: (_, sourceConfigData) => sourceConfigData,
       },
     ],
     urlValid: [
