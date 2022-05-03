@@ -89,7 +89,7 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
   const [type, setType] = useState(types[0].value);
   const [name, setName] = useState<string | undefined>();
 
-  const onTypeChange = (e) => {
+  const onTypeChange = (e: any) => {
     setType(e.target.value);
     refetchNames();
   };
@@ -112,16 +112,17 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
     refetch: refetchNames,
     status: namesStatus,
   } = useQuery(['debug-saved-object-names', type], () => fetchSavedObjectNames(type), {
-    // enabled: false,
     refetchOnWindowFocus: false,
   });
 
-  const comboBoxOptions = (savedObjectNames ?? []).map((obj) => ({
+  const comboBoxOptions = (savedObjectNames ?? []).map((obj: { key: string }) => ({
     label: obj.key,
     value: obj.key,
   }));
 
-  const selectedOption = comboBoxOptions.find((option) => option.value === name)!;
+  const selectedOption = comboBoxOptions.find(
+    (option: { value: string }) => option.value === name
+  )!;
   const selectedOptions = selectedOption ? [selectedOption] : [];
 
   return (
@@ -175,7 +176,7 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
                   if (!newSelectedOptions.length) {
                     setName(undefined);
                   } else {
-                    setName(newSelectedOptions[0].value);
+                    setName(newSelectedOptions[0].value as string);
                   }
                 }}
               />
