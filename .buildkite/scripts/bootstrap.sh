@@ -5,13 +5,16 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/setup_bazel.sh
 
-REMOTE_CACHE_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/bazel-remote-cache-test)"
+BAZEL_REGION="us-central1"
+if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+  BAZEL_REGION=$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone | rev | cut -c3- | rev)
+fi
+
+BAZEL_BUCKET="kibana-ci-bazel_$BAZEL_REGION"
 
 cat << EOF > .bazelrc
 import %workspace%/.bazelrc.common
-#build --remote_cache=grpc://test:${REMOTE_CACHE_PASSWORD}@34.121.74.141:9092
-#build --experimental_remote_cache_compression
-build --remote_cache=https://storage.googleapis.com/kibana_ci_bazel_remote_cache
+build --remote_cache=https://storage.googleapis.com/$BAZEL_BUCKET
 build --google_default_credentials
 EOF
 
