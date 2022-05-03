@@ -110,7 +110,7 @@ describe('SessionView component', () => {
 
         userEvent.click(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle'));
         expect(renderResult.getByText('Process')).toBeTruthy();
-        expect(renderResult.getByText('Host')).toBeTruthy();
+        expect(renderResult.getByText('Metadata')).toBeTruthy();
         expect(renderResult.getByText('Alerts')).toBeTruthy();
       });
 

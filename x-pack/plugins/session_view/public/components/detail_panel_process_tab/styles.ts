@@ -27,10 +27,15 @@ export const useStyles = () => {
       textOverflow: 'ellipsis',
     };
 
+    const metadataHostOS: CSSObject = {
+      margin: `${euiTheme.size.m} ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}`,
+    };
+
     return {
       descriptionSemibold,
       executableAction,
       ellipsis,
+      metadataHostOS,
     };
   }, [euiTheme]);
 

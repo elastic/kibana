@@ -149,6 +149,8 @@ export interface ProcessEvent {
   kibana?: {
     alert?: ProcessEventAlert;
   };
+  container?: ProcessEventContainer;
+  orchestrator?: ProcessEventOrchestrator;
 }
 
 export interface ProcessEventsPage {
@@ -187,3 +189,27 @@ export interface Process {
 export type ProcessMap = {
   [key: string]: Process;
 };
+
+export interface ProcessEventContainer {
+  id?: string;
+  name?: string;
+  image: {
+    name?: string;
+    tag?: string;
+  };
+}
+
+export interface ProcessEventOrchestrator {
+  resource: {
+    name?: string;
+    type?: string;
+    labels?: string;
+  };
+  namespace?: string;
+  cluster: {
+    version?: string;
+    name?: string;
+  };
+  annotations?: string;
+  owner_resource?: string;
+}

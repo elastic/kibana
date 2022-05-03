@@ -5,8 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiTextColor } from '@elastic/eui';
-import { ProcessEventHost } from '../../../common/types/process_tree';
+import { EuiTextColor, EuiPanel } from '@elastic/eui';
+import {
+  ProcessEventHost,
+  ProcessEventContainer,
+  ProcessEventOrchestrator,
+} from '../../../common/types/process_tree';
 import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelDescriptionList } from '../detail_panel_description_list';
@@ -16,12 +20,18 @@ import { useStyles } from '../detail_panel_process_tab/styles';
 
 interface DetailPanelHostTabDeps {
   processHost?: ProcessEventHost;
+  processContainer?: ProcessEventContainer;
+  processOrchestrator?: ProcessEventOrchestrator;
 }
 
 /**
  * Host Panel of  session view detail panel.
  */
-export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
+export const DetailPanelHostTab = ({
+  processHost,
+  processContainer,
+  processOrchestrator,
+}: DetailPanelHostTabDeps) => {
   const styles = useStyles();
 
   return (
@@ -80,86 +90,269 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           },
         ]}
       />
+      <EuiPanel
+        hasShadow={false}
+        color="subdued"
+        hasBorder={true}
+        borderRadius="m"
+        paddingSize="none"
+        css={styles.metadataHostOS}
+      >
+        <DetailPanelAccordion
+          id="hostOS"
+          title="Host OS"
+          listItems={[
+            {
+              title: <DetailPanelListItem>architecture</DetailPanelListItem>,
+              description: (
+                <DetailPanelCopy
+                  textToCopy={`host.architecture: "${dataOrDash(processHost?.architecture)}"`}
+                >
+                  <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                    {dataOrDash(processHost?.architecture)}
+                  </EuiTextColor>
+                </DetailPanelCopy>
+              ),
+            },
+            {
+              title: <DetailPanelListItem>os.family</DetailPanelListItem>,
+              description: (
+                <DetailPanelCopy
+                  textToCopy={`host.os.family: "${dataOrDash(processHost?.os?.family)}"`}
+                >
+                  <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                    {dataOrDash(processHost?.os?.family)}
+                  </EuiTextColor>
+                </DetailPanelCopy>
+              ),
+            },
+            {
+              title: <DetailPanelListItem>os.full</DetailPanelListItem>,
+              description: (
+                <DetailPanelCopy
+                  textToCopy={`host.os.full: "${dataOrDash(processHost?.os?.full)}"`}
+                >
+                  <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                    {dataOrDash(processHost?.os?.full)}
+                  </EuiTextColor>
+                </DetailPanelCopy>
+              ),
+            },
+            {
+              title: <DetailPanelListItem>os.kernel</DetailPanelListItem>,
+              description: (
+                <DetailPanelCopy
+                  textToCopy={`host.os.kernel: "${dataOrDash(processHost?.os?.kernel)}"`}
+                >
+                  <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                    {dataOrDash(processHost?.os?.kernel)}
+                  </EuiTextColor>
+                </DetailPanelCopy>
+              ),
+            },
+            {
+              title: <DetailPanelListItem>os.name</DetailPanelListItem>,
+              description: (
+                <DetailPanelCopy
+                  textToCopy={`host.os.name: "${dataOrDash(processHost?.os?.name)}"`}
+                >
+                  <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                    {dataOrDash(processHost?.os?.name)}
+                  </EuiTextColor>
+                </DetailPanelCopy>
+              ),
+            },
+            {
+              title: <DetailPanelListItem>os.platform</DetailPanelListItem>,
+              description: (
+                <DetailPanelCopy
+                  textToCopy={`host.os.platform: "${dataOrDash(processHost?.os?.platform)}"`}
+                >
+                  <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                    {dataOrDash(processHost?.os?.platform)}
+                  </EuiTextColor>
+                </DetailPanelCopy>
+              ),
+            },
+            {
+              title: <DetailPanelListItem>os.version</DetailPanelListItem>,
+              description: (
+                <DetailPanelCopy
+                  textToCopy={`host.os.version: "${dataOrDash(processHost?.os?.version)}"`}
+                >
+                  <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                    {dataOrDash(processHost?.os?.version)}
+                  </EuiTextColor>
+                </DetailPanelCopy>
+              ),
+            },
+          ]}
+        />
+      </EuiPanel>
       <DetailPanelAccordion
-        id="hostOS"
-        title="Host OS"
+        id="hostContainer"
+        title="Container"
         listItems={[
           {
-            title: <DetailPanelListItem>architecture</DetailPanelListItem>,
+            title: <DetailPanelListItem>id</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy textToCopy={`container.id: "${dataOrDash(processContainer?.id)}"`}>
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(processContainer?.id)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>name</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
-                textToCopy={`host.architecture: "${dataOrDash(processHost?.architecture)}"`}
+                textToCopy={`container.name: "${dataOrDash(processContainer?.name)}"`}
               >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost?.architecture)}
+                  {dataOrDash(processContainer?.name)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
           },
           {
-            title: <DetailPanelListItem>os.family</DetailPanelListItem>,
+            title: <DetailPanelListItem>image.name</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
-                textToCopy={`host.os.family: "${dataOrDash(processHost?.os?.family)}"`}
+                textToCopy={`container.image.name: "${dataOrDash(processContainer?.image?.name)}"`}
               >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost?.os?.family)}
+                  {dataOrDash(processContainer?.image?.name)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
           },
           {
-            title: <DetailPanelListItem>os.full</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={`host.os.full: "${dataOrDash(processHost?.os?.full)}"`}>
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost?.os?.full)}
-                </EuiTextColor>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>os.kernel</DetailPanelListItem>,
+            title: <DetailPanelListItem>image.tag</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
-                textToCopy={`host.os.kernel: "${dataOrDash(processHost?.os?.kernel)}"`}
+                textToCopy={`container.image.tag: "${dataOrDash(processContainer?.image?.tag)}"`}
               >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost?.os?.kernel)}
+                  {dataOrDash(processContainer?.image?.tag)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
           },
+        ]}
+      />
+      <DetailPanelAccordion
+        id="hostOrchestrator"
+        title="Orchestrator"
+        listItems={[
           {
-            title: <DetailPanelListItem>os.name</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={`host.os.name: "${dataOrDash(processHost?.os?.name)}"`}>
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost?.os?.name)}
-                </EuiTextColor>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>os.platform</DetailPanelListItem>,
+            title: <DetailPanelListItem>resource.name</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
-                textToCopy={`host.os.platform: "${dataOrDash(processHost?.os?.platform)}"`}
+                textToCopy={`orchestrator.resource.name: "${dataOrDash(
+                  processOrchestrator?.resource?.name
+                )}"`}
               >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost?.os?.platform)}
+                  {dataOrDash(processOrchestrator?.resource?.name)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
           },
           {
-            title: <DetailPanelListItem>os.version</DetailPanelListItem>,
+            title: <DetailPanelListItem>resource.type</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
-                textToCopy={`host.os.version: "${dataOrDash(processHost?.os?.version)}"`}
+                textToCopy={`orchestrator.resource.type: "${dataOrDash(
+                  processOrchestrator?.resource?.type
+                )}"`}
               >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost?.os?.version)}
+                  {dataOrDash(processOrchestrator?.resource?.type)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>namespace</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`orchestrator.namespace: "${dataOrDash(
+                  processOrchestrator?.namespace
+                )}"`}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(processOrchestrator?.namespace)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>cluster.version</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`orchestrator.cluster.version: "${dataOrDash(
+                  processOrchestrator?.cluster?.version
+                )}"`}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(processOrchestrator?.cluster?.version)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>cluster.name</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`orchestrator.cluster.name: "${dataOrDash(
+                  processOrchestrator?.cluster?.name
+                )}"`}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(processOrchestrator?.cluster?.name)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>resource.labels</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`orchestrator.resource.labels: "${dataOrDash(
+                  processOrchestrator?.resource?.labels
+                )}"`}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(processOrchestrator?.resource?.labels)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>annotations</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`orchestrator.annotations: "${dataOrDash(
+                  processOrchestrator?.annotations
+                )}"`}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(processOrchestrator?.annotations)}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>owner_resource</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`orchestrator.owner_resource: "${dataOrDash(
+                  processOrchestrator?.owner_resource
+                )}"`}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {dataOrDash(processOrchestrator?.owner_resource)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),

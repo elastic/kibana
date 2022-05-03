@@ -57,11 +57,17 @@ export const SessionViewDetailPanel = ({
         content: <DetailPanelProcessTab processDetail={processDetail} />,
       },
       {
-        id: 'host',
-        name: i18n.translate('xpack.sessionView.detailsPanel.host', {
-          defaultMessage: 'Host',
+        id: 'metadata',
+        name: i18n.translate('xpack.sessionView.detailsPanel.metadata', {
+          defaultMessage: 'Metadata',
         }),
-        content: <DetailPanelHostTab processHost={selectedProcess?.events[0]?.host} />,
+        content: (
+          <DetailPanelHostTab
+            processHost={selectedProcess?.events[0]?.host}
+            processContainer={selectedProcess?.events[0]?.container}
+            processOrchestrator={selectedProcess?.events[0]?.orchestrator}
+          />
+        ),
       },
       {
         id: 'alerts',

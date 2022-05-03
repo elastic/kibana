@@ -55,10 +55,10 @@ describe('DetailPanelHostTab component', () => {
 
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('hostname')).toBeVisible();
-      expect(renderResult.queryByText('id')).toBeVisible();
+      expect(renderResult.queryAllByText('id').length).toBe(2);
       expect(renderResult.queryByText('ip')).toBeVisible();
       expect(renderResult.queryByText('mac')).toBeVisible();
-      expect(renderResult.queryByText('name')).toBeVisible();
+      expect(renderResult.queryAllByText('name').length).toBe(2);
       expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ID)).toBeVisible();
@@ -67,10 +67,7 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
 
       // expand host os accordion
-      renderResult
-        .queryByTestId('sessionView:detail-panel-accordion')
-        ?.querySelector('button')
-        ?.click();
+      renderResult.queryByText('Host OS')?.querySelector('button')?.click();
       expect(renderResult.queryByText('os.family')).toBeVisible();
       expect(renderResult.queryByText('os.full')).toBeVisible();
       expect(renderResult.queryByText('os.kernel')).toBeVisible();
