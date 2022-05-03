@@ -19,6 +19,7 @@ const content: ExpressionFunctionParameter<'string'> = {
   help: 'A string of text that contains Markdown. To concatenate, pass the `string` function multiple times.',
   types: ['string'],
   default: '',
+  deprecated: false,
   aliases: ['_', 'expression'],
   multi: true,
   resolve: false,
