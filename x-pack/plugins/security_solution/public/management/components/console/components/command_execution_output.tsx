@@ -31,39 +31,29 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
     /** Updates the Command's status */
     const setCommandStatus = useCallback(
       (status: CommandExecutionState['status']) => {
-        if (status === state.status) {
-          return;
-        }
-
         dispatch({
-          type: 'updateCommandState',
+          type: 'updateCommandStatusState',
           payload: {
             id,
-            state: {
-              ...state,
-              status,
-            },
+            value: status,
           },
         });
       },
-      [dispatch, id, state]
+      [dispatch, id]
     );
 
     /** Updates the Command's execution store */
     const setCommandStore = useCallback(
       (store) => {
         dispatch({
-          type: 'updateCommandState',
+          type: 'updateCommandStoreState',
           payload: {
             id,
-            state: {
-              ...state,
-              store,
-            },
+            value: store,
           },
         });
       },
-      [dispatch, id, state]
+      [dispatch, id]
     );
 
     return (

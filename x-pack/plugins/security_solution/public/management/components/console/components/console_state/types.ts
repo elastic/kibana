@@ -38,7 +38,14 @@ export type ConsoleDataAction =
   | { type: 'scrollDown' }
   | { type: 'executeCommand'; payload: { input: string } }
   | { type: 'clear' }
-  | { type: 'updateCommandState'; payload: { id: string; state: CommandExecutionState } };
+  | {
+      type: 'updateCommandStoreState';
+      payload: { id: string; value: CommandExecutionState['store'] };
+    }
+  | {
+      type: 'updateCommandStatusState';
+      payload: { id: string; value: CommandExecutionState['status'] };
+    };
 
 export interface ConsoleStore {
   state: ConsoleDataState;

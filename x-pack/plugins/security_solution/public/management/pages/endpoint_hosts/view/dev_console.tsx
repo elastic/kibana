@@ -45,7 +45,8 @@ class DevCommandService implements CommandServiceInterface {
         RenderComponent: ({ command, setStatus, store, setStore }) => {
           const isMounted = useIsMounted();
 
-          const [response, setResponse] = useState<null | ReactElement>(null);
+          const [apiResponse, setApiResponse] = useState<null | string>(null);
+          const [uiResponse, setUiResponse] = useState<null | ReactElement>(null);
 
           useEffect(() => {
             (async () => {
@@ -56,13 +57,10 @@ class DevCommandService implements CommandServiceInterface {
                   apiInflight: true,
                 });
 
-                window.console.warn('cmd1: doing async work');
+                window.console.warn(`${Math.random()} ------> cmd1: doing async work`);
 
                 await delay(6000);
-                setStore({
-                  ...store,
-                  apiResponse: `API was called at: ${new Date().toLocaleDateString()}`,
-                });
+                setApiResponse(`API was called at: ${new Date().toLocaleString()}`);
               }
             })();
           }, [setStore, store]);
@@ -72,8 +70,7 @@ class DevCommandService implements CommandServiceInterface {
               await delay();
               if (!isMounted) return;
 
-              setStatus('success');
-              setResponse(
+              setUiResponse(
                 <EuiText>
                   <EuiText>{`${command.commandDefinition.name}`}</EuiText>
                   <EuiText>{`command input: ${command.input}`}</EuiText>
@@ -82,12 +79,27 @@ class DevCommandService implements CommandServiceInterface {
                 </EuiText>
               );
             })();
-          }, [command.args, command.commandDefinition.name, command.input, isMounted, setStatus]);
+          }, [command.args, command.commandDefinition.name, command.input, isMounted]);
+
+          useEffect(() => {
+            if (apiResponse && uiResponse) {
+              setStatus('success');
+            }
+          }, [apiResponse, setStatus, uiResponse]);
+
+          useEffect(() => {
+            if (apiResponse && store.apiResponse !== apiResponse) {
+              setStore({
+                ...store,
+                apiResponse,
+              });
+            }
+          }, [apiResponse, setStore, store]);
 
           if (store.apiResponse) {
             return (
               <div>
-                {response}
+                {uiResponse}
                 <EuiText>{store.apiResponse as ReactNode}</EuiText>
               </div>
             );

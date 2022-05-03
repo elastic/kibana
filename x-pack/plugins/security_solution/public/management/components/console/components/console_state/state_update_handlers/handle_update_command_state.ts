@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import type { ConsoleDataAction, ConsoleStoreReducer } from '../types';
+import type {
+  CommandExecutionState,
+  CommandHistoryItem,
+  ConsoleDataAction,
+  ConsoleStoreReducer,
+} from '../types';
 
-export const handleUpdateCommandState: ConsoleStoreReducer<
-  ConsoleDataAction & { type: 'updateCommandState' }
-> = (state, { payload: { id, state: commandState } }) => {
+type UpdateCommandStateAction = ConsoleDataAction & {
+  type: 'updateCommandStoreState' | 'updateCommandStatusState';
+};
+
+export const handleUpdateCommandState: ConsoleStoreReducer<UpdateCommandStateAction> = (
+  state,
+  { type, payload: { id, value } }
+) => {
   let foundIt = false;
   const updatedCommandHistory = state.commandHistory.map((item) => {
     if (foundIt || item.id !== id) {
@@ -18,10 +28,31 @@ export const handleUpdateCommandState: ConsoleStoreReducer<
 
     foundIt = true;
 
-    return {
+    const updatedCommandState: CommandHistoryItem = {
       ...item,
-      state: commandState,
+      state: {
+        ...item.state,
+      },
     };
+
+    switch (type) {
+      case 'updateCommandStoreState':
+        updatedCommandState.state.store = value as CommandExecutionState['store'];
+        break;
+      case 'updateCommandStatusState':
+        // If the status was not changed, then there is nothing to be done here, so
+        // instead of triggering a state change (and UI re-render), just return the
+        // original item;
+        if (updatedCommandState.state.status === value) {
+          foundIt = false;
+          return item;
+        }
+
+        updatedCommandState.state.status = value as CommandExecutionState['status'];
+        break;
+    }
+
+    return updatedCommandState;
   });
 
   if (foundIt) {

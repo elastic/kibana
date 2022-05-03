@@ -38,7 +38,8 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'executeCommand':
       return handleExecuteCommand(state, action);
 
-    case 'updateCommandState':
+    case 'updateCommandStatusState':
+    case 'updateCommandStoreState':
       return handleUpdateCommandState(state, action);
 
     case 'clear':
