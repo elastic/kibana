@@ -8,8 +8,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { ViewsCounters } from '../../common';
 export interface ContentEventCount {
-  [savedObjectId: string]: { [dayRange: string]: number };
+  [savedObjectId: string]: ViewsCounters;
 }
 
 /**
