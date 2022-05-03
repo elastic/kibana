@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const BASE_EVENT_LOG_API_PATH = '/internal/event_log';
-export { millisToNanos, nanosToMillis } from './lib';
+export function millisToNanos(millis: number): string {
+  const roundedMillis = Math.round(millis);
+  if (roundedMillis === 0) {
+    return '0';
+  }
+  return `${roundedMillis}000000`;
+}
