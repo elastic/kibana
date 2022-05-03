@@ -9,6 +9,8 @@ import React, { FC } from 'react';
 
 import { EuiFlexItem, EuiCard } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { StreamState } from './stream_reducer';
 
 const imageUrls = {
@@ -33,11 +35,20 @@ export const Cards: FC<CardsProps> = ({ cards }) => {
             <EuiCard
               image={
                 <div>
-                  <img src={imageUrls[entity]} alt="Nature" />
+                  <img
+                    src={imageUrls[entity as keyof typeof imageUrls]}
+                    alt={i18n.translate('aiops.streamFetch.entityCardImgAlt', {
+                      defaultMessage: '{entity} fighting.',
+                      values: { entity },
+                    })}
+                  />
                 </div>
               }
               title={entity}
-              description={`${entity} killed ${value} orcs.`}
+              description={i18n.translate('aiops.streamFetch.entityCardDescription', {
+                defaultMessage: '{entity} killed {value} orcs.',
+                values: { entity, value },
+              })}
               onClick={() => {}}
             />
           </EuiFlexItem>
@@ -58,8 +69,12 @@ export const CancelCard: FC = () => (
           />
         </div>
       }
-      title="Oh no, you gave up!"
-      description={`Orcs win.`}
+      title={i18n.translate('aiops.streamFetch.cancelTitle', {
+        defaultMessage: 'Oh no, you gave up!',
+      })}
+      description={i18n.translate('aiops.streamFetch.cancelDescription', {
+        defaultMessage: 'Orcs win.',
+      })}
       onClick={() => {}}
     />
   </EuiFlexItem>
@@ -79,7 +94,9 @@ export const WinCard: FC<WinCardProps> = ({ description }) => (
           />
         </div>
       }
-      title="You win!"
+      title={i18n.translate('aiops.streamFetch.winTitle', {
+        defaultMessage: 'You win!',
+      })}
       description={description}
       onClick={() => {}}
     />

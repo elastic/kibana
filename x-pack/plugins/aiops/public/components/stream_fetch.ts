@@ -50,13 +50,15 @@ export const streamFetch = async <T = unknown>(
           actionBuffer = [];
           lastCall = now;
         }
-      } catch (e) {
-        // Use the core notifications service to display a success message.
-        notifications.toasts.addError(
-          i18n.translate('aiops.streamFetchError', {
-            defaultMessage: 'An error occurred.',
-          })
-        );
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          notifications.toasts.addDanger(
+            i18n.translate('aiops.streamFetch.errorMessage', {
+              defaultMessage: 'An error occurred.',
+            })
+          );
+        }
+        break;
       }
     }
 

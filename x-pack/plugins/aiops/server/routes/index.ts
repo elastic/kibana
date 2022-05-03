@@ -37,6 +37,15 @@ export function defineRoutes(router: IRouter) {
       validate: false,
     },
     async (context, request, response) => {
+      let shouldStop = false;
+
+      request.events.aborted$.subscribe(() => {
+        shouldStop = true;
+      });
+      request.events.completed$.subscribe(() => {
+        shouldStop = true;
+      });
+
       const stream = new ResponseStream();
 
       function streamPush(d: ApiAction) {
@@ -50,6 +59,11 @@ export function defineRoutes(router: IRouter) {
         let progress = 0;
 
         function pushStreamUpdate() {
+          if (shouldStop) {
+            stream.push(null);
+            return;
+          }
+
           setTimeout(() => {
             progress++;
 

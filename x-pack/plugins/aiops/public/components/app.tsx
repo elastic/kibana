@@ -14,7 +14,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -114,13 +113,13 @@ export const AiopsApp = ({ basename, notifications, navigation }: AiopsAppDeps) 
                         <EuiButton type="primary" size="s" onClick={onClickHandler}>
                           {!state.isRunning && (
                             <FormattedMessage
-                              id="aiops.buttonText"
+                              id="aiops.startbuttonText"
                               defaultMessage="Commence fighting!"
                             />
                           )}
                           {state.isRunning && (
                             <FormattedMessage
-                              id="aiops.buttonText"
+                              id="aiops.cancelbuttonText"
                               defaultMessage="Flee from the battle!"
                             />
                           )}
@@ -140,10 +139,15 @@ export const AiopsApp = ({ basename, notifications, navigation }: AiopsAppDeps) 
                       {state.isRunning && <Cards cards={state.entities} />}
                       {!state.isRunning && state.progress === 100 && (
                         <WinCard
-                          description={`You defeated ${Object.values(state.entities).reduce(
-                            (p, c) => p + c,
-                            0
-                          )} orcs.`}
+                          description={i18n.translate('aiops.streamFetch.winCardDescription', {
+                            defaultMessage: 'You defeated {defeatedOrcs} orcs.',
+                            values: {
+                              defeatedOrcs: Object.values(state.entities).reduce(
+                                (p, c) => p + c,
+                                0
+                              ),
+                            },
+                          })}
                         />
                       )}
                       {state.isCancelled && <CancelCard />}
