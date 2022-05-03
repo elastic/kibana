@@ -323,7 +323,7 @@ experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[dat
         // Name of the file, exactly as in the Region map visualization
         name: World Countries
       },
-      // The result is a geojson file, get its features to use
+      // The result is a topojson file, get its features to use
       // this data source with the "shape" marks
       // https://vega.github.io/vega/docs/marks/shape/
       "format": {"type": "topojson", "feature": "data"},
