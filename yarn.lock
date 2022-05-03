@@ -6349,10 +6349,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.0.18":
-  version "4.0.18"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.0.18.tgz#98f6e1ccd2d92f6fddaccfc7c148d2e158da0f92"
-  integrity sha512-gkrUo3QldGr8V9im/DjgKkX4UVd1rtflfEBuPG9hPSA1keu7A0rF8h/MQjpTMm2EPVhBCd2K8tn5nlC9Vsd5Xw==
+"@types/selenium-webdriver@^4.0.19":
+  version "4.0.19"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.0.19.tgz#25699713552a63ee70215effdfd2e5d6dda19f8e"
+  integrity sha512-Irrh+iKc6Cxj6DwTupi4zgWhSBm1nK+JElOklIUiBVE6rcLYDtT1mwm9oFkHie485BQXNmZRoayjwxhowdInnA==
 
 "@types/semver@^7":
   version "7.3.4"
@@ -12503,6 +12503,11 @@ elliptic@^6.0.0:
     inherits "^2.0.4"
     minimalistic-assert "^1.0.1"
     minimalistic-crypto-utils "^1.0.1"
+
+email-addresses@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-5.0.0.tgz#7ae9e7f58eef7d5e3e2c2c2d3ea49b78dc854fa6"
+  integrity sha512-4OIPYlA6JXqtVn8zpHpGiI7vE6EQOAg16aGnDMIAlZVinnoZ8208tW1hAbjWydgN/4PLTT9q+O1K6AH/vALJGw==
 
 emittery@^0.7.1:
   version "0.7.1"

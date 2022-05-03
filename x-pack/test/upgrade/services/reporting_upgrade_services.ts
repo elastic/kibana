@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { indexTimestamp } from '../../plugins/reporting/server/lib/store/index_timestamp';
-import { services as xpackServices } from '../functional/services';
-import { services as apiIntegrationServices } from '../api_integration/services';
-import { FtrProviderContext } from './ftr_provider_context';
+import { indexTimestamp } from '../../../plugins/reporting/server/lib/store/index_timestamp';
+import { services as xpackServices } from '../../functional/services';
+import { services as apiIntegrationServices } from '../../api_integration/services';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 interface PDFAppCounts {
   app: {
@@ -104,7 +104,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<Function>} A function to call to clean up the index alias that was added.
      */
-    async coerceReportsIntoExistingIndex(indexName: string) {
+    async coerceReportsIntoExistingIndex(indexName: string): Promise<Function> {
       log.debug(`ReportingAPI.coerceReportsIntoExistingIndex(${indexName})`);
 
       // Adding an index alias coerces the report to be generated on an existing index which means any new

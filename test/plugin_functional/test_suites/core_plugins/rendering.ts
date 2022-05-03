@@ -141,6 +141,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
         'vis_type_vega.enableExternalUrls (boolean)',
+        'xpack.actions.email.domain_allowlist (array)',
         'xpack.apm.profilingEnabled (boolean)',
         'xpack.apm.serviceMapEnabled (boolean)',
         'xpack.apm.ui.enabled (boolean)',

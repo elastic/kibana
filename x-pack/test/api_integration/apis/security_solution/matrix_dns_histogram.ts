@@ -20,7 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');
 
-  describe('Matrix DNS Histogram', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/130692
+  describe.skip('Matrix DNS Histogram', () => {
     describe('Large data set', () => {
       before(
         async () =>
