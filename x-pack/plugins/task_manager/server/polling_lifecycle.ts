@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject, Observable, Subscription } from 'rxjs';
+import { Subject, Observable, Subscription, ReplaySubject } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
@@ -93,6 +93,8 @@ export class TaskPollingLifecycle {
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
 
+  private stop$: Subject<void>;
+
   /**
    * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
@@ -119,6 +121,7 @@ export class TaskPollingLifecycle {
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
+    this.stop$ = new ReplaySubject<void>(1);
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -191,6 +194,7 @@ export class TaskPollingLifecycle {
             // (such as polling for new work, marking tasks as running etc.) but does not
             // include the time of actually running the task
             workTimeout: pollInterval * maxPollInactivityCycles,
+            stop$: this.stop$,
           }),
         {
           heartbeatInterval: pollInterval,
@@ -204,7 +208,8 @@ export class TaskPollingLifecycle {
           onError: (error) => {
             logger.error(`[Task Poller Monitor]: ${error.message}`);
           },
-        }
+        },
+        this.stop$
       );
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
@@ -248,6 +253,11 @@ export class TaskPollingLifecycle {
 
   public get isStarted() {
     return !this.pollingSubscription.closed;
+  }
+
+  public stop() {
+    this.stop$.next();
+    this.stop$.complete();
   }
 
   private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {

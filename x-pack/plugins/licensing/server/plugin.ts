@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, Subject, Subscription, timer } from 'rxjs';
+import { Observable, Subject, Subscription, timer, ReplaySubject } from 'rxjs';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
@@ -93,7 +93,7 @@ function sign({
  * current Kibana instance.
  */
 export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
-  private stop$ = new Subject<void>();
+  private stop$: Subject<void> = new ReplaySubject<void>(1);
   private readonly logger: Logger;
   private readonly config: LicenseConfigType;
   private loggingSubscription?: Subscription;

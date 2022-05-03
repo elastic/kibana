@@ -37,6 +37,7 @@ const roots: string[] = [
   'x-pack/plugins',
   'src/plugins',
   'test',
+  'src/core',
   'src',
   ...getAllRepoRelativeBazelPackageDirs(),
 ];

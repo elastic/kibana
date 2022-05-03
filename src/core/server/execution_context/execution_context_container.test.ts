@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { Blob } from 'buffer';
+
 import type { KibanaExecutionContext } from '../../types';
 
 import {

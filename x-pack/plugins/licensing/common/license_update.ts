@@ -18,7 +18,10 @@ export function createLicenseUpdate(
   initialValues?: ILicense
 ) {
   const manuallyRefresh$ = new Subject<void>();
-  const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(exhaustMap(fetcher), share());
+  const fetched$ = merge(triggerRefresh$.pipe(takeUntil(stop$)), manuallyRefresh$).pipe(
+    exhaustMap(fetcher),
+    share()
+  );
 
   const cached$ = fetched$.pipe(
     takeUntil(stop$),

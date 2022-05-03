@@ -81,7 +81,8 @@ export function createAggregators(
   elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
-  logger: Logger
+  logger: Logger,
+  stop$: Observable<void>
 ): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [
     createConfigurationAggregator(config, managedConfig),
@@ -91,7 +92,8 @@ export function createAggregators(
       elasticsearchAndSOAvailability$,
       config.monitored_aggregated_stats_refresh_rate,
       config.poll_interval,
-      logger
+      logger,
+      stop$
     ),
   ];
   if (ephemeralTaskLifecycle.enabled) {

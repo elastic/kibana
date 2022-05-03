@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
+import { combineLatest, Observable, Subject, ReplaySubject } from 'rxjs';
+import { map, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   PluginInitializerContext,
@@ -69,19 +69,28 @@ export class TaskManagerPlugin
   private monitoringStats$ = new Subject<MonitoringStats>();
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
+  private stop$: Subject<void>;
+
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
+    this.stop$ = new ReplaySubject<void>(1);
   }
 
   public setup(
     core: CoreSetup,
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
-    this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+    this.elasticsearchAndSOAvailability$ = combineLatest([
+      getElasticsearchAndSOAvailability(core.status.core$),
+      this.stop$.pipe(
+        map(() => false),
+        startWith(true)
+      ),
+    ]).pipe(map(([coreStatus, taskManagerStatus]) => coreStatus && taskManagerStatus));
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
@@ -217,7 +226,8 @@ export class TaskManagerPlugin
       this.elasticsearchAndSOAvailability$!,
       this.config!,
       managedConfiguration,
-      this.logger
+      this.logger,
+      this.stop$
     ).subscribe((stat) => this.monitoringStats$.next(stat));
 
     const taskScheduling = new TaskScheduling({
@@ -241,6 +251,12 @@ export class TaskManagerPlugin
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled,
     };
+  }
+
+  public stop() {
+    this.stop$.next();
+    this.stop$.complete();
+    this.taskPollingLifecycle?.stop();
   }
 
   /**

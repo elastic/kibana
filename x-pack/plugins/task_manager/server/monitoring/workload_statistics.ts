@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, Observable, timer } from 'rxjs';
-import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
+import { mergeMap, map, filter, switchMap, catchError, takeUntil } from 'rxjs/operators';
 import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
@@ -116,7 +116,8 @@ export function createWorkloadAggregator(
   elasticsearchAndSOAvailability$: Observable<boolean>,
   refreshInterval: number,
   pollInterval: number,
-  logger: Logger
+  logger: Logger,
+  stop$: Observable<void>
 ): AggregatedStatProvider<WorkloadStat> {
   // calculate scheduleDensity going two refreshIntervals or 1 minute into into the future
   // (the longer of the two)
@@ -127,7 +128,10 @@ export function createWorkloadAggregator(
 
   const ownerIdsQueue = createRunningAveragedStat<number>(scheduleDensityBuckets);
 
-  return combineLatest([timer(0, refreshInterval), elasticsearchAndSOAvailability$]).pipe(
+  return combineLatest([
+    timer(0, refreshInterval).pipe(takeUntil(stop$)),
+    elasticsearchAndSOAvailability$,
+  ]).pipe(
     filter(([, areElasticsearchAndSOAvailable]) => areElasticsearchAndSOAvailable),
     mergeMap(() =>
       taskStore.aggregate({
