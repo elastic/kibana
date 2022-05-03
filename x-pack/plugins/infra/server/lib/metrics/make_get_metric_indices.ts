@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObjectsServiceStart } from '@kbn/core/server';
-import type { InfraSources } from '../sources';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { IInfraSources } from '../sources';
 
-export function makeGetMetricIndices(
-  savedObjectsService: SavedObjectsServiceStart,
-  metricSources: InfraSources
-) {
-  return async (request: KibanaRequest, sourceId: string = 'default') => {
-    const savedObjectsClient = savedObjectsService.getScopedClient(request);
+export function makeGetMetricIndices(metricSources: IInfraSources) {
+  return async (savedObjectsClient: SavedObjectsClientContract, sourceId: string = 'default') => {
     const source = await metricSources.getSourceConfiguration(savedObjectsClient, sourceId);
     return source.configuration.metricAlias;
   };

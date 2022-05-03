@@ -237,7 +237,7 @@ export class InfraServerPlugin
 
     return {
       logViews,
-      getMetricIndices: makeGetMetricIndices(core.savedObjects, this.libs.sources),
+      getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };
   }
 
