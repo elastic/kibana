@@ -35,7 +35,7 @@ import type { GetCasesProps } from './client/ui/get_cases';
 import { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 import { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import { GetRecentCasesProps } from './client/ui/get_recent_cases';
-import { Cases } from '../common/ui';
+import { Cases, CasesStatus } from '../common/ui';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -76,8 +76,9 @@ export interface CasesUiStart {
   api: {
     getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
     cases: {
-      find: (query: CasesFindRequest) => Promise<Cases>;
+      find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<Cases>;
       getAllCasesMetrics: (query: CasesStatusRequest) => Promise<CasesStatusResponse>;
+      getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
     };
   };
   ui: {

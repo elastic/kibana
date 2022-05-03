@@ -6,20 +6,40 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { Cases } from '../../common/ui';
-import { CASE_FIND_URL } from '../../common/constants';
-import { CasesFindRequest, CasesFindResponse } from '../../common/api';
-import { convertAllCasesToCamel } from './utils';
-import { decodeCasesFindResponse } from './decoders';
+import { Cases, CasesStatus } from '../../common/ui';
+import { CASE_FIND_URL, CASE_STATUS_URL } from '../../common/constants';
+import {
+  CasesFindRequest,
+  CasesFindResponse,
+  CasesStatusRequest,
+  CasesStatusResponse,
+} from '../../common/api';
+import { convertAllCasesToCamel, convertToCamelCase } from './utils';
+import { decodeCasesFindResponse, decodeCasesStatusResponse } from './decoders';
 
-interface HTTPService {
+export interface HTTPService {
   http: HttpStart;
+  signal?: AbortSignal;
 }
 
 export const getCases = async ({
   http,
+  signal,
   query,
 }: HTTPService & { query: CasesFindRequest }): Promise<Cases> => {
-  const res = await http.get<CasesFindResponse>(CASE_FIND_URL, { query });
+  const res = await http.get<CasesFindResponse>(CASE_FIND_URL, { query, signal });
   return convertAllCasesToCamel(decodeCasesFindResponse(res));
+};
+
+export const getCasesStatus = async ({
+  http,
+  signal,
+  query,
+}: HTTPService & { query: CasesStatusRequest }): Promise<CasesStatus> => {
+  const response = await http.get<CasesStatusResponse>(CASE_STATUS_URL, {
+    signal,
+    query,
+  });
+
+  return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
 };

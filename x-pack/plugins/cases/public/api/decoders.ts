@@ -11,7 +11,18 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { createToasterPlainError } from '../containers/utils';
 import { throwErrors } from '../../common';
-import { CasesFindResponse, CasesFindResponseRt } from '../../common/api';
+import {
+  CasesFindResponse,
+  CasesFindResponseRt,
+  CasesStatusResponse,
+  CasesStatusResponseRt,
+} from '../../common/api';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+
+export const decodeCasesStatusResponse = (respCase?: CasesStatusResponse) =>
+  pipe(
+    CasesStatusResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );

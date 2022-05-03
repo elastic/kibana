@@ -20,7 +20,6 @@ import {
   CaseResponse,
   CaseResolveResponse,
   CasesResponse,
-  CasesStatusResponse,
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
@@ -36,7 +35,6 @@ import {
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
@@ -53,14 +51,12 @@ import {
   Case,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
-  CasesStatus,
   CaseUserActions,
 } from './types';
 
 import {
   decodeCaseResponse,
   decodeCasesResponse,
-  decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
@@ -98,18 +94,6 @@ export const resolveCase = async (
     }
   );
   return convertToCamelCase<CaseResolveResponse, ResolvedCase>(decodeCaseResolveResponse(response));
-};
-
-export const getCasesStatus = async (
-  signal: AbortSignal,
-  owner: string[]
-): Promise<CasesStatus> => {
-  const response = await KibanaServices.get().http.fetch<CasesStatusResponse>(CASE_STATUS_URL, {
-    method: 'GET',
-    signal,
-    query: { ...(owner.length > 0 ? { owner } : {}) },
-  });
-  return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
 };
 
 export const getTags = async (signal: AbortSignal, owner: string[]): Promise<string[]> => {

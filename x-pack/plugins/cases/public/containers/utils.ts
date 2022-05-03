@@ -16,8 +16,6 @@ import {
   CaseResponseRt,
   CasesResponse,
   CasesResponseRt,
-  CasesStatusResponseRt,
-  CasesStatusResponse,
   throwErrors,
   CasesConfigurationsResponse,
   CaseConfigurationsResponseRt,
@@ -42,12 +40,6 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
     const camelKey = Array.isArray(target) ? key : snakeCase(key);
     acc[camelKey] = isObject(value) ? covertToSnakeCase(value as Record<string, unknown>) : value;
   });
-
-export const decodeCasesStatusResponse = (respCase?: CasesStatusResponse) =>
-  pipe(
-    CasesStatusResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
