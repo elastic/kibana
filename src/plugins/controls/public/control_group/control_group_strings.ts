@@ -44,6 +44,14 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
         defaultMessage: 'Edit control',
       }),
+    getDataViewTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.dataViewTitle', {
+        defaultMessage: 'Data view',
+      }),
+    getFieldTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.fielditle', {
+        defaultMessage: 'Field',
+      }),
     getTitleInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.titleInputTitle', {
         defaultMessage: 'Label',
@@ -56,6 +64,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
         defaultMessage: 'Control size',
       }),
+    getControlSettingsTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.controlSettingsTitle', {
+        defaultMessage: 'Control settings',
+      }),
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
         defaultMessage: 'Save and close',
@@ -63,6 +75,10 @@ export const ControlGroupStrings = {
     getCancelTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
         defaultMessage: 'Cancel',
+      }),
+    getSelectFieldMessage: () =>
+      i18n.translate('controls.controlGroup.manageControl.selectFieldMessage', {
+        defaultMessage: 'Please select a field',
       }),
   },
   management: {

@@ -179,7 +179,7 @@ export const ControlEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm>
-          <EuiFormRow label={'Data view'}>
+          <EuiFormRow label={ControlGroupStrings.manageControl.getDataViewTitle()}>
             <DataViewPicker
               dataViews={state.dataViewListItems}
               selectedDataViewId={dataView?.id}
@@ -199,7 +199,7 @@ export const ControlEditor = ({
               }}
             />
           </EuiFormRow>
-          <EuiFormRow label={'Field'}>
+          <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
             <FieldPicker
               showFields={Object.keys(state.fieldRegistry ?? {})}
               selectedFieldName={selectedField}
@@ -217,7 +217,7 @@ export const ControlEditor = ({
             />
           </EuiFormRow>
 
-          <EuiFormRow label={'Control type'}>
+          <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
             {factory ? (
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 <EuiFlexItem grow={false}>
@@ -230,15 +230,12 @@ export const ControlEditor = ({
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="alert" />
                 </EuiFlexItem>
-                <EuiFlexItem>Please select a field</EuiFlexItem>
+                <EuiFlexItem>
+                  {ControlGroupStrings.manageControl.getSelectFieldMessage()}
+                </EuiFlexItem>
               </EuiFlexGroup>
             )}
           </EuiFormRow>
-          {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
-            <EuiFormRow label={'Control settings'}>
-              <CustomSettings onChange={onTypeEditorChange} initialInput={embeddable?.getInput()} />
-            </EuiFormRow>
-          )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
               data-test-subj="control-editor-title-input"
@@ -262,6 +259,11 @@ export const ControlEditor = ({
               }}
             />
           </EuiFormRow>
+          {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
+            <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
+              <CustomSettings onChange={onTypeEditorChange} initialInput={embeddable?.getInput()} />
+            </EuiFormRow>
+          )}
           <EuiSpacer size="l" />
           {removeControl && (
             <EuiButtonEmpty
