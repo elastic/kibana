@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Dispatch, Reducer } from 'react';
-import { Command, CommandExecutionComponentProps, CommandServiceInterface } from '../../types';
+import type { Dispatch, Reducer } from 'react';
+import type { Command, CommandServiceInterface } from '../../types';
 import { BuiltinCommandServiceInterface } from '../../service/types.builtin_command_service';
 
 export interface ConsoleDataState {
@@ -26,16 +26,19 @@ export interface ConsoleDataState {
 export interface CommandHistoryItem {
   id: string;
   command: Command;
-  state: {
-    status: CommandExecutionComponentProps['status'];
-    store: CommandExecutionComponentProps['store'];
-  };
+  state: CommandExecutionState;
+}
+
+export interface CommandExecutionState {
+  status: 'pending' | 'success' | 'error';
+  store: Record<string, unknown>;
 }
 
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
   | { type: 'executeCommand'; payload: { input: string } }
-  | { type: 'clear' };
+  | { type: 'clear' }
+  | { type: 'updateCommandState'; payload: { id: string; state: CommandExecutionState } };
 
 export interface ConsoleStore {
   state: ConsoleDataState;

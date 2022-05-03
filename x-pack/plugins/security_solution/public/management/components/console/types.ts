@@ -7,6 +7,7 @@
 
 import type { ComponentType, ComponentProps } from 'react';
 import type { CommonProps } from '@elastic/eui';
+import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
@@ -75,7 +76,7 @@ export type CommandExecutionComponent = ComponentType<{
    * persisting data (ex. API response with IDs) that the command can use to determine
    * if the command has already been executed or if it's a new instance.
    */
-  store: Immutable<Record<string, unknown>>;
+  store: Immutable<CommandExecutionState['store']>;
   /** Sets the `store` data above */
   setStore: (meta: Record<string, unknown>) => void;
   /**
@@ -84,9 +85,9 @@ export type CommandExecutionComponent = ComponentType<{
    * `pending`. Ensure that once the action processing completes, that this is set to
    * either `success` or `error`.
    */
-  status: 'pending' | 'success' | 'error';
+  status: CommandExecutionState['status'];
   /** Set the status of the command execution  */
-  setStatus: (status: 'pending' | 'success' | 'error') => void;
+  setStatus: (status: CommandExecutionState['status']) => void;
 }>;
 
 export type CommandExecutionComponentProps = ComponentProps<CommandExecutionComponent>;

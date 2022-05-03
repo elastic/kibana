@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
+import type { CommandExecutionState, CommandHistoryItem } from './console_state/types';
 import { UserCommandInput } from './user_command_input';
-import { Command, CommandExecutionComponentProps } from '../types';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 
 const CommandOutputContainer = styled.div`
@@ -17,45 +17,72 @@ const CommandOutputContainer = styled.div`
 `;
 
 export interface CommandExecutionOutputProps {
-  command: Command;
+  item: CommandHistoryItem;
 }
-export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ command }) => {
-  const dispatch = useConsoleStateDispatch();
-  const [commandStatus, setCommandStatus] =
-    useState<CommandExecutionComponentProps['status']>('pending');
-  const [commandStore, setCommandStore] = useState<CommandExecutionComponentProps['store']>({});
-  const RenderComponent = command.commandDefinition.RenderComponent;
+export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
+  ({ item: { command, state, id } }) => {
+    const dispatch = useConsoleStateDispatch();
+    const RenderComponent = command.commandDefinition.RenderComponent;
 
-  const isRunning = useMemo(() => {
-    return commandStatus === 'pending';
-  }, [commandStatus]);
+    const isRunning = useMemo(() => {
+      return state.status === 'pending';
+    }, [state.status]);
 
-  useEffect(() => {
-    if (!isRunning) {
-      dispatch({ type: 'scrollDown' });
-    }
-  }, [isRunning, dispatch]);
+    /** Updates the Command's status */
+    const setCommandStatus = useCallback(
+      (status: CommandExecutionState['status']) => {
+        dispatch({
+          type: 'updateCommandState',
+          payload: {
+            id,
+            state: {
+              ...state,
+              status,
+            },
+          },
+        });
+      },
+      [dispatch, id, state]
+    );
 
-  return (
-    <CommandOutputContainer>
-      <div>
-        <UserCommandInput input={command.input} />
-        {isRunning && (
-          <>
-            <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />
-          </>
-        )}
-      </div>
-      <div>
-        <RenderComponent
-          command={command}
-          store={commandStore}
-          status={commandStatus}
-          setStore={setCommandStore}
-          setStatus={setCommandStatus}
-        />
-      </div>
-    </CommandOutputContainer>
-  );
-});
+    /** Updates the Command's execution store */
+    const setCommandStore = useCallback(
+      (store) => {
+        dispatch({
+          type: 'updateCommandState',
+          payload: {
+            id,
+            state: {
+              ...state,
+              store,
+            },
+          },
+        });
+      },
+      [dispatch, id, state]
+    );
+
+    return (
+      <CommandOutputContainer>
+        <div>
+          <UserCommandInput input={command.input} />
+          {isRunning && (
+            <>
+              <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />
+            </>
+          )}
+        </div>
+        <div>
+          <RenderComponent
+            command={command}
+            store={state.store}
+            status={state.status}
+            setStore={setCommandStore}
+            setStatus={setCommandStatus}
+          />
+        </div>
+      </CommandOutputContainer>
+    );
+  }
+);
 CommandExecutionOutput.displayName = 'CommandExecutionOutput';
