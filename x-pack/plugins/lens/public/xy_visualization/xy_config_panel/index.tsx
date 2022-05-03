@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
@@ -21,6 +21,7 @@ import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
+import { LegendSettingsPopoverProps } from '../../shared_components/legend_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -380,8 +381,10 @@ export const XyToolbar = memo(function XyToolbar(
             }}
             onAlignmentChange={(value) => {
               const [vertical, horizontal] = value.split('_');
-              const verticalAlignment = vertical as VerticalAlignment;
-              const horizontalAlignment = horizontal as HorizontalAlignment;
+              const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
+              const horizontalAlignment =
+                horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
+
               setState({
                 ...state,
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },

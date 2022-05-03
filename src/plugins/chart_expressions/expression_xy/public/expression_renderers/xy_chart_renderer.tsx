@@ -18,7 +18,6 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { XYChartProps } from '../../common';
-import { calculateMinInterval } from '../helpers/interval';
 import type { BrushEvent, FilterEvent } from '../types';
 
 export type GetStartDepsFn = () => Promise<{
@@ -56,7 +55,10 @@ export const getXyChartRenderer = ({
     };
     const deps = await getStartDeps();
 
-    const { XYChartReportable } = await import('../components/xy_chart');
+    const [{ XYChartReportable }, { calculateMinInterval }] = await Promise.all([
+      import('../components/xy_chart'),
+      import('../helpers/interval'),
+    ]);
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>

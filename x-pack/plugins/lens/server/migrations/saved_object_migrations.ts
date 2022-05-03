@@ -28,6 +28,11 @@ import {
   VisState716,
   CustomVisualizationMigrations,
   LensDocShape810,
+  LensDocShape830,
+  XYVisualizationStatePre830,
+  XYVisualizationState830,
+  VisState810,
+  VisState820,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -42,6 +47,7 @@ import {
   commonSetLastValueShowArrayValues,
   commonEnhanceTableRowHeight,
   commonSetIncludeEmptyRowsDateHistogram,
+  commonFixValueLabelsInXY,
   commonLockOldMetricVisSettings,
 } from './common_migrations';
 
@@ -473,7 +479,10 @@ const setLastValueShowArrayValues: SavedObjectMigrationFn<LensDocShape810, LensD
   return { ...doc, attributes: commonSetLastValueShowArrayValues(doc.attributes) };
 };
 
-const enhanceTableRowHeight: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+const enhanceTableRowHeight: SavedObjectMigrationFn<
+  LensDocShape810<VisState810>,
+  LensDocShape810<VisState820>
+> = (doc) => {
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonEnhanceTableRowHeight(newDoc.attributes) };
 };
@@ -482,6 +491,14 @@ const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, 
   doc
 ) => {
   return { ...doc, attributes: commonSetIncludeEmptyRowsDateHistogram(doc.attributes) };
+};
+
+const fixValueLabelsInXY: SavedObjectMigrationFn<
+  LensDocShape830<XYVisualizationStatePre830>,
+  LensDocShape830<XYVisualizationState830 | unknown>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
 };
 
 const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
@@ -507,7 +524,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     setIncludeEmptyRowsDateHistogram,
     enhanceTableRowHeight
   ),
-  '8.3.0': lockOldMetricVisSettings,
+  '8.3.0': flow(lockOldMetricVisSettings, fixValueLabelsInXY),
 };
 
 export const getAllMigrations = (

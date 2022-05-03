@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, ANNOTATION_LAYER } from '../constants';
 import { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../types';
+import { strings } from '../i18n';
 
-export function annotationLayerConfigFunction(): ExpressionFunctionDefinition<
+export function annotationLayerFunction(): ExpressionFunctionDefinition<
   typeof ANNOTATION_LAYER,
-  null,
+  Datatable,
   AnnotationLayerArgs,
   AnnotationLayerConfigResult
 > {
@@ -20,21 +21,17 @@ export function annotationLayerConfigFunction(): ExpressionFunctionDefinition<
     name: ANNOTATION_LAYER,
     aliases: [],
     type: ANNOTATION_LAYER,
-    inputTypes: ['null'],
-    help: 'Annotation layer in lens',
+    inputTypes: ['datatable'],
+    help: strings.getAnnotationLayerFnHelp(),
     args: {
-      layerId: {
-        types: ['string'],
-        help: '',
-      },
       hide: {
         types: ['boolean'],
         default: false,
-        help: 'Show details',
+        help: strings.getAnnotationLayerHideHelp(),
       },
       annotations: {
         types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
-        help: '',
+        help: strings.getAnnotationLayerAnnotationsHelp(),
         multi: true,
       },
     },
@@ -42,6 +39,7 @@ export function annotationLayerConfigFunction(): ExpressionFunctionDefinition<
       return {
         type: ANNOTATION_LAYER,
         ...args,
+        annotations: args.annotations ?? [],
         layerType: LayerTypes.ANNOTATIONS,
       };
     },

@@ -9,23 +9,24 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { FillStyle, YConfig } from '@kbn/expression-xy-plugin/common';
-import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYState, XYReferenceLineLayerConfig } from '../types';
-import { FormatFactory } from '../../../common';
+import { FillStyle, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
+import type { VisualizationDimensionEditorProps } from '../../../types';
+import { State, XYState, XYReferenceLineLayerConfig } from '../../types';
+import { FormatFactory } from '../../../../common';
 
-import { ColorPicker } from './color_picker';
-import { updateLayer } from '.';
-import { useDebouncedValue } from '../../shared_components';
-import { idPrefix } from './dimension_editor';
-import { isHorizontalChart } from '../state_helpers';
+import { ColorPicker } from '../color_picker';
+import { updateLayer } from '..';
+import { useDebouncedValue } from '../../../shared_components';
+import { idPrefix } from '../dimension_editor';
+import { isHorizontalChart } from '../../state_helpers';
 import {
   IconSelectSetting,
   MarkerDecorationPosition,
   TextDecorationSetting,
-} from './shared/marker_decoration_settings';
-import { LineStyleSettings } from './shared/line_style_settings';
-import { defaultReferenceLineColor } from '../color_assignment';
+} from '../shared/marker_decoration_settings';
+import { LineStyleSettings } from '../shared/line_style_settings';
+import { referenceLineIconsSet } from './icon_set';
+import { defaultReferenceLineColor } from '../../color_assignment';
 
 export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {
@@ -51,7 +52,7 @@ export const ReferenceLinePanel = (
   );
 
   const setConfig = useCallback(
-    (yConfig: Partial<YConfig> | undefined) => {
+    (yConfig: Partial<ExtendedYConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
@@ -75,7 +76,11 @@ export const ReferenceLinePanel = (
   return (
     <>
       <TextDecorationSetting setConfig={setConfig} currentConfig={localConfig} />
-      <IconSelectSetting setConfig={setConfig} currentConfig={localConfig} />
+      <IconSelectSetting
+        setConfig={setConfig}
+        currentConfig={localConfig}
+        customIconSet={referenceLineIconsSet}
+      />
       <MarkerDecorationPosition
         isHorizontal={isHorizontal}
         setConfig={setConfig}
@@ -102,7 +107,7 @@ export const ReferenceLinePanel = (
 
 interface LabelConfigurationOptions {
   isHorizontal: boolean;
-  axisMode: YConfig['axisMode'];
+  axisMode: ExtendedYConfig['axisMode'];
 }
 
 function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
@@ -148,8 +153,8 @@ export const FillSetting = ({
   setConfig,
   isHorizontal,
 }: {
-  currentConfig?: YConfig;
-  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
+  currentConfig?: ExtendedYConfig;
+  setConfig: (yConfig: Partial<ExtendedYConfig> | undefined) => void;
   isHorizontal: boolean;
 }) => {
   return (
