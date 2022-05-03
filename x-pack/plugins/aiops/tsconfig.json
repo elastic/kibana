@@ -21,6 +21,7 @@
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/custom_integrations/tsconfig.json" },
+    { "path": "../../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../../src/plugins/unified_search/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
   ]
