@@ -6,12 +6,7 @@
  */
 import expect from '@kbn/expect';
 
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_TYPE_ID,
-  ALERT_WORKFLOW_STATUS,
-  SPACE_IDS,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   superUser,
   globalRead,
@@ -97,7 +92,41 @@ export default ({ getService }: FtrProviderContext) => {
       expect(found.statusCode).to.eql(400);
     });
 
-    it(`${superUser.username} should NOT allow nested aggs and return alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+    it(`${superUser.username} should reject at route level when nested aggs contains script alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          aggs: {
+            alertsByGroupingCount: {
+              terms: {
+                field: 'kibana.alert.rule.name',
+                order: {
+                  _count: 'desc',
+                },
+                size: 10000,
+              },
+              aggs: {
+                test: {
+                  terms: {
+                    field: 'kibana.alert.rule.name',
+                    size: 10,
+                    script: {
+                      source: 'SCRIPT',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          index: SECURITY_SOLUTION_ALERT_INDEX,
+        });
+      expect(found.statusCode).to.eql(400);
+    });
+
+    it(`${superUser.username} should allow nested aggs and return alerts which match query in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {
       const found = await supertestWithoutAuth
         .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
         .auth(superUser.username, superUser.password)
@@ -125,7 +154,8 @@ export default ({ getService }: FtrProviderContext) => {
           },
           index: SECURITY_SOLUTION_ALERT_INDEX,
         });
-      expect(found.statusCode).to.eql(400);
+      expect(found.statusCode).to.eql(200);
+      expect(found.body.hits.total.value).to.be.above(0);
     });
 
     it(`${superUser.username} should allow cardinality aggs in ${SPACE1}/${SECURITY_SOLUTION_ALERT_INDEX}`, async () => {

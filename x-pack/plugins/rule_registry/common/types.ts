@@ -75,6 +75,8 @@ interface BucketAggsSchemas {
       | { [x: string]: SortOrderSchema }
       | Array<{ [x: string]: SortOrderSchema }>;
   };
+  aggs?: BucketAggsSchemas;
+  aggregations?: BucketAggsSchemas;
 }
 
 /**
@@ -111,7 +113,7 @@ interface BucketAggsSchemas {
  * - significant_text
  * - variable_width_histogram
  */
-export const bucketAggsSchemas: t.Type<BucketAggsSchemas> = t.partial({
+const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.partial({
   filter: t.exact(
     t.partial({
       term: t.record(t.string, t.union([t.string, t.boolean, t.number])),
@@ -176,9 +178,15 @@ export const bucketAggsSchemas: t.Type<BucketAggsSchemas> = t.partial({
       ]),
     })
   ),
-  aggs: t.undefined,
-  aggregations: t.undefined,
 });
+
+export const bucketAggsSchemas: t.Type<BucketAggsSchemas> = t.union([
+  bucketAggsTempsSchemas,
+  t.partial({
+    aggs: t.union([t.record(t.string, bucketAggsTempsSchemas), t.undefined]),
+    aggregations: t.union([t.record(t.string, bucketAggsTempsSchemas), t.undefined]),
+  }),
+]);
 
 /**
  * Schemas for the metrics Aggregations

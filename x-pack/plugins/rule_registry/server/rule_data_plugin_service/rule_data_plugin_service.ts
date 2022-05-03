@@ -159,7 +159,6 @@ export class RuleDataService implements IRuleDataService {
     const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: this.options.kibanaVersion });
 
     const indicesAssociatedWithFeature = this.indicesByFeatureId.get(indexOptions.feature) ?? [];
-    console.log('### initializeService ###', indexOptions.feature, indexInfo.baseName);
     this.indicesByFeatureId.set(indexOptions.feature, [...indicesAssociatedWithFeature, indexInfo]);
     this.indicesByBaseName.set(indexInfo.baseName, indexInfo);
 
