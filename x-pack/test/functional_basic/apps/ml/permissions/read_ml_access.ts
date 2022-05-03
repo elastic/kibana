@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
         const ecExpectedTotalCount = '287';
 
         const uploadFilePath = require.resolve(
-          '../../../../functional/apps/ml/group1/data_visualizer/files_to_import/artificial_server_log'
+          '../../../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
         const expectedUploadFileTitle = 'artificial_server_log';
 

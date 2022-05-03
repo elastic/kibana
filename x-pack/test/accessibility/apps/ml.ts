@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         const dfaJobId = `ihp_ally_${Date.now()}`;
 
         const uploadFilePath = require.resolve(
-          '../../functional/apps/ml/group1/data_visualizer/files_to_import/artificial_server_log'
+          '../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
 
         before(async () => {
