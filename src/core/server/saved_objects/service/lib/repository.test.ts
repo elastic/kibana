@@ -4605,14 +4605,14 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`defaults to the version of the existing document when type is multi-namespace`, async () => {
+      it(`does not default to the version of the existing document when type is multi-namespace`, async () => {
         await updateSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, { references });
         const versionProperties = {
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
         };
         expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining(versionProperties),
+          expect.not.objectContaining(versionProperties),
           expect.anything()
         );
       });
@@ -4623,6 +4623,35 @@ describe('SavedObjectsRepository', () => {
         });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({ if_seq_no: 100, if_primary_term: 200 }),
+          expect.anything()
+        );
+      });
+
+      it('default to a `retry_on_conflict` setting of `3` when `version` is not provided', async () => {
+        await updateSuccess(type, id, attributes, {});
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ retry_on_conflict: 3 }),
+          expect.anything()
+        );
+      });
+
+      it('default to a `retry_on_conflict` setting of `0` when `version` is provided', async () => {
+        await updateSuccess(type, id, attributes, {
+          version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
+        });
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ retry_on_conflict: 0, if_seq_no: 100, if_primary_term: 200 }),
+          expect.anything()
+        );
+      });
+
+      it('accepts a `retryOnConflict` option', async () => {
+        await updateSuccess(type, id, attributes, {
+          version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
+          retryOnConflict: 42,
+        });
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ retry_on_conflict: 42, if_seq_no: 100, if_primary_term: 200 }),
           expect.anything()
         );
       });

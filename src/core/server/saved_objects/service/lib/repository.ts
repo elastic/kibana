@@ -151,6 +151,7 @@ export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOp
 }
 
 export const DEFAULT_REFRESH_SETTING = 'wait_for';
+export const DEFAULT_RETRY_COUNT = 3;
 
 /**
  * See {@link SavedObjectsRepository}
@@ -1312,7 +1313,13 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
     }
 
-    const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const {
+      version,
+      references,
+      upsert,
+      refresh = DEFAULT_REFRESH_SETTING,
+      retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
+    } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: PreflightCheckNamespacesResult | undefined;
@@ -1373,8 +1380,9 @@ export class SavedObjectsRepository {
       .update<unknown, unknown, SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
+        ...getExpectedVersionProperties(version),
         refresh,
+        retry_on_conflict: retryOnConflict,
         body: {
           doc,
           ...(rawUpsert && { upsert: rawUpsert._source }),
