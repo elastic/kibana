@@ -8,6 +8,7 @@ USER_FROM_VAULT="$(retry 5 5 vault read -field=username secret/kibana-issues/dev
 PASS_FROM_VAULT="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/apm_parser_performance)"
 ES_SERVER_URL="https://kibana-ops-e2e-perf.es.us-central1.gcp.cloud.es.io:9243"
 BUILD_ID=${BUILDKITE_BUILD_ID}
+GCS_BUCKET="gs://kibana-performance/scalability-tests"
 
 .buildkite/scripts/bootstrap.sh
 
@@ -22,7 +23,14 @@ for i in "${journeys[@]}"; do
 done
 
 # archive json files with traces and upload as build artifacts
-echo "--- Archive jsons and upload as artefact"
-tar -czf scalability_traces.tar.gz output
-buildkite-agent artifact upload "scalability_traces.tar.gz"
-
+echo "--- Upload Kibana build, plugins and scalability traces to the public bucket"
+mkdir "${BUILD_ID}"
+tar -czf "${BUILD_ID}/scalability_traces.tar.gz" output
+buildkite-agent artifact upload "${BUILD_ID}/scalability_traces.tar.gz"
+buildkite-agent artifact download kibana-default.tar.gz ./"${BUILD_ID}"
+buildkite-agent artifact download kibana-default-plugins.tar.gz ./"${BUILD_ID}"
+echo "${BUILDKITE_COMMIT}" > "${BUILD_ID}/KIBANA_COMMIT_HASH"
+gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
+echo "--- Update reference to the latest CI build"
+echo "${BUILD_ID}" > LATEST
+gsutil cp LATEST "${GCS_BUCKET}"

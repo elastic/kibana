@@ -22,7 +22,7 @@ steps:
   - label: ':shipit: Performance Tests dataset extraction for scalability benchmarking'
     command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh
     agents:
-      queue: kibana-default
+      queue: n2-2
     depends_on: tests
 
   - wait: ~
