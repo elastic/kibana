@@ -233,7 +233,7 @@ export const commonPreserveOldLegendSizeDefault = (visState: any) => {
       ...visState,
       params: {
         ...visState.params,
-        legendSize: visState.params.legendSize ?? autoLegendSize,
+        legendSize: visState.params?.legendSize ?? autoLegendSize,
       },
     };
   }
