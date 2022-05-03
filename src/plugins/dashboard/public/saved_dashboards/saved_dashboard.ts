@@ -52,6 +52,7 @@ const defaults = {
     // for BWC reasons we can't default dashboards that already exist without this setting to true.
     useMargins: true,
     syncColors: false,
+    syncTooltips: false,
     hidePanelTitles: false,
   } as DashboardOptions),
   version: 1,

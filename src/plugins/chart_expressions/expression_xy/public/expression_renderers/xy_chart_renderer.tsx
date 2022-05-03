@@ -80,6 +80,7 @@ export const getXyChartRenderer = ({
               onSelectRange={onSelectRange}
               renderMode={handlers.getRenderMode()}
               syncColors={handlers.isSyncColorsEnabled()}
+              syncTooltips={handlers.isSyncTooltipsEnabled()}
             />
           </div>{' '}
         </I18nProvider>

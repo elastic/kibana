@@ -18,12 +18,15 @@ interface Props {
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
   syncColors: boolean;
   onSyncColorsChange: (syncColors: boolean) => void;
+  syncTooltips: boolean;
+  onSyncTooltipsChange: (syncTooltips: boolean) => void;
 }
 
 interface State {
   useMargins: boolean;
   hidePanelTitles: boolean;
   syncColors: boolean;
+  syncTooltips: boolean;
 }
 
 export class OptionsMenu extends Component<Props, State> {
@@ -31,6 +34,7 @@ export class OptionsMenu extends Component<Props, State> {
     useMargins: this.props.useMargins,
     hidePanelTitles: this.props.hidePanelTitles,
     syncColors: this.props.syncColors,
+    syncTooltips: this.props.syncTooltips,
   };
 
   constructor(props: Props) {
@@ -53,6 +57,12 @@ export class OptionsMenu extends Component<Props, State> {
     const isChecked = evt.target.checked;
     this.props.onSyncColorsChange(isChecked);
     this.setState({ syncColors: isChecked });
+  };
+
+  handleSyncTooltipsChange = (evt: any) => {
+    const isChecked = evt.target.checked;
+    this.props.onSyncTooltipsChange(isChecked);
+    this.setState({ syncTooltips: isChecked });
   };
 
   render() {
@@ -88,6 +98,17 @@ export class OptionsMenu extends Component<Props, State> {
             checked={this.state.syncColors}
             onChange={this.handleSyncColorsChange}
             data-test-subj="dashboardSyncColorsCheckbox"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <EuiSwitch
+            label={i18n.translate('dashboard.topNav.options.syncTooltipsBetweenPanelsSwitchLabel', {
+              defaultMessage: 'Sync tooltips across panels',
+            })}
+            checked={this.state.syncTooltips}
+            onChange={this.handleSyncTooltipsChange}
+            data-test-subj="dashboardSyncTooltipsCheckbox"
           />
         </EuiFormRow>
       </EuiForm>

@@ -13,6 +13,7 @@ import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from '@kbn/exp
 export const defaultHandlers: IInterpreterRenderHandlers = {
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
   done: action('done'),
   onDestroy: action('onDestroy'),

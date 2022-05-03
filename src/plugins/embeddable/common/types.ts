@@ -54,6 +54,11 @@ export type EmbeddableInput = {
    */
   syncColors?: boolean;
 
+  /**
+   * Flag whether tooltips should be synced with other panels on hover
+   */
+  syncTooltips?: boolean;
+
   executionContext?: KibanaExecutionContext;
 };
 

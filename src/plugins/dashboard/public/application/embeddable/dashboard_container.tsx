@@ -79,6 +79,7 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
 
@@ -314,6 +315,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       filters,
       searchSessionId,
       syncColors,
+      syncTooltips,
       executionContext,
     } = this.input;
     let combinedFilters = filters;
@@ -330,6 +332,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       id,
       searchSessionId,
       syncColors,
+      syncTooltips,
       executionContext,
     };
   }

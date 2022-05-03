@@ -152,6 +152,8 @@ export interface ExpressionExecutionParams {
 
   syncColors?: boolean;
 
+  syncTooltips?: boolean;
+
   inspectorAdapters?: Adapters;
 
   executionContext?: KibanaExecutionContext;

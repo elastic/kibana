@@ -50,7 +50,7 @@ export const getTimeseriesVisRenderer: (deps: {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
-    const { visParams: model, visData, syncColors } = config;
+    const { visParams: model, visData, syncColors, syncTooltips } = config;
 
     const showNoResult = !checkIfDataExists(visData, model);
 
@@ -70,6 +70,7 @@ export const getTimeseriesVisRenderer: (deps: {
               model={model}
               visData={visData as TimeseriesVisData}
               syncColors={syncColors}
+              syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
             />
           </VisualizationContainer>
