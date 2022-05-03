@@ -39,6 +39,7 @@ import {
 import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
 import { ObservabilityAppServices } from '../../../../application/types';
+import { OBSERVABILITY_RULE_TYPES } from '../../../rules/config';
 
 interface RuleStatsState {
   total: number;
@@ -115,6 +116,7 @@ function AlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
+        typesFilter: OBSERVABILITY_RULE_TYPES,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
