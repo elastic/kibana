@@ -44,8 +44,13 @@ interface AvailableSourcesListProps {
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const getSourceCard = ({ name, serviceType, accountContextOnly }: SourceDataItem) => {
-    const addPath = getAddPath(serviceType);
+  const getSourceCard = ({
+    accountContextOnly,
+    baseServiceType,
+    name,
+    serviceType,
+  }: SourceDataItem) => {
+    const addPath = getAddPath(serviceType, baseServiceType);
     const disabled = !hasPlatinumLicense && accountContextOnly;
 
     const connectButton = () => {
@@ -67,7 +72,14 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
         );
       } else {
         return (
-          <EuiButtonEmptyTo to={`${getSourcesPath(addPath, true)}/intro`}>Connect</EuiButtonEmptyTo>
+          <EuiButtonEmptyTo
+            to={
+              getSourcesPath(addPath, true) +
+              (serviceType === 'custom' || serviceType === 'external' ? '' : '/intro')
+            }
+          >
+            Connect
+          </EuiButtonEmptyTo>
         );
       }
     };
@@ -76,7 +88,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
       <>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
           <EuiFlexItem grow={false}>
-            <SourceIcon serviceType={serviceType} name={name} size="l" />
+            <SourceIcon serviceType={baseServiceType || serviceType} name={name} size="l" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="m">{name}</EuiText>

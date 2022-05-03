@@ -22,8 +22,7 @@ import {
 import { NAV } from '../../../../constants';
 import { getSourcesPath, ADD_SOURCE_PATH, getAddPath } from '../../../../routes';
 
-import { hasMultipleConnectorOptions } from '../../../../utils';
-import { getSourceData } from '../../source_data';
+import { getSourceData, hasMultipleConnectorOptions } from '../../source_data';
 
 import { AddSourceHeader } from './add_source_header';
 import { ConfigurationIntro } from './configuration_intro';
@@ -52,11 +51,7 @@ export const AddSourceIntro: React.FC = () => {
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
   const to =
     `${getSourcesPath(getAddPath(serviceType), isOrganization)}/` +
-    (hasMultipleConnectorOptions(sourceData)
-      ? 'choice'
-      : serviceType === 'external'
-      ? 'connector_registration'
-      : '');
+    (hasMultipleConnectorOptions(sourceData.serviceType) ? 'choice' : '');
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]}>
       <ConfigurationIntro name={name} advanceStepTo={to} header={header} />

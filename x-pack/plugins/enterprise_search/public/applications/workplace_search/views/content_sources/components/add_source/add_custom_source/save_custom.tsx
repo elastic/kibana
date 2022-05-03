@@ -38,7 +38,7 @@ import { AddCustomSourceLogic } from './add_custom_source_logic';
 export const SaveCustom: React.FC = () => {
   const { newCustomSource, sourceData } = useValues(AddCustomSourceLogic);
   const { isOrganization } = useValues(AppLogic);
-  const { serviceType, name, categories = [] } = sourceData;
+  const { serviceType, baseServiceType, name, categories = [] } = sourceData;
 
   return (
     <>
@@ -92,7 +92,7 @@ export const SaveCustom: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CustomSourceDeployment source={newCustomSource} sourceData={sourceData} />
+          <CustomSourceDeployment source={newCustomSource} baseServiceType={baseServiceType} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {serviceType !== 'custom' && (

@@ -95,7 +95,7 @@ export const SourcesRouter: React.FC = () => {
       <Route
         exact
         path={`${getSourcesPath(
-          getAddPath(':serviceType'),
+          getAddPath('external', ':baseServiceType'),
           isOrganization
         )}/connector_registration`}
         data-test-subj="ExternalConnectorConfigRoute"
@@ -111,7 +111,7 @@ export const SourcesRouter: React.FC = () => {
       </Route>
       <Route
         exact
-        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/custom`}
+        path={`${getSourcesPath(getAddPath('custom', ':baseServiceType'), isOrganization)}/`}
         data-test-subj="AddCustomSourceRoute"
       >
         <AddCustomSource />

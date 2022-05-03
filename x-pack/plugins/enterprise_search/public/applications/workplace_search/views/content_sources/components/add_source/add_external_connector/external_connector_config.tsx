@@ -39,8 +39,8 @@ import { ExternalConnectorFormFields } from './external_connector_form_fields';
 import { ExternalConnectorLogic } from './external_connector_logic';
 
 export const ExternalConnectorConfig: React.FC = () => {
-  const { serviceType } = useParams<{ serviceType: string }>();
-  const sourceData = getSourceData(serviceType);
+  const { baseServiceType } = useParams<{ baseServiceType?: string }>();
+  const sourceData = getSourceData('external', baseServiceType);
   const { saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
 
   const { formDisabled, buttonLoading, externalConnectorUrl, externalConnectorApiKey, urlValid } =
@@ -107,7 +107,13 @@ export const ExternalConnectorConfig: React.FC = () => {
     },
   ];
 
-  const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
+  const header = (
+    <AddSourceHeader
+      name={name}
+      serviceType={baseServiceType || 'external'}
+      categories={categories}
+    />
+  );
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (

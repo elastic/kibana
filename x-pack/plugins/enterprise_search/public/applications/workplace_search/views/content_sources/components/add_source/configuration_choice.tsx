@@ -18,6 +18,8 @@ import { AppLogic } from '../../../../app_logic';
 import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
+import { hasCustomConnectorOption, hasExternalConnectorOption } from '../../source_data';
+
 import { SourcesLogic } from '../../sources_logic';
 
 import { AddSourceHeader } from './add_source_header';
@@ -36,14 +38,11 @@ interface CardProps {
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
-  sourceData: {
-    externalConnectorAvailable,
-    customConnectorAvailable,
-    name,
-    categories = [],
-    serviceType,
-  },
+  sourceData: { name, categories = [], serviceType },
 }) => {
+  const externalConnectorAvailable = hasExternalConnectorOption(serviceType);
+  const customConnectorAvailable = hasCustomConnectorOption(serviceType);
+
   const { isOrganization } = useValues(AppLogic);
 
   const { initializeSources, resetSourcesState } = useActions(SourcesLogic);
@@ -57,10 +56,10 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
 
   const internalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/`;
   const externalTo = `${getSourcesPath(
-    getAddPath('external'), // TODO add serviceType after baseServiceType support
+    getAddPath('external', serviceType),
     isOrganization
   )}/connector_registration`;
-  const customTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/custom`;
+  const customTo = `${getSourcesPath(getAddPath('custom', serviceType), isOrganization)}`;
 
   const ConnectorCard: React.FC<CardProps> = ({
     title,
