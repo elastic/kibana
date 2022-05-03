@@ -22,8 +22,7 @@ import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { SearchIndices } from './search_indices';
 
 const mockActions = {
-  loadSearchEngines: jest.fn(),
-  loadSearchIndices: jest.fn(),
+  initPage: jest.fn(),
 };
 
 describe('SearchIndices', () => {
@@ -92,7 +91,6 @@ describe('SearchIndices', () => {
     expect(wrapper.find(GettingStartedSteps)).toHaveLength(0);
     expect(wrapper.find(ElasticsearchResources)).toHaveLength(0);
 
-    expect(mockActions.loadSearchIndices).toHaveBeenCalledTimes(1);
-    expect(mockActions.loadSearchEngines).toHaveBeenCalledTimes(1);
+    expect(mockActions.initPage).toHaveBeenCalledTimes(1);
   });
 });

@@ -20,30 +20,26 @@ describe('SearchIndicesLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mount();
   });
 
   it('has expected default values', () => {
-    mount();
     expect(SearchIndicesLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
-    describe('onLoadSearchIndices', () => {
+    describe('searchIndicesLoadSuccess', () => {
       it('should set searchIndices', () => {
-        mount();
-
-        SearchIndicesLogic.actions.onSearchIndicesLoad(searchIndices);
+        SearchIndicesLogic.actions.searchIndicesLoadSuccess(searchIndices);
         expect(SearchIndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
           searchIndices,
         });
       });
     });
-    describe('onLoadSearchEngines', () => {
+    describe('searchEnginesLoadSuccess', () => {
       it('should set searchEngines', () => {
-        mount();
-
-        SearchIndicesLogic.actions.onSearchEnginesLoad(searchEngines);
+        SearchIndicesLogic.actions.searchEnginesLoadSuccess(searchEngines);
         expect(SearchIndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
           searchEngines,
@@ -52,7 +48,7 @@ describe('SearchIndicesLogic', () => {
     });
   });
 
-  describe('listeners', () => {
+  describe.skip('listeners', () => {
     describe('loadSearchEngines', () => {});
     describe('loadSearchIndices', () => {});
   });

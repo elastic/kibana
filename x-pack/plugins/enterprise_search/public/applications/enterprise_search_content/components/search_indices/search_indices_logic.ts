@@ -22,40 +22,50 @@ export interface SearchIndicesValues {
 }
 
 export interface SearchIndicesActions {
+  initPage(): void;
   loadSearchEngines(): void;
-  onSearchEnginesLoad(searchEngines: Engine[]): Engine[]; // TODO proper types when backend ready
+  searchEnginesLoadSuccess(searchEngines: Engine[]): Engine[]; // TODO proper types when backend ready
   loadSearchIndices(): void;
-  onSearchIndicesLoad(searchIndices: SearchIndex[]): SearchIndex[]; // TODO proper types when backend ready
+  searchIndicesLoadSuccess(searchIndices: SearchIndex[]): SearchIndex[]; // TODO proper types when backend ready
 }
 
 export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchIndicesActions>>({
   path: ['enterprise_search', 'content', 'search_indices', 'search_indices_logic'],
   actions: {
+    initPage: true,
     loadSearchIndices: true,
-    onSearchIndicesLoad: (searchIndices) => searchIndices,
+    searchIndicesLoadSuccess: (searchIndices) => searchIndices,
     loadSearchEngines: true,
-    onSearchEnginesLoad: (searchEngines) => searchEngines,
+    searchEnginesLoadSuccess: (searchEngines) => searchEngines,
   },
   reducers: {
     searchIndices: [
       [],
       {
-        onSearchIndicesLoad: (_, searchIndices) => searchIndices,
+        searchIndicesLoadSuccess: (_, searchIndices) => searchIndices,
       },
     ],
     searchEngines: [
       [],
       {
-        onSearchEnginesLoad: (_, searchEngines) => searchEngines,
+        searchEnginesLoadSuccess: (_, searchEngines) => searchEngines,
       },
     ],
   },
   listeners: ({ actions }) => ({
+    initPage: async () => {
+      try {
+        actions.loadSearchEngines();
+        actions.loadSearchIndices();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     loadSearchEngines: async () => {
       try {
         // TODO replace with actual backend call, add test cases
         const response = await Promise.resolve(searchEnginesMock);
-        actions.onSearchEnginesLoad(response);
+        actions.searchEnginesLoadSuccess(response);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -64,7 +74,7 @@ export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchI
       try {
         // TODO replace with actual backend call, add test cases
         const response = await Promise.resolve(searchIndicesMock);
-        actions.onSearchIndicesLoad(response);
+        actions.searchIndicesLoadSuccess(response);
       } catch (e) {
         flashAPIErrors(e);
       }

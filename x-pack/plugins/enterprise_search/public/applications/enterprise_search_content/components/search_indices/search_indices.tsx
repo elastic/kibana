@@ -43,25 +43,20 @@ export const baseBreadcrumbs = [
 ];
 
 export const SearchIndices: React.FC = () => {
-  const { loadSearchEngines, loadSearchIndices, onSearchEnginesLoad, onSearchIndicesLoad } =
+  const { initPage, searchEnginesLoadSuccess, searchIndicesLoadSuccess } =
     useActions(SearchIndicesLogic);
   const { searchIndices, searchEngines } = useValues(SearchIndicesLogic);
 
   useEffect(() => {
-    loadSearchIndices();
-  }, []);
-
-  useEffect(() => {
-    loadSearchEngines();
+    initPage();
   }, []);
 
   // TODO This is for easy testing until we have the backend, please remove this before the release
   // @ts-ignore
   window.contentActions = {
-    loadSearchEngines,
-    loadSearchIndices,
-    onSearchIndicesLoad,
-    onSearchEnginesLoad,
+    initPage,
+    searchIndicesLoadSuccess,
+    searchEnginesLoadSuccess,
   };
 
   // TODO: Replace with a real list of indices
