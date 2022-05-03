@@ -241,10 +241,10 @@ export interface XYProps {
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
-  valueLabels: ValueLabelMode;
-  layers: CommonXYLayerConfig[];
   endValue?: EndValue;
   emphasizeFitting?: boolean;
+  valueLabels: ValueLabelMode;
+  layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
