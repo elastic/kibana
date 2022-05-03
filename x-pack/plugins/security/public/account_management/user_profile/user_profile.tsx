@@ -502,7 +502,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     }
                     fullWidth
                   >
-                    <EuiButton onClick={() => setShowChangePasswordFlyout(true)} iconType="lock">
+                    <EuiButton
+                      onClick={() => setShowChangePasswordFlyout(true)}
+                      iconType="lock"
+                      data-test-subj="openChangePasswordFlyout"
+                    >
                       <FormattedMessage
                         id="xpack.security.accountManagement.userProfile.changePasswordButton"
                         defaultMessage="Change password"
