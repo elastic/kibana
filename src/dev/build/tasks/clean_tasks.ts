@@ -204,7 +204,6 @@ export const DeleteBazelPackagesFromBuildRoot: Task = {
 
   async run(config, log, build) {
     const bazelPackagesOnBuildRoot = (await discoverBazelPackages())
-      .filter((pkg) => !pkg.isDevOnly())
       .map((pkg) => build.resolvePath(pkg.normalizedRepoRelativeDir));
 
     await deleteAll(bazelPackagesOnBuildRoot, log);
