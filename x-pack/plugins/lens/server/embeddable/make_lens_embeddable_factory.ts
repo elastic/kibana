@@ -33,7 +33,6 @@ import {
   LensDocShape713,
   LensDocShape715,
   LensDocShape810,
-  LensDocShape830,
   LensDocShapePre712,
   VisState716,
   VisState810,
