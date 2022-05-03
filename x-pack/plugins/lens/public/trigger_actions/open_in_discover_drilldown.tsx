@@ -122,7 +122,7 @@ export class OpenInDiscoverDrilldown
       context.filters,
       context.timeFieldName
     );
-    await execute({
+    execute({
       discover: this.deps.discover,
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
