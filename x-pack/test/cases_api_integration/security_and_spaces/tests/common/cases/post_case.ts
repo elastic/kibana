@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe.only('post_case', () => {
+  describe('post_case', () => {
     afterEach(async () => {
       await deleteCasesByESQuery(es);
     });
@@ -267,6 +267,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const { tags, ...caseWithoutTags } = getPostCaseRequest();
 
         await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseWithoutTags).expect(400);
+      });
+
+      it('400s when passing a wrong severity value', async () => {
+        const req = getPostCaseRequest();
+
+        await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ...req, severity: 'very-severe' })
+          .expect(400);
       });
 
       it.skip('400s if you passing status for a new case', async () => {
