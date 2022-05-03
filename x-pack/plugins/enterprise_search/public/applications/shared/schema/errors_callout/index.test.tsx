@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SchemaErrorsCallout } from './';
+import { SchemaErrorsCallout } from '.';
 
 describe('SchemaErrorsCallout', () => {
   it('renders', () => {

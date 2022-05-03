@@ -16,12 +16,12 @@ import {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectReference,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
 import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
-import { getMappedParams } from '../../server/rules_client/lib/mapped_params_utils';
+import { getMappedParams } from '../rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -152,6 +152,12 @@ export function getMigrations(
     pipeMigrations(addMappedParams)
   );
 
+  const migrationRules830 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(removeInternalTags)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
@@ -163,6 +169,7 @@ export function getMigrations(
     '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
     '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
     '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
+    '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
   };
 }
 
@@ -863,6 +870,32 @@ function getCorrespondingAction(
       (action) => (action as RawRuleAction)?.actionRef === connectorRef
     ) as RawRuleAction;
   }
+}
+/**
+ * removes internal tags(starts with '__internal') from Security Solution rules
+ * @param doc rule to be migrated
+ * @returns migrated rule if it's Security Solution rule or unchanged if not
+ */
+function removeInternalTags(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  if (!isDetectionEngineAADRuleType(doc)) {
+    return doc;
+  }
+
+  const {
+    attributes: { tags },
+  } = doc;
+
+  const filteredTags = (tags ?? []).filter((tag) => !tag.startsWith('__internal_'));
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      tags: filteredTags,
+    },
+  };
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {

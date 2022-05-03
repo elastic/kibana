@@ -8,13 +8,13 @@
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessEventHost } from '../../../common/types/process_tree';
-import { DetailPanelHostTab } from './index';
+import { DetailPanelHostTab } from '.';
 
 const TEST_ARCHITECTURE = 'x86_64';
 const TEST_HOSTNAME = 'host-james-fleet-714-2';
 const TEST_ID = '48c1b3f1ac5da4e0057fc9f60f4d1d5d';
-const TEST_IP = '127.0.0.1,::1,10.132.0.50,fe80::7d39:3147:4d9a:f809';
-const TEST_MAC = '42:01:0a:84:00:32';
+const TEST_IP = ['127.0.0.1', '::1', '10.132.0.50', 'fe80::7d39:3147:4d9a:f809'];
+const TEST_MAC = ['42:01:0a:84:00:32'];
 const TEST_NAME = 'name-james-fleet-714-2';
 const TEST_OS_FAMILY = 'family-centos';
 const TEST_OS_FULL = 'full-CentOS 7.9.2009';
@@ -62,8 +62,8 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ID)).toBeVisible();
-      expect(renderResult.queryByText(TEST_IP)).toBeVisible();
-      expect(renderResult.queryByText(TEST_MAC)).toBeVisible();
+      expect(renderResult.queryByText(TEST_IP.join(', '))).toBeVisible();
+      expect(renderResult.queryByText(TEST_MAC.join(', '))).toBeVisible();
       expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
 
       // expand host os accordion

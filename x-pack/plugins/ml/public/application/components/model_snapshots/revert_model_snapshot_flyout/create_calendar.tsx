@@ -23,7 +23,7 @@ import {
 
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
-import { useCurrentEuiTheme } from '../../../components/color_range_legend';
+import { useCurrentEuiTheme } from '../../color_range_legend';
 import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 
 export interface CalendarEvent {

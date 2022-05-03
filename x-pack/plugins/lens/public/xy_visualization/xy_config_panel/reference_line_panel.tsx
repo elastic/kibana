@@ -8,14 +8,11 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { FillStyle, YConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState, XYReferenceLineLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
-import {
-  FillStyle,
-  YConfig,
-} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 import { ColorPicker } from './color_picker';
 import { updateLayer } from '.';
@@ -28,6 +25,7 @@ import {
   TextDecorationSetting,
 } from './shared/marker_decoration_settings';
 import { LineStyleSettings } from './shared/line_style_settings';
+import { defaultReferenceLineColor } from '../color_assignment';
 
 export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {
@@ -91,6 +89,7 @@ export const ReferenceLinePanel = (
       <FillSetting isHorizontal={isHorizontal} setConfig={setConfig} currentConfig={localConfig} />
       <ColorPicker
         {...props}
+        defaultColor={defaultReferenceLineColor}
         setConfig={setConfig}
         disableHelpTooltip
         label={i18n.translate('xpack.lens.xyChart.lineColor.label', {

@@ -17,11 +17,15 @@ import {
 } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import {
+  getIndexPatternFromFilter,
+  getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
+} from '@kbn/data-plugin/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { IIndexPattern } from '../../../data/common';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '../../../data/public';
 import { getIndexPatterns } from '../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
@@ -29,7 +33,7 @@ type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter
 export interface FilterItemProps {
   id: string;
   filter: Filter;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
@@ -355,6 +359,7 @@ export function FilterItem(props: FilterItemProps) {
   const filterViewProps = {
     filter,
     valueLabel: valueLabelConfig.title,
+    fieldLabel: getFieldDisplayValueFromFilter(filter, indexPatterns),
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,
     className: getClasses(!!filter.meta.negate, valueLabelConfig),
@@ -394,6 +399,6 @@ export function FilterItem(props: FilterItemProps) {
     </EuiPopover>
   );
 }
-
+// Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default FilterItem;

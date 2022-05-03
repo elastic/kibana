@@ -30,7 +30,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-datemath",
+  "//packages/kbn-datemath",
   "//packages/kbn-es-query",
   "//packages/kbn-i18n",
   "//packages/kbn-securitysolution-io-ts-list-types",
@@ -46,7 +46,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath:npm_module_types",
+  "//packages/kbn-datemath:npm_module_types",
   "//packages/kbn-es-query:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-securitysolution-io-ts-list-types:npm_module_types",

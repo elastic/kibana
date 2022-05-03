@@ -7,21 +7,18 @@
 
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 
-import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { ValidLayer, YConfig } from '@kbn/expression-xy-plugin/common';
 import {
   State,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
 } from './types';
-import { OperationMetadata, DatasourcePublicAPI } from '../types';
+import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type {
-  ValidLayer,
-  YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -31,7 +28,7 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
+import { getUniqueLabels } from './annotations/helpers';
 import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
@@ -50,7 +47,7 @@ export const getSortedAccessors = (
 
 export const toExpression = (
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType
@@ -86,7 +83,7 @@ const simplifiedLayerExpression = {
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
     ...layer,
     hide: true,
-    yConfig: layer.yConfig?.map(({ lineWidth, ...rest }) => ({
+    yConfig: layer.yConfig?.map(({ ...rest }) => ({
       ...rest,
       lineWidth: 1,
       icon: undefined,
@@ -96,18 +93,12 @@ const simplifiedLayerExpression = {
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
     ...layer,
     hide: true,
-    annotations: layer.annotations?.map(({ lineWidth, ...rest }) => ({
-      ...rest,
-      lineWidth: 1,
-      icon: undefined,
-      textVisibility: false,
-    })),
   }),
 };
 
 export function toPreviewExpression(
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   eventAnnotationService: EventAnnotationServiceType
 ) {
@@ -158,7 +149,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType
@@ -420,19 +411,7 @@ const annotationLayerToExpression = (
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
           annotations: layer.annotations
-            ? layer.annotations.map(
-                (ann): Ast =>
-                  eventAnnotationService.toExpression({
-                    time: ann.key.timestamp,
-                    label: ann.label || defaultAnnotationLabel,
-                    textVisibility: ann.textVisibility,
-                    icon: ann.icon,
-                    lineStyle: ann.lineStyle,
-                    lineWidth: ann.lineWidth,
-                    color: ann.color,
-                    isHidden: Boolean(ann.isHidden),
-                  })
-              )
+            ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
             : [],
         },
       },

@@ -35,25 +35,21 @@ import {
   BarSeriesProps,
   LineSeriesProps,
   ColorVariant,
+  Placement,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Datatable, DatatableRow, DatatableColumn } from '../../../../expressions/public';
-import { RenderMode } from '../../../../expressions/common';
-import { FieldFormat } from '../../../../field_formats/common';
-import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
+import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import type { Datatable, DatatableRow, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { RenderMode } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { SeriesType, XYChartProps } from '../../common/types';
 import { isHorizontalChart, getSeriesColor, getAnnotationsLayers, getDataLayers } from '../helpers';
-import { EventAnnotationServiceType } from '../../../../event_annotation/public';
-import {
-  ChartsPluginSetup,
-  ChartsPluginStart,
-  PaletteRegistry,
-  SeriesLayer,
-  useActiveCursor,
-} from '../../../../../plugins/charts/public';
-import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../plugins/charts/common';
 import {
   getFilteredLayers,
   getReferenceLayers,
@@ -62,7 +58,6 @@ import {
   getAxesConfiguration,
   GroupsConfiguration,
   validateExtent,
-  computeOverallDataDomain,
   getColorAssignments,
   getLinesCausedPaddings,
 } from '../helpers';
@@ -71,7 +66,13 @@ import { getLegendAction } from './legend_action';
 import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { XYLayerConfigResult } from '../../common/types';
-import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
+import {
+  Annotations,
+  getAnnotationsGroupedByInterval,
+  getRangeAnnotations,
+  OUTSIDE_RECT_ANNOTATION_WIDTH,
+  OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
+} from './annotations';
 
 import './xy_chart.scss';
 
@@ -99,6 +100,7 @@ export type XYChartRenderProps = XYChartProps & {
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
+  syncTooltips: boolean;
   eventAnnotationService: EventAnnotationServiceType;
 };
 
@@ -144,6 +146,7 @@ export function XYChart({
   onSelectRange,
   interactive = true,
   syncColors,
+  syncTooltips,
   useLegacyTimeAxis,
 }: XYChartRenderProps) {
   const {
@@ -271,18 +274,21 @@ export function XYChart({
 
   const xColumnId = firstTable.columns.find((col) => col.id === filteredLayers[0].xAccessor)?.id;
 
-  const groupedAnnotations = getAnnotationsGroupedByInterval(
+  const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
     minInterval,
     xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
     xAxisFormatter
   );
+  const rangeAnnotations = getRangeAnnotations(annotationsLayers);
+
   const visualConfigs = [
     ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
-    ...groupedAnnotations,
+    ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const linesPaddings = getLinesCausedPaddings(visualConfigs, yAxesMap);
+  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].hide : false;
+  const linesPaddings = !shouldHideDetails ? getLinesCausedPaddings(visualConfigs, yAxesMap) : {};
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
     const tickVisible =
@@ -343,42 +349,21 @@ export function XYChart({
         min = extent.lowerBound ?? NaN;
         max = extent.upperBound ?? NaN;
       }
-    } else {
-      const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
-        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
-      );
-      if (!fit && axisHasReferenceLine) {
-        // Remove this once the chart will support automatic annotation fit for other type of charts
-        const { min: computedMin, max: computedMax } = computeOverallDataDomain(
-          filteredLayers,
-          axis.series.map(({ accessor }) => accessor),
-          data.tables
-        );
-
-        if (computedMin != null && computedMax != null) {
-          max = Math.max(computedMax, max || 0);
-          min = Math.min(computedMin, min || 0);
-        }
-        for (const { layerId, yConfig } of referenceLineLayers) {
-          const table = data.tables[layerId];
-          for (const { axisMode, forAccessor } of yConfig || []) {
-            if (axis.groupId === axisMode) {
-              for (const row of table.rows) {
-                const value = row[forAccessor];
-                // keep the 0 in view
-                max = Math.max(value, max || 0, 0);
-                min = Math.min(value, min || 0, 0);
-              }
-            }
-          }
-        }
-      }
     }
 
     return {
       fit,
       min,
       max,
+      includeDataFromIds: referenceLineLayers
+        .flatMap((l) =>
+          l.yConfig ? l.yConfig.map((yConfig) => ({ layerId: l.layerId, yConfig })) : []
+        )
+        .filter(({ yConfig }) => yConfig.axisMode === axis.groupId)
+        .map(
+          ({ layerId, yConfig }) =>
+            `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+        ),
     };
   };
 
@@ -534,11 +519,13 @@ export function XYChart({
               : undefined,
         },
       };
-
   return (
     <Chart ref={chartRef}>
       <Settings
         onPointerUpdate={handleCursorUpdate}
+        externalPointerEvents={{
+          tooltip: { visible: syncTooltips, placement: Placement.Right },
+        }}
         debugState={window._echDebugStateFlag ?? false}
         showLegend={
           legend.isVisible && !legend.showSingleSeries
@@ -936,15 +923,24 @@ export function XYChart({
           paddingMap={linesPaddings}
         />
       ) : null}
-      {groupedAnnotations.length ? (
+      {rangeAnnotations.length || groupedLineAnnotations.length ? (
         <Annotations
-          hide={annotationsLayers?.[0].hide}
-          groupedAnnotations={groupedAnnotations}
+          rangeAnnotations={rangeAnnotations}
+          groupedLineAnnotations={groupedLineAnnotations}
           formatter={xAxisFormatter}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
           isBarChart={filteredBarLayers.length > 0}
           minInterval={minInterval}
+          hide={annotationsLayers?.[0].hide}
+          outsideDimension={
+            rangeAnnotations.length && shouldHideDetails
+              ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+              : shouldUseNewTimeAxis
+              ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding || 0) +
+                Number(chartTheme.axes?.tickLabel?.fontSize || 0)
+              : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH
+          }
         />
       ) : null}
     </Chart>

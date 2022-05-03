@@ -6,24 +6,21 @@
  */
 
 import React, { memo } from 'react';
-import type { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
-import { ConfigContext, FleetStatusProvider, KibanaVersionContext } from '../../hooks';
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { Chat } from '@kbn/cloud-plugin/public';
+
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
-import { Chat } from '../../../../cloud/public';
-
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { ConfigContext, FleetStatusProvider, KibanaVersionContext } from '../../hooks';
 
 import { AgentPolicyContextProvider } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';

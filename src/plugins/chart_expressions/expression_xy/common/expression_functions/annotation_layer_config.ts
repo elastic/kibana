@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, ANNOTATION_LAYER } from '../constants';
 import { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../types';
 
@@ -33,7 +33,7 @@ export function annotationLayerConfigFunction(): ExpressionFunctionDefinition<
         help: 'Show details',
       },
       annotations: {
-        types: ['manual_event_annotation'],
+        types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
         help: '',
         multi: true,
       },

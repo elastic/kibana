@@ -9,8 +9,9 @@
 import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
+import { flattenHit } from '@kbn/data-plugin/public';
+import { getTypeForFieldIcon } from '../../../../../utils/get_type_for_field_icon';
 import { useDiscoverServices } from '../../../../../utils/use_discover_services';
-import { flattenHit } from '../../../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
@@ -73,7 +74,11 @@ export const DocViewerLegacyTable = ({
     .map((field) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, dataView) ? 'nested' : fieldMapping?.type;
+      const fieldType = isNestedFieldParent(field, dataView)
+        ? 'nested'
+        : fieldMapping
+        ? getTypeForFieldIcon(fieldMapping)
+        : undefined;
       const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
       return {
         action: {

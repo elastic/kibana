@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { flatMap, get } from 'lodash';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { AggregateEventsBySavedObjectResult } from '../../../../../../../event_log/server';
+import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { AggregateRuleExecutionEvent } from '../../../../../../common/detection_engine/schemas/common';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../../common/detection_engine/schemas/response';
 import {

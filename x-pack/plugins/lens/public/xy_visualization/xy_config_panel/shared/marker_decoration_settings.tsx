@@ -8,10 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import {
-  IconPosition,
-  YAxisMode,
-} from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { IconPosition, YAxisMode } from '@kbn/expression-xy-plugin/common';
 
 import { TooltipWrapper } from '../../../shared_components';
 import { hasIcon, IconSelect, IconSet } from './icon_select';
@@ -135,10 +132,12 @@ export const IconSelectSetting = ({
   currentConfig,
   setConfig,
   customIconSet,
+  defaultIcon = 'empty',
 }: {
   currentConfig?: MarkerDecorationConfig;
   setConfig: (config: MarkerDecorationConfig) => void;
   customIconSet?: IconSet;
+  defaultIcon?: string;
 }) => {
   return (
     <EuiFormRow
@@ -149,6 +148,7 @@ export const IconSelectSetting = ({
       })}
     >
       <IconSelect
+        defaultIcon={defaultIcon}
         customIconSet={customIconSet}
         value={currentConfig?.icon}
         onChange={(newIcon) => {
