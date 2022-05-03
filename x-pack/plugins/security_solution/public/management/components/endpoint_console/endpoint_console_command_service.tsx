@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CommandExecutionResponse } from '../console/types';
-import { EndpointError } from '../../../../common/endpoint/errors';
-import { handleIsolateAction, handleStatusAction } from './action_handlers';
+import { EndpointStatusActionResult } from './action_handlers/status_action';
 import { HostMetadata } from '../../../../common/endpoint/types';
-import { CommandServiceInterface, CommandDefinition, Command } from '../console';
+import { CommandServiceInterface, CommandDefinition } from '../console';
+import { IsolateActionResult } from './action_handlers/isolate_action';
 
 /**
  * Endpoint specific Response Actions (commands) for use with Console.
@@ -23,6 +21,10 @@ export class EndpointConsoleCommandService implements CommandServiceInterface {
       {
         name: 'isolate',
         about: 'Isolate the host',
+        RenderComponent: IsolateActionResult,
+        meta: {
+          endpointId: this.endpointMetadata.agent.id,
+        },
         args: {
           comment: {
             required: false,
@@ -34,23 +36,11 @@ export class EndpointConsoleCommandService implements CommandServiceInterface {
       {
         name: 'status',
         about: 'Display the latest status information for the Endpoint',
+        RenderComponent: EndpointStatusActionResult,
+        meta: {
+          endpointId: this.endpointMetadata.agent.id,
+        },
       },
     ];
-  }
-
-  async executeCommand(command: Command): Promise<CommandExecutionResponse> {
-    switch (command.args.name) {
-      case 'isolate':
-        return handleIsolateAction(this.endpointMetadata, command);
-      case 'status':
-        return handleStatusAction(this.endpointMetadata, command);
-      default:
-        throw new EndpointError(
-          i18n.translate('xpack.securitySolution.endpointResponseActions.unknownAction', {
-            defaultMessage: "Unknown action '{name}'",
-            values: { name: command.args.name },
-          })
-        );
-    }
   }
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -15,18 +15,14 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyStatus } from '../../endpoint_policy_status';
 import { EndpointAgentAndIsolationStatus } from '../../endpoint_agent_and_isolation_status';
 import { useGetEndpointHostInfo } from '../../../hooks';
-import { HostMetadata } from '../../../../../common/endpoint/types';
-import { Command } from '../../console';
-import { CommandExecutionResponse } from '../../console/types';
+import { CommandExecutionComponentProps } from '../../console/types';
 import { FormattedError } from '../../formatted_error';
 
-interface EndpointStatusActionResultProps {
-  endpointId: string;
-}
+export const EndpointStatusActionResult = memo<CommandExecutionComponentProps>(
+  ({ command, status, setStatus }) => {
+    const endpointId = command.commandDefinition?.meta?.endpointId as string;
 
-export const EndpointStatusActionResult = memo<EndpointStatusActionResultProps>(
-  ({ endpointId }) => {
-    const { isFetching, error, data: endpointInfo } = useGetEndpointHostInfo(endpointId);
+    const { isFetching, error, data: endpointInfo, isFetched } = useGetEndpointHostInfo(endpointId);
     const { data: endpointPendingActions } = useFetchEndpointPendingActionsSummary([endpointId]);
 
     const pendingIsolationActions = useMemo<
@@ -45,6 +41,12 @@ export const EndpointStatusActionResult = memo<EndpointStatusActionResultProps>(
         pendingUnIsolate: 0,
       };
     }, [endpointPendingActions?.data]);
+
+    useEffect(() => {
+      if (isFetched && status === 'pending') {
+        setStatus(error ? 'error' : 'success');
+      }
+    }, [error, isFetched, setStatus, status]);
 
     if (isFetching) {
       return null;
@@ -111,12 +113,3 @@ export const EndpointStatusActionResult = memo<EndpointStatusActionResultProps>(
   }
 );
 EndpointStatusActionResult.displayName = 'EndpointStatusActionResult';
-
-export const handleStatusAction = async (
-  endpointMetadata: HostMetadata,
-  command: Command
-): Promise<CommandExecutionResponse> => {
-  return {
-    result: <EndpointStatusActionResult endpointId={endpointMetadata.agent.id} />,
-  };
-};
