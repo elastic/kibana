@@ -12,13 +12,13 @@ import { ApmFields } from '../apm_fields';
 import { Fields } from '../../entity';
 import { StreamAggregator } from '../../stream_aggregator';
 
-interface LatencyState {
+type LatencyState = {
   count: number;
   min: number;
   max: number;
   sum: number;
   timestamp: number;
-}
+} & Pick<ApmFields, 'service.name' | 'service.environment' | 'transaction.type'>;
 
 export type ServiceFields = Fields &
   Pick<
@@ -32,6 +32,7 @@ export type ServiceFields = Fields &
     | 'service.name'
     | 'service.version'
     | 'service.environment'
+    | 'transaction.type'
   > &
   Partial<{
     'service.latency': { min: number; max: number; sum: number; value_count: number };
@@ -55,13 +56,17 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
           type: 'date',
           format: 'date_optional_time||epoch_millis',
         },
+        transaction: {
+          type: 'object',
+          properties: {
+            type: { type: 'keyword', time_series_dimension: true },
+          },
+        },
         service: {
           type: 'object',
           properties: {
-            name: {
-              type: 'keyword',
-              time_series_dimension: true,
-            },
+            name: { type: 'keyword', time_series_dimension: true },
+            environment: { type: 'keyword', time_series_dimension: true },
             latency: {
               type: 'aggregate_metric_double',
               metrics: ['min', 'max', 'sum', 'value_count'],
@@ -75,7 +80,7 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
   }
 
   getDimensions(): string[] {
-    return ['service.name'];
+    return ['service.name', 'service.environment', 'transaction.type'];
   }
 
   getWriteTarget(document: Record<string, any>): string | null {
@@ -96,17 +101,23 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
     if (!event['@timestamp']) return null;
 
     const service = event['service.name']!;
-    if (!this.state[service]) {
-      this.state[service] = {
+    const environment = event['service.environment'] ?? 'production';
+    const transactionType = event['transaction.type'] ?? 'request';
+    const key = `${service}-${environment}-${transactionType}`;
+    if (!this.state[key]) {
+      this.state[key] = {
         count: 0,
         min: 0,
         max: 0,
         sum: 0,
         timestamp: event['@timestamp'],
+        'service.name': service,
+        'service.environment': environment,
+        'transaction.type': transactionType,
       };
     }
     const duration = Number(event['transaction.duration.us']);
-    const state = this.state[service];
+    const state = this.state[key];
 
     state.count++;
     state.sum += duration;
@@ -119,8 +130,8 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
 
     const diff = Math.abs(event['@timestamp'] - this.state[service].timestamp);
     if (diff >= 1000 * 60) {
-      const fields = this.createServiceFields(service);
-      delete this.state[service];
+      const fields = this.createServiceFields(key);
+      delete this.state[key];
       return [fields];
     }
     return null;
@@ -131,25 +142,27 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
   }
 
   private createFieldsFromState(): ServiceFields[] {
-    const fields = Object.keys(this.state).map((service) => this.createServiceFields(service));
+    const fields = Object.keys(this.state).map((key) => this.createServiceFields(key));
     this.state = {};
     return fields;
   }
 
-  private createServiceFields(service: string): ServiceFields {
+  private createServiceFields(key: string): ServiceFields {
     this.processedComponent = ++this.processedComponent % 1000;
     const component = Date.now() % 100;
+    const state = this.state[key];
     return {
-      '@timestamp':
-        this.state[service].timestamp + random(0, 100) + component + this.processedComponent,
+      '@timestamp': state.timestamp + random(0, 100) + component + this.processedComponent,
       'metricset.name': 'service',
       'processor.event': 'service',
-      'service.name': service,
+      'service.name': state['service.name'],
+      'service.environment': state['service.environment'],
+      'transaction.type': state['transaction.type'],
       'service.latency': {
-        min: this.state[service].min,
-        max: this.state[service].max,
-        sum: this.state[service].sum,
-        value_count: this.state[service].count,
+        min: state.min,
+        max: state.max,
+        sum: state.sum,
+        value_count: state.count,
       },
     };
   }
