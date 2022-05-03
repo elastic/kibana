@@ -490,7 +490,7 @@ export class Execution<
           continue;
         }
 
-        throw new Error(`${fnDef.name} requires an "${name}" argument`);
+        throw new Error(`${fnDef.name} requires the "${name}" argument`);
       }
 
       // Create the functions to resolve the argument ASTs into values
