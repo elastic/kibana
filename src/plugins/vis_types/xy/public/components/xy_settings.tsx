@@ -51,6 +51,7 @@ type XYSettingsProps = Pick<
   | 'orderBucketsBySum'
 > & {
   onPointerUpdate: SettingsProps['onPointerUpdate'];
+  externalPointerEvents: SettingsProps['externalPointerEvents'];
   xDomain?: DomainRange;
   adjustedXDomain?: DomainRange;
   showLegend: boolean;
@@ -91,6 +92,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   showLegend,
   onElementClick,
   onPointerUpdate,
+  externalPointerEvents,
   onBrushEnd,
   onRenderChange,
   legendAction,
@@ -163,6 +165,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
     <Settings
       debugState={window._echDebugStateFlag ?? false}
       onPointerUpdate={onPointerUpdate}
+      externalPointerEvents={externalPointerEvents}
       xDomain={adjustedXDomain}
       rotation={rotation}
       theme={[themeOverrides, theme]}
