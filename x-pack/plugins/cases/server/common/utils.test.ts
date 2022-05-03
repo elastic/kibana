@@ -110,6 +110,7 @@ describe('common utils', () => {
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "defacement",
@@ -149,6 +150,7 @@ describe('common utils', () => {
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "Data Destruction",
@@ -192,6 +194,7 @@ describe('common utils', () => {
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "open",
               "tags": Array [
                 "LOLBins",
@@ -239,6 +242,7 @@ describe('common utils', () => {
               "settings": Object {
                 "syncAlerts": true,
               },
+              "severity": "low",
               "status": "closed",
               "tags": Array [
                 "LOLBins",
@@ -303,6 +307,7 @@ describe('common utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -358,6 +363,7 @@ describe('common utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -436,6 +442,7 @@ describe('common utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "LOLBins",
@@ -489,6 +496,7 @@ describe('common utils', () => {
           "settings": Object {
             "syncAlerts": true,
           },
+          "severity": "low",
           "status": "open",
           "tags": Array [
             "defacement",
