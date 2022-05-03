@@ -447,7 +447,7 @@ export const RulesList: React.FunctionComponent = () => {
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip',
             {
-              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} execution durations (mm:ss).`,
+              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} run durations (mm:ss).`,
               values: {
                 percentileOrdinal: percentileOrdinals[selectedPercentile!],
                 sampleLimit: MONITORING_HISTORY_LIMIT,
@@ -634,7 +634,7 @@ export const RulesList: React.FunctionComponent = () => {
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle',
               {
-                defaultMessage: 'Start time of the last execution.',
+                defaultMessage: 'Start time of the last run.',
               }
             )}
           >
@@ -790,7 +790,7 @@ export const RulesList: React.FunctionComponent = () => {
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
               {
-                defaultMessage: 'How often this rule executes successfully.',
+                defaultMessage: 'How often this rule runs successfully.',
               }
             )}
           >

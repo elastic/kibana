@@ -471,7 +471,7 @@ describe('rules_list component with items', () => {
     jest.runAllTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last execution.');
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last run.');
 
     wrapper
       .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
