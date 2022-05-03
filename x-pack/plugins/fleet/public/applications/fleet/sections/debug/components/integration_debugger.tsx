@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiHighlight,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -29,10 +30,12 @@ import {
   sendGetPackages,
   sendInstallPackage,
   sendRemovePackage,
+  useLink,
   useStartServices,
 } from '../../../hooks';
 import type { PackageListItem } from '../../../types';
 import { queryClient } from '..';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 const fetchInstalledIntegrations = async () => {
   const response = await sendGetPackages({ experimental: true });
@@ -48,6 +51,8 @@ const fetchInstalledIntegrations = async () => {
 
 export const IntegrationDebugger: React.FunctionComponent = () => {
   const { http, notifications } = useStartServices();
+  const { getHref } = useLink();
+
   const [selectedIntegrationId, setSelectedIntegrationId] = useState<string>();
   const [isReinstallModalVisible, setIsReinstallModalVisible] = useState(false);
   const [isUninstallModalVisible, setIsUninstallModalVisible] = useState(false);
@@ -59,15 +64,19 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
     if (response.error) {
       notifications.toasts.addError(response.error, {
-        title: `Error uninstalling ${integration.name}`,
+        title: `Error uninstalling ${integration.title}`,
         toastMessage: response.error.message,
       });
 
+      setIsUninstallModalVisible(false);
       throw new Error(response.error.message);
     }
 
-    notifications.toasts.addSuccess(`Successfully uninstalled ${integration.name}`);
+    notifications.toasts.addSuccess(`Successfully uninstalled ${integration.title}`);
+
     setSelectedIntegrationId(undefined);
+    setIsUninstallModalVisible(false);
+
     queryClient.invalidateQueries('debug-integrations');
 
     return response.data;
@@ -78,10 +87,11 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
     if (uninstallResponse.error) {
       notifications.toasts.addError(uninstallResponse.error, {
-        title: `Error reinstalling ${integration.name}`,
+        title: `Error reinstalling ${integration.title}`,
         toastMessage: uninstallResponse.error.message,
       });
 
+      setIsReinstallModalVisible(false);
       throw new Error(uninstallResponse.error.message);
     }
 
@@ -89,15 +99,19 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
     if (installResponse.error) {
       notifications.toasts.addError(installResponse.error, {
-        title: `Error reinstalling ${integration.name}`,
+        title: `Error reinstalling ${integration.title}`,
         toastMessage: installResponse.error.message,
       });
 
+      setIsReinstallModalVisible(false);
       throw new Error(installResponse.error.message);
     }
 
-    notifications.toasts.addSuccess(`Successfully reinstalled ${integration.name}`);
+    notifications.toasts.addSuccess(`Successfully reinstalled ${integration.title}`);
+
     setSelectedIntegrationId(undefined);
+    setIsReinstallModalVisible(false);
+
     queryClient.invalidateQueries('debug-integrations');
 
     return installResponse.data;
@@ -219,7 +233,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
                 cancelButtonText="Cancel"
                 confirmButtonText="Reinstall"
               >
-                Are you sure you want to reinstall {selectedIntegration.title}?`
+                Are you sure you want to reinstall {selectedIntegration.title}?
               </EuiConfirmModal>
             )}
 
@@ -231,12 +245,29 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
                 cancelButtonText="Cancel"
                 confirmButtonText="Uninstall"
               >
-                Are you sure you want to uninstall {selectedIntegration.title}?`
+                Are you sure you want to uninstall {selectedIntegration.title}?
               </EuiConfirmModal>
             )}
           </EuiFlexGroup>
         )}
       </EuiFlexGroup>
+
+      {selectedIntegration && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiLink
+            target="_blank"
+            href={getHref('integration_details_overview', {
+              pkgkey: pkgKeyFromPackageInfo({
+                name: selectedIntegration.name,
+                version: selectedIntegration.version,
+              }),
+            })}
+          >
+            View integration settings in Integrations UI
+          </EuiLink>
+        </>
+      )}
     </>
   );
 };
