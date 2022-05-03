@@ -7,7 +7,7 @@
 
 export { store, storage } from './store';
 
-export { RooState as AppState } from './root_reducer';
+export type { RooState as AppState } from './root_reducer';
 
-export { UiAction, UiSelector } from './ui';
-export { IndexStatusAction, IndexStatusSelector } from './index_status';
+export type { UiAction, UiSelector } from './ui';
+export type { IndexStatusAction, IndexStatusSelector } from './index_status';
