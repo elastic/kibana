@@ -9,7 +9,6 @@
 import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { RangeSliderEditor } from './range_slider_editor';
 import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './types';
 import {
@@ -51,8 +50,6 @@ export class RangeSliderEmbeddableFactory
       dataControlField.compatibleControlTypes.push(this.type);
     }
   };
-
-  public controlEditorComponent = RangeSliderEditor;
 
   public isEditable = () => Promise.resolve(false);
 

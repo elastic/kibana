@@ -15,7 +15,6 @@ import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/control_types/options_list/options_list_persistable_state';
-import { TimeSliderEditor } from './time_slider_editor';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { TimeSliderStrings } from './time_slider_strings';
 
@@ -53,8 +52,6 @@ export class TimesliderEmbeddableFactory
       dataControlField.compatibleControlTypes.push(this.type);
     }
   };
-
-  public controlEditorComponent = TimeSliderEditor;
 
   public isEditable = () => Promise.resolve(false);
 

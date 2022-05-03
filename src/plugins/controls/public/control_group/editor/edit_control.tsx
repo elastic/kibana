@@ -11,14 +11,19 @@ import { EuiButtonIcon } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
 import { ControlEditor } from './control_editor';
 import { pluginServices } from '../../services';
-import { forwardAllContext } from './forward_all_context';
 import { ControlGroupStrings } from '../control_group_strings';
-import { IEditableControlFactory, ControlInput, DataControlInput } from '../../types';
+import {
+  IEditableControlFactory,
+  ControlInput,
+  DataControlInput,
+  ControlEmbeddable,
+} from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 
@@ -56,15 +61,19 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   }, [panels, embeddableId]);
 
   const editControl = async () => {
-    const panel = panels[embeddableId];
-    let factory = getControlFactory(panel.type);
-    if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
-
-    const embeddable = await untilEmbeddableLoaded(embeddableId);
-    const controlGroup = embeddable.getRoot() as ControlGroupContainer;
+    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const embeddable = (await untilEmbeddableLoaded(
+      embeddableId
+    )) as ControlEmbeddable<DataControlInput>;
 
     const initialInputPromise = new Promise<EditControlResult>((resolve, reject) => {
-      let inputToReturn: Partial<ControlInput> = {};
+      const panel = panels[embeddableId];
+      let factory = getControlFactory(panel.type);
+      if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
+
+      const controlGroup = embeddable.getRoot() as ControlGroupContainer;
+
+      let inputToReturn: Partial<DataControlInput> = {};
 
       let removed = false;
       const onCancel = (ref: OverlayRef) => {
@@ -110,42 +119,45 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       };
 
       const flyoutInstance = openFlyout(
-        forwardAllContext(
-          <ControlEditor
-            isCreate={false}
-            width={panel.width}
-            embeddable={embeddable}
-            title={embeddable.getTitle()}
-            onCancel={() => onCancel(flyoutInstance)}
-            updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
-            setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
-            updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
-            onTypeEditorChange={(partialInput) => {
-              inputToReturn = { ...inputToReturn, ...partialInput };
-            }}
-            onSave={(type) => onSave(type, flyoutInstance)}
-            removeControl={() => {
-              openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-                confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-                cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-                title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-                buttonColor: 'danger',
-              }).then((confirmed) => {
-                if (confirmed) {
-                  removeEmbeddable(embeddableId);
-                  removed = true;
-                  flyoutInstance.close();
-                }
-              });
-            }}
-          />,
-          reduxContainerContext
+        toMountPoint(
+          <PresentationUtilProvider>
+            <ControlEditor
+              isCreate={false}
+              width={panel.width}
+              embeddable={embeddable}
+              title={embeddable.getTitle()}
+              onCancel={() => onCancel(flyoutInstance)}
+              updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+              setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
+              updateWidth={(newWidth) =>
+                dispatch(setControlWidth({ width: newWidth, embeddableId }))
+              }
+              onTypeEditorChange={(partialInput) => {
+                inputToReturn = { ...inputToReturn, ...partialInput };
+              }}
+              onSave={(type) => onSave(type, flyoutInstance)}
+              removeControl={() => {
+                openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
+                  confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
+                  cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
+                  title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
+                  buttonColor: 'danger',
+                }).then((confirmed) => {
+                  if (confirmed) {
+                    removeEmbeddable(embeddableId);
+                    removed = true;
+                    flyoutInstance.close();
+                  }
+                });
+              }}
+            />
+          </PresentationUtilProvider>
         ),
         {
           outsideClickCloses: false,
           onClose: (flyout) => {
-            setFlyoutRef(undefined);
             onCancel(flyout);
+            setFlyoutRef(undefined);
           },
         }
       );

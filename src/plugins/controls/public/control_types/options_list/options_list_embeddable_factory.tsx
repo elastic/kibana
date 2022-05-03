@@ -9,7 +9,7 @@
 import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { OptionsListEditor } from './options_list_editor';
+import { OptionsListEditorOptions } from './options_list_editor_options';
 import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import {
@@ -55,7 +55,7 @@ export class OptionsListEmbeddableFactory
     }
   };
 
-  public controlEditorComponent = OptionsListEditor;
+  public controlEditorOptionsComponent = OptionsListEditorOptions;
 
   public isEditable = () => Promise.resolve(false);
 
