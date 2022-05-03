@@ -21,6 +21,7 @@ const SKIPPABLE_PATHS = [
   /^\.github\//,
   /\.md$/,
   /^\.backportrc\.json$/,
+  /^nav-kibana-dev\.docnav\.json$/,
 ];
 
 const REQUIRED_PATHS = [
