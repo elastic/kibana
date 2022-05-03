@@ -129,7 +129,11 @@ export const ResultsLinks: FC<Props> = ({
           }
         })
       ).then((cards) => {
-        setAsyncHrefCards(flatten(cards).filter(isDefined));
+        setAsyncHrefCards(
+          flatten(cards)
+            .filter(isDefined)
+            .filter((d) => d.canDisplay === true)
+        );
       });
     }
 
