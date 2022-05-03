@@ -23,7 +23,7 @@ import { offsetRt } from '../../../common/offset_rt';
 
 const ServiceGroupsTitle = i18n.translate(
   'xpack.apm.views.serviceGroups.title',
-  { defaultMessage: ' Services' }
+  { defaultMessage: 'Services' }
 );
 
 /**
