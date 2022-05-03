@@ -41,15 +41,15 @@ export const SettingsRt = rt.type({
 
 export enum CaseSeverity {
   LOW = 'low',
-  MINOR = 'minor',
-  SIGNIFICANT = 'significant',
+  MEDIUM = 'medium',
+  HIGH = 'high',
   CRITICAL = 'critical',
 }
 
 export const CaseSeverityRT = rt.union([
   rt.literal(CaseSeverity.LOW),
-  rt.literal(CaseSeverity.MINOR),
-  rt.literal(CaseSeverity.SIGNIFICANT),
+  rt.literal(CaseSeverity.MEDIUM),
+  rt.literal(CaseSeverity.HIGH),
   rt.literal(CaseSeverity.CRITICAL),
 ]);
 
