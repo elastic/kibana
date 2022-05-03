@@ -94,7 +94,7 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiSelect
               id="soType"
@@ -105,7 +105,12 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={`
+            min-width: 400px;
+          `}
+        >
           <EuiFormRow>
             <SavedObjectNamesCombo
               name={name!}
@@ -116,7 +121,7 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiButton onClick={onClick} fill disabled={!name}>
               <FormattedMessage id="xpack.fleet.debugger.searchText" defaultMessage="Search" />
