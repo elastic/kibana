@@ -24,6 +24,7 @@ import {
   DisplayValueStyle,
   RecursivePartial,
   AxisStyle,
+  Placement,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -59,7 +60,13 @@ import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
-import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
+import {
+  Annotations,
+  getAnnotationsGroupedByInterval,
+  getRangeAnnotations,
+  OUTSIDE_RECT_ANNOTATION_WIDTH,
+  OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
+} from './annotations';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes } from '../../common/constants';
 import { DataLayers } from './data_layers';
 import { Tooltip } from './tooltip';
@@ -89,6 +96,7 @@ export type XYChartRenderProps = XYChartProps & {
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
+  syncTooltips: boolean;
   eventAnnotationService: EventAnnotationServiceType;
 };
 
@@ -131,6 +139,7 @@ export function XYChart({
   onSelectRange,
   interactive = true,
   syncColors,
+  syncTooltips,
   useLegacyTimeAxis,
 }: XYChartRenderProps) {
   const {
@@ -270,18 +279,21 @@ export function XYChart({
 
   const xColumnId = firstTable.columns.find((col) => col.id === dataLayers[0]?.xAccessor)?.id;
 
-  const groupedAnnotations = getAnnotationsGroupedByInterval(
+  const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
     minInterval,
     xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
     xAxisFormatter
   );
+  const rangeAnnotations = getRangeAnnotations(annotationsLayers);
+
   const visualConfigs = [
     ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
-    ...groupedAnnotations,
+    ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const linesPaddings = getLinesCausedPaddings(visualConfigs, yAxesMap);
+  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].hide : false;
+  const linesPaddings = !shouldHideDetails ? getLinesCausedPaddings(visualConfigs, yAxesMap) : {};
 
   const getYAxesStyle = (groupId: 'left' | 'right') => {
     const tickVisible =
@@ -524,6 +536,9 @@ export function XYChart({
     <Chart ref={chartRef}>
       <Settings
         onPointerUpdate={handleCursorUpdate}
+        externalPointerEvents={{
+          tooltip: { visible: syncTooltips, placement: Placement.Right },
+        }}
         debugState={window._echDebugStateFlag ?? false}
         showLegend={
           legend.isVisible && !legend.showSingleSeries
@@ -693,15 +708,24 @@ export function XYChart({
           paddingMap={linesPaddings}
         />
       ) : null}
-      {groupedAnnotations.length ? (
+      {rangeAnnotations.length || groupedLineAnnotations.length ? (
         <Annotations
-          hide={annotationsLayers?.[0].hide}
-          groupedAnnotations={groupedAnnotations}
+          rangeAnnotations={rangeAnnotations}
+          groupedLineAnnotations={groupedLineAnnotations}
           formatter={xAxisFormatter}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
           isBarChart={filteredBarLayers.length > 0}
           minInterval={minInterval}
+          hide={annotationsLayers?.[0].hide}
+          outsideDimension={
+            rangeAnnotations.length && shouldHideDetails
+              ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+              : shouldUseNewTimeAxis
+              ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding || 0) +
+                Number(chartTheme.axes?.tickLabel?.fontSize || 0)
+              : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH
+          }
         />
       ) : null}
     </Chart>
