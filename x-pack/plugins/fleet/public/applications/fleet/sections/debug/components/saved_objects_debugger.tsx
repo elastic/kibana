@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
 import {
   EuiFlexGroup,
@@ -17,12 +17,13 @@ import {
   EuiTitle,
   EuiText,
   EuiCallOut,
-  EuiComboBox,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendRequest } from '../../../hooks';
 
 import { CodeBlock } from './code_block';
+import { SavedObjectNamesCombo } from './saved_object_names_combo';
 
 const fetchSavedObjects = async (type: string, name: string) => {
   const path = `/.kibana/_search?q=${type}.name:${name}`;
@@ -43,41 +44,6 @@ const fetchSavedObjects = async (type: string, name: string) => {
   return response.data?.hits;
 };
 
-const fetchSavedObjectNames = async (type: string) => {
-  const path = `/.kibana/_search`;
-  const body = {
-    size: 0,
-    query: {
-      bool: {
-        filter: {
-          term: {
-            type,
-          },
-        },
-      },
-    },
-    aggs: {
-      names: {
-        terms: { field: `${type}.name`, size: 500 },
-      },
-    },
-  };
-  const response = await sendRequest({
-    method: 'post',
-    path: `/api/console/proxy`,
-    query: {
-      path,
-      method: 'GET',
-    },
-    body,
-  });
-
-  if (response.error) {
-    throw new Error(response.error.message);
-  }
-  return response.data?.aggregations.names.buckets;
-};
-
 export const SavedObjectsDebugger: React.FunctionComponent = () => {
   const types = [
     { value: 'ingest-agent-policies', text: 'Agent policy' },
@@ -89,9 +55,11 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
   const [type, setType] = useState(types[0].value);
   const [name, setName] = useState<string | undefined>();
 
+  const childRef = useRef<{ refetchNames: Function }>();
+
   const onTypeChange = (e: any) => {
     setType(e.target.value);
-    refetchNames();
+    childRef.current!.refetchNames();
   };
 
   const {
@@ -107,24 +75,6 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
     refetch();
   };
 
-  const {
-    data: savedObjectNames,
-    refetch: refetchNames,
-    status: namesStatus,
-  } = useQuery(['debug-saved-object-names', type], () => fetchSavedObjectNames(type), {
-    refetchOnWindowFocus: false,
-  });
-
-  const comboBoxOptions = (savedObjectNames ?? []).map((obj: { key: string }) => ({
-    label: obj.key,
-    value: obj.key,
-  }));
-
-  const selectedOption = comboBoxOptions.find(
-    (option: { value: string }) => option.value === name
-  )!;
-  const selectedOptions = selectedOption ? [selectedOption] : [];
-
   return (
     <>
       <EuiTitle size="l">
@@ -135,8 +85,8 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
 
       <EuiText grow={false}>
         <p>
-          Search for Saved objects by selecting a type and searching for its name. Use the code
-          block below to diagnose any potential issues.
+          Search for Saved objects by selecting a type and its name. Use the code block below to
+          diagnose any potential issues.
         </p>
       </EuiText>
 
@@ -156,37 +106,13 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow>
-            {namesStatus === 'error' ? (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut title="Error" color="danger">
-                  Error fetching Saved Object Names
-                </EuiCallOut>
-              </>
-            ) : (
-              <EuiComboBox
-                aria-label="Select a Saved Object"
-                placeholder="Select a Saved Object"
-                fullWidth
-                options={comboBoxOptions}
-                singleSelection={{ asPlainText: true }}
-                selectedOptions={selectedOptions}
-                isLoading={namesStatus === 'loading'}
-                onChange={(newSelectedOptions) => {
-                  if (!newSelectedOptions.length) {
-                    setName(undefined);
-                  } else {
-                    setName(newSelectedOptions[0].value as string);
-                  }
-                }}
-              />
-            )}
+            <SavedObjectNamesCombo name={name!} setName={setName} type={type} ref={childRef} />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow>
             <EuiButton onClick={onClick} fill disabled={!name}>
-              Search
+              <FormattedMessage id="xpack.fleet.debugger.searchText" defaultMessage="Search" />
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
