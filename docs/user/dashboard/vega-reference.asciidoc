@@ -245,8 +245,8 @@ url: {
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
-// The result is a geojson file, get its features to use
-// this data source with the "shape" marks
+// The result is either a topojson file or a geojson file. 
+// Get its features to use this data source with the "shape" marks
 // https://vega.github.io/vega/docs/marks/shape/
 format: {type: "topojson", feature: "data"}
 ----
