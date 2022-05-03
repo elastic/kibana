@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { generateKeyPairSync } from 'crypto';
+import fs from 'fs';
 import expect from '@kbn/expect';
+import { promisify } from 'util';
 import httpProxy from 'http-proxy';
+import { KBN_KEY_PATH } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import {
@@ -23,10 +25,12 @@ export default function serviceNowAccessTokenTest({ getService }: FtrProviderCon
   describe('get servicenow access token', () => {
     let servicenowSimulatorURL: string = '';
     let proxyServer: httpProxy | undefined;
+    let testPrivateKey: string;
     const configService = getService('config');
 
     // need to wait for kibanaServer to settle ...
     before(async () => {
+      testPrivateKey = await promisify(fs.readFile)(KBN_KEY_PATH, 'utf8');
       servicenowSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
       );
@@ -44,12 +48,6 @@ export default function serviceNowAccessTokenTest({ getService }: FtrProviderCon
     });
 
     it('should return 200 when requesting an access token with OAuth credentials', async () => {
-      const { privateKey } = generateKeyPairSync('rsa', {
-        modulusLength: 3072,
-        publicKeyEncoding: { format: 'pem', type: 'pkcs1' },
-        privateKeyEncoding: { format: 'pem', type: 'pkcs1' },
-      });
-
       const { body: accessToken } = await supertest
         .post('/internal/actions/connector/_servicenow_access_token')
         .set('kbn-xsrf', 'foo')
@@ -62,7 +60,7 @@ export default function serviceNowAccessTokenTest({ getService }: FtrProviderCon
           },
           secrets: {
             clientSecret: 'xyz',
-            privateKey,
+            privateKey: testPrivateKey,
           },
         })
         .expect(200);
