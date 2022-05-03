@@ -150,8 +150,7 @@ describe('unsupported_cluster_routing_allocation', () => {
     await root.setup();
 
     await expect(root.start()).rejects.toThrowError(
-      // eslint-disable-next-line prettier/prettier
-      "Unable to complete saved object migrations for the [.kibana] index: [unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\"transient\": {\"cluster.routing.allocation.enable\": null}, \"persistent\": {\"cluster.routing.allocation.enable\": null}}. Refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue."
+      /Unable to complete saved object migrations for the \[\.kibana\] index: \[unsupported_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {\"transient\": {\"cluster\.routing\.allocation\.enable\": null}, \"persistent\": {\"cluster\.routing\.allocation\.enable\": null}}\. Refer to https:\/\/www.elastic.co\/guide\/en\/kibana\/master\/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue\./
     );
   });
 });
