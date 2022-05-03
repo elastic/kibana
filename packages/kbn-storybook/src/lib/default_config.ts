@@ -14,6 +14,12 @@ import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
 const toPath = (_path: string) => path.join(REPO_ROOT, _path);
+
+// This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
+// changes to packages to cause a refresh in Storybook.
+const IGNORE_PATTERN =
+  /[/\\]node_modules[/\\](?!@kbn[/\\][^/\\]+[/\\](?!node_modules)([^/\\]+))([^/\\]+[/\\][^/\\]+)/;
+
 export const defaultConfig: StorybookConfig = {
   addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
   stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
@@ -45,6 +51,11 @@ export const defaultConfig: StorybookConfig = {
     }
 
     config.node = { fs: 'empty' };
+    config.watch = true;
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: [IGNORE_PATTERN],
+    };
 
     // Remove when @storybook has moved to @emotion v11
     // https://github.com/storybookjs/storybook/issues/13145
