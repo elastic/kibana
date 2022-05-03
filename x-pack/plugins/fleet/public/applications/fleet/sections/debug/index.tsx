@@ -10,7 +10,7 @@ import { EuiPage, EuiPageBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
-import { AgentPolicyDebugger } from './components';
+import { AgentPolicyDebugger, SavedObjectsDebugger } from './components';
 
 // TODO: Evaluate moving this react-query initialization up to the main Fleet app
 // setup if we end up pursuing wider adoption of react-query.
@@ -31,6 +31,10 @@ export const DebugPage: React.FunctionComponent = () => {
           <EuiSpacer size="xl" />
 
           <AgentPolicyDebugger />
+
+          <EuiSpacer size="xl" />
+
+          <SavedObjectsDebugger />
         </EuiPageBody>
       </EuiPage>
       <ReactQueryDevtools initialIsOpen={false} />
