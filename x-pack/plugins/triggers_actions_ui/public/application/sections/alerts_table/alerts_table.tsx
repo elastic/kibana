@@ -35,7 +35,7 @@ const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const emptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
   columns: [],
-  flyoutBody: null,
+  flyoutBody: () => null,
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
