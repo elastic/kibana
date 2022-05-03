@@ -48,9 +48,10 @@ import {
   ConnectorMappings,
   CasesByAlertId,
   CaseResolveResponse,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
   BulkCreateCommentRequest,
   CommentType,
+  CasesMetricsResponse,
 } from '@kbn/cases-plugin/common/api';
 import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
@@ -217,6 +218,23 @@ export const getServiceNowConnector = () => ({
   },
 });
 
+export const getServiceNowOAuthConnector = () => ({
+  name: 'ServiceNow OAuth Connector',
+  connector_type_id: '.servicenow',
+  secrets: {
+    clientSecret: 'xyz',
+    privateKey: '-----BEGIN RSA PRIVATE KEY-----\nddddddd\n-----END RSA PRIVATE KEY-----',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
+    isOAuth: true,
+    clientId: 'abc',
+    userIdentifierValue: 'elastic',
+    jwtKeyId: 'def',
+  },
+});
+
 export const getJiraConnector = () => ({
   name: 'Jira Connector',
   connector_type_id: '.jira',
@@ -262,7 +280,7 @@ export const getResilientConnector = () => ({
 });
 
 export const getServiceNowSIRConnector = () => ({
-  name: 'ServiceNow Connector',
+  name: 'ServiceNow SIR Connector',
   connector_type_id: '.servicenow-sir',
   secrets: {
     username: 'admin',
@@ -995,7 +1013,7 @@ export const getCaseMetrics = async ({
   features: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CaseMetricsResponse> => {
+}): Promise<SingleCaseMetricsResponse> => {
   const { body: metricsResponse } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics/${caseId}`)
     .query({ features: JSON.stringify(features) })
@@ -1249,4 +1267,26 @@ export const calculateDuration = (closedAt: string | null, createdAt: string | n
   }
 
   return Math.floor(Math.abs((closedAtMillis - createdAtMillis) / 1000));
+};
+
+export const getCasesMetrics = async ({
+  supertest,
+  features,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  features: string[];
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesMetricsResponse> => {
+  const { body: metricsResponse } = await supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics`)
+    .query({ features: JSON.stringify(features), ...query })
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return metricsResponse;
 };

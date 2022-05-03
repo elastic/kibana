@@ -108,6 +108,33 @@ describe('math(resp, panel, series)', () => {
     });
   });
 
+  test('handles math even if there is a series agg', async () => {
+    series.metrics.push({
+      id: 'myid',
+      type: 'series_agg',
+      function: 'sum',
+    });
+    const next = await mathAgg(resp, panel, series)((results) => results);
+    const results = await stdMetric(resp, panel, series)(next)([]);
+
+    expect(results).toHaveLength(1);
+
+    expect(results[0]).toEqual({
+      id: 'test╰┄►example-01',
+      label: 'example-01',
+      color: 'rgb(255, 0, 0)',
+      stack: false,
+      seriesId: 'test',
+      lines: { show: true, fill: 0, lineWidth: 1, steps: false },
+      points: { show: true, radius: 1, lineWidth: 1 },
+      bars: { fill: 0, lineWidth: 1, show: false },
+      data: [
+        [1, 2],
+        [2, 1],
+      ],
+    });
+  });
+
   test('turns division by zero into null values', async () => {
     resp.aggregations.test.buckets[0].timeseries.buckets[0].mincpu = 0;
     const next = await mathAgg(resp, panel, series)((results) => results);
