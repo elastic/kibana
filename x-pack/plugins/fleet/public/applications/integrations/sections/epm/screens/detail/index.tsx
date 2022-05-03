@@ -143,8 +143,7 @@ export function Detail() {
     resendRequest: refreshPackageInfo,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
-  const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUser();
+  const { isFirstTimeAgentUser, isLoading: firstTimeUserLoading } = useIsFirstTimeAgentUser();
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
@@ -281,6 +280,7 @@ export function Detail() {
         integration,
         isCloud,
         isExperimentalAddIntegrationPageEnabled,
+        isFirstTimeAgentUser,
         pkgkey,
       });
 
@@ -293,6 +293,7 @@ export function Detail() {
       integration,
       isCloud,
       isExperimentalAddIntegrationPageEnabled,
+      isFirstTimeAgentUser,
       pathname,
       pkgkey,
       search,

@@ -28,22 +28,18 @@ export const useIsFirstTimeAgentUser = (): UseIsFirstTimeAgentUserResponse => {
       });
 
       // now get all agents that are NOT part of a fleet server policy
-      const serverPolicyIdsQuery = (agentPoliciesData?.items || [])
+      const policyKuery = (agentPoliciesData?.items || [])
         .filter((item) => policyHasFleetServer(item))
         .map((p) => `policy_id:${p.id}`)
         .join(' or ');
-
-      // get agents that are not unenrolled and not fleet server
-      const kuery =
-        `not (_exists_:"unenrolled_at")` +
-        (serverPolicyIdsQuery.length ? ` and not (${serverPolicyIdsQuery})` : '');
 
       const { data: agentStatusData } = await sendGetAgents({
         page: 1,
         perPage: 1, // we only need to know if there is at least one non-fleet agent
         showInactive: true,
-        kuery,
+        ...(policyKuery.length ? { kuery: `not ${policyKuery}` } : {}),
       });
+
       setResult({ isLoading: false, isFirstTimeAgentUser: agentStatusData?.total === 0 });
     };
 
