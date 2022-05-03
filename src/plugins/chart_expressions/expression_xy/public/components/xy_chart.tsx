@@ -218,23 +218,11 @@ export function XYChart({
     right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
   };
 
-  const titles = useMemo(
-    () =>
-      getLayersTitles(
-        dataLayers,
-        { splitColumnAccessor, splitRowAccessor },
-        { xTitle: args.xTitle, yTitle: args.yTitle, yRightTitle: args.yRightTitle },
-        yAxesConfiguration
-      ),
-    [
-      args.xTitle,
-      args.yRightTitle,
-      args.yTitle,
-      dataLayers,
-      splitColumnAccessor,
-      splitRowAccessor,
-      yAxesConfiguration,
-    ]
+  const titles = getLayersTitles(
+    dataLayers,
+    { splitColumnAccessor, splitRowAccessor },
+    { xTitle: args.xTitle, yTitle: args.yTitle, yRightTitle: args.yRightTitle },
+    yAxesConfiguration
   );
 
   const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
