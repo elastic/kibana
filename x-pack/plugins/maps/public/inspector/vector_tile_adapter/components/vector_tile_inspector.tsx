@@ -9,10 +9,10 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Adapters } from '@kbn/inspector-plugin/public';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiSpacer } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { EmptyPrompt } from './empty_prompt';
 import type { TileRequest } from '../types';
-import { TileRequestView } from './tile_request_view';
+import { TileRequestTab } from './tile_request_tab';
 
 interface Props {
   adapters: Adapters;
@@ -20,6 +20,7 @@ interface Props {
 
 interface State {
   selectedLayer: EuiComboBoxOptionOption<string> | null;
+  selectedTileRequest: TileRequest | null;
   tileRequests: TileRequest[];
   layerOptions: Array<EuiComboBoxOptionOption<string>>;
 }
@@ -29,6 +30,7 @@ class VectorTileInspector extends Component<Props, State> {
 
   state: State = {
     selectedLayer: null,
+    selectedTileRequest: null,
     tileRequests: [],
     layerOptions: [],
   };
@@ -40,6 +42,7 @@ class VectorTileInspector extends Component<Props, State> {
     if (layerOptions.length === 0) {
       this.setState({
         selectedLayer: null,
+        selectedTileRequest: null,
         tileRequests: [],
         layerOptions: [],
       });
@@ -53,10 +56,24 @@ class VectorTileInspector extends Component<Props, State> {
       })
         ? this.state.selectedLayer
         : layerOptions[0];
+    const tileRequests = this.props.adapters.vectorTiles.getTileRequests(selectedLayer.value);
+    const selectedTileRequest =
+      this.state.selectedTileRequest &&
+      tileRequests.some((tileRequest) => {
+        return (
+          this.state.selectedTileRequest?.layerId === tileRequest.layerId &&
+          this.state.selectedTileRequest?.tileZXYKey === tileRequest.tileZXYKey
+        );
+      })
+        ? this.state.selectedTileRequest
+        : tileRequests.length
+        ? tileRequests[0]
+        : null;
 
     this.setState({
       selectedLayer,
-      tileRequests: this.props.adapters.vectorTiles.getTileRequests(selectedLayer.value),
+      selectedTileRequest,
+      tileRequests,
       layerOptions,
     });
   };
@@ -82,16 +99,37 @@ class VectorTileInspector extends Component<Props, State> {
     if (selectedOptions.length === 0) {
       this.setState({
         selectedLayer: null,
+        selectedTileRequest: null,
         tileRequests: [],
       });
       return;
     }
 
+    const selectedLayer = selectedOptions[0];
+    const tileRequests = this.props.adapters.vectorTiles.getTileRequests(selectedLayer.value);
     this.setState({
-      selectedLayer: selectedOptions[0],
-      tileRequests: this.props.adapters.vectorTiles.getTileRequests(selectedOptions[0].value),
+      selectedLayer,
+      selectedTileRequest: tileRequests.length ? tileRequests[0] : null,
+      tileRequests,
     });
   };
+
+  renderTabs() {
+    return this.state.tileRequests.map((tileRequest) => (
+      <EuiTab
+        key={`${tileRequest.layerId}${tileRequest.tileZXYKey}`}
+        onClick={() => {
+          this.setState({ selectedTileRequest: tileRequest });
+        }}
+        isSelected={
+          tileRequest.layerId === this.state.selectedTileRequest?.layerId &&
+          tileRequest.tileZXYKey === this.state.selectedTileRequest?.tileZXYKey
+        }
+      >
+        {tileRequest.tileZXYKey}
+      </EuiTab>
+    ));
+  }
 
   render() {
     return this.state.layerOptions.length === 0 ? (
@@ -108,16 +146,15 @@ class VectorTileInspector extends Component<Props, State> {
             defaultMessage: 'Layer',
           })}
         />
-        <div>
-          {this.state.tileRequests.map((tileRequest) => {
-            return (
-              <div key={`${tileRequest.layerId}${tileRequest.tileZXYKey}`}>
-                <EuiSpacer />
-                <TileRequestView tileRequest={tileRequest} />
-              </div>
-            );
-          })}
-        </div>
+        <EuiSpacer />
+        <EuiTabs size="s">{this.renderTabs()}</EuiTabs>
+        <EuiSpacer size="s" />
+        {this.state.selectedTileRequest && (
+          <TileRequestTab
+            key={`${this.state.selectedTileRequest.layerId}${this.state.selectedTileRequest.tileZXYKey}`}
+            tileRequest={this.state.selectedTileRequest}
+          />
+        )}
       </>
     );
   }

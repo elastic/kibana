@@ -73,7 +73,7 @@ test('Should return elasticsearch vector tile request for aggs tiles', () => {
   });
 });
 
-test('Should return elasticsearch vector tile request for aggs tiles', () => {
+test('Should return elasticsearch vector tile request for hits tiles', () => {
   expect(
     getTileRequest({
       layerId: '1',

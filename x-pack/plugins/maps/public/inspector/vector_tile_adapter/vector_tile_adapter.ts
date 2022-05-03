@@ -47,9 +47,13 @@ export class VectorTileAdapter extends EventEmitter {
   }
 
   getTileRequests(layerId: string): TileRequest[] {
-    return this._tileRequests.filter((tileRequest) => {
-      return tileRequest.layerId === layerId;
-    });
+    return this._tileRequests
+      .filter((tileRequest) => {
+        return tileRequest.layerId === layerId;
+      })
+      .sort((a, b) => {
+        return a.tileZXYKey.localeCompare(b.tileZXYKey);
+      });
   }
 
   _onChange() {

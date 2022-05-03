@@ -100,10 +100,7 @@ type Field =
       format: string;
     };
 
-function mergeFields(
-  fieldsList: Array<Field[] | undefined>,
-  excludeNames: string[]
-): Field[] {
+function mergeFields(fieldsList: Array<Field[] | undefined>, excludeNames: string[]): Field[] {
   const fieldNames: string[] = [];
   const mergedFields: Field[] = [];
 
