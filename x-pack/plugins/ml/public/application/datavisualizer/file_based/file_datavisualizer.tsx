@@ -45,7 +45,7 @@ export const FileDataVisualizerPage: FC = () => {
         ({
           id: 'create_ml_job',
           title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.anomalyDetectionTitle', {
-            defaultMessage: 'Create new ML job',
+            defaultMessage: 'Create ML job',
           }),
           description: '',
           icon: 'machineLearningApp',
