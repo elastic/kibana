@@ -7,28 +7,56 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { InferenceBase } from '../inference_base';
+import { InferenceBase, InferResponse } from '../inference_base';
+import { getGeneralInputComponent } from '../text_input';
+import { getNerOutputComponent } from './ner_output';
 
-export type FormattedNerResp = Array<{
+export type FormattedNerResponse = Array<{
   value: string;
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
-interface InferResponse {
-  response: FormattedNerResp;
-  rawResponse: estypes.MlInferTrainedModelDeploymentResponse;
-}
+export type NerResponse = InferResponse<
+  FormattedNerResponse,
+  estypes.MlInferTrainedModelDeploymentResponse
+>;
 
-export class NerInference extends InferenceBase<InferResponse> {
-  public async infer(inputText: string) {
-    const payload = { docs: { [this.inputField]: inputText } };
-    const resp = await this.trainedModelsApi.inferTrainedModel(this.model.model_id, payload, '30s');
+export class NerInference extends InferenceBase<NerResponse> {
+  public async infer() {
+    try {
+      this.setRunning();
+      const inputText = this.inputText$.value;
+      const payload = { docs: { [this.inputField]: inputText } };
+      const resp = await this.trainedModelsApi.inferTrainedModel(
+        this.model.model_id,
+        payload,
+        '30s'
+      );
 
-    return { response: parseResponse(resp), rawResponse: resp };
+      const processedResponse: NerResponse = {
+        response: parseResponse(resp),
+        rawResponse: resp,
+        inputText,
+      };
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
+      return processedResponse;
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
+  }
+
+  public getInputComponent(): JSX.Element {
+    return getGeneralInputComponent(this);
+  }
+
+  public getOutputComponent(): JSX.Element {
+    return getNerOutputComponent(this);
   }
 }
 
-function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): FormattedNerResp {
+function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): FormattedNerResponse {
   const { predicted_value: predictedValue, entities } = resp;
   const splitWordsAndEntitiesRegex = /(\[.*?\]\(.*?&.*?\))/;
   const matchEntityRegex = /(\[.*?\])\((.*?)&(.*?)\)/;
