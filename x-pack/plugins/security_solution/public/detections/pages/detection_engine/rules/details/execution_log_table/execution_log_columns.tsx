@@ -89,7 +89,7 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
   docLinks: DocLinksStart
 ): Array<EuiBasicTableColumn<AggregateRuleExecutionEvent>> => [
   {
-    field: 'gap_duration_ms',
+    field: 'gap_duration_s',
     name: (
       <TableHeaderTooltipCell
         title={i18n.COLUMN_GAP_DURATION}
@@ -117,9 +117,7 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
       />
     ),
     render: (value: number) => (
-      <>
-        {value != null ? <RuleDurationFormat duration={value} isSeconds={true} /> : getEmptyValue()}
-      </>
+      <>{value ? <RuleDurationFormat duration={value} isSeconds={true} /> : getEmptyValue()}</>
     ),
     sortable: true,
     truncateText: false,

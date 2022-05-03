@@ -52,7 +52,7 @@ const SORT_FIELD_TO_AGG_MAPPING: Record<string, string> = {
   duration_ms: 'ruleExecution>executionDuration',
   indexing_duration_ms: 'securityMetrics>indexDuration',
   search_duration_ms: 'securityMetrics>searchDuration',
-  gap_duration_ms: 'securityMetrics>gapDuration',
+  gap_duration_s: 'securityMetrics>gapDuration',
   schedule_delay_ms: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
   // TODO: To be added in https://github.com/elastic/kibana/pull/126210
@@ -297,7 +297,7 @@ export const formatAggExecutionEventFromBucket = (
     // security fields
     indexing_duration_ms: bucket?.securityMetrics?.indexDuration?.value ?? 0,
     search_duration_ms: bucket?.securityMetrics?.searchDuration?.value ?? 0,
-    gap_duration_ms: bucket?.securityMetrics?.gapDuration?.value ?? 0,
+    gap_duration_s: bucket?.securityMetrics?.gapDuration?.value ?? 0,
     // If security_status isn't available, use platform status from `event.outcome`, but translate to RuleExecutionStatus
     security_status:
       bucket?.securityStatus?.status?.hits?.hits[0]?._source?.kibana?.alert?.rule?.execution

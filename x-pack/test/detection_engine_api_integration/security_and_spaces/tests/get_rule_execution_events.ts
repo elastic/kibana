@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].search_duration_ms).to.greaterThan(0);
       expect(response.body.events[0].schedule_delay_ms).to.greaterThan(0);
       expect(response.body.events[0].indexing_duration_ms).to.greaterThan(0);
-      expect(response.body.events[0].gap_duration_ms).to.eql(0);
+      expect(response.body.events[0].gap_duration_s).to.eql(0);
       expect(response.body.events[0].security_status).to.eql('succeeded');
       expect(response.body.events[0].security_message).to.eql('succeeded');
     });
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].search_duration_ms).to.eql(0);
       expect(response.body.events[0].schedule_delay_ms).to.greaterThan(0);
       expect(response.body.events[0].indexing_duration_ms).to.eql(0);
-      expect(response.body.events[0].gap_duration_ms).to.eql(0);
+      expect(response.body.events[0].gap_duration_s).to.eql(0);
       expect(response.body.events[0].security_status).to.eql('partial failure');
       expect(
         response.body.events[0].security_message.startsWith(
@@ -156,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].search_duration_ms).to.eql(0);
       expect(response.body.events[0].schedule_delay_ms).to.eql(544808);
       expect(response.body.events[0].indexing_duration_ms).to.eql(0);
-      expect(response.body.events[0].gap_duration_ms).to.eql(245);
+      expect(response.body.events[0].gap_duration_s).to.eql(245);
       expect(response.body.events[0].security_status).to.eql('failed');
       expect(
         response.body.events[0].security_message.startsWith(

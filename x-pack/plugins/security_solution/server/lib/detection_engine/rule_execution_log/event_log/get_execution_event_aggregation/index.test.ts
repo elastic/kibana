@@ -72,7 +72,7 @@ describe('getExecutionEventAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_ms,schedule_delay_ms,num_triggered_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_s,schedule_delay_ms,num_triggered_actions]"`
     );
   });
 
@@ -85,7 +85,7 @@ describe('getExecutionEventAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_ms,schedule_delay_ms,num_triggered_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_s,schedule_delay_ms,num_triggered_actions]"`
     );
   });
 
@@ -650,7 +650,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: false,
           indexing_duration_ms: 7,
           search_duration_ms: 480,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -673,7 +673,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: false,
           indexing_duration_ms: 0,
           search_duration_ms: 9,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -968,7 +968,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: true,
           indexing_duration_ms: 7,
           search_duration_ms: 480,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -991,7 +991,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: false,
           indexing_duration_ms: 0,
           search_duration_ms: 9,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -1291,7 +1291,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: true,
           indexing_duration_ms: 7,
           search_duration_ms: 480,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -1314,7 +1314,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: false,
           indexing_duration_ms: 0,
           search_duration_ms: 9,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
