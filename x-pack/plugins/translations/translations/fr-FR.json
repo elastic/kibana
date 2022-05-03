@@ -29364,7 +29364,6 @@
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusActive": "Actif",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusDropdownMenuLabel": "Modifier le statut de la règle ou répéter",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusError": "Erreur",
-    "xpack.triggersActionsUI.sections.rulesList.ruleStatusFilterLabel": "Dernière réponse",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusLicenseError": "Erreur de licence",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusOk": "Ok",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusPending": "En attente",
