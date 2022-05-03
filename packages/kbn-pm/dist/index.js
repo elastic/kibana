@@ -9057,6 +9057,8 @@ var _ci_stats_config = __webpack_require__(218);
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
 /** A ci-stats metric record */
 
 /** Object that helps report data to the ci-stats service */
@@ -9246,7 +9248,8 @@ class CiStatsReporter {
           groupType: group.type
         },
         bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
-        body: buffer.join('\n')
+        body: buffer.join('\n'),
+        timeout: 5 * MINUTE
       });
       buffer.length = 0;
       bufferBytes = 0;
@@ -9315,7 +9318,8 @@ class CiStatsReporter {
     body,
     bodyDesc,
     path,
-    query
+    query,
+    timeout = 60 * SECOND
   }) {
     let attempt = 0;
     const maxAttempts = 5;
@@ -9343,7 +9347,8 @@ class CiStatsReporter {
           adapter: _http.default,
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,
-          maxContentLength: Infinity
+          maxContentLength: Infinity,
+          timeout
         });
         return resp.data;
       } catch (error) {
