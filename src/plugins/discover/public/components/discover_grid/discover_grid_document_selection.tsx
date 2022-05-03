@@ -38,8 +38,8 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);
 
   const toggleDocumentSelectionLabel = i18n.translate('discover.grid.selectDoc', {
-    defaultMessage: `Select document '{rowIndex}'`,
-    values: { rowIndex },
+    defaultMessage: `Select document '{rowNumber}'`,
+    values: { rowNumber: rowIndex + 1 },
   });
 
   useEffect(() => {
