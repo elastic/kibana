@@ -94,10 +94,10 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
   }
 
   getWriteTarget(document: Record<string, any>): string | null {
-    if (!document.processor?.event) {
-      throw Error("'processor.event' is not set on document, can not determine target index");
+    if (!document.metricset?.name) {
+      throw Error("'metricset.name' is not set on document, can not determine target index");
     }
-    const eventType = document.processor.event;
+    const eventType = document.metricset.name;
     if (eventType === 'service') return 'metrics-apm.service-default';
     return null;
   }
@@ -165,7 +165,7 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
     return {
       '@timestamp': state.timestamp + random(0, 100) + component + this.processedComponent,
       'metricset.name': 'service',
-      'processor.event': 'service',
+      'processor.event': 'metric',
       'service.name': state['service.name'],
       'service.environment': state['service.environment'],
       'transaction.type': state['transaction.type'],
