@@ -15,6 +15,8 @@
  */
 
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
+
 import {
   EuiFlyoutHeader,
   EuiButtonGroup,
@@ -29,11 +31,8 @@ import {
   EuiForm,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
   EuiIcon,
   EuiToolTip,
-  EuiText,
 } from '@elastic/eui';
 import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import {
@@ -41,21 +40,14 @@ import {
   LazyFieldPicker,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableFactory, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
-import useMount from 'react-use/lib/useMount';
 
 import { ControlGroupStrings } from '../control_group_strings';
 import {
   ControlEmbeddable,
-  ControlFactory,
-  ControlInput,
-  ControlOutput,
   ControlWidth,
-  DataControlField,
   DataControlFieldRegistry,
   DataControlInput,
   IEditableControlFactory,
-  IEditableDataControlFactory,
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { pluginServices } from '../../services';
@@ -105,7 +97,6 @@ export const ControlEditor = ({
   const { getControlTypes, getControlFactory } = controls;
   const [state, setState] = useState<ControlEditorState>({
     dataViewListItems: [],
-    fieldRegistry: {},
   });
 
   const [defaultTitle, setDefaultTitle] = useState<string>();
@@ -113,9 +104,7 @@ export const ControlEditor = ({
   const [currentWidth, setCurrentWidth] = useState(width);
   const [controlEditorValid, setControlEditorValid] = useState(false);
   const [selectedField, setSelectedField] = useState<string | undefined>(
-    embeddable
-      ? (embeddable.getInput() as DataControlInput).fieldName // CLEAN THIS ONCE OTHER PR GETS IN
-      : undefined
+    embeddable ? embeddable.getInput().fieldName : undefined
   );
 
   const getCompatibleControlTypes = (dataView?: DataView) => {
@@ -132,7 +121,7 @@ export const ControlEditor = ({
         }
       }
 
-      if (fieldRegistry[dataViewField.name].compatibleControlTypes.length === 0) {
+      if (fieldRegistry[dataViewField.name]?.compatibleControlTypes.length === 0) {
         delete fieldRegistry[dataViewField.name];
       }
     });
@@ -143,6 +132,7 @@ export const ControlEditor = ({
   useMount(() => {
     let mounted = true;
     if (selectedField) setDefaultTitle(selectedField);
+
     (async () => {
       const dataViewListItems = await getIdsWithTitle();
       const initialId =
