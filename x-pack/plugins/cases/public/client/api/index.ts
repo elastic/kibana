@@ -11,11 +11,12 @@ import {
   CasesByAlertIDRequest,
   CasesFindRequest,
   getCasesFromAlertsUrl,
-  CasesResponse,
   CasesStatusRequest,
   CasesStatusResponse,
 } from '../../../common/api';
-import { CASE_FIND_URL, CASE_STATUS_URL } from '../../../common/constants';
+import { CASE_STATUS_URL } from '../../../common/constants';
+import { Cases } from '../../../common/ui';
+import { getCases } from '../../api';
 import { CasesUiStart } from '../../types';
 
 export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['api'] => {
@@ -26,8 +27,7 @@ export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['ap
     ): Promise<CasesByAlertId> =>
       http.get<CasesByAlertId>(getCasesFromAlertsUrl(alertId), { query }),
     cases: {
-      find: (query: CasesFindRequest): Promise<CasesResponse> =>
-        http.get<CasesResponse>(CASE_FIND_URL, { query }),
+      find: (query: CasesFindRequest): Promise<Cases> => getCases({ http, query }),
       getAllCasesMetrics: (query: CasesStatusRequest): Promise<CasesStatusResponse> =>
         http.get<CasesStatusResponse>(CASE_STATUS_URL, { query }),
     },

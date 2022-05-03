@@ -19,9 +19,9 @@ interface CasesStatusState extends CasesStatus {
 }
 
 const initialData: CasesStatusState = {
-  countClosedCases: null,
-  countInProgressCases: null,
-  countOpenCases: null,
+  countClosedCases: 0,
+  countInProgressCases: 0,
+  countOpenCases: 0,
   isLoading: true,
   isError: false,
 };

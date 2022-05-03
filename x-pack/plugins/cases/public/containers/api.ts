@@ -6,15 +6,19 @@
  */
 
 import { omit } from 'lodash';
-
-import { StatusAll, ResolvedCase } from '../../common/ui/types';
+import {
+  Cases,
+  FetchCasesProps,
+  ResolvedCase,
+  SortFieldCase,
+  StatusAll,
+} from '../../common/ui/types';
 import {
   BulkCreateCommentRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
   CaseResolveResponse,
-  CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
   CaseUserActionsResponse,
@@ -28,6 +32,7 @@ import {
   User,
   getCaseCommentDeleteUrl,
   SingleCaseMetricsResponse,
+  CasesFindResponse,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -40,31 +45,27 @@ import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
 
+import { convertAllCasesToCamel, convertToCamelCase, convertArrayToCamelCase } from '../api/utils';
+
 import {
   ActionLicense,
-  AllCases,
   BulkUpdateStatus,
   Case,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   CasesStatus,
-  FetchCasesProps,
-  SortFieldCase,
   CaseUserActions,
 } from './types';
 
 import {
-  convertToCamelCase,
-  convertAllCasesToCamel,
-  convertArrayToCamelCase,
   decodeCaseResponse,
   decodeCasesResponse,
-  decodeCasesFindResponse,
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
 } from './utils';
+import { decodeCasesFindResponse } from '../api/decoders';
 
 export const getCase = async (
   caseId: string,
@@ -176,7 +177,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<AllCases> => {
+}: FetchCasesProps): Promise<Cases> => {
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags,
@@ -185,11 +186,13 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...queryParams,
   };
+
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
     query: query.status === StatusAll ? omit(query, ['status']) : query,
     signal,
   });
+
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
 };
 
