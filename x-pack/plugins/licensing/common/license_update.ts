@@ -18,8 +18,7 @@ export function createLicenseUpdate(
   initialValues?: ILicense
 ) {
   const manuallyRefresh$ = new Subject<void>();
-  const fetched$: Observable<ILicense> = merge(triggerRefresh$, manuallyRefresh$).pipe(
-    takeUntil(stop$),
+  const fetched$ = merge(triggerRefresh$.pipe(takeUntil(stop$)), manuallyRefresh$).pipe(
     exhaustMap(fetcher),
     share()
   );

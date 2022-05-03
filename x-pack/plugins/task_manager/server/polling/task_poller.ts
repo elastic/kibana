@@ -10,7 +10,16 @@
  */
 
 import { Subject, merge, of, Observable, combineLatest, timer } from 'rxjs';
-import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
+import {
+  mapTo,
+  filter,
+  scan,
+  concatMap,
+  tap,
+  catchError,
+  switchMap,
+  takeUntil,
+} from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
@@ -38,6 +47,7 @@ interface Opts<T, H> {
   pollRequests$: Observable<Option<T>>;
   work: WorkFn<T, H>;
   workTimeout: number;
+  stop$: Observable<void>;
 }
 
 /**
@@ -62,6 +72,7 @@ export function createTaskPoller<T, H>({
   bufferCapacity,
   work,
   workTimeout,
+  stop$,
 }: Opts<T, H>): Observable<Result<H, PollingError<T>>> {
   const hasCapacity = () => getCapacity() > 0;
 
@@ -86,10 +97,13 @@ export function createTaskPoller<T, H>({
       // We don't have control over `pollDelay` in the poller, and a change to `delayOnClaimConflicts` could accidentally cause us to pause Task Manager
       // polling for a far longer duration that we intended.
       // Since the goal is to shift it within the range of `period`, we use modulo as a safe guard to ensure this doesn't happen.
-      switchMap(([period, pollDelay]) => timer(period + (pollDelay % period), period)),
+      switchMap(([period, pollDelay]) =>
+        timer(period + (pollDelay % period), period).pipe(takeUntil(stop$))
+      ),
       mapTo(none)
     )
   ).pipe(
+    takeUntil(stop$),
     // buffer all requests in a single set (to remove duplicates) as we don't want
     // work to take place in parallel (it could cause Task Manager to pull in the same
     // task twice)

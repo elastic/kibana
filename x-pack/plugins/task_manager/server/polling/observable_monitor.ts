@@ -27,11 +27,13 @@ export function createObservableMonitor<T, E>(
     heartbeatInterval = DEFAULT_HEARTBEAT_INTERVAL,
     inactivityTimeout = DEFAULT_INACTIVITY_TIMEOUT,
     onError = noop,
-  }: ObservableMonitorOptions<E> = {}
+  }: ObservableMonitorOptions<E> = {},
+  stop$: Observable<void>
 ): Observable<T> {
   return new Observable((subscriber) => {
     const subscription: Subscription = timer(0, heartbeatInterval)
       .pipe(
+        takeUntil(stop$),
         // switch from the heartbeat interval to the instantiated observable until it completes / errors
         exhaustMap(() => takeUntilDurationOfInactivity(observableFactory(), inactivityTimeout)),
         // if an error is thrown, catch it, notify and try to recover

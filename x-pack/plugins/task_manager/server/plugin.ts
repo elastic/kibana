@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
+import { ReplaySubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { map, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   PluginInitializerContext,
@@ -69,7 +69,8 @@ export class TaskManagerPlugin
   private monitoringStats$ = new Subject<MonitoringStats>();
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private subscriptions: Subscription[];
-  private running$ = new BehaviorSubject<boolean>(true);
+
+  private stop$: Subject<void>;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -78,6 +79,7 @@ export class TaskManagerPlugin
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
     this.subscriptions = [];
+    this.stop$ = new ReplaySubject<void>(1);
   }
 
   public setup(
@@ -86,7 +88,10 @@ export class TaskManagerPlugin
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = combineLatest([
       getElasticsearchAndSOAvailability(core.status.core$),
-      this.running$,
+      this.stop$.pipe(
+        map(() => false),
+        startWith(true)
+      ),
     ]).pipe(map(([coreStatus, taskManagerStatus]) => coreStatus && taskManagerStatus));
 
     setupSavedObjects(core.savedObjects, this.config);
@@ -228,7 +233,8 @@ export class TaskManagerPlugin
         this.elasticsearchAndSOAvailability$!,
         this.config!,
         managedConfiguration,
-        this.logger
+        this.logger,
+        this.stop$
       ).subscribe((stat) => this.monitoringStats$.next(stat))
     );
 
@@ -256,9 +262,10 @@ export class TaskManagerPlugin
   }
 
   public stop() {
+    this.stop$.next();
+    this.stop$.complete();
+    this.taskPollingLifecycle?.stop();
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-    this.running$.next(false);
-    this.running$.complete();
   }
 
   /**

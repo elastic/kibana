@@ -33,7 +33,8 @@ export function createMonitoringStats(
   elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
-  logger: Logger
+  logger: Logger,
+  stop$: Observable<void>
 ): Observable<MonitoringStats> {
   return createMonitoringStatsStream(
     createAggregators(
@@ -43,7 +44,8 @@ export function createMonitoringStats(
       elasticsearchAndSOAvailability$,
       config,
       managedConfig,
-      logger
+      logger,
+      stop$
     ),
     config
   );
