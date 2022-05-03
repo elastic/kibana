@@ -8,7 +8,7 @@
 
 import { random } from 'lodash';
 import { Client } from '@elastic/elasticsearch';
-import { ApmFields, Observer } from '../apm_fields';
+import { ApmFields } from '../apm_fields';
 import { Fields } from '../../entity';
 import { StreamAggregator } from '../../stream_aggregator';
 
@@ -21,15 +21,19 @@ interface LatencyState {
 }
 
 export type ServiceFields = Fields &
+  Pick<
+    ApmFields,
+    | 'timestamp.us'
+    | 'ecs.version'
+    | 'metricset.name'
+    | 'observer'
+    | 'processor.event'
+    | 'processor.name'
+    | 'service.name'
+    | 'service.version'
+    | 'service.environment'
+  > &
   Partial<{
-    observer: Observer;
-    'ecs.version': string;
-    'metricset.name': string;
-    'processor.event': string;
-    'processor.name': string;
-    'service.name': string;
-    'service.version': string;
-    'service.environment': string;
     'service.latency': { min: number; max: number; sum: number; value_count: number };
   }>;
 
