@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { SingleCaseMetricsResponse } from '../../../../../common/api';
 import { AggregationBuilder, AggregationResponse } from '../../types';
 
-export class AlertUsers implements AggregationBuilder {
+export class AlertUsers implements AggregationBuilder<SingleCaseMetricsResponse> {
   constructor(private readonly uniqueValuesLimit: number = 10) {}
 
   build() {

@@ -30,7 +30,7 @@ export class AlertService {
     aggregationBuilders,
     alerts,
   }: {
-    aggregationBuilders: AggregationBuilder[];
+    aggregationBuilders: Array<AggregationBuilder<unknown>>;
     alerts: AlertIdIndex[];
   }): Promise<AggregationResponse> {
     try {

@@ -126,6 +126,14 @@ const CaseOperations = {
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
+  [ReadOperations.GetCasesMetrics]: {
+    ecsType: EVENT_TYPES.access,
+    name: ACCESS_CASE_OPERATION,
+    action: 'cases_get_metrics',
+    verbs: accessVerbs,
+    docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
   [WriteOperations.CreateCase]: {
     ecsType: EVENT_TYPES.creation,
     name: WriteOperations.CreateCase as const,

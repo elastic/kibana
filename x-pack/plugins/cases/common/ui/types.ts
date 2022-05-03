@@ -13,7 +13,7 @@ import {
   ActionConnector,
   CaseExternalServiceBasic,
   CaseUserActionResponse,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
   CommentResponse,
   CaseResponse,
   CommentResponseAlertsType,
@@ -24,7 +24,7 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean };
-  metrics: CaseMetricsFeature[];
+  metrics: SingleCaseMetricsFeature[];
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -97,8 +97,8 @@ export interface AllCases extends CasesStatus {
   total: number;
 }
 
-export type CaseMetrics = CaseMetricsResponse;
-export type CaseMetricsFeature =
+export type SingleCaseMetrics = SingleCaseMetricsResponse;
+export type SingleCaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'

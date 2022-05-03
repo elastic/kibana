@@ -36,7 +36,7 @@ import {
   CommentRequest,
   User,
   CaseStatuses,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
 } from '../../../common/api';
 
 export const getCase = async (
@@ -51,10 +51,10 @@ export const resolveCase = async (
   signal: AbortSignal
 ): Promise<ResolvedCase> => Promise.resolve(basicResolvedCase);
 
-export const getCaseMetrics = async (
+export const getSingleCaseMetrics = async (
   caseId: string,
   signal: AbortSignal
-): Promise<CaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
+): Promise<SingleCaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
 
 export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
   Promise.resolve(casesStatus);
