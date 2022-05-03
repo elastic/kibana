@@ -14,6 +14,14 @@ export class VectorTileAdapter extends EventEmitter {
   private _tileRequests: TileRequest[] = [];
 
   async addTileRequest(layer: ILayer, tileZXYKey: string, tileUrl: string) {
+    const index = this._tileRequests.findIndex(tileRequest => {
+      return tileRequest.layerId === layer.getId() && tileRequest.tileZXYKey === tileZXYKey;
+    });
+    if (index >= 0) {
+      // remove tile request if it already exists
+      this._tileRequests = this._tileRequests.splice(index, 1);
+    }
+
     this._tileRequests.push({
       layerId: layer.getId(),
       tileUrl,
@@ -32,6 +40,7 @@ export class VectorTileAdapter extends EventEmitter {
   }
 
   reset() {
+    console.log(`reset`);
     this._tileRequests = [];
     this._layerLabels = {};
     this._onChange();
