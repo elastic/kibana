@@ -68,8 +68,6 @@ export const callEnterpriseSearchConfigAPI = async ({
 
     const response = await fetch(enterpriseSearchUrl, options);
 
-    console.debug(response);
-
     if (!response.ok) {
       return {
         responseStatus: response.status,
