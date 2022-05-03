@@ -7,7 +7,7 @@
 
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { useQuery } from 'react-query';
-import { EuiSpacer, EuiCallOut, EuiComboBox } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
 import { sendRequest } from '../../../hooks';
 
@@ -50,10 +50,11 @@ interface SavedObjectNamesComboProps {
   name: string;
   setName: Function;
   type: string;
+  setNamesStatus: Function;
 }
 
 export const SavedObjectNamesCombo = forwardRef(
-  ({ name, setName, type }: SavedObjectNamesComboProps, ref) => {
+  ({ name, setName, type, setNamesStatus }: SavedObjectNamesComboProps, ref) => {
     const {
       data: savedObjectNames,
       refetch,
@@ -61,6 +62,8 @@ export const SavedObjectNamesCombo = forwardRef(
     } = useQuery(['debug-saved-object-names', type], () => fetchSavedObjectNames(type), {
       refetchOnWindowFocus: false,
     });
+
+    setNamesStatus?.(status);
 
     useImperativeHandle(ref, () => ({
       refetchNames: refetch,
@@ -76,14 +79,7 @@ export const SavedObjectNamesCombo = forwardRef(
     )!;
     const selectedOptions = selectedOption ? [selectedOption] : [];
 
-    return status === 'error' ? (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut title="Error" color="danger">
-          Error fetching Saved Object Names
-        </EuiCallOut>
-      </>
-    ) : (
+    return (
       <EuiComboBox
         aria-label="Select a Saved Object"
         placeholder="Select a Saved Object"

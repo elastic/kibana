@@ -54,6 +54,7 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
 
   const [type, setType] = useState(types[0].value);
   const [name, setName] = useState<string | undefined>();
+  const [namesStatus, setNamesStatus] = useState();
 
   const childRef = useRef<{ refetchNames: Function }>();
 
@@ -106,7 +107,13 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow>
-            <SavedObjectNamesCombo name={name!} setName={setName} type={type} ref={childRef} />
+            <SavedObjectNamesCombo
+              name={name!}
+              setName={setName}
+              type={type}
+              setNamesStatus={setNamesStatus}
+              ref={childRef}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -118,7 +125,7 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {status === 'error' && (
+      {(status === 'error' || namesStatus === 'error') && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut title="Error" color="danger">
