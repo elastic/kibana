@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { XJsonLang } from '@kbn/monaco';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { TileRequest } from '../types';
 import { getTileRequest } from './get_tile_request';
-import { TileRequestDetails } from './tile_request_details';
 
 interface Props {
   tileRequest: TileRequest;
@@ -40,26 +40,95 @@ export class TileRequestTab extends Component<Props, State> {
   }
 
   render() {
-    return this.state.path && this.state.body ? (
-      <TileRequestDetails path={this.state.path} body={this.state.body} />
-    ) : (
-      <EuiCallOut
-        title={i18n.translate('xpack.maps.inspector.vectorTileRequest.errorMessage', {
-          defaultMessage: 'Unable to create Elasticsearch vector tile search request',
-        })}
-        color="warning"
-        iconType="help"
-      >
-        <p>
-          {i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {
-            defaultMessage: `Could not convert tile request, '{tileUrl}', to Elasticesarch vector tile search request, error: {error}`,
-            values: {
-              tileUrl: this.props.tileRequest.tileUrl,
-              error: this.state.error,
-            },
+    if (!this.state.path || !this.state.body) {
+      return (
+        <EuiCallOut
+          title={i18n.translate('xpack.maps.inspector.vectorTileRequest.errorMessage', {
+            defaultMessage: 'Unable to create Elasticsearch vector tile search request',
           })}
-        </p>
-      </EuiCallOut>
+          color="warning"
+          iconType="help"
+        >
+          <p>
+            {i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {
+              defaultMessage: `Could not convert tile request, '{tileUrl}', to Elasticesarch vector tile search request, error: {error}`,
+              values: {
+                tileUrl: this.props.tileRequest.tileUrl,
+                error: this.state.error,
+              },
+            })}
+          </p>
+        </EuiCallOut>
+      );
+    }
+
+    const consoleHref = '';
+    const shouldShowDevToolsLink = false;
+
+    function onOpenInConsoleClick() {}
+
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        wrap={false}
+        responsive={true}
+        style={{ height: '100%' }}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" wrap>
+            <EuiFlexItem grow={false}>
+              <div>
+                <EuiCopy textToCopy={this.state.body}>
+                  {(copy) => (
+                    <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+                      {i18n.translate('xpack.maps.inspector.vectorTileRequest.copyToClipboardLabel', {
+                        defaultMessage: 'Copy to clipboard',
+                      })}
+                    </EuiButtonEmpty>
+                  )}
+                </EuiCopy>
+              </div>
+            </EuiFlexItem>
+            {shouldShowDevToolsLink && (
+              <EuiFlexItem grow={false}>
+                <div>
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="right"
+                    iconType="wrench"
+                    onClick={onOpenInConsoleClick}
+                  >
+                    {i18n.translate('xpack.maps.inspector.vectorTileRequest.openInConsoleLabel', {
+                      defaultMessage: 'Open in Console',
+                    })}
+                  </EuiButtonEmpty>
+                </div>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <CodeEditor
+            languageId={XJsonLang.ID}
+            value={this.state.body}
+            options={{
+              readOnly: true,
+              lineNumbers: 'off',
+              fontSize: 12,
+              minimap: {
+                enabled: false,
+              },
+              folding: true,
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              automaticLayout: true,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }
