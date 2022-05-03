@@ -39,6 +39,8 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
         rowItems: issuers,
         attrName: 'tls.server.issuer',
         idPrefix: `${tableId}-${_id}-table-issuers`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -52,6 +54,8 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
         rowItems: subjects,
         attrName: 'tls.server.subject',
         idPrefix: `${tableId}-${_id}-table-subjects`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -65,6 +69,8 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
         rowItem: sha1,
         attrName: 'tls.server.hash.sha1',
         idPrefix: `${tableId}-${sha1}-table-sha1`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -78,6 +84,8 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
         rowItems: ja3,
         attrName: 'tls.server.ja3s',
         idPrefix: `${tableId}-${_id}-table-ja3`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {

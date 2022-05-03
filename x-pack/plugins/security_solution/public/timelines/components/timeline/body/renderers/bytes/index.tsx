@@ -20,12 +20,16 @@ export const Bytes = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, isDraggable, value }) =>
+}>(({ contextId, eventId, fieldName, fieldType, isAggregatable, isDraggable, value }) =>
   isDraggable ? (
     <DefaultDraggable
       id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       isDraggable={isDraggable}
       // @ts-expect-error
       name={name}

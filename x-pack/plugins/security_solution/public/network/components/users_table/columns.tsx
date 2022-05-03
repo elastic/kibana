@@ -35,6 +35,8 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
         rowItem: userName,
         attrName: 'user.name',
         idPrefix: `${tableId}-table-${flowTarget}-user`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -61,6 +63,8 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
         rowItems: groupNames,
         attrName: 'user.group.name',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -74,6 +78,8 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
         rowItems: groupId,
         attrName: 'user.group.id',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {

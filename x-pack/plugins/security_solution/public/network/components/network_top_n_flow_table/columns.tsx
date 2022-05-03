@@ -162,6 +162,8 @@ export const getNetworkTopNFlowColumns = (
                 rowItem: as.name,
                 attrName: `${flowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
+                isAggregatable: true,
+                fieldType: 'keyword',
               })}
 
             {as.number && (
@@ -171,6 +173,8 @@ export const getNetworkTopNFlowColumns = (
                   rowItem: `${as.number}`,
                   attrName: `${flowTarget}.as.number`,
                   idPrefix: `${id}-number`,
+                  isAggregatable: true,
+                  fieldType: 'keyword',
                 })}
               </>
             )}
