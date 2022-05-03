@@ -2196,6 +2196,7 @@ describe('Lens migrations', () => {
         state: {
           visualization: {
             valueLabels: 'inside',
+            legend: {},
           },
         },
       },
