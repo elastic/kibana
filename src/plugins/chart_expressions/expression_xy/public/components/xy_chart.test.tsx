@@ -114,6 +114,7 @@ describe('XYChart component', () => {
       onClickValue,
       onSelectRange,
       syncColors: false,
+      syncTooltips: false,
       useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
     };

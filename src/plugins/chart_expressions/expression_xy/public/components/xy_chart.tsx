@@ -24,6 +24,7 @@ import {
   DisplayValueStyle,
   RecursivePartial,
   AxisStyle,
+  Placement,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -88,6 +89,7 @@ export type XYChartRenderProps = XYChartProps & {
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
+  syncTooltips: boolean;
   eventAnnotationService: EventAnnotationServiceType;
 };
 
@@ -130,6 +132,7 @@ export function XYChart({
   onSelectRange,
   interactive = true,
   syncColors,
+  syncTooltips,
   useLegacyTimeAxis,
 }: XYChartRenderProps) {
   const {
@@ -493,6 +496,9 @@ export function XYChart({
     <Chart ref={chartRef}>
       <Settings
         onPointerUpdate={handleCursorUpdate}
+        externalPointerEvents={{
+          tooltip: { visible: syncTooltips, placement: Placement.Right },
+        }}
         debugState={window._echDebugStateFlag ?? false}
         showLegend={
           legend.isVisible && !legend.showSingleSeries

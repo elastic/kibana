@@ -42,6 +42,14 @@ export const RESOURCE = i18n.translate('xpack.csp.findings.resourceLabel', {
   defaultMessage: 'Resource',
 });
 
+export const GENERAL = i18n.translate('xpack.csp.findings.findingsFlyout.generalTabLabel', {
+  defaultMessage: 'General',
+});
+
+export const JSON = i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabLabel', {
+  defaultMessage: 'JSON',
+});
+
 export const RESOURCE_ID = i18n.translate(
   'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
   {
@@ -140,6 +148,13 @@ export const SECTION = i18n.translate('xpack.csp.findings.sectionLabel', {
 export const AUDIT = i18n.translate('xpack.csp.findings.auditLabel', {
   defaultMessage: 'Audit',
 });
+
+export const REFERENCES = i18n.translate(
+  'xpack.csp.findings.findingsFlyout.generalTab.referencesLabel',
+  {
+    defaultMessage: 'References',
+  }
+);
 
 export const RESULT_DETAILS = i18n.translate('xpack.csp.findings.resultLabel', {
   defaultMessage: 'Result Details',
