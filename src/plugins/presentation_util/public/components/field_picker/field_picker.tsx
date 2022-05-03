@@ -39,7 +39,7 @@ export const FieldPicker = ({
         dataView.fields
           .filter(
             (f) =>
-              f.name.includes(nameFilter) &&
+              f.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
               (typesFilter.length === 0 || typesFilter.includes(f.type as string))
           )
           .filter((f) => (showFields ? showFields.includes(f.name) : true)),

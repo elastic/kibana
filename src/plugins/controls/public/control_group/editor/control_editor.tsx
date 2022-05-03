@@ -164,6 +164,8 @@ export const ControlEditor = ({
   const controlType =
     selectedField && fieldRegistry && fieldRegistry[selectedField].compatibleControlTypes[0];
   const factory = controlType && getControlFactory(controlType);
+  const CustomSettings =
+    factory && (factory as IEditableControlFactory).controlEditorOptionsComponent;
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -232,7 +234,11 @@ export const ControlEditor = ({
               </EuiFlexGroup>
             )}
           </EuiFormRow>
-
+          {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
+            <EuiFormRow label={'Control settings'}>
+              <CustomSettings onChange={onTypeEditorChange} initialInput={embeddable?.getInput()} />
+            </EuiFormRow>
+          )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
               data-test-subj="control-editor-title-input"
