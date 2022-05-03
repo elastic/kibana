@@ -33,10 +33,10 @@ import {
   LensDocShape713,
   LensDocShape715,
   LensDocShape810,
+  LensDocShape830,
   LensDocShapePre712,
   VisState716,
   VisState810,
-  VisState820,
   VisStatePre715,
   VisStatePre830,
 } from '../migrations/types';
@@ -116,7 +116,7 @@ export const makeLensEmbeddableFactory =
             '8.3.0': (state) => {
               const lensState = state as unknown as { attributes: LensDocShape810<VisState810> };
               let migratedLensState = commonLockOldMetricVisSettings(lensState.attributes);
-              migratedLensState = commonPreserveOldLegendSizeDefault(lensState.attributes);
+              migratedLensState = commonPreserveOldLegendSizeDefault(migratedLensState);
               migratedLensState = commonFixValueLabelsInXY(
                 migratedLensState as LensDocShape810<VisStatePre830>
               );

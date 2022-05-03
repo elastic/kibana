@@ -257,7 +257,7 @@ export const commonLockOldMetricVisSettings = (
 
 export const commonPreserveOldLegendSizeDefault = (
   attributes: LensDocShape810
-): LensDocShape810<VisState820> => {
+): LensDocShape830<VisState830> => {
   const newAttributes = cloneDeep(attributes);
 
   if (['lnsXY', 'lnsHeatmap'].includes(newAttributes.visualizationType + '')) {
@@ -275,7 +275,7 @@ export const commonPreserveOldLegendSizeDefault = (
     });
   }
 
-  return newAttributes;
+  return newAttributes as LensDocShape830<VisState830>;
 };
 
 const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
