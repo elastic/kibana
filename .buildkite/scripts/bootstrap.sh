@@ -7,7 +7,8 @@ source .buildkite/scripts/common/setup_bazel.sh
 
 BAZEL_REGION="us-central1"
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
-  BAZEL_REGION=$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone | rev | cut -c3- | rev)
+  # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
+  BAZEL_REGION=$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone | rev | cut -d'/' -f1 | cut -c3- | rev)
 fi
 
 BAZEL_BUCKET="kibana-ci-bazel_$BAZEL_REGION"
@@ -19,6 +20,8 @@ build --google_default_credentials
 EOF
 
 echo "--- yarn install and bootstrap"
+echo "Using Bazel remote cache bucket: $BAZEL_BUCKET"
+
 if ! yarn kbn bootstrap; then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
