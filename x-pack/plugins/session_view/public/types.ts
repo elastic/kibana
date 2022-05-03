@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ReactNode } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '../../../../src/core/public';
 
 export type SessionViewServices = CoreStart;
 
