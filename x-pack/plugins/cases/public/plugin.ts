@@ -48,7 +48,7 @@ export class CasesUiPlugin
         id: APP_ID,
         title: APP_TITLE,
         description: APP_DESC,
-        icon: 'watchesApp',
+        icon: 'casesApp',
         path: APP_PATH,
         showOnHomePage: false,
         category: 'admin',
