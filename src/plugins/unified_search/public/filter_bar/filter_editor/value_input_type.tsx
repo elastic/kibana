@@ -26,13 +26,10 @@ interface Props {
 }
 
 class ValueInputTypeUI extends Component<Props> {
-  private getValueForNumberField = (value?: string | number) => {
+  private getValueForNumberField = (value?: string | number): string | number | undefined => {
     if (typeof value === 'string') {
       const parsedValue = parseFloat(value);
-      if (!isNaN(parsedValue)) {
-        return parsedValue;
-      }
-      return value;
+      return isNaN(parsedValue) ? value : parsedValue;
     }
     return value;
   };
