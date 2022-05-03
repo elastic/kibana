@@ -439,7 +439,7 @@ describe('rules_list component with items', () => {
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-tagsPopover"]').length
     ).toEqual(mockedRulesData.length);
     // only show tags popover if tags exist on rule
-    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagsBadge"]');
+    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagBadge"]');
     expect(tagsBadges.length).toEqual(
       mockedRulesData.filter((data) => data.tags.length > 0).length
     );
@@ -459,7 +459,7 @@ describe('rules_list component with items', () => {
     jest.runAllTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last execution.');
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last run.');
 
     wrapper
       .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
