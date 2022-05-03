@@ -104,7 +104,7 @@ export type {
   ReferenceLineLayerConfigResult,
   AxisTitlesVisibilityConfigResult,
 } from '@kbn/expression-xy-plugin/common';
-export type { LensEmbeddableInput. LensSavedObjectAttributes } from './embeddable';
+export type { LensEmbeddableInput, LensSavedObjectAttributes } from './embeddable';
 
 export { layerTypes } from '../common';
 

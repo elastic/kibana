@@ -6,14 +6,15 @@
  */
 
 import moment from 'moment';
-import type { SimpleSavedObject } from '@kbn/core/public';
+import type { SimpleSavedObject, IUiSettingsClient } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import type {
   LensSavedObjectAttributes,
-  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   XYDataLayerConfig,
 } from '@kbn/lens-plugin/public';
-import { getUiSettings, getDataViews } from '../../../../util/dependency_cache';
 
 import { createEmptyJob, createEmptyDatafeed } from '../../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../../common/job_creator/util/general';
@@ -32,13 +33,15 @@ const COMPATIBLE_LAYER_TYPES = [
 ];
 
 export async function createADJobFromLensSavedObject(
-  so: SimpleSavedObject<LensSavedObjectAttributes>,
+  vis: SimpleSavedObject<LensSavedObjectAttributes>,
   startString: string,
   endString: string,
   query: any,
-  filters: any
+  filters: any,
+  dataViewClient: DataViewsContract,
+  kibanaConfig: IUiSettingsClient
 ) {
-  const dataView = await getDataViewFromLens(so);
+  const dataView = await getDataViewFromLens(vis, dataViewClient);
   if (dataView === null) {
     return;
   }
@@ -46,8 +49,9 @@ export async function createADJobFromLensSavedObject(
 
   // so.attributes.state.datasourceStates.indexpattern.layers['a12346a9-31fc-495c-87f1-91dedd4f8fba']
   //   .columns;
+  // debugger;
   // @ts-expect-error
-  const state = so.attributes?.state ?? so.state;
+  const state = vis.attributes?.state ?? vis.state;
   const visualization = state.visualization as { layers: XYDataLayerConfig[] };
   const compatibleLayers = visualization.layers.filter((l) =>
     COMPATIBLE_LAYER_TYPES.includes(l.seriesType)
@@ -64,7 +68,7 @@ export async function createADJobFromLensSavedObject(
     return;
   }
 
-  const { columns } = layer as { columns: Record<string, GenericIndexPatternColumn> };
+  const { columns } = layer as { columns: Record<string, FieldBasedIndexPatternColumn> };
   const cols = Object.entries(columns);
   const timeFieldCol = cols.find(([, c]) => c.dataType === 'date');
   if (timeFieldCol === undefined) {
@@ -87,34 +91,25 @@ export async function createADJobFromLensSavedObject(
   const { combinedQuery } = createQueries(
     { query: mainQuery, filter: filters },
     dataView,
-    getUiSettings()
+    kibanaConfig
   );
   datafeedConfig.query = combinedQuery;
 
-  // datafeedConfig.query = {
-  //   bool: {
-  //     must: [
-  //       {
-  //         match_all: {},
-  //       },
-  //     ],
-  //   },
-  // };
-
-  jobConfig.analysis_config.detectors = fields.map((f) => {
+  jobConfig.analysis_config.detectors = fields.map(({ operationType, sourceField }) => {
+    const func = lensOperationToMlFunction(operationType);
+    if (func === null) {
+      throw Error('');
+    }
     return {
-      function: lensOperationToMlFunction(f.operationType),
-      // @ts-expect-error sourceField missing in type
-      field_name: f.sourceField,
-      // @ts-expect-error sourceField missing in type
+      function: func,
+      field_name: sourceField,
       ...(splitField ? { partition_field_name: splitField.sourceField } : {}),
     };
   });
-  // @ts-expect-error sourceField missing in type
+
   jobConfig.data_description.time_field = timeField.sourceField;
   jobConfig.analysis_config.bucket_span = '15m';
   if (splitField) {
-    // @ts-expect-error sourceField missing in type
     jobConfig.analysis_config.influencers = [splitField.sourceField];
   }
 
@@ -125,6 +120,38 @@ export async function createADJobFromLensSavedObject(
   const start = moment(startString).valueOf();
   const end = moment(endString).valueOf();
 
+  return {
+    jobConfig,
+    datafeedConfig,
+    createdBy,
+    start,
+    end,
+  };
+}
+
+export async function canCreateAndStashADJob(
+  vis: SimpleSavedObject<LensSavedObjectAttributes>,
+  startString: string,
+  endString: string,
+  query: any,
+  filters: any,
+  dataViewClient: DataViewsContract,
+  kibanaConfig: IUiSettingsClient
+) {
+  const jobItems = await createADJobFromLensSavedObject(
+    vis,
+    startString,
+    endString,
+    query,
+    filters,
+    dataViewClient,
+    kibanaConfig
+  );
+  if (!jobItems) {
+    return;
+  }
+
+  const { jobConfig, datafeedConfig, createdBy, start, end } = jobItems;
   stashJobForCloning(
     {
       jobConfig,
@@ -138,9 +165,36 @@ export async function createADJobFromLensSavedObject(
   );
 }
 
-async function getDataViewFromLens(so: SimpleSavedObject<LensSavedObjectAttributes>) {
-  const dataViewClient = getDataViews();
+export async function canCreateADJob(
+  vis: SimpleSavedObject<LensSavedObjectAttributes>,
+  startString: string,
+  endString: string,
+  query: any,
+  filters: any,
+  dataViewClient: DataViewsContract,
+  kibanaConfig: IUiSettingsClient
+) {
+  try {
+    const jobItems = await createADJobFromLensSavedObject(
+      vis,
+      startString,
+      endString,
+      query,
+      filters,
+      dataViewClient,
+      kibanaConfig
+    );
 
+    return !!jobItems;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function getDataViewFromLens(
+  so: SimpleSavedObject<LensSavedObjectAttributes>,
+  dataViewClient: DataViewsContract
+) {
   const dv = so.references.find((r) => r.type === 'index-pattern');
   if (!dv) {
     return null;
@@ -152,8 +206,45 @@ function lensOperationToMlFunction(op: string) {
   switch (op) {
     case 'average':
       return 'mean';
+    case 'count':
+      return 'count';
+    case 'max':
+      return 'max';
+    case 'median':
+      return 'median';
+    case 'min':
+      return 'min';
+    case 'sum':
+      return 'sum';
+    case 'unique_count':
+      return 'distinct_count';
 
     default:
-      return op;
+      return null;
   }
+}
+
+export function getJobsItemsFromEmbeddable(embeddable: IEmbeddable) {
+  const {
+    query,
+    filters,
+    timeRange: { from, to },
+    // @ts-expect-error input not in type
+  } = embeddable.input;
+  // @ts-expect-error savedVis not in type
+  const vis = embeddable.savedVis;
+
+  return {
+    vis,
+    from,
+    to,
+    query,
+    filters,
+  } as {
+    vis: SimpleSavedObject<LensSavedObjectAttributes>;
+    from: string;
+    to: string;
+    query: any;
+    filters: any;
+  };
 }

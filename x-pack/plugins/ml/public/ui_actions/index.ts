@@ -44,7 +44,7 @@ export function registerMlUiActions(
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
   const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
-  const mLADJobAction = createMLADJobAction();
+  const mLADJobAction = createMLADJobAction(core.getStartServices);
 
   // Register actions
   uiActions.registerAction(editSwimlanePanelAction);

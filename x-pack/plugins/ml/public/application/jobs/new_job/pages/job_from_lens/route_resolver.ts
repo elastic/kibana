@@ -9,7 +9,8 @@ import type { SimpleSavedObject } from '@kbn/core/public';
 import rison from 'rison-node';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { getSavedObjectsClient } from '../../../../util/dependency_cache';
-import { createADJobFromLensSavedObject } from './create_job';
+import { canCreateAndStashADJob } from './create_job';
+import { getUiSettings, getDataViews } from '../../../../util/dependency_cache';
 
 export async function resolver(
   lensId: string | undefined,
@@ -19,11 +20,11 @@ export async function resolver(
   queryRisonString: any,
   filtersRisonsString: any
 ) {
-  let so: SimpleSavedObject<LensSavedObjectAttributes>;
+  let viz: SimpleSavedObject<LensSavedObjectAttributes>;
   if (lensId) {
-    so = await getLensSavedObject(lensId);
+    viz = await getLensSavedObject(lensId);
   } else if (vis) {
-    so = rison.decode(vis) as unknown as SimpleSavedObject<LensSavedObjectAttributes>;
+    viz = rison.decode(vis) as unknown as SimpleSavedObject<LensSavedObjectAttributes>;
   } else {
     throw new Error('Cannot create visualization');
   }
@@ -37,7 +38,10 @@ export async function resolver(
     // ignore
   }
 
-  await createADJobFromLensSavedObject(so, from, to, query, filters);
+  const dataViewClient = getDataViews();
+  const kibanaConfig = getUiSettings();
+
+  await canCreateAndStashADJob(viz, from, to, query, filters, dataViewClient, kibanaConfig);
 }
 
 async function getLensSavedObject(id: string) {

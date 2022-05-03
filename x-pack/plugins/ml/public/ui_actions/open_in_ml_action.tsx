@@ -8,17 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-// import { ViewMode } from '../../../../../src/plugins/embeddable/public';
-// import { MlCoreSetup } from '../plugin';
-import {
-  // ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  EditAnomalyChartsPanelContext,
-} from '../embeddables';
+import { MlCoreSetup } from '../plugin';
+import { getJobsItemsFromEmbeddable } from '../application/jobs/new_job/pages/job_from_lens';
 
 export const CREATE_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
-export function createMLADJobAction() {
-  return createAction<EditAnomalyChartsPanelContext>({
+export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
+  return createAction<{ embeddable: IEmbeddable }>({
     id: 'create-ml-ad-job-action',
     type: CREATE_ML_AD_JOB_ACTION,
     getIconType(context): string {
@@ -33,30 +29,32 @@ export function createMLADJobAction() {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
 
-      // const [coreStart] = await getStartServices();
-
       try {
-        // const { resolveEmbeddableAnomalyChartsUserInput } = await import(
-        //   '../embeddables/anomaly_charts/anomaly_charts_setup_flyout'
-        // );
         const { convertLensToADJob } = await import(
           '../embeddables/convert_to_jobs/convert_lens_to_job_action'
         );
 
         convertLensToADJob(embeddable);
-        // embeddable.updateInput(result);
       } catch (e) {
         return Promise.reject();
       }
     },
     async isCompatible(context: { embeddable: IEmbeddable }) {
-      // return (
-      //   embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE &&
-      //   embeddable.getInput().viewMode === ViewMode.EDIT
-      // );
+      const [coreStart, pluginsStart] = await getStartServices();
+      const { canCreateADJob } = await import('../application/jobs/new_job/pages/job_from_lens');
+      const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(context.embeddable);
       return (
         context.embeddable.type === 'lens' &&
-        (await (context.embeddable as any).canViewUnderlyingData())
+        (await (context.embeddable as any).canViewUnderlyingData()) &&
+        canCreateADJob(
+          vis,
+          from,
+          to,
+          query,
+          filters,
+          pluginsStart.data.dataViews,
+          coreStart.uiSettings
+        )
       );
     },
   });
