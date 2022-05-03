@@ -35,6 +35,9 @@ describe('<PolicyEdit />', () => {
       httpRequestsMockHelpers.setLoadRepositoriesResponse({
         repositories: [{ name: POLICY_EDIT.repository }],
       });
+      httpRequestsMockHelpers.setLoadFeaturesResponse({
+        features: [{ name: 'kibana' }, { name: 'tasks' }],
+      });
 
       testBed = await setup(httpSetup);
 
@@ -152,6 +155,7 @@ describe('<PolicyEdit />', () => {
               repository,
               config: {
                 includeGlobalState: true,
+                featureStates: ['kibana'],
                 ignoreUnavailable: true,
               },
               retention: {

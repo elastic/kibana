@@ -90,6 +90,11 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${API_BASE_PATH}policies/indices`, response, error);
 
+  const setLoadPoliciesResponse = (
+    response: HttpResponse = { indices: [] },
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}policies`, response, error);
+
   const setAddPolicyResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}policies`, response, error);
 
@@ -135,6 +140,7 @@ const registerHttpRequestMockHelpers = (
     setCleanupRepositoryResponse,
     setRestoreSnapshotResponse,
     setLoadFeaturesResponse,
+    setLoadPoliciesResponse,
   };
 };
 

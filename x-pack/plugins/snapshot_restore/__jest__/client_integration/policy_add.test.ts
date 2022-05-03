@@ -46,6 +46,9 @@ describe('<PolicyAdd />', () => {
         indices: ['my_index'],
         dataStreams: ['my_data_stream', 'my_other_data_stream'],
       });
+      httpRequestsMockHelpers.setLoadFeaturesResponse({
+        features: [{ name: 'kibana' }, { name: 'tasks' }],
+      });
 
       testBed = await setup(httpSetup);
       await nextTick();
@@ -123,12 +126,6 @@ describe('<PolicyAdd />', () => {
       });
 
       describe('snapshot settings (step 2)', () => {
-        beforeAll(() => {
-          httpRequestsMockHelpers.setLoadFeaturesResponse({
-            features: [{ name: 'kibana' }, { name: 'tasks' }],
-          });
-        });
-
         beforeEach(() => {
           const { form, actions } = testBed;
           // Complete step 1
@@ -166,6 +163,25 @@ describe('<PolicyAdd />', () => {
           component.update();
 
           expect(find('dataStreamBadge').length).toBe(2);
+        });
+
+        describe('feature states', () => {
+          test('feature states dropdown is only shown when include global state is enabled', async () => {
+            const { exists, component, form } = testBed;
+
+            // By default the toggle is enabled
+            expect(exists('featureStatesDropdown')).toBe(true);
+
+            await act(async () => {
+              // Toggle "All indices" switch
+              form.toggleEuiSwitch('globalStateToggle');
+              await nextTick();
+            });
+            component.update();
+
+            // But after we toggle off the include global state it should be hidden
+            expect(exists('featureStatesDropdown')).toBe(false);
+          });
         });
       });
 
@@ -218,7 +234,7 @@ describe('<PolicyAdd />', () => {
 
     describe('form payload & api errors', () => {
       beforeEach(async () => {
-        const { actions, form } = testBed;
+        const { actions, form, component } = testBed;
 
         // Complete step 1
         form.setInputValue('nameInput', POLICY_NAME);
@@ -226,6 +242,12 @@ describe('<PolicyAdd />', () => {
         actions.clickNextButton();
 
         // Complete step 2
+        await act(async () => {
+          await nextTick();
+        });
+        component.update();
+
+        form.setComboBoxValue('featureStatesDropdown', 'kibana');
         actions.clickNextButton();
 
         // Complete step 3
@@ -253,6 +275,7 @@ describe('<PolicyAdd />', () => {
               repository: repository.name,
               config: {
                 includeGlobalState: true,
+                featureStates: ['kibana'],
               },
               retention: {
                 expireAfterValue: Number(EXPIRE_AFTER_VALUE),

@@ -40,6 +40,8 @@ export const formSetup = async (
 export type PolicyFormTestSubjects =
   | 'advancedCronInput'
   | 'allIndicesToggle'
+  | 'globalStateToggle'
+  | 'featureStatesDropdown'
   | 'backButton'
   | 'deselectIndicesLink'
   | 'allDataStreamsToggle'

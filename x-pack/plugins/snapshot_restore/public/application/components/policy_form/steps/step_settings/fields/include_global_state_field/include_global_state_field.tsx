@@ -112,6 +112,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
             }
           >
             <EuiComboBox
+              data-test-subj="featureStatesDropdown"
               placeholder="All features"
               options={features}
               selectedOptions={selectedOptions}
