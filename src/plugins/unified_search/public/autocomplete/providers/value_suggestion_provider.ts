@@ -8,7 +8,6 @@
 
 import { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
-import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
 import {
   IIndexPattern,
@@ -124,6 +123,7 @@ export const setupValueSuggestionProvider = (
     const timeFilter = useTimeRange
       ? getAutocompleteTimefilter(timefilter, indexPattern)
       : undefined;
+    const { buildQueryFromFilters } = await import('@kbn/es-query');
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {
