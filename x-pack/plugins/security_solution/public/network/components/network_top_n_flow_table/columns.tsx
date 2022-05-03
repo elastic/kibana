@@ -81,6 +81,8 @@ export const getNetworkTopNFlowColumns = (
                 kqlQuery: '',
                 queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
               }}
+              isAggregatable={true}
+              fieldType={'ip'}
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (
                   <DragEffects>
@@ -104,6 +106,8 @@ export const getNetworkTopNFlowColumns = (
                   kqlQuery: '',
                   queryMatch: { field: geoAttrName, value: geo, operator: IS_OPERATOR },
                 }}
+                isAggregatable={true}
+                fieldType={'geo_point'}
                 render={(dataProvider, _, snapshot) =>
                   snapshot.isDragging ? (
                     <DragEffects>
@@ -141,6 +145,8 @@ export const getNetworkTopNFlowColumns = (
           attrName: domainAttr,
           idPrefix: id,
           displayCount: 1,
+          isAggregatable: true,
+          fieldType: 'keyword',
         });
       } else {
         return getEmptyTagValue();
