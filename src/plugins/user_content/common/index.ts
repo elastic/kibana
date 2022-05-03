@@ -5,8 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { API_BASE_PATH, metadataEventTypes } from './constants';
+export {
+  API_BASE_PATH,
+  metadataEventTypes,
+  EVENTS_COUNT_GRANULARITY,
+  userContentCommonMappings,
+} from './constants';
 
 export { withApiBaseBath } from './lib';
 
-export type { MetadataEventType, UserContentMetadataEvent } from './types';
+export type { MetadataEventType, UserContentMetadataEvent, ViewsCounters } from './types';

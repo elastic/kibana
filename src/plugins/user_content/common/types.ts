@@ -21,3 +21,7 @@ export interface UserContentMetadataEvent extends MetadataEvent<MetadataEventTyp
     [key: string]: unknown;
   };
 }
+
+export interface ViewsCounters {
+  [daysRange: string]: number;
+}

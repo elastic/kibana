@@ -11,6 +11,8 @@ import { SavedObjectsClientContract } from '@kbn/core/public';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
 import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
+import { userContentCommonMappings } from '@kbn/user-content-plugin/public';
+
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
@@ -99,6 +101,7 @@ export function createSavedDashboardClass(
           panelsJSON: { type: 'text' },
         },
       },
+      ...userContentCommonMappings,
     };
     public static fieldOrder = ['title', 'description'];
     public static searchSource = true;

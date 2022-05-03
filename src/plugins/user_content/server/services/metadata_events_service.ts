@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 
 import { UserContentEventsStream } from '../types';
-import { EVENTS_COUNT_GRANULARITY } from '../constants';
+import { EVENTS_COUNT_GRANULARITY } from '../../common';
 import { bucketsAggregationToContentEventCount } from '../lib';
 
 export class MetadataEventsService {

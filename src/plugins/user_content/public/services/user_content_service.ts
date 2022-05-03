@@ -7,6 +7,7 @@
  */
 import { SavedObjectsClientContract } from '@kbn/core/public';
 
+import { EVENTS_COUNT_GRANULARITY, ViewsCounters } from '../../common';
 import { MetadataEventsService } from './metadata_events_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -48,7 +49,7 @@ export class UserContentService {
   }
 
   private registerSavedObjectHooks() {
-    // Register metadata event whenever a user content saved object is accessed
+    // Hook whenever user generated saved object(s) are accessed
     this.savedObjectClient?.post('get', async (objects) => {
       const registeredContents = [...this.contents.keys()];
 
@@ -65,5 +66,47 @@ export class UserContentService {
         );
       }
     });
+
+    // Hook before saving a user generated saved object
+    this.savedObjectClient?.pre('create', async (objects) => {
+      if (!objects) {
+        return;
+      }
+
+      const updatedObject = objects.map((object) => {
+        const { type, attributes } = object;
+
+        if (!this.contents.has(type)) {
+          return object;
+        }
+
+        const updatedAttributes = this.addInitialViewCountsToAttributes(attributes as object);
+
+        return { ...object, attributes: updatedAttributes };
+      });
+
+      return updatedObject;
+    });
+  }
+
+  private addInitialViewCountsToAttributes(attributes: object): object {
+    if (typeof attributes !== 'object' || attributes === null || Array.isArray(attributes)) {
+      return attributes;
+    }
+
+    if (attributes.hasOwnProperty('views_counters')) {
+      return attributes;
+    }
+
+    // Initiate the views counters
+    return {
+      ...attributes,
+      views_counters: EVENTS_COUNT_GRANULARITY.reduce((agg, days) => {
+        return {
+          ...agg,
+          [`${days}_days`]: 0,
+        };
+      }, {} as ViewsCounters),
+    };
   }
 }

@@ -7,6 +7,8 @@
  */
 
 import { SavedObjectsType } from '@kbn/core/server';
+import { userContentCommonMappings } from '@kbn/user-content-plugin/common';
+
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,
@@ -65,6 +67,7 @@ export const createDashboardSavedObjectType = ({
       timeTo: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
+      ...userContentCommonMappings,
     },
   },
   migrations: () => createDashboardSavedObjectTypeMigrations(migrationDeps),

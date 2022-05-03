@@ -288,8 +288,12 @@ interface ObjectTypeAndId {
 type PreGetHook = (objects: ObjectTypeAndId[]) => Promise<void>;
 type PostGetHook = (objects: SavedObject[]) => Promise<void>;
 
-type PreCreateHook = () => Promise<void>;
-type PostCreateHook = () => Promise<void>;
+type PreCreateHook = (
+  ...args: Parameters<SavedObjectsClient['bulkCreate']>
+) => Promise<SavedObjectsBulkCreateObject[] | undefined>;
+type PostCreateHook = (
+  savedObject: Awaited<ReturnType<SavedObjectsClient['create']>>
+) => Promise<void>;
 
 interface PreHooks {
   get: PreGetHook[];
@@ -428,7 +432,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     this.batchResolveQueue = [];
   }
 
-  public create = <T = unknown>(
+  public create = async <T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -436,6 +440,17 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     if (!type || !attributes) {
       return Promise.reject(new Error('requires type and attributes'));
     }
+
+    const updatedObjects = await this.runPreCreateHooks(
+      [...this.preHooks.create],
+      [
+        {
+          ...options,
+          type,
+          attributes,
+        },
+      ]
+    );
 
     const path = this.getPath([type, options.id]);
     const query = {
@@ -446,13 +461,20 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       method: 'POST',
       query,
       body: JSON.stringify({
-        attributes,
+        attributes: updatedObjects[0].attributes, // Use the updated attributes from the hooks
         migrationVersion: options.migrationVersion,
         references: options.references,
       }),
     });
 
-    return createRequest.then((resp) => this.createSavedObject(resp));
+    return createRequest
+      .then((resp) => this.createSavedObject(resp))
+      .then(async (resp) => {
+        for (const postCreateHook of this.postHooks.create) {
+          await postCreateHook(resp);
+        }
+        return resp;
+      });
   };
 
   /**
@@ -463,17 +485,19 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
    * @property {boolean} [options.overwrite=false]
    * @returns The result of the create operation containing created saved objects.
    */
-  public bulkCreate = (
+  public bulkCreate = async (
     objects: SavedObjectsBulkCreateObject[] = [],
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
+    const updatedObjects = await this.runPreCreateHooks([...this.preHooks.create], objects);
+
     const path = this.getPath(['_bulk_create']);
     const query = { overwrite: options.overwrite };
 
     const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.savedObjectsFetch(path, {
       method: 'POST',
       query,
-      body: JSON.stringify(objects),
+      body: JSON.stringify(updatedObjects),
     });
     return request.then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
@@ -482,6 +506,21 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
         SavedObjectsBatchResponse
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
+  };
+
+  private runPreCreateHooks = async (
+    hooks: PreHooks['create'],
+    updatedObjects: SavedObjectsBulkCreateObject[]
+  ): Promise<SavedObjectsBulkCreateObject[]> => {
+    if (hooks.length === 0) {
+      return updatedObjects;
+    }
+    const [preCreateHook, ...rest] = hooks;
+    const result = await preCreateHook(updatedObjects);
+    if (rest.length) {
+      return await this.runPreCreateHooks(rest, result!);
+    }
+    return result!;
   };
 
   public delete = (

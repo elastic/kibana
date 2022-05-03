@@ -15,3 +15,5 @@ export type { UserContent } from './services';
 export function plugin() {
   return new UserContentPlugin();
 }
+
+export { userContentCommonMappings } from '../common';

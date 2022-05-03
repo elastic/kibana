@@ -151,6 +151,7 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsTypeMappingDefinition,
 } from './saved_objects';
 
 export { HttpFetchError } from './http';
