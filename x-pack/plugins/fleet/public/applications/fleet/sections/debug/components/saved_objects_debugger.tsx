@@ -92,7 +92,12 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={`
+            min-width: 300px;
+          `}
+        >
           <EuiFormRow>
             <EuiSelect
               prepend="Type"
