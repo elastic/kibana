@@ -6,11 +6,12 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import * as TEST_SUBJECTS from './test_subjects';
-import { FindingsTable } from './findings_table';
+import * as TEST_SUBJECTS from '../test_subjects';
+import { FindingsTable } from './latest_findings_table';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
-import type { CspFinding } from './types';
+import type { CspFinding } from '../types';
+import { TestProvider } from '../../../test/test_provider';
 
 const chance = new Chance();
 
@@ -75,7 +76,11 @@ describe('<FindingsTable />', () => {
       setQuery: jest.fn,
     };
 
-    render(<FindingsTable {...props} />);
+    render(
+      <TestProvider>
+        <FindingsTable {...props} />
+      </TestProvider>
+    );
 
     expect(screen.getByTestId(TEST_SUBJECTS.FINDINGS_TABLE_ZERO_STATE)).toBeInTheDocument();
   });
@@ -94,7 +99,11 @@ describe('<FindingsTable />', () => {
       setQuery: jest.fn,
     };
 
-    render(<FindingsTable {...props} />);
+    render(
+      <TestProvider>
+        <FindingsTable {...props} />
+      </TestProvider>
+    );
 
     data.forEach((item) => {
       expect(screen.getByText(item.rule.name)).toBeInTheDocument();
