@@ -663,6 +663,7 @@ export function XYChart({
 
       {dataLayers.length && (
         <DataLayers
+          titles={titles}
           layers={dataLayers}
           endValue={endValue}
           timeZone={timeZone}
@@ -694,6 +695,7 @@ export function XYChart({
           }}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
+          titles={titles}
         />
       ) : null}
       {rangeAnnotations.length || groupedLineAnnotations.length ? (

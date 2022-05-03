@@ -29,9 +29,11 @@ import {
   GroupsConfiguration,
   getSeriesProps,
   DatatablesWithFormatInfo,
+  LayersAccessorsTitles,
 } from '../helpers';
 
 interface Props {
+  titles: LayersAccessorsTitles;
   layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
@@ -50,6 +52,7 @@ interface Props {
 }
 
 export const DataLayers: FC<Props> = ({
+  titles,
   layers,
   endValue,
   timeZone,
@@ -89,6 +92,7 @@ export const DataLayers: FC<Props> = ({
 
           const seriesProps = getSeriesProps({
             layer,
+            titles: titles[layer.layerId],
             accessor,
             chartHasMoreThanOneBarSeries,
             colorAssignments,

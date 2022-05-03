@@ -8,13 +8,14 @@
 
 import './reference_lines.scss';
 
-import React from 'react';
+import React, { FC } from 'react';
 import { groupBy } from 'lodash';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CommonXYReferenceLineLayerConfig, IconPosition, YAxisMode } from '../../common/types';
 import {
+  LayersAccessorsTitles,
   LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
   Marker,
@@ -93,21 +94,24 @@ export interface ReferenceLineAnnotationsProps {
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
+  titles: LayersAccessorsTitles;
 }
 
-export const ReferenceLineAnnotations = ({
+export const ReferenceLineAnnotations: FC<ReferenceLineAnnotationsProps> = ({
   layers,
   formatters,
   axesMap,
   isHorizontal,
   paddingMap,
-}: ReferenceLineAnnotationsProps) => {
+  titles,
+}) => {
   return (
     <>
       {layers.flatMap((layer) => {
         if (!layer.yConfig) {
           return [];
         }
+        const layerTitles = titles[layer.layerId];
         const { columnToLabel, yConfig: yConfigs, table } = layer;
         const columnToLabelMap: Record<string, string> = columnToLabel
           ? JSON.parse(columnToLabel)
@@ -146,23 +150,22 @@ export const ReferenceLineAnnotations = ({
           // the padding map is built for vertical chart
           const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
+          const title =
+            columnToLabelMap[yConfig.forAccessor] ?? layerTitles.yTitles[yConfig.forAccessor];
+
           const props = {
             groupId,
             marker: (
               <Marker
                 config={yConfig}
-                label={columnToLabelMap[yConfig.forAccessor]}
+                label={title}
                 isHorizontal={isHorizontal}
                 hasReducedPadding={hasReducedPadding}
               />
             ),
             markerBody: (
               <MarkerBody
-                label={
-                  yConfig.textVisibility && !hasReducedPadding
-                    ? columnToLabelMap[yConfig.forAccessor]
-                    : undefined
-                }
+                label={yConfig.textVisibility && !hasReducedPadding ? title : undefined}
                 isHorizontal={
                   (!isHorizontal && yConfig.axisMode === 'bottom') ||
                   (isHorizontal && yConfig.axisMode !== 'bottom')
@@ -194,7 +197,7 @@ export const ReferenceLineAnnotations = ({
               key={`${layer.layerId}-${yConfig.forAccessor}-line`}
               dataValues={table.rows.map(() => ({
                 dataValue: row[yConfig.forAccessor],
-                header: columnToLabelMap[yConfig.forAccessor],
+                header: title,
                 details: formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
               }))}
               domainType={
@@ -235,7 +238,7 @@ export const ReferenceLineAnnotations = ({
                         x1: isFillAbove ? nextValue : row[yConfig.forAccessor],
                         y1: undefined,
                       },
-                      header: columnToLabelMap[yConfig.forAccessor],
+                      header: title,
                       details:
                         formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
                     };
@@ -247,7 +250,7 @@ export const ReferenceLineAnnotations = ({
                       x1: undefined,
                       y1: isFillAbove ? nextValue : row[yConfig.forAccessor],
                     },
-                    header: columnToLabelMap[yConfig.forAccessor],
+                    header: title,
                     details:
                       formatter?.convert(row[yConfig.forAccessor]) || row[yConfig.forAccessor],
                   };
