@@ -54,12 +54,8 @@ export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchI
   },
   listeners: ({ actions }) => ({
     initPage: async () => {
-      try {
-        actions.loadSearchEngines();
-        actions.loadSearchIndices();
-      } catch (e) {
-        flashAPIErrors(e);
-      }
+      actions.loadSearchEngines();
+      actions.loadSearchIndices();
     },
     loadSearchEngines: async () => {
       try {
