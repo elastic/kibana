@@ -7,23 +7,21 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   type Criteria,
-  EuiToolTip,
-  EuiTableFieldDataColumnType,
+  type EuiTableFieldDataColumnType,
   EuiEmptyPrompt,
   EuiBasicTable,
-  PropsOf,
   EuiBasicTableProps,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
-import moment from 'moment';
 import { SortDirection } from '@kbn/data-plugin/common';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
 import type { CspFinding } from '../types';
-import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import type { FindingsGroupByNoneQuery, CspFindingsResult } from './use_latest_findings';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
+import { getExpandColumn, getFindingsColumns } from '../layout/findings_layout';
 
 interface BaseFindingsTableProps extends FindingsGroupByNoneQuery {
   setQuery(query: Partial<FindingsGroupByNoneQuery>): void;
@@ -42,62 +40,11 @@ const FindingsTableComponent = ({
 }: FindingsTableProps) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
-  const columns: Array<
-    EuiTableFieldDataColumnType<CspFinding> | EuiTableActionsColumnType<CspFinding>
-  > = useMemo(
-    () => [
-      {
-        width: '40px',
-        actions: [
-          {
-            name: 'Expand',
-            description: 'Expand',
-            type: 'icon',
-            icon: 'expand',
-            onClick: (item) => setSelectedFinding(item),
-          },
-        ],
-      },
-      {
-        field: 'resource_id',
-        name: TEXT.RESOURCE_ID,
-        truncateText: true,
-        width: '15%',
-        sortable: true,
-        render: resourceFilenameRenderer,
-      },
-      {
-        field: 'result.evaluation',
-        name: TEXT.RESULT,
-        width: '100px',
-        sortable: true,
-        render: resultEvaluationRenderer,
-      },
-      {
-        field: 'rule.name',
-        name: TEXT.RULE,
-        sortable: true,
-      },
-      {
-        field: 'cluster_id',
-        name: TEXT.SYSTEM_ID,
-        truncateText: true,
-        sortable: true,
-      },
-      {
-        field: 'rule.section',
-        name: TEXT.CIS_SECTION,
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: '@timestamp',
-        name: TEXT.LAST_CHECKED,
-        truncateText: true,
-        sortable: true,
-        render: timestampRenderer,
-      },
-    ],
+  const columns: [
+    EuiTableActionsColumnType<CspFinding>,
+    ...Array<EuiBasicTableColumn<CspFinding>>
+  ] = useMemo(
+    () => [getExpandColumn<CspFinding>({ onClick: setSelectedFinding }), ...getFindingsColumns()],
     []
   );
 
@@ -187,21 +134,5 @@ const getEsSearchQueryFromEuiTableParams = ({
   ...(!!page && { from: page.index * page.size, size: page.size }),
   sort: sort ? [{ [sort.field]: SortDirection[sort.direction] }] : undefined,
 });
-
-const timestampRenderer = (timestamp: string) => (
-  <EuiToolTip position="top" content={timestamp}>
-    <span>{moment(timestamp).fromNow()}</span>
-  </EuiToolTip>
-);
-
-const resourceFilenameRenderer = (filename: string) => (
-  <EuiToolTip position="top" content={filename}>
-    <span>{filename}</span>
-  </EuiToolTip>
-);
-
-const resultEvaluationRenderer = (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
-  <CspEvaluationBadge type={type} />
-);
 
 export const FindingsTable = React.memo(FindingsTableComponent);

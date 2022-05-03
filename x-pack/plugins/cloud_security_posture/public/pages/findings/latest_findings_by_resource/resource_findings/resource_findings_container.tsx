@@ -15,6 +15,17 @@ import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageWrapper, PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcrumbs';
 import { findingsNavigation } from '../../../../common/navigation/constants';
+import { useResourceFindings } from './use_resource_findings';
+import { useUrlQuery } from '../../../../common/hooks/use_url_query';
+import { FindingsBaseURLQuery } from '../../types';
+import { getBaseQuery } from '../../utils';
+import { ResourceFindingsTable } from './resource_findings_table';
+import { FindingsSearchBar } from '../../layout/findings_search_bar';
+
+export const getDefaultQuery = (): FindingsBaseURLQuery => ({
+  query: { language: 'kuery', query: '' },
+  filters: [],
+});
 
 const BackToResourcesButton = () => {
   return (
@@ -33,9 +44,22 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
+  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
+
+  const resourceFindings = useResourceFindings({
+    ...getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
+    resourceId: params.resourceId,
+  });
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
+      <FindingsSearchBar
+        dataView={dataView}
+        setQuery={setUrlQuery}
+        query={urlQuery.query}
+        filters={urlQuery.filters}
+        loading={resourceFindings.isLoading}
+      />
       <PageWrapper>
         <PageTitle>
           <BackToResourcesButton />
@@ -52,6 +76,11 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
           />
         </PageTitle>
         <EuiSpacer />
+        <ResourceFindingsTable
+          loading={resourceFindings.isLoading}
+          data={resourceFindings.data}
+          error={resourceFindings.error}
+        />
       </PageWrapper>
     </div>
   );

@@ -7,6 +7,7 @@
 
 import { buildEsQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
+import type { EuiBasicTableProps } from '@elastic/eui';
 import type { FindingsBaseEsQuery, FindingsBaseURLQuery } from './types';
 
 export const getBaseQuery = ({
