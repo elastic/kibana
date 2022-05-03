@@ -14,7 +14,6 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import {
   throwErrors,
-  excess,
   CaseResponseRt,
   CaseResponse,
   CasePostRequest,
@@ -48,7 +47,7 @@ export const create = async (
   } = clientArgs;
 
   const query = pipe(
-    excess(CasePostRequestRt).decode({
+    CasePostRequestRt.decode({
       ...data,
     }),
     fold(throwErrors(Boom.badRequest), identity)

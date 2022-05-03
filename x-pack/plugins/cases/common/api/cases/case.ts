@@ -39,6 +39,20 @@ export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
 
+export enum CaseSeverity {
+  LOW = 'low',
+  MINOR = 'minor',
+  SIGNIFICANT = 'significant',
+  CRITICAL = 'critical',
+}
+
+export const CaseSeverityRT = rt.union([
+  rt.literal(CaseSeverity.LOW),
+  rt.literal(CaseSeverity.MINOR),
+  rt.literal(CaseSeverity.SIGNIFICANT),
+  rt.literal(CaseSeverity.CRITICAL),
+]);
+
 const CaseBasicRt = rt.type({
   /**
    * The description of the case
@@ -68,6 +82,7 @@ const CaseBasicRt = rt.type({
    * The plugin owner of the case
    */
   owner: rt.string,
+  severity: CaseSeverityRT,
 });
 
 /**
@@ -106,33 +121,38 @@ export const CaseAttributesRt = rt.intersection([
   }),
 ]);
 
-export const CasePostRequestRt = rt.type({
-  /**
-   * Description of the case
-   */
-  description: rt.string,
-  /**
-   * Identifiers for the case.
-   */
-  tags: rt.array(rt.string),
-  /**
-   * Title of the case
-   */
-  title: rt.string,
-  /**
-   * The external configuration for the case
-   */
-  connector: CaseConnectorRt,
-  /**
-   * Sync settings for alerts
-   */
-  settings: SettingsRt,
-  /**
-   * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
-   * creating this case must also be granted access to that plugin's feature.
-   */
-  owner: rt.string,
-});
+export const CasePostRequestRt = rt.intersection([
+  rt.type({
+    /**
+     * Description of the case
+     */
+    description: rt.string,
+    /**
+     * Identifiers for the case.
+     */
+    tags: rt.array(rt.string),
+    /**
+     * Title of the case
+     */
+    title: rt.string,
+    /**
+     * The external configuration for the case
+     */
+    connector: CaseConnectorRt,
+    /**
+     * Sync settings for alerts
+     */
+    settings: SettingsRt,
+    /**
+     * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
+     * creating this case must also be granted access to that plugin's feature.
+     */
+    owner: rt.string,
+  }),
+  rt.partial({
+    severity: CaseSeverityRT,
+  }),
+]);
 
 export const CasesFindRequestRt = rt.partial({
   /**
