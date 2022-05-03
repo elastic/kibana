@@ -58,11 +58,11 @@ export interface LegendSettingsPopoverProps {
   /**
    * Sets the vertical alignment for legend inside chart
    */
-  verticalAlignment?: VerticalAlignment;
+  verticalAlignment?: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
   /**
    * Sets the vertical alignment for legend inside chart
    */
-  horizontalAlignment?: HorizontalAlignment;
+  horizontalAlignment?: typeof HorizontalAlignment.Left | typeof HorizontalAlignment.Right;
   /**
    * Callback on horizontal alignment option change
    */
@@ -231,14 +231,16 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             position={position}
             onPositionChange={onPositionChange}
           />
-          <LegendSizeSettings
-            legendSize={legendSize}
-            onLegendSizeChange={onLegendSizeChange}
-            isVerticalLegend={
-              !position || position === Position.Left || position === Position.Right
-            }
-            showAutoOption={showAutoLegendSizeOption}
-          />
+          {location !== 'inside' && (
+            <LegendSizeSettings
+              legendSize={legendSize}
+              onLegendSizeChange={onLegendSizeChange}
+              isVerticalLegend={
+                !position || position === Position.Left || position === Position.Right
+              }
+              showAutoOption={showAutoLegendSizeOption}
+            />
+          )}
           {location && (
             <ColumnsNumberSetting
               floatingColumns={floatingColumns}

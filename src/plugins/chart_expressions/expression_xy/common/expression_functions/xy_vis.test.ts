@@ -8,14 +8,23 @@
 
 import { xyVisFunction } from '.';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import { sampleArgs } from '../__mocks__';
+import { sampleArgs, sampleLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
 
 describe('xyVis', () => {
-  test('it renders with the specified data and args', () => {
+  test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
-    const result = xyVisFunction.fn(data, args, createMockExecutionContext());
+    const { layers, ...rest } = args;
+    const result = await xyVisFunction.fn(
+      data,
+      { ...rest, dataLayers: [sampleLayer], referenceLineLayers: [], annotationLayers: [] },
+      createMockExecutionContext()
+    );
 
-    expect(result).toEqual({ type: 'render', as: XY_VIS, value: { data, args } });
+    expect(result).toEqual({
+      type: 'render',
+      as: XY_VIS,
+      value: { args: { ...rest, layers: [sampleLayer] } },
+    });
   });
 });
