@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
@@ -27,6 +27,7 @@ export type IHealthCheck = (options: HealthCheckOptions) => Promise<void>;
 export interface HealthCheckOptions {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  logger: Logger;
   updateReport: (content: string | string[], level?: number) => void;
   updateStatus: (status: STATUS) => void;
 }
@@ -89,6 +90,7 @@ export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, un
     await checkConfiguration({
       soClient,
       esClient,
+      logger,
       updateReport,
       updateStatus: updateStatus('configuration'),
     });
@@ -105,7 +107,7 @@ export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, un
     // On error, display and log, but still return 200 reponse with report so far
     updateReport(``);
     updateReport(
-      `‼️ Error finishing health check report while checking ${currentCheck}. 
+      `Error finishing health check report while checking ${currentCheck}. 
       Check Kibana logs for more details:`
     );
     updateReport(error.message);
