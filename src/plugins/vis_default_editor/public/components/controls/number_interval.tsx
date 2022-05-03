@@ -74,7 +74,7 @@ function NumberIntervalParamEditor({
   setValue,
 }: AggParamEditorProps<string | undefined>) {
   const field = agg.getField();
-  const fieldSupportsAuto = !field || field.type === 'number';
+  const fieldSupportsAuto = !field || field.type === 'number' || field.type === 'histogram';
   const isAutoChecked = fieldSupportsAuto && isAutoInterval(value);
   const base: number = get(editorConfig, 'interval.base') as number;
   const min = base || 0;
