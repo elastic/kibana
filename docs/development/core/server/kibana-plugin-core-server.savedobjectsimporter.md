@@ -21,6 +21,6 @@ export declare class SavedObjectsImporter
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [import({ readStream, createNewCopies, namespace, overwrite, })](./kibana-plugin-core-server.savedobjectsimporter.import.md) |  | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
+|  [import({ readStream, createNewCopies, namespace, overwrite, refresh, })](./kibana-plugin-core-server.savedobjectsimporter.import.md) |  | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
 |  [resolveImportErrors({ readStream, createNewCopies, namespace, retries, })](./kibana-plugin-core-server.savedobjectsimporter.resolveimporterrors.md) |  | Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed information. |
 

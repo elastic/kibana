@@ -20,4 +20,5 @@ export interface SavedObjectsImportOptions
 |  [namespace?](./kibana-plugin-core-server.savedobjectsimportoptions.namespace.md) | string | <i>(Optional)</i> if specified, will import in given namespace, else will import as global object |
 |  [overwrite](./kibana-plugin-core-server.savedobjectsimportoptions.overwrite.md) | boolean | If true, will override existing object if present. Note: this has no effect when used with the <code>createNewCopies</code> option. |
 |  [readStream](./kibana-plugin-core-server.savedobjectsimportoptions.readstream.md) | Readable | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to import |
+|  [refresh?](./kibana-plugin-core-server.savedobjectsimportoptions.refresh.md) | boolean \| 'wait\_for' | <i>(Optional)</i> Refresh setting, defaults to <code>wait_for</code> |
 

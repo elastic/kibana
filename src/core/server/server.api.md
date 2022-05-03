@@ -2541,7 +2541,7 @@ export class SavedObjectsImporter {
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
     });
-    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    import({ readStream, createNewCopies, namespace, overwrite, refresh, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 }
 
@@ -2604,6 +2604,7 @@ export interface SavedObjectsImportOptions {
     namespace?: string;
     overwrite: boolean;
     readStream: Readable;
+    refresh?: boolean | 'wait_for';
 }
 
 // @public
