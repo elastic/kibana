@@ -12,4 +12,4 @@ import { AiopsPlugin } from './plugin';
 export function plugin() {
   return new AiopsPlugin();
 }
-export { AiopsPluginSetup, AiopsPluginStart } from './types';
+export type { AiopsPluginSetup, AiopsPluginStart } from './types';

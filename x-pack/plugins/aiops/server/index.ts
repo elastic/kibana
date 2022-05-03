@@ -15,4 +15,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AiopsPlugin(initializerContext);
 }
 
-export { AiopsPluginSetup, AiopsPluginStart } from './types';
+export type { AiopsPluginSetup, AiopsPluginStart } from './types';
