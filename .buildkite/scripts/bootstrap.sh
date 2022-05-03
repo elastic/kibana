@@ -6,7 +6,6 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
-
 if ! yarn kbn bootstrap; then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
