@@ -9,6 +9,7 @@ Object {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  gap: 8px;
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -28,49 +29,15 @@ Object {
   background: rgba(0,119,204,0.04);
 }
 
-.emotion-1:first-of-type {
-  margin-right: 12px;
-}
-
-.emotion-1:not(:first-of-type) {
+.emotion-0 button {
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin-right: 8px;
 }
 
-.emotion-2:first-of-type {
-  margin-right: 12px;
-}
-
-.emotion-2:not(:first-of-type) {
-  margin-right: 8px;
-}
-
-.emotion-3 {
-  max-width: 70%;
-}
-
-.emotion-3:first-of-type {
-  margin-right: 12px;
-}
-
-.emotion-3:not(:first-of-type) {
-  margin-right: 8px;
-}
-
-.emotion-4 {
+.emotion-1 {
   text-transform: capitalize;
-}
-
-.emotion-4:first-of-type {
-  margin-right: 12px;
-}
-
-.emotion-4:not(:first-of-type) {
-  margin-right: 8px;
-}
-
-.emotion-4,
-.emotion-4 span {
-  cursor: pointer!important;
 }
 
 <body>
@@ -82,7 +49,7 @@ Object {
       >
         <button
           aria-label="expand"
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall emotion-1"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
           data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
           type="button"
         >
@@ -94,17 +61,16 @@ Object {
           />
         </button>
         <span
-          class="emotion-2"
           color="danger"
           data-euiicon-type="alert"
         />
         <div
-          class="euiText euiText--small emotion-3"
+          class="euiText euiText--small"
         >
           cmd test alert
         </div>
         <span
-          class="euiBadge euiBadge--iconLeft emotion-4"
+          class="euiBadge euiBadge--iconLeft emotion-1"
           style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
           title="open"
         >
@@ -127,6 +93,7 @@ Object {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  gap: 8px;
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -146,49 +113,15 @@ Object {
   background: rgba(0,119,204,0.04);
 }
 
-.emotion-1:first-of-type {
-  margin-right: 12px;
-}
-
-.emotion-1:not(:first-of-type) {
+.emotion-0 button {
+  -webkit-flex-shrink: 0;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
   margin-right: 8px;
 }
 
-.emotion-2:first-of-type {
-  margin-right: 12px;
-}
-
-.emotion-2:not(:first-of-type) {
-  margin-right: 8px;
-}
-
-.emotion-3 {
-  max-width: 70%;
-}
-
-.emotion-3:first-of-type {
-  margin-right: 12px;
-}
-
-.emotion-3:not(:first-of-type) {
-  margin-right: 8px;
-}
-
-.emotion-4 {
+.emotion-1 {
   text-transform: capitalize;
-}
-
-.emotion-4:first-of-type {
-  margin-right: 12px;
-}
-
-.emotion-4:not(:first-of-type) {
-  margin-right: 8px;
-}
-
-.emotion-4,
-.emotion-4 span {
-  cursor: pointer!important;
 }
 
 <div>
@@ -199,7 +132,7 @@ Object {
     >
       <button
         aria-label="expand"
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall emotion-1"
+        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
         data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
         type="button"
       >
@@ -211,17 +144,16 @@ Object {
         />
       </button>
       <span
-        class="emotion-2"
         color="danger"
         data-euiicon-type="alert"
       />
       <div
-        class="euiText euiText--small emotion-3"
+        class="euiText euiText--small"
       >
         cmd test alert
       </div>
       <span
-        class="euiBadge euiBadge--iconLeft emotion-4"
+        class="euiBadge euiBadge--iconLeft emotion-1"
         style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
         title="open"
       >
