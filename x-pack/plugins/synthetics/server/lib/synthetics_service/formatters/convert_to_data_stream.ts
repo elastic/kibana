@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
+import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants/monitor_defaults';
 import { DataStream, MonitorFields } from '../../../../common/runtime_types';
 
 interface DataStreamConfig {
