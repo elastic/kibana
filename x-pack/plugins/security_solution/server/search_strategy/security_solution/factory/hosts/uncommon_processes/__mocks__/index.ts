@@ -73,18 +73,14 @@ export const mockSearchStrategyResponse = {
                     _index: 'winlogbeat-8.0.0-2020.09.02-000001',
                     _id: 'ayrMZnQBB-gskcly0w7l',
                     _score: null,
-                    _source: {
-                      process: {
-                        args: [
-                          'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.631.0.exe',
-                          'WD',
-                          '/q',
-                        ],
-                        name: 'AM_Delta_Patch_1.323.631.0.exe',
-                      },
-                      user: {
-                        name: 'SYSTEM',
-                      },
+                    fields: {
+                      'process.args': [
+                        'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.631.0.exe',
+                        'WD',
+                        '/q',
+                      ],
+                      'process.name': ['AM_Delta_Patch_1.323.631.0.exe'],
+                      'user.name': ['SYSTEM'],
                     },
                     sort: [1599452531834],
                   },

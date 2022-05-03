@@ -48,9 +48,7 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
     const formattedHostItem = formatHostItem(aggregations);
     const ident = // endpoint-generated ID, NOT elastic-agent-id
       formattedHostItem.endpoint && formattedHostItem.endpoint.id
-        ? Array.isArray(formattedHostItem.endpoint.id)
-          ? formattedHostItem.endpoint.id[0]
-          : formattedHostItem.endpoint.id
+        ? formattedHostItem.endpoint.id[0]
         : null;
     if (deps == null) {
       return { ...response, inspect, hostDetails: { ...formattedHostItem } };

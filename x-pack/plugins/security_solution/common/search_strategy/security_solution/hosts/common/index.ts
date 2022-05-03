@@ -116,7 +116,7 @@ export interface HostAggEsData extends SearchHit {
 }
 
 export interface HostHit extends Hit {
-  _source: {
+  fields: {
     '@timestamp'?: string;
     host: HostEcs;
   };

@@ -32,7 +32,7 @@ describe('helpers', () => {
                     _type: 'type-1',
                     _id: 'id-1',
                     _score: 0,
-                    _source: {
+                    fields: {
                       host: {
                         name: ['host-1'],
                         id: ['host-id-1'],
@@ -72,7 +72,7 @@ describe('helpers', () => {
                     _type: 'type-1',
                     _id: 'id-1',
                     _score: 0,
-                    _source: {
+                    fields: {
                       host: {
                         name: ['host-1'],
                         id: ['host-id-1'],
@@ -95,7 +95,7 @@ describe('helpers', () => {
                     _type: 'type-2',
                     _id: 'id-2',
                     _score: 0,
-                    _source: {
+                    fields: {
                       host: {
                         name: ['host-2'],
                         id: ['host-id-2'],
@@ -135,7 +135,7 @@ describe('helpers', () => {
                     _type: 'type-9',
                     _id: 'id-9',
                     _score: 0,
-                    _source: {
+                    fields: {
                       // @ts-expect-error ts doesn't like seeing the object written this way, but sometimes this is the data we get!
                       'host.id': ['host-id-9'],
                       'host.name': ['host-9'],
@@ -197,7 +197,7 @@ describe('helpers', () => {
         { id: ['host-id-1'], name: ['host-name-1'] },
         { id: ['host-id-1'], name: ['host-name-1'] },
       ],
-      _source: {
+      fields: {
         '@timestamp': 'time',
         process: {
           name: ['process-1'],
@@ -209,8 +209,7 @@ describe('helpers', () => {
     };
 
     test('it formats a uncommon process data with a source of name correctly', () => {
-      const fields: readonly string[] = ['process.name'];
-      const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
+      const data = formatUncommonProcessesData(hit, processFieldsMap);
       const expected: HostsUncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
         node: {
@@ -229,8 +228,7 @@ describe('helpers', () => {
     });
 
     test('it formats a uncommon process data with a source of name and title correctly', () => {
-      const fields: readonly string[] = ['process.name', 'process.title'];
-      const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
+      const data = formatUncommonProcessesData(hit, processFieldsMap);
       const expected: HostsUncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
         node: {
@@ -250,8 +248,7 @@ describe('helpers', () => {
     });
 
     test('it formats a uncommon process data without any data if fields is empty', () => {
-      const fields: readonly string[] = [];
-      const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
+      const data = formatUncommonProcessesData(hit, processFieldsMap);
       const expected: HostsUncommonProcessesEdges = {
         cursor: {
           tiebreaker: null,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 
 import {
@@ -13,11 +13,10 @@ import {
   HostsUncommonProcessesEdges,
   HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { HostHits } from '../../../../../../common/search_strategy';
-import { processFieldsMap, userFieldsMap } from '@kbn/security-solution-plugin/common/ecs/ecs_fields';
+import { getFlattenedFields } from '../../../../helpers/get_flattened_fields';
 
-export const uncommonProcessesFields = [
+export const UNCOMMON_PROCESSES_FIELDS = [
   '_id',
   'instances',
   'process.args',
@@ -42,14 +41,6 @@ export const getHits = (
     host: getHosts(bucket.hosts.buckets),
   }));
 
-export interface UncommonProcessBucket {
-  key: string;
-  hosts: {
-    buckets: Array<{ key: string; host: HostHits }>;
-  };
-  process: ProcessHits;
-}
-
 export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
   buckets.map((bucket) => {
     const fields = get('host.hits.hits[0].fields', bucket);
@@ -59,54 +50,45 @@ export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>
     };
   });
 
-  export const formatAuthenticationData = (hit: HostsUncommonProcessHit): HostsUncommonProcessesEdges => {
-    const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
+export interface UncommonProcessBucket {
+  key: string;
+  hosts: {
+    buckets: Array<{ key: string; host: HostHits }>;
+  };
+  process: ProcessHits;
+}
 
-    let flattenedFields = {
+export const formatUncommonProcessesData = (
+  hit: HostsUncommonProcessHit,
+  fieldMap: Readonly<Record<string, string>>
+): HostsUncommonProcessesEdges =>
+  UNCOMMON_PROCESSES_FIELDS.reduce<HostsUncommonProcessesEdges>(
+    (flattenedFields, fieldName) => {
+      const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
+      flattenedFields.node._id = hit._id;
+      flattenedFields.node.instances = instancesCount;
+      flattenedFields.node.hosts = hit.host;
+      if (hit.cursor) {
+        flattenedFields.cursor.value = hit.cursor;
+      }
+
+      const processFlattenedFields = getFlattenedFields(
+        UNCOMMON_PROCESSES_FIELDS,
+        hit.fields,
+        fieldMap
+      );
+      return set('node', processFlattenedFields, flattenedFields);
+    },
+    {
       node: {
-        _id: hit._id,
-        instances: instancesCount,
-        hosts: hit.host,
+        _id: '',
+        instances: 0,
         process: {},
+        hosts: [],
       },
       cursor: {
-        value: hit.cursor,
+        value: '',
         tiebreaker: null,
       },
-    };
-  
-    const lastSuccessFields = getFlattenedFields(uncommonProcessesFields, hit, 'lastSuccess');
-    if (Object.keys(lastSuccessFields).length > 0) {
-      flattenedFields = set('node.lastSuccess', lastSuccessFields, flattenedFields);
     }
-  
-    const lastFailureFields = getFlattenedFields(uncommonProcessesFields, hit, 'lastFailure');
-    if (Object.keys(lastFailureFields).length > 0) {
-      flattenedFields = set('node.lastFailure', lastFailureFields, flattenedFields);
-    }
-  
-    return flattenedFields;
-  };
-
-  const getFlattenedFields = (fields: string[], hit: HostsUncommonProcessHit, parentField: string) => {
-    return fields.reduce((flattenedFields, fieldName) => {
-      const fieldPath = `${fieldName}`;
-      const esField = get(`${parentField}['${fieldName}']`, {
-        ...processFieldsMap,
-        ...userFieldsMap,
-      });
-  
-      if (!isEmpty(esField)) {
-        const fieldValue = get(`${parentField}['${esField}']`, hit.fields);
-        if (!isEmpty(fieldValue)) {
-          return set(
-            fieldPath,
-            toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
-            flattenedFields
-          );
-        }
-      }
-  
-      return flattenedFields;
-    }, {});
-  };
+  );

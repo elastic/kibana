@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import {
   Direction,

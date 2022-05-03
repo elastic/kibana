@@ -22,7 +22,7 @@ import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array'
 import { EndpointAppContext } from '../../../../../endpoint/types';
 import { getPendingActionCounts } from '../../../../../endpoint/services';
 
-export const HOST_FIELDS = [
+export const HOST_DETAILS_FIELDS = [
   '_id',
   'host.architecture',
   'host.id',
@@ -106,7 +106,7 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
 };
 
 export const formatHostItem = (bucket: HostAggEsItem): HostItem => {
-  return HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
+  return HOST_DETAILS_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
       if (fieldName === '_id') {

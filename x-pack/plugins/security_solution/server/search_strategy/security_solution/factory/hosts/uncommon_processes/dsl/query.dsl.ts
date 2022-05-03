@@ -13,7 +13,7 @@ import {
   userFieldsMap,
 } from '../../../../../../../common/ecs/ecs_fields';
 import { RequestOptionsPaginated } from '../../../../../../../common/search_strategy/security_solution';
-import { uncommonProcessesFields } from '../helpers';
+import { UNCOMMON_PROCESSES_FIELDS } from '../helpers';
 
 export const buildQuery = ({
   defaultIndex,
@@ -21,11 +21,11 @@ export const buildQuery = ({
   pagination: { querySize },
   timerange: { from, to },
 }: RequestOptionsPaginated) => {
-  const processUserFields = reduceFields(uncommonProcessesFields, {
+  const processUserFields = reduceFields(UNCOMMON_PROCESSES_FIELDS, {
     ...processFieldsMap,
     ...userFieldsMap,
   }) as string[];
-  const hostFields = reduceFields(uncommonProcessesFields, hostFieldsMap) as string[];
+  const hostFields = reduceFields(UNCOMMON_PROCESSES_FIELDS, hostFieldsMap) as string[];
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -222,7 +222,6 @@ export const buildQuery = ({
       fields: [
         ...processUserFields,
         ...hostFields,
-        'host.name',
         {
           field: '@timestamp',
           format: 'strict_date_optional_time',
