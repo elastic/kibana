@@ -123,7 +123,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
 
     return Boolean(
       newField &&
-        newField.type === 'number' &&
+        supportedTypes.includes(newField.type) &&
         newField.aggregatable &&
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.range)
     );

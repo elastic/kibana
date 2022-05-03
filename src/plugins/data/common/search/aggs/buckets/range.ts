@@ -83,7 +83,7 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
         name: 'field',
         type: 'field',
         // number_range is not supported by Elasticsearch
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER],
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
       },
       {
         name: 'ranges',
