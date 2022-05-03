@@ -109,7 +109,12 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={`
+            min-width: 400px;
+          `}
+        >
           <EuiFormRow>
             <SavedObjectNamesCombo
               name={name!}
