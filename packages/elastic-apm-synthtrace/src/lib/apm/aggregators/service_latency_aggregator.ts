@@ -35,7 +35,12 @@ export type ServiceFields = Fields &
     | 'transaction.type'
   > &
   Partial<{
-    'service.latency': { min: number; max: number; sum: number; value_count: number };
+    'transaction.duration.aggregate': {
+      min: number;
+      max: number;
+      sum: number;
+      value_count: number;
+    };
   }>;
 
 export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
@@ -60,6 +65,17 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
           type: 'object',
           properties: {
             type: { type: 'keyword', time_series_dimension: true },
+            duration: {
+              type: 'object',
+              properties: {
+                aggregate: {
+                  type: 'aggregate_metric_double',
+                  metrics: ['min', 'max', 'sum', 'value_count'],
+                  default_metric: 'sum',
+                  time_series_metric: 'gauge',
+                },
+              },
+            },
           },
         },
         service: {
@@ -67,12 +83,6 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
           properties: {
             name: { type: 'keyword', time_series_dimension: true },
             environment: { type: 'keyword', time_series_dimension: true },
-            latency: {
-              type: 'aggregate_metric_double',
-              metrics: ['min', 'max', 'sum', 'value_count'],
-              default_metric: 'sum',
-              time_series_metric: 'gauge',
-            },
           },
         },
       },
@@ -97,7 +107,6 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
   private processedComponent: number = 0;
 
   process(event: ApmFields): Fields[] | null {
-    if (event['processor.event'] !== 'transaction') return null;
     if (!event['@timestamp']) return null;
 
     const service = event['service.name']!;
@@ -158,7 +167,7 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
       'service.name': state['service.name'],
       'service.environment': state['service.environment'],
       'transaction.type': state['transaction.type'],
-      'service.latency': {
+      'transaction.duration.aggregate': {
         min: state.min,
         max: state.max,
         sum: state.sum,
