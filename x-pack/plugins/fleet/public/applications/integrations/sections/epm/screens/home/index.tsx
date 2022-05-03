@@ -85,6 +85,7 @@ export const mapToCard = (
     version: 'version' in item ? item.version || '' : '',
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
+    suggestionScore: item.suggestionScore,
   };
 };
 

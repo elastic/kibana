@@ -44,6 +44,7 @@ export const sendRequest = <D = any, E = RequestError>(
 
 export const useRequest = <D = any, E = RequestError>(config: UseRequestConfig) => {
   if (!httpClient) {
+    // debugger;
     throw new Error('sendRequest has no http client set');
   }
   return _useRequest<D, E>(httpClient, config);

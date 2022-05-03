@@ -386,6 +386,7 @@ type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, key
 export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
+  suggestionScore?: number;
   id: string;
 };
 
@@ -400,6 +401,7 @@ export interface IntegrationCardItem {
   integration: string;
   id: string;
   categories: string[];
+  suggestionScore?: number;
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;

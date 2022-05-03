@@ -309,6 +309,15 @@ export const AvailablePackages: React.FC = memo(() => {
     return c.categories.includes(selectedCategory);
   });
 
+  const suggestedCards = _.sortBy(
+    cards.filter(
+      (item) =>
+        item.suggestionScore &&
+        (selectedCategory === '' || item.categories.includes(selectedCategory))
+    ),
+    'suggestionScore'
+  ).reverse();
+
   // TODO: Remove this hard coded list of integrations with a suggestion service
   const featuredList = (
     <>
@@ -373,6 +382,7 @@ export const AvailablePackages: React.FC = memo(() => {
 
   return (
     <PackageListGrid
+      suggestedList={suggestedCards}
       featuredList={featuredList}
       isLoading={isLoadingAllPackages}
       controls={controls}

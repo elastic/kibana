@@ -110,16 +110,15 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
     }),
     [isCloudEnabled]
   );
-  useEffect(() => {
-    setHttpClient(startServices.http);
-    setCustomIntegrations({
-      getAppendCustomIntegrations: async () => [],
-      getReplacementCustomIntegrations: async () => {
-        const { integrations } = await import('./fixtures/replacement_integrations');
-        return integrations;
-      },
-    });
-  }, [startServices]);
+
+  setHttpClient(startServices.http);
+  setCustomIntegrations({
+    getAppendCustomIntegrations: async () => [],
+    getReplacementCustomIntegrations: async () => {
+      const { integrations } = await import('./fixtures/replacement_integrations');
+      return integrations;
+    },
+  });
 
   const config = {
     enabled: true,

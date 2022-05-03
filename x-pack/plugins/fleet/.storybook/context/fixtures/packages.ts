@@ -20,6 +20,7 @@ export const items: GetPackagesResponse['items'] = [
     id: 'ga_not_installed',
     status: 'not_installed',
     categories: ['aws', 'azure'],
+    suggestionScore: 10,
   },
   {
     name: 'ga_beats',
@@ -33,6 +34,7 @@ export const items: GetPackagesResponse['items'] = [
     id: 'ga_not_installed_beat',
     status: 'not_installed',
     categories: ['azure', 'cloud', 'config_management'],
+    suggestionScore: 5,
   },
   {
     name: 'ga_installed',
@@ -70,6 +72,7 @@ export const items: GetPackagesResponse['items'] = [
       version: 'WzczMTIsNF0=',
     },
     categories: ['cloud', 'containers'],
+    suggestionScore: 1,
   },
   {
     name: 'ga_installed_update',

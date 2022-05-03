@@ -16,6 +16,10 @@ import {
   EuiTitle,
   EuiSearchBar,
   EuiText,
+  EuiIcon,
+  EuiPanel,
+  EuiSplitPanel,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -33,6 +37,7 @@ export interface Props {
   controls?: ReactNode | ReactNode[];
   title?: string;
   list: IntegrationCardItem[];
+  suggestedList?: IntegrationCardItem[];
   featuredList?: JSX.Element | null;
   initialSearch?: string;
   setSelectedCategory: (category: string) => void;
@@ -50,6 +55,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   onSearchChange,
   setSelectedCategory,
   showMissingIntegrationMessage = false,
+  suggestedList = [],
   featuredList = null,
   callout,
 }) => {
@@ -93,18 +99,42 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   if (isLoading || !localSearchRef.current) {
     gridContent = <Loading />;
   } else {
-    const filteredList = searchTerm
-      ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
-            .map((match) => match[searchIdField])
-            .includes(item[searchIdField])
-        )
-      : list;
+    const filterListBySearchTerm = (inputList: IntegrationCardItem[]) =>
+      searchTerm
+        ? inputList.filter((item) =>
+            (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
+              .map((match) => match[searchIdField])
+              .includes(item[searchIdField])
+          )
+        : inputList;
+
+    const filteredList = filterListBySearchTerm(list);
+    const suggestedFilteredList = filterListBySearchTerm(suggestedList).slice(0, 3);
+
+    const suggestedContent = suggestedFilteredList.length ? (
+      <>
+        <EuiPanel color="subdued" hasShadow={false} hasBorder>
+          <EuiText color="subdued">
+            <h5>
+              Suggestions{' '}
+              <EuiIconTip content="Integrations that are recommended for you based on data you've collected." />
+            </h5>
+          </EuiText>
+          <EuiSpacer />
+          <GridColumn list={suggestedFilteredList} />
+        </EuiPanel>
+        <EuiSpacer />
+      </>
+    ) : null;
+
     gridContent = (
-      <GridColumn
-        list={filteredList}
-        showMissingIntegrationMessage={showMissingIntegrationMessage}
-      />
+      <>
+        {suggestedContent}
+        <GridColumn
+          list={filteredList}
+          showMissingIntegrationMessage={showMissingIntegrationMessage}
+        />
+      </>
     );
   }
 
