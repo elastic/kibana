@@ -190,7 +190,7 @@ yargs(process.argv.slice(2))
 
       const aggregators: StreamAggregator[] = [new ServiceLatencyAggregator()];
       if (argv.clean) {
-        await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-default'));
+        await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-*'));
       }
       if (runOptions.gcpRepository) {
         await apmEsClient.registerGcpRepository(runOptions.gcpRepository);
@@ -218,5 +218,4 @@ yargs(process.argv.slice(2))
       }
     }
   )
-  .showHelpOnFail(false)
   .parse();
