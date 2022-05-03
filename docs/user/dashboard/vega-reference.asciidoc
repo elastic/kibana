@@ -248,7 +248,11 @@ url: {
 // The result is either a topojson file or a geojson file. 
 // Get its features to use this data source with the "shape" marks
 // https://vega.github.io/vega/docs/marks/shape/
+// For a topojson file use
 format: {type: "topojson", feature: "data"}
+
+// For a geojson file use
+format: {property: "features"}
 ----
 
 [float]
