@@ -68,9 +68,6 @@ export function decorateMochaUi(log, lifecycle, context, { rootTags }) {
           this.onlyEsVersion = (semver) => {
             this._esVersionRequirement = semver;
           };
-          this.meta = (meta) => {
-            this._meta = meta;
-          };
 
           provider.call(this);
 
@@ -140,10 +137,6 @@ export function decorateMochaUi(log, lifecycle, context, { rootTags }) {
             All ${name}() calls in test files must be within a describe() call.
           `);
         }
-
-        this.meta = (meta) => {
-          this._meta = meta;
-        };
       },
     });
   }
