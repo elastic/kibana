@@ -41,7 +41,6 @@ export type {
   AxesSettingsConfig,
   CommonXYLayerConfig,
   AnnotationLayerArgs,
-  XYLayerConfigResult,
   ExtendedYConfigResult,
   GridlinesConfigResult,
   DataLayerConfigResult,
