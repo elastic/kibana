@@ -22,9 +22,8 @@ const BackToResourcesButton = () => {
       <EuiButtonEmpty iconType={'arrowLeft'}>
         <FormattedMessage
           id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
-          defaultMessage=" Back to group by resource view"
+          defaultMessage="Back to group by resource view"
         />
-        Back to group by resource view
       </EuiButtonEmpty>
     </Link>
   );
