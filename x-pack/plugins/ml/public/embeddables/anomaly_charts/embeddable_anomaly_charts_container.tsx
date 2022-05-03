@@ -11,10 +11,7 @@ import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs/operators';
-import { KibanaExecutionContext } from '@kbn/core/types';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
@@ -60,24 +57,12 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   onError,
   onLoading,
 }) => {
-  const parentExecutionContext = useObservable(
-    embeddableInput.pipe(map((v) => v.executionContext))
+  useEmbeddableExecutionContext<AnomalyChartsEmbeddableInput>(
+    services[0].executionContext,
+    embeddableInput,
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    id
   );
-
-  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
-    const child: KibanaExecutionContext = {
-      type: 'visualization',
-      name: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-      id,
-    };
-
-    return {
-      ...parentExecutionContext,
-      child,
-    };
-  }, [parentExecutionContext, id]);
-
-  useExecutionContext(services[0].executionContext, embeddableExecutionContext);
 
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
