@@ -376,6 +376,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/aiops/README.md[aiops]
+|The Kibana AIOps plugin provides APIs and components for the "Explain log rate spikes" UI.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
