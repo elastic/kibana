@@ -90,7 +90,7 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
   },
   {
     field: 'cluster_id',
-    name: TEXT.SYSTEM_ID,
+    name: TEXT.CLUSTER_ID,
     truncateText: true,
     sortable: true,
   },

@@ -7,7 +7,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   type Criteria,
-  type EuiTableFieldDataColumnType,
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiBasicTableProps,
