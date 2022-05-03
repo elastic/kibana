@@ -128,23 +128,30 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreationDataGridHistogramButton');
     },
 
-    async enableSourceDataPreviewHistogramCharts(expectedDefaultButtonState: boolean) {
-      await this.assertSourceDataPreviewHistogramChartButtonCheckState(expectedDefaultButtonState);
-      if (expectedDefaultButtonState === false) {
+    async enableSourceDataPreviewHistogramCharts(shouldBeEnabled: boolean) {
+      const isEnabled = await this.getSourceDataPreviewHistogramChartButtonCheckState();
+      if (isEnabled !== shouldBeEnabled) {
         await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
-        await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+        await this.assertSourceDataPreviewHistogramChartEnabled(shouldBeEnabled);
       }
     },
 
-    async assertSourceDataPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
-      const actualCheckState =
+    async assertSourceDataPreviewHistogramChartEnabled(shouldBeEnabled: boolean) {
+      const isEnabled = await this.getSourceDataPreviewHistogramChartButtonCheckState();
+      expect(isEnabled).to.eql(
+        shouldBeEnabled,
+        `Source data preview histogram charts should be '${
+          shouldBeEnabled ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
+    async getSourceDataPreviewHistogramChartButtonCheckState(): Promise<boolean> {
+      return (
         (await testSubjects.getAttribute(
           'mlAnalyticsCreationDataGridHistogramButton',
           'aria-pressed'
-        )) === 'true';
-      expect(actualCheckState).to.eql(
-        expectedCheckState,
-        `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        )) === 'true'
       );
     },
 
@@ -181,6 +188,17 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
             `Id text for column '${id}' should be '${expected.id}' (got '${actualId}')`
           );
         }
+      });
+    },
+
+    async enableAndAssertSourceDataPreviewHistogramCharts(
+      expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
+    ) {
+      await retry.tryForTime(20 * 1000, async () => {
+        // turn histogram charts off and on before checking
+        await this.enableSourceDataPreviewHistogramCharts(false);
+        await this.enableSourceDataPreviewHistogramCharts(true);
+        await this.assertSourceDataPreviewHistogramCharts(expectedHistogramCharts);
       });
     },
 
