@@ -173,11 +173,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
             options={comboBoxOptions}
             singleSelection={{ asPlainText: true }}
             selectedOptions={selectedOptions}
-            isDisabled={
-              integrations.status === 'loading' ||
-              reinstallMutation.isLoading ||
-              uninstallMutation.isLoading
-            }
+            isDisabled={integrations.status === 'loading'}
             prepend={
               selectedOptions.length > 0 ? (
                 <EuiButtonEmpty>
@@ -206,21 +202,13 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
         {selectedIntegration && (
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                isLoading={reinstallMutation.isLoading}
-                onClick={() => setIsReinstallModalVisible(true)}
-              >
+              <EuiButton color="primary" onClick={() => setIsReinstallModalVisible(true)}>
                 Reinstall
               </EuiButton>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="danger"
-                isLoading={uninstallMutation.isLoading}
-                onClick={() => setIsUninstallModalVisible(true)}
-              >
+              <EuiButton color="danger" onClick={() => setIsUninstallModalVisible(true)}>
                 Uninstall
               </EuiButton>
             </EuiFlexItem>
@@ -230,6 +218,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
                 title={`Reinstall ${selectedIntegration.title}`}
                 onCancel={() => setIsReinstallModalVisible(false)}
                 onConfirm={() => reinstallMutation.mutate(selectedIntegration)}
+                isLoading={reinstallMutation.isLoading}
                 cancelButtonText="Cancel"
                 confirmButtonText="Reinstall"
               >
@@ -242,6 +231,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
                 title={`Uninstall ${selectedIntegration.title}`}
                 onCancel={() => setIsUninstallModalVisible(false)}
                 onConfirm={() => uninstallMutation.mutate(selectedIntegration)}
+                isLoading={uninstallMutation.isLoading}
                 cancelButtonText="Cancel"
                 confirmButtonText="Uninstall"
               >
