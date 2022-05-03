@@ -248,7 +248,7 @@ export const dateHistogramOperation: OperationDefinition<
     const definedOption = options.find((o) => o.key === intervalInput);
     const selectedOptions = definedOption
       ? [definedOption]
-      : [{ label: intervalInput, key: 'custom' }];
+      : [{ label: intervalInput, key: intervalInput }];
 
     useEffect(() => {
       if (isValid && intervalInput !== currentColumn.params.interval) {
@@ -293,6 +293,14 @@ export const dateHistogramOperation: OperationDefinition<
             defaultMessage:
               'Select an option or create a custom value. Examples: 30s, 20m, 24h, 2d, 1w, 1M',
           })}
+          isInvalid={!isValid}
+          error={
+            !isValid &&
+            i18n.translate('xpack.lens.indexPattern.dateHistogram.invalidInterval', {
+              defaultMessage:
+                "Please pick a valid interval. It's not possible to use multiple weeks, months or years as interval.",
+            })
+          }
         >
           {intervalIsRestricted ? (
             <FormattedMessage
@@ -309,25 +317,22 @@ export const dateHistogramOperation: OperationDefinition<
               data-test-subj="lensDateHistogramInterval"
               isInvalid={!isValid}
               onChange={(opts) => {
-                if (opts.length) {
-                  const newValue = opts[0].key!;
-                  setIntervalInput(newValue);
-                  if (newValue === autoInterval && currentColumn.params.ignoreTimeRange) {
-                    updateLayer(
-                      updateColumnParam({
-                        layer,
-                        columnId,
-                        paramName: 'ignoreTimeRange',
-                        value: false,
-                      })
-                    );
-                  }
+                const newValue = opts.length ? opts[0].key! : '';
+                setIntervalInput(newValue);
+                if (newValue === autoInterval && currentColumn.params.ignoreTimeRange) {
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'ignoreTimeRange',
+                      value: false,
+                    })
+                  );
                 }
               }}
               onCreateOption={(customValue: string) => setIntervalInput(customValue.trim())}
               options={options}
               selectedOptions={selectedOptions}
-              isClearable={false}
               singleSelection={{ asPlainText: true }}
               placeholder={i18n.translate(
                 'xpack.lens.indexPattern.dateHistogram.selectIntervalPlaceholder',
