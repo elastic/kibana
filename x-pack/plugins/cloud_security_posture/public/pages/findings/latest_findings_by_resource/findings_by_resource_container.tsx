@@ -21,7 +21,7 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 
-export const getDefaultQuery = (): FindingsBaseURLQuery => ({
+const getDefaultQuery = (): FindingsBaseURLQuery => ({
   query: { language: 'kuery', query: '' },
   filters: [],
 });
@@ -31,7 +31,7 @@ export const FindingsByResourceContainer = ({ dataView }: { dataView: DataView }
     <Route
       exact
       path={findingsNavigation.findings_by_resource.path}
-      render={() => <LatestFindingsByResourceContainer dataView={dataView} />}
+      render={() => <LatestFindingsByResource dataView={dataView} />}
     />
     <Route
       path={findingsNavigation.resource_findings.path}
@@ -40,7 +40,7 @@ export const FindingsByResourceContainer = ({ dataView }: { dataView: DataView }
   </Switch>
 );
 
-const LatestFindingsByResourceContainer = ({ dataView }: { dataView: DataView }) => {
+const LatestFindingsByResource = ({ dataView }: { dataView: DataView }) => {
   useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
   const findingsGroupByResource = useFindingsByResource(
