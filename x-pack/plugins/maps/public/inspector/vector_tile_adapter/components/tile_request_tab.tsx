@@ -6,10 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
-import { EuiButtonEmpty, EuiCallOut, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { compressToEncodedURIComponent } from 'lz-string';
+import {
+  getDevToolsCapabilities,
+  getNavigateToUrl,
+  getShareService,
+} from '../../../kibana_services';
 import type { TileRequest } from '../types';
 import { getTileRequest } from './get_tile_request';
 
@@ -17,56 +30,17 @@ interface Props {
   tileRequest: TileRequest;
 }
 
-interface State {
-  path?: string;
-  body?: string;
-  error?: string;
-}
-
-export class TileRequestTab extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    try {
-      const { path, body } = getTileRequest(this.props.tileRequest);
-      this.state = {
-        path,
-        body: JSON.stringify(body, null, 2),
-      };
-    } catch (e) {
-      this.state = {
-        error: e.message,
-      };
+export function TileRequestTab(props: Props) {
+  try {
+    const { path, body } = getTileRequest(props.tileRequest);
+    const bodyAsString = JSON.stringify(body, null, 2);
+    let consoleHref: string | undefined;
+    if (getDevToolsCapabilities().show) {
+      const devToolsDataUri = compressToEncodedURIComponent(`POST ${path}\n${bodyAsString}`);
+      consoleHref = getShareService()
+        .url.locators.get('CONSOLE_APP_LOCATOR')
+        ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
     }
-  }
-
-  render() {
-    if (!this.state.path || !this.state.body) {
-      return (
-        <EuiCallOut
-          title={i18n.translate('xpack.maps.inspector.vectorTileRequest.errorMessage', {
-            defaultMessage: 'Unable to create Elasticsearch vector tile search request',
-          })}
-          color="warning"
-          iconType="help"
-        >
-          <p>
-            {i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {
-              defaultMessage: `Could not convert tile request, '{tileUrl}', to Elasticesarch vector tile search request, error: {error}`,
-              values: {
-                tileUrl: this.props.tileRequest.tileUrl,
-                error: this.state.error,
-              },
-            })}
-          </p>
-        </EuiCallOut>
-      );
-    }
-
-    const consoleHref = '';
-    const shouldShowDevToolsLink = false;
-
-    function onOpenInConsoleClick() {}
-
     return (
       <EuiFlexGroup
         direction="column"
@@ -80,25 +54,31 @@ export class TileRequestTab extends Component<Props, State> {
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" wrap>
             <EuiFlexItem grow={false}>
               <div>
-                <EuiCopy textToCopy={this.state.body}>
+                <EuiCopy textToCopy={bodyAsString}>
                   {(copy) => (
                     <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
-                      {i18n.translate('xpack.maps.inspector.vectorTileRequest.copyToClipboardLabel', {
-                        defaultMessage: 'Copy to clipboard',
-                      })}
+                      {i18n.translate(
+                        'xpack.maps.inspector.vectorTileRequest.copyToClipboardLabel',
+                        {
+                          defaultMessage: 'Copy to clipboard',
+                        }
+                      )}
                     </EuiButtonEmpty>
                   )}
                 </EuiCopy>
               </div>
             </EuiFlexItem>
-            {shouldShowDevToolsLink && (
+            {consoleHref !== undefined && (
               <EuiFlexItem grow={false}>
                 <div>
                   <EuiButtonEmpty
                     size="xs"
                     flush="right"
+                    onClick={() => {
+                      const navigateToUrl = getNavigateToUrl();
+                      navigateToUrl(consoleHref!);
+                    }}
                     iconType="wrench"
-                    onClick={onOpenInConsoleClick}
                   >
                     {i18n.translate('xpack.maps.inspector.vectorTileRequest.openInConsoleLabel', {
                       defaultMessage: 'Open in Console',
@@ -112,7 +92,7 @@ export class TileRequestTab extends Component<Props, State> {
         <EuiFlexItem grow={true}>
           <CodeEditor
             languageId={XJsonLang.ID}
-            value={this.state.body}
+            value={bodyAsString}
             options={{
               readOnly: true,
               lineNumbers: 'off',
@@ -129,6 +109,26 @@ export class TileRequestTab extends Component<Props, State> {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+    );
+  } catch (e) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.maps.inspector.vectorTileRequest.errorMessage', {
+          defaultMessage: 'Unable to create Elasticsearch vector tile search request',
+        })}
+        color="warning"
+        iconType="help"
+      >
+        <p>
+          {i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {
+            defaultMessage: `Could not convert tile request, '{tileUrl}', to Elasticesarch vector tile search request, error: {error}`,
+            values: {
+              tileUrl: props.tileRequest.tileUrl,
+              error: e.message,
+            },
+          })}
+        </p>
+      </EuiCallOut>
     );
   }
 }

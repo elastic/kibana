@@ -59,7 +59,7 @@ class VectorTileInspector extends Component<Props, State> {
     const tileRequests = this.props.adapters.vectorTiles.getTileRequests(selectedLayer.value);
     const selectedTileRequest =
       this.state.selectedTileRequest &&
-      tileRequests.some((tileRequest) => {
+      tileRequests.some((tileRequest: TileRequest) => {
         return (
           this.state.selectedTileRequest?.layerId === tileRequest.layerId &&
           this.state.selectedTileRequest?.tileZXYKey === tileRequest.tileZXYKey
