@@ -38,7 +38,7 @@ export const getXYVisRenderer: (deps: {
   name: visName,
   displayName: 'XY visualization',
   reuseDomNode: true,
-  render: async (domNode, { visData, visConfig, visType, syncColors }, handlers) => {
+  render: async (domNode, { visData, visConfig, visType, syncColors, syncTooltips }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
@@ -53,6 +53,7 @@ export const getXYVisRenderer: (deps: {
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               syncColors={syncColors}
+              syncTooltips={syncTooltips}
               useLegacyTimeAxis={uiSettings.get(LEGACY_TIME_AXIS, false)}
             />
           </VisualizationContainer>

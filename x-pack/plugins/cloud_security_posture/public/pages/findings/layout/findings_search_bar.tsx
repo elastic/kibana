@@ -9,18 +9,17 @@ import { css } from '@emotion/react';
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
-import * as TEST_SUBJECTS from './test_subjects';
-import type { CspFindingsResult } from './use_findings';
-import type { FindingsBaseURLQuery } from './types';
-import type { CspClientPluginStartDeps } from '../../types';
-import { PLUGIN_NAME } from '../../../common';
-import { FINDINGS_SEARCH_PLACEHOLDER } from './translations';
+import * as TEST_SUBJECTS from '../test_subjects';
+import type { FindingsBaseURLQuery } from '../types';
+import type { CspClientPluginStartDeps } from '../../../types';
+import { PLUGIN_NAME } from '../../../../common';
+import { FINDINGS_SEARCH_PLACEHOLDER } from '../translations';
 
 type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
 
 interface FindingsSearchBarProps extends SearchBarQueryProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;
-  loading: CspFindingsResult['loading'];
+  loading: boolean;
 }
 
 export const FindingsSearchBar = ({
