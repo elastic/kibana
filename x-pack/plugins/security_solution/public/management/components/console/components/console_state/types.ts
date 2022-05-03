@@ -6,8 +6,7 @@
  */
 
 import { Dispatch, Reducer } from 'react';
-import { CommandServiceInterface } from '../../types';
-import { HistoryItemComponent } from '../history_item';
+import { Command, CommandExecutionComponentProps, CommandServiceInterface } from '../../types';
 import { BuiltinCommandServiceInterface } from '../../service/types.builtin_command_service';
 
 export interface ConsoleDataState {
@@ -20,8 +19,17 @@ export interface ConsoleDataState {
   /**
    * List of commands entered by the user and being shown in the UI
    */
-  commandHistory: Array<ReturnType<HistoryItemComponent>>;
+  commandHistory: CommandHistoryItem[];
   dataTestSubj?: string;
+}
+
+export interface CommandHistoryItem {
+  id: string;
+  command: Command;
+  state: {
+    status: CommandExecutionComponentProps['status'];
+    store: CommandExecutionComponentProps['store'];
+  };
 }
 
 export type ConsoleDataAction =
