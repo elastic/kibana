@@ -18,6 +18,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
@@ -38,6 +39,7 @@ import {
 import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
 import { ObservabilityAppServices } from '../../../../application/types';
+import { OBSERVABILITY_RULE_TYPES } from '../../../rules/config';
 
 interface RuleStatsState {
   total: number;
@@ -69,6 +71,8 @@ const ALERT_STATUS_REGEX = new RegExp(
   )}\\s*:\\s*(".+?"|\\*?)`,
   'gm'
 );
+
+const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
 function AlertsPage() {
   const { ObservabilityPageTemplate, config } = usePluginContext();
@@ -112,6 +116,7 @@ function AlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
+        typesFilter: OBSERVABILITY_RULE_TYPES,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
@@ -330,6 +335,8 @@ function AlertsPage() {
               rangeTo={rangeTo}
               kuery={kuery}
               setRefetch={setRefetch}
+              stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
+              storage={new Storage(window.localStorage)}
             />
           </CasesContext>
         </EuiFlexItem>

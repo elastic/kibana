@@ -80,7 +80,11 @@ describe('GET role mappings', () => {
       headers,
     });
 
-    const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+    const response = await handler(
+      coreMock.createCustomRequestHandlerContext(mockContext),
+      mockRequest,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toEqual([
       {
@@ -159,7 +163,11 @@ describe('GET role mappings', () => {
       headers,
     });
 
-    const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+    const response = await handler(
+      coreMock.createCustomRequestHandlerContext(mockContext),
+      mockRequest,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       name: 'mapping1',
@@ -194,7 +202,11 @@ describe('GET role mappings', () => {
         headers,
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
       expect(
@@ -223,7 +235,11 @@ describe('GET role mappings', () => {
         headers,
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
       expect(response.status).toBe(404);
       expect(
         mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping
