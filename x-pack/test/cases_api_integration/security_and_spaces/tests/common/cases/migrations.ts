@@ -369,7 +369,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('8.3.0', () => {
+    describe('8.3.0', () => {
       describe('adding duration', () => {
         before(async () => {
           await kibanaServer.importExport.load(
