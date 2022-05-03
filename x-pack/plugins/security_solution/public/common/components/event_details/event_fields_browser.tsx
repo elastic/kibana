@@ -29,6 +29,7 @@ import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
+import { useDetailPanelStorage } from '../../../timelines/components/side_panel/hooks/use_detail_panel_storage';
 
 interface Props {
   browserFields: BrowserFields;
@@ -138,13 +139,25 @@ const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
 // Encapsulating the pagination logic for the table.
 const useFieldBrowserPagination = () => {
-  const [pagination, setPagination] = useState<{ pageIndex: number }>({
+  const { getDetailPanelStorage, setDetailPanelStorage } = useDetailPanelStorage();
+  const existingPageSize = useMemo(
+    () => getDetailPanelStorage().fieldTablePageSize,
+    [getDetailPanelStorage]
+  );
+  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize?: number }>({
     pageIndex: 0,
+    pageSize: existingPageSize,
   });
 
-  const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
-    setPagination({ pageIndex: index });
-  }, []);
+  const onTableChange = useCallback(
+    ({ page: { index, size } }: { page: { index: number; size: number } }) => {
+      if (size !== pagination.pageSize) {
+        setDetailPanelStorage({ fieldTablePageSize: size });
+      }
+      setPagination({ pageIndex: index, pageSize: size });
+    },
+    [pagination, setDetailPanelStorage]
+  );
   const paginationTableProp = useMemo(
     () => ({
       ...pagination,
