@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MVT_GETGRIDTILE_API_PATH, RENDER_AS } from '../../../../common/constants';
-import { getGridTileRequest } from '../../../../common/mvt_request_body';
+import { MVT_GETGRIDTILE_API_PATH, MVT_GETTILE_API_PATH, RENDER_AS } from '../../../../common/constants';
+import { getAggsTileRequest, getHitsTileRequest } from '../../../../common/mvt_request_body';
 import type { TileRequest } from '../types';
 
 function getSearchParams(url: string): URLSearchParams {
@@ -31,13 +31,34 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
     ? (searchParams.get('requestBody') as string)
     : '()';
 
+  if (!searchParams.has('index')) {
+    throw new Error(`Required query parameter 'index' not provided.`);
+  }
+  const index = searchParams.get('index') as string;
+
+  if (!searchParams.has('geometryFieldName')) {
+    throw new Error(`Required query parameter 'geometryFieldName' not provided.`);
+  }
+  const geometryFieldName = searchParams.get('geometryFieldName') as string;
+
   if (tileRequest.tileUrl.includes(MVT_GETGRIDTILE_API_PATH)) {
-    return getGridTileRequest({
+    return getAggsTileRequest({
       encodedRequestBody,
-      geometryFieldName: searchParams.get('geometryFieldName') as string,
+      geometryFieldName,
       gridPrecision: parseInt(searchParams.get('gridPrecision') as string, 10),
-      index: searchParams.get('index') as string,
+      index,
       renderAs: searchParams.get('renderAs') as RENDER_AS,
+      x,
+      y,
+      z,
+    });
+  }
+
+  if (tileRequest.tileUrl.includes(MVT_GETTILE_API_PATH)) {
+    return getHitsTileRequest({
+      encodedRequestBody,
+      geometryFieldName,
+      index,
       x,
       y,
       z,

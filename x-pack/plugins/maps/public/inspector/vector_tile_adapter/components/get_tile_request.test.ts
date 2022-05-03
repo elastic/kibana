@@ -7,7 +7,7 @@
 
 import { getTileRequest } from './get_tile_request';
 
-test('Should return elasticsearch vector tile request for grid tiles', () => {
+test('Should return elasticsearch vector tile request for aggs tiles', () => {
   expect(
     getTileRequest({
       layerId: '1',
@@ -69,6 +69,51 @@ test('Should return elasticsearch vector tile request for grid tiles', () => {
           type: 'long',
         },
       },
+    },
+  });
+});
+
+test('Should return elasticsearch vector tile request for aggs tiles', () => {
+  expect(
+    getTileRequest({
+      layerId: '1',
+      tileUrl: `http://localhost:5601/pof/api/maps/mvt/getTile/2/0/0.pbf?geometryFieldName=geo.coordinates&index=kibana_sample_data_logs&requestBody=(_source%3A!f%2Cdocvalue_fields%3A!()%2Cquery%3A(bool%3A(filter%3A!((range%3A(timestamp%3A(format%3Astrict_date_optional_time%2Cgte%3A%272022-04-22T16%3A46%3A00.744Z%27%2Clte%3A%272022-04-29T16%3A46%3A05.345Z%27))))%2Cmust%3A!()%2Cmust_not%3A!()%2Cshould%3A!()))%2Cruntime_mappings%3A(hour_of_day%3A(script%3A(source%3A%27emit(doc%5B!%27timestamp!%27%5D.value.getHour())%3B%27)%2Ctype%3Along))%2Cscript_fields%3A()%2Csize%3A10000%2Cstored_fields%3A!(geo.coordinates))&token=415049b6-bb0a-444a-a7b9-89717db5183c`,
+      tileZXYKey: '2/0/0',
+    })
+  ).toEqual({
+    path: '/kibana_sample_data_logs/_mvt/geo.coordinates/2/0/0',
+    body: {
+      grid_precision: 0,
+      exact_bounds: true,
+      extent: 4096,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                timestamp: {
+                  format: 'strict_date_optional_time',
+                  gte: '2022-04-22T16:46:00.744Z',
+                  lte: '2022-04-29T16:46:05.345Z',
+                },
+              },
+            },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      },
+      fields: [],
+      runtime_mappings: {
+        hour_of_day: {
+          script: {
+            source: "emit(doc['timestamp'].value.getHour());",
+          },
+          type: 'long',
+        },
+      },
+      track_total_hits: 10001,
     },
   });
 });
