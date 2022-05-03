@@ -10,6 +10,7 @@
 import http from 'http';
 
 import expect from '@kbn/expect';
+import { CaseConnector, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -36,11 +37,6 @@ import {
   createConfiguration,
   getSignalsWithES,
 } from '../../../../common/lib/utils';
-import {
-  CaseConnector,
-  CaseStatuses,
-  CommentType,
-} from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,

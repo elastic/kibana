@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 
-import { LicensingPluginSetup } from '../../../../licensing/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import {
   ReindexSavedObject,

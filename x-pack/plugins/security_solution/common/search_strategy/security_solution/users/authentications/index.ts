@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { UserEcs } from '../../../../ecs/user';
 import { SourceEcs } from '../../../../ecs/source';
@@ -59,7 +59,7 @@ export interface LastSourceHost {
 }
 
 export interface AuthenticationHit extends Hit {
-  _source: {
+  fields: {
     '@timestamp': string;
     lastSuccess?: LastSourceHost;
     lastFailure?: LastSourceHost;

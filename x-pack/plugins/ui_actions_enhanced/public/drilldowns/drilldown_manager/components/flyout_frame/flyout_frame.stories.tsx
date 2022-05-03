@@ -10,7 +10,7 @@
 import * as React from 'react';
 import { EuiFlyout, EuiButton } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
-import { FlyoutFrame } from './index';
+import { FlyoutFrame } from '.';
 
 storiesOf('components/FlyoutFrame', module)
   .add('default', () => {

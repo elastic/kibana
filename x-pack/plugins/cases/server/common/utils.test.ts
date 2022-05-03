@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import { makeLensEmbeddableFactory } from '../../../lens/server/embeddable/make_lens_embeddable_factory';
+import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   CaseResponse,
@@ -103,6 +103,7 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "description": "This is a brand new case of a bad meanie defacing data",
+              "duration": null,
               "external_service": null,
               "id": "mock-id-1",
               "owner": "securitySolution",
@@ -141,6 +142,7 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "description": "Oh no, a bad meanie destroying data!",
+              "duration": null,
               "external_service": null,
               "id": "mock-id-2",
               "owner": "securitySolution",
@@ -183,6 +185,7 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
+              "duration": null,
               "external_service": null,
               "id": "mock-id-3",
               "owner": "securitySolution",
@@ -229,6 +232,7 @@ describe('common utils', () => {
                 "username": "elastic",
               },
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
+              "duration": null,
               "external_service": null,
               "id": "mock-id-4",
               "owner": "securitySolution",
@@ -292,6 +296,7 @@ describe('common utils', () => {
             "username": "elastic",
           },
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "duration": null,
           "external_service": null,
           "id": "mock-id-3",
           "owner": "securitySolution",
@@ -346,6 +351,7 @@ describe('common utils', () => {
             "username": "elastic",
           },
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "duration": null,
           "external_service": null,
           "id": "mock-id-3",
           "owner": "securitySolution",
@@ -423,6 +429,7 @@ describe('common utils', () => {
             "username": "elastic",
           },
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "duration": null,
           "external_service": null,
           "id": "mock-id-3",
           "owner": "securitySolution",
@@ -475,6 +482,7 @@ describe('common utils', () => {
             "username": "elastic",
           },
           "description": "This is a brand new case of a bad meanie defacing data",
+          "duration": null,
           "external_service": null,
           "id": "mock-id-1",
           "owner": "securitySolution",

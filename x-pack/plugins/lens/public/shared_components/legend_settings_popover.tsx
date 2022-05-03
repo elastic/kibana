@@ -15,11 +15,11 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { ToolbarPopover } from '../shared_components';
+import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarPopover } from '.';
 import { LegendLocationSettings } from './legend_location_settings';
 import { ColumnsNumberSetting } from './columns_number_setting';
 import { LegendSizeSettings } from './legend_size_settings';
-import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { useDebouncedValue } from './debounced_value';
 
 export interface LegendSettingsPopoverProps {
@@ -58,11 +58,11 @@ export interface LegendSettingsPopoverProps {
   /**
    * Sets the vertical alignment for legend inside chart
    */
-  verticalAlignment?: VerticalAlignment;
+  verticalAlignment?: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
   /**
    * Sets the vertical alignment for legend inside chart
    */
-  horizontalAlignment?: HorizontalAlignment;
+  horizontalAlignment?: typeof HorizontalAlignment.Left | typeof HorizontalAlignment.Right;
   /**
    * Callback on horizontal alignment option change
    */
@@ -225,13 +225,15 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             position={position}
             onPositionChange={onPositionChange}
           />
-          <LegendSizeSettings
-            legendSize={legendSize}
-            onLegendSizeChange={onLegendSizeChange}
-            isVerticalLegend={
-              !position || position === Position.Left || position === Position.Right
-            }
-          />
+          {location !== 'inside' && (
+            <LegendSizeSettings
+              legendSize={legendSize}
+              onLegendSizeChange={onLegendSizeChange}
+              isVerticalLegend={
+                !position || position === Position.Left || position === Position.Right
+              }
+            />
+          )}
           {location && (
             <ColumnsNumberSetting
               floatingColumns={floatingColumns}

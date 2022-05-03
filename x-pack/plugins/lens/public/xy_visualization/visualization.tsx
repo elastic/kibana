@@ -11,22 +11,22 @@ import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { ThemeServiceStart } from 'kibana/public';
-import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import {
+  FillStyle,
+  SeriesType,
+  YAxisMode,
+  ExtendedYConfig,
+} from '@kbn/expression-xy-plugin/common';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
-import {
-  FillStyle,
-  SeriesType,
-  YAxisMode,
-  YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
@@ -66,7 +66,7 @@ import {
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import { XYState } from './types';
-import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
@@ -300,6 +300,7 @@ export const getXyVisualization = ({
 
   setDimension(props) {
     const { prevState, layerId, columnId, groupId } = props;
+
     const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
       (l) => l.layerId === layerId
     );
@@ -338,7 +339,7 @@ export const getXyVisualization = ({
     }
     const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map<YConfig>((metric, idx) => {
+    const yConfig = metrics.map<ExtendedYConfig>((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
@@ -449,7 +450,7 @@ export const getXyVisualization = ({
     const groupsAvailable = getGroupsAvailableInData(
       getDataLayers(prevState.layers),
       frame.datasourceLayers,
-      frame?.activeData
+      frame.activeData
     );
 
     if (
@@ -513,10 +514,26 @@ export const getXyVisualization = ({
     );
   },
 
-  toExpression: (state, layers, attributes) =>
-    toExpression(state, layers, paletteService, attributes, eventAnnotationService),
-  toPreviewExpression: (state, layers) =>
-    toPreviewExpression(state, layers, paletteService, eventAnnotationService),
+  shouldBuildDatasourceExpressionManually: () => true,
+
+  toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
+    toExpression(
+      state,
+      layers,
+      paletteService,
+      attributes,
+      datasourceExpressionsByLayers,
+      eventAnnotationService
+    ),
+
+  toPreviewExpression: (state, layers, datasourceExpressionsByLayers = {}) =>
+    toPreviewExpression(
+      state,
+      layers,
+      paletteService,
+      datasourceExpressionsByLayers,
+      eventAnnotationService
+    ),
 
   getErrorMessages(state, datasourceLayers) {
     // Data error handling below here
@@ -597,10 +614,12 @@ export const getXyVisualization = ({
       ...getDataLayers(state.layers),
       ...getReferenceLayers(state.layers),
     ].filter(({ accessors }) => accessors.length > 0);
+
     const accessorsWithArrayValues = [];
+
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
-      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      const rows = frame.activeData?.[layerId] && frame.activeData[layerId].rows;
       if (!rows) {
         break;
       }
@@ -612,6 +631,7 @@ export const getXyVisualization = ({
         }
       }
     }
+
     return accessorsWithArrayValues.map((label) => (
       <FormattedMessage
         key={label}
