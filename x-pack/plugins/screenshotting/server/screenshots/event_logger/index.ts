@@ -319,5 +319,6 @@ export class EventLogger {
     };
 
     this.logger.get('events').debug(message, errorData);
+    apm.captureError(error as Error | string);
   }
 }
