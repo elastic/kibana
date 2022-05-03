@@ -59,6 +59,12 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._source = source as IMvtVectorSource;
   }
 
+  isInitialDataLoadComplete(): boolean {
+    return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
+      ? false
+      : super.isInitialDataLoadComplete();
+  }
+
   getFeatureId(feature: Feature): string | number | undefined {
     if (!this.getSource().isESSource()) {
       return feature.id;

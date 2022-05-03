@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-import { pageObjects } from '../functional/page_objects';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export { pageObjects };
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('upgrade', function () {
+    loadTestFile(require.resolve('./maps_smoke_tests'));
+  });
+}

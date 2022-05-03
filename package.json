@@ -697,7 +697,7 @@
     "@types/redux-actions": "^2.6.1",
     "@types/redux-logger": "^3.0.8",
     "@types/seedrandom": ">=2.0.0 <4.0.0",
-    "@types/selenium-webdriver": "^4.0.18",
+    "@types/selenium-webdriver": "^4.0.19",
     "@types/semver": "^7",
     "@types/set-value": "^2.0.0",
     "@types/sinon": "^7.0.13",

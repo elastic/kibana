@@ -72,7 +72,7 @@ export const DocumentExplorerUpdateCallout = () => {
           Learn more about the structure of your data with {fieldStatistics}."
           values={{
             fieldStatistics: (
-              <EuiLink href={docLinks.links.discover.fieldStatistics} external>
+              <EuiLink href={docLinks.links.discover.fieldStatistics} target="_blank">
                 <span css={semiBoldStyle}>
                   <FormattedMessage
                     id="discover.docExplorerUpdateCallout.fieldStatistics"
@@ -82,7 +82,7 @@ export const DocumentExplorerUpdateCallout = () => {
               </EuiLink>
             ),
             documentExplorer: (
-              <EuiLink href={docLinks.links.discover.documentExplorer} external>
+              <EuiLink href={docLinks.links.discover.documentExplorer} target="_blank">
                 <span css={semiBoldStyle}>
                   <FormattedMessage
                     id="discover.docExplorerUpdateCallout.documentExplorer"

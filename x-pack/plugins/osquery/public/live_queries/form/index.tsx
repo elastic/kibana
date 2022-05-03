@@ -62,7 +62,7 @@ interface LiveQueryFormProps {
   ecsMappingField?: boolean;
   formType?: FormType;
   enabled?: boolean;
-  hideFullscreen?: true;
+  isExternal?: true;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -73,7 +73,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ecsMappingField = true,
   formType = 'steps',
   enabled = true,
-  hideFullscreen,
+  isExternal,
 }) => {
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -393,10 +393,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           actionId={actionId}
           endDate={data?.actions[0].expiration}
           agentIds={agentIds}
-          hideFullscreen={hideFullscreen}
+          isExternal={isExternal}
         />
       ) : null,
-    [actionId, agentIds, data?.actions, hideFullscreen]
+    [actionId, agentIds, data?.actions, isExternal]
   );
 
   const formSteps: EuiContainedStepProps[] = useMemo(
@@ -464,6 +464,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
+          isExternal={isExternal}
           onClose={handleCloseSaveQueryFlout}
           defaultValue={flyoutFormDefaultValue}
         />

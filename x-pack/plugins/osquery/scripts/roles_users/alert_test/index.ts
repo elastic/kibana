@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export default ({ loadTestFile }) => {
-  describe('upgrade', function () {
-    loadTestFile(require.resolve('./dashboard_smoke_tests'));
-  });
-};
+import * as alertTestUser from './user.json';
+import * as alertTestRole from './role.json';
+
+export { alertTestUser, alertTestRole };
