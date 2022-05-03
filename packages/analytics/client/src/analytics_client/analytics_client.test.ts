@@ -19,7 +19,8 @@ import { TelemetryCounterType } from '../events';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-describe('AnalyticsClient', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/131369
+describe.skip('AnalyticsClient', () => {
   let analyticsClient: AnalyticsClient;
   let logger: MockedLogger;
 
