@@ -18,7 +18,6 @@ import { shallow } from 'enzyme';
 import { Feature } from 'geojson';
 import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { InnerJoin } from '../../../joins/inner_join';
 import {
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
