@@ -87,6 +87,34 @@ export const BarChartBaseComponent = ({
     ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
+  const xAxisStyle = useMemo(
+    () =>
+      deepmerge(
+        {
+          tickLine: {
+            size: tickSize,
+          },
+        },
+        getOr({}, 'configs.axis.bottom.style', chartConfigs)
+      ),
+    [chartConfigs, tickSize]
+  );
+
+  const yAxisStyle = useMemo(
+    () =>
+      deepmerge(
+        {
+          tickLine: {
+            size: tickSize,
+          },
+        },
+        getOr({}, 'configs.axis.left.style', chartConfigs)
+      ),
+    [chartConfigs, tickSize]
+  );
+
+  const xAxisLabelFormat = get('configs.axis.bottom.labelFormat', chartConfigs);
+
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
@@ -106,6 +134,7 @@ export const BarChartBaseComponent = ({
             data={series.value ?? []}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}
+            barSeriesStyle={get('configs.series.barSeriesStyle', chartConfigs)}
           />
         ) : null;
       })}
@@ -114,22 +143,15 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        style={{
-          tickLine: {
-            size: tickSize,
-          },
-        }}
+        style={xAxisStyle}
         tickFormat={xTickFormatter}
+        labelFormat={xAxisLabelFormat}
       />
 
       <Axis
         id={yAxisId}
         position={Position.Left}
-        style={{
-          tickLine: {
-            size: tickSize,
-          },
-        }}
+        style={yAxisStyle}
         tickFormat={yTickFormatter}
         title={yAxisTitle}
       />
@@ -143,7 +165,7 @@ export const BarChartBase = React.memo(BarChartBaseComponent);
 
 BarChartBase.displayName = 'BarChartBase';
 
-interface BarChartComponentProps {
+export interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;

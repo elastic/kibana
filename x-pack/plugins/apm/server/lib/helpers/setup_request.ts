@@ -42,36 +42,38 @@ export async function setupRequest({
 }: APMRouteHandlerResources) {
   return withApmSpan('setup_request', async () => {
     const { query } = params;
+    const coreContext = await context.core;
+    const licensingContext = await context.licensing;
 
     const [indices, includeFrozen] = await Promise.all([
       getApmIndices({
-        savedObjectsClient: context.core.savedObjects.client,
+        savedObjectsClient: coreContext.savedObjects.client,
         config,
       }),
       withApmSpan('get_ui_settings', () =>
-        context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
+        coreContext.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
       ),
     ]);
 
     return {
       indices,
       apmEventClient: new APMEventClient({
-        esClient: context.core.elasticsearch.client.asCurrentUser,
+        esClient: coreContext.elasticsearch.client.asCurrentUser,
         debug: query._inspect,
         request,
         indices,
         options: { includeFrozen },
       }),
-      internalClient: createInternalESClient({
+      internalClient: await createInternalESClient({
         context,
         request,
         debug: query._inspect,
       }),
       ml:
-        plugins.ml && isActivePlatinumLicense(context.licensing.license)
+        plugins.ml && isActivePlatinumLicense(licensingContext.license)
           ? getMlSetup(
               plugins.ml.setup,
-              context.core.savedObjects.client,
+              coreContext.savedObjects.client,
               request
             )
           : undefined,
@@ -82,7 +84,9 @@ export async function setupRequest({
 
 function getMlSetup(
   ml: Required<APMRouteHandlerResources['plugins']>['ml']['setup'],
-  savedObjectsClient: APMRouteHandlerResources['context']['core']['savedObjects']['client'],
+  savedObjectsClient: Awaited<
+    APMRouteHandlerResources['context']['core']
+  >['savedObjects']['client'],
   request: KibanaRequest
 ) {
   return {

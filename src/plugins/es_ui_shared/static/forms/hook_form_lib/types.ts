@@ -43,6 +43,30 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   /* Returns an array with of all errors in the form. */
   getErrors: () => string[];
   /**
+   * Update multiple field values at once. You don't need to provide all the form
+   * fields, **partial** update is supported. This method is mainly useful to update an array
+   * of object fields.
+   *
+   * @example
+   * ```js
+   * // Update an array of fields
+   * form.updateFieldValues({ myArray: [{ foo: 'bar', baz: true }, { foo2: 'bar2', baz: false }] })
+   *
+   * // or simply multiple fields at once
+   * form.updateFieldValues({ foo: 'bar', baz: false })
+   * ```
+   */
+  updateFieldValues: (
+    updatedFormData: Partial<T> & FormData,
+    options?: {
+      /**
+       * Flag to indicate if the deserializer(s) are run against the provided form data.
+       * @default true
+       */
+      runDeserializer?: boolean;
+    }
+  ) => void;
+  /**
    * Reset the form states to their initial value and optionally
    * all the fields to their initial values.
    */
