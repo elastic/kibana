@@ -330,7 +330,7 @@ export const dateHistogramOperation: OperationDefinition<
               isClearable={false}
               singleSelection={{ asPlainText: true }}
               placeholder={i18n.translate(
-                'visDefaultEditor.controls.timeInterval.selectIntervalPlaceholder',
+                'xpack.lens.indexPattern.dateHistogram.selectIntervalPlaceholder',
                 {
                   defaultMessage: 'Select an interval',
                 }
