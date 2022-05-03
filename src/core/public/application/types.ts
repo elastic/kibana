@@ -868,4 +868,11 @@ export interface InternalApplicationStart extends ApplicationStart {
    * @internal
    */
   history: History<unknown>;
+
+  /**
+   * Register the function used to resolve dependencies before loading an app.
+   *
+   * @param handler
+   */
+  setEnsureDependenciesLoaded: (handler: (pluginId: string) => Promise<void>) => void;
 }

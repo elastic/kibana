@@ -90,11 +90,13 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     response: KibanaResponseFactory
   ): HttpResourcesServiceToolkit {
     const cspHeader = deps.http.csp.header;
+    const logger = this.logger;
     return {
-      async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
+      async renderCoreApp(appId: string, options: HttpResourcesRenderOptions = {}) {
+        logger.info(`renderCoreApp: ${appId}`);
         const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings.client, {
+        const body = await deps.rendering.render(appId, request, uiSettings.client, {
           isAnonymousPage: false,
           vars: {
             apmConfig,
@@ -107,10 +109,11 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           headers: { ...options.headers, 'content-security-policy': cspHeader },
         });
       },
-      async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
+      async renderAnonymousCoreApp(appId: string, options: HttpResourcesRenderOptions = {}) {
+        logger.info(`renderAnonymousCoreApp: ${appId}`);
         const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings.client, {
+        const body = await deps.rendering.render(appId, request, uiSettings.client, {
           isAnonymousPage: true,
           vars: {
             apmConfig,

@@ -27,6 +27,12 @@ export interface InjectedPluginMetadata {
   };
 }
 
+export interface RegisteredApplication {
+  appId: string;
+  appRoute?: string;
+  pluginName: PluginName;
+}
+
 /** @internal */
 export interface InjectedMetadataParams {
   injectedMetadata: {
@@ -49,6 +55,11 @@ export interface InjectedMetadataParams {
     theme: {
       darkMode: boolean;
       version: ThemeVersion;
+    };
+    registeredApps: RegisteredApplication[];
+    initialApp: {
+      appId: string;
+      pluginId: string;
     };
     env: {
       mode: Readonly<EnvironmentMode>;
@@ -143,6 +154,10 @@ export class InjectedMetadataService {
       getTheme: () => {
         return this.state.theme;
       },
+
+      getRegisteredApps: () => {
+        return this.state.registeredApps;
+      },
     };
   }
 }
@@ -184,6 +199,7 @@ export interface InjectedMetadataSetup {
   getInjectedVars: () => {
     [key: string]: unknown;
   };
+  getRegisteredApps: () => RegisteredApplication[];
 }
 
 /** @internal */

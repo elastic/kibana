@@ -113,6 +113,9 @@ export class SpacesPlugin
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
 
+    // flag the spaces plugin as being required for all applications
+    core.ui.markAsRequired();
+
     const spacesServiceSetup = this.spacesService.setup({
       basePath: core.http.basePath,
     });

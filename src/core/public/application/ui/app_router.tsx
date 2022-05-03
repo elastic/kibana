@@ -16,16 +16,18 @@ import type { MountPoint } from '../../types';
 import { CoreTheme } from '../../theme';
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
+import { AppLazyLoader } from './app_lazy_loader';
 import { ScopedHistory } from '../scoped_history';
 
 interface Props {
-  mounters: Map<string, Mounter>;
+  mounters$: Observable<Map<string, Mounter>>;
   history: History;
   theme$: Observable<CoreTheme>;
   appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
+  ensureDependenciesLoaded: (path: string) => Promise<void>;
 }
 
 interface Params {
@@ -34,14 +36,16 @@ interface Params {
 
 export const AppRouter: FunctionComponent<Props> = ({
   history,
-  mounters,
+  mounters$,
   theme$,
   setAppLeaveHandler,
   setAppActionMenu,
   appStatuses$,
   setIsMounting,
+  ensureDependenciesLoaded,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
+  const mounters = useObservable(mounters$, new Map());
   const createScopedHistory = useMemo(
     () => (appPath: string) => new ScopedHistory(history, appPath),
     [history]
@@ -76,14 +80,17 @@ export const AppRouter: FunctionComponent<Props> = ({
           }: RouteComponentProps<Params>) => {
             // the id/mounter retrieval can be removed once #76348 is addressed
             const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
+            console.log('**** in the catch-all', appId, url, mounter);
             return (
-              <AppContainer
-                appPath={url}
-                appId={id ?? appId}
-                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                createScopedHistory={createScopedHistory}
-                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
-              />
+              <AppLazyLoader appUrl={url} ensureDependenciesLoaded={ensureDependenciesLoaded}>
+                <AppContainer
+                  appPath={url}
+                  appId={id ?? appId}
+                  appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                  createScopedHistory={createScopedHistory}
+                  {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
+                />
+              </AppLazyLoader>
             );
           }}
         />

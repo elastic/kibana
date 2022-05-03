@@ -33,7 +33,7 @@ export function defineLoggedOutRoutes({
         });
       }
 
-      return response.renderAnonymousCoreApp();
+      return response.renderAnonymousCoreApp('security_logged_out');
     }
   );
 }

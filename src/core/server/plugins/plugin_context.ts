@@ -227,6 +227,11 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       register: deps.uiSettings.register,
     },
+    ui: {
+      markAsRequired: deps.ui.markAsRequired.bind(null, plugin.name),
+      markAsRequiredFor: deps.ui.markAsRequiredFor.bind(null, plugin.name),
+      registerApp: deps.ui.registerApp.bind(null, plugin.name),
+    },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {

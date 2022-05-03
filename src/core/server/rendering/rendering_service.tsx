@@ -19,6 +19,7 @@ import {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,
+  RenderingStartDeps,
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   RenderingMetadata,
@@ -27,12 +28,17 @@ import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
 import { KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
+import { InternalUiServiceStart } from '../ui';
 import { filterUiPlugins } from './filter_ui_plugins';
+import { registerRoutes } from './routes';
 
 type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
 
 /** @internal */
 export class RenderingService {
+  private started: boolean = false;
+  private uiStart?: InternalUiServiceStart;
+
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -61,8 +67,9 @@ export class RenderingService {
     status,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
+    const router = http.createRouter('');
     registerBootstrapRoute({
-      router: http.createRouter(''),
+      router,
       renderer: bootstrapRendererFactory({
         uiPlugins,
         serverBasePath: http.basePath.serverBasePath,
@@ -71,17 +78,35 @@ export class RenderingService {
       }),
     });
 
+    registerRoutes({
+      router,
+      uiPlugins,
+      getUiStart: () => this.uiStart!,
+      serverBasePath: http.basePath.serverBasePath,
+      packageInfo: this.coreContext.env.packageInfo,
+    });
+
     return {
       render: this.render.bind(this, { http, uiPlugins, status }),
     };
   }
 
+  public start({ ui }: RenderingStartDeps) {
+    this.started = true;
+    this.uiStart = ui;
+  }
+
   private async render(
     { http, uiPlugins, status }: RenderOptions,
+    appId: string,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
+    if (!this.started) {
+      throw new Error('render cannot be called before the service has started');
+    }
+
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
@@ -104,6 +129,9 @@ export class RenderingService {
       buildNum,
     });
 
+    const registeredApps = this.uiStart!.getRegisteredApps();
+    const pluginId = registeredApps.find((app) => app.appId === appId)!.pluginName;
+
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
@@ -123,6 +151,11 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         env,
+        registeredApps,
+        initialApp: {
+          appId,
+          pluginId,
+        },
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,

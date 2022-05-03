@@ -13,6 +13,6 @@ import type { RouteDefinitionParams } from '..';
 export function defineLogoutRoutes({ httpResources }: RouteDefinitionParams) {
   httpResources.register(
     { path: '/logout', validate: false, options: { authRequired: false } },
-    (context, request, response) => response.renderAnonymousCoreApp()
+    (context, request, response) => response.renderAnonymousCoreApp('security_logout')
   );
 }

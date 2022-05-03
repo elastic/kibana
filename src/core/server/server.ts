@@ -57,6 +57,7 @@ import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_con
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
 import { AnalyticsService } from './analytics';
+import { UiService } from './ui';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -85,6 +86,7 @@ export class Server {
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
   private readonly docLinks: DocLinksService;
+  private readonly ui: UiService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -125,6 +127,7 @@ export class Server {
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
     this.docLinks = new DocLinksService(core);
+    this.ui = new UiService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -208,6 +211,8 @@ export class Server {
     const executionContextSetup = this.executionContext.setup();
     const docLinksSetup = this.docLinks.setup();
 
+    const uiSetup = this.ui.setup();
+
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
@@ -290,6 +295,7 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      ui: uiSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -311,6 +317,7 @@ export class Server {
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
     const deprecationsStart = this.deprecations.start();
+
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -318,8 +325,8 @@ export class Server {
       docLinks: docLinkStart,
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
-
     soStartSpan?.end();
+
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
@@ -329,6 +336,9 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+
+    const uiStart = this.ui.start();
+    this.rendering.start({ ui: uiStart });
 
     this.status.start();
 

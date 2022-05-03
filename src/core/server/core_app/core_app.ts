@@ -78,7 +78,7 @@ export class CoreApp {
                 body: 'Kibana server is not ready yet',
                 bypassErrorFormat: true,
               })
-            : res.renderCoreApp(),
+            : res.renderCoreApp('unknown'), // TODO: fixme
       });
     });
   }
@@ -112,13 +112,18 @@ export class CoreApp {
     resources.register(
       {
         path: '/app/{id}/{any*}',
-        validate: false,
+        validate: {
+          params: schema.object({
+            id: schema.string(),
+            any: schema.maybe(schema.any()),
+          }),
+        },
         options: {
           authRequired: true,
         },
       },
       async (context, request, response) => {
-        return response.renderCoreApp();
+        return response.renderCoreApp(request.params.id);
       }
     );
 
@@ -133,9 +138,9 @@ export class CoreApp {
       },
       async (context, request, response) => {
         if (anonymousStatusPage) {
-          return response.renderAnonymousCoreApp();
+          return response.renderAnonymousCoreApp('status');
         } else {
-          return response.renderCoreApp();
+          return response.renderCoreApp('status');
         }
       }
     );

@@ -17,6 +17,8 @@ import {
 } from './plugin_context';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
 import { InjectedPluginMetadata } from '../injected_metadata';
+import { PluginInfo } from './types';
+import { loadPluginBundles } from './load_plugin_bundles';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -27,6 +29,7 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 export interface PluginsServiceSetup {
   contracts: ReadonlyMap<string, unknown>;
 }
+
 /** @internal */
 export interface PluginsServiceStart {
   contracts: ReadonlyMap<string, unknown>;
@@ -44,6 +47,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
 
   private readonly satupPlugins: PluginName[] = [];
+
+  private readonly pluginSetupContracts = new Map<PluginName, unknown>();
+  private readonly pluginStartContracts = new Map<PluginName, unknown>();
+
+  private coreInternalSetup?: PluginsServiceSetupDeps;
+  private coreInternalStart?: PluginsServiceStartDeps;
 
   constructor(private readonly coreContext: CoreContext, plugins: InjectedPluginMetadata[]) {
     // Generate opaque ids
@@ -80,62 +89,115 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   }
 
   public async setup(deps: PluginsServiceSetupDeps): Promise<PluginsServiceSetup> {
+    this.coreInternalSetup = deps;
+
+    /*
     // Setup each plugin with required and optional plugin contracts
-    const contracts = new Map<string, unknown>();
-    for (const [pluginName, plugin] of this.plugins.entries()) {
-      const pluginDepContracts = [...this.pluginDependencies.get(pluginName)!].reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have client-side code or is a
-          // missing optional plugin.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
-
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
-
-      const contract = plugin.setup(
-        createPluginSetupContext(this.coreContext, deps, plugin),
-        pluginDepContracts
-      );
-
-      contracts.set(pluginName, contract);
-      this.satupPlugins.push(pluginName);
+    for (const pluginName of this.plugins.keys()) {
+      this.setupPlugin(pluginName);
     }
+    */
 
     // Expose setup contracts
-    return { contracts };
+    return { contracts: this.pluginSetupContracts };
+  }
+
+  private setupPlugin(pluginName: PluginName) {
+    const plugin = this.plugins.get(pluginName)!;
+    const pluginDepContracts = [...this.pluginDependencies.get(pluginName)!].reduce(
+      (depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have client-side code or is a
+        // missing optional plugin.
+        if (this.pluginSetupContracts.has(dependencyName)) {
+          depContracts[dependencyName] = this.pluginSetupContracts.get(dependencyName);
+        }
+
+        return depContracts;
+      },
+      {} as Record<PluginName, unknown>
+    );
+
+    const contract = plugin.setup(
+      createPluginSetupContext(this.coreContext, this.coreInternalSetup!, plugin),
+      pluginDepContracts
+    );
+
+    this.pluginSetupContracts.set(pluginName, contract);
+    this.satupPlugins.push(pluginName);
   }
 
   public async start(deps: PluginsServiceStartDeps): Promise<PluginsServiceStart> {
+    this.coreInternalStart = deps;
+
+    deps.application.setEnsureDependenciesLoaded((pluginId: string) =>
+      this.loadPluginDependencies(pluginId)
+    );
+
+    /*
     // Setup each plugin with required and optional plugin contracts
-    const contracts = new Map<string, unknown>();
-    for (const [pluginName, plugin] of this.plugins.entries()) {
-      const pluginDepContracts = [...this.pluginDependencies.get(pluginName)!].reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have client-side code or is a
-          // missing optional plugin.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
-
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
-
-      const contract = plugin.start(
-        createPluginStartContext(this.coreContext, deps, plugin),
-        pluginDepContracts
-      );
-
-      contracts.set(pluginName, contract);
+    for (const pluginName of this.plugins.keys()) {
+      this.startPlugin(pluginName);
     }
+    */
 
     // Expose start contracts
-    return { contracts };
+    return {
+      contracts: this.pluginStartContracts,
+    };
+  }
+
+  private async loadPluginDependencies(pluginId: string): Promise<void> {
+    // plugin already instantiated, returning.
+    if (this.pluginSetupContracts.has(pluginId)) {
+      return Promise.resolve();
+    }
+
+    console.log('plugin_service loadPluginDependencies', pluginId);
+
+    const { plugins } = await this.coreInternalStart!.http.get<{ plugins: PluginInfo[] }>(
+      `/internal/core/rendering/plugin/${pluginId}/dependencies`
+    );
+
+    return await this.loadPluginsAsync(plugins);
+  }
+
+  private async loadPluginsAsync(plugins: PluginInfo[]): Promise<void> {
+    const pluginsToLoad = plugins.filter(
+      ({ pluginId }) => !this.pluginSetupContracts.has(pluginId)
+    );
+
+    await loadPluginBundles(pluginsToLoad);
+
+    const pluginIds = pluginsToLoad.map(({ pluginId }) => pluginId);
+    for (const pluginId of pluginIds) {
+      this.setupPlugin(pluginId);
+    }
+    for (const pluginId of pluginIds) {
+      this.startPlugin(pluginId);
+    }
+  }
+
+  private startPlugin(pluginName: PluginName) {
+    const plugin = this.plugins.get(pluginName)!;
+    const pluginDepContracts = [...this.pluginDependencies.get(pluginName)!].reduce(
+      (depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have client-side code or is a
+        // missing optional plugin.
+        if (this.pluginStartContracts.has(dependencyName)) {
+          depContracts[dependencyName] = this.pluginStartContracts.get(dependencyName);
+        }
+
+        return depContracts;
+      },
+      {} as Record<PluginName, unknown>
+    );
+
+    const contract = plugin.start(
+      createPluginStartContext(this.coreContext, this.coreInternalStart!, plugin),
+      pluginDepContracts
+    );
+
+    this.pluginStartContracts.set(pluginName, contract);
   }
 
   public async stop() {
