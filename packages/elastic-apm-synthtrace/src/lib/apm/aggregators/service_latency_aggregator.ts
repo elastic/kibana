@@ -123,12 +123,14 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
         };
       }
       const duration = Number(event['transaction.duration.us']);
-      const state = this.state[key];
+      if (duration >= 0) {
+        const state = this.state[key];
 
-      state.count++;
-      state.sum += duration;
-      if (duration > state.max) state.max = duration;
-      if (duration < state.min) state.min = Math.min(0, duration);
+        state.count++;
+        state.sum += duration;
+        if (duration > state.max) state.max = duration;
+        if (duration < state.min) state.min = Math.min(0, duration);
+      }
     };
 
     // ensure we flush current state first if event falls out of the current max window age
