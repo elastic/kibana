@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { settingsService } from '../../services';
+import { settingsService, agentPolicyService, outputService } from '../../services';
 import { fetchList, fetchInfo } from '../../services/epm/registry';
 import { getRegistryUrl, getDefaultRegistryUrl } from '../../services/epm/registry/registry_url';
 
@@ -13,7 +13,6 @@ import type { IHealthCheck } from '.';
 
 export const checkConfiguration: IHealthCheck = async ({
   soClient,
-  esClient,
   logger,
   updateReport,
   updateStatus,
@@ -22,7 +21,6 @@ export const checkConfiguration: IHealthCheck = async ({
   updateStatus('running');
   updateReport(``);
   updateReport(`Checking Fleet configuration...`);
-  const settings = await settingsService.getSettings(soClient);
 
   // Check package registry URL
   const registryUrl = getRegistryUrl();
@@ -55,8 +53,25 @@ export const checkConfiguration: IHealthCheck = async ({
     logger.error(e);
   }
 
-  // Check Fleet Server hosts
+  // Check Fleet Server config
+  const settings = await settingsService.getSettings(soClient);
+  const fleetServerPolicies = await agentPolicyService.list(soClient, {
+    perPage: 100,
+    kuery: 'ingest-agent-policies.has_fleet_server: true',
+  });
   updateReport(``);
+  updateReport(`Fleet Server policies:`, 2);
+  if (fleetServerPolicies.total === 0) {
+    hasProblem = true;
+    updateReport(`No Fleet Server policies found. Visit Fleet in Kibana to create a policy.`, 3);
+  } else {
+    updateReport(
+      fleetServerPolicies.items.map(
+        (policy) => `${policy.name} (id: ${policy.id}, output id: ${policy.data_output_id})`
+      ),
+      3
+    );
+  }
   updateReport(`Fleet Server hosts:`, 2);
   if (settings.fleet_server_hosts.length === 0) {
     hasProblem = true;
@@ -64,14 +79,25 @@ export const checkConfiguration: IHealthCheck = async ({
   } else {
     updateReport(settings.fleet_server_hosts, 3);
     updateReport(
-      `Elastic Agents will check-in to Fleet, reporting their health and retrieving policy updates, using these host address(es).`,
+      `Elastic Agents will check-in to Fleet Server, reporting their health and retrieving policy updates, using these host address(es).`,
       2
     );
   }
-  updateReport(``);
 
   // Check outputs
+  const outputs = await outputService.list(soClient);
+  updateReport(``);
+  updateReport(`Fleet outputs:`, 2);
+  outputs.items.forEach((output) => {
+    updateReport(`${output.name} (id: ${output.id}, type: ${output.type})`, 3);
+    if (output.hosts) {
+      updateReport(`hosts:`, 4);
+      updateReport(output.hosts, 5);
+    }
+  });
 
+  // Finish and report overall status for this check
+  updateReport(``);
   updateReport(`Finished checking Fleet configuration.`);
   updateStatus(hasProblem ? 'problem' : 'healthy');
 };
