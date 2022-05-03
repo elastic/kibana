@@ -12,12 +12,12 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiButton,
-  EuiFieldText,
   EuiSelect,
   EuiSpacer,
   EuiTitle,
   EuiText,
   EuiCallOut,
+  EuiComboBox,
 } from '@elastic/eui';
 
 import { sendRequest } from '../../../hooks';
@@ -43,6 +43,41 @@ const fetchSavedObjects = async (type: string, name: string) => {
   return response.data?.hits;
 };
 
+const fetchSavedObjectNames = async (type: string) => {
+  const path = `/.kibana/_search`;
+  const body = {
+    size: 0,
+    query: {
+      bool: {
+        filter: {
+          term: {
+            type,
+          },
+        },
+      },
+    },
+    aggs: {
+      names: {
+        terms: { field: `${type}.name`, size: 500 },
+      },
+    },
+  };
+  const response = await sendRequest({
+    method: 'post',
+    path: `/api/console/proxy`,
+    query: {
+      path,
+      method: 'GET',
+    },
+    body,
+  });
+
+  if (response.error) {
+    throw new Error(response.error.message);
+  }
+  return response.data?.aggregations.names.buckets;
+};
+
 export const SavedObjectsDebugger: React.FunctionComponent = () => {
   const types = [
     { value: 'ingest-agent-policies', text: 'Agent policy' },
@@ -52,21 +87,18 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
   ];
 
   const [type, setType] = useState(types[0].value);
-  const [name, setName] = useState('');
+  const [name, setName] = useState<string | undefined>();
 
   const onTypeChange = (e) => {
     setType(e.target.value);
-  };
-
-  const onNameChange = (e) => {
-    setName(e.target.value);
+    refetchNames();
   };
 
   const {
     data: savedObjectResult,
     refetch,
     status,
-  } = useQuery(['debug-saved-objects', type, name], () => fetchSavedObjects(type, name), {
+  } = useQuery(['debug-saved-objects', type, name], () => fetchSavedObjects(type, name!), {
     enabled: false,
     refetchOnWindowFocus: false,
   });
@@ -74,6 +106,24 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
   const onClick = async () => {
     refetch();
   };
+
+  const {
+    data: savedObjectNames,
+    refetch: refetchNames,
+    status: namesStatus,
+  } = useQuery(['debug-saved-object-names', type], () => fetchSavedObjectNames(type), {
+    // enabled: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const comboBoxOptions = (savedObjectNames ?? []).map((obj) => ({
+    label: obj.key,
+    value: obj.key,
+  }));
+
+  const selectedOption = comboBoxOptions.find((option) => option.value === name)!;
+  const selectedOptions = selectedOption ? [selectedOption] : [];
+
   return (
     <>
       <EuiTitle size="l">
@@ -105,7 +155,31 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow>
-            <EuiFieldText value={name} onChange={(e) => onNameChange(e)} />
+            {namesStatus === 'error' ? (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut title="Error" color="danger">
+                  Error fetching Saved Object Names
+                </EuiCallOut>
+              </>
+            ) : (
+              <EuiComboBox
+                aria-label="Select a Saved Object"
+                placeholder="Select a Saved Object"
+                fullWidth
+                options={comboBoxOptions}
+                singleSelection={{ asPlainText: true }}
+                selectedOptions={selectedOptions}
+                isLoading={namesStatus === 'loading'}
+                onChange={(newSelectedOptions) => {
+                  if (!newSelectedOptions.length) {
+                    setName(undefined);
+                  } else {
+                    setName(newSelectedOptions[0].value);
+                  }
+                }}
+              />
+            )}
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
