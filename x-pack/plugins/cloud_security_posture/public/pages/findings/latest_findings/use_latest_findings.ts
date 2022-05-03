@@ -10,16 +10,13 @@ import { lastValueFrom } from 'rxjs';
 import type { EsQuerySortValue, IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { extractErrorMessage } from '../../../common/utils/helpers';
-import * as TEXT from './translations';
-import type { CspFinding, FindingsQueryResult } from './types';
-import { useKibana } from '../../common/hooks/use_kibana';
-import type { FindingsBaseEsQuery, FindingsQueryStatus } from './types';
+import { extractErrorMessage } from '../../../../common/utils/helpers';
+import * as TEXT from '../translations';
+import type { CspFinding, FindingsQueryResult } from '../types';
+import { useKibana } from '../../../common/hooks/use_kibana';
+import type { FindingsBaseEsQuery } from '../types';
 
-interface UseFindingsOptions
-  extends FindingsBaseEsQuery,
-    FindingsGroupByNoneQuery,
-    FindingsQueryStatus {}
+interface UseFindingsOptions extends FindingsBaseEsQuery, FindingsGroupByNoneQuery {}
 
 export interface FindingsGroupByNoneQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
@@ -65,13 +62,7 @@ export const showErrorToast = (
   else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
 };
 
-export const getFindingsQuery = ({
-  index,
-  query,
-  size,
-  from,
-  sort,
-}: Omit<UseFindingsOptions, 'enabled'>) => ({
+export const getFindingsQuery = ({ index, query, size, from, sort }: UseFindingsOptions) => ({
   index,
   query,
   size,
@@ -79,7 +70,7 @@ export const getFindingsQuery = ({
   sort: mapEsQuerySortKey(sort),
 });
 
-export const useFindings = ({ enabled, index, query, sort, from, size }: UseFindingsOptions) => {
+export const useLatestFindings = ({ index, query, sort, from, size }: UseFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
@@ -94,7 +85,6 @@ export const useFindings = ({ enabled, index, query, sort, from, size }: UseFind
         })
       ),
     {
-      enabled,
       select: ({ rawResponse: { hits } }) => ({
         page: hits.hits.map((hit) => hit._source!),
         total: number.is(hits.total) ? hits.total : 0,

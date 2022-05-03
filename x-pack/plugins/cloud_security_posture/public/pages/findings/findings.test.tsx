@@ -40,7 +40,7 @@ const Wrapper = ({
   </TestProvider>
 );
 
-describe('<Findings />', () => {
+describe.skip('<Findings />', () => {
   it("renders the success state component when 'latest findings' DataView exists and request status is 'success'", async () => {
     const data = dataPluginMock.createStartContract();
     const unifiedSearch = unifiedSearchPluginMock.createStartContract();

@@ -17,13 +17,13 @@ import {
 import moment from 'moment';
 import { SortDirection } from '@kbn/data-plugin/common';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { extractErrorMessage } from '../../../common/utils/helpers';
-import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
-import type { CspFinding } from './types';
-import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
-import type { FindingsGroupByNoneQuery, CspFindingsResult } from './use_findings';
-import { FindingsRuleFlyout } from './findings_flyout/findings_flyout';
+import { extractErrorMessage } from '../../../../common/utils/helpers';
+import * as TEST_SUBJECTS from '../test_subjects';
+import * as TEXT from '../translations';
+import type { CspFinding } from '../types';
+import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
+import type { FindingsGroupByNoneQuery, CspFindingsResult } from './use_latest_findings';
+import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 
 interface BaseFindingsTableProps extends FindingsGroupByNoneQuery {
   setQuery(query: Partial<FindingsGroupByNoneQuery>): void;

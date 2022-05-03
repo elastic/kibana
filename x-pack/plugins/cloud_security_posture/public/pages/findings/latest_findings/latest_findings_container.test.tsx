@@ -6,21 +6,21 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FindingsContainer, getDefaultQuery } from './findings_container';
+import { LatestFindingsContainer, getDefaultQuery } from './latest_findings_container';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { TestProvider } from '../../test/test_provider';
-import { getFindingsQuery } from './use_findings';
-import { encodeQuery } from '../../common/navigation/query_utils';
+import { TestProvider } from '../../../test/test_provider';
+import { getFindingsQuery } from './use_latest_findings';
+import { encodeQuery } from '../../../common/navigation/query_utils';
 import { useLocation } from 'react-router-dom';
 import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
-import { getFindingsCountAggQuery } from './use_findings_count';
+import { getFindingsCountAggQuery } from '../use_findings_count';
 
-jest.mock('../../common/api/use_latest_findings_data_view');
-jest.mock('../../common/api/use_cis_kubernetes_integration');
+jest.mock('../../../common/api/use_latest_findings_data_view');
+jest.mock('../../../common/api/use_cis_kubernetes_integration');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -32,7 +32,7 @@ beforeEach(() => {
   jest.restoreAllMocks();
 });
 
-describe('<FindingsContainer />', () => {
+describe('<LatestFindingsContainer />', () => {
   it('data#search.search fn called with URL query', () => {
     const query = getDefaultQuery();
     const dataMock = dataPluginMock.createStartContract();
@@ -53,7 +53,7 @@ describe('<FindingsContainer />', () => {
           unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         }}
       >
-        <FindingsContainer dataView={dataView} />
+        <LatestFindingsContainer dataView={dataView} />
       </TestProvider>
     );
 

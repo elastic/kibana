@@ -8,11 +8,9 @@ import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { showErrorToast } from './use_findings';
-import type { FindingsBaseEsQuery, FindingsQueryResult, FindingsQueryStatus } from './types';
-
-interface UseFindingsByResourceOptions extends FindingsBaseEsQuery, FindingsQueryStatus {}
+import { useKibana } from '../../../common/hooks/use_kibana';
+import { showErrorToast } from '../latest_findings/use_latest_findings';
+import type { FindingsBaseEsQuery, FindingsQueryResult } from '../types';
 
 type FindingsAggRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type FindingsAggResponse = IKibanaSearchResponse<
@@ -43,7 +41,7 @@ interface FindingsAggBucket {
 export const getFindingsByResourceAggQuery = ({
   index,
   query,
-}: Omit<UseFindingsByResourceOptions, 'enabled'>): estypes.SearchRequest => ({
+}: FindingsBaseEsQuery): estypes.SearchRequest => ({
   index,
   size: 0,
   body: {
@@ -68,7 +66,7 @@ export const getFindingsByResourceAggQuery = ({
   },
 });
 
-export const useFindingsByResource = ({ enabled, index, query }: UseFindingsByResourceOptions) => {
+export const useFindingsByResource = ({ index, query }: FindingsBaseEsQuery) => {
   const {
     data,
     notifications: { toasts },
@@ -83,7 +81,6 @@ export const useFindingsByResource = ({ enabled, index, query }: UseFindingsByRe
         })
       ),
     {
-      enabled,
       select: ({ rawResponse }) => ({
         page: rawResponse.aggregations?.groupBy.buckets.map(createFindingsByResource) || [],
       }),

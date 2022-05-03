@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
-import { extractErrorMessage } from '../../../common/utils/helpers';
-import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
+import { extractErrorMessage } from '../../../../common/utils/helpers';
+import * as TEST_SUBJECTS from '../test_subjects';
+import * as TEXT from '../translations';
 import type { CspFindingsByResourceResult } from './use_findings_by_resource';
 
 export const formatNumber = (value: number) =>

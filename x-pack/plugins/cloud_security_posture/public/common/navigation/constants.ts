@@ -24,3 +24,8 @@ export const allNavigationItems: Record<CspPage, CspNavigationItem> = {
     disabled: !INTERNAL_FEATURE_FLAGS.showBenchmarks,
   },
 };
+
+export const findingsNavigation = {
+  findings_default: { name: TEXT.FINDINGS, path: '/findings/default' },
+  findings_by_resource: { name: TEXT.FINDINGS, path: '/findings/resource' },
+};
