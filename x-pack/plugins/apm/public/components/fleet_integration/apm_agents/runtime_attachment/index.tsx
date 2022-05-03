@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  htmlIdGenerator,
-  euiDragDropReorder,
-  DropResult,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { htmlIdGenerator, euiDragDropReorder, DropResult } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import React, { useState, useCallback, ReactNode } from 'react';
 import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attachment';
 
@@ -42,8 +38,7 @@ interface Props {
   initialIsEnabled?: boolean;
   initialDiscoveryRules?: IDiscoveryRule[];
   operationTypes: Operation[];
-  selectedVersion: string;
-  versions: string[];
+  version: RuntimeAttachmentSettings['version'];
 }
 
 interface Option {
@@ -58,8 +53,11 @@ export interface Operation {
 }
 
 const versionRegex = new RegExp(/^\d+\.\d+\.\d+$/);
-function validateVersion(version: string) {
-  return versionRegex.test(version);
+function validateVersion(version: RuntimeAttachmentSettings['version']) {
+  if (version) {
+    return versionRegex.test(version);
+  }
+  return false;
 }
 
 export function RuntimeAttachment(props: Props) {
@@ -75,10 +73,11 @@ export function RuntimeAttachment(props: Props) {
   const [editDiscoveryRuleId, setEditDiscoveryRuleId] = useState<null | string>(
     null
   );
-  const [version, setVersion] = useState(props.selectedVersion);
-  const [versions, setVersions] = useState(props.versions);
+  const [version, setVersion] = useState<RuntimeAttachmentSettings['version']>(
+    props.version
+  );
   const [isValidVersion, setIsValidVersion] = useState(
-    validateVersion(version)
+    isEmpty(version) ? true : validateVersion(version)
   );
 
   const onToggleEnable = useCallback(() => {
@@ -250,11 +249,14 @@ export function RuntimeAttachment(props: Props) {
     [isEnabled, discoveryRuleList, onChange, version]
   );
 
-  function onChangeVersion(nextVersion?: string) {
-    if (!nextVersion) {
+  function onChangeVersion(nextVersion: RuntimeAttachmentSettings['version']) {
+    const isNextVersionValid = validateVersion(nextVersion);
+    setIsValidVersion(isNextVersionValid);
+    setVersion(nextVersion);
+
+    if (!isNextVersionValid) {
       return;
     }
-    setVersion(nextVersion);
     onChange({
       enabled: isEnabled,
       discoveryRules: isEnabled
@@ -262,29 +264,6 @@ export function RuntimeAttachment(props: Props) {
         : [],
       version: nextVersion,
     });
-  }
-
-  function onCreateNewVersion(
-    newVersion: string,
-    flattenedOptions: Array<EuiComboBoxOptionOption<string>>
-  ) {
-    const normalizedNewVersion = newVersion.trim().toLowerCase();
-    const isNextVersionValid = validateVersion(normalizedNewVersion);
-    setIsValidVersion(isNextVersionValid);
-    if (!normalizedNewVersion || !isNextVersionValid) {
-      return;
-    }
-
-    // Create the option if it doesn't exist.
-    if (
-      flattenedOptions.findIndex(
-        (option) => option.label.trim().toLowerCase() === normalizedNewVersion
-      ) === -1
-    ) {
-      setVersions([...versions, newVersion]);
-    }
-
-    onChangeVersion(newVersion);
   }
 
   return (
@@ -310,15 +289,8 @@ export function RuntimeAttachment(props: Props) {
       discoveryRulesDescription={props.discoveryRulesDescription}
       showUnsavedWarning={props.showUnsavedWarning}
       onDragEnd={onDragEnd}
-      selectedVersion={version}
-      versions={versions}
-      onChangeVersion={(selectedVersions) => {
-        const nextVersion: string | undefined = selectedVersions[0]?.label;
-        const isNextVersionValid = validateVersion(nextVersion);
-        setIsValidVersion(isNextVersionValid);
-        onChangeVersion(nextVersion);
-      }}
-      onCreateNewVersion={onCreateNewVersion}
+      version={version}
+      onChangeVersion={onChangeVersion}
       isValidVersion={isValidVersion}
     />
   );

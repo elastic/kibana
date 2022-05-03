@@ -32,8 +32,6 @@ const excludeOptions = [
 ];
 const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
 
-const versions = ['1.27.1', '1.27.0', '1.26.0', '1.25.0'];
-
 export const RuntimeAttachmentExample: Story = () => {
   const [runtimeAttachmentSettings, setRuntimeAttachmentSettings] = useState(
     {}
@@ -70,8 +68,7 @@ export const RuntimeAttachmentExample: Story = () => {
             probe: '10948653898867',
           },
         ]}
-        versions={versions}
-        selectedVersion={versions[0]}
+        version={null}
       />
       <hr />
       <pre>{JSON.stringify(runtimeAttachmentSettings, null, 4)}</pre>
