@@ -18,6 +18,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/reporting_functional/reporting_without_security.config.ts'),
   require.resolve('../test/reporting_functional/reporting_and_deprecated_security.config.ts'),
   require.resolve('../test/security_functional/login_selector.config.ts'),
+  require.resolve('../test/security_functional/login_selector_pki.config.ts'),
   require.resolve('../test/security_functional/oidc.config.ts'),
   require.resolve('../test/security_functional/saml.config.ts'),
   require.resolve('../test/functional_embedded/config.ts'),
