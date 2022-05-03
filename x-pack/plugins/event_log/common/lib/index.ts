@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const BASE_EVENT_LOG_API_PATH = '/internal/event_log';
-export { millisToNanos, nanosToMillis } from './lib';
+export { millisToNanos } from './millis_to_nanos';
+export { nanosToMillis } from './nanos_to_millis';

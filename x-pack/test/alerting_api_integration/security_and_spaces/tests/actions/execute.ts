@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -16,8 +16,6 @@ import {
   getEventLog,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-
-const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -538,14 +536,12 @@ export default function ({ getService }: FtrProviderContext) {
     const executeEventEnd = Date.parse(executeEvent?.event?.end || 'undefined');
     const dateNow = Date.now();
 
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(executeEventStart).to.be.ok();
     expect(startExecuteEventStart).to.equal(executeEventStart);
     expect(executeEventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (executeEventEnd - executeEventStart)
-    );
+    const durationDiff = Math.abs(nanosToMillis(duration!) - (executeEventEnd - executeEventStart));
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);

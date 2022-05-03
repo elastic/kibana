@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
@@ -17,8 +17,6 @@ import {
   ESTestIndexTool,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-
-const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
@@ -403,10 +401,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(
                   numSearches
                 );
-                const esSearchDuration =
-                  event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms;
-                const totalSearchDuration =
-                  event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms;
+                const esSearchDuration = Number(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms
+                );
+                const totalSearchDuration = Number(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms
+                );
 
                 expect(esSearchDuration).not.to.be(undefined);
                 expect(totalSearchDuration).not.to.be(undefined);
@@ -861,15 +861,13 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   const dateNow = Date.now();
 
   if (duration !== undefined) {
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(eventStart).to.be.ok();
 
     if (shouldHaveEventEnd !== false) {
       expect(eventEnd).to.be.ok();
 
-      const durationDiff = Math.abs(
-        Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-      );
+      const durationDiff = Math.abs(nanosToMillis(duration!) - (eventEnd - eventStart));
 
       // account for rounding errors
       expect(durationDiff < 1).to.equal(true);
