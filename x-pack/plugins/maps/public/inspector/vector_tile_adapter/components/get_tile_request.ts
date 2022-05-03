@@ -17,7 +17,7 @@ function getSearchParams(url: string): URLSearchParams {
 
 function getZXY(zxyString: string) {
   const split = zxyString.split('/');
-  if (split.length != 3) {
+  if (split.length !== 3) {
     throw new Error('Unable to extract {z}/{x}/{y} coordinates from tile request');
   }
 
@@ -28,7 +28,7 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
   const { z, x, y } = getZXY(tileRequest.tileZXYKey);
   const searchParams = getSearchParams(tileRequest.tileUrl);
   const encodedRequestBody = searchParams.has('requestBody')
-    ? searchParams.get('requestBody') as string
+    ? (searchParams.get('requestBody') as string)
     : '()';
 
   if (tileRequest.tileUrl.includes(MVT_GETGRIDTILE_API_PATH)) {
@@ -44,5 +44,5 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
     });
   }
 
-  return {};
+  throw new Error('Unexpected path');
 }

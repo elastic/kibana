@@ -111,7 +111,7 @@ class VectorTileInspector extends Component<Props, State> {
         <div>
           {this.state.tileRequests.map((tileRequest) => {
             return (
-              <div key={tileRequest.tileZXYKey}>
+              <div key={`${tileRequest.layerId}${tileRequest.tileZXYKey}`}>
                 <EuiSpacer />
                 <TileRequestView tileRequest={tileRequest} />
               </div>

@@ -6,8 +6,9 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import { EuiAccordion, EuiPanel } from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiPanel } from '@elastic/eui';
 import type { TileRequest } from '../types';
 import { getTileRequest } from './get_tile_request';
 
@@ -18,6 +19,7 @@ interface Props {
 interface State {
   esPath?: string;
   esBody?: object;
+  error?: string;
 }
 
 export class TileRequestView extends Component<Props, State> {
@@ -25,13 +27,53 @@ export class TileRequestView extends Component<Props, State> {
 
   _onToggle = () => {
     if (!this.state.esPath || !this.state.esBody) {
-      const { path, body } = getTileRequest(this.props.tileRequest);
-      this.setState({
-        esPath: path,
-        esBody: body
-      });
+      try {
+        const { path, body } = getTileRequest(this.props.tileRequest);
+        this.setState({
+          esPath: path,
+          esBody: body,
+        });
+      } catch (e) {
+        this.setState({ error: e.message });
+      }
     }
   };
+
+  renderContent() {
+    if (this.state.esPath && this.state.esBody) {
+      return (
+        <>
+          <p>{this.state.esPath}</p>
+          <p>{JSON.stringify(this.state.esBody, null, 2)}</p>
+        </>
+      );
+    }
+
+    if (this.state.error) {
+      return (
+        <EuiCallOut
+          title={i18n.translate('xpack.maps.inspector.vectorTileRequest.errorMessage', {
+            defaultMessage: 'Unable to create Elasticsearch vector tile search request',
+          })}
+          color="warning"
+          iconType="help"
+        >
+          <p>
+            {i18n.translate('xpack.maps.inspector.vectorTileRequest.errorTitle', {
+              defaultMessage:
+                `Could not convert Kibana tile request, '{tileUrl}', to Elasticesarch vector tile search request, error: {error}`,
+              values: {
+                tileUrl: this.props.tileRequest.tileUrl,
+                error: this.state.error,
+              },
+            })}
+          </p>
+        </EuiCallOut>
+      );
+    }
+
+    return null;
+  }
 
   render() {
     return (
@@ -40,14 +82,7 @@ export class TileRequestView extends Component<Props, State> {
         buttonContent={this.props.tileRequest.tileZXYKey}
         onToggle={this._onToggle}
       >
-        <EuiPanel>
-          <p>
-            {this.state.esPath}
-          </p>
-          <p>
-            {JSON.stringify(this.state.esBody, null, 2)}
-          </p>
-        </EuiPanel>
+        <EuiPanel>{this.renderContent()}</EuiPanel>
       </EuiAccordion>
     );
   }
