@@ -35,8 +35,8 @@ export const explainLogRateSpikesRouteFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.AiopsBreadcrumbs.dataViewLabel', {
-        defaultMessage: 'Data View',
+      text: i18n.translate('xpack.ml.AiopsBreadcrumbs.explainLogRateSpikesLabel', {
+        defaultMessage: 'Explain log rate spikes',
       }),
     },
   ],
