@@ -50,6 +50,7 @@ export const useSignalHelpers = (): {
   );
 
   const pollForSignalIndex = useCallback(() => {
+    console.log('POLLING FOR SIGNALS INDEX');
     const asyncSearch = async () => {
       abortCtrl.current = new AbortController();
       try {

@@ -41,8 +41,11 @@ export const useInitSourcerer = (
   const abortCtrl = useRef(new AbortController());
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
+  // Does this need to be called on every route change or just the overview/alerts routes?
+  // Can the detections specific logic be moved out so that we aren't making this request each time?
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
 
+  // Access data view UI selectors
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
     []
@@ -53,6 +56,7 @@ export const useInitSourcerer = (
 
   const { addError, addWarning } = useAppToasts();
 
+  // What's the relationship between "defaultDataView" and the permissions?
   useEffect(() => {
     if (defaultDataView.error != null) {
       addWarning({
@@ -67,6 +71,10 @@ export const useInitSourcerer = (
     }
   }, [addWarning, defaultDataView.error]);
 
+  // There's lots of timeline specific logic in here - do we need to access this state in each
+  // route? Can this logic be pulled out? It may help to just show logic that is called on every
+  // route here and move route specific stuff out on it's own and called here when needed (pure
+  // ask for helping understand what logic is happening everywhere vs specific routes)
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const activeTimeline = useDeepEqualSelector((state) =>
     getTimelineSelector(state, TimelineId.active)
@@ -83,7 +91,7 @@ export const useInitSourcerer = (
     missingPatterns: timelineMissingPatterns,
   } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
-
+  // In the below description, what does *this data view* refer to?
   /*
    * Note for future engineer:
    * we changed the logic to not fetch all the index fields for every data view on the loading of the app
@@ -133,6 +141,7 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
+      // If legacy timeline, load legacy signals index (as opposed to signals data view index)
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedDataView({
@@ -152,6 +161,7 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
+      // If NON legacy timeline, load data view with default data view signals index
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedDataView({
@@ -175,6 +185,8 @@ export const useInitSourcerer = (
     signalIndexNameSourcerer,
   ]);
 
+  // ONLY used to update the data view if signals index name change discovered
+  // (for example signals index goes from nonexistent to existent)
   const updateSourcererDataView = useCallback(
     (newSignalsIndex: string) => {
       const asyncSearch = async (newPatternList: string[]) => {
@@ -215,6 +227,7 @@ export const useInitSourcerer = (
     [defaultDataView.title, dispatch, indexFieldsSearch, addError]
   );
 
+  // Same as comments above, could we move this detections specific logic out?
   const onSignalIndexUpdated = useCallback(() => {
     if (
       !loadingSignalIndex &&
@@ -250,6 +263,7 @@ export const useInitSourcerer = (
       initialDetectionSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
+      // Is this same as timeline? Checks to see whether to use legacy .siem signals index or not?
       initialDetectionSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedDataView({
@@ -318,6 +332,8 @@ export const useSourcererDataView = (
     };
   });
 
+  // Is the addition of EXCLUDE_ELASTIC_CLOUD_INDEX so that the overview landing page
+  // does not get skipped because cloud logs include documents even on first app render?
   const selectedPatterns = useMemo(
     () =>
       scopeSelectedPatterns.some((index) => index === LOGS_WILDCARD_INDEX)
@@ -328,6 +344,8 @@ export const useSourcererDataView = (
 
   const [legacyPatterns, setLegacyPatterns] = useState<string[]>([]);
 
+  // Do we only need to make this call if `selectedDataView == null || missingPatterns.length > 0` that is true? In that case can we wrap it
+  // around that to only jump in there when needed
   const [indexPatternsLoading, fetchIndexReturn] = useFetchIndex(legacyPatterns);
 
   const legacyDataView: Omit<SourcererDataView, 'id'> & { id: string | null } = useMemo(
@@ -371,6 +389,8 @@ export const useSourcererDataView = (
     [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
   );
 
+  // This only pulls from Redux store, correct? Not seeing anything here that would trigger an
+  // API call to fetch the fields or anything?
   return useMemo(
     () => ({
       browserFields: sourcererDataView.browserFields,
