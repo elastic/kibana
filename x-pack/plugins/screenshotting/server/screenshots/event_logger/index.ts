@@ -84,7 +84,7 @@ type LogAdapter = (
   startTime?: Date | undefined
 ) => void;
 
-type Labels = Record<keyof SimpleEvent, number | string | undefined>;
+type Labels = Record<keyof SimpleEvent, number | undefined>;
 type TransactionEndFn = (args: { labels: Partial<Labels> }) => void;
 type LogEndFn = (metricData?: Partial<SimpleEvent>) => void;
 
@@ -177,24 +177,20 @@ export class EventLogger {
     const transaction = this.transactions[action];
 
     this.startTiming(action);
-
     this.logEvent(action, 'start', { action });
 
     return ({ labels }) => {
-      this.logEvent(action, 'complete', { action });
-
       Object.entries(labels).forEach(([label]) => {
         const labelField = label as keyof SimpleEvent;
         const labelValue = labels[labelField];
         transaction?.setLabel(label, labelValue, false);
       });
+
       transaction?.end();
 
-      this.logEvent(action, 'complete', { action });
+      this.logEvent(action, 'complete', { ...labels, action }, this.timings[action]);
     };
   }
-
-  // General method for spans
 
   /**
    * General event logging function
@@ -209,9 +205,9 @@ export class EventLogger {
   public log(
     message: string,
     action: Actions,
-    transaction: Transactions,
     type: SpanTypes,
-    metricsPre: Partial<SimpleEvent> = {}
+    metricsPre: Partial<SimpleEvent> = {},
+    transaction: Transactions
   ): LogEndFn {
     const txn = this.transactions[transaction];
     const span = txn?.startSpan(action, type);
@@ -232,9 +228,35 @@ export class EventLogger {
   }
 
   /**
+   * Logging helper for screenshotting events
+   */
+  public logScreenshottingEvent(
+    message: string,
+    action: Actions,
+    type: SpanTypes,
+    metricsPre: Partial<SimpleEvent> = {}
+  ) {
+    return this.log(message, action, type, metricsPre, Transactions.SCREENSHOTTING);
+  }
+
+  /**
+   * Logging helper for screenshotting events
+   */
+  public logPdfEvent(
+    message: string,
+    action: Actions,
+    type: SpanTypes,
+    metricsPre: Partial<SimpleEvent> = {}
+  ) {
+    return this.log(message, action, type, metricsPre, Transactions.PDF);
+  }
+
+  /**
    * Helper function to calculate the byte length of a set of captured PNG images
    */
-  public getByteLengthFromCaptureResults(results: CaptureResult['results']) {
+  public getByteLengthFromCaptureResults(
+    results: CaptureResult['results']
+  ): Pick<SimpleEvent, 'byte_length'> {
     const totalByteLength = results.reduce(
       (totals, { screenshots }) =>
         totals +
@@ -244,7 +266,7 @@ export class EventLogger {
         ),
       0
     );
-    return totalByteLength;
+    return { byte_length: totalByteLength };
   }
 
   /**

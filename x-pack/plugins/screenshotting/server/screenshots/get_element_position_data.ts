@@ -8,7 +8,7 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
-import { Actions, EventLogger, Transactions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export interface AttributesMap {
   [key: string]: string | null;
@@ -40,10 +40,9 @@ export const getElementPositionAndAttributes = async (
 ): Promise<ElementsPositionAndAttribute[] | null> => {
   const { kbnLogger } = eventLogger;
 
-  const spanEnd = eventLogger.log(
+  const spanEnd = eventLogger.logScreenshottingEvent(
     'get element position data',
     Actions.GET_ELEMENT_POSITION_DATA,
-    Transactions.SCREENSHOTTING,
     'read'
   );
 

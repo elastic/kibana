@@ -8,7 +8,7 @@
 import type { Headers } from '@kbn/core/server';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
-import { Actions, EventLogger, Transactions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const openUrl = async (
   browser: HeadlessChromiumDriver,
@@ -20,12 +20,7 @@ export const openUrl = async (
   headers: Headers
 ): Promise<void> => {
   const { kbnLogger } = eventLogger;
-  const spanEnd = eventLogger.log(
-    'open url',
-    Actions.OPEN_URL,
-    Transactions.SCREENSHOTTING,
-    'wait'
-  );
+  const spanEnd = eventLogger.logScreenshottingEvent('open url', Actions.OPEN_URL, 'wait');
 
   // If we're moving to another page in the app, we'll want to wait for the app to tell us
   // it's loaded the next page.

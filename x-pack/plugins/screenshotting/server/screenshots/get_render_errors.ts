@@ -8,7 +8,7 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { Layout } from '../layouts';
 import { CONTEXT_GETRENDERERRORS } from './constants';
-import { Actions, EventLogger, Transactions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const getRenderErrors = async (
   browser: HeadlessChromiumDriver,
@@ -17,10 +17,9 @@ export const getRenderErrors = async (
 ): Promise<undefined | string[]> => {
   const { kbnLogger } = eventLogger;
 
-  const spanEnd = eventLogger.log(
+  const spanEnd = eventLogger.logScreenshottingEvent(
     'look for render errors',
     Actions.GET_RENDER_ERRORS,
-    Transactions.SCREENSHOTTING,
     'read'
   );
 

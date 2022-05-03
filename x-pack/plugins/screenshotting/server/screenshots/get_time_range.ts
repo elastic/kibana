@@ -8,17 +8,16 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_GETTIMERANGE } from './constants';
-import { Actions, EventLogger, Transactions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const getTimeRange = async (
   browser: HeadlessChromiumDriver,
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<string | null> => {
-  const spanEnd = eventLogger.log(
+  const spanEnd = eventLogger.logScreenshottingEvent(
     'looking for time range',
     Actions.GET_TIMERANGE,
-    Transactions.SCREENSHOTTING,
     'read'
   );
 

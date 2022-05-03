@@ -13,7 +13,7 @@ import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
 import type { Layout } from '../layouts';
-import { Actions, EventLogger, Transactions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -194,10 +194,9 @@ export class ScreenshotObservableHandler {
       // allows for them to be displayed properly in many cases
       await injectCustomCss(driver, eventLogger, layout);
 
-      const spanEnd = this.eventLogger.log(
+      const spanEnd = this.eventLogger.logScreenshottingEvent(
         'get positions of visualization elements',
         Actions.GET_ELEMENT_POSITION_DATA,
-        Transactions.SCREENSHOTTING,
         'read'
       );
       try {

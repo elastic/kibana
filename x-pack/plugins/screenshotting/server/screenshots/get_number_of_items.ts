@@ -8,7 +8,7 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
-import { Actions, EventLogger, Transactions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const getNumberOfItems = async (
   browser: HeadlessChromiumDriver,
@@ -17,10 +17,9 @@ export const getNumberOfItems = async (
   layout: Layout
 ): Promise<number> => {
   const { kbnLogger } = eventLogger;
-  const spanEnd = eventLogger.log(
+  const spanEnd = eventLogger.logScreenshottingEvent(
     'get the number of visualization items on the page',
     Actions.GET_NUMBER_OF_ITEMS,
-    Transactions.SCREENSHOTTING,
     'read'
   );
 

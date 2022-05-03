@@ -243,7 +243,7 @@ export class Screenshots {
             cpu: metrics?.cpu,
             memory: metrics?.memory,
             memory_mb: metrics?.memoryInMegabytes,
-            byte_length: eventLogger.getByteLengthFromCaptureResults(results),
+            ...eventLogger.getByteLengthFromCaptureResults(results),
           },
         });
       }),

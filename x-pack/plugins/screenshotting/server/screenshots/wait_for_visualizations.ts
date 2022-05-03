@@ -8,7 +8,7 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
-import { Actions, EventLogger, Transactions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 interface CompletedItemsCountParameters {
   context: string;
@@ -42,10 +42,9 @@ export const waitForVisualizations = async (
   layout: Layout
 ): Promise<void> => {
   const { kbnLogger } = eventLogger;
-  const spanEnd = eventLogger.log(
+  const spanEnd = eventLogger.logScreenshottingEvent(
     'waiting for each visualization to complete rendering',
     Actions.WAIT_VISUALIZATIONS,
-    Transactions.SCREENSHOTTING,
     'wait'
   );
 

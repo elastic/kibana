@@ -40,10 +40,9 @@ export async function pngsToPdf({
     }
     results.forEach((result) => {
       result.screenshots.forEach((png) => {
-        const spanEnd = eventLogger.log(
+        const spanEnd = eventLogger.logPdfEvent(
           'add image to PDF file',
           Actions.ADD_IMAGE,
-          Transactions.PDF,
           'output'
         );
         pdfMaker?.addImage(png.data, {
@@ -54,12 +53,7 @@ export async function pngsToPdf({
       });
     });
 
-    const spanEnd = eventLogger.log(
-      'compile PDF file',
-      Actions.COMPILE,
-      Transactions.PDF,
-      'output'
-    );
+    const spanEnd = eventLogger.logPdfEvent('compile PDF file', Actions.COMPILE, 'output');
     buffer = await pdfMaker.generate();
     spanEnd();
 

@@ -38,29 +38,32 @@ describe('Event Logger', () => {
 
   it('creates logs for the events and includes durations and event payload data', () => {
     const screenshottingEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
-    const openUrlEnd = eventLogger.log(
+    const openUrlEnd = eventLogger.logScreenshottingEvent(
       'open the url to the Kibana application',
       Actions.OPEN_URL,
-      Transactions.SCREENSHOTTING,
       'wait'
     );
     openUrlEnd();
-    const getElementPositionsEnd = eventLogger.log(
+    const getElementPositionsEnd = eventLogger.logScreenshottingEvent(
       'scan the page to find the boundaries of visualization elements',
       Actions.GET_ELEMENT_POSITION_DATA,
-      Transactions.SCREENSHOTTING,
       'wait'
     );
     getElementPositionsEnd();
     screenshottingEnd({
-      labels: { cpu: 12, cpu_percentage: 0, memory: 450789, memory_mb: 449 },
+      labels: {
+        cpu: 12,
+        cpu_percentage: 0,
+        memory: 450789,
+        memory_mb: 449,
+        byte_length: 14000,
+      },
     });
 
     const pdfEnd = eventLogger.startTransaction(Transactions.PDF);
-    const addImageEnd = eventLogger.log(
+    const addImageEnd = eventLogger.logPdfEvent(
       'add image to the PDF file',
       Actions.ADD_IMAGE,
-      Transactions.PDF,
       'output'
     );
     addImageEnd();
@@ -72,11 +75,12 @@ describe('Event Logger', () => {
       screenshotting: data?.kibana?.screenshotting,
     }));
 
+    expect(logs.length).toBe(10);
     expect(logs).toMatchInlineSnapshot(`
       Array [
         Object {
           "duration": undefined,
-          "message": "starting: screenshot pipeline",
+          "message": "starting: screenshot-pipeline",
           "screenshotting": Object {
             "action": "screenshot-pipeline-start",
             "session_id": "NEW_UUID",
@@ -116,18 +120,20 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 20000,
-          "message": "completed: screenshot pipeline",
+          "message": "completed: screenshot-pipeline",
           "screenshotting": Object {
             "action": "screenshot-pipeline-complete",
-            "byte_length": 0,
+            "byte_length": 14000,
             "cpu": 12,
+            "cpu_percentage": 0,
             "memory": 450789,
+            "memory_mb": 449,
             "session_id": "NEW_UUID",
           },
         },
         Object {
           "duration": undefined,
-          "message": "starting: pdf generation",
+          "message": "starting: generate-pdf",
           "screenshotting": Object {
             "action": "generate-pdf-start",
             "session_id": "NEW_UUID",
@@ -151,7 +157,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 27000,
-          "message": "completed: pdf generation",
+          "message": "completed: generate-pdf",
           "screenshotting": Object {
             "action": "generate-pdf-complete",
             "byte_length_pdf": 6666,
@@ -168,10 +174,9 @@ describe('Event Logger', () => {
       boundingClientRect: { width: 1350, height: 2000 },
       scroll: {},
     } as ElementPosition;
-    const endScreenshot = eventLogger.log(
+    const endScreenshot = eventLogger.logScreenshottingEvent(
       'screenshot capture test',
       Actions.GET_SCREENSHOT,
-      Transactions.SCREENSHOTTING,
       'read',
       eventLogger.getPixelsFromElementPosition(elementPosition)
     );
@@ -210,7 +215,7 @@ describe('Event Logger', () => {
 
   it('creates helpful error logs', () => {
     eventLogger.startTransaction(Transactions.SCREENSHOTTING);
-    eventLogger.log('opening the url', Actions.OPEN_URL, Transactions.SCREENSHOTTING, 'wait');
+    eventLogger.logScreenshottingEvent('opening the url', Actions.OPEN_URL, 'wait');
     eventLogger.error(new Error('Something erroneous happened'), Transactions.SCREENSHOTTING);
 
     const logData = logSpy.mock.calls.map(([message, data]) => ({
@@ -223,7 +228,7 @@ describe('Event Logger', () => {
       Array [
         Object {
           "error": undefined,
-          "message": "starting: screenshot pipeline",
+          "message": "starting: screenshot-pipeline",
           "screenshotting": Object {
             "action": "screenshot-pipeline-start",
             "session_id": "NEW_UUID",

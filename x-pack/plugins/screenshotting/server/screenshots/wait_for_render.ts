@@ -8,7 +8,7 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
-import { Actions, EventLogger, Transactions } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const waitForRenderComplete = async (
   browser: HeadlessChromiumDriver,
@@ -16,10 +16,9 @@ export const waitForRenderComplete = async (
   loadDelay: number,
   layout: Layout
 ) => {
-  const spanEnd = eventLogger.log(
+  const spanEnd = eventLogger.logScreenshottingEvent(
     'wait for render complete',
     Actions.WAIT_RENDER,
-    Transactions.SCREENSHOTTING,
     'wait'
   );
 
