@@ -222,22 +222,24 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('threshold validation', () => {
-      it('should result in 400 error if no threshold-specific fields are provided', async () => {
+      it('should result in partial success if no threshold-specific fields are provided', async () => {
         const { threshold, ...rule } = getThresholdRuleForSignalTesting(['*']);
         const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', ruleToNdjson(rule as CreateRulesSchema), 'rules.ndjson')
-          .expect(400);
+          .expect(200);
 
-        expect(body).to.eql({
-          error: 'Bad Request',
-          message: '[request body]: Invalid value "undefined" supplied to "threshold"',
-          statusCode: 400,
+        expect(body.errors[0]).to.eql({
+          rule_id: '(unknown id)',
+          error: {
+            message: 'when "type" is "threshold", "threshold" is required',
+            status_code: 400,
+          },
         });
       });
 
-      it('should result in 400 error if more than 3 threshold fields', async () => {
+      it('should result in partial success if more than 3 threshold fields', async () => {
         const baseRule = getThresholdRuleForSignalTesting(['*']);
         const rule = {
           ...baseRule,
@@ -247,18 +249,21 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         };
         const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', ruleToNdjson(rule), 'rules.ndjson')
-          .expect(400);
+          .expect(200);
 
-        expect(body).to.eql({
-          message: ['Number of fields must be 3 or less'],
-          status_code: 400,
+        expect(body.errors[0]).to.eql({
+          rule_id: '(unknown id)',
+          error: {
+            message: 'Number of fields must be 3 or less',
+            status_code: 400,
+          },
         });
       });
 
-      it('should result in 400 error if threshold value is less than 1', async () => {
+      it('should result in partial success if threshold value is less than 1', async () => {
         const baseRule = getThresholdRuleForSignalTesting(['*']);
         const rule = {
           ...baseRule,
@@ -268,15 +273,17 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         };
         const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', ruleToNdjson(rule), 'rules.ndjson')
-          .expect(400);
+          .expect(200);
 
-        expect(body).to.eql({
-          error: 'Bad Request',
-          message: '[request body]: Invalid value "0" supplied to "threshold,value"',
-          statusCode: 400,
+        expect(body.errors[0]).to.eql({
+          rule_id: '(unknown id)',
+          error: {
+            message: 'Invalid value "0" supplied to "threshold,value"',
+            status_code: 400,
+          },
         });
       });
 
@@ -295,14 +302,17 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         };
         const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', ruleToNdjson(rule), 'rules.ndjson')
-          .expect(400);
+          .expect(200);
 
-        expect(body).to.eql({
-          message: ['Cardinality of a field that is being aggregated on is always 1'],
-          status_code: 400,
+        expect(body.errors[0]).to.eql({
+          rule_id: '(unknown id)',
+          error: {
+            message: 'Cardinality of a field that is being aggregated on is always 1',
+            status_code: 400,
+          },
         });
       });
     });
