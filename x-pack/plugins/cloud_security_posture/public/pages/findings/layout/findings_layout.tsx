@@ -7,16 +7,8 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-interface Props {
-  title?: string;
-}
-
-export const PageWrapper: React.FC<Props> = ({
-  children,
-  title = <FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />,
-}) => {
+export const PageWrapper: React.FC = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -24,11 +16,18 @@ export const PageWrapper: React.FC<Props> = ({
         padding: ${euiTheme.size.l};
       `}
     >
-      <EuiTitle size="l">
-        <h2>{title}</h2>
-      </EuiTitle>
-      <EuiSpacer />
       {children}
     </div>
   );
 };
+
+export const PageTitle: React.FC = ({ children }) => (
+  <EuiTitle size="l">
+    <div>
+      {children}
+      <EuiSpacer />
+    </div>
+  </EuiTitle>
+);
+
+export const PageTitleText = ({ title }: { title: React.ReactNode }) => <h2>{title}</h2>;
