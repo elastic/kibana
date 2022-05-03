@@ -6,17 +6,33 @@
  */
 
 import React from 'react';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
+import { AgentPolicyDebugger } from './components';
+
 // TODO: Evaluate moving this react-query initialization up to the main Fleet app
 // setup if we end up pursuing wider adoption of react-query.
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 export const DebugPage: React.FunctionComponent = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <main>Debug Page</main>
+      <EuiPage>
+        <EuiPageBody panelled>
+          <EuiPageHeader
+            pageTitle="Fleet Debugging Dashboard"
+            iconType="wrench"
+            description={`This page provides an interface for managing Fleet's data and diagnosing issues.
+            Be aware that these debugging tools can be destructive in nature, and you should proceed with caution.`}
+          />
+
+          <EuiSpacer size="xl" />
+
+          <AgentPolicyDebugger />
+        </EuiPageBody>
+      </EuiPage>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
