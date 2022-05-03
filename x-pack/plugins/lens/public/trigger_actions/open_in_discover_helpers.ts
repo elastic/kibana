@@ -35,7 +35,11 @@ export function execute({ embeddable, discover, timeRange, filters, openInSameTa
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
   }
-  const args = embeddable.getViewUnderlyingDataArgs()!;
+  const args = embeddable.getViewUnderlyingDataArgs();
+  if (!args) {
+    // shouldn't be executed because of the isCompatible check
+    throw new Error('Underlying data is not ready');
+  }
   const discoverUrl = discover.locator?.getRedirectUrl({
     ...args,
     timeRange: timeRange || args.timeRange,

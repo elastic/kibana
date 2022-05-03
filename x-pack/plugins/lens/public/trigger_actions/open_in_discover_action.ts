@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { execute, isCompatible } from './open_in_discover_helpers';
 
@@ -18,7 +18,7 @@ interface Context {
 }
 
 export const createOpenInDiscoverAction = (
-  discover: Pick<DiscoverSetup, 'locator'>,
+  discover: Pick<DiscoverStart, 'locator'>,
   hasDiscoverAccess: boolean
 ) =>
   createAction<Context>({

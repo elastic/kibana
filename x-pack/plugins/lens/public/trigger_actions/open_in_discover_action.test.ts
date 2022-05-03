@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DiscoverSetup } from '@kbn/discover-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { DOC_TYPE } from '../../common';
@@ -17,7 +17,7 @@ describe('open in discover action', () => {
     it('is incompatible with non-lens embeddables', async () => {
       const embeddable = { type: 'NOT_LENS' } as IEmbeddable;
 
-      const isCompatible = await createOpenInDiscoverAction({} as DiscoverSetup, true).isCompatible(
+      const isCompatible = await createOpenInDiscoverAction({} as DiscoverStart, true).isCompatible(
         {
           embeddable,
         } as ActionExecutionContext<{ embeddable: IEmbeddable }>
@@ -33,7 +33,7 @@ describe('open in discover action', () => {
       let hasDiscoverAccess = true;
       // make sure it would work if we had access to Discover
       expect(
-        await createOpenInDiscoverAction({} as DiscoverSetup, hasDiscoverAccess).isCompatible({
+        await createOpenInDiscoverAction({} as DiscoverStart, hasDiscoverAccess).isCompatible({
           embeddable,
         } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
       ).toBeTruthy();
@@ -41,7 +41,7 @@ describe('open in discover action', () => {
       // make sure no Discover access makes the action incompatible
       hasDiscoverAccess = false;
       expect(
-        await createOpenInDiscoverAction({} as DiscoverSetup, hasDiscoverAccess).isCompatible({
+        await createOpenInDiscoverAction({} as DiscoverStart, hasDiscoverAccess).isCompatible({
           embeddable,
         } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
       ).toBeFalsy();
@@ -53,7 +53,7 @@ describe('open in discover action', () => {
       // test false
       embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(false));
       expect(
-        await createOpenInDiscoverAction({} as DiscoverSetup, true).isCompatible({
+        await createOpenInDiscoverAction({} as DiscoverStart, true).isCompatible({
           embeddable,
         } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
       ).toBeFalsy();
@@ -63,7 +63,7 @@ describe('open in discover action', () => {
       // test true
       embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(true));
       expect(
-        await createOpenInDiscoverAction({} as DiscoverSetup, true).isCompatible({
+        await createOpenInDiscoverAction({} as DiscoverStart, true).isCompatible({
           embeddable,
         } as unknown as ActionExecutionContext<{ embeddable: IEmbeddable }>)
       ).toBeTruthy();
@@ -91,7 +91,7 @@ describe('open in discover action', () => {
       locator: {
         getRedirectUrl: jest.fn(() => discoverUrl),
       },
-    } as unknown as DiscoverSetup;
+    } as unknown as DiscoverStart;
 
     globalThis.open = jest.fn();
 
