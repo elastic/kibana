@@ -9,6 +9,7 @@
 /* eslint max-len: 0 */
 import { i18n } from '@kbn/i18n';
 import { SavedObject } from '@kbn/core/server';
+import { defaultUserContentAttributes } from '@kbn/user-content-plugin/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {
@@ -500,6 +501,7 @@ export const getSavedObjects = (): SavedObject[] => [
         searchSourceJSON:
           '{"query":{"language":"kuery","query":""},"filter":[],"highlightAll":true,"version":true}',
       },
+      ...defaultUserContentAttributes,
     },
   },
   {

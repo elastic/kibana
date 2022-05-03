@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { cloneDeep, isObjectLike } from 'lodash';
 import { SavedObjectsClientContract } from '@kbn/core/public';
 
-import { EVENTS_COUNT_GRANULARITY, ViewsCounters } from '../../common';
+import { defaultUserContentAttributes } from '../../common';
 import { MetadataEventsService } from './metadata_events_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -80,7 +81,7 @@ export class UserContentService {
           return object;
         }
 
-        const updatedAttributes = this.addInitialViewCountsToAttributes(attributes as object);
+        const updatedAttributes = this.addDefaultUserContentAttributes(attributes as object);
 
         return { ...object, attributes: updatedAttributes };
       });
@@ -89,24 +90,33 @@ export class UserContentService {
     });
   }
 
-  private addInitialViewCountsToAttributes(attributes: object): object {
+  /**
+   * Merge user content common default attributes to the provided attibutes.
+   * This does **override** existing attributes.
+   *
+   * @param attributes Saved object attributes to be saved
+   * @returns The attributes provided + the common user content attributes
+   */
+  private addDefaultUserContentAttributes(attributes: object): object {
     if (typeof attributes !== 'object' || attributes === null || Array.isArray(attributes)) {
       return attributes;
     }
 
-    if (attributes.hasOwnProperty('views_counters')) {
-      return attributes;
-    }
+    const userContentAttributes: { [key: string]: unknown } = { ...attributes };
+
+    Object.entries(defaultUserContentAttributes).forEach(([attr, value]) => {
+      if (attributes.hasOwnProperty(attr)) {
+        // Already declared, we don't want to override it
+        return;
+      }
+
+      userContentAttributes[attr] = isObjectLike(value) ? cloneDeep(value) : value;
+    });
 
     // Initiate the views counters
     return {
       ...attributes,
-      views_counters: EVENTS_COUNT_GRANULARITY.reduce((agg, days) => {
-        return {
-          ...agg,
-          [`${days}_days`]: 0,
-        };
-      }, {} as ViewsCounters),
+      ...userContentAttributes,
     };
   }
 }

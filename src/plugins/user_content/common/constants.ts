@@ -7,6 +7,8 @@
  */
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/public';
 
+import { ViewsCounters } from './types';
+
 export const API_BASE_PATH = '/api/user_content';
 
 export const metadataEventTypes = ['viewed:kibana', 'viewed:api'] as const;
@@ -25,4 +27,13 @@ export const userContentCommonMappings = {
       };
     }, {}),
   } as SavedObjectsTypeMappingDefinition,
+};
+
+export const defaultUserContentAttributes = {
+  views_counters: EVENTS_COUNT_GRANULARITY.reduce((agg, days) => {
+    return {
+      ...agg,
+      [`${days}_days`]: 0,
+    };
+  }, {} as ViewsCounters),
 };

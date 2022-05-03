@@ -10,6 +10,7 @@ export {
   metadataEventTypes,
   EVENTS_COUNT_GRANULARITY,
   userContentCommonMappings,
+  defaultUserContentAttributes,
 } from './constants';
 
 export { withApiBaseBath } from './lib';
