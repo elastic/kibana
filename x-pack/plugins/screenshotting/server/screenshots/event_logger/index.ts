@@ -83,8 +83,8 @@ type LogAdapter = (
 ) => void;
 
 type ScreenshottingEndFn = ({ metrics, results }: CaptureResult) => void;
-type GeneratePdfEndFn = (action: Partial<ScreenshottingAction['kibana']['screenshotting']>) => void;
-type LogEndFn = (metricData?: Partial<ScreenshottingAction['kibana']['screenshotting']>) => void;
+type GeneratePdfEndFn = (action: Partial<SimpleEvent>) => void;
+type LogEndFn = (metricData?: Partial<SimpleEvent>) => void;
 
 function fillLogData(
   message: string,
@@ -229,66 +229,45 @@ export class EventLogger {
    * @param {Actions} action - action type for kibana.screenshotting.action
    * @param {TransactionType} transaction - name of the internal APM transaction in which to associate the span
    * @param {SpanTypes} type - identifier of the span type
+   * @param {metricsPre} type - optional metrics to add to the "start" log of the event
    * @returns {LogEndFn} - function to log the end of the span
    */
   public log(
     message: string,
     action: Actions,
     transaction: TransactionType,
-    type: SpanTypes
+    type: SpanTypes,
+    metricsPre: Partial<SimpleEvent> = {}
   ): LogEndFn {
     const txn = this.transactions[transaction];
     const span = txn?.startSpan(action, type);
 
     this.spans.set(action, span);
     this.startTiming(action);
-    this.logEvent(message, 'start', { action });
+    this.logEvent(message, 'start', { ...metricsPre, action });
 
     return (metricData = {}) => {
       span?.end();
-      this.logEvent(message, 'complete', { ...metricData, action }, this.timings[action]);
-    };
-  }
-
-  private getPixels(elementPosition: ElementPosition, zoom: number) {
-    const { width, height } = elementPosition.boundingClientRect;
-    return width * zoom * (height * zoom);
-  }
-
-  /**
-   * Specific method for capturing an action around screenshot capture,
-   * needed to convert layout data into number of pixels for logging
-   *
-   * @param {GetScreenshotOptions}
-   * @param {ElementPosition} .elementPosition - info for logging the screenshot dimension metrics
-   * @returns {LogEndFn} - function to log the end of screenshot capture
-   */
-  public startScreenshot({ elementPosition }: { elementPosition: ElementPosition }): LogEndFn {
-    const action = Actions.GET_SCREENSHOT;
-    this.spans.set(
-      action,
-      this.transactions.screenshotting?.startSpan(Actions.GET_SCREENSHOT, 'read')
-    );
-    this.startTiming(action);
-    this.logEvent('screenshot capture', 'start', {
-      action: Actions.GET_SCREENSHOT,
-      pixels: this.getPixels(elementPosition, this.config.capture.zoom),
-    });
-
-    return (metricData) => {
-      this.spans.get(action)?.end();
-
       this.logEvent(
-        'screenshot capture',
+        message,
         'complete',
-        {
-          action,
-          byte_length: metricData?.byte_length,
-          pixels: this.getPixels(elementPosition, this.config.capture.zoom),
-        },
+        { ...metricsPre, ...metricData, action },
         this.timings[action]
       );
     };
+  }
+
+  /**
+   * Helper function to create the "metricPre" data needed to log the start
+   * of a screenshot capture event.
+   */
+  public getPixelsFromElementPosition(
+    elementPosition: ElementPosition
+  ): Pick<SimpleEvent, 'pixels'> {
+    const { width, height } = elementPosition.boundingClientRect;
+    const zoom = this.config.capture.zoom;
+    const pixels = width * zoom * (height * zoom);
+    return { pixels };
   }
 
   /**

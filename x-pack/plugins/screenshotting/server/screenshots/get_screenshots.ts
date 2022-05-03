@@ -39,9 +39,13 @@ export const getScreenshots = async (
   try {
     for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
       const item = elementsPositionAndAttributes[i];
-      const endScreenshot = eventLogger.startScreenshot({
-        elementPosition: item.position,
-      });
+      const endScreenshot = eventLogger.log(
+        'screenshot capture',
+        Actions.GET_SCREENSHOT,
+        'screenshotting',
+        'read',
+        eventLogger.getPixelsFromElementPosition(item.position)
+      );
 
       const data = await browser.screenshot(item.position);
 

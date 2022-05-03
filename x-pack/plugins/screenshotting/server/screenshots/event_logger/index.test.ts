@@ -169,7 +169,13 @@ describe('Event Logger', () => {
       boundingClientRect: { width: 1350, height: 2000 },
       scroll: {},
     } as ElementPosition;
-    const endScreenshot = eventLogger.startScreenshot({ elementPosition });
+    const endScreenshot = eventLogger.log(
+      'screenshot capture test',
+      Actions.GET_SCREENSHOT,
+      'screenshotting',
+      'read',
+      eventLogger.getPixelsFromElementPosition(elementPosition)
+    );
     endScreenshot({ byte_length: 4444 });
 
     const logData = logSpy.mock.calls.map(([message, data]) => ({
@@ -182,7 +188,7 @@ describe('Event Logger', () => {
       Array [
         Object {
           "duration": undefined,
-          "message": "starting: screenshot capture",
+          "message": "starting: screenshot capture test",
           "screenshotting": Object {
             "action": "get-screenshots-start",
             "pixels": 10800000,
@@ -191,7 +197,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 2000,
-          "message": "completed: screenshot capture",
+          "message": "completed: screenshot capture test",
           "screenshotting": Object {
             "action": "get-screenshots-complete",
             "byte_length": 4444,
