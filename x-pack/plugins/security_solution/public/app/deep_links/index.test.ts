@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { getDeepLinks } from '.';
-import { AppDeepLink, Capabilities } from '../../../../../../src/core/public';
+import { AppDeepLink, Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '../types';
 import { mockGlobalState } from '../../common/mock';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../../common/constants';
@@ -142,7 +142,11 @@ describe('deepLinks', () => {
 
   describe('experimental flags', () => {
     it('should return NO users link when enableExperimental.usersEnabled === false', () => {
-      const deepLinks = getDeepLinks(mockGlobalState.app.enableExperimental);
+      const deepLinks = getDeepLinks({
+        ...mockGlobalState.app.enableExperimental,
+        usersEnabled: false,
+      });
+
       expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeFalsy();
     });
 

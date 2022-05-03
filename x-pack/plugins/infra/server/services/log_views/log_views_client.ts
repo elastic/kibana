@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
+import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUtils,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
 import {
   defaultLogViewAttributes,
   defaultLogViewId,

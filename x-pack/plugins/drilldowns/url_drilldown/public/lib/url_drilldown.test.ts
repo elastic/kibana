@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { IExternalUrl } from 'src/core/public';
-import { uiSettingsServiceMock } from 'src/core/public/mocks';
+import { IExternalUrl } from '@kbn/core/public';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import {
   IEmbeddable,
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   CONTEXT_MENU_TRIGGER,
-} from '../../../../../../src/plugins/embeddable/public';
-import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
-import { of } from '../../../../../../src/plugins/kibana_utils';
+} from '@kbn/embeddable-plugin/public';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { of } from '@kbn/kibana-utils-plugin';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
-import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 
 const mockDataPoints = [
   {

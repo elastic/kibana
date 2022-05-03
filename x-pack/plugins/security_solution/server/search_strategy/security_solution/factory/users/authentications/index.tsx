@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
@@ -20,17 +20,9 @@ import { UsersQueries } from '../../../../../../common/search_strategy/security_
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
-import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
+import { buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 
-import { buildQueryEntities as buildAuthenticationQueryEntities } from './dsl/query_entities.dsl';
-
-import {
-  authenticationsFields,
-  formatAuthenticationData,
-  formatAuthenticationEntitiesData,
-  getHits,
-  getHitsEntities,
-} from './helpers';
+import { formatAuthenticationData, getHits } from './helpers';
 
 export const authentications: SecuritySolutionFactory<UsersQueries.authentications> = {
   buildDsl: (options: UserAuthenticationsRequestOptions) => {
@@ -50,7 +42,7 @@ export const authentications: SecuritySolutionFactory<UsersQueries.authenticatio
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHits(response);
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationData(authenticationsFields, hit, auditdFieldsMap)
+      formatAuthenticationData(hit)
     );
 
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
@@ -58,47 +50,6 @@ export const authentications: SecuritySolutionFactory<UsersQueries.authenticatio
       dsl: [inspectStringifyObject(buildAuthenticationQuery(options))],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
-    return {
-      ...response,
-      inspect,
-      edges,
-      totalCount,
-      pageInfo: {
-        activePage: activePage ?? 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
-      },
-    };
-  },
-};
-
-export const authenticationsEntities: SecuritySolutionFactory<UsersQueries.authentications> = {
-  buildDsl: (options: UserAuthenticationsRequestOptions) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-
-    return buildAuthenticationQueryEntities(options);
-  },
-  parse: async (
-    options: UserAuthenticationsRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<UserAuthenticationsStrategyResponse> => {
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.stack_by_count.value', response.rawResponse);
-
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const hits: AuthenticationHit[] = getHitsEntities(response);
-    const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationEntitiesData(authenticationsFields, hit, auditdFieldsMap)
-    );
-
-    const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
-    const inspect = {
-      dsl: [inspectStringifyObject(buildAuthenticationQueryEntities(options))],
-    };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
-
     return {
       ...response,
       inspect,

@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { UsersComponentsQueryProps } from './types';
 import { AuthenticationsUserTable } from '../../../common/components/authentication/authentications_user_table';
-
+import { histogramConfigs } from '../../../common/components/authentication/helpers';
+import { AuthenticationsUserTableProps } from '../../../common/components/authentication/types';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 export const ID = 'usersAuthenticationsQuery';
+
+const HISTOGRAM_QUERY_ID = 'usersAuthenticationsHistogramQuery';
 
 export const AuthenticationsQueryTabBody = ({
   endDate,
@@ -21,19 +24,33 @@ export const AuthenticationsQueryTabBody = ({
   type,
   docValueFields,
   deleteQuery,
-}: UsersComponentsQueryProps) => {
+  userName,
+}: AuthenticationsUserTableProps) => {
   return (
-    <AuthenticationsUserTable
-      endDate={endDate}
-      filterQuery={filterQuery}
-      indexNames={indexNames}
-      setQuery={setQuery}
-      deleteQuery={deleteQuery}
-      startDate={startDate}
-      type={type}
-      skip={skip}
-      docValueFields={docValueFields}
-    />
+    <>
+      <MatrixHistogram
+        endDate={endDate}
+        filterQuery={filterQuery}
+        id={HISTOGRAM_QUERY_ID}
+        indexNames={indexNames}
+        setQuery={setQuery}
+        startDate={startDate}
+        {...histogramConfigs}
+      />
+
+      <AuthenticationsUserTable
+        endDate={endDate}
+        filterQuery={filterQuery}
+        indexNames={indexNames}
+        setQuery={setQuery}
+        deleteQuery={deleteQuery}
+        startDate={startDate}
+        type={type}
+        skip={skip}
+        docValueFields={docValueFields}
+        userName={userName}
+      />
+    </>
   );
 };
 

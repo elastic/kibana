@@ -68,6 +68,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
       fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
+      fieldTypeHelp: `${ELASTICSEARCH_DOCS}mapping-types.html`,
+      dateFieldTypeDocs: `${ELASTICSEARCH_DOCS}date.html`,
+      dateFormatsDocs: `${ELASTICSEARCH_DOCS}mapping-date-format.html`,
       documentExplorer: `${KIBANA_DOCS}document-explorer.html`,
     },
     filebeat: {
@@ -94,6 +97,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       crawlRules: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-crawl-rules`,
       curations: `${APP_SEARCH_DOCS}curations-guide.html`,
       duplicateDocuments: `${APP_SEARCH_DOCS}web-crawler-reference.html#web-crawler-reference-content-deduplication`,
+      elasticsearchIndexedEngines: `${APP_SEARCH_DOCS}elasticsearch-engines.html`,
       entryPoints: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-entry-points`,
       guide: `${APP_SEARCH_DOCS}index.html`,
       indexingDocuments: `${APP_SEARCH_DOCS}indexing-documents-guide.html`,
@@ -160,6 +164,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     logstash: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
+      inputElasticAgent: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/plugins-inputs-elastic_agent.html`,
     },
     functionbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/functionbeat/${DOC_LINK_VERSION}`,
@@ -325,10 +330,12 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
+      ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
     },
     securitySolution: {
       trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
       eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
+      blocklist: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/blocklist.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -381,6 +388,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-regression.html#ml-dfanalytics-regression-evaluation`,
       classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-classification.html#ml-dfanalytics-class-aucroc`,
       setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
+      trainedModels: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-trained-models.html`,
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -451,6 +459,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       monitorKibana: `${KIBANA_DOCS}monitoring-metricbeat.html`,
       monitorLogstash: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/monitoring-with-metricbeat.html`,
       troubleshootKibana: `${KIBANA_DOCS}monitor-troubleshooting.html`,
+    },
+    reporting: {
+      cloudMinimumRequirements: `${KIBANA_DOCS}reporting-getting-started.html#reporting-on-cloud-resource-requirements`,
     },
     security: {
       apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
@@ -580,7 +591,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       guide: `${FLEET_DOCS}index.html`,
       fleetServer: `${FLEET_DOCS}fleet-server.html`,
       fleetServerAddFleetServer: `${FLEET_DOCS}add-a-fleet-server.html`,
-      settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
+      settings: `${FLEET_DOCS}fleet-settings.html`,
       settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
       settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
       troubleshooting: `${FLEET_DOCS}fleet-troubleshooting.html`,
@@ -596,6 +607,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
       onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
+      secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -634,6 +646,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
+    },
+    kibanaUpgradeSavedObjects: {
+      resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
     },
   });
 };

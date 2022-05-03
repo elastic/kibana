@@ -18,7 +18,7 @@ import { ApiTokenTypes } from '../credentials/constants';
 
 import { EngineTypes } from './types';
 
-import { EngineLogic } from './';
+import { EngineLogic } from '.';
 
 describe('EngineLogic', () => {
   const { mount, unmount } = new LogicMounter(EngineLogic);

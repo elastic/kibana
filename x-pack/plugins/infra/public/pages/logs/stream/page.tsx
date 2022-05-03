@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { StreamPageContent } from './page_content';
 import { StreamPageHeader } from './page_header';

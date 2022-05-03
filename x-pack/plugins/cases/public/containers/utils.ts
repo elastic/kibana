@@ -11,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ToastInputFields } from 'kibana/public';
+import { ToastInputFields } from '@kbn/core/public';
 import {
   CasesFindResponse,
   CasesFindResponseRt,
@@ -32,8 +32,8 @@ import {
   CasePatchRequest,
   CaseResolveResponse,
   CaseResolveResponseRt,
-  CaseMetricsResponse,
-  CaseMetricsResponseRt,
+  SingleCaseMetricsResponse,
+  SingleCaseMetricsResponseRt,
 } from '../../common/api';
 import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
@@ -96,9 +96,9 @@ export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCaseMetricsResponse = (respCase?: CaseMetricsResponse) =>
+export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResponse) =>
   pipe(
-    CaseMetricsResponseRt.decode(respCase),
+    SingleCaseMetricsResponseRt.decode(respCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 

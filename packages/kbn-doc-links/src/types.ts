@@ -83,6 +83,7 @@ export interface DocLinks {
     readonly crawlRules: string;
     readonly curations: string;
     readonly duplicateDocuments: string;
+    readonly elasticsearchIndexedEngines: string;
     readonly entryPoints: string;
     readonly guide: string;
     readonly indexingDocuments: string;
@@ -142,6 +143,7 @@ export interface DocLinks {
   };
   readonly logstash: {
     readonly base: string;
+    readonly inputElasticAgent: string;
   };
   readonly functionbeat: {
     readonly base: string;
@@ -233,10 +235,12 @@ export interface DocLinks {
     readonly detectionsReq: string;
     readonly networkMap: string;
     readonly troubleshootGaps: string;
+    readonly ruleApiOverview: string;
   };
   readonly securitySolution: {
     readonly trustedApps: string;
     readonly eventFilters: string;
+    readonly blocklist: string;
   };
   readonly query: {
     readonly eql: string;
@@ -307,6 +311,9 @@ export interface DocLinks {
     gdalTutorial: string;
   }>;
   readonly monitoring: Record<string, string>;
+  readonly reporting: Readonly<{
+    cloudMinimumRequirements: string;
+  }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
@@ -356,6 +363,7 @@ export interface DocLinks {
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;
+    secureLogstash: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -393,5 +401,8 @@ export interface DocLinks {
   };
   readonly legal: {
     readonly privacyStatement: string;
+  };
+  readonly kibanaUpgradeSavedObjects: {
+    readonly resolveMigrationFailures: string;
   };
 }

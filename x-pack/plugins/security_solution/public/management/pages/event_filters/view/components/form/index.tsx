@@ -27,6 +27,8 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
@@ -34,8 +36,6 @@ import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import { getExceptionBuilderComponentLazy } from '../../../../../../../../lists/public';
-import type { OnChangeProps } from '../../../../../../../../lists/public';
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
 import {
@@ -88,7 +88,7 @@ interface EventFiltersFormProps {
 }
 export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
   ({ allowSelectOs = false, policies, arePoliciesLoading }) => {
-    const { http, data } = useKibana().services;
+    const { http, unifiedSearch } = useKibana().services;
 
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const exception = useEventFiltersSelector(getFormEntryStateMutable);
@@ -225,7 +225,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
         getExceptionBuilderComponentLazy({
           allowLargeValueLists: false,
           httpService: http,
-          autocompleteService: data.autocomplete,
+          autocompleteService: unifiedSearch.autocomplete,
           exceptionListItems: [exception as ExceptionListItemSchema],
           listType: EVENT_FILTER_LIST_TYPE,
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -243,7 +243,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception?.os_types,
         }),
-      [data, handleOnBuilderChange, http, indexPatterns, exception]
+      [unifiedSearch, handleOnBuilderChange, http, indexPatterns, exception]
     );
 
     const nameInputMemo = useMemo(

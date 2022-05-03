@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -27,10 +28,8 @@ import {
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export const ID = 'hostsAllQuery';
@@ -78,7 +77,6 @@ export const useAllHost = ({
   const searchSubscription = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
@@ -168,24 +166,18 @@ export const useAllHost = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.hosts,
-        indices: indexNames,
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-      });
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        docValueFields: docValueFields ?? [],
-        factoryQueryType,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        timerange,
         sort: {
           direction,
           field: sortField,
@@ -206,7 +198,6 @@ export const useAllHost = ({
     limit,
     startDate,
     sortField,
-    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {

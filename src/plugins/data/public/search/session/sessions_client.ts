@@ -7,13 +7,13 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup, SavedObjectsFindOptions } from 'kibana/public';
+import { HttpSetup, SavedObjectsFindOptions } from '@kbn/core/public';
 import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'kibana/server';
+} from '@kbn/core/server';
 import type { SearchSessionSavedObjectAttributes } from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;
 export type ISessionsClient = PublicContract<SessionsClient>;

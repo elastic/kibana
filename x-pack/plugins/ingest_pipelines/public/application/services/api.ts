@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import { FieldCopyAction, Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectConfig } from '../../../saved_objects/public';
+import { SavedObjectConfig } from '@kbn/saved-objects-plugin/public';
 
 /**
  * Extract the tag references from the object's attribute

@@ -69,14 +69,11 @@ export const ProcessTreeAlert = ({
       <EuiButtonIcon
         iconType="expand"
         aria-label="expand"
-        css={styles.alertRowItem}
         data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
         onClick={handleExpandClick}
       />
-      <EuiIcon type="alert" css={styles.alertRowItem} />
-      <EuiText size="s" css={styles.alertRuleName}>
-        {dataOrDash(name)}
-      </EuiText>
+      <EuiIcon type="alert" color="danger" />
+      <EuiText size="s">{dataOrDash(name)}</EuiText>
       <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
         {dataOrDash(status)}
       </EuiBadge>
