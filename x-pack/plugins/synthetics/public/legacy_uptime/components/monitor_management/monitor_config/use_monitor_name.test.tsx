@@ -9,7 +9,16 @@ import { defaultCore, WrappedHelper } from '../../../lib/helper/rtl_helpers';
 import { renderHook } from '@testing-library/react-hooks';
 import { useMonitorName } from './use_monitor_name';
 
-import * as hooks from '../../../hooks/use_monitor';
+import * as reactRouter from 'react-router-dom';
+
+const mockRouter = {
+  ...reactRouter,
+};
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn().mockReturnValue({}),
+}));
 
 describe('useMonitorName', () => {
   it('returns expected results', () => {
@@ -56,7 +65,7 @@ describe('useMonitorName', () => {
       },
     });
 
-    jest.spyOn(hooks, 'useMonitorId').mockReturnValue('test-id');
+    jest.spyOn(mockRouter, 'useParams').mockReturnValue({ monitorId: 'test-id' });
 
     const { result, waitForNextUpdate } = renderHook(() => useMonitorName({ search: 'Test' }), {
       wrapper: WrappedHelper,
