@@ -87,7 +87,11 @@ export const getHistogramBucketAgg = ({
       {
         name: 'field',
         type: 'field',
-        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.NUMBER_RANGE],
+        filterFieldTypes: [
+          KBN_FIELD_TYPES.NUMBER,
+          KBN_FIELD_TYPES.NUMBER_RANGE,
+          KBN_FIELD_TYPES.HISTOGRAM,
+        ],
       },
       {
         /*

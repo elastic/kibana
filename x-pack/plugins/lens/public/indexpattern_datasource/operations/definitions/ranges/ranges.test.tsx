@@ -346,6 +346,22 @@ describe('ranges', () => {
       });
     });
 
+    it('should return operation with the right type for histogram', () => {
+      expect(
+        rangeOperation.getPossibleOperationForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          displayName: 'test',
+          type: 'histogram',
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: true,
+        scale: 'interval',
+      });
+    });
+
     it('should not return operation if field type is not number', () => {
       expect(
         rangeOperation.getPossibleOperationForField({

@@ -71,6 +71,8 @@ function getFieldDefaultFormat(indexPattern: IndexPattern, field: IndexPatternFi
   return undefined;
 }
 
+const supportedTypes = ['number', 'histogram'];
+
 export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field'> = {
   type: 'range',
   displayName: i18n.translate('xpack.lens.indexPattern.intervals', {
@@ -82,7 +84,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
-      type === 'number' &&
+      supportedTypes.includes(type) &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.range)
     ) {
