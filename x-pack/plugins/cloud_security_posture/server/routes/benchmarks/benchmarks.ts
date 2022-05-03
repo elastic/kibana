@@ -111,14 +111,12 @@ export const getCspRulesStatus = async (
       enabled_status: {
         filter: {
           term: {
-            'csp_rule.attributes.enabled': true,
+            [`${cspRuleAssetSavedObjectType}.attributes.enabled`]: true,
           },
         },
       },
     },
-    searchFields: ['name'],
-    // TODO: research how to get all rules
-    perPage: 10000,
+    perPage: 0,
   });
   return cspRules;
 };
