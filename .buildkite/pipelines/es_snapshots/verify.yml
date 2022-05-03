@@ -32,7 +32,7 @@ steps:
     agents:
       queue: kibana-default
     env:
-      FILTER_CONFIG_TYPE: integration,functional
+      LIMIT_CONFIG_TYPE: integration,functional
     retry:
       automatic:
         - exit_status: '*'
