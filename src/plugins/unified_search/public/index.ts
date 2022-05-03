@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { PluginInitializerContext } from '@kbn/core/public';
 import { ConfigSchema } from '../config';
 export type { IndexPatternSelectProps } from './index_pattern_select';
@@ -28,7 +29,7 @@ export type {
   AutocompleteStart,
 } from './autocomplete';
 
-export { QuerySuggestionTypes } from './autocomplete';
+export { QuerySuggestionTypes } from './autocomplete/providers/query_suggestion_provider';
 
 import { UnifiedSearchPublicPlugin } from './plugin';
 

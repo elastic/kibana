@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import type { CoreSetup } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
-import { QuerySuggestionBasic, QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
+import type { QuerySuggestionBasic, QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 
 export type KqlQuerySuggestionProvider<T = QuerySuggestionBasic> = (
   core: CoreSetup<object, UnifiedSearchPublicPluginStart>
