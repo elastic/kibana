@@ -40,44 +40,6 @@ export const FindingsByResourceContainer = ({ dataView }: { dataView: DataView }
   </Switch>
 );
 
-export const FindingsByResourceContainer1 = ({ dataView }: { dataView: DataView }) => {
-  useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
-  const findingsGroupByResource = useFindingsByResource(
-    getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query })
-  );
-
-  return (
-    <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
-      <FindingsSearchBar
-        dataView={dataView}
-        setQuery={setUrlQuery}
-        query={urlQuery.query}
-        filters={urlQuery.filters}
-        loading={findingsGroupByResource.isLoading}
-      />
-      <PageWrapper>
-        <PageTitle>
-          <PageTitleText
-            title={
-              <FormattedMessage
-                id="xpack.csp.findings.findingsByResourceTitle"
-                defaultMessage="Findings"
-              />
-            }
-          />
-        </PageTitle>
-        <FindingsGroupBySelector type="resource" />
-        <FindingsByResourceTable
-          data={findingsGroupByResource.data}
-          error={findingsGroupByResource.error}
-          loading={findingsGroupByResource.isLoading}
-        />
-      </PageWrapper>
-    </div>
-  );
-};
-
 const LatestFindingsByResourceContainer = ({ dataView }: { dataView: DataView }) => {
   useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
