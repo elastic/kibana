@@ -27,12 +27,7 @@ export class ImportResolver {
     const pkgMap = new Map();
     for (const dir of discoverBazelPackageLocations(REPO_ROOT)) {
       const relativeBazelPackageDir = Path.relative(REPO_ROOT, dir);
-      const repoRootBazelPackageDir = Path.resolve(repoRoot, relativeBazelPackageDir);
-
-      if (!Fs.existsSync(Path.resolve(repoRootBazelPackageDir, 'package.json'))) {
-        continue;
-      }
-
+      const repoRootBazelPackageDir = Path.resolve(repoRoot, relativeBazelPackageDir);git 
       const pkg = JSON.parse(
         Fs.readFileSync(Path.resolve(repoRootBazelPackageDir, 'package.json'), 'utf8')
       );
