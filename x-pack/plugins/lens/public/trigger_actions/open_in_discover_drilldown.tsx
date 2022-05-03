@@ -127,7 +127,7 @@ export class OpenInDiscoverDrilldown
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,
-      ...config,
+      openInSameTab: !config.openInNewTab,
       filters,
       timeRange,
     });

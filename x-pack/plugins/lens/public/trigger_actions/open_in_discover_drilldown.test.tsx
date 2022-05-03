@@ -58,6 +58,6 @@ describe('open in discover drilldown', () => {
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );
-    expect(execute).toHaveBeenCalledWith(expect.objectContaining({ filters, openInNewTab: true }));
+    expect(execute).toHaveBeenCalledWith(expect.objectContaining({ filters, openInSameTab: true }));
   });
 });
