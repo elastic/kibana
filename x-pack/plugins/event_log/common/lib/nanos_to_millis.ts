@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { searchIndices } from './search_indices.mock';
-export { searchEngines } from './search_engines.mock';
+const ONE_MILLION = BigInt(1000 * 1000);
+
+export function nanosToMillis(nanos: string | number): number {
+  return Number(BigInt(nanos) / ONE_MILLION);
+}

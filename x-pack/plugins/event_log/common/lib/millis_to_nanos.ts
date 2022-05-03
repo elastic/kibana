@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { searchIndices } from './search_indices.mock';
-export { searchEngines } from './search_engines.mock';
+export function millisToNanos(millis: number): string {
+  const roundedMillis = Math.round(millis);
+  if (roundedMillis === 0) {
+    return '0';
+  }
+  return `${roundedMillis}000000`;
+}
