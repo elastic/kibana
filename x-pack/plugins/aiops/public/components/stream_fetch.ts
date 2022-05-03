@@ -7,11 +7,13 @@
 
 import type React from 'react';
 
-import { ApiAction } from '../../common/api';
+import { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
-export const streamFetch = async (
-  dispatch: React.Dispatch<ApiAction | ApiAction[]>,
-  abortCtrl: React.MutableRefObject<AbortController>
+export const streamFetch = async <T = unknown>(
+  dispatch: React.Dispatch<T | T[]>,
+  abortCtrl: React.MutableRefObject<AbortController>,
+  notifications: CoreStart['notifications']
 ) => {
   const stream = await fetch('/api/aiops/example_stream', {
     signal: abortCtrl.current.signal,
@@ -22,41 +24,43 @@ export const streamFetch = async (
 
   if (stream.body !== null) {
     const reader = stream.body.pipeThrough(new TextDecoderStream()).getReader();
-
-    let partial = '';
-    let actionBuffer: ApiAction[] = [];
     const bufferBounce = 500;
+    let partial = '';
+    let actionBuffer: T[] = [];
     let lastCall = 0;
 
     while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-
-      const full = `${partial}${value}`;
-      const parts = full.split('\n');
-      const last = parts.pop();
-
-      partial = last ?? '';
-
       try {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const full = `${partial}${value}`;
+        const parts = full.split('\n');
+        const last = parts.pop();
+
+        partial = last ?? '';
+
         const actions = parts.map((p) => JSON.parse(p));
         actionBuffer.push(...actions);
 
         const now = Date.now();
 
         if (now - lastCall >= bufferBounce && actionBuffer.length > 0) {
-          console.log('actions', actionBuffer);
           dispatch(actionBuffer);
           actionBuffer = [];
           lastCall = now;
         }
       } catch (e) {
-        console.error('failed JSON parsing/dispatching actions', e);
+        // Use the core notifications service to display a success message.
+        notifications.toasts.addError(
+          i18n.translate('aiops.streamFetchError', {
+            defaultMessage: 'An error occurred.',
+          })
+        );
       }
     }
 
     if (actionBuffer.length > 0) {
-      console.log('last actions', actionBuffer);
       dispatch(actionBuffer);
       actionBuffer.length = 0;
     }

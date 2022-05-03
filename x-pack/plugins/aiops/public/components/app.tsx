@@ -49,7 +49,7 @@ interface AiopsAppDeps {
   navigation: NavigationPublicPluginStart;
 }
 
-export const AiopsApp = ({ basename, notifications, http, navigation }: AiopsAppDeps) => {
+export const AiopsApp = ({ basename, notifications, navigation }: AiopsAppDeps) => {
   // Use React hooks to manage state.
   const [state, dispatch] = useReducer(streamReducer, initialState);
 
@@ -67,13 +67,10 @@ export const AiopsApp = ({ basename, notifications, http, navigation }: AiopsApp
     dispatch(setIsRunning(true));
 
     abortCtrl.current = new AbortController();
-    await streamFetch(dispatch, abortCtrl);
+    await streamFetch(dispatch, abortCtrl, notifications);
 
     dispatch(setIsRunning(false));
-    console.log('Response fully received');
   };
-
-  console.log('state', state);
 
   // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
