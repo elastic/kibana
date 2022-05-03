@@ -54,6 +54,13 @@ exports[`error 1`] = `
 </div>
 `;
 
+exports[`field custom label 1`] = `
+<div>
+  
+  geo.coordinates in US
+</div>
+`;
+
 exports[`warning 1`] = `
 <div>
   

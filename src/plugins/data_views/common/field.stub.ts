@@ -15,6 +15,7 @@ export const createIndexPatternFieldStub = ({ spec }: { spec: FieldSpec }): Data
 export const stubFieldSpecMap: Record<string, FieldSpec> = {
   'machine.os': {
     name: 'machine.os',
+    customLabel: 'OS',
     esTypes: ['text'],
     type: 'string',
     aggregatable: false,

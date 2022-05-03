@@ -28,6 +28,14 @@ function getValueFormatter(indexPattern?: DataView, key?: string) {
   return indexPattern.getFormatterForField(field);
 }
 
+export function getFieldDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
+  const { key } = filter.meta;
+  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
+  if (!indexPattern) return '';
+  const field = indexPattern.fields.find((f: DataViewField) => f.name === key);
+  return field?.customLabel ?? '';
+}
+
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
   const { key, value } = filter.meta;
   if (typeof value === 'function') {

@@ -16,6 +16,7 @@ import type { FilterLabelStatus } from '../../filter_item';
 export interface FilterLabelProps {
   filter: Filter;
   valueLabel?: string;
+  fieldLabel?: string;
   filterLabelStatus?: FilterLabelStatus;
   hideAlias?: boolean;
 }
@@ -25,6 +26,7 @@ export interface FilterLabelProps {
 export default function FilterLabel({
   filter,
   valueLabel,
+  fieldLabel,
   filterLabelStatus,
   hideAlias,
 }: FilterLabelProps) {
@@ -59,14 +61,14 @@ export default function FilterLabel({
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {getValue(`${existsOperator.message}`)}
+          {fieldLabel || filter.meta.key}: {getValue(`${existsOperator.message}`)}
         </Fragment>
       );
     case FILTERS.PHRASES:
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {getValue(`${isOneOfOperator.message} ${valueLabel}`)}
+          {fieldLabel || filter.meta.key}: {getValue(`${isOneOfOperator.message} ${valueLabel}`)}
         </Fragment>
       );
     case FILTERS.QUERY_STRING:
@@ -81,7 +83,7 @@ export default function FilterLabel({
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {getValue(valueLabel)}
+          {fieldLabel || filter.meta.key}: {getValue(valueLabel)}
         </Fragment>
       );
     default:
