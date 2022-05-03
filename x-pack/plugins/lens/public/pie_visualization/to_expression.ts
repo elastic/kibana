@@ -10,6 +10,7 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
@@ -21,7 +22,6 @@ import {
   PieVisualizationState,
   EmptySizeRatios,
   LegendDisplay,
-  DEFAULT_LEGEND_SIZE,
 } from '../../common';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 

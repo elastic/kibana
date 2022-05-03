@@ -22,7 +22,8 @@ import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
 import type { DatasourceLayers, OperationDescriptor } from '../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { layerTypes, DEFAULT_LEGEND_SIZE } from '../../common';
+import { DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
+import { layerTypes } from '../../common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function exampleState(): HeatmapVisualizationState {

@@ -9,7 +9,7 @@ import React from 'react';
 import { LegendSizeSettings } from './legend_size_settings';
 import { EuiSuperSelect } from '@elastic/eui';
 import { shallow } from 'enzyme';
-import { DEFAULT_LEGEND_SIZE, LegendSizes } from '../../common';
+import { DEFAULT_LEGEND_SIZE, LegendSizes } from '@kbn/visualizations-plugin/public';
 
 describe('legend size settings', () => {
   it('renders nothing if not vertical legend', () => {

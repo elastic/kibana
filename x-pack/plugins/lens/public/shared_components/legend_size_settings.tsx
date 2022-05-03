@@ -8,7 +8,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { DEFAULT_LEGEND_SIZE, LegendSizes } from '../../common';
+import { DEFAULT_LEGEND_SIZE, LegendSizes } from '@kbn/visualizations-plugin/public';
 
 interface LegendSizeSettingsProps {
   legendSize: number | undefined;

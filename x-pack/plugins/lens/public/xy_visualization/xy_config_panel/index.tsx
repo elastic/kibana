@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
-import { LegendSizes } from '../../../common';
+import { LegendSizes } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
 import { isHorizontalChart } from '../state_helpers';

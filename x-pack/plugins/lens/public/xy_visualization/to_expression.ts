@@ -11,6 +11,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { ValidLayer, YConfig } from '@kbn/expression-xy-plugin/common';
+import { DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 import {
   State,
   XYDataLayerConfig,
@@ -29,7 +30,7 @@ import {
   getAnnotationsLayers,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
-import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
+import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,

@@ -15,6 +15,7 @@ import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/color
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { HeatmapIcon } from '@kbn/expression-heatmap-plugin/public';
+import { DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
@@ -31,7 +32,7 @@ import {
 import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
-import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
+import { layerTypes } from '../../common';
 
 const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Magnitude',

@@ -18,14 +18,10 @@ import {
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendSizes } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import {
-  LegendDisplay,
-  LegendSizes,
-  PieVisualizationState,
-  SharedPieLayerState,
-} from '../../common';
+import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import {
   ToolbarPopover,
