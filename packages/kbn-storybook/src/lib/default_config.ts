@@ -18,7 +18,7 @@ const toPath = (_path: string) => path.join(REPO_ROOT, _path);
 // This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
 // changes to packages to cause a refresh in Storybook.
 const IGNORE_PATTERN =
-  '[/\\]node_modules[/\\](?!@kbn[/\\][^/\\]+[/\\](?!node_modules)([^/\\]+))([^/\\]+[/\\][^/\\]+)';
+  /[/\\]node_modules[/\\](?!@kbn[/\\][^/\\]+[/\\](?!node_modules)([^/\\]+))([^/\\]+[/\\][^/\\]+)/;
 
 export const defaultConfig: StorybookConfig = {
   addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
