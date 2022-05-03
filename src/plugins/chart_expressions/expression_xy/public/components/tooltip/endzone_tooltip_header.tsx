@@ -26,7 +26,7 @@ export const EndzoneTooltipHeader: FC<EndzoneTooltipHeaderProps> = ({ value }) =
         <EuiIcon type="iInCircle" />
       </EuiFlexItem>
       <EuiFlexItem>
-        {i18n.translate('charts.partialData.bucketTooltipText', {
+        {i18n.translate('expressionXY.partialData.bucketTooltipText', {
           defaultMessage:
             'The selected time range does not include this entire bucket. It might contain partial data.',
         })}
