@@ -7,21 +7,11 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { ControlGroupInput, getDefaultControlGroupInput } from '../../../controls/common';
-import { RawControlGroupAttributes } from '../types';
-
-export const getDefaultDashboardControlGroupInput = getDefaultControlGroupInput;
-
-export const controlGroupInputToRawAttributes = (
-  controlGroupInput: Omit<ControlGroupInput, 'id'>
-): RawControlGroupAttributes => {
-  return {
-    controlStyle: controlGroupInput.controlStyle,
-    chainingSystem: controlGroupInput.chainingSystem,
-    panelsJSON: JSON.stringify(controlGroupInput.panels),
-    ignoreParentSettingsJSON: JSON.stringify(controlGroupInput.ignoreParentSettings),
-  };
-};
+import deepEqual from 'fast-deep-equal';
+import { pick } from 'lodash';
+import { ControlGroupInput } from '..';
+import { DEFAULT_CONTROL_STYLE, DEFAULT_CONTROL_WIDTH } from './control_group_constants';
+import { PersistableControlGroupInput, RawControlGroupAttributes } from './types';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
@@ -32,7 +22,48 @@ const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   }
 };
 
-export const rawAttributesToControlGroupInput = (
+export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => ({
+  panels: {},
+  defaultControlWidth: DEFAULT_CONTROL_WIDTH,
+  controlStyle: DEFAULT_CONTROL_STYLE,
+  chainingSystem: 'HIERARCHICAL',
+  ignoreParentSettings: {
+    ignoreFilters: false,
+    ignoreQuery: false,
+    ignoreTimerange: false,
+    ignoreValidations: false,
+  },
+});
+
+export const persistableControlGroupInputIsEqual = (
+  a: PersistableControlGroupInput | undefined,
+  b: PersistableControlGroupInput | undefined
+) => {
+  const defaultInput = getDefaultControlGroupInput();
+  const inputA = {
+    ...defaultInput,
+    ...pick(a, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
+  };
+  const inputB = {
+    ...defaultInput,
+    ...pick(b, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
+  };
+  if (deepEqual(inputA, inputB)) return true;
+  return false;
+};
+
+export const controlGroupInputToRawControlGroupAttributes = (
+  controlGroupInput: Omit<ControlGroupInput, 'id'>
+): RawControlGroupAttributes => {
+  return {
+    controlStyle: controlGroupInput.controlStyle,
+    chainingSystem: controlGroupInput.chainingSystem,
+    panelsJSON: JSON.stringify(controlGroupInput.panels),
+    ignoreParentSettingsJSON: JSON.stringify(controlGroupInput.ignoreParentSettings),
+  };
+};
+
+export const rawControlGroupAttributesToControlGroupInput = (
   rawControlGroupAttributes: RawControlGroupAttributes
 ): Omit<ControlGroupInput, 'id'> | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
@@ -50,7 +81,7 @@ export const rawAttributesToControlGroupInput = (
   };
 };
 
-export const rawAttributesToSerializable = (
+export const rawControlGroupAttributesToSerializable = (
   rawControlGroupAttributes: Omit<RawControlGroupAttributes, 'id'>
 ): SerializableRecord => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
@@ -62,7 +93,7 @@ export const rawAttributesToSerializable = (
   };
 };
 
-export const serializableToRawAttributes = (
+export const serializableToRawControlGroupAttributes = (
   serializable: SerializableRecord
 ): Omit<RawControlGroupAttributes, 'id' | 'type'> => {
   return {

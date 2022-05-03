@@ -17,6 +17,7 @@ import { shallow } from 'enzyme';
 
 import { Feature } from 'geojson';
 import { MVTSingleLayerVectorSource } from '../../../sources/mvt_single_layer_vector_source';
+import { IVectorSource } from '../../../sources/vector_source';
 import {
   TiledSingleLayerVectorSourceDescriptor,
   VectorLayerDescriptor,
@@ -91,5 +92,49 @@ describe('getFeatureById', () => {
     const layer: MvtVectorLayer = createLayer({}, {});
     const feature = layer.getFeatureById('foobar') as Feature;
     expect(feature).toEqual(null);
+  });
+});
+
+describe('isInitialDataLoadComplete', () => {
+  const sourceDataRequestDescriptor = {
+    data: {},
+    dataId: 'source',
+    dataRequestMeta: {},
+    dataRequestMetaAtStart: undefined,
+    dataRequestToken: undefined,
+  };
+  test('should return false when tile loading has not started', () => {
+    const layer = new MvtVectorLayer({
+      customIcons: [],
+      layerDescriptor: {
+        __dataRequests: [sourceDataRequestDescriptor],
+      } as unknown as VectorLayerDescriptor,
+      source: {} as unknown as IVectorSource,
+    });
+    expect(layer.isInitialDataLoadComplete()).toBe(false);
+  });
+
+  test('should return false when tiles are loading', () => {
+    const layer = new MvtVectorLayer({
+      customIcons: [],
+      layerDescriptor: {
+        __areTilesLoaded: false,
+        __dataRequests: [sourceDataRequestDescriptor],
+      } as unknown as VectorLayerDescriptor,
+      source: {} as unknown as IVectorSource,
+    });
+    expect(layer.isInitialDataLoadComplete()).toBe(false);
+  });
+
+  test('should return true when tiles are loaded', () => {
+    const layer = new MvtVectorLayer({
+      customIcons: [],
+      layerDescriptor: {
+        __areTilesLoaded: true,
+        __dataRequests: [sourceDataRequestDescriptor],
+      } as unknown as VectorLayerDescriptor,
+      source: {} as unknown as IVectorSource,
+    });
+    expect(layer.isInitialDataLoadComplete()).toBe(true);
   });
 });

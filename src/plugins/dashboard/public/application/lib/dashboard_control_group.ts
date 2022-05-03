@@ -11,16 +11,17 @@ import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
-import { pick } from 'lodash';
-import { DashboardContainer, DashboardContainerControlGroupInput } from '..';
+import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
 import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
 import {
-  controlGroupInputToRawAttributes,
-  getDefaultDashboardControlGroupInput,
-  rawAttributesToControlGroupInput,
-} from '../../../common';
+  controlGroupInputToRawControlGroupAttributes,
+  getDefaultControlGroupInput,
+  persistableControlGroupInputIsEqual,
+  RawControlGroupAttributes,
+  rawControlGroupAttributesToControlGroupInput,
+} from '../../../../controls/common';
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
 }
@@ -45,7 +46,7 @@ export const syncDashboardControlGroup = async ({
   const subscriptions = new Subscription();
 
   const isControlGroupInputEqual = () =>
-    controlGroupInputIsEqual(
+    persistableControlGroupInputIsEqual(
       controlGroup.getInput(),
       dashboardContainer.getInput().controlGroupInput
     );
@@ -92,7 +93,7 @@ export const syncDashboardControlGroup = async ({
     dashboardContainer
       .getInput$()
       .pipe(
-        distinctUntilChanged((a, b) =>
+        distinctUntilChanged((a: DashboardContainerInput, b: DashboardContainerInput) =>
           distinctUntilDiffCheck<DashboardContainerInput>(a, b, dashboardRefetchDiff)
         )
       )
@@ -122,7 +123,7 @@ export const syncDashboardControlGroup = async ({
       .subscribe(() => {
         if (!isControlGroupInputEqual()) {
           if (!dashboardContainer.getInput().controlGroupInput) {
-            controlGroup.updateInput(getDefaultDashboardControlGroupInput());
+            controlGroup.updateInput(getDefaultControlGroupInput());
             return;
           }
           controlGroup.updateInput({ ...dashboardContainer.getInput().controlGroupInput });
@@ -152,39 +153,22 @@ export const syncDashboardControlGroup = async ({
   };
 };
 
-export const controlGroupInputIsEqual = (
-  a: DashboardContainerControlGroupInput | undefined,
-  b: DashboardContainerControlGroupInput | undefined
-) => {
-  const defaultInput = getDefaultDashboardControlGroupInput();
-  const inputA = {
-    ...defaultInput,
-    ...pick(a, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
-  };
-  const inputB = {
-    ...defaultInput,
-    ...pick(b, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
-  };
-  if (deepEqual(inputA, inputB)) return true;
-  return false;
-};
-
 export const serializeControlGroupToDashboardSavedObject = (
   dashboardSavedObject: DashboardSavedObject,
   dashboardState: DashboardState
 ) => {
   // only save to saved object if control group is not default
   if (
-    controlGroupInputIsEqual(
+    persistableControlGroupInputIsEqual(
       dashboardState.controlGroupInput,
-      getDefaultDashboardControlGroupInput()
+      getDefaultControlGroupInput()
     )
   ) {
     dashboardSavedObject.controlGroupInput = undefined;
     return;
   }
   if (dashboardState.controlGroupInput) {
-    dashboardSavedObject.controlGroupInput = controlGroupInputToRawAttributes(
+    dashboardSavedObject.controlGroupInput = controlGroupInputToRawControlGroupAttributes(
       dashboardState.controlGroupInput
     );
   }
@@ -194,7 +178,9 @@ export const deserializeControlGroupFromDashboardSavedObject = (
   dashboardSavedObject: DashboardSavedObject
 ): Omit<ControlGroupInput, 'id'> | undefined => {
   if (!dashboardSavedObject.controlGroupInput) return;
-  return rawAttributesToControlGroupInput(dashboardSavedObject.controlGroupInput);
+  return rawControlGroupAttributesToControlGroupInput(
+    dashboardSavedObject.controlGroupInput as RawControlGroupAttributes
+  );
 };
 
 export const combineDashboardFiltersWithControlGroupFilters = (
