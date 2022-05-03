@@ -46,6 +46,7 @@ import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
+import { useIsFirstTimeAgentUser } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 
 import {
@@ -142,6 +143,8 @@ export function Detail() {
     resendRequest: refreshPackageInfo,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
+  const { isFirstTimeAgentUser, isLoading: firstTimeUserLoading } = useIsFirstTimeAgentUser();
+
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
 
@@ -155,7 +158,10 @@ export function Detail() {
     }
   }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
 
-  const isLoading = (packageInfoLoading && !packageIsInitialRequest) || permissionCheck.isLoading;
+  const isLoading =
+    (packageInfoLoading && !packageIsInitialRequest) ||
+    permissionCheck.isLoading ||
+    firstTimeUserLoading;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
@@ -274,6 +280,7 @@ export function Detail() {
         integration,
         isCloud,
         isExperimentalAddIntegrationPageEnabled,
+        isFirstTimeAgentUser,
         pkgkey,
       });
 
@@ -286,6 +293,7 @@ export function Detail() {
       integration,
       isCloud,
       isExperimentalAddIntegrationPageEnabled,
+      isFirstTimeAgentUser,
       pathname,
       pkgkey,
       search,
