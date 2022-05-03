@@ -29468,7 +29468,6 @@
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusActive": "活动",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusDropdownMenuLabel": "更改规则状态或暂停",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusError": "错误",
-    "xpack.triggersActionsUI.sections.rulesList.ruleStatusFilterLabel": "上次响应",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusLicenseError": "许可证错误",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusOk": "确定",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusPending": "待处理",
