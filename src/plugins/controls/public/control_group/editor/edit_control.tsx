@@ -18,7 +18,7 @@ import { ControlEditor } from './control_editor';
 import { pluginServices } from '../../services';
 import { forwardAllContext } from './forward_all_context';
 import { ControlGroupStrings } from '../control_group_strings';
-import { IEditableControlFactory, ControlInput } from '../../types';
+import { IEditableControlFactory, ControlInput, DataControlInput } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 

@@ -10,7 +10,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { OptionsListEditor } from './options_list_editor';
-import { ControlEmbeddable, IEditableControlFactory } from '../../types';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import {
   createOptionsListExtract,
@@ -44,6 +44,15 @@ export class OptionsListEmbeddableFactory
       newInput.selectedOptions = [];
     }
     return newInput;
+  };
+
+  public isFieldCompatible = (dataControlField: DataControlField) => {
+    if (
+      (dataControlField.field.aggregatable && dataControlField.field.type === 'string') ||
+      dataControlField.field.type === 'boolean'
+    ) {
+      dataControlField.compatibleControlTypes.push(this.type);
+    }
   };
 
   public controlEditorComponent = OptionsListEditor;

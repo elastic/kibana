@@ -16,9 +16,9 @@ import {
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ControlInput } from '../common/types';
+import { ControlInput, DataControlInput } from '../common/types';
 import { ControlsService } from './services/controls';
 
 export interface CommonControlOutput {
@@ -28,7 +28,11 @@ export interface CommonControlOutput {
 
 export type ControlOutput = EmbeddableOutput & CommonControlOutput;
 
-export type ControlFactory = EmbeddableFactory<ControlInput, ControlOutput, ControlEmbeddable>;
+export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFactory<
+  ControlInput,
+  ControlOutput,
+  ControlEmbeddable
+>;
 
 export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
@@ -44,7 +48,9 @@ export interface IEditableControlFactory<T extends ControlInput = ControlInput> 
     newState: Partial<T>,
     embeddable?: ControlEmbeddable<T>
   ) => Partial<T>;
+  isFieldCompatible?: (dataControlField: DataControlField) => void; // reducer
 }
+
 export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
   getRelevantDataViewId?: () => string | undefined;
@@ -54,6 +60,17 @@ export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   setDefaultTitle: (defaultTitle: string) => void;
   selectedField: string | undefined;
   setSelectedField: (newField: string | undefined) => void;
+}
+
+export interface DataControlField {
+  field: DataViewField;
+  parentFieldName?: string;
+  childFieldName?: string;
+  compatibleControlTypes: string[];
+}
+
+export interface DataControlFieldRegistry {
+  [fieldName: string]: DataControlField;
 }
 
 /**

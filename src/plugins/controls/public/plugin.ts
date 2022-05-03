@@ -65,6 +65,7 @@ export class ControlsPlugin
       factoryDef.controlEditorComponent;
     (factory as IEditableControlFactory<I>).presaveTransformFunction =
       factoryDef.presaveTransformFunction;
+    (factory as IEditableControlFactory<I>).isFieldCompatible = factoryDef.isFieldCompatible;
   }
 
   public setup(
