@@ -1580,6 +1580,8 @@ var _ciStatsCore = __webpack_require__("../../node_modules/@kbn/ci-stats-core/ta
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
 
 function limitMetaStrings(meta) {
   return Object.fromEntries(Object.entries(meta).map(([key, value]) => {
@@ -1782,7 +1784,8 @@ class CiStatsReporter {
           groupType: group.type
         },
         bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
-        body: buffer.join('\n')
+        body: buffer.join('\n'),
+        timeout: 5 * MINUTE
       });
       buffer.length = 0;
       bufferBytes = 0;
@@ -1851,7 +1854,8 @@ class CiStatsReporter {
     body,
     bodyDesc,
     path,
-    query
+    query,
+    timeout = 60 * SECOND
   }) {
     let attempt = 0;
     const maxAttempts = 5;
@@ -1879,7 +1883,8 @@ class CiStatsReporter {
           adapter: _http.default,
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,
-          maxContentLength: Infinity
+          maxContentLength: Infinity,
+          timeout
         });
         return resp.data;
       } catch (error) {
