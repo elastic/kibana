@@ -64,10 +64,10 @@ export const RESULT = i18n.translate(
   }
 );
 
-export const SYSTEM_ID = i18n.translate(
-  'xpack.csp.findings.findingsTable.findingsTableColumn.systemIdColumnLabel',
+export const CLUSTER_ID = i18n.translate(
+  'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
   {
-    defaultMessage: 'System ID',
+    defaultMessage: 'Cluster ID',
   }
 );
 
