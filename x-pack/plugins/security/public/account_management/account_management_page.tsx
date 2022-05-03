@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
@@ -22,6 +23,11 @@ export const AccountManagementPage: FunctionComponent = () => {
 
   const currentUser = useCurrentUser();
   const userProfile = useUserProfile<Pick<UserProfileProps['data'], 'avatar'>>('avatar');
+
+  const error = currentUser.error || userProfile.error;
+  if (error) {
+    return <EuiEmptyPrompt iconType="alert" title={<h2>{error.message}</h2>} />;
+  }
 
   if (!currentUser.value || !userProfile.value) {
     return null;
