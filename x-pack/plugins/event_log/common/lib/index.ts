@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { searchIndices } from './search_indices.mock';
-export { searchEngines } from './search_engines.mock';
+export { millisToNanos } from './millis_to_nanos';
+export { nanosToMillis } from './nanos_to_millis';
