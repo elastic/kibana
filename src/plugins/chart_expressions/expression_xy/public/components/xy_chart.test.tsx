@@ -27,6 +27,7 @@ import {
   LineAnnotation,
   LineSeries,
   Position,
+  RectAnnotation,
   ScaleType,
   SeriesNameFn,
   Settings,
@@ -53,6 +54,7 @@ import {
 import { XYChart, XYChartRenderProps } from './xy_chart';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { Annotations } from './annotations';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -119,6 +121,7 @@ describe('XYChart component', () => {
       onClickValue,
       onSelectRange,
       syncColors: false,
+      syncTooltips: false,
       useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
     };
@@ -2533,30 +2536,35 @@ describe('XYChart component', () => {
   });
 
   describe('annotations', () => {
-    const sampleStyledAnnotation: EventAnnotationOutput = {
+    const customLineStaticAnnotation: EventAnnotationOutput = {
       time: '2022-03-18T08:25:00.000Z',
       label: 'Event 1',
       icon: 'triangle',
-      type: 'manual_event_annotation',
+      type: 'manual_point_event_annotation' as const,
       color: 'red',
       lineStyle: 'dashed',
       lineWidth: 3,
     };
-    const sampleAnnotationLayers: AnnotationLayerConfigResult[] = [
-      {
-        type: 'annotationLayer',
-        layerType: LayerTypes.ANNOTATIONS,
-        layerId: 'annotation',
-        annotations: [
-          {
-            time: '2022-03-18T08:25:17.140Z',
-            label: 'Annotation',
-            type: 'manual_event_annotation',
-          },
-        ],
-      },
-    ];
-    function sampleArgsWithAnnotation(annotationLayers = sampleAnnotationLayers) {
+    const defaultLineStaticAnnotation = {
+      time: '2022-03-18T08:25:17.140Z',
+      label: 'Annotation',
+      type: 'manual_point_event_annotation' as const,
+    };
+    const defaultRangeStaticAnnotation = {
+      time: '2022-03-18T08:25:17.140Z',
+      endTime: '2022-03-31T08:25:17.140Z',
+      label: 'Event range',
+      type: 'manual_range_event_annotation' as const,
+    };
+    const createLayerWithAnnotations = (
+      annotations: EventAnnotationOutput[] = [defaultLineStaticAnnotation]
+    ): AnnotationLayerConfigResult => ({
+      type: 'annotationLayer',
+      layerType: LayerTypes.ANNOTATIONS,
+      layerId: 'annotation',
+      annotations,
+    });
+    function sampleArgsWithAnnotations(annotationLayers = [createLayerWithAnnotations()]) {
       const { args } = sampleArgs();
       return {
         data: dateHistogramData,
@@ -2566,34 +2574,39 @@ describe('XYChart component', () => {
         } as XYArgs,
       };
     }
-    test('should render basic annotation', () => {
-      const { data, args } = sampleArgsWithAnnotation();
+    test('should render basic line annotation', () => {
+      const { data, args } = sampleArgsWithAnnotations();
       const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
     });
-    test('should render simplified annotation when hide is true', () => {
-      const { data, args } = sampleArgsWithAnnotation();
-      (args.layers[0] as AnnotationLayerConfigResult).hide = true;
+    test('should render basic range annotation', () => {
+      const { data, args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
+      ]);
+      const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
+      expect(component.find(RectAnnotation)).toMatchSnapshot();
+    });
+    test('should render simplified annotations when hide is true', () => {
+      const { data, args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
+      ]);
+      (args.layers[1] as AnnotationLayerConfigResult).hide = true;
       const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
+      expect(component.find('RectAnnotation')).toMatchSnapshot();
     });
 
-    test('should render grouped annotations preserving the shared styles', () => {
-      const { data, args } = sampleArgsWithAnnotation([
-        {
-          type: 'annotationLayer',
-          layerType: LayerTypes.ANNOTATIONS,
-          layerId: 'annotation',
-          annotations: [
-            sampleStyledAnnotation,
-            { ...sampleStyledAnnotation, time: '2022-03-18T08:25:00.020Z', label: 'Event 2' },
-            {
-              ...sampleStyledAnnotation,
-              time: '2022-03-18T08:25:00.001Z',
-              label: 'Event 3',
-            },
-          ],
-        },
+    test('should render grouped line annotations preserving the shared styles', () => {
+      const { data, args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([
+          customLineStaticAnnotation,
+          { ...customLineStaticAnnotation, time: '2022-03-18T08:25:00.020Z', label: 'Event 2' },
+          {
+            ...customLineStaticAnnotation,
+            time: '2022-03-18T08:25:00.001Z',
+            label: 'Event 3',
+          },
+        ]),
       ]);
       const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
       const groupedAnnotation = component.find(LineAnnotation);
@@ -2613,30 +2626,20 @@ describe('XYChart component', () => {
         ' Event 1 2022-03-18T08:25:00.000Z Event 3 2022-03-18T08:25:00.001Z Event 2 2022-03-18T08:25:00.020Z'
       );
     });
-    test('should render grouped annotations with default styles', () => {
-      const { data, args } = sampleArgsWithAnnotation([
-        {
-          type: 'annotationLayer',
-          layerType: LayerTypes.ANNOTATIONS,
-          layerId: 'annotation',
-          annotations: [sampleStyledAnnotation],
-        },
-        {
-          type: 'annotationLayer',
-          layerType: LayerTypes.ANNOTATIONS,
-          layerId: 'annotation',
-          annotations: [
-            {
-              ...sampleStyledAnnotation,
-              icon: 'square',
-              color: 'blue',
-              lineStyle: 'dotted',
-              lineWidth: 10,
-              time: '2022-03-18T08:25:00.001Z',
-              label: 'Event 2',
-            },
-          ],
-        },
+    test('should render grouped line annotations with default styles', () => {
+      const { data, args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([customLineStaticAnnotation]),
+        createLayerWithAnnotations([
+          {
+            ...customLineStaticAnnotation,
+            icon: 'square',
+            color: 'blue',
+            lineStyle: 'dotted',
+            lineWidth: 10,
+            time: '2022-03-18T08:25:00.001Z',
+            label: 'Event 2',
+          },
+        ]),
       ]);
       const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
       const groupedAnnotation = component.find(LineAnnotation);
@@ -2646,27 +2649,26 @@ describe('XYChart component', () => {
       expect(groupedAnnotation).toMatchSnapshot();
     });
     test('should not render hidden annotations', () => {
-      const { data, args } = sampleArgsWithAnnotation([
-        {
-          type: 'annotationLayer',
-          layerType: LayerTypes.ANNOTATIONS,
-          layerId: 'annotation',
-          annotations: [
-            sampleStyledAnnotation,
-            { ...sampleStyledAnnotation, time: '2022-03-18T08:30:00.020Z', label: 'Event 2' },
-            {
-              ...sampleStyledAnnotation,
-              time: '2022-03-18T08:35:00.001Z',
-              label: 'Event 3',
-              isHidden: true,
-            },
-          ],
-        },
+      const { data, args } = sampleArgsWithAnnotations([
+        createLayerWithAnnotations([
+          customLineStaticAnnotation,
+          { ...customLineStaticAnnotation, time: '2022-03-18T08:30:00.020Z', label: 'Event 2' },
+          {
+            ...customLineStaticAnnotation,
+            time: '2022-03-18T08:35:00.001Z',
+            label: 'Event 3',
+            isHidden: true,
+          },
+          defaultRangeStaticAnnotation,
+          { ...defaultRangeStaticAnnotation, label: 'range', isHidden: true },
+        ]),
       ]);
       const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
-      const annotations = component.find(LineAnnotation);
+      const lineAnnotations = component.find(LineAnnotation);
+      const rectAnnotations = component.find(Annotations).find(RectAnnotation);
 
-      expect(annotations.length).toEqual(2);
+      expect(lineAnnotations.length).toEqual(2);
+      expect(rectAnnotations.length).toEqual(1);
     });
   });
 });
