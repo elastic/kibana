@@ -67,8 +67,7 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject, ignoreV
       value={value ?? ['', '']}
       onChange={onChangeComplete}
       fieldFormatter={fieldFormatter}
-      ignoreValidation={ignoreValidation}
-      isInvalid={isInvalid}
+      isInvalid={!ignoreValidation && isInvalid}
     />
   );
 };

@@ -299,23 +299,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
-    // const hasBothSelections = hasLowerSelection && hasUpperSelection;
-    // const hasInvalidSelection =
-    //   !ignoreParentSettings?.ignoreValidations &&
-    //   hasBothSelections &&
-    //   parseFloat(selectedMin) > parseFloat(selectedMax);
-    // const isLowerSelectionOutOfRange =
-    //   hasLowerSelection && parseFloat(selectedMin) > parseFloat(availableMax);
-    // const isUpperSelectionOutOfRange =
-    //   hasUpperSelection && parseFloat(selectedMax) < parseFloat(availableMin);
-    // const isSelectionOutOfRange =
-    //   (!ignoreParentSettings?.ignoreValidations && hasData && isLowerSelectionOutOfRange) ||
-    //   isUpperSelectionOutOfRange;
+
     const { dataView, field } = await this.getCurrentDataViewAndField();
 
-    // if (!hasData || !hasEitherSelection || hasInvalidSelection || isSelectionOutOfRange) {
     if (!hasData || !hasEitherSelection) {
-      this.updateComponentState({ loading: false });
+      this.updateComponentState({
+        loading: false,
+        isInvalid: !ignoreParentSettings?.ignoreValidations && hasEitherSelection,
+      });
       this.updateOutput({ filters: [], dataViews: [dataView], loading: false });
       return;
     }
@@ -349,7 +340,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       const { min, max } = await this.fetchMinMax({ dataView, field, filters, query });
 
       if (!min && !max) {
-        this.updateComponentState({ loading: false, isInvalid: false });
+        this.updateComponentState({ loading: false, isInvalid: true });
         this.updateOutput({
           filters: [],
           dataViews: [dataView],
@@ -359,7 +350,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       }
     }
 
-    this.updateComponentState({ loading: false, isInvalid: true });
+    this.updateComponentState({ loading: false, isInvalid: false });
     this.updateOutput({ filters: [rangeFilter], dataViews: [dataView], loading: false });
   };
 

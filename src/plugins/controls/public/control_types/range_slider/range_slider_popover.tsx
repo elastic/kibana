@@ -23,9 +23,10 @@ import {
 import { RangeSliderStrings } from './range_slider_strings';
 import { RangeValue } from './types';
 
+const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
+
 export interface Props {
   id: string;
-  ignoreValidation?: boolean;
   isInvalid?: boolean;
   isLoading?: boolean;
   min: string;
@@ -38,7 +39,6 @@ export interface Props {
 
 export const RangeSliderPopover: FC<Props> = ({
   id,
-  ignoreValidation,
   isInvalid,
   isLoading,
   min,
@@ -59,6 +59,8 @@ export const RangeSliderPopover: FC<Props> = ({
 
   if (!hasAvailableRange) {
     helpText = RangeSliderStrings.popover.getNoAvailableDataHelpText();
+  } else if (isInvalid) {
+    helpText = RangeSliderStrings.popover.getNoDataHelpText();
   }
 
   const hasLowerBoundSelection = value[0] !== '';
@@ -72,12 +74,6 @@ export const RangeSliderPopover: FC<Props> = ({
   // EuiDualRange can only handle integers as min/max
   const roundedMin = hasAvailableRange ? Math.floor(minValue) : minValue;
   const roundedMax = hasAvailableRange ? Math.ceil(maxValue) : maxValue;
-
-  const isSelectionInvalid = !ignoreValidation && hasAvailableRange && isInvalid;
-
-  if (isSelectionInvalid) {
-    helpText = RangeSliderStrings.popover.getNoDataHelpText();
-  }
 
   if (lowerBoundValue > upperBoundValue) {
     errorMessage = RangeSliderStrings.errors.getUpperLessThanLowerErrorMessage();
@@ -129,7 +125,7 @@ export const RangeSliderPopover: FC<Props> = ({
             controlOnly
             fullWidth
             className={`rangeSliderAnchor__fieldNumber ${
-              hasLowerBoundSelection && isInvalid ? 'rangeSliderAnchor__fieldNumber--invalid' : ''
+              hasLowerBoundSelection && isInvalid ? INVALID_CLASS : ''
             }`}
             value={hasLowerBoundSelection ? lowerBoundValue : ''}
             onChange={(event) => {
@@ -151,7 +147,7 @@ export const RangeSliderPopover: FC<Props> = ({
             controlOnly
             fullWidth
             className={`rangeSliderAnchor__fieldNumber ${
-              hasUpperBoundSelection && isInvalid ? 'rangeSliderAnchor__fieldNumber--invalid' : ''
+              hasUpperBoundSelection && isInvalid ? INVALID_CLASS : ''
             }`}
             value={hasUpperBoundSelection ? upperBoundValue : ''}
             onChange={(event) => {
