@@ -1000,7 +1000,7 @@ export class RulesClient {
       snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
     };
 
-    const tagsBuckets = resp.aggregations.tags.buckets;
+    const tagsBuckets = resp.aggregations.tags?.buckets || [];
     ret.ruleTags = tagsBuckets.map((bucket) => bucket.key);
 
     return ret;

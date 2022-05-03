@@ -32,14 +32,21 @@ export async function loadRuleAggregations({
   typesFilter,
   actionTypesFilter,
   ruleStatusesFilter,
+  tagsFilter,
 }: {
   http: HttpSetup;
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
   ruleStatusesFilter?: string[];
+  tagsFilter?: string[];
 }): Promise<RuleAggregations> {
-  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, ruleStatusesFilter });
+  const filters = mapFiltersToKql({
+    typesFilter,
+    actionTypesFilter,
+    ruleStatusesFilter,
+    tagsFilter,
+  });
   const res = await http.get<AsApiContract<RuleAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {

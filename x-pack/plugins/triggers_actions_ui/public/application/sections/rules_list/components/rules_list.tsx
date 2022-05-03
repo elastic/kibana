@@ -295,6 +295,7 @@ export const RulesList: React.FunctionComponent = () => {
           tagsFilter,
           sort,
         });
+        await loadRuleTags();
         await loadRuleAggs();
         setRulesState({
           isLoading: false,
@@ -338,12 +339,10 @@ export const RulesList: React.FunctionComponent = () => {
         typesFilter,
         actionTypesFilter,
         ruleStatusesFilter,
+        tagsFilter,
       });
       if (rulesAggs?.ruleExecutionStatus) {
         setRulesStatusesTotal(rulesAggs.ruleExecutionStatus);
-      }
-      if (rulesAggs?.ruleTags) {
-        setTags(rulesAggs.ruleTags);
       }
     } catch (e) {
       toasts.addDanger({
@@ -353,6 +352,24 @@ export const RulesList: React.FunctionComponent = () => {
             defaultMessage: 'Unable to load rule status info',
           }
         ),
+      });
+    }
+  }
+
+  async function loadRuleTags() {
+    if (!isRuleTagFilterEnabled) {
+      return;
+    }
+    try {
+      const rulesAggs = await loadRuleAggregations({ http });
+      if (rulesAggs?.ruleTags) {
+        setTags(rulesAggs.ruleTags);
+      }
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTags', {
+          defaultMessage: 'Unable to load rule tags',
+        }),
       });
     }
   }

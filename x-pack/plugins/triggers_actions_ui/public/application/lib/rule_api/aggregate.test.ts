@@ -209,4 +209,47 @@ describe('loadRuleAggregations', () => {
       ]
     `);
   });
+
+  test('should call aggregate API with tagsFilter', async () => {
+    const resolvedValue = {
+      rule_execution_status: {
+        ok: 4,
+        active: 2,
+        error: 1,
+        pending: 1,
+        unknown: 0,
+      },
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadRuleAggregations({
+      http,
+      searchText: 'baz',
+      tagsFilter: ['a', 'b', 'c'],
+    });
+
+    expect(result).toEqual({
+      ruleExecutionStatus: {
+        ok: 4,
+        active: 2,
+        error: 1,
+        pending: 1,
+        unknown: 0,
+      },
+    });
+
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_aggregate",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.tags:(a or b or c)",
+            "search": "baz",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
+          },
+        },
+      ]
+    `);
+  });
 });

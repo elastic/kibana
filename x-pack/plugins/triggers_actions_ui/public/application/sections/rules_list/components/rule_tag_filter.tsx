@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSelectable,
@@ -62,16 +62,19 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
     [tags, selectedTags, optionDataTestSubj]
   );
 
-  const onChangeInternal = (newOptions: EuiSelectableOption[]) => {
-    const newSelectedTags = newOptions.reduce<string[]>((result, option) => {
-      if (option.checked === 'on') {
-        result = [...result, option.label];
-      }
-      return result;
-    }, []);
+  const onChangeInternal = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const newSelectedTags = newOptions.reduce<string[]>((result, option) => {
+        if (option.checked === 'on') {
+          result = [...result, option.label];
+        }
+        return result;
+      }, []);
 
-    onChange(newSelectedTags);
-  };
+      onChange(newSelectedTags);
+    },
+    [onChange]
+  );
 
   const onClosePopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
