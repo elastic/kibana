@@ -17,12 +17,12 @@ import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcr
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
-import { FindingsBaseURLQuery } from '../../types';
+import type { FindingsBaseURLQuery } from '../../types';
 import { getBaseQuery } from '../../utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 
-export const getDefaultQuery = (): FindingsBaseURLQuery => ({
+const getDefaultQuery = (): FindingsBaseURLQuery => ({
   query: { language: 'kuery', query: '' },
   filters: [],
 });

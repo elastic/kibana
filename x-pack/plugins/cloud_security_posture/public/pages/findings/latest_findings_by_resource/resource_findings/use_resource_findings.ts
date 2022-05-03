@@ -6,17 +6,13 @@
  */
 import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
-import {
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '@kbn/data-plugin/common';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { CspFinding, FindingsBaseEsQuery, FindingsQueryResult } from '../../types';
 
-interface Options extends FindingsBaseEsQuery {
+interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
 }
 
@@ -29,24 +25,20 @@ export const getResourceFindingsQuery = ({
   index,
   query,
   resourceId,
-}: Options): estypes.SearchRequest => {
-  const queryWithResourceIdFilter = {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [...(query?.bool?.filter || []), { term: { 'resource_id.keyword': resourceId } }],
+}: UseResourceFindingsOptions): estypes.SearchRequest => ({
+  index,
+  body: {
+    query: {
+      ...query,
+      bool: {
+        ...query?.bool,
+        filter: [...(query?.bool?.filter || []), { term: { 'resource_id.keyword': resourceId } }],
+      },
     },
-  };
+  },
+});
 
-  return {
-    index,
-    body: {
-      query: queryWithResourceIdFilter,
-    },
-  };
-};
-
-export const useResourceFindings = ({ index, query, resourceId }: Options) => {
+export const useResourceFindings = ({ index, query, resourceId }: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
@@ -61,15 +53,10 @@ export const useResourceFindings = ({ index, query, resourceId }: Options) => {
         })
       ),
     {
-      select: ({ rawResponse }) => {
-        console.log({ rawResponse });
-        const hits = rawResponse.hits;
-        return {
-          page: hits.hits.map((hit) => hit._source!),
-          total: typeof hits.total === 'number' ? hits.total : 0,
-        };
-      },
-
+      select: ({ rawResponse: { hits } }) => ({
+        page: hits.hits.map((hit) => hit._source!),
+        total: hits.total as number,
+      }),
       onError: (err) => showErrorToast(toasts, err),
     }
   );
