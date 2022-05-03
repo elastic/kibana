@@ -43,6 +43,28 @@ describe('mapFiltersToKql', () => {
   test('should handle ruleStatusesFilter', () => {
     expect(
       mapFiltersToKql({
+        ruleStatusesFilter: ['enabled'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+
+    expect(
+      mapFiltersToKql({
+        ruleStatusesFilter: ['disabled'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(false) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+
+    expect(
+      mapFiltersToKql({
+        ruleStatusesFilter: ['snoozed'],
+      })
+    ).toEqual(['(alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)']);
+
+    expect(
+      mapFiltersToKql({
         ruleStatusesFilter: ['enabled', 'snoozed'],
       })
     ).toEqual([
@@ -51,10 +73,10 @@ describe('mapFiltersToKql', () => {
 
     expect(
       mapFiltersToKql({
-        ruleStatusesFilter: ['enabled'],
+        ruleStatusesFilter: ['disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+      'alert.attributes.enabled:(false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
     ]);
 
     expect(
