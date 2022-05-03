@@ -15,7 +15,7 @@ import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getPatchBulkRequest,
-  getAlertMock,
+  getRuleMock,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
@@ -26,10 +26,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('patch_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
+describe('patch_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -40,23 +37,27 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
     const logger = loggingSystemMock.createLogger();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    ); // update succeeds
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // update succeeds
 
-    patchRulesBulkRoute(server.router, ml, isRuleRegistryEnabled, logger);
+    patchRulesBulkRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getPatchBulkRequest(), context);
+      const response = await server.inject(
+        getPatchBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns an error in the response when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      const response = await server.inject(getPatchBulkRequest(), context);
+      const response = await server.inject(
+        getPatchBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
@@ -79,7 +80,7 @@ describe.each([
           },
         ],
       });
-      await server.inject(request, context);
+      await server.inject(request, requestContextMock.convertContext(context));
 
       expect(clients.rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -104,7 +105,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [typicalMlRulePayload()],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -130,7 +131,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [payloadWithoutType],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -152,7 +153,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [{ ...getCreateRulesSchemaMock(), rule_id: undefined }],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
