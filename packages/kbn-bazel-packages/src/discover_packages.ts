@@ -40,15 +40,11 @@ export function discoverBazelPackageLocations(repoRoot: string) {
         absolute: true,
       }
     )
-    .map((path) => Path.dirname(path))
-    .reduce((accum: { [key: string]: boolean }, curr: string) => {
-      accum[curr] = true;
-      return accum;
-    }, {});
+    .map((path) => Path.dirname(path));
 
   // NOTE: only return as discovered packages the ones with a package.json + BUILD.bazel file.
   // In the future we should change this to only discover the ones declaring kibana.json.
-  return packagesWithPackageJson.filter((pkg) => !!packagesWithBuildBazel[pkg]);
+  return packagesWithPackageJson.filter((pkg) => packagesWithBuildBazel.includes(pkg));
 }
 
 export async function discoverBazelPackages(repoRoot: string = REPO_ROOT) {
