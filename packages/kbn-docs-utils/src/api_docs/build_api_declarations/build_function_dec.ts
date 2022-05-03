@@ -11,6 +11,7 @@ import {
   MethodDeclaration,
   ConstructorDeclaration,
   MethodSignature,
+  ConstructSignatureDeclaration,
 } from 'ts-morph';
 
 import { buildApiDecsForParameters } from './build_parameter_decs';
@@ -23,7 +24,12 @@ import { BuildApiDecOpts } from './types';
  * Takes the various function-like node declaration types and converts them into an ApiDeclaration.
  */
 export function buildFunctionDec(
-  node: FunctionDeclaration | MethodDeclaration | ConstructorDeclaration | MethodSignature,
+  node:
+    | ConstructSignatureDeclaration
+    | FunctionDeclaration
+    | MethodDeclaration
+    | ConstructorDeclaration
+    | MethodSignature,
   opts: BuildApiDecOpts
 ): ApiDeclaration {
   const fn = {

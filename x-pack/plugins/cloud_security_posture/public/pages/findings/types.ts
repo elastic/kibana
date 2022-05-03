@@ -48,8 +48,14 @@ export interface CspFinding {
 
 interface CspRule {
   benchmark: { name: string; version: string };
+  section: string;
+  audit: string;
+  references: string;
+  profile_applicability: string;
   description: string;
   impact: string;
+  default_value: string;
+  rationale: string;
   name: string;
   remediation: string;
   tags: string[];
@@ -57,9 +63,8 @@ interface CspRule {
 
 interface CspFindingResult {
   evaluation: 'passed' | 'failed';
-  evidence: {
-    filemode: string;
-  };
+  expected?: Record<string, unknown>;
+  evidence: Record<string, unknown>;
 }
 
 interface CspFindingResource {
@@ -69,6 +74,7 @@ interface CspFindingResource {
   mode: string;
   path: string;
   type: string;
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingHost {
@@ -88,6 +94,7 @@ interface CspFindingHost {
     family: string;
     name: string;
   };
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingAgent {

@@ -10,7 +10,7 @@ import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { Optional } from '@kbn/utility-types';
 import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
-import { from, Observable, of } from 'rxjs';
+import { from, Observable, of, throwError } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -22,12 +22,15 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   LayoutParams,
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
+  errors,
 } from '../../common';
+import { systemHasInsufficientMemory } from '../cloud';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import type { ConfigType } from '../config';
 import { durationToNumber } from '../config';
@@ -100,7 +103,8 @@ export class Screenshots {
     private readonly logger: Logger,
     private readonly packageInfo: PackageInfo,
     private readonly http: HttpServiceSetup,
-    private readonly config: ConfigType
+    private readonly config: ConfigType,
+    private readonly cloud?: CloudSetup
   ) {
     this.semaphore = new Semaphore(config.poolSize);
   }
@@ -214,10 +218,18 @@ export class Screenshots {
     );
   }
 
+  systemHasInsufficientMemory(): boolean {
+    return systemHasInsufficientMemory(this.cloud, this.logger.get('cloud'));
+  }
+
   getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult>;
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+    if (this.systemHasInsufficientMemory()) {
+      return throwError(() => new errors.InsufficientMemoryAvailableOnCloudError());
+    }
+
     const eventLogger = new EventLogger(this.logger, this.config);
     const transactionEnd = eventLogger.screenshottingTransaction();
 
