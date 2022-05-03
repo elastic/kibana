@@ -9,8 +9,10 @@ REMOTE_CACHE_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issu
 
 cat << EOF > .bazelrc
 import %workspace%/.bazelrc.common
-build --remote_cache=grpc://test:${REMOTE_CACHE_PASSWORD}@34.121.74.141:9092
-build --experimental_remote_cache_compression
+#build --remote_cache=grpc://test:${REMOTE_CACHE_PASSWORD}@34.121.74.141:9092
+#build --experimental_remote_cache_compression
+build --remote_cache=https://storage.googleapis.com/kibana_ci_bazel_remote_cache
+build --google_default_credentials
 EOF
 
 echo "--- yarn install and bootstrap"
