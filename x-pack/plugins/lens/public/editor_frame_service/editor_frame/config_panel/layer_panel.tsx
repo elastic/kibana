@@ -145,8 +145,6 @@ export function LayerPanel(
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
 
-  const { setDimension, removeDimension } = activeVisualization;
-
   const allAccessors = groups.flatMap((group) =>
     group.accessors.map((accessor) => accessor.columnId)
   );
@@ -209,7 +207,7 @@ export function LayerPanel(
               previousColumn = typeof dropResult === 'object' ? dropResult.deleted : undefined;
             }
           }
-          const newVisState = setDimension({
+          const newVisState = activeVisualization.setDimension({
             columnId,
             groupId,
             layerId: targetLayerId,
@@ -221,7 +219,7 @@ export function LayerPanel(
           if (typeof dropResult === 'object') {
             // When a column is moved, we delete the reference to the old
             updateVisualization(
-              removeDimension({
+              activeVisualization.removeDimension({
                 columnId: dropResult.deleted,
                 layerId: targetLayerId,
                 prevState: newVisState,
@@ -234,7 +232,7 @@ export function LayerPanel(
         }
       } else {
         if (dropType === 'duplicate_compatible' || dropType === 'reorder') {
-          const newVisState = setDimension({
+          const newVisState = activeVisualization.setDimension({
             columnId,
             groupId,
             layerId: targetLayerId,
@@ -247,16 +245,15 @@ export function LayerPanel(
       }
     };
   }, [
-    framePublicAPI,
+    layerDatasource,
+    setNextFocusedButtonId,
     groups,
     layerDatasourceOnDrop,
-    props.visualizationState,
-    updateVisualization,
-    setDimension,
-    removeDimension,
     layerDatasourceDropProps,
-    setNextFocusedButtonId,
-    layerDatasource,
+    activeVisualization,
+    props.visualizationState,
+    framePublicAPI,
+    updateVisualization,
   ]);
 
   const isDimensionPanelOpen = Boolean(activeId);
