@@ -132,12 +132,14 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
     };
 
     // ensure we flush current state first if event falls out of the current max window age
-    const diff = Math.abs(event['@timestamp'] - this.state[key].timestamp);
-    if (diff >= 1000 * 60) {
-      const fields = this.createServiceFields(key);
-      delete this.state[key];
-      addToState(event['@timestamp']);
-      return [fields];
+    if (this.state[key]) {
+      const diff = Math.abs(event['@timestamp'] - this.state[key].timestamp);
+      if (diff >= 1000 * 60) {
+        const fields = this.createServiceFields(key);
+        delete this.state[key];
+        addToState(event['@timestamp']);
+        return [fields];
+      }
     }
 
     addToState(event['@timestamp']);
