@@ -230,6 +230,8 @@
                 "section": "def-server.ResponseError",
                 "text": "ResponseError"
               },
+              " | Buffer | ",
+              "Stream",
               ">) => ",
               "KibanaResponse",
               "<string | Error | { message: string | Error; attributes?: ",
@@ -240,7 +242,9 @@
                 "section": "def-server.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; }>; redirected: (options: ",
+              " | undefined; } | Buffer | ",
+              "Stream",
+              ">; redirected: (options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -420,6 +424,8 @@
                 "section": "def-server.ResponseError",
                 "text": "ResponseError"
               },
+              " | Buffer | ",
+              "Stream",
               ">) => ",
               "KibanaResponse",
               "<string | Error | { message: string | Error; attributes?: ",
@@ -430,7 +436,9 @@
                 "section": "def-server.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; }>; redirected: (options: ",
+              " | undefined; } | Buffer | ",
+              "Stream",
+              ">; redirected: (options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -638,6 +646,8 @@
                     "section": "def-server.ResponseError",
                     "text": "ResponseError"
                   },
+                  " | Buffer | ",
+                  "Stream",
                   ">) => ",
                   "KibanaResponse",
                   "<string | Error | { message: string | Error; attributes?: ",
@@ -648,7 +658,9 @@
                     "section": "def-server.ResponseErrorAttributes",
                     "text": "ResponseErrorAttributes"
                   },
-                  " | undefined; }>; redirected: (options: ",
+                  " | undefined; } | Buffer | ",
+                  "Stream",
+                  ">; redirected: (options: ",
                   {
                     "pluginId": "core",
                     "scope": "server",

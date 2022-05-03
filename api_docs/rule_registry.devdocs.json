@@ -1376,9 +1376,7 @@
           },
           "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
           "RuleTypeParamsValidator",
-          "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; config?: ",
-          "RuleTypeConfig",
-          " | undefined; actionGroups: ",
+          "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",

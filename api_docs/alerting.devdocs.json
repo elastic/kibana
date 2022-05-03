@@ -2456,20 +2456,6 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleType.config",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "RuleTypeConfig",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3889,10 +3875,10 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.IExecutionLog.num_scheduled_actions",
+            "id": "def-common.IExecutionLog.num_generated_actions",
             "type": "number",
             "tags": [],
-            "label": "num_scheduled_actions",
+            "label": "num_generated_actions",
             "description": [],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
             "deprecated": false
@@ -4549,72 +4535,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionRunResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "RuleExecutionRunResult",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionRunResult.state",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "signature": [
-              "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; numberOfScheduledActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionRunResult.monitoring",
-            "type": "Object",
-            "tags": [],
-            "label": "monitoring",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.RuleMonitoring",
-                "text": "RuleMonitoring"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionRunResult.schedule",
-            "type": "Object",
-            "tags": [],
-            "label": "schedule",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.IntervalSchedule",
-                "text": "IntervalSchedule"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.RuleExecutionStatus",
         "type": "Interface",
         "tags": [],
@@ -4631,46 +4551,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"unknown\" | \"warning\" | \"pending\" | \"ok\" | \"active\""
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionStatus.numberOfTriggeredActions",
-            "type": "number",
-            "tags": [],
-            "label": "numberOfTriggeredActions",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionStatus.numberOfScheduledActions",
-            "type": "number",
-            "tags": [],
-            "label": "numberOfScheduledActions",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RuleExecutionStatus.metrics",
-            "type": "Object",
-            "tags": [],
-            "label": "metrics",
-            "description": [],
-            "signature": [
-              "{ numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; } | undefined"
+              "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false
@@ -5105,6 +4986,17 @@
     "enums": [
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ActionsCompletion",
+        "type": "Enum",
+        "tags": [],
+        "label": "ActionsCompletion",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.HealthStatus",
         "type": "Enum",
         "tags": [],
@@ -5263,7 +5155,7 @@
         "label": "ExecutionLogSortFields",
         "description": [],
         "signature": [
-          "\"timestamp\" | \"execution_duration\" | \"total_search_duration\" | \"es_search_duration\" | \"schedule_delay\" | \"num_triggered_actions\" | \"num_scheduled_actions\""
+          "\"timestamp\" | \"execution_duration\" | \"total_search_duration\" | \"es_search_duration\" | \"schedule_delay\" | \"num_triggered_actions\" | \"num_generated_actions\""
         ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
@@ -5465,41 +5357,13 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionMetrics",
-        "type": "Type",
-        "tags": [],
-        "label": "RuleExecutionMetrics",
-        "description": [],
-        "signature": [
-          "{ numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }"
-        ],
-        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionState",
-        "type": "Type",
-        "tags": [],
-        "label": "RuleExecutionState",
-        "description": [],
-        "signature": [
-          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; } & { metrics: { numSearches?: number | undefined; totalSearchDurationMs?: number | undefined; esSearchDurationMs?: number | undefined; }; alertExecutionStore: { numberOfTriggeredActions?: number | undefined; numberOfScheduledActions?: number | undefined; triggeredActionsStatus?: string | undefined; }; }"
-        ],
-        "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.RuleExecutionStatuses",
         "type": "Type",
         "tags": [],
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"error\" | \"unknown\" | \"warning\" | \"pending\" | \"ok\" | \"active\""
+          "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
@@ -5750,7 +5614,7 @@
         "label": "executionLogSortableColumns",
         "description": [],
         "signature": [
-          "readonly [\"timestamp\", \"execution_duration\", \"total_search_duration\", \"es_search_duration\", \"schedule_delay\", \"num_triggered_actions\", \"num_scheduled_actions\"]"
+          "readonly [\"timestamp\", \"execution_duration\", \"total_search_duration\", \"es_search_duration\", \"schedule_delay\", \"num_triggered_actions\", \"num_generated_actions\"]"
         ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,

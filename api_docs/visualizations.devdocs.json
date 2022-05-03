@@ -3162,9 +3162,9 @@
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
-              "<unknown>; getRefreshIntervalUpdate$: () => ",
+              "<void>; getRefreshIntervalUpdate$: () => ",
               "Observable",
-              "<unknown>; getAutoRefreshFetch$: () => ",
+              "<void>; getAutoRefreshFetch$: () => ",
               "Observable",
               "<",
               {
@@ -3176,7 +3176,7 @@
               },
               ">; getFetch$: () => ",
               "Observable",
-              "<unknown>; getTime: () => ",
+              "<void>; getTime: () => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -4496,13 +4496,7 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
@@ -4852,6 +4846,34 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.SAVED_OBJECTS_LIMIT_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECTS_LIMIT_SETTING",
+        "description": [],
+        "signature": [
+          "\"savedObjects:listingLimit\""
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.SAVED_OBJECTS_PER_PAGE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECTS_PER_PAGE_SETTING",
+        "description": [],
+        "signature": [
+          "\"savedObjects:perPage\""
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.SavedVisState",
         "type": "Type",
         "tags": [],
@@ -5018,7 +5040,7 @@
         "label": "VisualizeEmbeddableContract",
         "description": [],
         "signature": [
-          "{ readonly type: \"visualization\"; readonly id: string; getExplicitInput: () => ",
+          "{ readonly id: string; readonly type: \"visualization\"; getExplicitInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5234,7 +5256,7 @@
         "label": "VisualizeEmbeddableFactoryContract",
         "description": [],
         "signature": [
-          "{ readonly type: \"visualization\"; create: (input: ",
+          "{ create: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5294,7 +5316,7 @@
           "VisualizeEmbeddable",
           " | ",
           "DisabledLabEmbeddable",
-          " | undefined>; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
+          " | undefined>; readonly type: \"visualization\"; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",

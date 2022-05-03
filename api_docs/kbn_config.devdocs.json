@@ -57,37 +57,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/config",
-        "id": "def-server.getPluginSearchPaths",
-        "type": "Function",
-        "tags": [],
-        "label": "getPluginSearchPaths",
-        "description": [],
-        "signature": [
-          "({ rootDir, oss, examples }: SearchOptions) => string[]"
-        ],
-        "path": "packages/kbn-config/src/plugins/plugin_search_paths.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/config",
-            "id": "def-server.getPluginSearchPaths.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ rootDir, oss, examples }",
-            "description": [],
-            "signature": [
-              "SearchOptions"
-            ],
-            "path": "packages/kbn-config/src/plugins/plugin_search_paths.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/config",
         "id": "def-server.hasConfigPathIntersection",
         "type": "Function",
         "tags": [],

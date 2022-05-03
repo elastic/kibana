@@ -4108,26 +4108,6 @@
             "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
           },
@@ -7106,14 +7086,6 @@
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
             "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
           },
           {
@@ -8116,8 +8088,8 @@
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.IFieldType",
-            "text": "IFieldType"
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
           },
           " | undefined"
         ],
@@ -15772,26 +15744,6 @@
             "path": "src/plugins/data_view_editor/public/open_editor.tsx"
           },
           {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/hooks/update_kuery_string.ts"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/contexts/uptime_index_pattern_context.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
           },
@@ -18997,54 +18949,10 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/field.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/field.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/field.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/value.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/value.ts"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/actions/filters/create_filters_from_range_select.ts"
           },
           {
@@ -19052,32 +18960,48 @@
             "path": "src/plugins/data/public/actions/filters/create_filters_from_range_select.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/server/autocomplete/terms_enum.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/field.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/server/autocomplete/terms_enum.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/field.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/server/autocomplete/terms_agg.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/field.tsx"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/server/autocomplete/terms_agg.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/server/autocomplete/terms_agg.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/server/autocomplete/terms_agg.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/server/index.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
@@ -19113,19 +19037,27 @@
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+            "path": "src/plugins/unified_search/server/autocomplete/terms_enum.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+            "path": "src/plugins/unified_search/server/autocomplete/terms_enum.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
           },
           {
             "plugin": "data",
@@ -19174,6 +19106,22 @@
           {
             "plugin": "unifiedSearch",
             "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
           }
         ],
         "children": [
@@ -19513,30 +19461,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/get_index_pattern_from_filter.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/query/timefilter/timefilter.ts"
           },
           {
@@ -19546,190 +19470,38 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/query/timefilter/timefilter.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/value.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/autocomplete/providers/kql_query_suggestion/value.ts"
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_bar_top_row.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/query_bar_top_row.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/components/param_details_form/use_derived_index_pattern.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/with_kuery_autocompletion.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/with_kuery_autocompletion.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/kuery_bar/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/lib/kuery.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_item.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_item.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_bar.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_bar.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/apply_filters/apply_filter_popover_content.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/apply_filters/apply_filters_popover.tsx"
-          },
-          {
-            "plugin": "stackAlerts",
-            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
-          },
-          {
-            "plugin": "stackAlerts",
-            "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/read_only_filter_items.tsx"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "data",
@@ -22134,14 +21906,6 @@
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
             "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
           },
           {
@@ -22286,7 +22050,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"className\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+              ", \"children\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
               {
                 "pluginId": "core",
                 "scope": "public",

@@ -1,5 +1,5 @@
 {
-  "id": "@elastic/datemath",
+  "id": "@kbn/datemath",
   "client": {
     "classes": [],
     "functions": [],
@@ -12,7 +12,7 @@
     "classes": [],
     "functions": [
       {
-        "parentPluginId": "@elastic/datemath",
+        "parentPluginId": "@kbn/datemath",
         "id": "def-server.parse",
         "type": "Function",
         "tags": [],
@@ -21,11 +21,11 @@
         "signature": [
           "(input: string, options: { roundUp?: boolean | undefined; momentInstance?: typeof moment | undefined; forceNow?: Date | undefined; }) => moment.Moment | undefined"
         ],
-        "path": "packages/elastic-datemath/src/index.ts",
+        "path": "packages/kbn-datemath/src/index.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.parse.$1",
             "type": "string",
             "tags": [],
@@ -34,22 +34,22 @@
             "signature": [
               "string"
             ],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "isRequired": true
           },
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.parse.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
             "description": [],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.parse.$2.roundUp",
                 "type": "CompoundType",
                 "tags": [],
@@ -58,11 +58,11 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.parse.$2.momentInstance",
                 "type": "Function",
                 "tags": [],
@@ -71,11 +71,11 @@
                 "signature": [
                   "typeof moment | undefined"
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.parse.$2.forceNow",
                 "type": "Object",
                 "tags": [],
@@ -84,7 +84,7 @@
                 "signature": [
                   "Date | undefined"
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
@@ -98,7 +98,7 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "@elastic/datemath",
+        "parentPluginId": "@kbn/datemath",
         "id": "def-server.Unit",
         "type": "Type",
         "tags": [],
@@ -107,12 +107,12 @@
         "signature": [
           "\"y\" | \"M\" | \"w\" | \"d\" | \"h\" | \"m\" | \"s\" | \"ms\""
         ],
-        "path": "packages/elastic-datemath/src/index.ts",
+        "path": "packages/kbn-datemath/src/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/datemath",
+        "parentPluginId": "@kbn/datemath",
         "id": "def-server.units",
         "type": "Array",
         "tags": [],
@@ -120,20 +120,20 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@elastic/datemath",
+            "pluginId": "@kbn/datemath",
             "scope": "server",
-            "docId": "kibElasticDatemathPluginApi",
+            "docId": "kibKbnDatemathPluginApi",
             "section": "def-server.Unit",
             "text": "Unit"
           },
           "[]"
         ],
-        "path": "packages/elastic-datemath/src/index.ts",
+        "path": "packages/kbn-datemath/src/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/datemath",
+        "parentPluginId": "@kbn/datemath",
         "id": "def-server.unitsAsc",
         "type": "Array",
         "tags": [],
@@ -141,20 +141,20 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@elastic/datemath",
+            "pluginId": "@kbn/datemath",
             "scope": "server",
-            "docId": "kibElasticDatemathPluginApi",
+            "docId": "kibKbnDatemathPluginApi",
             "section": "def-server.Unit",
             "text": "Unit"
           },
           "[]"
         ],
-        "path": "packages/elastic-datemath/src/index.ts",
+        "path": "packages/kbn-datemath/src/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/datemath",
+        "parentPluginId": "@kbn/datemath",
         "id": "def-server.unitsDesc",
         "type": "Array",
         "tags": [],
@@ -162,20 +162,20 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@elastic/datemath",
+            "pluginId": "@kbn/datemath",
             "scope": "server",
-            "docId": "kibElasticDatemathPluginApi",
+            "docId": "kibKbnDatemathPluginApi",
             "section": "def-server.Unit",
             "text": "Unit"
           },
           "[]"
         ],
-        "path": "packages/elastic-datemath/src/index.ts",
+        "path": "packages/kbn-datemath/src/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/datemath",
+        "parentPluginId": "@kbn/datemath",
         "id": "def-server.UnitsMap",
         "type": "Type",
         "tags": [],
@@ -184,44 +184,44 @@
         "signature": [
           "{ y: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; M: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; w: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; d: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; h: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; m: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; s: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; ms: { weight: number; type: \"calendar\" | \"fixed\" | \"mixed\"; base: number; }; }"
         ],
-        "path": "packages/elastic-datemath/src/index.ts",
+        "path": "packages/kbn-datemath/src/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
-        "parentPluginId": "@elastic/datemath",
+        "parentPluginId": "@kbn/datemath",
         "id": "def-server.unitsMap",
         "type": "Object",
         "tags": [],
         "label": "unitsMap",
         "description": [],
-        "path": "packages/elastic-datemath/src/index.ts",
+        "path": "packages/kbn-datemath/src/index.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.unitsMap.ms",
             "type": "Object",
             "tags": [],
             "label": "ms",
             "description": [],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.ms.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.ms.type",
                 "type": "string",
                 "tags": [],
@@ -230,43 +230,43 @@
                 "signature": [
                   "\"fixed\""
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.ms.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
           },
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.unitsMap.s",
             "type": "Object",
             "tags": [],
             "label": "s",
             "description": [],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.s.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.s.type",
                 "type": "string",
                 "tags": [],
@@ -275,43 +275,43 @@
                 "signature": [
                   "\"fixed\""
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.s.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
           },
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.unitsMap.m",
             "type": "Object",
             "tags": [],
             "label": "m",
             "description": [],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.m.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.m.type",
                 "type": "string",
                 "tags": [],
@@ -320,43 +320,43 @@
                 "signature": [
                   "\"mixed\""
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.m.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
           },
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.unitsMap.h",
             "type": "Object",
             "tags": [],
             "label": "h",
             "description": [],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.h.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.h.type",
                 "type": "string",
                 "tags": [],
@@ -365,43 +365,43 @@
                 "signature": [
                   "\"mixed\""
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.h.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
           },
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.unitsMap.d",
             "type": "Object",
             "tags": [],
             "label": "d",
             "description": [],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.d.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.d.type",
                 "type": "string",
                 "tags": [],
@@ -410,43 +410,43 @@
                 "signature": [
                   "\"mixed\""
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.d.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
           },
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.unitsMap.w",
             "type": "Object",
             "tags": [],
             "label": "w",
             "description": [],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.w.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.w.type",
                 "type": "string",
                 "tags": [],
@@ -455,43 +455,43 @@
                 "signature": [
                   "\"calendar\""
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.w.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
           },
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.unitsMap.M",
             "type": "Object",
             "tags": [],
             "label": "M",
             "description": [],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.M.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.M.type",
                 "type": "string",
                 "tags": [],
@@ -500,23 +500,23 @@
                 "signature": [
                   "\"calendar\""
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.M.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
           },
           {
-            "parentPluginId": "@elastic/datemath",
+            "parentPluginId": "@kbn/datemath",
             "id": "def-server.unitsMap.y",
             "type": "Object",
             "tags": [],
@@ -524,21 +524,21 @@
             "description": [
               "// q: { weight: 8, type: 'calendar' }, // TODO: moment duration does not support quarter"
             ],
-            "path": "packages/elastic-datemath/src/index.ts",
+            "path": "packages/kbn-datemath/src/index.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.y.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.y.type",
                 "type": "string",
                 "tags": [],
@@ -547,17 +547,17 @@
                 "signature": [
                   "\"calendar\""
                 ],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               },
               {
-                "parentPluginId": "@elastic/datemath",
+                "parentPluginId": "@kbn/datemath",
                 "id": "def-server.unitsMap.y.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/elastic-datemath/src/index.ts",
+                "path": "packages/kbn-datemath/src/index.ts",
                 "deprecated": false
               }
             ]
