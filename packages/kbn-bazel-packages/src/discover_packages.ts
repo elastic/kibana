@@ -25,8 +25,9 @@ export function discoverBazelPackageLocations(repoRoot: string) {
         absolute: true,
       }
     )
-    // NOTE: removing x-pack for now in case a package is added to the x-pack root folder and a BUILD.bazel
-    // is also added into x-pack
+    // NOTE: removing x-pack by default for now to prevent a situation where a BUILD.bazel file
+    // needs to be added at the root of the folder which will make x-pack to be wrongly recognized
+    // as a Bazel package in that case
     .filter((path) => !normalizePath(path).includes('x-pack/package.json'))
     .sort((a, b) => a.localeCompare(b))
     .map((path) => Path.dirname(path));
@@ -45,8 +46,8 @@ export function discoverBazelPackageLocations(repoRoot: string) {
       return accum;
     }, {});
 
-  // NOTE: only return as discovered packages the ones with package.json + BUILD.bazel files.
-  // In the future we can change this to only discover the ones with kibana.json files.
+  // NOTE: only return as discovered packages the ones with a package.json + BUILD.bazel file.
+  // In the future we should change this to only discover the ones declaring kibana.json.
   return packagesWithPackageJson.filter((pkg) => !!packagesWithBuildBazel[pkg]);
 }
 
