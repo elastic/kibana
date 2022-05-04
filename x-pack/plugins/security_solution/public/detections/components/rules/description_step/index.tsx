@@ -13,6 +13,10 @@ import styled from 'styled-components';
 import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
+import {
+  RelatedIntegrations,
+  RequiredFields,
+} from '../../../../../common/detection_engine/schemas/common';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
@@ -22,7 +26,7 @@ import { ListItems } from './types';
 import {
   buildQueryBarDescription,
   buildSeverityDescription,
-  buildStringArrayDescription,
+  // buildStringArrayDescription,
   buildThreatDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
@@ -31,6 +35,8 @@ import {
   buildRuleTypeDescription,
   buildThresholdDescription,
   buildThreatMappingDescription,
+  buildRelatedIntegrationsDescription,
+  buildRequiredFieldsDescription,
 } from './helpers';
 import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
@@ -151,7 +157,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
-/* eslint complexity: ["error", 21]*/
+/* eslint complexity: ["error", 25]*/
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -183,15 +189,22 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
-    const values: string[] = get(field, data);
-    return buildStringArrayDescription(label, field, values);
+    // TODO: lol 😭
+    // } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
+    //   const values: string[] = get(field, data);
+    //   return buildStringArrayDescription(label, field, values);
   } else if (field === 'riskScore') {
     const values: AboutStepRiskScore = get(field, data);
     return buildRiskScoreDescription(values);
   } else if (field === 'severity') {
     const values: AboutStepSeverity = get(field, data);
     return buildSeverityDescription(values);
+  } else if (field === 'requiredFields') {
+    const requiredFields = get(field, data) as RequiredFields;
+    return buildRequiredFieldsDescription(label, requiredFields);
+  } else if (field === 'relatedIntegrations') {
+    const relatedIntegrations = get(field, data) as RelatedIntegrations;
+    return buildRelatedIntegrationsDescription(label, relatedIntegrations);
   } else if (field === 'timeline') {
     const timeline = get(field, data) as FieldValueTimeline;
     return [

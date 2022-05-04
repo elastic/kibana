@@ -25,6 +25,8 @@ import {
   Author,
   BuildingBlockType,
   License,
+  RelatedIntegrations,
+  RequiredFields,
   RuleNameOverride,
   SortOrder,
   TimestampOverride,
@@ -109,6 +111,7 @@ export interface AboutStepRule {
 export interface AboutStepRuleDetails {
   note: string;
   description: string;
+  setup: string;
 }
 
 export interface AboutStepSeverity {
@@ -128,6 +131,8 @@ export interface DefineStepRule {
   index: string[];
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  relatedIntegrations: RelatedIntegrations;
+  requiredFields: RequiredFields;
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;

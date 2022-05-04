@@ -16,8 +16,10 @@ import {
   EuiText,
   EuiIcon,
   EuiToolTip,
+  EuiToken,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
+import { capitalize } from 'lodash';
 
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
@@ -30,7 +32,11 @@ import { MATCHES, AND, OR } from '../../../../common/components/threat_match/tra
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  RelatedIntegrations,
+  RequiredFields,
+  Threshold,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   subtechniquesOptions,
   tacticsOptions,
@@ -504,6 +510,72 @@ export const buildThreatMappingDescription = (
     {
       title,
       description,
+    },
+  ];
+};
+
+export const buildRelatedIntegrationsDescription = (
+  label: string,
+  relatedIntegrations: RelatedIntegrations
+): ListItems[] => {
+  const badgeInstalledColor = '#E0E5EE'; // 'subdued' not working?
+  const badgeUninstalledColor = 'accent';
+  const basePath = 'http://localhost:5601/kbn'; // const { basePath } = useBasePath();
+  const installedText = 'Installed';
+  const uninstalledText = 'Uninstalled';
+  const installedPackages = ['aws'];
+
+  return relatedIntegrations.map((rI, index) => {
+    const isInstalled = installedPackages.includes(rI.package);
+    const badgeColor = isInstalled ? badgeInstalledColor : badgeUninstalledColor;
+    const badgeText = isInstalled ? installedText : uninstalledText;
+    const integrationURL = `${basePath}/app/integrations/detail/${rI.package}-${
+      rI.version
+    }/overview${rI.integration ? `?integration=${rI.integration}` : ''}`;
+
+    return {
+      title: index === 0 ? label : '',
+      description: (
+        <>
+          <EuiLink href={integrationURL} target="_blank">
+            {rI.integration
+              ? `${capitalize(rI.integration)} ${capitalize(rI.integration)}`
+              : capitalize(rI.package)}
+          </EuiLink>{' '}
+          <EuiBadge color={badgeColor}>{badgeText}</EuiBadge>
+        </>
+      ),
+    };
+  });
+};
+
+const FieldTypeText = styled(EuiText)`
+  font-family: 'Roboto Mono', 'serif'; // const { euiTheme } = useEuiTheme(); // Use 'Inter' from designs
+`;
+
+export const buildRequiredFieldsDescription = (
+  label: string,
+  requiredFields: RequiredFields
+): ListItems[] => {
+  const typeToTokenMapping: Record<string, string> = {
+    keyword: 'keyword',
+    match_only_text: 'text',
+  };
+
+  return [
+    {
+      title: label,
+      description: (
+        <FieldTypeText grow={false} size={'s'}>
+          {requiredFields.map((rF, index) => (
+            <>
+              <EuiToken iconType={`token${capitalize(typeToTokenMapping[rF.type] ?? 'Null')}`} />
+              {` ${rF.name}`}
+              {index + 1 !== requiredFields.length && <>{', '}</>}
+            </>
+          ))}
+        </FieldTypeText>
+      ),
     },
   ];
 };
