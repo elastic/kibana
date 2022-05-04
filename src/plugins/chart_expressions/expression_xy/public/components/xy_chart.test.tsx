@@ -53,7 +53,6 @@ import {
 import { XYChart, XYChartRenderProps } from './xy_chart';
 import {
   CommonXYAnnotationLayerConfig,
-  DataLayerConfigResult,
   ExtendedDataLayerConfig,
   XYProps,
 } from '../../common/types';
