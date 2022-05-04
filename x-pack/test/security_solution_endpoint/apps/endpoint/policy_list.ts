@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.navigateToPolicyList();
         await testSubjects.existOrFail('emptyPolicyTable');
       });
-      it('navigates to Fleet to add the Endpoint Security integration', async () => {
+      it('navigates to Fleet and ensures the integration page is loaded correctly', async () => {
         const fleetButton = await testSubjects.find('onboardingStartButton');
         await fleetButton.click();
         await testSubjects.existOrFail('createPackagePolicy_pageTitle');

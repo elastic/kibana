@@ -60,7 +60,7 @@ export const PolicyEndpointCount = memo<
 
   if (nonLinkCondition) {
     return (
-      <EuiText size="s" data-test-subj={dataTestSubj}>
+      <EuiText size="s" data-test-subj={`${dataTestSubj}_nonLink`}>
         {children}
       </EuiText>
     );
