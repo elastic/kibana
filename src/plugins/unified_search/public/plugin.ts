@@ -14,7 +14,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ConfigSchema } from '../config';
 import { setIndexPatterns, setTheme, setOverlays, setAutocomplete } from './services';
-import { AutocompleteService } from './autocomplete';
+import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import type {
