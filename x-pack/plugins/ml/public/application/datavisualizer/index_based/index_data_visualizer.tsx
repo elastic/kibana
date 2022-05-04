@@ -62,7 +62,7 @@ export const IndexDataVisualizerPage: FC = () => {
     dataViewId,
     dataViewTitle,
     globalState,
-  }: AsyncLinkCardParams) => {
+  }: AsyncLinkCardParams): Promise<ResultLink[]> => {
     return [
       {
         id: 'create_ml_ad_job',
@@ -101,7 +101,7 @@ export const IndexDataVisualizerPage: FC = () => {
           }
         },
         'data-test-subj': 'dataVisualizerCreateAdvancedJobCard',
-      } as ResultLink,
+      },
       {
         id: 'create_ml_dfa_job',
         title: i18n.translate('xpack.ml.indexDatavisualizer.actionsPanel.dataframeTitle', {
@@ -130,7 +130,7 @@ export const IndexDataVisualizerPage: FC = () => {
           );
         },
         'data-test-subj': 'dataVisualizerCreateDataFrameAnalyticsCard',
-      } as ResultLink,
+      },
     ];
   };
 
@@ -143,36 +143,36 @@ export const IndexDataVisualizerPage: FC = () => {
       }
     );
     return modules?.map(
-      (m) =>
-        ({
-          id: m.id,
-          title: m.title,
-          description: m.description,
-          icon: m.logo.icon,
-          getUrl: async () => {
-            return await mlLocator.getUrl({
-              page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
-              pageState: {
-                id: m.id,
-                index: dataViewId,
-              },
-            });
-          },
-          canDisplay: async () => {
-            try {
-              const { timeFieldName } = await getDataView(dataViewId);
-              return (
-                isFullLicense() &&
-                timeFieldName !== undefined &&
-                checkPermission('canCreateJob') &&
-                mlNodesAvailable()
-              );
-            } catch (error) {
-              return false;
-            }
-          },
-          'data-test-subj': m.id,
-        } as ResultLink)
+      (m): ResultLink => ({
+        id: m.id,
+        title: m.title,
+        description: m.description,
+        icon: m.logo.icon,
+        type: 'index',
+        getUrl: async () => {
+          return await mlLocator.getUrl({
+            page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
+            pageState: {
+              id: m.id,
+              index: dataViewId,
+            },
+          });
+        },
+        canDisplay: async () => {
+          try {
+            const { timeFieldName } = await getDataView(dataViewId);
+            return (
+              isFullLicense() &&
+              timeFieldName !== undefined &&
+              checkPermission('canCreateJob') &&
+              mlNodesAvailable()
+            );
+          } catch (error) {
+            return false;
+          }
+        },
+        'data-test-subj': m.id,
+      })
     );
   };
 

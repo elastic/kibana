@@ -26,7 +26,7 @@ export interface AsyncLinkCardParams {
 }
 
 export type AsyncLinkCards = Array<
-  (params: AsyncLinkCardParams) => Promise<ResultLink | ResultLink[] | undefined>
+  (params: AsyncLinkCardParams) => Promise<ResultLink[] | undefined>
 >;
 
 export interface ResultLink {
@@ -120,12 +120,6 @@ export const ResultsLinks: FC<Props> = ({
                 href: await c.getUrl(),
               }))
             );
-          }
-
-          if (results) {
-            const canDisplay = await results.canDisplay();
-            const href = await results.getUrl();
-            return { ...results, canDisplay, href };
           }
         })
       ).then((cards) => {

@@ -88,12 +88,6 @@ export const ActionsPanel: FC<Props> = ({
               }))
             );
           }
-
-          if (results) {
-            const canDisplay = await results.canDisplay();
-            const href = await results.getUrl();
-            return { ...results, canDisplay, href };
-          }
         })
       ).then((cards) => {
         setAsyncHrefCards(

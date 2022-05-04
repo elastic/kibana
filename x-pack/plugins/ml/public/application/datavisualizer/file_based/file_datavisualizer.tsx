@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   FileDataVisualizerSpec,
-  ResultLink,
   AsyncLinkCardParams,
+  AsyncLinkCards,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
@@ -39,10 +39,10 @@ export const FileDataVisualizerPage: FC = () => {
 
   const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
 
-  const asyncLinkCards = useMemo(
+  const asyncLinkCards: AsyncLinkCards = useMemo(
     () => [
-      async ({ dataViewId, globalState }: AsyncLinkCardParams) =>
-        ({
+      async ({ dataViewId, globalState }: AsyncLinkCardParams) => [
+        {
           id: 'create_ml_job',
           title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.anomalyDetectionTitle', {
             defaultMessage: 'Create ML job',
@@ -72,9 +72,8 @@ export const FileDataVisualizerPage: FC = () => {
               return false;
             }
           },
-        } as ResultLink),
-      async ({ dataViewId, globalState }: AsyncLinkCardParams) =>
-        ({
+        },
+        {
           id: 'open_in_data_viz',
           title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.dataframeTitle', {
             defaultMessage: 'Open in Data Visualizer',
@@ -92,7 +91,8 @@ export const FileDataVisualizerPage: FC = () => {
             });
           },
           canDisplay: async () => dataViewId !== '',
-        } as ResultLink),
+        },
+      ],
     ],
     [mlLocator]
   );
