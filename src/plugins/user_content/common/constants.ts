@@ -30,7 +30,7 @@ export const userContentCommonMappings = {
 const viewsCount = EVENTS_COUNT_GRANULARITY.reduce((agg, days) => {
   return {
     ...agg,
-    [`views_${days}_days`]: 0,
+    [`views_${days}_days`]: 1,
   };
 }, {} as ViewsCounters);
 
