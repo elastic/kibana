@@ -27,6 +27,7 @@ const baseAllowlistFields: AllowlistFields = {
     dll: true,
     malware_signature: true,
     memory_region: true,
+    protection: true,
     real: {
       entity_id: true,
     },
@@ -61,6 +62,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     mtime: true,
     directory: true,
     hash: true,
+    pe: true,
     Ext: {
       bytes_compressed: true,
       bytes_compressed_present: true,
