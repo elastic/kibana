@@ -242,7 +242,7 @@ experimental[] Access the Elastic Map Service files via the same mechanism:
 url: {
   // "type" defaults to "elasticsearch" otherwise
   %type%: emsfile
-  // Name of the file, exactly as in the Region map visualization
+  // Name of the file, exactly as in https://maps.elastic.co
   name: World Countries
 }
 // The result is either a topojson file or a geojson file. 
