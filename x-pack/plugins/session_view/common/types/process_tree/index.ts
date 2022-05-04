@@ -198,7 +198,7 @@ export interface ProcessEventContainer {
     tag?: string;
     hash: {
       all?: string;
-    }
+    };
   };
 }
 
@@ -217,5 +217,5 @@ export interface ProcessEventOrchestrator {
   };
   parent: {
     type?: string;
-  }
+  };
 }
