@@ -6,16 +6,15 @@
  */
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
+import { render } from '../utils/testing';
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { mountWithRouter } from '../utils/testing/enzyme_helpers';
 import { OVERVIEW_ROUTE } from '../../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   SyntheticsUrlParams,
   getSupportedUrlParams,
 } from '../utils/url_params/get_supported_url_params';
-import { MountWithReduxProvider } from '../utils/testing/helper_with_redux';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 
 describe('useBreadcrumbs', () => {
@@ -32,14 +31,12 @@ describe('useBreadcrumbs', () => {
       return <>Hello</>;
     };
 
-    mountWithRouter(
-      <MountWithReduxProvider>
-        <KibanaContextProvider services={{ ...core }}>
-          <Route path={OVERVIEW_ROUTE}>
-            <Component />
-          </Route>
-        </KibanaContextProvider>
-      </MountWithReduxProvider>
+    render(
+      <KibanaContextProvider services={{ ...core }}>
+        <Route path={OVERVIEW_ROUTE}>
+          <Component />
+        </Route>
+      </KibanaContextProvider>
     );
 
     const urlParams: SyntheticsUrlParams = getSupportedUrlParams({});

@@ -6,12 +6,11 @@
  */
 
 import DateMath from '@kbn/datemath';
+import userEvent from '@testing-library/user-event';
+import { render } from '../utils/testing';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, SyntheticsUrlParamsHook } from './use_url_params';
 import { SyntheticsRefreshContext } from '../contexts';
-import { mountWithRouter } from '../utils/testing/enzyme_helpers';
-import { MountWithReduxProvider } from '../utils/testing/helper_with_redux';
-import { createMemoryHistory } from 'history';
 
 interface MockUrlParamsComponentProps {
   hook: SyntheticsUrlParamsHook;
@@ -49,83 +48,21 @@ describe('useUrlParams', () => {
     dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
   });
 
-  it('accepts router props, updates URL params, and returns the current params', () => {
-    const history = createMemoryHistory();
-    jest.spyOn(history, 'push');
-
-    const component = mountWithRouter(
-      <MountWithReduxProvider>
-        <SyntheticsRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
-          <UseUrlParamsTestComponent hook={useUrlParams} />
-        </SyntheticsRefreshContext.Provider>
-      </MountWithReduxProvider>,
-      history
+  it('accepts router props, updates URL params, and returns the current params', async () => {
+    const { findByText, history } = render(
+      <SyntheticsRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
+        <UseUrlParamsTestComponent hook={useUrlParams} />
+      </SyntheticsRefreshContext.Provider>
     );
 
-    const setUrlParamsButton = component.find('#setUrlParams');
-    setUrlParamsButton.simulate('click');
-    expect(history.push).toHaveBeenCalledWith({
+    const pushSpy = jest.spyOn(history, 'push');
+
+    const setUrlParamsButton = await findByText('Set url params');
+    userEvent.click(setUrlParamsButton);
+    expect(pushSpy).toHaveBeenCalledWith({
       pathname: '/',
       search: 'dateRangeEnd=now&dateRangeStart=now-12d',
     });
-  });
-
-  it('gets the expected values using the context', () => {
-    const component = mountWithRouter(
-      <MountWithReduxProvider>
-        <SyntheticsRefreshContext.Provider
-          value={{
-            lastRefresh: 123,
-            refreshApp: jest.fn(),
-          }}
-        >
-          <UseUrlParamsTestComponent hook={useUrlParams} />
-        </SyntheticsRefreshContext.Provider>
-      </MountWithReduxProvider>
-    );
-
-    expect(component).toBeDefined();
-
-    const getUrlParamsButton = component.find('#getUrlParams');
-    getUrlParamsButton.simulate('click');
-
-    expect(getUrlParamsButton).toBeDefined();
-  });
-
-  it('deletes keys that do not have truthy values', () => {
-    const history = createMemoryHistory({
-      initialEntries: ['/?g=%22%22&dateRangeStart=now-12&dateRangeEnd=now&pagination=foo'],
-    });
-    history.location.key = 'test';
-
-    jest.spyOn(history, 'push');
-    const component = mountWithRouter(
-      <MountWithReduxProvider>
-        <SyntheticsRefreshContext.Provider
-          value={{
-            lastRefresh: 123,
-            refreshApp: jest.fn(),
-          }}
-        >
-          <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />
-        </SyntheticsRefreshContext.Provider>
-      </MountWithReduxProvider>,
-      history
-    );
-
-    const getUrlParamsButton = component.find('#getUrlParams');
-    getUrlParamsButton.simulate('click');
-
-    expect(component).toBeDefined();
-
-    component.update();
-
-    const setUrlParamsButton = component.find('#setUrlParams');
-    setUrlParamsButton.simulate('click');
-
-    expect(history.push).toHaveBeenCalledWith({
-      pathname: '/',
-      search: 'dateRangeEnd=now&dateRangeStart=now-12&g=%22%22',
-    });
+    pushSpy.mockClear();
   });
 });
