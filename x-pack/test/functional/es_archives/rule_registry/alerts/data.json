@@ -57,7 +57,7 @@
     "source": {
       "event.kind" : "signal",
       "@timestamp": "2020-12-16T15:16:18.570Z",
-      "kibana.alert.rule.rule_type_id": "siem.signals",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.workflow_status": "open",
@@ -74,7 +74,7 @@
     "source": {
       "event.kind" : "signal",
       "@timestamp": "2020-12-16T15:16:18.570Z",
-      "kibana.alert.rule.rule_type_id": "siem.customRule",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.workflow_status": "open",
@@ -90,7 +90,7 @@
     "id": "space1securityalert",
     "source": {
       "@timestamp": "2020-12-16T15:16:18.570Z",
-      "kibana.alert.rule.rule_type_id": "siem.signals",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.workflow_status": "open",
@@ -106,7 +106,7 @@
     "id": "space2securityalert",
     "source": {
       "@timestamp": "2020-12-16T15:16:18.570Z",
-      "kibana.alert.rule.rule_type_id": "siem.signals",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.workflow_status": "open",
