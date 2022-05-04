@@ -115,4 +115,9 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getAriaLabelHelp(),
   },
+  addTimeMarker: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getAddTimeMakerHelp(),
+  },
 };

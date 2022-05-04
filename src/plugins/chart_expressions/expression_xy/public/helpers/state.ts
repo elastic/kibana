@@ -25,6 +25,12 @@ export function isHorizontalChart(layers: CommonXYLayerConfig[]) {
   return getDataLayers(layers).every((l) => isHorizontalSeries(l.seriesType));
 }
 
+export function isTimeChart(layers: CommonXYLayerConfig[]) {
+  return getDataLayers(layers).every(
+    (l) => l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date'
+  );
+}
+
 export const getSeriesColor = (layer: CommonXYLayerConfig, accessor: string) => {
   if ((isDataLayer(layer) && layer.splitAccessor) || isAnnotationsLayer(layer)) {
     return null;

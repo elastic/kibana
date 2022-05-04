@@ -47,6 +47,7 @@ type GetSeriesPropsFn = (config: {
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
+  defaultXScaleType: XScaleType;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -243,6 +244,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   emphasizeFitting,
   fillOpacity,
   formattedDatatableInfo,
+  defaultXScaleType,
 }): SeriesSpec => {
   const { table } = layer;
   const isStacked = layer.seriesType.includes('stacked');
@@ -290,7 +292,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
     data: rows,
-    xScaleType: layer.xAccessor ? layer.xScaleType : 'ordinal',
+    xScaleType: layer.xAccessor ? layer.xScaleType || defaultXScaleType : 'ordinal',
     yScaleType:
       formatter?.id === 'bytes' && layer.yScaleType === ScaleType.Linear
         ? ScaleType.LinearBinary

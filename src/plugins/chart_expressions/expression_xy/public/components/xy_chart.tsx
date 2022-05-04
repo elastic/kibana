@@ -47,6 +47,7 @@ import {
   getFilteredLayers,
   getReferenceLayers,
   isDataLayer,
+  isTimeChart,
   getAxesConfiguration,
   GroupsConfiguration,
   getLinesCausedPaddings,
@@ -63,8 +64,10 @@ import {
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
-import { AxisExtentModes, SeriesTypes, ValueLabelModes } from '../../common/constants';
+import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
+import { XYCurrentTime } from './xy_current_time';
+
 import './xy_chart.scss';
 
 declare global {
@@ -215,7 +218,18 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
 
-  const isTimeViz = Boolean(dataLayers.every((l) => l.xScaleType === 'time'));
+  const isTimeViz = isTimeChart(dataLayers);
+
+  const defaultXScaleType = Boolean(
+    dataLayers.every(
+      (l) =>
+        l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date' &&
+        (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
+    )
+  )
+    ? XScaleTypes.TIME
+    : XScaleTypes.ORDINAL;
+
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
@@ -550,6 +564,11 @@ export function XYChart({
         ariaLabel={args.ariaLabel}
         ariaUseDefaultSummary={!args.ariaLabel}
       />
+      <XYCurrentTime
+        enabled={Boolean(args.addTimeMarker && isTimeViz)}
+        isDarkMode={darkMode}
+        domain={rawXDomain}
+      />
 
       <Axis
         id="x"
@@ -618,6 +637,7 @@ export function XYChart({
           shouldShowValueLabels={shouldShowValueLabels}
           formattedDatatables={formattedDatatables}
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
+          defaultXScaleType={defaultXScaleType}
         />
       )}
       {referenceLineLayers.length ? (

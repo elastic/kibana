@@ -203,6 +203,7 @@ export interface XYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  addTimeMarker?: boolean;
 }
 
 export interface LayeredXYArgs {
@@ -226,6 +227,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  addTimeMarker?: boolean;
 }
 
 export interface XYProps {
@@ -249,6 +251,7 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  addTimeMarker?: boolean;
 }
 
 export interface AnnotationLayerArgs {

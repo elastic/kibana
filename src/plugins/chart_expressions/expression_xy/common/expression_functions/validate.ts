@@ -13,6 +13,7 @@ import {
   DataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
+  ExtendedDataLayerConfigResult,
 } from '../types';
 
 const errors = {
@@ -36,6 +37,10 @@ const errors = {
   dataBoundsForNotLineChartError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
+    }),
+  timeMarkerForNotTimeChartsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError', {
+      defaultMessage: 'Only time charts can have current time marker',
     }),
 };
 
@@ -99,5 +104,19 @@ export const validateValueLabels = (
 ) => {
   if ((!hasBar || !hasNotHistogramBars) && valueLabels !== ValueLabelModes.HIDE) {
     throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
+  }
+};
+
+export const validateAddTimeMarker = (
+  dataLayers: Array<DataLayerConfigResult | ExtendedDataLayerConfigResult>,
+  addTimeMarker?: boolean
+) => {
+  const isTimeViz = Boolean(
+    dataLayers.every(
+      (l) => l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date'
+    )
+  );
+  if (addTimeMarker && !isTimeViz) {
+    throw new Error(errors.timeMarkerForNotTimeChartsError());
   }
 };

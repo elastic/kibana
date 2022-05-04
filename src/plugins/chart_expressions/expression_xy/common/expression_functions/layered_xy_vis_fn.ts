@@ -6,15 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { XY_VIS_RENDERER } from '../constants';
+import { XY_VIS_RENDERER, LayerTypes } from '../constants';
 import { appendLayerIds } from '../helpers';
-import { LayeredXyVisFn } from '../types';
+import { LayeredXyVisFn, ExtendedDataLayerConfig } from '../types';
 import { logDatatables } from '../utils';
+import { validateAddTimeMarker } from './validate';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
 
   logDatatables(layers, handlers);
+  validateAddTimeMarker(
+    layers.filter<ExtendedDataLayerConfig>(
+      (layer): layer is ExtendedDataLayerConfig =>
+        layer.layerType === LayerTypes.DATA || !layer.layerType
+    ),
+    args.addTimeMarker
+  );
 
   return {
     type: 'render',

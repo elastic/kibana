@@ -32,7 +32,6 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
   xScaleType: {
     options: [...Object.values(XScaleTypes)],
     help: strings.getXScaleTypeHelp(),
-    default: XScaleTypes.ORDINAL,
     strict: true,
   },
   isHistogram: {

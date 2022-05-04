@@ -10,11 +10,12 @@ import { search } from '@kbn/data-plugin/public';
 import { XYChartProps } from '../../common';
 import { getFilteredLayers } from './layers';
 import { isDataLayer } from './visualization';
+import { isTimeChart } from './state';
 
 export function calculateMinInterval({ args: { layers } }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
-  const isTimeViz = filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time');
+  const isTimeViz = isTimeChart(filteredLayers);
   const xColumn = filteredLayers[0].table.columns.find(
     (column) => isDataLayer(filteredLayers[0]) && column.id === filteredLayers[0].xAccessor
   );
