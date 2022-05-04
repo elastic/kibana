@@ -14,7 +14,7 @@ Use the event log index to determine:
 [float]
 ==== Example event log queries
 
-The following event log query looks at all event related to a specific rule id:
+The following event log query looks at all events related to a specific rule id:
 
 [source, txt]
 --------------------------------------------------
