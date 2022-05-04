@@ -9,9 +9,14 @@
 import { LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { shallow } from 'enzyme';
 import React from 'react';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { LensMultiTable } from '../../common';
-import { ReferenceLineLayerArgs, YConfig } from '../../common/types';
+import { LayerTypes } from '../../common/constants';
+import {
+  ReferenceLineLayerArgs,
+  ReferenceLineLayerConfig,
+  ExtendedYConfig,
+} from '../../common/types';
 import { ReferenceLineAnnotations, ReferenceLineAnnotationsProps } from './reference_lines';
 
 const row: Record<string, number> = {
@@ -23,34 +28,28 @@ const row: Record<string, number> = {
   yAccessorRightSecondId: 10,
 };
 
-const histogramData: LensMultiTable = {
-  type: 'lens_multitable',
-  tables: {
-    firstLayer: {
-      type: 'datatable',
-      rows: [row],
-      columns: Object.keys(row).map((id) => ({
-        id,
-        name: `Static value: ${row[id]}`,
-        meta: {
-          type: 'number',
-          params: { id: 'number' },
-        },
-      })),
+const data: Datatable = {
+  type: 'datatable',
+  rows: [row],
+  columns: Object.keys(row).map((id) => ({
+    id,
+    name: `Static value: ${row[id]}`,
+    meta: {
+      type: 'number',
+      params: { id: 'number' },
     },
-  },
-  dateRange: {
-    fromDate: new Date('2020-04-01T16:14:16.246Z'),
-    toDate: new Date('2020-04-01T17:15:41.263Z'),
-  },
+  })),
 };
 
-function createLayers(yConfigs: ReferenceLineLayerArgs['yConfig']): ReferenceLineLayerArgs[] {
+function createLayers(yConfigs: ReferenceLineLayerArgs['yConfig']): ReferenceLineLayerConfig[] {
   return [
     {
-      layerId: 'firstLayer',
+      layerId: 'first',
       accessors: (yConfigs || []).map(({ forAccessor }) => forAccessor),
       yConfig: yConfigs,
+      type: 'referenceLineLayer',
+      layerType: LayerTypes.REFERENCELINE,
+      table: data,
     },
   ];
 }
@@ -64,7 +63,7 @@ interface XCoords {
   x1: number | undefined;
 }
 
-function getAxisFromId(layerPrefix: string): YConfig['axisMode'] {
+function getAxisFromId(layerPrefix: string): ExtendedYConfig['axisMode'] {
   return /left/i.test(layerPrefix) ? 'left' : /right/i.test(layerPrefix) ? 'right' : 'bottom';
 }
 
@@ -95,21 +94,20 @@ describe('ReferenceLineAnnotations', () => {
       ['yAccessorLeft', 'below'],
       ['yAccessorRight', 'above'],
       ['yAccessorRight', 'below'],
-    ] as Array<[string, YConfig['fill']]>)(
+    ] as Array<[string, ExtendedYConfig['fill']]>)(
       'should render a RectAnnotation for a reference line with fill set: %s %s',
       (layerPrefix, fill) => {
         const axisMode = getAxisFromId(layerPrefix);
         const wrapper = shallow(
           <ReferenceLineAnnotations
             {...defaultProps}
-            data={histogramData}
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
                 axisMode,
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
+                type: 'extendedYConfig',
               },
             ])}
           />
@@ -135,19 +133,18 @@ describe('ReferenceLineAnnotations', () => {
     it.each([
       ['xAccessor', 'above'],
       ['xAccessor', 'below'],
-    ] as Array<[string, YConfig['fill']]>)(
+    ] as Array<[string, ExtendedYConfig['fill']]>)(
       'should render a RectAnnotation for a reference line with fill set: %s %s',
       (layerPrefix, fill) => {
         const wrapper = shallow(
           <ReferenceLineAnnotations
             {...defaultProps}
-            data={histogramData}
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
                 axisMode: 'bottom',
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
               },
             ])}
@@ -176,27 +173,26 @@ describe('ReferenceLineAnnotations', () => {
       ['yAccessorLeft', 'below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
       ['yAccessorRight', 'above', { y0: 5, y1: 10 }, { y0: 10, y1: undefined }],
       ['yAccessorRight', 'below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
-    ] as Array<[string, YConfig['fill'], YCoords, YCoords]>)(
+    ] as Array<[string, ExtendedYConfig['fill'], YCoords, YCoords]>)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
         const axisMode = getAxisFromId(layerPrefix);
         const wrapper = shallow(
           <ReferenceLineAnnotations
             {...defaultProps}
-            data={histogramData}
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
                 axisMode,
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode,
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
               },
             ])}
@@ -227,26 +223,25 @@ describe('ReferenceLineAnnotations', () => {
     it.each([
       ['xAccessor', 'above', { x0: 1, x1: 2 }, { x0: 2, x1: undefined }],
       ['xAccessor', 'below', { x0: undefined, x1: 1 }, { x0: 1, x1: 2 }],
-    ] as Array<[string, YConfig['fill'], XCoords, XCoords]>)(
+    ] as Array<[string, ExtendedYConfig['fill'], XCoords, XCoords]>)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
         const wrapper = shallow(
           <ReferenceLineAnnotations
             {...defaultProps}
-            data={histogramData}
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
                 axisMode: 'bottom',
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode: 'bottom',
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
               },
             ])}
@@ -282,21 +277,20 @@ describe('ReferenceLineAnnotations', () => {
         const wrapper = shallow(
           <ReferenceLineAnnotations
             {...defaultProps}
-            data={histogramData}
             layers={createLayers([
               {
                 forAccessor: `${layerPrefix}FirstId`,
                 axisMode,
                 lineStyle: 'solid',
                 fill: 'above',
-                type: 'yConfig',
+                type: 'extendedYConfig',
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 axisMode,
                 lineStyle: 'solid',
                 fill: 'below',
-                type: 'yConfig',
+                type: 'extendedYConfig',
               },
             ])}
           />
@@ -326,27 +320,26 @@ describe('ReferenceLineAnnotations', () => {
     it.each([
       ['above', { y0: 5, y1: 10 }, { y0: 10, y1: undefined }],
       ['below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
-    ] as Array<[YConfig['fill'], YCoords, YCoords]>)(
+    ] as Array<[ExtendedYConfig['fill'], YCoords, YCoords]>)(
       'should be robust and works also for different axes when on same direction: 1x Left + 1x Right both %s',
       (fill, coordsA, coordsB) => {
         const wrapper = shallow(
           <ReferenceLineAnnotations
             {...defaultProps}
-            data={histogramData}
             layers={createLayers([
               {
                 forAccessor: `yAccessorLeftFirstId`,
                 axisMode: 'left',
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
+                type: 'extendedYConfig',
               },
               {
                 forAccessor: `yAccessorRightSecondId`,
                 axisMode: 'right',
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
+                type: 'extendedYConfig',
               },
             ])}
           />
