@@ -22,6 +22,8 @@ import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
 
 const BASE_URL = 'https://ci-stats.kibana.dev';
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
 
 function limitMetaStrings(meta: CiStatsMetadata) {
   return Object.fromEntries(
@@ -107,6 +109,7 @@ interface ReqOptions {
   body: any;
   bodyDesc: string;
   query?: AxiosRequestConfig['params'];
+  timeout?: number;
 }
 
 /** Object that helps report data to the ci-stats service */
@@ -282,6 +285,7 @@ export class CiStatsReporter {
         },
         bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
         body: buffer.join('\n'),
+        timeout: 5 * MINUTE,
       });
       buffer.length = 0;
       bufferBytes = 0;
@@ -336,7 +340,7 @@ export class CiStatsReporter {
     }
   }
 
-  private async req<T>({ auth, body, bodyDesc, path, query }: ReqOptions) {
+  private async req<T>({ auth, body, bodyDesc, path, query, timeout = 60 * SECOND }: ReqOptions) {
     let attempt = 0;
     const maxAttempts = 5;
 
@@ -365,6 +369,7 @@ export class CiStatsReporter {
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,
           maxContentLength: Infinity,
+          timeout,
         });
 
         return resp.data;
