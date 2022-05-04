@@ -79,7 +79,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const anomalyBucketStartMoment = moment(anomaly.time).tz(getDateFormatTz());
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
-      .add(anomaly.source.bucket_span, 'seconds')
+      .add(anomaly.source.bucket_span, 'seconds').subtract(1, 'ms')
       .toISOString();
     const timeRange = data.query.timefilter.timefilter.getTime();
 
