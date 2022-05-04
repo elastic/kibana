@@ -401,13 +401,13 @@ export type DataLayerFn = ExpressionFunctionDefinition<
   typeof DATA_LAYER,
   Datatable,
   DataLayerArgs,
-  DataLayerConfigResult
+  Promise<DataLayerConfigResult>
 >;
 export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
   Datatable,
   ExtendedDataLayerArgs,
-  ExtendedDataLayerConfigResult
+  Promise<ExtendedDataLayerConfigResult>
 >;
 
 export type ReferenceLineLayerFn = ExpressionFunctionDefinition<

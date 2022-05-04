@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { xyVisFunction } from '.';
+import { layeredXyVisFunction } from '.';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import { sampleArgs, sampleLayer } from '../__mocks__';
+import { sampleArgs, sampleExtendedLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
 
-describe('xyVis', () => {
+describe('layeredXyVis', () => {
   test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
-    const result = await xyVisFunction.fn(
+    const result = await layeredXyVisFunction.fn(
       data,
-      { ...rest, dataLayers: [sampleLayer], referenceLineLayers: [], annotationLayers: [] },
+      { ...rest, layers: [sampleExtendedLayer] },
       createMockExecutionContext()
     );
 
     expect(result).toEqual({
       type: 'render',
       as: XY_VIS,
-      value: { args: { ...rest, layers: [sampleLayer] } },
+      value: { args: { ...rest, layers: [sampleExtendedLayer] } },
     });
   });
 
@@ -33,28 +33,24 @@ describe('xyVis', () => {
     const { layers, ...rest } = args;
 
     expect(
-      xyVisFunction.fn(
+      layeredXyVisFunction.fn(
         data,
         {
           ...rest,
           markSizeRatio: 0,
-          dataLayers: [sampleLayer],
-          referenceLineLayers: [],
-          annotationLayers: [],
+          layers: [sampleExtendedLayer],
         },
         createMockExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();
 
     expect(
-      xyVisFunction.fn(
+      layeredXyVisFunction.fn(
         data,
         {
           ...rest,
           markSizeRatio: 101,
-          dataLayers: [sampleLayer],
-          referenceLineLayers: [],
-          annotationLayers: [],
+          layers: [sampleExtendedLayer],
         },
         createMockExecutionContext()
       )
