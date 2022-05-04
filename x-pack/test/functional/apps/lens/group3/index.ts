@@ -73,20 +73,20 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./chart_data'));
     loadTestFile(require.resolve('./time_shift'));
     loadTestFile(require.resolve('./drag_and_drop'));
-    loadTestFile(require.resolve('./disable_auto_apply'));
-    loadTestFile(require.resolve('./geo_field'));
-    loadTestFile(require.resolve('./formula'));
-    loadTestFile(require.resolve('./heatmap'));
-    loadTestFile(require.resolve('./gauge'));
-    loadTestFile(require.resolve('./metrics'));
-    loadTestFile(require.resolve('./reference_lines'));
-    loadTestFile(require.resolve('./annotations'));
-    loadTestFile(require.resolve('./inspector'));
-    loadTestFile(require.resolve('./error_handling'));
-    loadTestFile(require.resolve('./lens_tagging'));
-    loadTestFile(require.resolve('./lens_reporting'));
-    loadTestFile(require.resolve('./tsvb_open_in_lens'));
-    // has to be last one in the suite because it overrides saved objects
-    loadTestFile(require.resolve('./rollup'));
+    // loadTestFile(require.resolve('./disable_auto_apply'));
+    // loadTestFile(require.resolve('./geo_field'));
+    // loadTestFile(require.resolve('./formula'));
+    // loadTestFile(require.resolve('./heatmap'));
+    // loadTestFile(require.resolve('./gauge'));
+    // loadTestFile(require.resolve('./metrics'));
+    // loadTestFile(require.resolve('./reference_lines'));
+    // loadTestFile(require.resolve('./annotations'));
+    // loadTestFile(require.resolve('./inspector'));
+    // loadTestFile(require.resolve('./error_handling'));
+    // loadTestFile(require.resolve('./lens_tagging'));
+    // loadTestFile(require.resolve('./lens_reporting'));
+    // loadTestFile(require.resolve('./tsvb_open_in_lens'));
+    // // has to be last one in the suite because it overrides saved objects
+    // loadTestFile(require.resolve('./rollup'));
   });
 };
