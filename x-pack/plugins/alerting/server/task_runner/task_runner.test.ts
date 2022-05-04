@@ -344,7 +344,7 @@ describe('Task Runner', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
         2,
         generateEventLog({
-          duration: 0,
+          duration: '0',
           start: DATE_1970,
           action: EVENT_LOG_ACTIONS.newInstance,
           actionSubgroup: 'subDefault',
@@ -356,7 +356,7 @@ describe('Task Runner', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
         3,
         generateEventLog({
-          duration: 0,
+          duration: '0',
           start: DATE_1970,
           action: EVENT_LOG_ACTIONS.activeInstance,
           actionGroupId: 'default',
@@ -459,7 +459,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       2,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
@@ -470,7 +470,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       3,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
@@ -1026,7 +1026,7 @@ describe('Task Runner', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
         2,
         generateEventLog({
-          duration: 0,
+          duration: '0',
           start: DATE_1970,
           action: EVENT_LOG_ACTIONS.newInstance,
           actionGroupId: 'default',
@@ -1037,7 +1037,7 @@ describe('Task Runner', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
         3,
         generateEventLog({
-          duration: 0,
+          duration: '0',
           start: DATE_1970,
           action: EVENT_LOG_ACTIONS.activeInstance,
           actionGroupId: 'default',
@@ -1110,7 +1110,7 @@ describe('Task Runner', () => {
                 state: {
                   bar: false,
                   start: DATE_1969,
-                  duration: 80000000000,
+                  duration: '80000000000',
                 },
               },
               '2': {
@@ -1118,7 +1118,7 @@ describe('Task Runner', () => {
                 state: {
                   bar: false,
                   start: '1969-12-31T06:00:00.000Z',
-                  duration: 70000000000,
+                  duration: '70000000000',
                 },
               },
             },
@@ -1170,7 +1170,7 @@ describe('Task Runner', () => {
         2,
         generateEventLog({
           action: EVENT_LOG_ACTIONS.recoveredInstance,
-          duration: 64800000000000,
+          duration: '64800000000000',
           instanceId: '2',
           start: '1969-12-31T06:00:00.000Z',
           end: DATE_1970,
@@ -1420,7 +1420,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: DATE_1969,
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -1428,7 +1428,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -1460,7 +1460,7 @@ describe('Task Runner', () => {
       generateEventLog({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         actionGroupId: 'default',
-        duration: 64800000000000,
+        duration: '64800000000000',
         instanceId: '2',
         start: '1969-12-31T06:00:00.000Z',
         end: DATE_1970,
@@ -2046,7 +2046,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       2,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
@@ -2057,7 +2057,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       3,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
@@ -2068,7 +2068,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       4,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
@@ -2079,7 +2079,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       5,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
@@ -2133,7 +2133,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: DATE_1969,
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -2141,7 +2141,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -2186,7 +2186,7 @@ describe('Task Runner', () => {
       generateEventLog({
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
-        duration: 64800000000000,
+        duration: '64800000000000',
         start: '1969-12-31T06:00:00.000Z',
         instanceId: '2',
         consumer: 'bar',
@@ -2316,7 +2316,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: DATE_1969,
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -2324,7 +2324,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -2367,7 +2367,7 @@ describe('Task Runner', () => {
       3,
       generateEventLog({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
-        duration: 64800000000000,
+        duration: '64800000000000',
         start: '1969-12-31T06:00:00.000Z',
         end: DATE_1970,
         consumer: 'bar',
@@ -2790,7 +2790,7 @@ describe('Task Runner', () => {
               },
             },
             state: {
-              duration: 0,
+              duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
           },
@@ -2820,7 +2820,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       2,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
@@ -2831,7 +2831,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       3,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
@@ -2990,7 +2990,7 @@ describe('Task Runner', () => {
               },
             },
             state: {
-              duration: 0,
+              duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
           },
@@ -3002,7 +3002,7 @@ describe('Task Runner', () => {
               },
             },
             state: {
-              duration: 0,
+              duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
           },

@@ -7,10 +7,9 @@
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import { UseQueryResult } from 'react-query';
 
-export type FindingsGroupByKind = 'none' | 'resource';
+export type FindingsGroupByKind = 'default' | 'resource';
 
 export interface FindingsBaseURLQuery {
-  groupBy: FindingsGroupByKind;
   query: Query;
   filters: Filter[];
 }
@@ -20,10 +19,6 @@ export interface FindingsBaseEsQuery {
   query?: {
     bool: BoolQuery;
   };
-}
-
-export interface FindingsQueryStatus {
-  enabled: boolean;
 }
 
 export interface FindingsQueryResult<TData = unknown, TError = unknown> {
