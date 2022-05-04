@@ -34,9 +34,10 @@ export function TileRequestTab(props: Props) {
   try {
     const { path, body } = getTileRequest(props.tileRequest);
     const bodyAsString = JSON.stringify(body, null, 2);
+    const consoleRequest = `POST ${path}\n${bodyAsString}`;
     let consoleHref: string | undefined;
     if (getDevToolsCapabilities().show) {
-      const devToolsDataUri = compressToEncodedURIComponent(`POST ${path}\n${bodyAsString}`);
+      const devToolsDataUri = compressToEncodedURIComponent(consoleRequest);
       consoleHref = getShareService()
         .url.locators.get('CONSOLE_APP_LOCATOR')
         ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
@@ -92,7 +93,7 @@ export function TileRequestTab(props: Props) {
         <EuiFlexItem grow={true}>
           <CodeEditor
             languageId={XJsonLang.ID}
-            value={bodyAsString}
+            value={consoleRequest}
             options={{
               readOnly: true,
               lineNumbers: 'off',
