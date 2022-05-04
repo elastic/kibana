@@ -80,6 +80,12 @@ export const getOAuthAccessToken = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const { type, options } = req.body;
 
+        try {
+          configurationUtilities.ensureUriAllowed(options.tokenUrl);
+        } catch (err) {
+          return res.badRequest({ body: err.message });
+        }
+
         let accessToken: string | null = null;
         if (type === 'jwt') {
           const tokenOpts = options as OAuthJwtParams;

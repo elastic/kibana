@@ -140,5 +140,31 @@ export default function oAuthAccessTokenTest({ getService }: FtrProviderContext)
         })
         .expect(400);
     });
+
+    it('should return 400 when token url not included in allowlist', async () => {
+      const { body } = await supertest
+        .post('/internal/actions/connector/_oauth_access_token')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          type: 'jwt',
+          options: {
+            tokenUrl: `https://servicenow.nonexistent.com/oauth_token.do`,
+            config: {
+              clientId: 'abc',
+              userIdentifierValue: 'elastic',
+              jwtKeyId: 'def',
+            },
+            secrets: {
+              clientSecret: 'xyz',
+              privateKey: testPrivateKey,
+            },
+          },
+        });
+
+      expect(body.statusCode).to.equal(400);
+      expect(body.message).to.equal(
+        `target url "https://servicenow.nonexistent.com/oauth_token.do" is not added to the Kibana config xpack.actions.allowedHosts`
+      );
+    });
   });
 }
