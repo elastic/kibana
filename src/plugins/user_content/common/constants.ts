@@ -13,9 +13,11 @@ export const API_BASE_PATH = '/api/user_content';
 export const metadataEventTypes = ['viewed:kibana', 'viewed:api'] as const;
 
 /** The **days** we want to aggregate events count */
-export const EVENTS_COUNT_GRANULARITY = [7, 14, 30, 45, 60, 90];
+export const EVENTS_COUNT_GRANULARITY = [7, 14, 30, 45, 60, 90] as const;
 
-export const viewsCountRangeFields = EVENTS_COUNT_GRANULARITY.map((days) => `views_${days}_days`);
+export const viewsCountRangeFields = EVENTS_COUNT_GRANULARITY.map(
+  (days) => `views_${days}_days` as const
+);
 
 const viewsCountMapping = viewsCountRangeFields.reduce((agg, field) => {
   return {

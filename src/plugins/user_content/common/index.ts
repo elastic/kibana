@@ -16,4 +16,9 @@ export {
 
 export { withApiBaseBath } from './lib';
 
-export type { MetadataEventType, UserContentMetadataEvent, ViewsCounters } from './types';
+export type {
+  MetadataEventType,
+  UserContentMetadataEvent,
+  ViewsCounters,
+  ViewsCountRangeField,
+} from './types';

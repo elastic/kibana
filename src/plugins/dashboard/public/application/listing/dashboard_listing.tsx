@@ -19,6 +19,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { UserContentPluginStart } from '@kbn/user-content-plugin/public';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -63,6 +64,7 @@ export const DashboardListing = ({
       dashboardCapabilities,
       dashboardSessionStorage,
       chrome: { setBreadcrumbs },
+      userContent,
     },
   } = useKibana<DashboardAppServices>();
 
@@ -117,9 +119,10 @@ export const DashboardListing = ({
         core.application,
         kbnUrlStateStorage,
         core.uiSettings.get('state:storeInSessionStorage'),
+        userContent,
         savedObjectsTagging
       ),
-    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
+    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging, userContent]
   );
 
   const createItem = useCallback(() => {
@@ -324,6 +327,7 @@ const getTableColumns = (
   application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   useHash: boolean,
+  userContent: UserContentPluginStart,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
   return [
@@ -353,5 +357,9 @@ const getTableColumns = (
       sortable: true,
     },
     ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
+    ...userContent.ui.getUserContentTableColumnsDefinitions({
+      contentType: 'dashboard',
+      selectedViewsRange: 'views_7_days',
+    }),
   ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };

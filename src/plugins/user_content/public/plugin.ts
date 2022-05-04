@@ -36,11 +36,16 @@ export class UserContentPlugin implements Plugin<UserContentPluginSetup, UserCon
 
     this.userContentService.init({ metadataEventService, savedObjectClient: savedObjects.client });
 
-    const { register } = this.userContentService;
+    const { register, getUserContentTableColumnsDefinitions } = this.userContentService;
 
     return {
       userContentService: {
         register: register.bind(this.userContentService),
+      },
+      ui: {
+        getUserContentTableColumnsDefinitions: getUserContentTableColumnsDefinitions.bind(
+          this.userContentService
+        ),
       },
     };
   }
