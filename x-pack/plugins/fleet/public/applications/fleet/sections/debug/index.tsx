@@ -14,6 +14,7 @@ import {
   AgentPolicyDebugger,
   IntegrationDebugger,
   PreconfigurationDebugger,
+  FleetIndicesDebugger,
   SavedObjectsDebugger,
 } from './components';
 
@@ -53,6 +54,12 @@ export const DebugPage: React.FunctionComponent = () => {
 
           <EuiSpacer size="xl" />
           <PreconfigurationDebugger />
+          <EuiSpacer size="xl" />
+
+          <EuiHorizontalRule />
+
+          <EuiSpacer size="xl" />
+          <FleetIndicesDebugger />
           <EuiSpacer size="xl" />
         </EuiPageBody>
       </EuiPage>

@@ -11,21 +11,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiButton,
   EuiSelect,
   EuiSpacer,
   EuiTitle,
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendRequest } from '../../../hooks';
 
 import { CodeBlock } from './code_block';
 import { SavedObjectNamesCombo } from './saved_object_names_combo';
 
-const fetchSavedObjects = async (type: string, name: string) => {
+const fetchSavedObjects = async (type?: string, name?: string) => {
+  if (!type || !name) return;
   const path = `/.kibana/_search?q=${type}.name:${name}`;
   const body = {};
   const response = await sendRequest({
@@ -60,26 +59,18 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
 
   const onTypeChange = (e: any) => {
     setType(e.target.value);
+    setName(undefined);
     childRef.current!.refetchNames();
   };
 
-  const {
-    data: savedObjectResult,
-    refetch,
-    status,
-  } = useQuery(['debug-saved-objects', type, name], () => fetchSavedObjects(type, name!), {
-    enabled: false,
-    refetchOnWindowFocus: false,
-  });
-
-  const onClick = async () => {
-    refetch();
-  };
+  const { data: savedObjectResult, status } = useQuery(['debug-saved-objects', type, name], () =>
+    fetchSavedObjects(type, name)
+  );
 
   return (
     <>
       <EuiTitle size="l">
-        <h2>Saved Objects Debugger</h2>
+        <h2>Saved Objects</h2>
       </EuiTitle>
 
       <EuiSpacer size="m" />
@@ -94,9 +85,15 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={`
+            min-width: 300px;
+          `}
+        >
           <EuiFormRow>
             <EuiSelect
+              prepend="Type"
               id="soType"
               options={types}
               value={type}
@@ -119,13 +116,6 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
               setNamesStatus={setNamesStatus}
               ref={childRef}
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow>
-            <EuiButton onClick={onClick} fill disabled={!name}>
-              <FormattedMessage id="xpack.fleet.debugger.searchText" defaultMessage="Search" />
-            </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
