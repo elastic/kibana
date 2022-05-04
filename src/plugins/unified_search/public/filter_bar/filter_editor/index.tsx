@@ -70,6 +70,20 @@ interface State {
   isCustomEditorOpen: boolean;
 }
 
+const panelTitleAdd = i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
+  defaultMessage: 'Add filter',
+});
+const panelTitleEdit = i18n.translate('unifiedSearch.filter.filterEditor.editFilterPopupTitle', {
+  defaultMessage: 'Edit filter',
+});
+
+const addButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.addButtonLabel', {
+  defaultMessage: 'Add filter',
+});
+const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.updateButtonLabel', {
+  defaultMessage: 'Update filter',
+});
+
 class FilterEditorUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -86,26 +100,6 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   public render() {
-    const panelTitleAdd = i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
-      defaultMessage: 'Add filter',
-    });
-    const panelTitleEdit = i18n.translate(
-      'unifiedSearch.filter.filterEditor.editFilterPopupTitle',
-      {
-        defaultMessage: 'Edit filter',
-      }
-    );
-
-    const addButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.addButtonLabel', {
-      defaultMessage: 'Add filter',
-    });
-    const updateButtonLabel = i18n.translate(
-      'unifiedSearch.filter.filterEditor.updateButtonLabel',
-      {
-        defaultMessage: 'Update filter',
-      }
-    );
-
     return (
       <div>
         <EuiPopoverTitle paddingSize="s">
