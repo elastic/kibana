@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('select bucket Split slices');
         await PageObjects.visEditor.clickBucket('Split slices');
         log.debug('Click aggregation Terms');
-        await PageObjects.visEditor.selectAggregation('Terms');
+        await PageObjects.visEditor.selectAggregation('Stratoula');
         log.debug('Click field machine.os.raw');
         await PageObjects.visEditor.selectField('machine.os.raw');
         await PageObjects.visEditor.toggleOtherBucket(2);
@@ -446,7 +446,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForVisualization();
       });
 
-      it('should still showing pie chart when a subseries have zero data', async function () {
+      it('should still showing pie chart when a subseries have zero data-miaou', async function () {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();

@@ -80,7 +80,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('visualize ciGroup1', function () {
       this.tags('ciGroup1');
 
-      loadTestFile(require.resolve('./_pie_chart'));
+      // loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_shared_item'));
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
