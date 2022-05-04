@@ -7,7 +7,6 @@
 
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
-import { mapValues } from 'lodash';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -29,6 +28,7 @@ import { getMappedParams } from '../rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
+const MINIMUM_SS_MIGRATION_VERSION = '8.3.0';
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 export const FILEBEAT_7X_INDICATOR_PATH = 'threatintel.indicator';
 
@@ -180,7 +180,7 @@ export function getMigrations(
       '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
       '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
     },
-    getEsQueryAlertSearchSourceMigrations(searchSourceMigrations)
+    getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
   );
 }
 
@@ -931,35 +931,55 @@ function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }
 
+function mapSearchSourceMigrationFunc(
+  migrateSerializedSearchSourceFields: MigrateFunction<SerializedSearchSourceFields>
+): MigrateFunction {
+  return (state) => {
+    const _state = state as { attributes: RawRule };
+
+    const serializedSearchSource = _state.attributes.params.searchConfiguration;
+
+    if (isSerializedSearchSource(serializedSearchSource)) {
+      return {
+        ..._state,
+        attributes: {
+          ..._state.attributes,
+          params: {
+            ..._state.attributes.params,
+            searchConfiguration: migrateSerializedSearchSourceFields(serializedSearchSource),
+          },
+        },
+      };
+    }
+    return _state;
+  };
+}
+
 /**
- * This creates a migration map that applies search source migrations to legacy es query rules
+ * This creates a migration map that applies search source migrations to legacy es query rules.
+ * It doesn't modify existing migrations. The following migrations will occur at minimum version of 8.3+.
  */
-function getEsQueryAlertSearchSourceMigrations(
+function getSearchSourceMigrations(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   searchSourceMigrations: MigrateFunctionsObject
-): MigrateFunctionsObject {
-  return mapValues<MigrateFunctionsObject, MigrateFunction>(
-    searchSourceMigrations,
-    (
-        migrateSerializedSearchSourceFields: MigrateFunction<SerializedSearchSourceFields>
-      ): MigrateFunction =>
-      (state) => {
-        const _state = state as { attributes: RawRule };
+) {
+  const filteredMigrations: SavedObjectMigrationMap = {};
+  for (const versionKey in searchSourceMigrations) {
+    if (versionKey >= MINIMUM_SS_MIGRATION_VERSION) {
+      const migrateSearchSource = mapSearchSourceMigrationFunc(
+        searchSourceMigrations[versionKey]
+      ) as unknown as AlertMigration;
 
-        const serializedSearchSource = _state.attributes.params.searchConfiguration;
-
-        if (isSerializedSearchSource(serializedSearchSource)) {
-          return {
-            ..._state,
-            attributes: {
-              ..._state.attributes,
-              params: {
-                ..._state.attributes.params,
-                searchConfiguration: migrateSerializedSearchSourceFields(serializedSearchSource),
-              },
-            },
-          };
-        }
-        return _state;
-      }
-  );
+      filteredMigrations[versionKey] = executeMigrationWithErrorHandling(
+        createEsoMigration(
+          encryptedSavedObjects,
+          (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> =>
+            true,
+          pipeMigrations(migrateSearchSource)
+        ),
+        versionKey
+      );
+    }
+  }
+  return filteredMigrations;
 }

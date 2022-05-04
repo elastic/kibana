@@ -2319,7 +2319,7 @@ describe('successful migrations', () => {
 
     describe('8.3.0', () => {
       test('migrates es_query alert params', () => {
-        const migration820 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+        const migration830 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.3.0'
         ];
         const alert = getMockData(
@@ -2329,7 +2329,7 @@ describe('successful migrations', () => {
           },
           true
         );
-        const migratedAlert820 = migration820(alert, migrationContext);
+        const migratedAlert820 = migration830(alert, migrationContext);
 
         expect(migratedAlert820.attributes.params).toEqual({
           esQuery: '{ "query": "test-query" }',
@@ -2625,6 +2625,53 @@ describe('handles errors during migrations', () => {
       }).toThrowError(`Can't migrate!`);
       expect(migrationContext.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.16.0 migration failed for alert ${rule.id} with error: Can't migrate!`,
+        {
+          migrations: {
+            alertDocument: {
+              ...rule,
+              attributes: {
+                ...rule.attributes,
+              },
+            },
+          },
+        }
+      );
+    });
+  });
+
+  describe('8.3.0 throws if migration fails', () => {
+    test('should show the proper exception on search source migration', () => {
+      encryptedSavedObjectsSetup.createMigration.mockImplementation(({ migration }) => migration);
+      const mockRule = getMockData();
+      const rule = {
+        ...mockRule,
+        attributes: {
+          ...mockRule.attributes,
+          params: {
+            searchConfiguration: {
+              some: 'prop',
+              migrated: false,
+            },
+          },
+        },
+      };
+
+      const versionToTest = '8.3.0';
+      const migration830 = getMigrations(
+        encryptedSavedObjectsSetup,
+        {
+          [versionToTest]: () => {
+            throw new Error(`Can't migrate search source!`);
+          },
+        },
+        isPreconfigured
+      )[versionToTest];
+
+      expect(() => {
+        migration830(rule, migrationContext);
+      }).toThrowError(`Can't migrate search source!`);
+      expect(migrationContext.log.error).toHaveBeenCalledWith(
+        `encryptedSavedObject ${versionToTest} migration failed for alert ${rule.id} with error: Can't migrate search source!`,
         {
           migrations: {
             alertDocument: {
