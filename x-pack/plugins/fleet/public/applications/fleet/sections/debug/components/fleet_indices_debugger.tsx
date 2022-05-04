@@ -13,7 +13,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
@@ -56,11 +55,6 @@ export const FleetIndicesDebugger = () => {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h2>Fleet Indices</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-
       <EuiText grow={false}>
         <p>
           Search for the contents of Fleet indices. Use the code block below to diagnose any

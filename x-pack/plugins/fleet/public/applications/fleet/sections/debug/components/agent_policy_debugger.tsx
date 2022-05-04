@@ -15,7 +15,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { useQuery } from 'react-query';
@@ -82,12 +81,6 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h2>Agent Policy Debugger</h2>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
       <EuiText grow={false}>
         <p>
           Search for an Agent Policy using its name or <EuiCode>id</EuiCode> value. Use the code

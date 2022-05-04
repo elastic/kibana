@@ -8,12 +8,14 @@
 import React from 'react';
 import {
   EuiAccordion,
+  EuiCallOut,
   EuiHorizontalRule,
   EuiListGroup,
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -31,64 +33,71 @@ import {
 // setup if we end up pursuing wider adoption of react-query.
 export const queryClient = new QueryClient();
 
+const panels = [
+  {
+    title: 'Agent Policy Debugger',
+    id: 'agentPolicyDebugger',
+    component: <AgentPolicyDebugger />,
+  },
+  {
+    title: 'Integration Debugger',
+    id: 'integrationDebugger',
+    component: <IntegrationDebugger />,
+  },
+  {
+    title: 'Saved Objects Debugger',
+    id: 'savedObjectsDebugger',
+    component: <SavedObjectsDebugger />,
+  },
+  {
+    title: 'Fleet Indices Debugger',
+    id: 'fleetIndicesDebugger',
+    component: <FleetIndicesDebugger />,
+  },
+  {
+    title: 'Preconfiguration Debugger',
+    id: 'preconfigurationDebugger',
+    component: <PreconfigurationDebugger />,
+  },
+];
+
 export const DebugPage: React.FunctionComponent = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <EuiPage>
         <EuiPageBody panelled>
-          <EuiPageHeader
-            pageTitle="Fleet Debugging Dashboard"
-            iconType="wrench"
-            description={`This page provides an interface for managing Fleet's data and diagnosing issues.
-            Be aware that these debugging tools can be destructive in nature, and you should proceed with caution.`}
-          />
+          <EuiPageHeader pageTitle="Fleet Debugging Dashboard" iconType="wrench" />
+          <EuiCallOut color="danger" iconType="alert" title="Danger zone">
+            <EuiText grow={false}>
+              <p>
+                This page provides an interface for directly managing {"Fleet's"} underlying data
+                and diagnosing issues. Be aware that these debugging tools can be{' '}
+                <strong>destructive</strong> in nature and can result in{' '}
+                <strong>loss of data</strong>. Please proceed with caution.
+              </p>
+            </EuiText>
+          </EuiCallOut>
 
-          <EuiAccordion
-            id="agentPolicyDebugger"
-            buttonContent="Agent Policy Debugger"
-            initialIsOpen={true}
-            paddingSize="l"
-          >
-            <AgentPolicyDebugger />
-          </EuiAccordion>
-          <EuiSpacer />
-          <EuiAccordion
-            id="integrationDebugger"
-            buttonContent="Integration Debugger"
-            initialIsOpen={true}
-            paddingSize="l"
-          >
-            <IntegrationDebugger />
-          </EuiAccordion>
-          <EuiSpacer />
-          <EuiAccordion
-            id="savedObjectsDebugger"
-            buttonContent="Saved Objects"
-            initialIsOpen={true}
-            paddingSize="l"
-          >
-            <SavedObjectsDebugger />
-          </EuiAccordion>
-          <EuiSpacer />
-          <EuiAccordion
-            id="fleetIndicesDebugger"
-            buttonContent="Fleet Indices"
-            initialIsOpen={true}
-            paddingSize="l"
-          >
-            <FleetIndicesDebugger />
-          </EuiAccordion>
-          <EuiSpacer />
-          <EuiAccordion
-            id="preconfigurationDebugger"
-            buttonContent="Preconfiguration Debugger"
-            initialIsOpen={true}
-            paddingSize="l"
-          >
-            <PreconfigurationDebugger />
-          </EuiAccordion>
+          <EuiSpacer size="xl" />
 
-          <EuiHorizontalRule />
+          {panels.map(({ title, id, component }) => (
+            <>
+              <EuiAccordion
+                id={id}
+                initialIsOpen
+                buttonContent={
+                  <EuiTitle size="l">
+                    <h2>{title}</h2>
+                  </EuiTitle>
+                }
+              >
+                <EuiSpacer size="m" />
+                {component}
+              </EuiAccordion>
+
+              <EuiHorizontalRule />
+            </>
+          ))}
 
           <EuiTitle size="l">
             <h2>Useful Links</h2>

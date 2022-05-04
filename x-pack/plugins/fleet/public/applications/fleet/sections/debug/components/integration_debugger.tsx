@@ -142,12 +142,6 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h2>Integration Debugger</h2>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
       <EuiText grow={false}>
         <p>Use this tool to uninstall or reinstall installed integrations.</p>
         <p>

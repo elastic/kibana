@@ -13,7 +13,6 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiTitle,
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
@@ -82,12 +81,6 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h2>Saved Objects</h2>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
       <EuiText grow={false}>
         <p>
           Search for Saved objects by selecting a type and its name. Use the code block below to

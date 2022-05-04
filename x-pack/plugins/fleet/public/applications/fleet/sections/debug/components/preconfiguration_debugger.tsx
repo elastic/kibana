@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiTitle,
   EuiSpacer,
   EuiText,
   EuiCode,
@@ -107,12 +106,6 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
   return (
     <>
-      <EuiTitle size="l">
-        <h2>Preconfiguration Debugger</h2>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
       <EuiText grow={false}>
         <p>
           This tool can be used to reset {'"preconfigured"'} policies that are managed via{' '}
