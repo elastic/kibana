@@ -8000,7 +8000,6 @@
     "xpack.apm.settings.customLink.delete": "Supprimer",
     "xpack.apm.settings.customLink.delete.failed": "Impossible de supprimer le lien personnalisé",
     "xpack.apm.settings.customLink.delete.successed": "Lien personnalisé supprimé.",
-    "xpack.apm.settings.customLink.emptyPromptText": "Nous allons y remédier ! Vous pouvez ajouter des liens personnalisés au menu contextuel Actions à partir des détails de transaction de chaque service. Créez un lien utile vers le portail d'assistance de votre société, ou ouvrez un nouveau rapport de bug. Pour en savoir plus, consultez notre documentation.",
     "xpack.apm.settings.customLink.emptyPromptTitle": "Aucun lien trouvé.",
     "xpack.apm.settings.customLink.flyout.action.title": "Lien",
     "xpack.apm.settings.customLink.flyout.close": "Fermer",
