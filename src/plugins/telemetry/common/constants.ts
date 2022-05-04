@@ -13,6 +13,12 @@
 export const REPORT_INTERVAL_MS = 86400000;
 
 /**
+ * How often we poll for the opt-in status.
+ * Currently, 10 seconds.
+ */
+export const OPT_IN_POLL_INTERVAL_MS = 10000;
+
+/**
  * Key for the localStorage service
  */
 export const LOCALSTORAGE_KEY = 'telemetry.data';

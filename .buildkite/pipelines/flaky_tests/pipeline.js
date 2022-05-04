@@ -6,56 +6,182 @@
  * Side Public License, v 1.
  */
 
+const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
+if (!configJson) {
+  console.error('+++ Triggering directly is not supported anymore');
+  console.error(
+    `Please use the "Trigger Flaky Test Runner" UI to run the Flaky Test Runner. You can find the UI at the URL below:`
+  );
+  console.error('\n    https://ci-stats.kibana.dev/trigger_flaky_test_runner\n');
+  process.exit(1);
+}
+
 const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
   require('./groups.json').groups
 );
 
-const stepInput = (key, nameOfSuite) => {
-  return {
-    key: `ftsr-suite/${key}`,
-    text: nameOfSuite,
-    required: false,
-    default: '0',
+const concurrency = 25;
+const initialJobs = 3;
+
+function getTestSuitesFromJson(json) {
+  const fail = (errorMsg) => {
+    console.error('+++ Invalid test config provided');
+    console.error(`${errorMsg}: ${json}`);
+    process.exit(1);
   };
-};
 
-const inputs = [
-  {
-    key: 'ftsr-override-count',
-    text: 'Override for all suites',
-    default: '0',
-    required: true,
-  },
-];
-
-for (const group of groups) {
-  if (!group.ciGroups) {
-    inputs.push(stepInput(group.key, group.name));
-  } else {
-    for (let i = 1; i <= group.ciGroups; i++) {
-      inputs.push(stepInput(`${group.key}/${i}`, `${group.name} ${i}`));
-    }
+  let parsed;
+  try {
+    parsed = JSON.parse(json);
+  } catch (error) {
+    fail(`JSON test config did not parse correctly`);
   }
+
+  if (!Array.isArray(parsed)) {
+    fail(`JSON test config must be an array`);
+  }
+
+  /** @type {Array<{ key: string, count: number }>} */
+  const testSuites = [];
+  for (const item of parsed) {
+    if (typeof item !== 'object' || item === null) {
+      fail(`testSuites must be objects`);
+    }
+    const key = item.key;
+    if (typeof key !== 'string') {
+      fail(`testSuite.key must be a string`);
+    }
+    const count = item.count;
+    if (typeof count !== 'number') {
+      fail(`testSuite.count must be a number`);
+    }
+    testSuites.push({
+      key,
+      count,
+    });
+  }
+
+  return testSuites;
 }
 
+const testSuites = getTestSuitesFromJson(configJson);
+const totalJobs = testSuites.reduce((acc, t) => acc + t.count, initialJobs);
+
+if (totalJobs > 500) {
+  console.error('+++ Too many tests');
+  console.error(
+    `Buildkite builds can only contain 500 steps in total. Found ${totalJobs} in total. Make sure your test runs are less than ${
+      500 - initialJobs
+    }`
+  );
+  process.exit(1);
+}
+
+const steps = [];
 const pipeline = {
-  steps: [
-    {
-      input: 'Number of Runs - Click Me',
-      fields: inputs,
-      if: `build.env('KIBANA_FLAKY_TEST_RUNNER_CONFIG') == null`,
-    },
-    {
-      wait: '~',
-    },
-    {
-      command: '.buildkite/pipelines/flaky_tests/runner.sh',
-      label: 'Create pipeline',
-      agents: {
-        queue: 'kibana-default',
-      },
-    },
-  ],
+  env: {
+    IGNORE_SHIP_CI_STATS_ERROR: 'true',
+  },
+  steps: steps,
 };
+
+steps.push({
+  command: '.buildkite/scripts/steps/build_kibana.sh',
+  label: 'Build Kibana Distribution and Plugins',
+  agents: { queue: 'c2-8' },
+  key: 'build',
+  if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
+});
+
+for (const testSuite of testSuites) {
+  const TEST_SUITE = testSuite.key;
+  const RUN_COUNT = testSuite.count;
+  const UUID = process.env.UUID;
+
+  const JOB_PARTS = TEST_SUITE.split('/');
+  const IS_XPACK = JOB_PARTS[0] === 'xpack';
+  const TASK = JOB_PARTS[1];
+  const CI_GROUP = JOB_PARTS.length > 2 ? JOB_PARTS[2] : '';
+
+  if (RUN_COUNT < 1) {
+    continue;
+  }
+
+  switch (TASK) {
+    case 'cigroup':
+      if (IS_XPACK) {
+        steps.push({
+          command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/xpack_cigroup.sh`,
+          label: `Default CI Group ${CI_GROUP}`,
+          agents: { queue: 'n2-4' },
+          depends_on: 'build',
+          parallelism: RUN_COUNT,
+          concurrency: concurrency,
+          concurrency_group: UUID,
+          concurrency_method: 'eager',
+        });
+      } else {
+        steps.push({
+          command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/oss_cigroup.sh`,
+          label: `OSS CI Group ${CI_GROUP}`,
+          agents: { queue: 'ci-group-4d' },
+          depends_on: 'build',
+          parallelism: RUN_COUNT,
+          concurrency: concurrency,
+          concurrency_group: UUID,
+          concurrency_method: 'eager',
+        });
+      }
+      break;
+
+    case 'firefox':
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${IS_XPACK ? 'xpack' : 'oss'}_firefox.sh`,
+        label: `${IS_XPACK ? 'Default' : 'OSS'} Firefox`,
+        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        depends_on: 'build',
+        parallelism: RUN_COUNT,
+        concurrency: concurrency,
+        concurrency_group: UUID,
+        concurrency_method: 'eager',
+      });
+      break;
+
+    case 'accessibility':
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${
+          IS_XPACK ? 'xpack' : 'oss'
+        }_accessibility.sh`,
+        label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
+        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
+        depends_on: 'build',
+        parallelism: RUN_COUNT,
+        concurrency: concurrency,
+        concurrency_group: UUID,
+        concurrency_method: 'eager',
+      });
+      break;
+
+    case 'cypress':
+      const CYPRESS_SUITE = CI_GROUP;
+      const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));
+      if (!group) {
+        throw new Error(
+          `Group configuration was not found in groups.json for the following cypress suite: {${CYPRESS_SUITE}}.`
+        );
+      }
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
+        label: group.name,
+        agents: { queue: 'ci-group-6' },
+        depends_on: 'build',
+        parallelism: RUN_COUNT,
+        concurrency: concurrency,
+        concurrency_group: UUID,
+        concurrency_method: 'eager',
+      });
+      break;
+  }
+}
 
 console.log(JSON.stringify(pipeline, null, 2));
