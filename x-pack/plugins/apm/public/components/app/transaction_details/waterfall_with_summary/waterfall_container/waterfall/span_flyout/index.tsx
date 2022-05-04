@@ -40,6 +40,7 @@ import { ResponsiveFlyout } from '../responsive_flyout';
 import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
+import { ProcessorEvent } from '../../../../../../../../common/processor_event';
 
 function formatType(type: string) {
   switch (type) {
@@ -115,6 +116,7 @@ export function SpanFlyout({
     spanLinksCount,
     traceId: span.trace.id,
     spanId: span.span.id,
+    processorEvent: ProcessorEvent.span,
   });
 
   return (

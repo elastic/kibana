@@ -10,6 +10,7 @@ import {
   SPAN_LINKS,
   TRACE_ID,
   TRANSACTION_ID,
+  PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
@@ -20,12 +21,14 @@ export async function getIncomingSpanLinks({
   spanId,
   start,
   end,
+  processorEvent,
 }: {
   traceId: string;
   spanId: string;
   setup: Setup;
   start: number;
   end: number;
+  processorEvent: ProcessorEvent;
 }) {
   const { apmEventClient } = setup;
 
@@ -42,14 +45,10 @@ export async function getIncomingSpanLinks({
             ...rangeQuery(start, end),
             { term: { [TRACE_ID]: traceId } },
             { exists: { field: SPAN_LINKS } },
-            {
-              bool: {
-                should: [
-                  { term: { [SPAN_ID]: spanId } },
-                  { term: { [TRANSACTION_ID]: spanId } },
-                ],
-              },
-            },
+            { term: { [PROCESSOR_EVENT]: processorEvent } },
+            ...(processorEvent === ProcessorEvent.transaction
+              ? [{ term: { [TRANSACTION_ID]: spanId } }]
+              : [{ term: { [SPAN_ID]: spanId } }]),
           ],
         },
       },

@@ -20,16 +20,23 @@ import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_sum
 import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 interface Props {
   spanLinksCount: SpanLinksCount;
   traceId: string;
   spanId: string;
+  processorEvent: ProcessorEvent;
 }
 
 type LinkType = 'incoming' | 'outgoing';
 
-export function SpanLinks({ spanLinksCount, traceId, spanId }: Props) {
+export function SpanLinks({
+  spanLinksCount,
+  traceId,
+  spanId,
+  processorEvent,
+}: Props) {
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/transactions/view');
@@ -43,22 +50,28 @@ export function SpanLinks({ spanLinksCount, traceId, spanId }: Props) {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const params = {
-        path: { traceId, spanId },
-        query: { kuery, start, end },
-      };
       if (selectedLinkType === 'incoming') {
         return callApmApi(
           'GET /internal/apm/traces/{traceId}/span_links/{spanId}/incoming',
-          { params }
+          {
+            params: {
+              path: { traceId, spanId },
+              query: { kuery, start, end, processorEvent },
+            },
+          }
         );
       }
       return callApmApi(
         'GET /internal/apm/traces/{traceId}/span_links/{spanId}/outgoing',
-        { params }
+        {
+          params: {
+            path: { traceId, spanId },
+            query: { kuery, start, end },
+          },
+        }
       );
     },
-    [selectedLinkType, kuery, traceId, spanId, start, end]
+    [selectedLinkType, kuery, traceId, spanId, start, end, processorEvent]
   );
 
   const selectOptions: EuiSelectOption[] = useMemo(

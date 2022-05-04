@@ -12,6 +12,7 @@ import { getIncomingSpanLinks } from './get_incoming_span_links';
 import { kueryRt, rangeRt } from '../default_api_types';
 import { getOutgoingSpanLinks } from './get_outgoing_span_links';
 import { SpanLinkDetails } from '../../../common/span_links';
+import { processorEventRt } from '../../../common/processor_event';
 
 const incomingSpanLinksRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/incoming',
@@ -20,7 +21,11 @@ const incomingSpanLinksRoute = createApmServerRoute({
       traceId: t.string,
       spanId: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt]),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      t.type({ processorEvent: processorEventRt }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -38,6 +43,7 @@ const incomingSpanLinksRoute = createApmServerRoute({
       spanId: path.spanId,
       start: query.start,
       end: query.end,
+      processorEvent: query.processorEvent,
     });
 
     return {
