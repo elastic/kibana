@@ -131,7 +131,6 @@ export const applicationUsageSchema = {
   r: commonSchema,
 
   // X-Pack
-  aiops: commonSchema,
   apm: commonSchema,
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
