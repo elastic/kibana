@@ -14,7 +14,7 @@ export function RequestsViewCallout() {
     <EuiCallOut
       size="s"
       title={i18n.translate('xpack.maps.inspector.vectorTile.requestsView', {
-        defaultMessage: `Layers can retrieve data from vector tile search API and search API. This view displays vector tile search API requests. To inspect search API requests, open the 'View' dropdown and select 'Requests'.`,
+        defaultMessage: `Layers retrieve data from vector tile search API and search API. This view displays vector tile search API requests. To inspect search API requests, open the 'View' dropdown and select 'Requests'.`,
       })}
       iconType="iInCircle"
     />
