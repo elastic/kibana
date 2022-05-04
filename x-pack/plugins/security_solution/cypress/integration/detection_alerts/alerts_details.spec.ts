@@ -76,10 +76,12 @@ describe('Alert details with unmapped fields', () => {
       .within(($tableContainer) => {
         expect($tableContainer[0].scrollLeft).to.equal(0);
 
-        // Try to scroll left and make sure that the table hasn't actually scrolled
+        // Due to the introduction of pagination on the table, a slight horizontal overflow has been introduced.
+        // scroll ignores the `overflow-x:hidden` attribute and will still scroll the element if there is a hidden overflow
+        // Updated the below to equal 4 to account for this and keep a test to make sure it doesn't grow
         $tableContainer[0].scroll({ left: 1000 });
 
-        expect($tableContainer[0].scrollLeft).to.equal(0);
+        expect($tableContainer[0].scrollLeft).to.equal(4);
       });
   });
 });
