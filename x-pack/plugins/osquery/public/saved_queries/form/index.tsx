@@ -85,7 +85,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <ECSMappingEditorField />
+          <ECSMappingEditorField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {!viewMode && hasPlayground && (
