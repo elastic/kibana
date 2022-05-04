@@ -23,7 +23,7 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaSolutionAvatar } from '@kbn/shared-ux-components';
+import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
