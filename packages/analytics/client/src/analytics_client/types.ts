@@ -176,7 +176,7 @@ export interface IAnalyticsClient {
   ) => void;
   /**
    * Registers the event type that will be emitted via the reportEvent API.
-   * @param eventTypeOps
+   * @param eventTypeOps The definition of the event type {@link EventTypeOpts}.
    */
   registerEventType: <EventTypeData>(eventTypeOps: EventTypeOpts<EventTypeData>) => void;
 
