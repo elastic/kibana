@@ -33,11 +33,13 @@ export default ({ getService }: FtrProviderContext) => {
   // existence being near 0.
   describe('migrate_legacy_actions', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/legacy_actions');
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/legacy_actions');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/legacy_actions');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/security_solution/legacy_actions'
+      );
     });
 
     it('migrates legacy actions for rule with no actions', async () => {
