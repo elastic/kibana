@@ -20,6 +20,7 @@ import {
   parseDuration,
 } from '@kbn/alerting-plugin/common';
 import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
@@ -59,6 +60,9 @@ jest.mock('../../../lib/capabilities', () => ({
   hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn(),
+}));
 const { loadRules, loadRuleTypes, loadRuleAggregations } =
   jest.requireMock('../../../lib/rule_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
@@ -94,6 +98,10 @@ const ruleTypeFromApi = {
 ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+beforeEach(() => {
+  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+});
 
 describe('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
@@ -459,7 +467,7 @@ describe('rules_list component with items', () => {
     jest.runAllTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last execution.');
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last run.');
 
     wrapper
       .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
@@ -800,6 +808,39 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('EuiHealth[data-test-subj="totalWarningRulesCount"]').text()).toEqual(
       'Warning: 6'
     );
+  });
+
+  it('does not render the status filter if the feature flag is off', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeFalsy();
+  });
+
+  it('renders the status filter if the experiment is on', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeTruthy();
+  });
+
+  it('can filter by rule states', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    loadRules.mockReset();
+    await setup();
+
+    expect(loadRules.mock.calls[0][0].ruleStatusesFilter).toEqual([]);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterButton"] button').simulate('click');
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[1][0].ruleStatusesFilter).toEqual(['enabled']);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[2][0].ruleStatusesFilter).toEqual(['enabled', 'snoozed']);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[3][0].ruleStatusesFilter).toEqual(['enabled']);
   });
 });
 
