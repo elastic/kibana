@@ -5,7 +5,14 @@
  * 2.0.
  */
 
+/**
+ * aiops plugin server setup contract
+ */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiopsPluginSetup {}
+
+/**
+ * aiops plugin server start contract
+ */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiopsPluginStart {}

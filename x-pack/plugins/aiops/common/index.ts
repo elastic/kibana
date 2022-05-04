@@ -5,5 +5,11 @@
  * 2.0.
  */
 
+/**
+ * PLUGIN_ID is used as a unique identifier for the aiops plugin
+ */
 export const PLUGIN_ID = 'aiops';
-export const PLUGIN_NAME = 'aiops';
+/**
+ * PLUGIN_NAME is used as the display name for the aiops plugin
+ */
+export const PLUGIN_NAME = 'AIOps';

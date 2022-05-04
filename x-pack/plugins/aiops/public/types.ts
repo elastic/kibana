@@ -7,8 +7,15 @@
 
 import type { AiopsPlugin } from './plugin';
 
+/**
+ * aiops plugin public setup contract
+ */
 export type AiopsPluginSetup = ReturnType<AiopsPlugin['setup']>;
+
+/**
+ * aiops plugin publis start contract
+ */
 export type AiopsPluginStart = ReturnType<AiopsPlugin['start']>;
 
 // eslint-disable-next-line
-export interface AppPluginStartDependencies {}
+export type AppPluginStartDependencies = {};

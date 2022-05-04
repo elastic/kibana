@@ -13,6 +13,9 @@ import { getCoreStart } from '../kibana_services';
 
 import { AiopsApp } from './app';
 
+/**
+ * Spec used for lazy loading in the ML plugin
+ */
 export type ExplainLogRateSpikesSpec = typeof ExplainLogRateSpikes;
 
 export const ExplainLogRateSpikes: FC = () => {

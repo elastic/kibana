@@ -12,6 +12,5 @@ import { AiopsPlugin } from './plugin';
 export function plugin() {
   return new AiopsPlugin();
 }
-export type { AiopsPluginSetup, AiopsPluginStart } from './types';
 
 export type { ExplainLogRateSpikesSpec } from './components/explain_log_rate_spikes';
