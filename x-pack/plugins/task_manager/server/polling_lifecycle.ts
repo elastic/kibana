@@ -6,6 +6,7 @@
  */
 
 import { Subject, Observable, Subscription, ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
@@ -94,6 +95,7 @@ export class TaskPollingLifecycle {
   private config: TaskManagerConfig;
 
   private stop$: Subject<void>;
+  private subscriptions: Subscription[] = [];
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -122,6 +124,8 @@ export class TaskPollingLifecycle {
     this.usageCounter = usageCounter;
     this.config = config;
     this.stop$ = new ReplaySubject<void>(1);
+    maxWorkersConfiguration$ = maxWorkersConfiguration$.pipe(takeUntil(this.stop$));
+    pollIntervalConfiguration$ = pollIntervalConfiguration$.pipe(takeUntil(this.stop$));
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -134,7 +138,7 @@ export class TaskPollingLifecycle {
       logger,
       maxWorkers$: maxWorkersConfiguration$,
     });
-    this.pool.load.subscribe(emitEvent);
+    this.subscriptions.push(this.pool.load.subscribe(emitEvent));
 
     this.taskClaiming = new TaskClaiming({
       taskStore,
@@ -156,7 +160,7 @@ export class TaskPollingLifecycle {
           : this.pool.availableWorkers,
     });
     // pipe taskClaiming events into the lifecycle event stream
-    this.taskClaiming.events.subscribe(emitEvent);
+    this.subscriptions.push(this.taskClaiming.events.subscribe(emitEvent));
 
     const { max_poll_inactivity_cycles: maxPollInactivityCycles, poll_interval: pollInterval } =
       config;
@@ -212,15 +216,18 @@ export class TaskPollingLifecycle {
         this.stop$
       );
 
-    elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
-      if (areESAndSOAvailable && !this.isStarted) {
-        // start polling for work
-        this.pollingSubscription = this.subscribeToPoller(poller$);
-      } else if (!areESAndSOAvailable && this.isStarted) {
-        this.pollingSubscription.unsubscribe();
-        this.pool.cancelRunningTasks();
-      }
-    });
+    this.subscriptions.push(
+      elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
+        if (areESAndSOAvailable && !this.isStarted) {
+          // start polling for work
+          this.pollingSubscription = this.subscribeToPoller(poller$);
+          this.subscriptions.push(this.pollingSubscription);
+        } else if (!areESAndSOAvailable && this.isStarted) {
+          this.pollingSubscription.unsubscribe();
+          this.pool.cancelRunningTasks();
+        }
+      })
+    );
   }
 
   public get events(): Observable<TaskLifecycleEvent> {
@@ -256,8 +263,12 @@ export class TaskPollingLifecycle {
   }
 
   public stop() {
+    this.pool.stop();
     this.stop$.next();
     this.stop$.complete();
+    this.events$.complete();
+    this.claimRequests$.complete();
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {
@@ -298,6 +309,7 @@ export class TaskPollingLifecycle {
   ) {
     return poller$
       .pipe(
+        takeUntil(this.stop$),
         tap(
           mapErr((error: PollingError<string>) => {
             if (error.type === PollingErrorType.RequestCapacityReached) {

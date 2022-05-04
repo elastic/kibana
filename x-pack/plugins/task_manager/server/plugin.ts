@@ -201,6 +201,8 @@ export class TaskManagerPlugin
       startingPollInterval: this.config!.poll_interval,
     });
 
+    // FIXME the polling lifecycle introduces some async tasks that are not properly
+    // cancelled onStop, taking around 20-30 extra seconds to finish
     this.taskPollingLifecycle = new TaskPollingLifecycle({
       config: this.config!,
       definitions: this.definitions,

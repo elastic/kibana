@@ -11,8 +11,8 @@
 
 import stats from 'stats-lite';
 import { isNumber, random } from 'lodash';
-import { merge, of, Observable, combineLatest, ReplaySubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { merge, of, Observable, combineLatest } from 'rxjs';
+import { filter, map, startWith, shareReplay } from 'rxjs/operators';
 import { Option, none, some, isSome, Some } from 'fp-ts/lib/Option';
 import { isOk } from '../lib/result_type';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
@@ -33,8 +33,7 @@ export function delayOnClaimConflicts(
 ): Observable<number> {
   const claimConflictQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   // return a subject to allow multicast and replay the last value to new subscribers
-  const multiCastDelays$ = new ReplaySubject<number>(1);
-  merge(
+  return merge(
     of(0),
     combineLatest([
       maxWorkersConfiguration$,
@@ -72,9 +71,5 @@ export function delayOnClaimConflicts(
         return random(pollInterval * 0.25, pollInterval * 0.75, false);
       })
     )
-  ).subscribe((delay) => {
-    multiCastDelays$.next(delay);
-  });
-
-  return multiCastDelays$;
+  ).pipe(startWith(1), shareReplay(1));
 }

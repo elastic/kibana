@@ -103,7 +103,6 @@ export function createTaskPoller<T, H>({
       mapTo(none)
     )
   ).pipe(
-    takeUntil(stop$),
     // buffer all requests in a single set (to remove duplicates) as we don't want
     // work to take place in parallel (it could cause Task Manager to pull in the same
     // task twice)
@@ -141,7 +140,7 @@ export function createTaskPoller<T, H>({
     catchError((err: Error) => of(asPollingError<T>(err, PollingErrorType.WorkError)))
   );
 
-  return merge(requestWorkProcessing$, errors$);
+  return merge(requestWorkProcessing$, errors$.pipe(takeUntil(stop$)));
 }
 /**
  * Unwraps optional values and pushes them into a set

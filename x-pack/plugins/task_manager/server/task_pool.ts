@@ -9,7 +9,7 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { padStart } from 'lodash';
 import { Logger } from '@kbn/core/server';
@@ -43,6 +43,7 @@ export class TaskPool {
   private tasksInPool = new Map<string, TaskRunner>();
   private logger: Logger;
   private load$ = new Subject<TaskManagerStat>();
+  private maxWorkersSub: Subscription;
 
   /**
    * Creates an instance of TaskPool.
@@ -54,7 +55,7 @@ export class TaskPool {
    */
   constructor(opts: Opts) {
     this.logger = opts.logger;
-    opts.maxWorkers$.subscribe((maxWorkers) => {
+    this.maxWorkersSub = opts.maxWorkers$.subscribe((maxWorkers) => {
       this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
       this.maxWorkers = maxWorkers;
     });
@@ -158,6 +159,11 @@ export class TaskPool {
     for (const task of this.tasksInPool.values()) {
       this.cancelTask(task);
     }
+  }
+
+  public stop() {
+    this.maxWorkersSub.unsubscribe();
+    this.load$.complete();
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {

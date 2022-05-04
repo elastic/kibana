@@ -7,7 +7,7 @@
 
 import { Subject, Observable, throwError, timer, Subscription } from 'rxjs';
 import { noop } from 'lodash';
-import { exhaustMap, tap, takeUntil, switchMap, switchMapTo, catchError } from 'rxjs/operators';
+import { exhaustMap, tap, takeUntil, switchMap, timeout, catchError } from 'rxjs/operators';
 
 const DEFAULT_HEARTBEAT_INTERVAL = 1000;
 
@@ -58,26 +58,19 @@ function takeUntilDurationOfInactivity<T>(source$: Observable<T>, inactivityTime
     // an observable which starts a timer every time a new value is passed in, replacing the previous timer
     // if the timer goes off without having been reset by a fresh value, it will emit a single event - which will
     // notify our monitor that the source has been inactive for too long
-    const inactivityMonitor$ = new Subject<void>();
     return source$.pipe(
-      takeUntil(
-        inactivityMonitor$.pipe(
-          // on each new emited value, start a new timer, discarding the old one
-          switchMap(() => timer(inactivityTimeout)),
-          // every time a timer expires (meaning no new value came in on time to discard it)
-          // throw an error, forcing the monitor instantiate a new observable
-          switchMapTo(
-            throwError(
+      timeout({
+        each: inactivityTimeout,
+        with: () =>
+          throwError(
+            () =>
               new Error(
                 `Observable Monitor: Hung Observable restarted after ${inactivityTimeout}ms of inactivity`
               )
-            )
-          )
-        )
-      ),
-      // poke `inactivityMonitor$` so it restarts the timer
-      tap(() => inactivityMonitor$.next())
+          ),
+      })
     );
   }
+
   return source$;
 }
