@@ -33,6 +33,7 @@ const baseAllowlistFields: AllowlistFields = {
       elevation: true,
       elevation_type: true,
       integrity_level_name: true,
+      security_attributes: true,
     },
   },
   thread: true,
