@@ -21,6 +21,7 @@ import {
   EuiLink,
   EuiText,
   EuiTourStep,
+  EuiContextMenuPanelProps,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
@@ -125,6 +126,78 @@ export function ChangeDataView({
     );
   };
 
+  const getPanelItems = () => {
+    const panelItems: EuiContextMenuPanelProps['items'] = [];
+    if (onAddField) {
+      panelItems.push(
+        <EuiContextMenuItem
+          key="add"
+          icon="indexOpen"
+          data-test-subj="indexPattern-add-field"
+          onClick={() => {
+            setPopoverIsOpen(false);
+            onAddField();
+          }}
+        >
+          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.addFieldButton', {
+            defaultMessage: 'Add a field to this data view',
+          })}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          key="manage"
+          icon="indexSettings"
+          data-test-subj="indexPattern-manage-field"
+          onClick={() => {
+            setPopoverIsOpen(false);
+            application.navigateToApp('management', {
+              path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
+            });
+          }}
+        >
+          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
+            defaultMessage: 'Manage this data view',
+          })}
+        </EuiContextMenuItem>,
+        <EuiHorizontalRule margin="none" />
+      );
+    }
+    panelItems.push(
+      <DataViewsList
+        dataViewsList={dataViewsList}
+        onChangeDataView={(newId) => {
+          onChangeDataView(newId);
+          setPopoverIsOpen(false);
+        }}
+        currentDataViewId={currentDataViewId}
+        selectableProps={selectableProps}
+        searchListInputId={searchListInputId}
+      />
+    );
+
+    if (onDataViewCreated) {
+      panelItems.push(
+        <EuiHorizontalRule margin="none" />,
+        <EuiContextMenuItem
+          css={css`
+            color: ${euiTheme.colors.primaryText};
+          `}
+          data-test-subj="dataview-create-new"
+          icon="plusInCircleFilled"
+          onClick={() => {
+            setPopoverIsOpen(false);
+            onDataViewCreated();
+          }}
+        >
+          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.addNewDataView', {
+            defaultMessage: 'Create a data view',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    return panelItems;
+  };
+
   return (
     <EuiTourStep
       title={
@@ -163,74 +236,7 @@ export function ChangeDataView({
         buffer={8}
       >
         <div css={styles.popoverContent}>
-          {onAddField && (
-            <>
-              <EuiContextMenuPanel
-                size="s"
-                items={[
-                  <EuiContextMenuItem
-                    key="add"
-                    icon="indexOpen"
-                    data-test-subj="indexPattern-add-field"
-                    onClick={() => {
-                      setPopoverIsOpen(false);
-                      onAddField();
-                    }}
-                  >
-                    {i18n.translate('unifiedSearch.query.queryBar.indexPattern.addFieldButton', {
-                      defaultMessage: 'Add a field to this data view',
-                    })}
-                  </EuiContextMenuItem>,
-                  <EuiContextMenuItem
-                    key="manage"
-                    icon="indexSettings"
-                    data-test-subj="indexPattern-manage-field"
-                    onClick={() => {
-                      setPopoverIsOpen(false);
-                      application.navigateToApp('management', {
-                        path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
-                      });
-                    }}
-                  >
-                    {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
-                      defaultMessage: 'Manage this data view',
-                    })}
-                  </EuiContextMenuItem>,
-                ]}
-              />
-              <EuiHorizontalRule margin="none" />
-            </>
-          )}
-          <DataViewsList
-            dataViewsList={dataViewsList}
-            onChangeDataView={(newId) => {
-              onChangeDataView(newId);
-              setPopoverIsOpen(false);
-            }}
-            currentDataViewId={currentDataViewId}
-            selectableProps={selectableProps}
-            searchListInputId={searchListInputId}
-          />
-          {onDataViewCreated && (
-            <>
-              <EuiHorizontalRule margin="none" />
-              <EuiContextMenuItem
-                css={css`
-                  color: ${euiTheme.colors.primaryText};
-                `}
-                data-test-subj="dataview-create-new"
-                icon="plusInCircleFilled"
-                onClick={() => {
-                  setPopoverIsOpen(false);
-                  onDataViewCreated();
-                }}
-              >
-                {i18n.translate('unifiedSearch.query.queryBar.indexPattern.addNewDataView', {
-                  defaultMessage: 'Create a data view',
-                })}
-              </EuiContextMenuItem>
-            </>
-          )}
+          <EuiContextMenuPanel size="s" items={getPanelItems()} />
         </div>
       </EuiPopover>
     </EuiTourStep>
