@@ -55,10 +55,10 @@ describe('DetailPanelHostTab component', () => {
 
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('hostname')).toBeVisible();
-      expect(renderResult.queryAllByText('id').length).toBe(2);
+      expect(renderResult.queryAllByText('id').length).toBe(1);
       expect(renderResult.queryByText('ip')).toBeVisible();
       expect(renderResult.queryByText('mac')).toBeVisible();
-      expect(renderResult.queryAllByText('name').length).toBe(2);
+      expect(renderResult.queryAllByText('name').length).toBe(1);
       expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
       expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ID)).toBeVisible();

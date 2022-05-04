@@ -29,6 +29,26 @@ export const useStyles = () => {
 
     const metadataHostOS: CSSObject = {
       margin: `${euiTheme.size.m} ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}`,
+      paddingBottom: euiTheme.size.base,
+    };
+
+    const accordion: CSSObject = {
+      borderTop: euiTheme.border.thin,
+      '&:last-child': {
+        borderBottom: euiTheme.border.thin,
+      },
+      dl: {
+        paddingTop: '0px',
+      },
+      '&:only-child': {
+        border: euiTheme.border.thin,
+        borderRadius: euiTheme.border.radius.medium,
+      },
+    };
+
+    const accordionButton: CSSObject = {
+      padding: euiTheme.size.base,
+      fontWeight: euiTheme.font.weight.bold,
     };
 
     return {
@@ -36,6 +56,8 @@ export const useStyles = () => {
       executableAction,
       ellipsis,
       metadataHostOS,
+      accordion,
+      accordionButton,
     };
   }, [euiTheme]);
 

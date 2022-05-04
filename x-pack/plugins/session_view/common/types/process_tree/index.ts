@@ -196,20 +196,26 @@ export interface ProcessEventContainer {
   image: {
     name?: string;
     tag?: string;
+    hash: {
+      all?: string;
+    }
   };
 }
 
 export interface ProcessEventOrchestrator {
+  id?: string;
   resource: {
     name?: string;
     type?: string;
     labels?: string;
+    ip?: string;
   };
   namespace?: string;
   cluster: {
     version?: string;
     name?: string;
   };
-  annotations?: string;
-  owner_resource?: string;
+  parent: {
+    type?: string;
+  }
 }
