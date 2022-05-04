@@ -33,13 +33,17 @@ export const SeveritySelector: React.FC<Props> = ({
     return {
       value: severity,
       inputDisplay: (
-        <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems={'center'}
+          responsive={false}
+          data-test-subj={`case-severity-selection-${severity}`}
+        >
           <EuiFlexItem grow={false}>
             <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      'data-test-subj': `case-severity-selection-${severity}`,
     };
   });
 
