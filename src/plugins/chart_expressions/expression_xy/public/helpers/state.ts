@@ -7,6 +7,7 @@
  */
 
 import type { CommonXYLayerConfig, SeriesType, ExtendedYConfig, YConfig } from '../../common';
+import { XScaleTypes } from '../../common/constants';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -27,7 +28,9 @@ export function isHorizontalChart(layers: CommonXYLayerConfig[]) {
 
 export function isTimeChart(layers: CommonXYLayerConfig[]) {
   return getDataLayers(layers).every(
-    (l) => l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date'
+    (l) =>
+      l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date' &&
+      (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
   );
 }
 

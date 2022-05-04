@@ -220,15 +220,7 @@ export function XYChart({
 
   const isTimeViz = isTimeChart(dataLayers);
 
-  const defaultXScaleType = Boolean(
-    dataLayers.every(
-      (l) =>
-        l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date' &&
-        (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
-    )
-  )
-    ? XScaleTypes.TIME
-    : XScaleTypes.ORDINAL;
+  const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
