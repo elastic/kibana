@@ -17,9 +17,7 @@ const baseAllowlistFields: AllowlistFields = {
   command_line: true,
   hash: true,
   pid: true,
-  pe: {
-    original_file_name: true,
-  },
+  pe: true,
   uptime: true,
   Ext: {
     architecture: true,
