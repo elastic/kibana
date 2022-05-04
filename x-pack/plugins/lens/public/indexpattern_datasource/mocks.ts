@@ -93,13 +93,6 @@ export const createMockedIndexPattern = (): IndexPattern => {
       lang: 'painless' as const,
       script: '1234',
     },
-    {
-      name: 'my_histogram',
-      displayName: 'my_histogram',
-      type: 'histogram',
-      aggregatable: true,
-      searchable: true,
-    },
   ];
   return {
     id: '1',

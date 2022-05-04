@@ -6,6 +6,7 @@
  */
 
 import { createMockedIndexPattern } from '../../mocks';
+import { getFieldByNameFactory } from '../../pure_helpers';
 import type { IndexPatternLayer } from '../../types';
 import { getInvalidFieldMessage, getErrorsForHistogramField } from './helpers';
 import type { TermsIndexPatternColumn } from './terms';
@@ -168,11 +169,35 @@ describe('helpers', () => {
       incompleteColumns: {},
       indexPatternId: '1',
     } as IndexPatternLayer;
+    const indexPattern = createMockedIndexPattern();
+    const updatedIndexPattern = {
+      ...indexPattern,
+      fields: [
+        ...indexPattern.fields,
+        {
+          name: 'my_histogram',
+          displayName: 'my_histogram',
+          type: 'histogram',
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+      getFieldByName: getFieldByNameFactory([
+        {
+          name: 'my_histogram',
+          type: 'histogram',
+          displayName: 'my_histogram',
+          searchable: true,
+          aggregatable: true,
+        },
+      ]),
+    };
+
     it('return no error if a count aggregation is given', () => {
       const messages = getErrorsForHistogramField(
         layer,
         'd682b1d9-ce53-4443-a1e6-959197a314a6',
-        createMockedIndexPattern()
+        updatedIndexPattern
       );
       expect(messages).toBeUndefined();
     });
@@ -182,7 +207,7 @@ describe('helpers', () => {
       const messages = getErrorsForHistogramField(
         layer,
         'd682b1d9-ce53-4443-a1e6-959197a314a6',
-        createMockedIndexPattern()
+        updatedIndexPattern
       );
       expect(messages).toHaveLength(1);
       expect(messages![0]).toEqual(
@@ -226,7 +251,7 @@ describe('helpers', () => {
       const messages = getErrorsForHistogramField(
         newLayer,
         'd682b1d9-ce53-4443-a1e6-959197a314a6',
-        createMockedIndexPattern()
+        updatedIndexPattern
       );
       expect(messages).toHaveLength(1);
       expect(messages![0]).toEqual(
