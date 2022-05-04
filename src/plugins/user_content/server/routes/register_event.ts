@@ -16,7 +16,7 @@ import type { RouteDependencies } from './types';
 
 export const registerRegisterEventRoute = (
   router: IRouter,
-  { userContentEventStreamPromise }: RouteDependencies
+  { depsFromPluginStartPromise }: RouteDependencies
 ) => {
   router.post(
     {
@@ -33,9 +33,9 @@ export const registerRegisterEventRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const { body, params } = req;
 
-      const userContentEventStream = await userContentEventStreamPromise;
+      const { userContentEventsStream } = await depsFromPluginStartPromise;
 
-      userContentEventStream.registerEvent({
+      userContentEventsStream.registerEvent({
         type: params.eventType,
         data: {
           so_id: body.soId,

@@ -8,43 +8,42 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 
-import { UserContentEventsStream } from '../types';
+import { UserContentEventsStream, DepsFromPluginStart } from '../types';
 import { EVENTS_COUNT_GRANULARITY } from '../../common';
 import { bucketsAggregationToContentEventCount } from '../lib';
 
 export class MetadataEventsService {
   private logger: Logger;
-  private userContentEventStreamPromise: Promise<UserContentEventsStream> | undefined;
+  private depsFromPluginStartPromise: Promise<DepsFromPluginStart> | undefined;
 
   constructor({ logger }: { logger: Logger }) {
     this.logger = logger;
   }
 
   init({
-    userContentEventStreamPromise,
+    depsFromPluginStartPromise,
   }: {
-    userContentEventStreamPromise: Promise<UserContentEventsStream>;
+    depsFromPluginStartPromise: Promise<DepsFromPluginStart>;
   }) {
-    this.userContentEventStreamPromise = userContentEventStreamPromise;
+    this.depsFromPluginStartPromise = depsFromPluginStartPromise;
   }
 
   async updateViewCounts() {
-    // 1. Load snapshot
+    if (!this.depsFromPluginStartPromise) {
+      throw new Error(`Plugin start dependencies not provided.`);
+    }
+
+    // 1. TODO load snapshot
 
     // 2. If no snapshot load events since snapshot otherwise load all events
-    const userContentEventStream = await this.userContentEventStreamPromise;
-
-    if (!userContentEventStream) {
-      throw new Error(`User content event stream not provided.`);
-    }
+    const { userContentEventsStream } = await this.depsFromPluginStartPromise;
 
     try {
       const buckets = await this.fetchEventsCount(
         ['viewed:kibana', 'viewed:api'],
-        userContentEventStream
+        userContentEventsStream
       );
 
-      // return buckets;
       return bucketsAggregationToContentEventCount(buckets, EVENTS_COUNT_GRANULARITY);
     } catch (e) {
       this.logger.error(e);

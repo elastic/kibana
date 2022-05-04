@@ -16,7 +16,7 @@ import type { RouteDependencies } from './types';
 
 export const registerBulkEventsRoute = (
   router: IRouter,
-  { userContentEventStreamPromise }: RouteDependencies
+  { depsFromPluginStartPromise }: RouteDependencies
 ) => {
   router.post(
     {
@@ -28,9 +28,9 @@ export const registerBulkEventsRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const { body } = req;
 
-      const userContentEventStream = await userContentEventStreamPromise;
+      const { userContentEventsStream } = await depsFromPluginStartPromise;
 
-      userContentEventStream.bulkRegisterEvents(
+      userContentEventsStream.bulkRegisterEvents(
         body.map(({ type, soId }) => ({
           type,
           data: {
