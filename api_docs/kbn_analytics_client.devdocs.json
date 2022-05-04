@@ -1,5 +1,5 @@
 {
-  "id": "@elastic/analytics",
+  "id": "@kbn/analytics-client",
   "client": {
     "classes": [],
     "functions": [],
@@ -12,7 +12,7 @@
     "classes": [],
     "functions": [
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.createAnalytics",
         "type": "Function",
         "tags": [],
@@ -23,26 +23,26 @@
         "signature": [
           "(initContext: ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.AnalyticsClientInitContext",
             "text": "AnalyticsClientInitContext"
           },
           ") => ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.IAnalyticsClient",
             "text": "IAnalyticsClient"
           }
         ],
-        "path": "packages/elastic-analytics/src/index.ts",
+        "path": "packages/analytics/client/src/index.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.createAnalytics.$1",
             "type": "Object",
             "tags": [],
@@ -52,14 +52,14 @@
             ],
             "signature": [
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.AnalyticsClientInitContext",
                 "text": "AnalyticsClientInitContext"
               }
             ],
-            "path": "packages/elastic-analytics/src/index.ts",
+            "path": "packages/analytics/client/src/index.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -70,7 +70,7 @@
     ],
     "interfaces": [
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.AnalyticsClientInitContext",
         "type": "Interface",
         "tags": [],
@@ -78,11 +78,11 @@
         "description": [
           "\nGeneral settings of the analytics client"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.AnalyticsClientInitContext.isDev",
             "type": "boolean",
             "tags": [],
@@ -90,11 +90,11 @@
             "description": [
               "\nBoolean indicating if it's running in developer mode."
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.AnalyticsClientInitContext.sendTo",
             "type": "CompoundType",
             "tags": [],
@@ -105,11 +105,11 @@
             "signature": [
               "\"staging\" | \"production\""
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.AnalyticsClientInitContext.logger",
             "type": "Object",
             "tags": [],
@@ -120,14 +120,14 @@
             "signature": [
               "Logger"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.ContextProviderOpts",
         "type": "Interface",
         "tags": [],
@@ -137,19 +137,19 @@
         ],
         "signature": [
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.ContextProviderOpts",
             "text": "ContextProviderOpts"
           },
           "<Context>"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.ContextProviderOpts.name",
             "type": "string",
             "tags": [],
@@ -157,11 +157,11 @@
             "description": [
               "\nThe name of the provider."
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.ContextProviderOpts.context$",
             "type": "Object",
             "tags": [],
@@ -173,11 +173,11 @@
               "Observable",
               "<Context>"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.ContextProviderOpts.schema",
             "type": "Object",
             "tags": [],
@@ -188,22 +188,22 @@
             "signature": [
               "{ [Key in keyof Required<Context>]: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaValue",
                 "text": "SchemaValue"
               },
               "<Context[Key]>; }"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.Event",
         "type": "Interface",
         "tags": [],
@@ -211,11 +211,11 @@
         "description": [
           "\nDefinition of the full event structure"
         ],
-        "path": "packages/elastic-analytics/src/events/types.ts",
+        "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.Event.timestamp",
             "type": "string",
             "tags": [],
@@ -223,11 +223,11 @@
             "description": [
               "\nThe time the event was generated in ISO format."
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.Event.event_type",
             "type": "string",
             "tags": [],
@@ -235,11 +235,11 @@
             "description": [
               "\nThe event type."
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.Event.properties",
             "type": "Object",
             "tags": [],
@@ -250,11 +250,11 @@
             "signature": [
               "{ [x: string]: unknown; }"
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.Event.context",
             "type": "Object",
             "tags": [],
@@ -264,31 +264,123 @@
             ],
             "signature": [
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.EventContext",
                 "text": "EventContext"
               }
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.EventContext",
         "type": "Interface",
         "tags": [],
         "label": "EventContext",
-        "description": [],
-        "path": "packages/elastic-analytics/src/events/types.ts",
+        "description": [
+          "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
+        ],
+        "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-server.EventContext.userId",
+            "type": "string",
+            "tags": [],
+            "label": "userId",
+            "description": [
+              "\nThe unique user ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/client/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-server.EventContext.cloudId",
+            "type": "string",
+            "tags": [],
+            "label": "cloudId",
+            "description": [
+              "\nThe Cloud ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/client/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-server.EventContext.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\nThe product's version."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/client/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-server.EventContext.pageName",
+            "type": "string",
+            "tags": [],
+            "label": "pageName",
+            "description": [
+              "\nThe name of the current page."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/client/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-server.EventContext.applicationId",
+            "type": "string",
+            "tags": [],
+            "label": "applicationId",
+            "description": [
+              "\nThe current application ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/client/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-server.EventContext.entityId",
+            "type": "string",
+            "tags": [],
+            "label": "entityId",
+            "description": [
+              "\nThe current entity ID (dashboard ID, visualization ID, etc.)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/client/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.EventContext.Unnamed",
             "type": "IndexSignature",
             "tags": [],
@@ -297,14 +389,14 @@
             "signature": [
               "[key: string]:  unknown"
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.EventTypeOpts",
         "type": "Interface",
         "tags": [],
@@ -314,19 +406,19 @@
         ],
         "signature": [
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.EventTypeOpts",
             "text": "EventTypeOpts"
           },
           "<EventTypeData>"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.EventTypeOpts.eventType",
             "type": "string",
             "tags": [],
@@ -334,11 +426,11 @@
             "description": [
               "\nThe event type's unique name."
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.EventTypeOpts.schema",
             "type": "Object",
             "tags": [],
@@ -349,22 +441,22 @@
             "signature": [
               "{ [Key in keyof Required<EventTypeData>]: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaValue",
                 "text": "SchemaValue"
               },
               "<EventTypeData[Key]>; }"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.IAnalyticsClient",
         "type": "Interface",
         "tags": [],
@@ -372,11 +464,11 @@
         "description": [
           "\nAnalytics client's public APIs"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IAnalyticsClient.reportEvent",
             "type": "Function",
             "tags": [],
@@ -387,11 +479,11 @@
             "signature": [
               "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.reportEvent.$1",
                 "type": "string",
                 "tags": [],
@@ -402,12 +494,12 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.reportEvent.$2",
                 "type": "Uncategorized",
                 "tags": [],
@@ -418,7 +510,7 @@
                 "signature": [
                   "EventTypeData"
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -426,7 +518,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IAnalyticsClient.registerEventType",
             "type": "Function",
             "tags": [],
@@ -437,19 +529,19 @@
             "signature": [
               "<EventTypeData>(eventTypeOps: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.EventTypeOpts",
                 "text": "EventTypeOpts"
               },
               "<EventTypeData>) => void"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.registerEventType.$1",
                 "type": "Object",
                 "tags": [],
@@ -457,15 +549,15 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@elastic/analytics",
+                    "pluginId": "@kbn/analytics-client",
                     "scope": "server",
-                    "docId": "kibElasticAnalyticsPluginApi",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
                     "section": "def-server.EventTypeOpts",
                     "text": "EventTypeOpts"
                   },
                   "<EventTypeData>"
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -473,7 +565,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IAnalyticsClient.registerShipper",
             "type": "Function",
             "tags": [],
@@ -484,35 +576,35 @@
             "signature": [
               "<Shipper extends ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.IShipper",
                 "text": "IShipper"
               },
               ", ShipperConfig>(Shipper: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.ShipperClassConstructor",
                 "text": "ShipperClassConstructor"
               },
               "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.RegisterShipperOpts",
                 "text": "RegisterShipperOpts"
               },
               " | undefined) => void"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.registerShipper.$1",
                 "type": "Object",
                 "tags": [],
@@ -522,20 +614,20 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@elastic/analytics",
+                    "pluginId": "@kbn/analytics-client",
                     "scope": "server",
-                    "docId": "kibElasticAnalyticsPluginApi",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
                     "section": "def-server.ShipperClassConstructor",
                     "text": "ShipperClassConstructor"
                   },
                   "<Shipper, ShipperConfig>"
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.registerShipper.$2",
                 "type": "Uncategorized",
                 "tags": [],
@@ -546,12 +638,12 @@
                 "signature": [
                   "ShipperConfig"
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               },
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.registerShipper.$3",
                 "type": "Object",
                 "tags": [],
@@ -561,15 +653,15 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@elastic/analytics",
+                    "pluginId": "@kbn/analytics-client",
                     "scope": "server",
-                    "docId": "kibElasticAnalyticsPluginApi",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
                     "section": "def-server.RegisterShipperOpts",
                     "text": "RegisterShipperOpts"
                   },
                   " | undefined"
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -577,7 +669,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IAnalyticsClient.optIn",
             "type": "Function",
             "tags": [],
@@ -588,19 +680,19 @@
             "signature": [
               "(optInConfig: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.OptInConfig",
                 "text": "OptInConfig"
               },
               ") => void"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.optIn.$1",
                 "type": "Object",
                 "tags": [],
@@ -610,14 +702,14 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@elastic/analytics",
+                    "pluginId": "@kbn/analytics-client",
                     "scope": "server",
-                    "docId": "kibElasticAnalyticsPluginApi",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
                     "section": "def-server.OptInConfig",
                     "text": "OptInConfig"
                   }
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -625,7 +717,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IAnalyticsClient.registerContextProvider",
             "type": "Function",
             "tags": [],
@@ -636,19 +728,19 @@
             "signature": [
               "<Context>(contextProviderOpts: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.ContextProviderOpts",
                 "text": "ContextProviderOpts"
               },
               "<Context>) => void"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.registerContextProvider.$1",
                 "type": "Object",
                 "tags": [],
@@ -658,15 +750,15 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@elastic/analytics",
+                    "pluginId": "@kbn/analytics-client",
                     "scope": "server",
-                    "docId": "kibElasticAnalyticsPluginApi",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
                     "section": "def-server.ContextProviderOpts",
                     "text": "ContextProviderOpts"
                   },
                   "<Context>"
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -674,7 +766,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IAnalyticsClient.removeContextProvider",
             "type": "Function",
             "tags": [],
@@ -685,11 +777,11 @@
             "signature": [
               "(contextProviderName: string) => void"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IAnalyticsClient.removeContextProvider.$1",
                 "type": "string",
                 "tags": [],
@@ -700,7 +792,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+                "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -708,7 +800,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IAnalyticsClient.telemetryCounter$",
             "type": "Object",
             "tags": [],
@@ -720,22 +812,22 @@
               "Observable",
               "<",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.TelemetryCounter",
                 "text": "TelemetryCounter"
               },
               ">"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.IShipper",
         "type": "Interface",
         "tags": [],
@@ -743,11 +835,11 @@
         "description": [
           "\nBasic structure of a Shipper"
         ],
-        "path": "packages/elastic-analytics/src/shippers/types.ts",
+        "path": "packages/analytics/client/src/shippers/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IShipper.reportEvents",
             "type": "Function",
             "tags": [],
@@ -758,19 +850,19 @@
             "signature": [
               "(events: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.Event",
                 "text": "Event"
               },
               "[]) => void"
             ],
-            "path": "packages/elastic-analytics/src/shippers/types.ts",
+            "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IShipper.reportEvents.$1",
                 "type": "Array",
                 "tags": [],
@@ -780,15 +872,15 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "@elastic/analytics",
+                    "pluginId": "@kbn/analytics-client",
                     "scope": "server",
-                    "docId": "kibElasticAnalyticsPluginApi",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
                     "section": "def-server.Event",
                     "text": "Event"
                   },
                   "[]"
                 ],
-                "path": "packages/elastic-analytics/src/shippers/types.ts",
+                "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -796,7 +888,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IShipper.optIn",
             "type": "Function",
             "tags": [],
@@ -807,11 +899,11 @@
             "signature": [
               "(isOptedIn: boolean) => void"
             ],
-            "path": "packages/elastic-analytics/src/shippers/types.ts",
+            "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IShipper.optIn.$1",
                 "type": "boolean",
                 "tags": [],
@@ -822,7 +914,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/elastic-analytics/src/shippers/types.ts",
+                "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -830,7 +922,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IShipper.extendContext",
             "type": "Function",
             "tags": [],
@@ -841,19 +933,19 @@
             "signature": [
               "((newContext: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.EventContext",
                 "text": "EventContext"
               },
               ") => void) | undefined"
             ],
-            "path": "packages/elastic-analytics/src/shippers/types.ts",
+            "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "children": [
               {
-                "parentPluginId": "@elastic/analytics",
+                "parentPluginId": "@kbn/analytics-client",
                 "id": "def-server.IShipper.extendContext.$1",
                 "type": "Object",
                 "tags": [],
@@ -861,14 +953,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@elastic/analytics",
+                    "pluginId": "@kbn/analytics-client",
                     "scope": "server",
-                    "docId": "kibElasticAnalyticsPluginApi",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
                     "section": "def-server.EventContext",
                     "text": "EventContext"
                   }
                 ],
-                "path": "packages/elastic-analytics/src/shippers/types.ts",
+                "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -876,7 +968,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.IShipper.telemetryCounter$",
             "type": "Object",
             "tags": [],
@@ -888,22 +980,22 @@
               "Observable",
               "<",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.TelemetryCounter",
                 "text": "TelemetryCounter"
               },
               "> | undefined"
             ],
-            "path": "packages/elastic-analytics/src/shippers/types.ts",
+            "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.OptInConfig",
         "type": "Interface",
         "tags": [],
@@ -911,11 +1003,11 @@
         "description": [
           "\n"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.OptInConfig.global",
             "type": "Object",
             "tags": [],
@@ -925,18 +1017,18 @@
             ],
             "signature": [
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.OptInConfigPerType",
                 "text": "OptInConfigPerType"
               }
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.OptInConfig.event_types",
             "type": "Object",
             "tags": [],
@@ -947,22 +1039,22 @@
             "signature": [
               "Record<string, ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.OptInConfigPerType",
                 "text": "OptInConfigPerType"
               },
               " | undefined> | undefined"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.OptInConfigPerType",
         "type": "Interface",
         "tags": [],
@@ -970,11 +1062,11 @@
         "description": [
           "\nSets whether a type of event is enabled/disabled globally or per shipper."
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.OptInConfigPerType.enabled",
             "type": "boolean",
             "tags": [],
@@ -982,11 +1074,11 @@
             "description": [
               "\nThe event type is globally enabled."
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.OptInConfigPerType.shippers",
             "type": "Object",
             "tags": [],
@@ -997,14 +1089,14 @@
             "signature": [
               "Record<string, boolean | undefined> | undefined"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.RegisterShipperOpts",
         "type": "Interface",
         "tags": [],
@@ -1012,13 +1104,13 @@
         "description": [
           "\nOptional options to register a shipper"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "children": [],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.SchemaArray",
         "type": "Interface",
         "tags": [],
@@ -1028,27 +1120,27 @@
         ],
         "signature": [
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaArray",
             "text": "SchemaArray"
           },
           "<Value, Base> extends ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaMeta",
             "text": "SchemaMeta"
           },
           "<Base>"
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.SchemaArray.type",
             "type": "string",
             "tags": [],
@@ -1057,11 +1149,11 @@
             "signature": [
               "\"array\""
             ],
-            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "path": "packages/analytics/client/src/schema/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.SchemaArray.items",
             "type": "CompoundType",
             "tags": [],
@@ -1070,70 +1162,70 @@
             "signature": [
               "{ type: \"pass_through\"; _meta: { description: string; } & ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaMetaOptional",
                 "text": "SchemaMetaOptional"
               },
               "<Value>; } | (unknown extends Value ? ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaArray",
                 "text": "SchemaArray"
               },
               "<Value, Value> | ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaObject",
                 "text": "SchemaObject"
               },
               "<Value> | ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaChildValue",
                 "text": "SchemaChildValue"
               },
               "<Value> : NonNullable<Value> extends (infer U)[] ? ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaArray",
                 "text": "SchemaArray"
               },
               "<U, Value> : NonNullable<Value> extends object ? ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaObject",
                 "text": "SchemaObject"
               },
               "<Value> : ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaChildValue",
                 "text": "SchemaChildValue"
               },
               "<Value>)"
             ],
-            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "path": "packages/analytics/client/src/schema/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.SchemaChildValue",
         "type": "Interface",
         "tags": [],
@@ -1141,19 +1233,19 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaChildValue",
             "text": "SchemaChildValue"
           },
           "<Value>"
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.SchemaChildValue.type",
             "type": "Uncategorized",
             "tags": [],
@@ -1162,34 +1254,34 @@
             "signature": [
               "NonNullable<Value> extends string ? ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.AllowedSchemaStringTypes",
                 "text": "AllowedSchemaStringTypes"
               },
               " : NonNullable<Value> extends number ? ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.AllowedSchemaNumberTypes",
                 "text": "AllowedSchemaNumberTypes"
               },
               " : NonNullable<Value> extends boolean ? \"boolean\" : ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.AllowedSchemaTypes",
                 "text": "AllowedSchemaTypes"
               }
             ],
-            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "path": "packages/analytics/client/src/schema/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.SchemaChildValue._meta",
             "type": "CompoundType",
             "tags": [],
@@ -1198,22 +1290,22 @@
             "signature": [
               "{ description: string; } & ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaMetaOptional",
                 "text": "SchemaMetaOptional"
               },
               "<Value>"
             ],
-            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "path": "packages/analytics/client/src/schema/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.SchemaMeta",
         "type": "Interface",
         "tags": [],
@@ -1223,19 +1315,19 @@
         ],
         "signature": [
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaMeta",
             "text": "SchemaMeta"
           },
           "<Value>"
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.SchemaMeta._meta",
             "type": "CompoundType",
             "tags": [],
@@ -1244,22 +1336,22 @@
             "signature": [
               "({ description?: string | undefined; } & ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaMetaOptional",
                 "text": "SchemaMetaOptional"
               },
               "<Value>) | undefined"
             ],
-            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "path": "packages/analytics/client/src/schema/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.SchemaObject",
         "type": "Interface",
         "tags": [],
@@ -1269,27 +1361,27 @@
         ],
         "signature": [
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaObject",
             "text": "SchemaObject"
           },
           "<Value> extends ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaMeta",
             "text": "SchemaMeta"
           },
           "<Value>"
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.SchemaObject.properties",
             "type": "Object",
             "tags": [],
@@ -1298,22 +1390,22 @@
             "signature": [
               "{ [Key in keyof Required<Value>]: ",
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.SchemaValue",
                 "text": "SchemaValue"
               },
               "<Value[Key]>; }"
             ],
-            "path": "packages/elastic-analytics/src/schema/types.ts",
+            "path": "packages/analytics/client/src/schema/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.ShipperClassConstructor",
         "type": "Interface",
         "tags": [],
@@ -1323,19 +1415,19 @@
         ],
         "signature": [
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.ShipperClassConstructor",
             "text": "ShipperClassConstructor"
           },
           "<Shipper, Config>"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.ShipperClassConstructor.shipperName",
             "type": "string",
             "tags": [],
@@ -1343,11 +1435,11 @@
             "description": [
               "\nThe shipper's unique name"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.ShipperClassConstructor.Unnamed",
             "type": "Any",
             "tags": [],
@@ -1358,14 +1450,14 @@
             "signature": [
               "any"
             ],
-            "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false
           }
         ],
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.TelemetryCounter",
         "type": "Interface",
         "tags": [],
@@ -1373,11 +1465,11 @@
         "description": [
           "\nShape of the events emitted by the telemetryCounter$ observable"
         ],
-        "path": "packages/elastic-analytics/src/events/types.ts",
+        "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "children": [
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.TelemetryCounter.type",
             "type": "Enum",
             "tags": [],
@@ -1387,18 +1479,18 @@
             ],
             "signature": [
               {
-                "pluginId": "@elastic/analytics",
+                "pluginId": "@kbn/analytics-client",
                 "scope": "server",
-                "docId": "kibElasticAnalyticsPluginApi",
+                "docId": "kibKbnAnalyticsClientPluginApi",
                 "section": "def-server.TelemetryCounterType",
                 "text": "TelemetryCounterType"
               }
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.TelemetryCounter.source",
             "type": "string",
             "tags": [],
@@ -1406,11 +1498,11 @@
             "description": [
               "\nWho emitted the event? It can be \"client\" or the name of the shipper."
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.TelemetryCounter.event_type",
             "type": "string",
             "tags": [],
@@ -1418,11 +1510,11 @@
             "description": [
               "\nThe event type the success/failure/drop event refers to."
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.TelemetryCounter.code",
             "type": "string",
             "tags": [],
@@ -1430,11 +1522,11 @@
             "description": [
               "\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           },
           {
-            "parentPluginId": "@elastic/analytics",
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-server.TelemetryCounter.count",
             "type": "number",
             "tags": [],
@@ -1442,7 +1534,7 @@
             "description": [
               "\nThe number of events that this counter refers to."
             ],
-            "path": "packages/elastic-analytics/src/events/types.ts",
+            "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
           }
         ],
@@ -1451,7 +1543,7 @@
     ],
     "enums": [
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.TelemetryCounterType",
         "type": "Enum",
         "tags": [],
@@ -1459,14 +1551,14 @@
         "description": [
           "\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
         ],
-        "path": "packages/elastic-analytics/src/events/types.ts",
+        "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.AllowedSchemaBooleanTypes",
         "type": "Type",
         "tags": [],
@@ -1477,12 +1569,12 @@
         "signature": [
           "\"boolean\""
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.AllowedSchemaNumberTypes",
         "type": "Type",
         "tags": [],
@@ -1493,12 +1585,12 @@
         "signature": [
           "\"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.AllowedSchemaStringTypes",
         "type": "Type",
         "tags": [],
@@ -1507,14 +1599,14 @@
           "Types matching string values"
         ],
         "signature": [
-          "\"keyword\" | \"date\" | \"text\""
+          "\"keyword\" | \"text\" | \"date\""
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.AllowedSchemaTypes",
         "type": "Type",
         "tags": [],
@@ -1523,14 +1615,14 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"date\" | \"text\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.EventType",
         "type": "Type",
         "tags": [],
@@ -1541,12 +1633,12 @@
         "signature": [
           "string"
         ],
-        "path": "packages/elastic-analytics/src/events/types.ts",
+        "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.PossibleSchemaTypes",
         "type": "Type",
         "tags": [],
@@ -1557,35 +1649,35 @@
         "signature": [
           "Value extends string ? ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.AllowedSchemaStringTypes",
             "text": "AllowedSchemaStringTypes"
           },
           " : Value extends number ? ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.AllowedSchemaNumberTypes",
             "text": "AllowedSchemaNumberTypes"
           },
           " : Value extends boolean ? \"boolean\" : ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.AllowedSchemaTypes",
             "text": "AllowedSchemaTypes"
           }
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.RootSchema",
         "type": "Type",
         "tags": [],
@@ -1596,20 +1688,20 @@
         "signature": [
           "{ [Key in keyof Required<Base>]: ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaValue",
             "text": "SchemaValue"
           },
           "<Base[Key]>; }"
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.SchemaMetaOptional",
         "type": "Type",
         "tags": [],
@@ -1620,12 +1712,12 @@
         "signature": [
           "unknown extends Value ? { optional?: boolean | undefined; } : undefined extends Value ? { optional: true; } : { optional?: false | undefined; }"
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.SchemaValue",
         "type": "Type",
         "tags": [],
@@ -1636,68 +1728,68 @@
         "signature": [
           "{ type: \"pass_through\"; _meta: { description: string; } & ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaMetaOptional",
             "text": "SchemaMetaOptional"
           },
           "<Value>; } | (unknown extends Value ? ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaArray",
             "text": "SchemaArray"
           },
           "<unknown, Value> | ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaObject",
             "text": "SchemaObject"
           },
           "<Value> | ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaChildValue",
             "text": "SchemaChildValue"
           },
           "<Value> : NonNullable<Value> extends (infer U)[] ? ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaArray",
             "text": "SchemaArray"
           },
           "<U, Value> : NonNullable<Value> extends object ? ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaObject",
             "text": "SchemaObject"
           },
           "<Value> : ",
           {
-            "pluginId": "@elastic/analytics",
+            "pluginId": "@kbn/analytics-client",
             "scope": "server",
-            "docId": "kibElasticAnalyticsPluginApi",
+            "docId": "kibKbnAnalyticsClientPluginApi",
             "section": "def-server.SchemaChildValue",
             "text": "SchemaChildValue"
           },
           "<Value>)"
         ],
-        "path": "packages/elastic-analytics/src/schema/types.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "@elastic/analytics",
+        "parentPluginId": "@kbn/analytics-client",
         "id": "def-server.ShipperName",
         "type": "Type",
         "tags": [],
@@ -1708,7 +1800,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/elastic-analytics/src/analytics_client/types.ts",
+        "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
