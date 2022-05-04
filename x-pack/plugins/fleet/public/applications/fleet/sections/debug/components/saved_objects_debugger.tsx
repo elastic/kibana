@@ -142,7 +142,9 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
         </>
       )}
 
-      {savedObjectResult && (
+      {/* Allowing this to render while status === loading prevents the Code Block UI from
+      flickering when selecting a new object */}
+      {(savedObjectResult || status === 'loading') && (
         <>
           <EuiSpacer size="m" />
           <CodeBlock value={JSON.stringify(savedObjectResult, null, 2)} />
