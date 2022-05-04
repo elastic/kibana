@@ -92,21 +92,16 @@ export type CommandExecutionComponent = ComponentType<{
 
 export type CommandExecutionComponentProps = ComponentProps<CommandExecutionComponent>;
 
-export interface CommandServiceInterface {
+export interface ConsoleProps extends CommonProps {
   /**
-   * Returns the list of commands that will be available in the console for execution
+   * The list of Commands that will be available in the console for the user to execute
    */
-  getCommandList(): CommandDefinition[];
-
+  commands: CommandDefinition[];
   /**
    * If defined, then the `help` builtin command will display this output instead of the default one
    * which is generated out of the Command list.
    */
   HelpComponent?: CommandExecutionComponent;
-}
-
-export interface ConsoleProps extends CommonProps {
-  commandService: CommandServiceInterface;
   prompt?: string;
   /**
    * For internal use only!

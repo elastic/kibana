@@ -6,11 +6,8 @@
  */
 
 import { useConsoleStore } from '../../components/console_state/console_state';
-import { CommandServiceInterface } from '../../types';
+import { ConsoleDataState } from '../../components/console_state/types';
 
-/**
- * Returns the Command service that the console was provided on input
- */
-export const useCommandService = (): CommandServiceInterface => {
-  return useConsoleStore().state.commandService;
+export const useWithCustomHelpComponent = (): ConsoleDataState['HelpComponent'] => {
+  return useConsoleStore().state.HelpComponent;
 };

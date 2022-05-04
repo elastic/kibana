@@ -6,8 +6,11 @@
  */
 
 import { useConsoleStore } from '../../components/console_state/console_state';
-import { CommandServiceInterface } from '../../types';
+import type { CommandDefinition } from '../../types';
 
-export const useBuiltinCommandService = (): CommandServiceInterface => {
-  return useConsoleStore().state.builtinCommandService;
+/**
+ * Returns the Command service that the console was provided on input
+ */
+export const useWithCommandList = (): CommandDefinition[] => {
+  return useConsoleStore().state.commands;
 };

@@ -6,20 +6,24 @@
  */
 
 import type { Dispatch, Reducer } from 'react';
-import type { Command, CommandServiceInterface } from '../../types';
-import { BuiltinCommandServiceInterface } from '../../service/types.builtin_command_service';
+import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
 
 export interface ConsoleDataState {
-  /** Command service defined on input to the `Console` component by consumers of the component */
-  commandService: CommandServiceInterface;
-  /** Command service for builtin console commands */
-  builtinCommandService: BuiltinCommandServiceInterface;
+  /**
+   * Commands available in the console, which includes both the builtin command and the ones
+   * defined on input to the `Console` component by consumers of the component
+   */
+  commands: CommandDefinition[];
+
   /** UI function that scrolls the console down to the bottom */
   scrollToBottom: () => void;
+
   /**
    * List of commands entered by the user and being shown in the UI
    */
   commandHistory: CommandHistoryItem[];
+  /** Component defined on input to the Console that will handle the `help` command */
+  HelpComponent?: CommandExecutionComponent;
   dataTestSubj?: string;
 }
 

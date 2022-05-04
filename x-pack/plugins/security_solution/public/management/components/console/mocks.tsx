@@ -12,19 +12,14 @@ import { EuiCode } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { act } from '@testing-library/react';
 import { Console } from './console';
-import type {
-  CommandServiceInterface,
-  ConsoleProps,
-  CommandDefinition,
-  CommandExecutionComponent,
-} from './types';
+import type { ConsoleProps, CommandDefinition, CommandExecutionComponent } from './types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 
 export interface ConsoleTestSetup {
   renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
 
-  commandServiceMock: jest.Mocked<CommandServiceInterface>;
+  commands: CommandDefinition[];
 
   enterCommand(
     cmd: string,
@@ -78,25 +73,20 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
 
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
-  const commandServiceMock = getCommandServiceMock();
+  const commandList = getCommandListMock();
 
   const renderConsole: ConsoleTestSetup['renderConsole'] = ({
     prompt = '$$>',
-    commandService = commandServiceMock,
+    commands,
     'data-test-subj': dataTestSubj = 'test',
     ...others
   } = {}) => {
-    if (commandService !== commandServiceMock) {
+    if (commands !== commandList) {
       throw new Error('Must use CommandService provided by test setup');
     }
 
     return (renderResult = mockedContext.render(
-      <Console
-        prompt={prompt}
-        commandService={commandService}
-        data-test-subj={dataTestSubj}
-        {...others}
-      />
+      <Console prompt={prompt} commands={commands} data-test-subj={dataTestSubj} {...others} />
     ));
   };
 
@@ -106,12 +96,12 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
 
   return {
     renderConsole,
-    commandServiceMock,
+    commands: commandList,
     enterCommand,
   };
 };
 
-export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> => {
+export const getCommandListMock = (): CommandDefinition[] => {
   const RenderComponent: CommandExecutionComponent = ({
     command,
     status,
@@ -208,9 +198,5 @@ export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> =>
     },
   ];
 
-  return {
-    getCommandList: jest.fn(() => {
-      return commands;
-    }),
-  };
+  return commands;
 };

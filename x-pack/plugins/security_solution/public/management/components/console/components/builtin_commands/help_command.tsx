@@ -6,22 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { memo, useMemo, useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
+import { useWithCustomHelpComponent } from '../../hooks/state_selectors/use_with_custom_help_component';
 import { CommandList } from '../command_list';
-import { useCommandService } from '../../hooks/state_selectors/use_command_service';
-import { CommandExecutionComponentProps } from '../../types';
+import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
+import type { CommandExecutionComponentProps } from '../../types';
 import { HelpOutput } from '../help_output';
-import { useBuiltinCommandService } from '../../hooks/state_selectors/use_builtin_command_service';
 
 export const HelpCommand = memo<CommandExecutionComponentProps>((props) => {
-  const builtinCommandService = useBuiltinCommandService();
-  const commandService = useCommandService();
-
-  const CustomHelpComponent = commandService.HelpComponent;
-
-  const allCommands = useMemo(() => {
-    return builtinCommandService.getCommandList().concat(commandService.getCommandList());
-  }, [builtinCommandService, commandService]);
+  const commands = useWithCommandList();
+  const CustomHelpComponent = useWithCustomHelpComponent();
 
   useEffect(() => {
     if (!CustomHelpComponent) {
@@ -38,7 +32,7 @@ export const HelpCommand = memo<CommandExecutionComponentProps>((props) => {
         defaultMessage: 'Available commands',
       })}
     >
-      <CommandList commands={allCommands} />
+      <CommandList commands={commands} />
     </HelpOutput>
   );
 });

@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-/* eslint complexity: ["error", 40]*/
-// FIXME:PT remove the complexity
-
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
@@ -83,13 +80,13 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     return state;
   }
 
-  const { commandService, builtinCommandService } = state;
+  const { commands } = state;
 
   // Get the command definition; first by using the builtin command service (case its an internal command)
   // if nothing is returned, then try to get it from the command definition provided on input
-  const commandDefinition: CommandDefinition | undefined =
-    builtinCommandService.getCommandDefinition(parsedInput.name) ??
-    commandService.getCommandList().find((definition) => definition.name === parsedInput.name);
+  const commandDefinition: CommandDefinition | undefined = commands.find(
+    (definition) => definition.name === parsedInput.name
+  );
 
   // Unknown command
   if (!commandDefinition) {
