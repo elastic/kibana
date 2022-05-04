@@ -20,7 +20,7 @@ export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServi
       return 'machineLearningApp';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.ml.actions.editAnomalyChartsTitle', {
+      i18n.translate('xpack.ml.actions.createADJobFromLens', {
         defaultMessage: 'Create Anomaly Detection Job',
       }),
     async execute({ embeddable }) {

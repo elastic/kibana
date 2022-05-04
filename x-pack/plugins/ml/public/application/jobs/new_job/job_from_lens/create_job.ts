@@ -146,28 +146,33 @@ export async function canCreateAndStashADJob(
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient
 ) {
-  const { jobConfig, datafeedConfig, createdBy } = await createADJobFromLensSavedObject(
-    vis,
-    query,
-    filters,
-    dataViewClient,
-    kibanaConfig
-  );
+  try {
+    const { jobConfig, datafeedConfig, createdBy } = await createADJobFromLensSavedObject(
+      vis,
+      query,
+      filters,
+      dataViewClient,
+      kibanaConfig
+    );
 
-  const start = moment(startString).valueOf();
-  const end = moment(endString).valueOf();
+    const start = moment(startString).valueOf();
+    const end = moment(endString).valueOf();
 
-  stashJobForCloning(
-    {
-      jobConfig,
-      datafeedConfig,
-      createdBy,
-      start,
-      end,
-    } as JobCreatorType,
-    true,
-    true
-  );
+    stashJobForCloning(
+      {
+        jobConfig,
+        datafeedConfig,
+        createdBy,
+        start,
+        end,
+      } as JobCreatorType,
+      true,
+      true
+    );
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
 }
 
 export async function canCreateADJob(
