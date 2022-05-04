@@ -295,12 +295,13 @@ export function createTestEsCluster<
       });
 
       if (!debugFiles.length) {
+        log.info('[es] no debug files found, assuming es did not write any');
         return;
       }
 
       const uuid = Uuid.v4();
       const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${uuid}.tar.gz`);
-      log.info('[es] debug files found, archiving install to', debugPath);
+      log.error('[es] debug files found, archiving install to', debugPath);
       const archiver = createArchiver('tar', { gzip: true });
       const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
       archiver.directory(config.installPath, `es_debug_${uuid}`);
