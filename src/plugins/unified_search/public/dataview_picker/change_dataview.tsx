@@ -27,7 +27,7 @@ import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewPickerProps } from '.';
 import { DataViewsList } from './dataview_list';
-import { ChangeDataViewStyles } from './change_dataview.styles';
+import { changeDataViewStyles } from './change_dataview.styles';
 
 const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 
@@ -66,7 +66,7 @@ export function ChangeDataView({
   const [triggerLabel, setTriggerLabel] = useState('');
   const kibana = useKibana<IDataPluginServices>();
   const { application, data, storage } = kibana.services;
-  const styles = ChangeDataViewStyles({ fullWidth: trigger.fullWidth });
+  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
 
   const [isTourDismissed, setIsTourDismissed] = useState(() =>
     Boolean(storage.get(NEW_DATA_VIEW_MENU_STORAGE_KEY))
