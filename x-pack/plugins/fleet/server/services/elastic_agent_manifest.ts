@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const elasticAgentStandaloneManifest = `
----
+export const elasticAgentStandaloneManifest = `---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -178,6 +177,7 @@ rules:
       - pods
       - services
       - configmaps
+      - serviceaccounts
     verbs: ["get", "list", "watch"]
   # Enable this rule only if planing to use kubernetes_secrets provider
   #- apiGroups: [""]
@@ -210,6 +210,23 @@ rules:
       - "/metrics"
     verbs:
       - get
+  # required for cloudbeat
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingressclasses
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - podsecuritypolicies
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -251,8 +268,7 @@ metadata:
 ---
 `;
 
-export const elasticAgentManagedManifest = `
----
+export const elasticAgentManagedManifest = `---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -457,6 +473,7 @@ rules:
       - "/metrics"
     verbs:
       - get
+  # required for cloudbeat
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources:
       - clusterrolebindings
@@ -512,5 +529,4 @@ metadata:
   labels:
     k8s-app: elastic-agent
 ---
-
 `;
