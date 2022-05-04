@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('select bucket Split slices');
         await PageObjects.visEditor.clickBucket('Split slices');
         log.debug('Click aggregation Terms');
-        await PageObjects.visEditor.selectAggregation('Stratoula');
+        await PageObjects.visEditor.selectAggregation('Terms');
         log.debug('Click field machine.os.raw');
         await PageObjects.visEditor.selectField('machine.os.raw');
         await PageObjects.visEditor.toggleOtherBucket(2);
