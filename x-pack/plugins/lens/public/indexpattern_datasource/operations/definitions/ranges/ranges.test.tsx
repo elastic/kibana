@@ -947,4 +947,73 @@ describe('ranges', () => {
       });
     });
   });
+
+  describe('getErrorMessage', () => {
+    it('should return no error for valid values', () => {
+      expect(
+        rangeOperation.getErrorMessage!(layer, 'col1', defaultOptions.indexPattern)
+      ).toBeUndefined();
+    });
+
+    it('should return error for histogram with no count aggregation values', () => {
+      const updatedIndexPattern = {
+        ...defaultOptions.indexPattern,
+        fields: [
+          {
+            name: sourceField,
+            type: 'number',
+            displayName: sourceField,
+            searchable: true,
+            aggregatable: true,
+          },
+          {
+            name: 'my_histogram',
+            displayName: 'my_histogram',
+            type: 'histogram',
+            aggregatable: true,
+            searchable: true,
+          },
+        ],
+        getFieldByName: getFieldByNameFactory([
+          {
+            name: 'my_histogram',
+            type: 'histogram',
+            displayName: 'my_histogram',
+            searchable: true,
+            aggregatable: true,
+          },
+        ]),
+      };
+      const updatedLayer = {
+        ...layer,
+        columns: {
+          col1: {
+            label: 'my_histogram',
+            dataType: 'number',
+            operationType: 'range',
+            scale: 'interval',
+            isBucketed: true,
+            sourceField: 'my_histogram',
+            params: {
+              type: MODES.Histogram,
+              ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+              maxBars: 'auto',
+            },
+          } as RangeIndexPatternColumn,
+          col2: {
+            label: 'Average',
+            dataType: 'number',
+            isBucketed: false,
+            sourceField,
+            operationType: 'average',
+          },
+        },
+      } as IndexPatternLayer;
+      expect(rangeOperation.getErrorMessage!(updatedLayer, 'col1', updatedIndexPattern)).toEqual(
+        expect.arrayContaining([
+          expect.stringMatching('Histogram fields can only be used with a count aggregation'),
+        ])
+      );
+    });
+  });
 });

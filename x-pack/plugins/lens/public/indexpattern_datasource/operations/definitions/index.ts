@@ -273,7 +273,8 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
   getDisabledStatus?: (
     indexPattern: IndexPattern,
     layer: IndexPatternLayer,
-    layerType?: LayerType
+    layerType?: LayerType,
+    columnId?: string
   ) => string | undefined;
   /**
    * Validate that the operation has the right preconditions in the state. For example:

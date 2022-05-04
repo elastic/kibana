@@ -12,7 +12,7 @@ import {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { IndexPattern, IndexPatternField } from '../../types';
+import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
@@ -85,6 +85,43 @@ export function getInvalidFieldMessage(
   }
 
   return undefined;
+}
+
+export function getErrorsForHistogramField(
+  layer: IndexPatternLayer,
+  columnId: string,
+  indexPattern: IndexPattern
+) {
+  // check if has field of histogram type
+  const column = layer.columns[columnId];
+  const { operationType } = column;
+  const operationDefinition = operationType ? operationDefinitionMap[operationType] : undefined;
+  const fieldNames =
+    hasField(column) && operationDefinition
+      ? operationDefinition?.getCurrentFields?.(column) ?? [column.sourceField]
+      : [];
+  const fields = fieldNames.map((fieldName) => indexPattern.getFieldByName(fieldName));
+  const filteredFields = fields.filter(Boolean) as IndexPatternField[];
+  const hasHistogramField = filteredFields.some((field) => field.type === 'histogram');
+  // check if metric is not count
+  const metric = layer.columnOrder.filter((colId) => !layer.columns[colId].isBucketed);
+  const hasCountAggregation = metric.some(
+    (colId) => layer.columns[colId].operationType === 'count'
+  );
+
+  // check if other bucket is present
+  const otherBucketsExist = layer.columnOrder.some(
+    (colId) => layer.columns[colId].isBucketed && colId !== columnId
+  );
+
+  if (hasHistogramField && (!hasCountAggregation || otherBucketsExist)) {
+    return [
+      i18n.translate('xpack.lens.indexPattern.histogramFieldsWithNoCount', {
+        defaultMessage:
+          'Histogram fields can only be used with a count aggregation. Please remove the histogram field or change the metric to a count or remove the breakdown dimension.',
+      }),
+    ];
+  }
 }
 
 export function combineErrorMessages(

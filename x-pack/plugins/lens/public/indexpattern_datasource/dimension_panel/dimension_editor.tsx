@@ -265,7 +265,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         definition.getDisabledStatus(
           state.indexPatterns[state.currentIndexPatternId],
           state.layers[layerId],
-          layerType
+          layerType,
+          columnId
         ),
     };
   });

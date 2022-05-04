@@ -6,7 +6,8 @@
  */
 
 import { createMockedIndexPattern } from '../../mocks';
-import { getInvalidFieldMessage } from './helpers';
+import type { IndexPatternLayer } from '../../types';
+import { getInvalidFieldMessage, getErrorsForHistogramField } from './helpers';
 import type { TermsIndexPatternColumn } from './terms';
 
 describe('helpers', () => {
@@ -125,6 +126,112 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toBeUndefined();
+    });
+  });
+
+  describe('getErrorsForHistogramField', () => {
+    const layer = {
+      columns: {
+        '731ee6a5-da3d-4b0f-8f37-ffeb539a7980': {
+          label: 'Count of records',
+          dataType: 'number',
+          operationType: 'count',
+          isBucketed: false,
+          scale: 'ratio',
+          sourceField: '___records___',
+          params: {
+            emptyAsNull: true,
+          },
+        },
+        'd682b1d9-ce53-4443-a1e6-959197a314a6': {
+          label: 'my_histogram',
+          dataType: 'number',
+          operationType: 'range',
+          sourceField: 'my_histogram',
+          isBucketed: true,
+          scale: 'interval',
+          params: {
+            includeEmptyRows: true,
+            type: 'histogram',
+            ranges: [
+              {
+                from: 0,
+                to: 1000,
+                label: '',
+              },
+            ],
+            maxBars: 'auto',
+          },
+        },
+      },
+      columnOrder: ['d682b1d9-ce53-4443-a1e6-959197a314a6', '731ee6a5-da3d-4b0f-8f37-ffeb539a7980'],
+      incompleteColumns: {},
+      indexPatternId: '1',
+    } as IndexPatternLayer;
+    it('return no error if a count aggregation is given', () => {
+      const messages = getErrorsForHistogramField(
+        layer,
+        'd682b1d9-ce53-4443-a1e6-959197a314a6',
+        createMockedIndexPattern()
+      );
+      expect(messages).toBeUndefined();
+    });
+
+    it('returns an error if a metric is non a count aggregation', () => {
+      layer.columns['731ee6a5-da3d-4b0f-8f37-ffeb539a7980'].operationType = 'average';
+      const messages = getErrorsForHistogramField(
+        layer,
+        'd682b1d9-ce53-4443-a1e6-959197a314a6',
+        createMockedIndexPattern()
+      );
+      expect(messages).toHaveLength(1);
+      expect(messages![0]).toEqual(
+        'Histogram fields can only be used with a count aggregation. Please remove the histogram field or change the metric to a count or remove the breakdown dimension.'
+      );
+    });
+
+    it('returns an error if a metric is a count aggregation and a breakdown is also given', () => {
+      layer.columns['731ee6a5-da3d-4b0f-8f37-ffeb539a7980'].operationType = 'count';
+      const newLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          'ef5fa77a-b1f7-405e-9551-6b533aafa114': {
+            label: 'bytes',
+            dataType: 'number',
+            operationType: 'range',
+            sourceField: 'bytes',
+            isBucketed: true,
+            scale: 'interval',
+            params: {
+              includeEmptyRows: true,
+              type: 'histogram',
+              ranges: [
+                {
+                  from: 0,
+                  to: 1000,
+                  label: '',
+                },
+              ],
+              maxBars: 'auto',
+            },
+          },
+        },
+        columnOrder: [
+          'd682b1d9-ce53-4443-a1e6-959197a314a6',
+          '731ee6a5-da3d-4b0f-8f37-ffeb539a7980',
+          'ef5fa77a-b1f7-405e-9551-6b533aafa114',
+        ],
+      } as IndexPatternLayer;
+      const messages = getErrorsForHistogramField(
+        newLayer,
+        'd682b1d9-ce53-4443-a1e6-959197a314a6',
+        createMockedIndexPattern()
+      );
+      expect(messages).toHaveLength(1);
+      expect(messages![0]).toEqual(
+        'Histogram fields can only be used with a count aggregation. Please remove the histogram field or change the metric to a count or remove the breakdown dimension.'
+      );
     });
   });
 });

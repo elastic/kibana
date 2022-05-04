@@ -18,7 +18,12 @@ import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../common/expressions/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
-import { getInvalidFieldMessage, isValidNumber } from '../helpers';
+import {
+  getInvalidFieldMessage,
+  isValidNumber,
+  combineErrorMessages,
+  getErrorsForHistogramField,
+} from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;
 // Try to cover all possible serialized states for ranges
@@ -80,8 +85,17 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+  getErrorMessage: (layer, columnId, indexPattern) => {
+    return combineErrorMessages([
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getErrorsForHistogramField(layer, columnId, indexPattern),
+    ]);
+  },
+  getDisabledStatus(indexPattern, layer, layerType, columnId) {
+    if (columnId) {
+      return getErrorsForHistogramField(layer, columnId, indexPattern)?.join(', ');
+    }
+  },
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.includes(type) &&
