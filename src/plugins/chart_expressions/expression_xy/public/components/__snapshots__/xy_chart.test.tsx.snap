@@ -777,6 +777,24 @@ exports[`XYChart component it renders area 1`] = `
     shouldShowValueLabels={true}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
@@ -1319,6 +1337,24 @@ exports[`XYChart component it renders bar 1`] = `
     shouldShowValueLabels={true}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
@@ -1861,6 +1897,24 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     shouldShowValueLabels={true}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
@@ -2403,6 +2457,24 @@ exports[`XYChart component it renders line 1`] = `
     shouldShowValueLabels={true}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
@@ -2945,6 +3017,24 @@ exports[`XYChart component it renders stacked area 1`] = `
     shouldShowValueLabels={false}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
@@ -3487,6 +3577,24 @@ exports[`XYChart component it renders stacked bar 1`] = `
     shouldShowValueLabels={false}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [
@@ -4029,6 +4137,24 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     shouldShowValueLabels={false}
     syncColors={false}
     timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
     valueLabels="hide"
     yAxesConfiguration={
       Array [

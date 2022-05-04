@@ -202,7 +202,7 @@ const getSeriesName: GetSeriesNameFn = (
   // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
   return layer.splitAccessor
     ? data.seriesKeys[0]
-    : columnToLabelMap[data.seriesKeys[0]] ?? titles.yTitles[data.seriesKeys[0]];
+    : columnToLabelMap[data.seriesKeys[0]] ?? titles.yTitles[data.seriesKeys[0]] ?? null;
 };
 
 const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
@@ -227,7 +227,7 @@ const getColor: GetColorFn = (
     {
       name: layer.splitAccessor
         ? String(seriesKeys[0])
-        : columnToLabelMap[seriesKeys[0]] ?? titles.yTitles[seriesKeys[0]],
+        : columnToLabelMap[seriesKeys[0]] ?? titles.yTitles[seriesKeys[0]] ?? null,
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
       rankAtDepth: colorAssignment.getRank(layer, String(seriesKeys[0]), String(yAccessor)),
     },

@@ -86,6 +86,15 @@ describe('ReferenceLineAnnotations', () => {
         isHorizontal: false,
         axesMap: { left: true, right: false },
         paddingMap: {},
+        titles: {
+          first: {
+            xTitles: {},
+            yTitles: {},
+            splitColumnTitles: {},
+            splitRowTitles: {},
+            splitSeriesTitles: {},
+          },
+        },
       };
     });
 
