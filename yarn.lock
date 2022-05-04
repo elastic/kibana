@@ -2932,6 +2932,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory":
   version "0.0.0"
   uid ""
@@ -6029,6 +6041,18 @@
   uid ""
 
 "@types/kbn__analytics-client@link:bazel-bin/packages/analytics/client/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -9884,9 +9908,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001097, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001125, caniuse-lite@^1.0.30001286:
-  version "1.0.30001309"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001309.tgz#e0ee78b9bec0704f67304b00ff3c5c0c768a9f62"
-  integrity sha512-Pl8vfigmBXXq+/yUz1jUwULeq9xhMJznzdc/xwl4WclDAuebcTHVefpz8lE/bMI+UN7TOkSSe7B7RnZd6+dzjA==
+  version "1.0.30001335"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001335.tgz"
+  integrity sha512-ddP1Tgm7z2iIxu6QTtbZUv6HJxSaV/PZeSrWFZtbY4JZ69tOeNhBCl3HyRQgeNZKE5AOn1kpV7fhljigy0Ty3w==
 
 canvg@^3.0.9:
   version "3.0.9"
