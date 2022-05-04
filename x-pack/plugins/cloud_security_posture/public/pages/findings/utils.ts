@@ -41,8 +41,8 @@ export const getEsSortFromEui = <T extends unknown>(
   sort ? [{ [sort.field]: sort.direction as SortDirection }] : undefined;
 
 export const getEuiPaginationFromEs = <T extends unknown>({
-  from: pageIndex,
   size: pageSize,
+  from,
   total,
 }: {
   total?: number | undefined;
@@ -50,7 +50,7 @@ export const getEuiPaginationFromEs = <T extends unknown>({
   from: number;
 }): EuiBasicTableProps<T>['pagination'] => ({
   pageSize,
-  pageIndex: Math.ceil(pageIndex / pageSize),
+  pageIndex: Math.ceil(from / pageSize),
   totalItemCount: total || 0,
   pageSizeOptions: [10, 25, 100],
   showPerPageOptions: true,
