@@ -7,16 +7,16 @@
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/public';
 import {
-  CaseAttributes,
-  CaseConnector,
   CasePatchRequest,
   CaseStatuses,
   User,
   ActionConnector,
   CaseExternalServiceBasic,
   CaseUserActionResponse,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
   CommentResponse,
+  CaseResponse,
+  CommentResponseAlertsType,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -24,7 +24,7 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean };
-  metrics: CaseMetricsFeature[];
+  metrics: SingleCaseMetricsFeature[];
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -57,33 +57,10 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type Comment = SnakeToCamelCase<CommentResponse>;
+export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
-
-interface BasicCase {
-  id: string;
-  owner: string;
-  closedAt: string | null;
-  closedBy: ElasticUser | null;
-  comments: Comment[];
-  createdAt: string;
-  createdBy: ElasticUser;
-  status: CaseStatuses;
-  title: string;
-  totalAlerts: number;
-  totalComment: number;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
-  version: string;
-}
-
-export interface Case extends BasicCase {
-  connector: CaseConnector;
-  description: string;
-  externalService: CaseExternalService | null;
-  settings: CaseAttributes['settings'];
-  tags: string[];
-}
+export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 
 export interface ResolvedCase {
   case: Case;
@@ -120,8 +97,8 @@ export interface AllCases extends CasesStatus {
   total: number;
 }
 
-export type CaseMetrics = CaseMetricsResponse;
-export type CaseMetricsFeature =
+export type SingleCaseMetrics = SingleCaseMetricsResponse;
+export type SingleCaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'

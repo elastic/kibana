@@ -14,7 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./aliases'));
-      loadTestFile(require.resolve('./create_endpoint_exceptions'));
       loadTestFile(require.resolve('./add_actions'));
       loadTestFile(require.resolve('./update_actions'));
       loadTestFile(require.resolve('./add_prepackaged_rules'));
@@ -25,7 +24,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./create_rules_bulk'));
       loadTestFile(require.resolve('./create_ml'));
       loadTestFile(require.resolve('./create_threat_matching'));
-      loadTestFile(require.resolve('./create_exceptions'));
       loadTestFile(require.resolve('./delete_rules'));
       loadTestFile(require.resolve('./delete_rules_bulk'));
       loadTestFile(require.resolve('./export_rules'));
@@ -53,6 +51,18 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./throttle'));
       loadTestFile(require.resolve('./ignore_fields'));
       loadTestFile(require.resolve('./migrations'));
+    });
+
+    describe('', function () {
+      this.tags('ciGroup26');
+
+      loadTestFile(require.resolve('./create_endpoint_exceptions'));
+    });
+
+    describe('', function () {
+      this.tags('ciGroup14');
+
+      loadTestFile(require.resolve('./create_exceptions'));
     });
 
     // That split here enable us on using a different ciGroup to run the tests
