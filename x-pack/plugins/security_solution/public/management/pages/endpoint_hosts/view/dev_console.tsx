@@ -72,19 +72,31 @@ class DevCommandService implements CommandServiceInterface {
 
           useEffect(() => {
             (async () => {
-              await delay();
-              if (!isMounted) return;
+              const doUiResponse = () => {
+                setUiResponse(
+                  <EuiText>
+                    <EuiText>{`${command.commandDefinition.name}`}</EuiText>
+                    <EuiText>{`command input: ${command.input}`}</EuiText>
+                    <EuiText>{'Arguments provided:'}</EuiText>
+                    <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
+                  </EuiText>
+                );
+              };
 
-              setUiResponse(
-                <EuiText>
-                  <EuiText>{`${command.commandDefinition.name}`}</EuiText>
-                  <EuiText>{`command input: ${command.input}`}</EuiText>
-                  <EuiText>{'Arguments provided:'}</EuiText>
-                  <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
-                </EuiText>
-              );
+              if (store.apiResponse) {
+                doUiResponse();
+              } else {
+                await delay();
+                doUiResponse();
+              }
             })();
-          }, [command.args, command.commandDefinition.name, command.input, isMounted]);
+          }, [
+            command.args,
+            command.commandDefinition.name,
+            command.input,
+            isMounted,
+            store.apiResponse,
+          ]);
 
           useEffect(() => {
             if (apiResponse && uiResponse) {
