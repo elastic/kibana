@@ -27,4 +27,37 @@ describe('xyVis', () => {
       value: { args: { ...rest, layers: [sampleLayer] } },
     });
   });
+
+  test('it should throw error if markSizeRatio is lower then 1 or greater then 100', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          markSizeRatio: 0,
+          dataLayers: [sampleLayer],
+          referenceLineLayers: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          markSizeRatio: 101,
+          dataLayers: [sampleLayer],
+          referenceLineLayers: [],
+          annotationLayers: [],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
 });

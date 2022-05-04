@@ -107,7 +107,7 @@ export const createArgsWithLayers = (
     mode: 'full',
     type: 'axisExtentConfig',
   },
-  markSizeRatio: 1,
+  markSizeRatio: 5,
   layers: Array.isArray(layers) ? layers : [layers],
 });
 

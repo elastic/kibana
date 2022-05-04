@@ -24,6 +24,7 @@ describe('dataLayerConfig', () => {
       yScaleType: 'linear',
       isHistogram: false,
       palette: mockPaletteOutput,
+      markSizeAccessor: 'b',
     };
 
     const result = await dataLayerFunction.fn(data, args, createMockExecutionContext());
@@ -34,5 +35,43 @@ describe('dataLayerConfig', () => {
       ...args,
       table: data,
     });
+  });
+
+  test('throws the error if markSizeAccessor is provided to the not line/area chart', async () => {
+    const { data } = sampleArgs();
+    const args: DataLayerArgs = {
+      seriesType: 'bar',
+      xAccessor: 'c',
+      accessors: ['a', 'b'],
+      splitAccessor: 'd',
+      xScaleType: 'linear',
+      yScaleType: 'linear',
+      isHistogram: false,
+      palette: mockPaletteOutput,
+      markSizeAccessor: 'b',
+    };
+
+    expect(
+      dataLayerFunction.fn(data, args, createMockExecutionContext())
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test("throws the error if markSizeAccessor doesn't have the corresponding column in the table", async () => {
+    const { data } = sampleArgs();
+    const args: DataLayerArgs = {
+      seriesType: 'line',
+      xAccessor: 'c',
+      accessors: ['a', 'b'],
+      splitAccessor: 'd',
+      xScaleType: 'linear',
+      yScaleType: 'linear',
+      isHistogram: false,
+      palette: mockPaletteOutput,
+      markSizeAccessor: 'nonsense',
+    };
+
+    expect(
+      dataLayerFunction.fn(data, args, createMockExecutionContext())
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });
