@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -24,6 +24,7 @@ import {
   DisplayValueStyle,
   RecursivePartial,
   AxisStyle,
+  Placement,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -56,10 +57,15 @@ import { getLegendAction } from './legend_action';
 import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYLayerConfig } from '../../common/types';
-import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
-import { SeriesTypes, ValueLabelModes } from '../../common/constants';
+import {
+  Annotations,
+  getAnnotationsGroupedByInterval,
+  getRangeAnnotations,
+  OUTSIDE_RECT_ANNOTATION_WIDTH,
+  OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
+} from './annotations';
+import { AxisExtentModes, SeriesTypes, ValueLabelModes } from '../../common/constants';
 import { DataLayers } from './data_layers';
-
 import './xy_chart.scss';
 
 declare global {
@@ -84,6 +90,7 @@ export type XYChartRenderProps = XYChartProps & {
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
+  syncTooltips: boolean;
   eventAnnotationService: EventAnnotationServiceType;
 };
 
@@ -134,6 +141,7 @@ export function XYChart({
   onSelectRange,
   interactive = true,
   syncColors,
+  syncTooltips,
   useLegacyTimeAxis,
 }: XYChartRenderProps) {
   const {
@@ -162,18 +170,21 @@ export function XYChart({
     datatables: filteredLayers.map(({ table }) => table),
   });
 
+  const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
+  const formattedDatatables = useMemo(
+    () => getFormattedTablesByLayers(dataLayers, formatFactory),
+    [dataLayers, formatFactory]
+  );
+
   if (filteredLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
     return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
   }
 
-  const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
-
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
-  const formattedDatatables = getFormattedTablesByLayers(dataLayers, formatFactory);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -247,12 +258,14 @@ export function XYChart({
 
   const xColumnId = firstTable.columns.find((col) => col.id === dataLayers[0]?.xAccessor)?.id;
 
-  const groupedAnnotations = getAnnotationsGroupedByInterval(
+  const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
     minInterval,
     xColumnId ? firstTable.rows[0]?.[xColumnId] : undefined,
     xAxisFormatter
   );
+  const rangeAnnotations = getRangeAnnotations(annotationsLayers);
+
   const visualConfigs = [
     ...referenceLineLayers
       .flatMap(({ yConfig }) => yConfig)
@@ -260,10 +273,12 @@ export function XYChart({
         ...config,
         position: getAxisGroupConfig(yAxesConfiguration, config)?.position,
       })),
-    ...groupedAnnotations,
+    ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
+    ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const linesPaddings = getLinesCausedPaddings(visualConfigs, yAxesMap);
+  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].hide : false;
+  const linesPaddings = !shouldHideDetails ? getLinesCausedPaddings(visualConfigs, yAxesMap) : {};
 
   const getYAxesStyle = (axis: AxisConfiguration) => {
     const tickVisible = axis.showLabels;
@@ -308,8 +323,10 @@ export function XYChart({
         return layer.seriesType === SeriesTypes.BAR || layer.seriesType === SeriesTypes.AREA;
       })
     );
-    const fit = !hasBarOrArea && extent.mode === 'dataBounds';
+
+    const fit = !hasBarOrArea && extent.mode === AxisExtentModes.DATA_BOUNDS;
     const padding = axis.boundsMargin || undefined;
+
     let min: number = NaN;
     let max: number = NaN;
     if (extent.mode === 'custom') {
@@ -429,13 +446,13 @@ export function XYChart({
     onSelectRange(context);
   };
 
-  const legendInsideParams = {
+  const legendInsideParams: LegendPositionConfig = {
     vAlign: legend.verticalAlignment ?? VerticalAlignment.Top,
     hAlign: legend?.horizontalAlignment ?? HorizontalAlignment.Right,
     direction: LayoutDirection.Vertical,
     floating: true,
     floatingColumns: legend?.floatingColumns ?? 1,
-  } as LegendPositionConfig;
+  };
 
   const isHistogramModeEnabled = dataLayers.some(
     ({ isHistogram, seriesType, isStacked }) =>
@@ -486,6 +503,9 @@ export function XYChart({
     <Chart ref={chartRef}>
       <Settings
         onPointerUpdate={handleCursorUpdate}
+        externalPointerEvents={{
+          tooltip: { visible: syncTooltips, placement: Placement.Right },
+        }}
         debugState={window._echDebugStateFlag ?? false}
         showLegend={
           legend.isVisible && !legend.showSingleSeries
@@ -633,15 +653,24 @@ export function XYChart({
           paddingMap={linesPaddings}
         />
       ) : null}
-      {groupedAnnotations.length ? (
+      {rangeAnnotations.length || groupedLineAnnotations.length ? (
         <Annotations
-          hide={annotationsLayers?.[0].hide}
-          groupedAnnotations={groupedAnnotations}
+          rangeAnnotations={rangeAnnotations}
+          groupedLineAnnotations={groupedLineAnnotations}
           formatter={xAxisFormatter}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
           isBarChart={filteredBarLayers.length > 0}
           minInterval={minInterval}
+          hide={annotationsLayers?.[0].hide}
+          outsideDimension={
+            rangeAnnotations.length && shouldHideDetails
+              ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+              : shouldUseNewTimeAxis
+              ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding || 0) +
+                Number(chartTheme.axes?.tickLabel?.fontSize || 0)
+              : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH
+          }
         />
       ) : null}
     </Chart>

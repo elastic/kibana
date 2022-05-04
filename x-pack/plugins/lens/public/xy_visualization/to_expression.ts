@@ -31,7 +31,7 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
+import { getUniqueLabels } from './annotations/helpers';
 import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
@@ -87,7 +87,7 @@ const simplifiedLayerExpression = {
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
     ...layer,
     hide: true,
-    yConfig: layer.yConfig?.map(({ lineWidth, ...rest }) => ({
+    yConfig: layer.yConfig?.map(({ ...rest }) => ({
       ...rest,
       lineWidth: 1,
       icon: undefined,
@@ -97,12 +97,6 @@ const simplifiedLayerExpression = {
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
     ...layer,
     hide: true,
-    annotations: layer.annotations?.map(({ lineWidth, ...rest }) => ({
-      ...rest,
-      lineWidth: 1,
-      icon: undefined,
-      textVisibility: false,
-    })),
   }),
 };
 
@@ -278,9 +272,10 @@ export const buildExpression = (
                         : [],
                     // ensure that even if the user types more than 5 columns
                     // we will only show 5
-                    floatingColumns: state.legend.floatingColumns
-                      ? [Math.min(5, state.legend.floatingColumns)]
-                      : [],
+                    floatingColumns:
+                      state.legend.floatingColumns && state.legend.isInside
+                        ? [Math.min(5, state.legend.floatingColumns)]
+                        : [],
                     maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
                     shouldTruncate: [
                       state.legend.shouldTruncate ??
@@ -421,19 +416,7 @@ const annotationLayerToExpression = (
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
           annotations: layer.annotations
-            ? layer.annotations.map(
-                (ann): Ast =>
-                  eventAnnotationService.toExpression({
-                    time: ann.key.timestamp,
-                    label: ann.label || defaultAnnotationLabel,
-                    textVisibility: ann.textVisibility,
-                    icon: ann.icon,
-                    lineStyle: ann.lineStyle,
-                    lineWidth: ann.lineWidth,
-                    color: ann.color,
-                    isHidden: Boolean(ann.isHidden),
-                  })
-              )
+            ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
             : [],
         },
       },
@@ -554,8 +537,8 @@ const extendedYConfigToExpression = (
         type: 'function',
         function: 'extendedYConfig',
         arguments: {
-          axisId: axisId ? [axisId] : [],
           forAccessor: [yConfig.forAccessor],
+          axisId: axisId ? [axisId] : [],
           color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
           lineStyle: [yConfig.lineStyle || 'solid'],
           lineWidth: [yConfig.lineWidth || 1],
@@ -575,21 +558,17 @@ const extendedYConfigToExpression = (
 const axisExtentConfigToExpression = (
   extent: AxisExtentConfig | undefined,
   layers: ValidXYDataLayerConfig[]
-): Ast => {
-  const hasLine = layers.filter(({ seriesType }) => seriesType.includes('line')).length > 0;
-  const mode = !extent?.mode || (!hasLine && extent?.mode === 'dataBounds') ? 'full' : extent.mode;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'axisExtentConfig',
-        arguments: {
-          mode: [mode],
-          lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
-          upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
-        },
+): Ast => ({
+  type: 'expression',
+  chain: [
+    {
+      type: 'function',
+      function: 'axisExtentConfig',
+      arguments: {
+        mode: [extent?.mode ?? 'full'],
+        lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
+        upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
       },
-    ],
-  };
-};
+    },
+  ],
+});

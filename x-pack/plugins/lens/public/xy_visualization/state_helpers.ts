@@ -59,7 +59,8 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
     return null;
   }
   return (
-    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
+    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color ||
+    null
   );
 };
 

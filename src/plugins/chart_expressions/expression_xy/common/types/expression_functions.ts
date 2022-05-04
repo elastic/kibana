@@ -167,11 +167,11 @@ export interface LegendConfig {
   /**
    * Horizontal Alignment of the legend when it is set inside chart
    */
-  horizontalAlignment?: HorizontalAlignment;
+  horizontalAlignment?: typeof HorizontalAlignment.Right | typeof HorizontalAlignment.Left;
   /**
    * Vertical Alignment of the legend when it is set inside chart
    */
-  verticalAlignment?: VerticalAlignment;
+  verticalAlignment?: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
   /**
    * Number of columns when legend is set inside chart
    */
@@ -284,10 +284,6 @@ export type XYExtendedLayerConfig =
   | ExtendedReferenceLineLayerConfig
   | ExtendedAnnotationLayerConfig;
 
-export type XYLayerConfigResult =
-  | DataLayerConfigResult
-  | ReferenceLineLayerConfigResult
-  | AnnotationLayerConfigResult;
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult
@@ -324,6 +320,24 @@ export type DataLayerConfigResult = Omit<DataLayerArgs, 'palette'> & {
 export interface WithLayerId {
   layerId: string;
 }
+
+export type DataLayerConfig = DataLayerConfigResult & WithLayerId;
+export type ReferenceLineLayerConfig = ReferenceLineLayerConfigResult & WithLayerId;
+export type AnnotationLayerConfig = AnnotationLayerConfigResult & WithLayerId;
+
+export type ExtendedDataLayerConfig = ExtendedDataLayerConfigResult & WithLayerId;
+export type ExtendedReferenceLineLayerConfig = ExtendedReferenceLineLayerConfigResult & WithLayerId;
+export type ExtendedAnnotationLayerConfig = ExtendedAnnotationLayerConfigResult & WithLayerId;
+
+export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette'> & {
+  type: typeof EXTENDED_DATA_LAYER;
+  layerType: typeof LayerTypes.DATA;
+  palette: PaletteOutput;
+  table: Datatable;
+};
+
+export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
+export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
 
 export type DataLayerConfig = DataLayerConfigResult & WithLayerId;
 export type ReferenceLineLayerConfig = ReferenceLineLayerConfigResult & WithLayerId;
