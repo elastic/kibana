@@ -12,6 +12,7 @@ import {
   VisToExpressionAst,
   SchemaConfig,
   DEFAULT_LEGEND_SIZE,
+  LegendSizes,
 } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
@@ -70,7 +71,10 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     nestedLegend: vis.params?.nestedLegend ?? false,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
-    legendSize: vis.params.legendSize ?? DEFAULT_LEGEND_SIZE,
+    legendSize:
+      vis.params.legendSize === LegendSizes.AUTO
+        ? undefined
+        : vis.params.legendSize ?? DEFAULT_LEGEND_SIZE,
     distinctColors: vis.params?.distinctColors,
     isDonut: vis.params.isDonut ?? false,
     emptySizeRatio: vis.params.emptySizeRatio,
