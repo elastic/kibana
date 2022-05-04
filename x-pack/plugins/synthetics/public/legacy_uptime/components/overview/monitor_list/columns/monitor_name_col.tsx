@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
 import { useGetUrlParams } from '../../../../hooks';
-import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
+import { stringifyUrlParams } from '../../../../../apps/synthetics/utils/url_params/stringify_url_params';
 import { MonitorSummary } from '../../../../../../common/runtime_types/monitor';
 import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 

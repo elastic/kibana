@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../../../../common/constants';
 import { useGetUrlParams } from '../../../hooks';
-import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
+import { stringifyUrlParams } from '../../../../apps/synthetics/utils/url_params/stringify_url_params';
 
 const tabs = [
   {

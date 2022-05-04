@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { parseIsPaused } from './parse_is_paused';
-import { parseUrlInt } from './parse_url_int';
+import { parseIsPaused } from '../../../../apps/synthetics/utils/url_params/parse_is_paused';
+import { parseUrlInt } from '../../../../apps/synthetics/utils/url_params/parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
-import { parseAbsoluteDate } from './parse_absolute_date';
+import { parseAbsoluteDate } from '../../../../apps/synthetics/utils/url_params/parse_absolute_date';
 
 export interface UptimeUrlParams {
   absoluteDateRangeStart: number;

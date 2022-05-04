@@ -72,7 +72,7 @@ type RouteProps = {
   };
 } & EuiPageTemplateProps;
 
-const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
+const baseTitle = i18n.translate('xpack.synthetics.routes.legacyBaseTitle', {
   defaultMessage: 'Uptime - Kibana',
 });
 

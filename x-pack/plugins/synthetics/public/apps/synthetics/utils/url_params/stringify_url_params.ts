@@ -6,8 +6,8 @@
  */
 
 import { stringify } from 'query-string';
-import { UptimeUrlParams } from './url_params';
-import { CLIENT_DEFAULTS } from '../../../../common/constants';
+import { SyntheticsUrlParams } from './get_supported_url_params';
+import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 const {
   AUTOREFRESH_INTERVAL,
@@ -17,7 +17,7 @@ const {
   FOCUS_CONNECTOR_FIELD,
 } = CLIENT_DEFAULTS;
 
-export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty = false) => {
+export const stringifyUrlParams = (params: Partial<SyntheticsUrlParams>, ignoreEmpty = false) => {
   if (ignoreEmpty) {
     // We don't want to encode this values because they are often set to Date.now(), the relative
     // values in dateRangeStart are better for a URL.
