@@ -31,12 +31,11 @@ import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
 import { ControlGroupContainer } from '../control_group';
 import { pluginServices, registry } from '../services/storybook';
-import { replaceValueSuggestionMethod } from '../services/storybook/unified_search';
 import { injectStorybookDataView } from '../services/storybook/data_views';
-import { populateStorybookControlFactories } from './storybook_control_factories';
-import { OptionsListRequest } from '../services/options_list';
-import { OptionsListResponse } from '../control_types/options_list/types';
 import { replaceOptionsListMethod } from '../services/storybook/options_list';
+import { populateStorybookControlFactories } from './storybook_control_factories';
+import { replaceValueSuggestionMethod } from '../services/storybook/unified_search';
+import { OptionsListResponse, OptionsListRequest } from '../control_types/options_list/types';
 
 export default {
   title: 'Controls',

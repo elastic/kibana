@@ -320,6 +320,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
         });
 
+        it('Can search options list for available options case insensitive', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSearchForOption('MEO');
+          await ensureAvailableOptionsEql(['meow'], true);
+          await dashboardControls.optionsListPopoverClearSearch();
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
         it('Can select multiple available options', async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverSelectOption('hiss');
