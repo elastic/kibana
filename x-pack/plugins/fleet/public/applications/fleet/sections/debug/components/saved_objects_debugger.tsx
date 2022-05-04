@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
 import {
   EuiFlexGroup,
@@ -23,7 +23,8 @@ import { sendRequest } from '../../../hooks';
 import { CodeBlock } from './code_block';
 import { SavedObjectNamesCombo } from './saved_object_names_combo';
 
-const fetchSavedObjects = async (type: string, name: string) => {
+const fetchSavedObjects = async (type?: string, name?: string) => {
+  if (!type || !name) return;
   const path = `/.kibana/_search?q=${type}.name:${name}`;
   const body = {};
   const response = await sendRequest({
@@ -58,21 +59,13 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
 
   const onTypeChange = (e: any) => {
     setType(e.target.value);
+    setName(undefined);
     childRef.current!.refetchNames();
   };
 
-  const {
-    data: savedObjectResult,
-    refetch,
-    status,
-  } = useQuery(['debug-saved-objects', type, name], () => fetchSavedObjects(type, name!), {
-    enabled: false,
-    refetchOnWindowFocus: false,
-  });
-
-  useEffect(() => {
-    if (name) refetch();
-  }, [name, refetch]);
+  const { data: savedObjectResult, status } = useQuery(['debug-saved-objects', type, name], () =>
+    fetchSavedObjects(type, name)
+  );
 
   return (
     <>

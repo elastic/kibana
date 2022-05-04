@@ -15,14 +15,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 
 import { sendRequest } from '../../../hooks';
 
 import { CodeBlock } from './code_block';
 
-const fetchIndex = async (index: string) => {
+const fetchIndex = async (index?: string) => {
+  if (!index) return;
   const path = `/${index}/_search`;
   const response = await sendRequest({
     method: 'post',
@@ -43,21 +44,15 @@ export const FleetIndicesDebugger = () => {
   ];
   const [index, setIndex] = useState<string | undefined>();
 
-  const {
-    data: indexResult,
-    refetch,
-    status,
-  } = useQuery(['debug-indices', index], () => fetchIndex(index!), {
-    enabled: false,
-    refetchOnWindowFocus: false,
-    retry: false,
-  });
+  const { data: indexResult, status } = useQuery(
+    ['debug-indices', index],
+    () => fetchIndex(index),
+    {
+      retry: false,
+    }
+  );
 
   const selectedOptions = index ? [indices.find((option) => option.value === index)!] : [];
-
-  useEffect(() => {
-    if (index) refetch();
-  }, [index, refetch]);
 
   return (
     <>

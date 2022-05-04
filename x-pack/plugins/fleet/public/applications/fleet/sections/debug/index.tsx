@@ -49,6 +49,9 @@ export const DebugPage: React.FunctionComponent = () => {
           <SavedObjectsDebugger />
           <EuiSpacer size="xl" />
 
+          <EuiHorizontalRule />
+
+          <EuiSpacer size="xl" />
           <FleetIndicesDebugger />
           <EuiSpacer size="xl" />
         </EuiPageBody>
