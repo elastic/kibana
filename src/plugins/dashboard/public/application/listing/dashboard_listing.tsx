@@ -135,9 +135,17 @@ export const DashboardListing = ({
         kbnUrlStateStorage,
         core.uiSettings.get('state:storeInSessionStorage'),
         userContent,
+        viewsCountRange,
         savedObjectsTagging
       ),
-    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging, userContent]
+    [
+      core.application,
+      core.uiSettings,
+      kbnUrlStateStorage,
+      savedObjectsTagging,
+      userContent,
+      viewsCountRange,
+    ]
   );
 
   const createItem = useCallback(() => {
@@ -372,6 +380,7 @@ const getTableColumns = (
   kbnUrlStateStorage: IKbnUrlStateStorage,
   useHash: boolean,
   userContent: UserContentPluginStart,
+  selectedViewsRange: ViewsCountRangeField,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
   return [
@@ -403,7 +412,7 @@ const getTableColumns = (
     ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
     ...userContent.ui.getUserContentTableColumnsDefinitions({
       contentType: 'dashboard',
-      selectedViewsRange: 'views_7_days',
+      selectedViewsRange,
     }),
   ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };

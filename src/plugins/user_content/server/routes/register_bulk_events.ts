@@ -40,6 +40,7 @@ export const registerBulkEventsRoute = (
           type,
           data: {
             so_id: soId,
+            so_type: soType,
           },
         };
       });
