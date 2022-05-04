@@ -98,3 +98,6 @@ fi
 
 export BUILD_TS_REFS_DISABLE=true
 export DISABLE_BOOTSTRAP_VALIDATION=true
+
+# Prevent Browserlist from logging on CI about outdated database versions
+export BROWSERSLIST_IGNORE_OLD_DATA=true
