@@ -1004,16 +1004,12 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(
-      expect.objectContaining({
-        hits: expect.objectContaining({
-          hits: expect.arrayContaining([
-            expect.objectContaining({
-              ...sampleDocWithSortId(),
-              _id: expect.any(String),
-            }),
-          ]),
+      expect.objectContaining([
+        expect.objectContaining({
+          ...sampleDocWithSortId(),
+          _id: expect.any(String),
         }),
-      })
+      ])
     );
     expect(success).toEqual(true);
     expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
