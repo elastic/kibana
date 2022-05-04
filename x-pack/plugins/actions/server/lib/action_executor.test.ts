@@ -296,7 +296,8 @@ test('throws an error when config is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+    message: 'an error occurred while validating the action',
+    serviceMessage: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
 
@@ -336,7 +337,8 @@ test('throws an error when connector is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: `error validating action type connector: config must be defined`,
+    message: 'an error occurred while validating the action',
+    serviceMessage: `error validating action type connector: config must be defined`,
   });
 });
 
@@ -376,7 +378,8 @@ test('throws an error when params is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
+    message: 'an error occurred while validating the action',
+    serviceMessage: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
 
@@ -521,7 +524,7 @@ test('logs a warning when alert executor throws an error', async () => {
   executorMock.mockRejectedValue(new Error('this action execution is intended to fail'));
   await actionExecutor.execute(executeParams);
   expect(loggerMock.warn).toBeCalledWith(
-    'action execution failure: test:1: action-1: an error occurred while running the action executor: this action execution is intended to fail'
+    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail'
   );
 });
 
