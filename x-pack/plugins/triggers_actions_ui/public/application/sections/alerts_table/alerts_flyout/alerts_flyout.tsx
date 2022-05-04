@@ -23,6 +23,13 @@ import {
 } from '@elastic/eui';
 import { AlertsField, AlertsData } from '../../../../types';
 
+const SAMPLE_TITLE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.sampleTitle',
+  {
+    defaultMessage: 'Sample title',
+  }
+);
+
 const NAME_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.name',
   {
@@ -64,8 +71,11 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
-        <EuiSpacer size="xl" />
-        <EuiFlexGroup gutterSize="none">
+        <EuiTitle size="m">
+          <h2>{SAMPLE_TITLE_LABEL}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiPagination
               aria-label={PAGINATION_LABEL}
@@ -77,7 +87,6 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="xl" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" direction="column">
