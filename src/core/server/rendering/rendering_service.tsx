@@ -26,7 +26,7 @@ import {
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
-import { KibanaRequest } from '../http';
+import type { HttpAuth, KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
 import { filterUiPlugins } from './filter_ui_plugins';
 
@@ -98,14 +98,20 @@ export class RenderingService {
       user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
 
-    const clusterInfo =
-      (await (elasticsearch &&
-        firstValueFrom(
+    let clusterInfo = {};
+    try {
+      // Only provide the clusterInfo if the request is authenticated and the elasticsearch service is available.
+      if (isAuthenticated(http.auth, request) && elasticsearch) {
+        clusterInfo = await firstValueFrom(
           elasticsearch.clusterInfo$.pipe(
             timeout(50), // If not available, just return undefined
             catchError(() => of({}))
           )
-        ))) ?? {};
+        );
+      }
+    } catch (err) {
+      // swallow error
+    }
 
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
     const themeVersion: ThemeVersion = 'v8';
@@ -177,4 +183,10 @@ const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
     browserConfig: {},
     exposedConfigKeys: {},
   }) as { browserConfig: Record<string, unknown>; exposedConfigKeys: Record<string, string> };
+};
+
+const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {
+  const { status: authStatus } = auth.get(request);
+  // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
+  return authStatus !== 'unauthenticated';
 };
