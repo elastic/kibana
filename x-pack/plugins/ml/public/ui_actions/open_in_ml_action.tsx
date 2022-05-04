@@ -6,15 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { Embeddable } from '@kbn/lens-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
-import { getJobsItemsFromEmbeddable } from '../application/jobs/new_job/pages/job_from_lens';
 
 export const CREATE_ML_AD_JOB_ACTION = 'createMLADJobAction';
 
 export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<{ embeddable: IEmbeddable }>({
+  return createAction<{ embeddable: Embeddable }>({
     id: 'create-ml-ad-job-action',
     type: CREATE_ML_AD_JOB_ACTION,
     getIconType(context): string {
@@ -30,31 +29,23 @@ export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServi
       }
 
       try {
-        const { convertLensToADJob } = await import(
-          '../embeddables/convert_to_jobs/convert_lens_to_job_action'
-        );
+        const { convertLensToADJob } = await import('../application/jobs/new_job/job_from_lens');
 
         convertLensToADJob(embeddable);
       } catch (e) {
         return Promise.reject();
       }
     },
-    async isCompatible(context: { embeddable: IEmbeddable }) {
+    async isCompatible(context: { embeddable: Embeddable }) {
       const [coreStart, pluginsStart] = await getStartServices();
-      const { canCreateADJob } = await import('../application/jobs/new_job/pages/job_from_lens');
-      const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(context.embeddable);
+      const { canCreateADJob, getJobsItemsFromEmbeddable } = await import(
+        '../application/jobs/new_job/job_from_lens'
+      );
+      const { query, filters, vis } = getJobsItemsFromEmbeddable(context.embeddable);
       return (
         context.embeddable.type === 'lens' &&
         (await (context.embeddable as any).canViewUnderlyingData()) &&
-        canCreateADJob(
-          vis,
-          from,
-          to,
-          query,
-          filters,
-          pluginsStart.data.dataViews,
-          coreStart.uiSettings
-        )
+        canCreateADJob(vis, query, filters, pluginsStart.data.dataViews, coreStart.uiSettings)
       );
     },
   });

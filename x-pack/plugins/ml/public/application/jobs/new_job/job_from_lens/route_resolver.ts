@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { SimpleSavedObject } from '@kbn/core/public';
 import rison from 'rison-node';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { getSavedObjectsClient } from '../../../../util/dependency_cache';
 import { canCreateAndStashADJob } from './create_job';
-import { getUiSettings, getDataViews } from '../../../../util/dependency_cache';
+import { getUiSettings, getDataViews, getSavedObjectsClient } from '../../../util/dependency_cache';
 
 export async function resolver(
   lensId: string | undefined,
@@ -18,13 +16,13 @@ export async function resolver(
   from: string,
   to: string,
   queryRisonString: any,
-  filtersRisonsString: any
+  filtersRisonString: any
 ) {
-  let viz: SimpleSavedObject<LensSavedObjectAttributes>;
+  let viz: LensSavedObjectAttributes;
   if (lensId) {
     viz = await getLensSavedObject(lensId);
   } else if (vis) {
-    viz = rison.decode(vis) as unknown as SimpleSavedObject<LensSavedObjectAttributes>;
+    viz = rison.decode(vis) as unknown as LensSavedObjectAttributes;
   } else {
     throw new Error('Cannot create visualization');
   }
@@ -33,9 +31,9 @@ export async function resolver(
   let filters;
   try {
     query = rison.decode(queryRisonString);
-    filters = rison.decode(filtersRisonsString);
+    filters = rison.decode(filtersRisonString);
   } catch (error) {
-    // ignore
+    // ignore errors
   }
 
   const dataViewClient = getDataViews();
@@ -46,5 +44,6 @@ export async function resolver(
 
 async function getLensSavedObject(id: string) {
   const savedObjectClient = getSavedObjectsClient();
-  return savedObjectClient.get<LensSavedObjectAttributes>('lens', id);
+  const so = await savedObjectClient.get<LensSavedObjectAttributes>('lens', id);
+  return so.attributes;
 }

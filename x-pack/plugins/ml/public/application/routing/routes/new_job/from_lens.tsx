@@ -13,7 +13,7 @@ import { parse } from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
-import { resolver } from '../../../jobs/new_job/pages/job_from_lens';
+import { resolver } from '../../../jobs/new_job/job_from_lens';
 
 export const fromLensRouteFactory = (): MlRoute => ({
   path: '/jobs/new_job/from_lens',
