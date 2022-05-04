@@ -25,7 +25,8 @@ import {
   Settings,
 } from '@elastic/charts';
 import { useChartTheme } from '@kbn/observability-plugin/public';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import {
   StorageExplorerItem,
@@ -47,7 +48,7 @@ export function StorageExplorer() {
     rotations: euiPaletteColorBlindRotations,
   });
 
-  const { data, status } = useFetcher(
+  const { data, status } = useProgressiveFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/storage_explorer', {
         params: {
@@ -163,7 +164,8 @@ export function StorageExplorer() {
   };
 
   const loading =
-    status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING;
+    isEmpty(items) &&
+    (status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING);
 
   const requestFailed = status === FETCH_STATUS.FAILURE;
 

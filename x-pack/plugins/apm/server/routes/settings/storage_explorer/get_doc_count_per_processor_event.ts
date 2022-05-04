@@ -24,9 +24,11 @@ import {
 export async function getDocCountPerProcessorEvent({
   setup,
   indexLifecyclePhase,
+  probability,
 }: {
   setup: Setup;
   indexLifecyclePhase: IndexLifecyclePhase;
+  probability: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -54,28 +56,35 @@ export async function getDocCountPerProcessorEvent({
           },
         },
         aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size: 500,
+          sample: {
+            random_sampler: {
+              probability,
             },
             aggs: {
-              environments: {
+              services: {
                 terms: {
-                  field: SERVICE_ENVIRONMENT,
+                  field: SERVICE_NAME,
                   size: 500,
                 },
-              },
-              processor_event: {
-                terms: {
-                  field: PROCESSOR_EVENT,
-                  size: 10,
-                },
                 aggs: {
-                  sampled_transactions: {
+                  environments: {
                     terms: {
-                      field: TRANSACTION_SAMPLED,
+                      field: SERVICE_ENVIRONMENT,
+                      size: 500,
+                    },
+                  },
+                  processor_event: {
+                    terms: {
+                      field: PROCESSOR_EVENT,
                       size: 10,
+                    },
+                    aggs: {
+                      sampled_transactions: {
+                        terms: {
+                          field: TRANSACTION_SAMPLED,
+                          size: 10,
+                        },
+                      },
                     },
                   },
                 },
@@ -87,44 +96,47 @@ export async function getDocCountPerProcessorEvent({
     }
   );
 
-  const serviceStats = response.aggregations?.services.buckets.map((bucket) => {
-    const serviceName = bucket.key as string;
-    const totalServiceDocs = bucket.doc_count;
-    const environments = bucket.environments.buckets.map(
-      ({ key }) => key as string
-    );
+  const serviceStats = response.aggregations?.sample.services.buckets.map(
+    (bucket) => {
+      const serviceName = bucket.key as string;
+      const totalServiceDocs = bucket.doc_count;
+      const environments = bucket.environments.buckets.map(
+        ({ key }) => key as string
+      );
 
-    const sampledTransactionDocs = bucket.processor_event.buckets.find(
-      (x) => x.key === 'transaction'
-    )?.sampled_transactions.buckets[0].doc_count;
+      const sampledTransactionDocs = bucket.processor_event.buckets.find(
+        (x) => x.key === 'transaction'
+      )?.sampled_transactions.buckets[0].doc_count;
 
-    const docsPerProcessorEvent = bucket.processor_event.buckets.reduce(
-      (
-        acc: Record<Exclude<ProcessorEvent, ProcessorEvent.profile>, number>,
-        { key, doc_count: docCount }
-      ) => {
-        acc[key as Exclude<ProcessorEvent, ProcessorEvent.profile>] = docCount;
-        return acc;
-      },
-      {
-        [ProcessorEvent.transaction]: 0,
-        [ProcessorEvent.span]: 0,
-        [ProcessorEvent.metric]: 0,
-        [ProcessorEvent.error]: 0,
-      }
-    );
+      const docsPerProcessorEvent = bucket.processor_event.buckets.reduce(
+        (
+          acc: Record<Exclude<ProcessorEvent, ProcessorEvent.profile>, number>,
+          { key, doc_count: docCount }
+        ) => {
+          acc[key as Exclude<ProcessorEvent, ProcessorEvent.profile>] =
+            docCount;
+          return acc;
+        },
+        {
+          [ProcessorEvent.transaction]: 0,
+          [ProcessorEvent.span]: 0,
+          [ProcessorEvent.metric]: 0,
+          [ProcessorEvent.error]: 0,
+        }
+      );
 
-    return {
-      serviceName,
-      environments,
-      totalServiceDocs,
-      sampledTransactionDocs,
-      transactionDocs: docsPerProcessorEvent.transaction,
-      spanDocs: docsPerProcessorEvent.span,
-      metricDocs: docsPerProcessorEvent.metric,
-      errorDocs: docsPerProcessorEvent.error,
-    };
-  });
+      return {
+        serviceName,
+        environments,
+        totalServiceDocs,
+        sampledTransactionDocs,
+        transactionDocs: docsPerProcessorEvent.transaction,
+        spanDocs: docsPerProcessorEvent.span,
+        metricDocs: docsPerProcessorEvent.metric,
+        errorDocs: docsPerProcessorEvent.error,
+      };
+    }
+  );
 
   return serviceStats ?? [];
 }

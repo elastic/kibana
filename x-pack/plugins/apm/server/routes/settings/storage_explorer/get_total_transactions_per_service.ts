@@ -24,10 +24,12 @@ export async function getTotalTransactionsPerService({
   setup,
   searchAggregatedTransactions,
   indexLifecyclePhase,
+  probability,
 }: {
   setup: Setup;
   searchAggregatedTransactions: boolean;
   indexLifecyclePhase: IndexLifecyclePhase;
+  probability: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -55,10 +57,17 @@ export async function getTotalTransactionsPerService({
           },
         },
         aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size: 500,
+          sample: {
+            random_sampler: {
+              probability,
+            },
+            aggs: {
+              services: {
+                terms: {
+                  field: SERVICE_NAME,
+                  size: 500,
+                },
+              },
             },
           },
         },
@@ -67,7 +76,7 @@ export async function getTotalTransactionsPerService({
   );
 
   return (
-    response.aggregations?.services.buckets.reduce(
+    response.aggregations?.sample.services.buckets.reduce(
       (transactionsPerService, bucket) => {
         transactionsPerService[bucket.key as string] = bucket.doc_count;
         return transactionsPerService;

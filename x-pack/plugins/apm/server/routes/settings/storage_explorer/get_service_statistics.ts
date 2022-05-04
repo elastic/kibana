@@ -26,7 +26,10 @@ export function getServiceStatistics({
 
       const sampling =
         sampledTransactionDocs && totalTransactionsPerService[serviceName]
-          ? sampledTransactionDocs / totalTransactionsPerService[serviceName]
+          ? Math.min(
+              sampledTransactionDocs / totalTransactionsPerService[serviceName],
+              1
+            )
           : 0;
 
       return {

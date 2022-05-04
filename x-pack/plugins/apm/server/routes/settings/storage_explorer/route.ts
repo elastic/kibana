@@ -17,12 +17,13 @@ import {
 } from '../../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
 import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
+import { probabilityRt } from '../../default_api_types';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
   options: { tags: ['access:apm'] },
   params: t.type({
-    query: indexLifecyclePhaseRt,
+    query: t.intersection([indexLifecyclePhaseRt, probabilityRt]),
   }),
   handler: async (
     resources
@@ -33,7 +34,7 @@ const storageExplorerRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params, context } = resources;
     const {
-      query: { indexLifecyclePhase },
+      query: { indexLifecyclePhase, probability },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -47,12 +48,14 @@ const storageExplorerRoute = createApmServerRoute({
         getDocCountPerProcessorEvent({
           setup,
           indexLifecyclePhase,
+          probability,
         }),
         getIndicesStats({ context, setup, indexLifecyclePhase }),
         getTotalTransactionsPerService({
           setup,
           searchAggregatedTransactions,
           indexLifecyclePhase,
+          probability,
         }),
       ]);
 
