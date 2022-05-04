@@ -146,7 +146,7 @@ const RuleOverviewTab = ({ rule, toggleRule }: { rule: RuleSavedObject; toggleRu
             label={TEXT.ACTIVATED}
             checked={rule.attributes.enabled}
             onChange={toggleRule}
-            data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
+            data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
           />
         </EuiToolTip>
       </span>

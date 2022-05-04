@@ -42,7 +42,7 @@ export function useFetchRules({
         page,
         searchText,
         typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
-        ruleStatusesFilter: ruleLastResponseFilter,
+        ruleExecutionStatusesFilter: ruleLastResponseFilter,
         sort,
       });
       setRulesState((oldState) => ({
