@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiHorizontalRule, EuiPage, EuiPageBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiHorizontalRule,
+  EuiListGroup,
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
@@ -34,33 +43,79 @@ export const DebugPage: React.FunctionComponent = () => {
             Be aware that these debugging tools can be destructive in nature, and you should proceed with caution.`}
           />
 
-          <EuiSpacer size="xl" />
-          <AgentPolicyDebugger />
-          <EuiSpacer size="xl" />
+          <EuiAccordion
+            id="agentPolicyDebugger"
+            buttonContent="Agent Policy Debugger"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <AgentPolicyDebugger />
+          </EuiAccordion>
+          <EuiSpacer />
+          <EuiAccordion
+            id="integrationDebugger"
+            buttonContent="Integration Debugger"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <IntegrationDebugger />
+          </EuiAccordion>
+          <EuiSpacer />
+          <EuiAccordion
+            id="savedObjectsDebugger"
+            buttonContent="Saved Objects"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <SavedObjectsDebugger />
+          </EuiAccordion>
+          <EuiSpacer />
+          <EuiAccordion
+            id="fleetIndicesDebugger"
+            buttonContent="Fleet Indices"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <FleetIndicesDebugger />
+          </EuiAccordion>
+          <EuiSpacer />
+          <EuiAccordion
+            id="preconfigurationDebugger"
+            buttonContent="Preconfiguration Debugger"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <PreconfigurationDebugger />
+          </EuiAccordion>
 
           <EuiHorizontalRule />
 
-          <EuiSpacer size="xl" />
-          <IntegrationDebugger />
-          <EuiSpacer size="xl" />
+          <EuiTitle size="l">
+            <h2>Useful Links</h2>
+          </EuiTitle>
 
-          <EuiHorizontalRule />
+          <EuiSpacer size="m" />
 
-          <EuiSpacer size="xl" />
-          <SavedObjectsDebugger />
-          <EuiSpacer size="xl" />
-
-          <EuiHorizontalRule />
-
-          <EuiSpacer size="xl" />
-          <PreconfigurationDebugger />
-          <EuiSpacer size="xl" />
-
-          <EuiHorizontalRule />
-
-          <EuiSpacer size="xl" />
-          <FleetIndicesDebugger />
-          <EuiSpacer size="xl" />
+          <EuiListGroup
+            listItems={[
+              {
+                label: 'Download Health Check Report',
+                href: '/api/fleet/health_check',
+                target: '_blank',
+                download: 'fleet_health_check_report.txt',
+              },
+              {
+                label: 'View Agents in Fleet UI',
+                href: '/app/fleet/agents',
+                target: '_blank',
+              },
+              {
+                label: 'Troubleshooting Guide',
+                href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
+                target: '_blank',
+              },
+            ]}
+          />
         </EuiPageBody>
       </EuiPage>
       <ReactQueryDevtools initialIsOpen={false} />

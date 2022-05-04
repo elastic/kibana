@@ -92,6 +92,7 @@ export const SETTINGS_API_ROUTES = {
 
 // App API routes
 export const APP_API_ROUTES = {
+  HEALTH_CHECK_PATTERN: `${API_ROOT}/health_check`,
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
   GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
   // deprecated since 8.0
