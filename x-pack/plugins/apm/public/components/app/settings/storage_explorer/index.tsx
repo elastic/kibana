@@ -193,7 +193,7 @@ export function StorageExplorer() {
         title={
           <h2>
             {i18n.translate(
-              'xpack.apm.settings.storageExplorer.loadingPromptTitle',
+              'xpack.apm.settings.storageExplorer.errorPromptTitle',
               {
                 defaultMessage: 'Could not load storage explorer',
               }
