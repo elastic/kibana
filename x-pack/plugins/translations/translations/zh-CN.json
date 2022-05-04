@@ -22877,7 +22877,6 @@
     "xpack.reporting.panelContent.unsavedStateErrorTitle": "未保存的工作",
     "xpack.reporting.pdfFooterImageDescription": "要在 PDF 的页脚中使用的定制图像",
     "xpack.reporting.pdfFooterImageLabel": "PDF 页脚图像",
-<<<<<<< HEAD
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage": "报告“{reportObjectTitle}”包含电子表格应用程序可解释为公式的字符。",
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle": "{reportType} 可能包含公式",
     "xpack.reporting.publicNotifier.downloadReportButtonLabel": "下载报告",
@@ -22894,17 +22893,6 @@
     "xpack.reporting.publicNotifier.reportLinkDescription": "立即下载，或者稍后在 {path} 中获取。",
     "xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle": "为“{reportObjectTitle}”创建了 {reportType}",
     "xpack.reporting.publicNotifier.warning.title": "{reportType} 已完成，但出现问题",
-=======
-    "xpack.reporting.publicNotifier.downloadReportButtonLabel": "下载报告",
-    "xpack.reporting.publicNotifier.error.calloutTitle": "报告作业失败",
-    "xpack.reporting.publicNotifier.error.checkManagement": "更多信息位于 {path}。",
-    "xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel": "管理 > Kibana > Reporting",
-    "xpack.reporting.publicNotifier.error.tryRefresh": "请尝试刷新页面。",
-    "xpack.reporting.publicNotifier.httpErrorMessage": "无法检查 Reporting 作业状态！",
-    "xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription": "报告已达到最大大小，仅包含部分数据。",
-    "xpack.reporting.publicNotifier.pollingErrorMessage": "报告通知器错误！",
-    "xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel": "“堆栈管理”>“告警和洞见”>“报告”",
->>>>>>> 8a8a12aa7eb ([Reporting] Fix copy issue in report notifications (#123607))
     "xpack.reporting.redirectApp.errorTitle": "重定向错误",
     "xpack.reporting.redirectApp.redirectConsoleErrorPrefixLabel": "重定向页面错误：",
     "xpack.reporting.registerFeature.reportingDescription": "管理您从 Discover、Visualize 和 Dashboard 生成的报告。",
