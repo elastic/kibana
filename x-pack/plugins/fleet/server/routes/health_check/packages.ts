@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { groupBy } from 'lodash';
+import { groupBy, keyBy } from 'lodash';
 
 import { installationStatuses } from '../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../constants';
-import { packagePolicyService } from '../../services';
+import { packagePolicyService, agentPolicyService } from '../../services';
 import { getInstallations } from '../../services/epm/packages';
 
 import type { IHealthCheck } from '.';
@@ -59,21 +59,27 @@ export const checkPackages: IHealthCheck = async ({
         );
       }
     );
-    // TODO: Provide guidance on triggering reinstall
+    // TODO: Provide guidance on triggering uninstall/reinstall
     updateReport(`Fleet likely ran into a problem installing these integrations.`, 2);
   }
 
   // List of used packages and associated policies
+  // Including identifing orphaned ones
   const installedPackages = await getInstallations(soClient, {
     perPage: 100,
     filter: `
         ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:${installationStatuses.Installed}
     `,
   });
+  const orphanedPackagePolicies: string[] = [];
   const packagePolicies = await packagePolicyService.list(soClient, {
     perPage: 10000,
   });
   const packagePoliciesByPackage = groupBy(packagePolicies.items, 'package.name');
+  const agentPolicies = await agentPolicyService.list(soClient, {
+    perPage: 10000,
+  });
+  const agentPoliciesById = keyBy(agentPolicies.items, 'id');
   const usedPackages = installedPackages.saved_objects.filter(
     ({ attributes: { name } }) => !!packagePoliciesByPackage[name]
   );
@@ -81,14 +87,36 @@ export const checkPackages: IHealthCheck = async ({
   updateReport(`Integrations in use:`, 2);
   usedPackages.forEach(({ attributes: { name, version } }) => {
     updateReport(`${name} v${version}, policies:`, 3);
-    packagePoliciesByPackage[name].forEach((policy) => {
-      updateReport(`${policy.name} (id: ${policy.id})`, 4);
-      if (policy.package?.version !== version) {
-        updateReport(`This policy is using an outdated version: ${policy.package?.version}`, 5);
+    packagePoliciesByPackage[name].forEach((packagePolicy) => {
+      updateReport(`${packagePolicy.name} (id: ${packagePolicy.id})`, 4);
+      if (packagePolicy.package?.version !== version) {
+        updateReport(
+          `This policy is using an outdated version: ${packagePolicy.package?.version}`,
+          5
+        );
       }
-      // TODO: Check if the package policy is orphaned
+      if (!agentPoliciesById[packagePolicy.policy_id]) {
+        orphanedPackagePolicies.push(packagePolicy.id);
+      }
     });
   });
+
+  // Report orphaned package policies
+  if (orphanedPackagePolicies.length > 0) {
+    hasProblem = true;
+    updateReport(``);
+    updateReport(
+      `The following integration policies are orphaned (detached from a parent agent policy):`,
+      2
+    );
+    updateReport(orphanedPackagePolicies, 3);
+    updateReport(`Run the following command in Kibana > Dev Tools > Console to remove them:`, 2);
+    updateReport(`POST /api/fleet/package_policies/delete`, 3);
+    updateReport(
+      `{"packagePolicyIds": ${JSON.stringify(orphanedPackagePolicies)}, "force": true}`,
+      3
+    );
+  }
 
   //  List of unused packages and versions
   const unusedPackages = installedPackages.saved_objects.filter(

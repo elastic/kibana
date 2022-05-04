@@ -19,6 +19,8 @@ import { checkPackages } from './packages';
  * Dev notes:
  *  This could potentially be a long running operation. Should we advise users
  *  to increase timeout (Kibana and ES) settings before running?
+ *  How can we verify the usefulness of this health check? Can we get a snapshot of
+ *  a "broken" cluster to check report?
  */
 
 type CHECK = 'configuration' | 'packages' | 'agents' | 'policies';
