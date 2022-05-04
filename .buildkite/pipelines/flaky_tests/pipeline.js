@@ -9,8 +9,10 @@
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
   console.error('+++ Triggering directly is not supported anymore');
-  console.error(`Please use the "Trigger Flaky Test Runner" UI to run the Flaky Test Runner. You can find the UI at the URL below:`);
-  console.error('\n    https://ci-stats.kibana.dev/trigger_flaky_test_runner\n')
+  console.error(
+    `Please use the "Trigger Flaky Test Runner" UI to run the Flaky Test Runner. You can find the UI at the URL below:`
+  );
+  console.error('\n    https://ci-stats.kibana.dev/trigger_flaky_test_runner\n');
   process.exit(1);
 }
 
