@@ -188,22 +188,19 @@ export function LayerSettings(props: Props) {
 
     options.push(
       ...TMSService.SupportedLanguages.map(({ key, label, omt }) => {
-        const i18nLabel = i18n.translate(
-          `xpack.maps.layerPanel.settingsPanel.labelLanguage${key}`,
-          {
-            defaultMessage: label,
-          }
-        );
-        return { key, label: i18nLabel, value: omt };
+        return { key, label, value: omt };
       })
     );
 
     return (
       <EuiFormRow
         display="columnCompressed"
-        // TODO i18n
-        label="Label language"
-        helpText="Display labels in a different language"
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageLabel', {
+          defaultMessage: 'Label language',
+        })}
+        helpText={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageHelpText', {
+          defaultMessage: 'Display labels in a different language',
+        })}
       >
         <EuiComboBox
           options={options}
