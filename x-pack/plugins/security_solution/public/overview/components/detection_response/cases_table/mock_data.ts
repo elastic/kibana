@@ -28,8 +28,8 @@ export const mockCasesResult = {
         email: null,
         username: 'elastic',
       },
-      created_at: '2022-04-25T01:50:14.499Z',
-      created_by: {
+      createdAt: '2022-04-25T01:50:14.499Z',
+      createdBy: {
         username: 'elastic',
         email: null,
         full_name: null,
@@ -68,8 +68,8 @@ export const mockCasesResult = {
         email: null,
         username: 'elastic',
       },
-      created_at: '2022-04-21T13:42:17.414Z',
-      created_by: {
+      createdAt: '2022-04-21T13:42:17.414Z',
+      createdBy: {
         username: 'elastic',
         email: null,
         full_name: null,
@@ -108,8 +108,8 @@ export const mockCasesResult = {
         email: null,
         username: 'elastic',
       },
-      created_at: '2022-04-21T13:41:59.025Z',
-      created_by: {
+      createdAt: '2022-04-21T13:41:59.025Z',
+      createdBy: {
         username: 'elastic',
         email: null,
         full_name: null,
