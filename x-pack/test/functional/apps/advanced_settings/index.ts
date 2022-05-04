@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function advancedSettingsApp({ loadTestFile }: FtrProviderContext) {
   describe('Advanced Settings', function canvasAppTestSuite() {
-    this.tags(['ciGroup2', 'skipFirefox']); // CI requires tags ヽ(゜Q。)ノ？
+    this.tags(['skipFirefox']); // CI requires tags ヽ(゜Q。)ノ？
     loadTestFile(require.resolve('./feature_controls/advanced_settings_security'));
     loadTestFile(require.resolve('./feature_controls/advanced_settings_spaces'));
   });

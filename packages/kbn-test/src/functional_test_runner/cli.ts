@@ -98,11 +98,7 @@ export function runFtrCli() {
           });
         }
 
-        try {
-          await functionalTestRunner.close();
-        } finally {
-          process.exit();
-        }
+        process.exit();
       };
 
       process.on('unhandledRejection', (err) =>

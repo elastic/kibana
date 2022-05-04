@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
   const a11y = getService('a11y'); /* this is the wrapping service around axe */
 
-  describe('machine learning embeddables anomaly charts', function () {
+  describe('machine learning embeddables anomaly charts Accessibility', function () {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();

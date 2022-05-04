@@ -10,7 +10,7 @@ import { services } from './services';
 
 export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProviderContext) {
   const xPackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
+    require.resolve('../functional/config.base.js')
   );
 
   return {

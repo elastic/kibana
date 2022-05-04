@@ -22,7 +22,6 @@ const writeFileAsync = promisify(writeFile);
 export class ScreenshotsService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
-  private readonly testMetadata = this.ctx.getService('testMetadata');
   private readonly browser = this.ctx.getService('browser');
 
   private readonly SESSION_DIRECTORY = resolve(this.config.get('screenshots.directory'), 'session');
@@ -54,13 +53,7 @@ export class ScreenshotsService extends FtrService {
     const baselinePath = resolve(this.BASELINE_DIRECTORY, `${name}.png`);
     const failurePath = resolve(this.FAILURE_DIRECTORY, `${name}.png`);
 
-    await this.capture({
-      path: sessionPath,
-      name,
-      el,
-      baselinePath,
-      failurePath,
-    });
+    await this.capture(sessionPath, el);
 
     if (updateBaselines) {
       this.log.debug('Updating baseline snapshot');
@@ -82,42 +75,20 @@ export class ScreenshotsService extends FtrService {
 
   async take(name: string, el?: WebElementWrapper, subDirectories: string[] = []) {
     const path = resolve(this.SESSION_DIRECTORY, ...subDirectories, `${name}.png`);
-    await this.capture({ path, name, el });
+    await this.capture(path, el);
   }
 
   async takeForFailure(name: string, el?: WebElementWrapper) {
     const path = resolve(this.FAILURE_DIRECTORY, `${name}.png`);
-    await this.capture({
-      path,
-      name: `failure[${name}]`,
-      el,
-    });
+    await this.capture(path, el);
   }
 
-  private async capture({
-    path,
-    el,
-    name,
-    baselinePath,
-    failurePath,
-  }: {
-    path: string;
-    name: string;
-    el?: WebElementWrapper;
-    baselinePath?: string;
-    failurePath?: string;
-  }) {
+  private async capture(path: string, el?: WebElementWrapper) {
     try {
       this.log.info(`Taking screenshot "${path}"`);
       const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
       await mkdirAsync(dirname(path), { recursive: true });
       await writeFileAsync(path, screenshot, 'base64');
-      this.testMetadata.addScreenshot({
-        name,
-        base64Png: Buffer.isBuffer(screenshot) ? screenshot.toString('base64') : screenshot,
-        baselinePath,
-        failurePath,
-      });
     } catch (err) {
       this.log.error('SCREENSHOT FAILED');
       this.log.error(err);

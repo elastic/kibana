@@ -261,6 +261,24 @@ exports.Cluster = class Cluster {
   }
 
   /**
+   * Stops ES process, it it's running, without waiting for it to shutdown gracefully
+   */
+  async kill() {
+    if (this._stopCalled) {
+      return;
+    }
+
+    this._stopCalled;
+
+    if (!this._process || !this._outcome) {
+      throw new Error('ES has not been started');
+    }
+
+    await treeKillAsync(this._process.pid, 'SIGKILL');
+    await this._outcome;
+  }
+
+  /**
    * Common logic from this.start() and this.run()
    *
    * Start the elasticsearch process (stored at `this._process`)

@@ -27,7 +27,6 @@ export default function canvasApp({ loadTestFile, getService }) {
       await security.testUser.restoreDefaults();
     });
 
-    this.tags('ciGroup2');
     loadTestFile(require.resolve('./smoke_test'));
     loadTestFile(require.resolve('./expression'));
     loadTestFile(require.resolve('./filters'));

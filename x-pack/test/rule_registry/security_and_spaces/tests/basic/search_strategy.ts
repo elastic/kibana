@@ -19,7 +19,7 @@ import {
   waitForSignalsToBePresent,
   waitForRuleSuccessOrStatus,
 } from '../../../../detection_engine_api_integration/utils';
-import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/tests/generating_signals';
+import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/group1/generating_signals';
 import {
   obsOnlySpacesAllEsRead,
   obsOnlySpacesAll,

@@ -19,23 +19,15 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpacesAndUsers(getService);
     });
 
-    describe('', function () {
-      this.tags('ciGroup13');
+    // Trial
+    loadTestFile(require.resolve('./cases/push_case'));
+    loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
+    loadTestFile(require.resolve('./configure'));
 
-      // Trial
-      loadTestFile(require.resolve('./cases/push_case'));
-      loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
-      loadTestFile(require.resolve('./configure'));
-    });
+    // Common
+    loadTestFile(require.resolve('../common'));
 
-    describe('', function () {
-      this.tags('ciGroup25');
-
-      // Common
-      loadTestFile(require.resolve('../common'));
-
-      // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
-      loadTestFile(require.resolve('../common/migrations'));
-    });
+    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
+    loadTestFile(require.resolve('../common/migrations'));
   });
 };

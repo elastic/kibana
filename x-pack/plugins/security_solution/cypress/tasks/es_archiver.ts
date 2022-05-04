@@ -8,7 +8,7 @@
 import Path from 'path';
 
 const ES_ARCHIVE_DIR = '../../test/security_solution_cypress/es_archives';
-const CONFIG_PATH = '../../test/functional/config.js';
+const CONFIG_PATH = '../../test/functional/config.base.js';
 const ES_URL = Cypress.env('ELASTICSEARCH_URL');
 const KIBANA_URL = Cypress.config().baseUrl;
 const CCS_ES_URL = Cypress.env('CCS_ELASTICSEARCH_URL');

@@ -10,8 +10,6 @@ import { PluginFunctionalProviderContext } from '../../../../test/plugin_functio
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('reporting examples', function () {
-    this.tags('ciGroup13');
-
     loadTestFile(require.resolve('./capture_test'));
   });
 }

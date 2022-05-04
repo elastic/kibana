@@ -24,7 +24,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);
-const defaultConfigPath = resolveConfigPath('test/functional/config.js');
+const defaultConfigPath = resolveConfigPath('test/functional/config.base.js');
 
 export function runCli() {
   new RunWithCommands({

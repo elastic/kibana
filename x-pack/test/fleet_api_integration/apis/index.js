@@ -9,8 +9,6 @@ import { setupTestUsers } from './test_users';
 
 export default function ({ loadTestFile, getService }) {
   describe('Fleet Endpoints', function () {
-    this.tags('ciGroup29');
-
     before(async () => {
       await setupTestUsers(getService('security'));
     });

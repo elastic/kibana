@@ -17,13 +17,13 @@ This directory is excluded from the build and tools within it should help users 
 
 ## Functional Test Scripts
 
-**`node scripts/functional_tests [--config test/functional/config.js --config test/api_integration/config.js]`**
+**`node scripts/functional_tests [--config test/functional/config.base.js --config test/api_integration/config.js]`**
 
 Runs all the functional tests: selenium tests and api integration tests. List configs with multiple `--config` arguments. Uses the [@kbn/test](../packages/kbn-test) library to run Elasticsearch and Kibana servers and tests against those servers, for multiple server+test setups. In particular, calls out to [`runTests()`](../packages/kbn-test/src/functional_tests/tasks.js). Can be run on a single config.
 
-**`node scripts/functional_tests_server [--config test/functional/config.js]`**
+**`node scripts/functional_tests_server [--config test/functional/config.base.js]`**
 
-Starts just the Elasticsearch and Kibana servers given a single config, i.e. via `--config test/functional/config.js` or `--config test/api_integration/config`. Allows the user to start just the servers with this script, and keep them running while running tests against these servers. The idea is that the same config file configures both Elasticsearch and Kibana servers. Uses the [`startServers()`](../packages/kbn-test/src/functional_tests/tasks.js#L52-L80) method from [@kbn/test](../packages/kbn-test) library.
+Starts just the Elasticsearch and Kibana servers given a single config, i.e. via `--config test/functional/config.base.js` or `--config test/api_integration/config`. Allows the user to start just the servers with this script, and keep them running while running tests against these servers. The idea is that the same config file configures both Elasticsearch and Kibana servers. Uses the [`startServers()`](../packages/kbn-test/src/functional_tests/tasks.js#L52-L80) method from [@kbn/test](../packages/kbn-test) library.
 
 Example. Start servers _and_ run tests, separately, but using the same config:
 
@@ -51,7 +51,7 @@ If you wish to load up specific es archived data for your test, you can do so vi
 node scripts/es_archiver.js load <archive> [--es-url=http://username:password@localhost:9200] [--kibana-url=http://username:password@localhost:5601/{basepath?}]
 ```
 
-That will load the specified archive located in the archive directory specified by the default functional config file, located in `test/functional/config.js`. To load archives from other function config files you can pass `--config path/to/config.js`.
+That will load the specified archive located in the archive directory specified by the default functional config file, located in `test/functional/config.base.js`. To load archives from other function config files you can pass `--config path/to/config.js`.
 
 *Note:* The `--es-url` and `--kibana-url` options may or may not be neccessary depending on your current Kibana configuration settings, and their values
 may also change based on those settings (for example if you are not running with security you will not need the `username:password` portion).
