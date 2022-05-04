@@ -1,0 +1,37 @@
+<style>
+  div.container {
+    position: relative;
+    font-size: 10px;
+    font-family: system-ui;
+    text-align: center;
+    color: #aaa;
+    width: 100%;
+  }
+  div.pages {
+    position: absolute;
+
+    left: 50%;
+    transform: translateX(-50%);
+
+    bottom: 1mm;
+
+    text-align: center;
+  }
+  div.logo {
+    position: absolute;
+
+    left: 2mm;
+    bottom: 1mm;
+
+    height: 6, 86mm;
+    width: 20mm;
+
+    content: url('data:image/png;base64,{{ logo }}');
+  }
+</style>
+<div class="container">
+  <div class="logo"></div>
+  <div class="pages">
+    <span class="pageNumber"></span>&nbsp;of&nbsp;<span class="totalPages"></span>
+  </div>
+</div>
