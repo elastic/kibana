@@ -165,6 +165,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.deployment_url (string)',
         'xpack.cloud.full_story.enabled (boolean)',
         'xpack.cloud.full_story.org_id (any)',
+        // No PII. Just the list of event types we want to forward to FullStory.
         'xpack.cloud.full_story.eventTypesAllowlist (array)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
