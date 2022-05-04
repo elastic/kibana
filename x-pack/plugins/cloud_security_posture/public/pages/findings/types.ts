@@ -30,6 +30,7 @@ export interface FindingsQueryResult<TData = unknown, TError = unknown> {
 // TODO: this needs to be defined in a versioned schema
 export interface CspFinding {
   '@timestamp': string;
+  resource_id: string;
   cycle_id: string;
   result: CspFindingResult;
   resource: CspFindingResource;

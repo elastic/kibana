@@ -7,6 +7,9 @@
 import React from 'react';
 import {
   EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiTitle,
@@ -16,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
 import { CspFinding } from '../types';
@@ -61,19 +65,45 @@ export const getExpandColumn = <T extends unknown>({
   ],
 });
 
+export const getResourceIdColumn = <T extends Pick<CspFinding, 'resource_id'>>(
+  column?: Partial<EuiBasicTableColumn<T>>
+): EuiBasicTableColumn<T> => ({
+  field: 'resource_id',
+  truncateText: true,
+  width: '15%',
+  sortable: true,
+  name: (
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem>
+        <FormattedMessage
+          id="xpack.csp.findings.resourceIdColumnLabel"
+          defaultMessage="Resource ID"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiIconTip
+          type="iInCircle"
+          color="subdued"
+          content={
+            <FormattedMessage
+              id="xpack.csp.findings.resourceIdColumnDescription"
+              defaultMessage="Custom Elastic Resource ID"
+            />
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+  render: (filename: string) => (
+    <EuiToolTip position="top" content={filename} anchorClassName={'eui-textTruncate'}>
+      <span>{filename}</span>
+    </EuiToolTip>
+  ),
+  ...column,
+});
+
 export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => [
-  {
-    field: 'resource_id',
-    name: TEXT.RESOURCE_ID,
-    truncateText: true,
-    width: '15%',
-    sortable: true,
-    render: (filename: string) => (
-      <EuiToolTip position="top" content={filename}>
-        <span>{filename}</span>
-      </EuiToolTip>
-    ),
-  },
+  getResourceIdColumn(),
   {
     field: 'result.evaluation',
     name: TEXT.RESULT,

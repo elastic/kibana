@@ -22,19 +22,19 @@ export type CspFindingsByResourceResult = FindingsQueryResult<
   unknown
 >;
 
+export type FindingsByResourceAggregationsKeys = Record<
+  'resource_id' | 'cluster_id' | 'cis_section' | 'resource_type' | 'resource_name',
+  string
+>;
+
+export interface FindingsAggBucket {
+  doc_count: number;
+  failed_findings: { doc_count: number };
+  key: FindingsByResourceAggregationsKeys;
+}
 interface FindingsByResourceAggs extends estypes.AggregationsCompositeAggregate {
   groupBy: {
     buckets: FindingsAggBucket[];
-  };
-}
-
-interface FindingsAggBucket {
-  doc_count: number;
-  failed_findings: { doc_count: number };
-  key: {
-    resource_id: string;
-    cluster_id: string;
-    cis_section: string;
   };
 }
 
@@ -54,6 +54,8 @@ export const getFindingsByResourceAggQuery = ({
             { resource_id: { terms: { field: 'resource_id.keyword' } } },
             { cluster_id: { terms: { field: 'cluster_id.keyword' } } },
             { cis_section: { terms: { field: 'rule.section.keyword' } } },
+            { resource_type: { terms: { field: 'resource.type.keyword' } } },
+            { resource_name: { terms: { field: 'resource.name.keyword' } } },
           ],
         },
         aggs: {

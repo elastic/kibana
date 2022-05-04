@@ -6,12 +6,14 @@
  */
 import React from 'react';
 import {
-  EuiTableFieldDataColumnType,
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
+  EuiToolTip,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
@@ -21,6 +23,7 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
 import type { CspFindingsByResourceResult } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
+import { getResourceIdColumn } from '../layout/findings_layout';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
@@ -54,19 +57,61 @@ const FindingsByResourceTableComponent = ({
   );
 };
 
-const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
+const columns: Array<EuiBasicTableColumn<CspFindingsByResource>> = [
+  getResourceIdColumn<CspFindingsByResource>({
+    render: (resourceId: string) => (
+      <EuiToolTip position="top" content={resourceId} anchorClassName={'eui-textTruncate'}>
+        <Link to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}>
+          {resourceId}
+        </Link>
+      </EuiToolTip>
+    ),
+  }),
   {
     field: 'resource_id',
+    truncateText: true,
+    width: '200px',
+    name: (
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.csp.findings.groupByResourceTable.resourceIdColumnLabel"
+            defaultMessage="Resource ID"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiIconTip
+            type="iInCircle"
+            color="subdued"
+            content={
+              <FormattedMessage
+                id="xpack.csp.findings.groupByResourceTable.resourceIdColumnDescription"
+                defaultMessage="Custom Elastic Resource ID"
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  },
+  {
+    field: 'resource.type',
+    truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.resourceIdColumnLabel"
-        defaultMessage="Resource ID"
+        id="xpack.csp.findings.groupByResourceTable.resourceTypeColumnLabel"
+        defaultMessage="Resource Type"
       />
     ),
-    render: (resourceId: CspFindingsByResource['resource_id']) => (
-      <Link to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}>
-        {resourceId}
-      </Link>
+  },
+  {
+    field: 'resource.name',
+    truncateText: true,
+    name: (
+      <FormattedMessage
+        id="xpack.csp.findings.groupByResourceTable.resourceNameColumnLabel"
+        defaultMessage="Resource Name"
+      />
     ),
   },
   {
@@ -74,19 +119,36 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.cisSectionColumnLabel"
-        defaultMessage="CIS Section"
+        id="xpack.csp.findings.groupByResourceTable.cisSectionsColumnLabel"
+        defaultMessage="CIS Sections"
       />
     ),
+    render: (sections?: string[]) => sections?.join?.(', '),
   },
   {
     field: 'cluster_id',
     truncateText: true,
     name: (
-      <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.clusterIdColumnLabel"
-        defaultMessage="Cluster ID"
-      />
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem>
+          <FormattedMessage
+            id="xpack.csp.findings.groupByResourceTable.clusterIdColumnLabel"
+            defaultMessage="Cluster ID"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiIconTip
+            type="iInCircle"
+            color="subdued"
+            content={
+              <FormattedMessage
+                id="xpack.csp.findings.groupByResourceTable.clusterIdColumnDescription"
+                defaultMessage="Kube-System Namespace ID"
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
   },
   {
