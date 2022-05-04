@@ -81,7 +81,7 @@ describe('create CSP rules with post package create callback', () => {
     } as unknown as SavedObjectsFindResponse);
     await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
 
-    expect(mockSoClient.find.mock.calls[0][0]).toMatchObject({ perPage: 1000 });
+    expect(mockSoClient.find.mock.calls[0][0]).toMatchObject({ perPage: 10000 });
   });
 
   it('should not create rules when the package policy is not csp package', async () => {

@@ -48,7 +48,7 @@ export const onPackagePolicyPostCreateCallback = async (
   const existingRuleTemplates: SavedObjectsFindResponse<CloudSecurityPostureRuleTemplateSchema> =
     await savedObjectsClient.find({
       type: cloudSecurityPostureRuleTemplateSavedObjectType,
-      perPage: 1000,
+      perPage: 10000,
     });
 
   if (existingRuleTemplates.total === 0) {
