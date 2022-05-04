@@ -21,6 +21,7 @@ import {
   EuiTableActionsColumnType,
   SearchFilterConfig,
   EuiToolTip,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -62,6 +63,7 @@ export interface TableListViewProps<V> {
    */
   tableCaption: string;
   searchFilters?: SearchFilterConfig[];
+  toolsRight?: EuiSearchBarProps['toolsRight'];
   theme: ThemeServiceStart;
   application: ApplicationStart;
 }
@@ -461,7 +463,7 @@ class TableListView<V extends {}> extends React.Component<
   }
 
   renderTable() {
-    const { searchFilters } = this.props;
+    const { searchFilters, toolsRight } = this.props;
 
     const selection = this.props.deleteItems
       ? {
@@ -475,7 +477,7 @@ class TableListView<V extends {}> extends React.Component<
         }
       : undefined;
 
-    const search = {
+    const search: EuiSearchBarProps = {
       onChange: this.setFilter.bind(this),
       toolsLeft: this.renderToolsLeft(),
       defaultQuery: this.state.filter,
@@ -484,6 +486,7 @@ class TableListView<V extends {}> extends React.Component<
         'data-test-subj': 'tableListSearchBox',
       },
       filters: searchFilters ?? [],
+      toolsRight,
     };
 
     const noItemsMessage = (

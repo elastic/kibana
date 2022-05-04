@@ -15,12 +15,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiSearchBarProps,
+  EuiSelect,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
-import type { UserContentPluginStart } from '@kbn/user-content-plugin/public';
+import type { UserContentPluginStart, ViewsCountRangeField } from '@kbn/user-content-plugin/public';
+import { viewsCountRangeFields } from '@kbn/user-content-plugin/public';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -78,6 +81,10 @@ export const DashboardListing = ({
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
+  );
+
+  const [viewsCountRange, setViewsCountRange] = useState<ViewsCountRangeField>(
+    viewsCountRangeFields[0]
   );
 
   useExecutionContext(core.executionContext, {
@@ -293,6 +300,28 @@ export const DashboardListing = ({
       ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
       : [];
   }, [savedObjectsTagging]);
+
+  const toolsRight = useMemo<EuiSearchBarProps['toolsRight']>(() => {
+    const viewsCountOptions = viewsCountRangeFields.map((range) => {
+      const days = /_(\d+)_/.exec(range)?.[1];
+      const text = `Last ${days} days`;
+
+      return {
+        value: range,
+        text,
+      };
+    });
+
+    return [
+      <EuiSelect
+        id="viewsDaysRangeSelect"
+        options={viewsCountOptions}
+        value={viewsCountRange}
+        onChange={(e) => setViewsCountRange(e.target.value as ViewsCountRangeField)}
+        aria-label="Select views count days range"
+      />,
+    ];
+  }, [viewsCountRange]);
 
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
     dashboardListingTable;
