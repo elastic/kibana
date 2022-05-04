@@ -139,8 +139,7 @@ export async function getSpanLinksDetails({
   const spanLinksDetailsMap = linkedSpans.reduce<
     Record<string, SpanLinkDetails>
   >((acc, { _source: source }) => {
-    const commonProps = {
-      traceId: source.trace.id,
+    const commonDetails = {
       serviceName: source.service.name,
       agentName: source.agent.name,
       environment: source.service.environment as Environment,
@@ -151,21 +150,27 @@ export async function getSpanLinksDetails({
       const transaction = source as TransactionRaw;
       const key = `${transaction.trace.id}:${transaction.transaction.id}`;
       acc[key] = {
-        ...commonProps,
+        traceId: source.trace.id,
         spanId: transaction.transaction.id,
-        spanName: transaction.transaction.name,
-        duration: transaction.transaction.duration.us,
+        details: {
+          ...commonDetails,
+          spanName: transaction.transaction.name,
+          duration: transaction.transaction.duration.us,
+        },
       };
     } else {
       const span = source as SpanRaw;
       const key = `${span.trace.id}:${span.span.id}`;
       acc[key] = {
-        ...commonProps,
+        traceId: source.trace.id,
         spanId: span.span.id,
-        spanName: span.span.name,
-        duration: span.span.duration.us,
-        spanSubtype: span.span.subtype,
-        spanType: span.span.type,
+        details: {
+          ...commonDetails,
+          spanName: span.span.name,
+          duration: span.span.duration.us,
+          spanSubtype: span.span.subtype,
+          spanType: span.span.type,
+        },
       };
     }
 

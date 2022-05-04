@@ -46,19 +46,19 @@ export function SpanLinksTable({ items }: Props) {
         defaultMessage: 'Service name',
       }),
       sortable: true,
-      render: (_, { serviceName, agentName, environment }) => {
-        if (serviceName) {
+      render: (_, { details }) => {
+        if (details) {
           return (
             <ServiceLink
-              serviceName={serviceName}
-              agentName={agentName}
+              serviceName={details.serviceName}
+              agentName={details.agentName}
               query={{
                 rangeFrom,
                 rangeTo,
                 kuery: '',
                 serviceGroup: '',
                 comparisonEnabled: true,
-                environment: environment || 'ENVIRONMENT_ALL',
+                environment: details.environment || 'ENVIRONMENT_ALL',
               }}
             />
           );
@@ -83,11 +83,8 @@ export function SpanLinksTable({ items }: Props) {
         defaultMessage: 'Span',
       }),
       sortable: true,
-      render: (
-        _,
-        { spanId, traceId, spanSubtype, spanType, spanName, transactionId }
-      ) => {
-        if (spanName) {
+      render: (_, { spanId, traceId, details }) => {
+        if (details) {
           return (
             <EuiFlexGroup
               alignItems="center"
@@ -95,16 +92,19 @@ export function SpanLinksTable({ items }: Props) {
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon type={getSpanIcon(spanType, spanSubtype)} size="l" />
+                <EuiIcon
+                  type={getSpanIcon(details.spanType, details.spanSubtype)}
+                  size="l"
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink
                   href={link('/link-to/transaction/{transactionId}', {
-                    path: { transactionId: transactionId || spanId },
+                    path: { transactionId: details.transactionId || spanId },
                     query: { waterfallItemId: spanId },
                   })}
                 >
-                  {spanName}
+                  {details.spanName}
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -120,10 +120,10 @@ export function SpanLinksTable({ items }: Props) {
       }),
       sortable: true,
       width: '150',
-      render: (_, { duration }) => {
+      render: (_, { details }) => {
         return (
           <EuiText size="s" color="subdued">
-            {asDuration(duration)}
+            {asDuration(details?.duration)}
           </EuiText>
         );
       },
@@ -132,7 +132,7 @@ export function SpanLinksTable({ items }: Props) {
       field: 'actions',
       name: 'Actions',
       width: '100',
-      render: (_, { spanId, traceId, transactionId, spanName }) => {
+      render: (_, { spanId, traceId, details }) => {
         const id = `${traceId}:${spanId}`;
         return (
           <EuiPopover
@@ -151,11 +151,11 @@ export function SpanLinksTable({ items }: Props) {
             }}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              {spanName && (
+              {details && (
                 <EuiFlexItem>
                   <EuiLink
                     href={link('/link-to/transaction/{transactionId}', {
-                      path: { transactionId: transactionId || spanId },
+                      path: { transactionId: details.transactionId || spanId },
                     })}
                   >
                     {i18n.translate(
@@ -183,11 +183,11 @@ export function SpanLinksTable({ items }: Props) {
                   )}
                 </EuiCopy>
               </EuiFlexItem>
-              {spanName && (
+              {details && (
                 <EuiFlexItem>
                   <EuiLink
                     href={link('/link-to/transaction/{transactionId}', {
-                      path: { transactionId: transactionId || spanId },
+                      path: { transactionId: details.transactionId || spanId },
                       query: { waterfallItemId: spanId },
                     })}
                   >

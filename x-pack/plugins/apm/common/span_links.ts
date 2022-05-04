@@ -11,12 +11,14 @@ import { Environment } from './environment_rt';
 export interface SpanLinkDetails {
   traceId: string;
   spanId: string;
-  agentName?: AgentName;
-  serviceName?: string;
-  spanName?: string;
-  duration?: number;
-  spanSubtype?: string;
-  spanType?: string;
-  environment?: Environment;
-  transactionId?: string;
+  details?: {
+    agentName: AgentName;
+    serviceName: string;
+    duration: number;
+    environment: Environment;
+    transactionId?: string;
+    spanName?: string;
+    spanSubtype?: string;
+    spanType?: string;
+  };
 }

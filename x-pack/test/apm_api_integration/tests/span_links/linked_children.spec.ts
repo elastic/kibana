@@ -130,8 +130,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns service-B as incoming span links', () => {
           expect(
-            spanLinksDetails.spanLinksDetails.filter((item) => item.serviceName === 'service-B')
-              .length
+            spanLinksDetails.spanLinksDetails.filter(
+              (item) => item.details?.serviceName === 'service-B'
+            ).length
           ).to.be.greaterThan(0);
         });
 
