@@ -60,7 +60,7 @@ import { AnalyticsService, AnalyticsServiceSetup } from './analytics';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
-const KIBANA_STARTED_EVENT = 'core.kibana_started';
+const KIBANA_STARTED_EVENT = 'kibana_started';
 
 /** @internal */
 interface UptimePerStep {

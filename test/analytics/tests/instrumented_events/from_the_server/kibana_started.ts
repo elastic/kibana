@@ -12,10 +12,10 @@ import { FtrProviderContext } from '../../../services';
 export default function ({ getService }: FtrProviderContext) {
   const ebtServerHelper = getService('kibana_ebt_server');
 
-  describe('core.kibana_started', () => {
-    it('should emit the "core.kibana_started" event', async () => {
-      const [event] = await ebtServerHelper.getLastEvents(1, ['core.kibana_started']);
-      expect(event.event_type).to.eql('core.kibana_started');
+  describe('kibana_started', () => {
+    it('should emit the "kibana_started" event', async () => {
+      const [event] = await ebtServerHelper.getLastEvents(1, ['kibana_started']);
+      expect(event.event_type).to.eql('kibana_started');
       expect(event.properties.uptime_per_step.constructor.start).to.be.a('number');
       expect(event.properties.uptime_per_step.constructor.end).to.be.a('number');
       expect(event.properties.uptime_per_step.preboot.start).to.be.a('number');
