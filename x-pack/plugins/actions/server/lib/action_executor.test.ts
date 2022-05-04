@@ -296,8 +296,7 @@ test('throws an error when config is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: 'an error occurred while validating the action',
-    serviceMessage: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+    message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
 
@@ -337,8 +336,7 @@ test('throws an error when connector is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: 'an error occurred while validating the action',
-    serviceMessage: `error validating action type connector: config must be defined`,
+    message: `error validating action type connector: config must be defined`,
   });
 });
 
@@ -378,8 +376,7 @@ test('throws an error when params is invalid', async () => {
     actionId: '1',
     status: 'error',
     retry: false,
-    message: 'an error occurred while validating the action',
-    serviceMessage: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
+    message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
   });
 });
 

@@ -438,8 +438,7 @@ function validateAction({ actionId, actionType, params, config, secrets }: Valid
     throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
       actionId,
       status: 'error',
-      message: 'an error occurred while validating the action',
-      serviceMessage: err.message,
+      message: err.message,
       retry: false,
     });
   }
