@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
@@ -24,8 +24,6 @@ import {
   TaskManagerUtils,
   getEventLog,
 } from '../../../common/lib';
-
-const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -1303,13 +1301,11 @@ instanceStateValue: true
     const eventEnd = Date.parse(event?.event?.end || 'undefined');
     const dateNow = Date.now();
 
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(eventStart).to.be.ok();
     expect(eventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-    );
+    const durationDiff = Math.abs(nanosToMillis(duration!) - (eventEnd - eventStart));
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);
@@ -1332,6 +1328,10 @@ instanceStateValue: true
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(0);
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms).to.be(0);
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_active_alerts).to.be(1);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_new_alerts).to.be(1);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_recovered_alerts).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_number_of_alerts).to.be(1);
 
     expect(event?.rule).to.eql({
       id: alertId,
