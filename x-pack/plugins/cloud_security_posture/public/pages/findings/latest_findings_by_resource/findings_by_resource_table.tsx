@@ -68,33 +68,6 @@ const columns: Array<EuiBasicTableColumn<CspFindingsByResource>> = [
     ),
   }),
   {
-    field: 'resource_id',
-    truncateText: true,
-    width: '200px',
-    name: (
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem>
-          <FormattedMessage
-            id="xpack.csp.findings.groupByResourceTable.resourceIdColumnLabel"
-            defaultMessage="Resource ID"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiIconTip
-            type="iInCircle"
-            color="subdued"
-            content={
-              <FormattedMessage
-                id="xpack.csp.findings.groupByResourceTable.resourceIdColumnDescription"
-                defaultMessage="Custom Elastic Resource ID"
-              />
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  },
-  {
     field: 'resource.type',
     truncateText: true,
     name: (
