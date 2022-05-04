@@ -7,7 +7,7 @@
 
 import rison from 'rison-node';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import { getJobsItemsFromEmbeddable } from './create_job';
+import { getJobsItemsFromEmbeddable } from './utils';
 
 export function convertLensToADJob(embeddable: Embeddable) {
   const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);

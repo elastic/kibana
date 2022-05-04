@@ -6,5 +6,6 @@
  */
 
 export { resolver } from './route_resolver';
-export { canCreateADJob, getJobsItemsFromEmbeddable } from './create_job';
+export { canCreateADJob } from './create_job';
 export { convertLensToADJob } from './convert_lens_to_job_action';
+export { getJobsItemsFromEmbeddable } from './utils';

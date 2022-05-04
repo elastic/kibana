@@ -17,7 +17,6 @@ import type {
   FieldBasedIndexPatternColumn,
   XYDataLayerConfig,
   IndexPatternPersistedState,
-  Embeddable,
 } from '@kbn/lens-plugin/public';
 
 import type { JobCreatorType } from '../common/job_creator';
@@ -25,6 +24,7 @@ import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/
 import { stashJobForCloning } from '../common/job_creator/util/general';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries, getDefaultQuery } from '../utils/new_job_utils';
+import { lensOperationToMlFunction } from './utils';
 
 const COMPATIBLE_SERIES_TYPES = [
   'line',
@@ -37,105 +37,6 @@ const COMPATIBLE_SERIES_TYPES = [
 ];
 
 const COMPATIBLE_LAYER_TYPE = 'data';
-
-async function createADJobFromLensSavedObject(
-  vis: LensSavedObjectAttributes,
-  query: Query,
-  filters: Filter[],
-  dataViewClient: DataViewsContract,
-  kibanaConfig: IUiSettingsClient
-) {
-  const dataView = await getDataViewFromLens(vis, dataViewClient);
-  if (dataView === null) {
-    throw Error('No data views can be found in the visualization.');
-  }
-
-  const state = vis.state;
-  const visualization = state.visualization as { layers: XYDataLayerConfig[] };
-  const compatibleLayers = visualization.layers.filter(
-    (l) => l.layerType === COMPATIBLE_LAYER_TYPE && COMPATIBLE_SERIES_TYPES.includes(l.seriesType)
-  );
-
-  if (compatibleLayers.length === 0) {
-    throw Error(
-      'Visualization does not contain any layers which can be used for creating an anomaly detection job.'
-    );
-  }
-
-  const compatibleLayerIds = compatibleLayers.map((l) => l.layerId);
-
-  const indexpattern = state.datasourceStates.indexpattern as IndexPatternPersistedState;
-  const [layer] = Object.entries(indexpattern.layers)
-    .filter(([id]) => compatibleLayerIds.includes(id))
-    .map(([, l]) => l);
-
-  if (layer === undefined) {
-    throw Error(
-      'Visualization does not contain any layers which can be used for creating an anomaly detection job.'
-    );
-  }
-
-  const { columns } = layer as { columns: Record<string, FieldBasedIndexPatternColumn> };
-  const cols = Object.entries(columns);
-  const timeFieldCol = cols.find(([, c]) => c.dataType === 'date');
-  if (timeFieldCol === undefined) {
-    throw Error('Cannot find a date field.');
-  }
-  const [, timeField] = timeFieldCol;
-  if (timeField.sourceField !== dataView.timeFieldName) {
-    throw Error('Selected time field must be the default time field configured for data view.');
-  }
-
-  const [firstCompatibleLayer] = compatibleLayers;
-  const fields = firstCompatibleLayer.accessors.map((a) => columns[a]);
-
-  const splitField = firstCompatibleLayer.splitAccessor
-    ? columns[firstCompatibleLayer.splitAccessor]
-    : null;
-
-  const jobConfig = createEmptyJob();
-  const datafeedConfig = createEmptyDatafeed(dataView.title);
-
-  const mainQuery = query?.query !== '' ? query : state.query;
-
-  const { combinedQuery } = createQueries(
-    { query: mainQuery, filter: filters },
-    dataView,
-    kibanaConfig
-  );
-  datafeedConfig.query = combinedQuery;
-
-  jobConfig.analysis_config.detectors = fields.map(({ operationType, sourceField }) => {
-    const func = lensOperationToMlFunction(operationType);
-    if (func === null) {
-      throw Error(
-        `Selected function ${operationType} is not supported by anomaly detection detectors`
-      );
-    }
-    return {
-      function: func,
-      field_name: sourceField,
-      ...(splitField ? { partition_field_name: splitField.sourceField } : {}),
-    };
-  });
-
-  jobConfig.data_description.time_field = timeField.sourceField;
-  jobConfig.analysis_config.bucket_span = '15m';
-  if (splitField) {
-    jobConfig.analysis_config.influencers = [splitField.sourceField];
-  }
-
-  const createdBy =
-    splitField || jobConfig.analysis_config.detectors.length > 1
-      ? CREATED_BY_LABEL.MULTI_METRIC
-      : CREATED_BY_LABEL.SINGLE_METRIC;
-
-  return {
-    jobConfig,
-    datafeedConfig,
-    createdBy,
-  };
-}
 
 export async function canCreateAndStashADJob(
   vis: LensSavedObjectAttributes,
@@ -197,6 +98,112 @@ export async function canCreateADJob(
   }
 }
 
+async function createADJobFromLensSavedObject(
+  vis: LensSavedObjectAttributes,
+  query: Query,
+  filters: Filter[],
+  dataViewClient: DataViewsContract,
+  kibanaConfig: IUiSettingsClient
+) {
+  const dataView = await getDataViewFromLens(vis, dataViewClient);
+  if (dataView === null) {
+    throw Error('No data views can be found in the visualization.');
+  }
+
+  const { fields, timeField, splitField } = getFields(vis.state);
+
+  if (timeField.sourceField !== dataView.timeFieldName) {
+    throw Error('Selected time field must be the default time field configured for data view.');
+  }
+
+  const jobConfig = createEmptyJob();
+  const datafeedConfig = createEmptyDatafeed(dataView.title);
+
+  const mainQuery = query?.query !== '' ? query : vis.state.query;
+
+  const { combinedQuery } = createQueries(
+    { query: mainQuery, filter: filters },
+    dataView,
+    kibanaConfig
+  );
+  datafeedConfig.query = combinedQuery;
+
+  jobConfig.analysis_config.detectors = createDetectors(fields, splitField);
+
+  jobConfig.data_description.time_field = timeField.sourceField;
+  jobConfig.analysis_config.bucket_span = '15m';
+  if (splitField) {
+    jobConfig.analysis_config.influencers = [splitField.sourceField];
+  }
+
+  const createdBy =
+    splitField || jobConfig.analysis_config.detectors.length > 1
+      ? CREATED_BY_LABEL.MULTI_METRIC
+      : CREATED_BY_LABEL.SINGLE_METRIC;
+
+  return {
+    jobConfig,
+    datafeedConfig,
+    createdBy,
+  };
+}
+
+function getFields(state: LensSavedObjectAttributes['state']) {
+  const compatibleLayers = (state.visualization as { layers: XYDataLayerConfig[] }).layers.filter(
+    (l) => l.layerType === COMPATIBLE_LAYER_TYPE && COMPATIBLE_SERIES_TYPES.includes(l.seriesType)
+  );
+
+  const compatibleLayerIds = compatibleLayers.map((l) => l.layerId);
+
+  const [layer] = Object.entries(
+    (state.datasourceStates.indexpattern as IndexPatternPersistedState).layers
+  )
+    .filter(([id]) => compatibleLayerIds.includes(id))
+    .map(([, l]) => l);
+
+  if (layer === undefined) {
+    throw Error(
+      'Visualization does not contain any layers which can be used for creating an anomaly detection job.'
+    );
+  }
+  const { columns } = layer as { columns: Record<string, FieldBasedIndexPatternColumn> };
+  const cols = Object.entries(columns);
+  const timeFieldCol = cols.find(([, c]) => c.dataType === 'date');
+  if (timeFieldCol === undefined) {
+    throw Error('Cannot find a date field.');
+  }
+
+  const [, timeField] = timeFieldCol;
+
+  const [firstCompatibleLayer] = compatibleLayers;
+  const fields = firstCompatibleLayer.accessors.map((a) => columns[a]);
+
+  const splitField = firstCompatibleLayer.splitAccessor
+    ? columns[firstCompatibleLayer.splitAccessor]
+    : null;
+
+  return { fields, timeField, splitField };
+}
+
+function createDetectors(
+  fields: FieldBasedIndexPatternColumn[],
+  splitField: FieldBasedIndexPatternColumn | null
+) {
+  return fields.map(({ operationType, sourceField }) => {
+    const func = lensOperationToMlFunction(operationType);
+    if (func === null) {
+      throw Error(
+        `Selected function ${operationType} is not supported by anomaly detection detectors`
+      );
+    }
+    return {
+      function: func,
+      field_name: sourceField,
+      ...(splitField ? { partition_field_name: splitField.sourceField } : {}),
+    };
+  });
+}
+
 async function getDataViewFromLens(
   so: LensSavedObjectAttributes,
   dataViewClient: DataViewsContract
@@ -206,46 +213,4 @@ async function getDataViewFromLens(
     return null;
   }
   return dataViewClient.get(dv.id);
-}
-
-function lensOperationToMlFunction(op: string) {
-  switch (op) {
-    case 'average':
-      return 'mean';
-    case 'count':
-      return 'count';
-    case 'max':
-      return 'max';
-    case 'median':
-      return 'median';
-    case 'min':
-      return 'min';
-    case 'sum':
-      return 'sum';
-    case 'unique_count':
-      return 'distinct_count';
-
-    default:
-      return null;
-  }
-}
-
-export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
-  const { query, filters, timeRange } = embeddable.getInput();
-
-  // @ts-expect-error savedVis is private in Embeddable
-  const vis = embeddable.savedVis as LensSavedObjectAttributes;
-
-  if (timeRange === undefined) {
-    throw Error('');
-  }
-  const { to, from } = timeRange;
-
-  return {
-    vis,
-    from,
-    to,
-    query,
-    filters,
-  };
 }
