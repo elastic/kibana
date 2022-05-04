@@ -96,6 +96,14 @@ export interface ApmPluginStartDeps {
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
 });
+
+const allServicesTitle = i18n.translate(
+  'xpack.apm.navigation.allServicesTitle',
+  {
+    defaultMessage: 'All services',
+  }
+);
+
 const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
@@ -273,12 +281,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           ? [
               {
                 id: 'service-groups-list',
-                title: 'Service groups',
+                title: servicesTitle,
                 path: '/service-groups',
               },
             ]
           : []),
-        { id: 'services', title: servicesTitle, path: '/services' },
+        {
+          id: 'services',
+          title: serviceGroupsEnabled ? allServicesTitle : servicesTitle,
+          path: '/services',
+        },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         { id: 'backends', title: dependenciesTitle, path: '/backends' },

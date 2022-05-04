@@ -74,6 +74,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'internalAlertsTable',
           'internalShareableComponentsSandbox',
+          'ruleStatusFilter',
         ])}`,
         `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
