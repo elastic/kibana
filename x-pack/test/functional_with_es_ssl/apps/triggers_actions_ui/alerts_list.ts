@@ -31,8 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/131535
-  describe.skip('rules list', function () {
+  describe('rules list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -640,24 +639,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Select enabled
       await testSubjects.click('ruleStatusFilterButton');
       await testSubjects.click('ruleStatusFilterOption-enabled');
+      await new Promise((res) => setTimeout(res, 1000));
       await assertRulesLength(1);
 
       // Select disabled
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await testSubjects.click('ruleStatusFilterOption-disabled');
+      await new Promise((res) => setTimeout(res, 1000));
       await assertRulesLength(1);
 
       // Select snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await testSubjects.click('ruleStatusFilterOption-snoozed');
+      await new Promise((res) => setTimeout(res, 1000));
       await assertRulesLength(1);
 
       // Select disabled and snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
+      await new Promise((res) => setTimeout(res, 1000));
       await assertRulesLength(2);
 
       // Select all 3
       await testSubjects.click('ruleStatusFilterOption-enabled');
+      await new Promise((res) => setTimeout(res, 1000));
       await assertRulesLength(3);
     });
   });
