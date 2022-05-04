@@ -75,6 +75,15 @@ export const buildHostsKpiUniqueIpsQuery = ({
           filter,
         },
       },
+      _source: false,
+      fields: [
+        'destination.ip',
+        'source.ip',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

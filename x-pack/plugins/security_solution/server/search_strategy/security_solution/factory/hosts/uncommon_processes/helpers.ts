@@ -23,7 +23,7 @@ export const UNCOMMON_PROCESSES_FIELDS = [
   'process.name',
   'user.id',
   'user.name',
-  'hosts.name',
+  'host.name',
 ];
 
 export const getHits = (
@@ -61,34 +61,32 @@ export interface UncommonProcessBucket {
 export const formatUncommonProcessesData = (
   hit: HostsUncommonProcessHit,
   fieldMap: Readonly<Record<string, string>>
-): HostsUncommonProcessesEdges =>
-  UNCOMMON_PROCESSES_FIELDS.reduce<HostsUncommonProcessesEdges>(
-    (flattenedFields, fieldName) => {
+): HostsUncommonProcessesEdges => {
+      let flattenedFields = {
+        node: {
+          _id: '',
+          instances: 0,
+          process: {},
+          hosts: [{}],
+        },
+        cursor: {
+          value: '',
+          tiebreaker: null,
+        },
+      }
       const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
+      const processFlattenedFields = getFlattenedFields(
+        UNCOMMON_PROCESSES_FIELDS,
+        hit.fields,
+        fieldMap
+      );
+
+      flattenedFields = set('node', processFlattenedFields, flattenedFields);
       flattenedFields.node._id = hit._id;
       flattenedFields.node.instances = instancesCount;
       flattenedFields.node.hosts = hit.host;
       if (hit.cursor) {
         flattenedFields.cursor.value = hit.cursor;
       }
-
-      const processFlattenedFields = getFlattenedFields(
-        UNCOMMON_PROCESSES_FIELDS,
-        hit.fields,
-        fieldMap
-      );
-      return set('node', processFlattenedFields, flattenedFields);
-    },
-    {
-      node: {
-        _id: '',
-        instances: 0,
-        process: {},
-        hosts: [],
-      },
-      cursor: {
-        value: '',
-        tiebreaker: null,
-      },
-    }
-  );
+      return flattenedFields;
+    };
