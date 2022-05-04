@@ -79,6 +79,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
 
   function renderContent() {
     const disabledReason = layer.getJoinsDisabledReason();
+
     return disabledReason ? (
       <EuiCallOut color="warning">{disabledReason}</EuiCallOut>
     ) : (

@@ -1348,7 +1348,9 @@
         "type": "string",
         "tags": [],
         "label": "SECURITY_SOLUTION_OWNER",
-        "description": [],
+        "description": [
+          "\nOwner"
+        ],
         "signature": [
           "\"securitySolution\""
         ],
