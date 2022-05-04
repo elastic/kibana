@@ -8,19 +8,15 @@
 import './solution_nav.scss';
 
 import React, { FunctionComponent, useState, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiAvatarProps,
-  EuiBreakpointSize,
-  EuiButtonEmpty,
+  EuiCollapsibleNavGroup,
   EuiFlyout,
-  EuiHideFor,
-  EuiScreenReaderOnly,
-  EuiShowFor,
   EuiSideNav,
   EuiSideNavItemType,
   EuiSideNavProps,
+  EuiSpacer,
   EuiTitle,
   htmlIdGenerator,
   useIsWithinBreakpoints,
@@ -30,7 +26,10 @@ import classNames from 'classnames';
 import { KibanaSolutionAvatar } from '../../solution_avatar';
 import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
-export type KibanaPageTemplateSolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items'> & {
+export type KibanaPageTemplateSolutionNavProps = Omit<
+  EuiSideNavProps<{}>,
+  'children' | 'items' | 'heading'
+> & {
   /**
    * Name of the solution, i.e. "Observability"
    */
@@ -96,6 +95,43 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   const isHidden = isLargerBreakpoint && !isOpenOnDesktop;
   const isCustomSideNav = !!children;
 
+  const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
+    'kbnPageTemplateSolutionNav--hidden': isHidden,
+  });
+
+  /**
+   * Create the avatar
+   */
+  const solutionAvatar = useMemo(() => {
+    if (!icon) {
+      return;
+    }
+    return (
+      <KibanaSolutionAvatar
+        className="kbnPageTemplateSolutionNav__avatar"
+        iconType={icon}
+        name={name}
+      />
+    );
+  }, [name, icon]);
+
+  /**
+   * Create the titles
+   */
+  const headingID = headingProps?.id || generateId('heading');
+  const HeadingElement = headingProps?.element || 'h2';
+  const titleText = useMemo(
+    () => (
+      <EuiTitle size="xs" id={headingID}>
+        <HeadingElement>
+          {solutionAvatar}
+          <strong>{name}</strong>
+        </HeadingElement>
+      </EuiTitle>
+    ),
+    [name, solutionAvatar, headingID, HeadingElement]
+  );
+
   /**
    * Create the side nav content
    */
@@ -106,151 +142,33 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
     if (!items) {
       return null;
     }
-    const sideNavClasses = classNames({
-      'kbnPageTemplateSolutionNav--hidden': isHidden,
-    });
     return (
       <EuiSideNav
+        aria-labelledby={headingID}
         aria-hidden={isHidden}
-        className={sideNavClasses}
         items={setTabIndex(items, isHidden)}
         mobileBreakpoints={[]} // prevent EuiSideNav to apply mobile version, already implemented here
         {...rest}
       />
     );
-  }, [children, isCustomSideNav, isHidden, items, rest]);
-
-  /**
-   * Create the avatar
-   */
-  const solutionAvatar = icon ? (
-    <KibanaSolutionAvatar
-      className="kbnPageTemplateSolutionNavAvatar"
-      iconType={icon}
-      name={name}
-    />
-  ) : null;
-
-  /**
-   * Create the titles
-   */
-  const titleText = (
-    <>
-      {solutionAvatar}
-      <strong>{name}</strong>
-    </>
-  );
-
-  const mobileTitle = (
-    <>
-      {solutionAvatar}
-      <FormattedMessage
-        id="sharedUXComponents.solutionNav.mobileTitleText"
-        defaultMessage="{solutionName} Menu"
-        values={{ solutionName: name || 'Navigation' }}
-      />
-    </>
-  );
-
-  // To support the extra CSS needed to show/hide/animate the content,
-  // We add a className for every breakpoint supported
-  const contentClasses = classNames(
-    'euiSideNav__content',
-    mobileBreakpoints?.map((breakpointName) => `euiSideNav__contentMobile-${breakpointName}`)
-  );
-  const sideNavContentId = generateId('content');
-  const navContent = (
-    <div id={sideNavContentId} className={contentClasses}>
-      {sideNavContent}
-    </div>
-  );
-
-  const {
-    screenReaderOnly: headingScreenReaderOnly = false,
-    element: HeadingElement = 'h2',
-    ...titleProps
-  } = headingProps ?? {};
-
-  const hasMobileVersion = mobileBreakpoints && mobileBreakpoints.length > 0;
-  const hasHeader = !!titleText;
-
-  const sharedHeadingProps = {
-    id: headingProps?.id || generateId('heading'),
-    className: headingProps?.className,
-    'data-test-subj': headingProps?.['data-test-subj'],
-    'aria-label': headingProps?.['aria-label'],
-  };
-
-  let headingNode;
-  if (hasHeader) {
-    headingNode = <HeadingElement {...sharedHeadingProps}>{titleText}</HeadingElement>;
-
-    if (headingScreenReaderOnly) {
-      headingNode = <EuiScreenReaderOnly>{headingNode}</EuiScreenReaderOnly>;
-    } else {
-      headingNode = (
-        <EuiTitle
-          size="xs"
-          {...titleProps}
-          className={classNames('euiSideNav__heading', headingProps?.className)}
-        >
-          <HeadingElement {...sharedHeadingProps}>{titleText}</HeadingElement>
-        </EuiTitle>
-      );
-    }
-  }
-
-  const breakpoints: EuiBreakpointSize[] | undefined = mobileBreakpoints;
-  const navClasses = classNames('euiSideNav', 'kbnPageTemplateSolutionNav', {
-    'euiSideNav-isOpenMobile': isSideNavOpenOnMobile,
-  });
-
-  let mobileNode;
-  if (hasMobileVersion) {
-    mobileNode = (
-      <EuiShowFor sizes={breakpoints || 'none'}>
-        <nav aria-labelledby={sharedHeadingProps.id} className={navClasses} {...rest}>
-          <HeadingElement {...sharedHeadingProps}>
-            <EuiButtonEmpty
-              className="euiSideNav__mobileToggle"
-              textProps={{ className: 'euiSideNav__mobileToggleText' }}
-              contentProps={{
-                className: 'euiSideNav__mobileToggleContent',
-              }}
-              onClick={toggleOpenOnMobile}
-              iconType="apps"
-              iconSide="right"
-              aria-controls={sideNavContentId}
-              aria-expanded={isSideNavOpenOnMobile}
-            >
-              {mobileTitle || titleText}
-            </EuiButtonEmpty>
-          </HeadingElement>
-          {navContent}
-        </nav>
-      </EuiShowFor>
-    );
-  }
-
-  const sideNavNode = (
-    <>
-      {mobileNode}
-      <EuiHideFor sizes={isHidden ? 'all' : breakpoints || 'none'}>
-        <nav
-          aria-labelledby={headingNode ? sharedHeadingProps.id : undefined}
-          className={navClasses}
-          {...rest}
-        >
-          {headingNode}
-          {navContent}
-        </nav>
-      </EuiHideFor>
-    </>
-  );
+  }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
 
   return (
     <>
-      {isSmallerBreakpoint && sideNavNode}
+      {isSmallerBreakpoint && (
+        <EuiCollapsibleNavGroup
+          className={sideNavClasses}
+          paddingSize="m"
+          background="none"
+          title={titleText}
+          titleElement="span"
+          isCollapsible={true}
+          initialIsOpen={false}
+          iconType="apps"
+        >
+          {sideNavContent}
+        </EuiCollapsibleNavGroup>
+      )}
       {isMediumBreakpoint && (
         <>
           {isSideNavOpenOnMobile && (
@@ -263,7 +181,11 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
               closeButtonPosition={isCustomSideNav ? 'inside' : 'outside'}
               className="kbnPageTemplateSolutionNav__flyout"
             >
-              {sideNavNode}
+              <div className={sideNavClasses}>
+                {titleText}
+                <EuiSpacer size="l" />
+                {sideNavContent}
+              </div>
             </EuiFlyout>
           )}
           <KibanaPageTemplateSolutionNavCollapseButton
@@ -274,7 +196,11 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
       )}
       {isLargerBreakpoint && (
         <>
-          {sideNavNode}
+          <div className={sideNavClasses}>
+            {titleText}
+            <EuiSpacer size="l" />
+            {sideNavContent}
+          </div>
           <KibanaPageTemplateSolutionNavCollapseButton
             isCollapsed={!isOpenOnDesktop}
             onClick={onCollapse}

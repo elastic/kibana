@@ -92,31 +92,10 @@ describe('KibanaPageTemplateSolutionNav', () => {
   });
 
   describe('heading', () => {
-    test('is rendered', () => {
-      const component = shallow(
-        <KibanaPageTemplateSolutionNav name="Solution" heading="Side Nav Heading" />
-      );
-
-      expect(component).toMatchSnapshot();
-    });
-
-    test('is hidden with screenReaderOnly', () => {
-      const component = shallow(
-        <KibanaPageTemplateSolutionNav
-          name="Solution"
-          heading="Side Nav Heading"
-          headingProps={{ screenReaderOnly: true }}
-        />
-      );
-
-      expect(component).toMatchSnapshot();
-    });
-
     test('accepts more headingProps', () => {
       const component = shallow(
         <KibanaPageTemplateSolutionNav
           name="Solution"
-          heading="Side Nav Heading"
           headingProps={{ id: 'testID', element: 'h3' }}
         />
       );
