@@ -5,30 +5,36 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFiltersForm } from './form';
-import { RenderResult, act } from '@testing-library/react';
-import { fireEvent, waitFor } from '@testing-library/dom';
+import { act, cleanup } from '@testing-library/react';
+import { fireEvent } from '@testing-library/dom';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { getInitialExceptionFromEvent } from '../utils';
 import { useFetchIndex } from '../../../../../common/containers/source';
-import { ecsEventMock } from '../../test_utils';
-import { NAME_ERROR, NAME_LABEL } from '../translations';
+import { NAME_ERROR } from '../event_filters_list';
 import { useCurrentUser, useKibana } from '../../../../../common/lib/kibana';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
-import { GetPolicyListResponse } from '../../../policy/types';
 import userEvent from '@testing-library/user-event';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  ArtifactFormComponentOnChangeCallbackProps,
+  ArtifactFormComponentProps,
+} from '../../../../components/artifact_list_page';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { EventFiltersForm } from './form';
+import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import { PolicyData } from '../../../../../../common/endpoint/types';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
+    isGoldPlus: jest.fn(),
   };
   return {
     licenseService: licenseServiceInstance,
@@ -39,47 +45,85 @@ jest.mock('../../../../../common/hooks/use_license', () => {
 });
 
 describe('Event filter form', () => {
-  let component: RenderResult;
+  const generator = new EndpointDocGenerator('effected-policy-select');
+
+  let formProps: jest.Mocked<ArtifactFormComponentProps>;
   let mockedContext: AppContextTestRender;
-  let render: (
-    props?: Partial<React.ComponentProps<typeof EventFiltersForm>>
-  ) => ReturnType<AppContextTestRender['render']>;
-  let renderWithData: (
-    customEventFilterProps?: Partial<ExceptionListItemSchema>
-  ) => Promise<ReturnType<AppContextTestRender['render']>>;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
+  let latestUpdatedItem: ArtifactFormComponentProps['item'];
 
-  let policiesRequest: GetPolicyListResponse;
+  const getUI = () => <EventFiltersForm {...formProps} />;
+  const render = () => {
+    return (renderResult = mockedContext.render(getUI()));
+  };
+  const rerender = () => renderResult.rerender(getUI());
+  const rerenderWithLatestProps = () => {
+    formProps.item = latestUpdatedItem;
+    rerender();
+  };
 
-  beforeEach(async () => {
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
-    mockedContext = createAppRootMockRenderer();
-    policiesRequest = await sendGetEndpointSpecificPackagePoliciesMock();
-    render = (props) =>
-      mockedContext.render(
-        <EventFiltersForm policies={policiesRequest.items} policiesIsLoading={false} {...props} />
-      );
-    renderWithData = async (customEventFilterProps = {}) => {
-      const renderResult = render();
-      const entry = getInitialExceptionFromEvent(ecsEventMock());
-
-      act(() => {
-        mockedContext.store.dispatch({
-          type: 'eventFiltersInitForm',
-          payload: { entry: { ...entry, ...customEventFilterProps } },
-        });
-      });
-      await waitFor(() => {
-        expect(renderResult.getByTestId('exceptionsBuilderWrapper')).toBeInTheDocument();
-      });
-      return renderResult;
+  function createEntry(
+    overrides?: ExceptionListItemSchema['entries'][number]
+  ): ExceptionListItemSchema['entries'][number] {
+    const defaultEntry: ExceptionListItemSchema['entries'][number] = {
+      field: '',
+      operator: 'included',
+      type: 'match',
+      value: '',
     };
 
-    (useFetchIndex as jest.Mock).mockImplementation(() => [
-      false,
-      {
-        indexPatterns: stubIndexPattern,
-      },
-    ]);
+    return {
+      ...defaultEntry,
+      ...overrides,
+    };
+  }
+
+  function createItem(
+    overrides: Partial<ArtifactFormComponentProps['item']> = {}
+  ): ArtifactFormComponentProps['item'] {
+    const defaults: ArtifactFormComponentProps['item'] = {
+      id: 'some_item_id',
+      list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      name: '',
+      description: '',
+      os_types: [OperatingSystem.WINDOWS],
+      entries: [createEntry()],
+      type: 'simple',
+      tags: ['policy:all'],
+    };
+    return {
+      ...defaults,
+      ...overrides,
+    };
+  }
+
+  function createOnChangeArgs(
+    overrides: Partial<ArtifactFormComponentOnChangeCallbackProps>
+  ): ArtifactFormComponentOnChangeCallbackProps {
+    const defaults = {
+      item: createItem(),
+      isValid: false,
+    };
+    return {
+      ...defaults,
+      ...overrides,
+    };
+  }
+
+  function createPolicies(): PolicyData[] {
+    const policies = [
+      generator.generatePolicyPackagePolicy(),
+      generator.generatePolicyPackagePolicy(),
+    ];
+    policies.map((p, i) => {
+      p.id = `id-${i}`;
+      p.name = `some-policy-${Math.random().toString(36).split('.').pop()}`;
+      return p;
+    });
+    return policies;
+  }
+
+  beforeEach(async () => {
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -89,194 +133,283 @@ describe('Event filter form', () => {
         notifications: {},
       },
     });
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+    mockedContext = createAppRootMockRenderer();
+    latestUpdatedItem = createItem();
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
+      {
+        indexPatterns: stubIndexPattern,
+      },
+    ]);
+
+    formProps = {
+      item: latestUpdatedItem,
+      mode: 'create',
+      disabled: false,
+      error: undefined,
+      policiesIsLoading: false,
+      onChange: jest.fn((updates) => {
+        latestUpdatedItem = updates.item;
+      }),
+      policies: [],
+    };
   });
 
-  it('should renders correctly without data', () => {
-    component = render();
-    expect(component.getByTestId('loading-spinner')).not.toBeNull();
+  afterEach(() => {
+    cleanup();
   });
 
-  it('should renders correctly with data', async () => {
-    component = await renderWithData();
-
-    expect(component.getByTestId('exceptionsBuilderWrapper')).not.toBeNull();
-  });
-
-  it('should displays loader when policies are still loading', () => {
-    component = render({ policiesIsLoading: true });
-
-    expect(component.queryByTestId('exceptionsBuilderWrapper')).toBeNull();
-    expect(component.getByTestId('loading-spinner')).not.toBeNull();
-  });
-
-  it('should display sections', async () => {
-    component = await renderWithData();
-
-    expect(component.queryByText('Details')).not.toBeNull();
-    expect(component.queryByText('Conditions')).not.toBeNull();
-    expect(component.queryByText('Comments')).not.toBeNull();
-  });
-
-  it('should display name error only when on blur and empty name', async () => {
-    component = await renderWithData();
-    expect(component.queryByText(NAME_ERROR)).toBeNull();
-    const nameInput = component.getByLabelText(NAME_LABEL);
-    act(() => {
-      fireEvent.blur(nameInput);
+  describe('Details and Conditions', () => {
+    it('should render correctly without data', () => {
+      formProps.policies = createPolicies();
+      formProps.policiesIsLoading = true;
+      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
+      formProps.item.entries = [];
+      render();
+      expect(renderResult.getByTestId('loading-spinner')).not.toBeNull();
     });
-    expect(component.queryByText(NAME_ERROR)).not.toBeNull();
+
+    it('should render correctly with data', async () => {
+      formProps.policies = createPolicies();
+      render();
+      expect(renderResult.queryByTestId('loading-spinner')).toBeNull();
+      expect(renderResult.getByTestId('exceptionsBuilderWrapper')).not.toBeNull();
+    });
+
+    it('should display sections', async () => {
+      render();
+      expect(renderResult.queryByText('Details')).not.toBeNull();
+      expect(renderResult.queryByText('Conditions')).not.toBeNull();
+      expect(renderResult.queryByText('Comments')).not.toBeNull();
+    });
+
+    it('should display name error only when on blur and empty name', async () => {
+      render();
+      expect(renderResult.queryByText(NAME_ERROR)).toBeNull();
+      const nameInput = renderResult.getByTestId('eventFilters-form-name-input');
+      act(() => {
+        fireEvent.blur(nameInput);
+      });
+      rerenderWithLatestProps();
+      expect(renderResult.queryByText(NAME_ERROR)).not.toBeNull();
+    });
+
+    it('should change name', async () => {
+      render();
+      const nameInput = renderResult.getByTestId('eventFilters-form-name-input');
+      // console.log('nameInput ', nameInput);
+
+      act(() => {
+        fireEvent.change(nameInput, {
+          target: {
+            value: 'Exception name',
+          },
+        });
+        fireEvent.blur(nameInput);
+      });
+      rerenderWithLatestProps();
+
+      expect(formProps.item?.name).toBe('Exception name');
+      expect(renderResult.queryByText(NAME_ERROR)).toBeNull();
+    });
+
+    it('should change name with a white space still shows an error', async () => {
+      render();
+      const nameInput = renderResult.getByTestId('eventFilters-form-name-input');
+
+      act(() => {
+        fireEvent.change(nameInput, {
+          target: {
+            value: '   ',
+          },
+        });
+        fireEvent.blur(nameInput);
+      });
+      rerenderWithLatestProps();
+
+      expect(formProps.item.name).toBe('');
+      expect(renderResult.queryByText(NAME_ERROR)).not.toBeNull();
+    });
+
+    it('should change description', async () => {
+      render();
+      const nameInput = renderResult.getByTestId('eventFilters-form-description-input');
+
+      act(() => {
+        fireEvent.change(nameInput, {
+          target: {
+            value: 'Exception description',
+          },
+        });
+        fireEvent.blur(nameInput);
+      });
+      rerenderWithLatestProps();
+
+      expect(formProps.item.description).toBe('Exception description');
+    });
+
+    it('should change comments', async () => {
+      render();
+      const commentInput = renderResult.getByLabelText('Comment Input');
+
+      act(() => {
+        fireEvent.change(commentInput, {
+          target: {
+            value: 'Exception comment',
+          },
+        });
+        fireEvent.blur(commentInput);
+      });
+      rerenderWithLatestProps();
+
+      expect(formProps.item.comments).toEqual([{ comment: 'Exception comment' }]);
+    });
   });
 
-  it('should change name', async () => {
-    component = await renderWithData();
+  describe('Policy section', () => {
+    beforeEach(() => {
+      formProps.policies = createPolicies();
+    });
 
-    const nameInput = component.getByLabelText(NAME_LABEL);
+    afterEach(() => {
+      cleanup();
+    });
 
-    act(() => {
-      fireEvent.change(nameInput, {
-        target: {
-          value: 'Exception name',
+    it('should display loader when policies are still loading', () => {
+      formProps.policiesIsLoading = true;
+      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
+      render();
+      expect(renderResult.getByTestId('loading-spinner')).not.toBeNull();
+    });
+
+    it('should display the policy list when "per policy" is selected', async () => {
+      render();
+      userEvent.click(renderResult.getByTestId('perPolicy'));
+      rerenderWithLatestProps();
+      // policy selector should show up
+      expect(renderResult.getByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+    });
+
+    it('should call onChange when a policy is selected from the policy selection', async () => {
+      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
+      render();
+      const policyId = formProps.policies[0].id;
+      userEvent.click(renderResult.getByTestId('effectedPolicies-select-perPolicy'));
+      userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+      formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
+      rerender();
+      const expected = createOnChangeArgs({
+        item: {
+          ...formProps.item,
+          tags: [`policy:${policyId}`],
         },
       });
+      expect(formProps.onChange).toHaveBeenCalledWith(expected);
     });
 
-    expect(getState().form.entry?.name).toBe('Exception name');
-    expect(getState().form.hasNameError).toBeFalsy();
+    it('should have global policy by default', async () => {
+      render();
+      expect(renderResult.getByTestId('globalPolicy')).toBeChecked();
+      expect(renderResult.getByTestId('perPolicy')).not.toBeChecked();
+    });
+
+    it('should retain the previous policy selection when switching from per-policy to global', async () => {
+      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
+      render();
+      const policyId = formProps.policies[0].id;
+
+      // move to per-policy and select the first
+      userEvent.click(renderResult.getByTestId('perPolicy'));
+      userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+      formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
+      rerender();
+      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+      expect(formProps.item.tags).toEqual([`policy:${policyId}`]);
+
+      // move back to global
+      userEvent.click(renderResult.getByTestId('globalPolicy'));
+      formProps.item.tags = ['policy:all'];
+      rerenderWithLatestProps();
+      expect(formProps.item.tags).toEqual(['policy:all']);
+      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
+
+      // move back to per-policy
+      userEvent.click(renderResult.getByTestId('perPolicy'));
+      formProps.item.tags = [`policy:${policyId}`];
+      rerender();
+      // on change called with the previous policy
+      expect(formProps.item.tags).toEqual([`policy:${policyId}`]);
+      // the previous selected policy should be selected
+      // expect(renderResult.getByTestId(`policy-${policyId}`)).toHaveAttribute(
+      //   'data-test-selected',
+      //   'true'
+      // );
+    });
   });
 
-  it('should change name with a white space still shows an error', async () => {
-    component = await renderWithData();
+  describe('Policy section with downgraded license', () => {
+    beforeEach(() => {
+      const policies = createPolicies();
+      formProps.policies = policies;
+      formProps.item.tags = [policies.map((p) => `policy:${p.id}`)[0]];
+      formProps.mode = 'edit';
+      // downgrade license
+      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    });
 
-    const nameInput = component.getByLabelText(NAME_LABEL);
+    it('should hide assignment section when no license', () => {
+      render();
+      formProps.item.tags = ['policy:all'];
+      rerender();
+      expect(renderResult.queryByTestId('effectedPolicies-select')).toBeNull();
+    });
 
-    act(() => {
-      fireEvent.change(nameInput, {
-        target: {
-          value: ' ',
+    it('should hide assignment section when create mode and no license even with by policy', () => {
+      render();
+      formProps.mode = 'create';
+      rerender();
+      expect(renderResult.queryByTestId('effectedPolicies-select')).toBeNull();
+    });
+
+    it('should show disabled assignment section when edit mode and no license with by policy', async () => {
+      render();
+      formProps.item.tags = ['policy:id-0'];
+      rerender();
+
+      expect(renderResult.queryByTestId('perPolicy')).not.toBeNull();
+      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toBe('true');
+    });
+
+    it("allows the user to set the event filter entry to 'Global' in the edit option", () => {
+      render();
+      const globalButtonInput = renderResult.getByTestId('globalPolicy') as HTMLButtonElement;
+      userEvent.click(globalButtonInput);
+      formProps.item.tags = ['policy:all'];
+      rerender();
+      const expected = createOnChangeArgs({
+        item: {
+          ...formProps.item,
+          tags: ['policy:all'],
         },
       });
+      expect(formProps.onChange).toHaveBeenCalledWith(expected);
+
+      const policyItem = formProps.onChange.mock.calls[0][0].item.tags
+        ? formProps.onChange.mock.calls[0][0].item.tags[0]
+        : '';
+
+      expect(policyItem).toBe('policy:all');
+    });
+  });
+
+  describe('Warnings', () => {
+    beforeEach(() => {
+      render();
     });
 
-    expect(getState().form.entry?.name).toBe('');
-    expect(getState().form.hasNameError).toBeTruthy();
-  });
-
-  it('should change description', async () => {
-    component = await renderWithData();
-
-    const nameInput = component.getByTestId('eventFilters-form-description-input');
-
-    act(() => {
-      fireEvent.change(nameInput, {
-        target: {
-          value: 'Exception description',
-        },
-      });
-    });
-
-    expect(getState().form.entry?.description).toBe('Exception description');
-  });
-
-  it('should change comments', async () => {
-    component = await renderWithData();
-
-    const commentInput = component.getByLabelText('Add a new LABEL');
-
-    act(() => {
-      fireEvent.change(commentInput, {
-        target: {
-          value: 'Exception comment',
-        },
-      });
-    });
-
-    expect(getState().form.newComment).toBe('Exception comment');
-  });
-
-  it('should display the policy list when "per policy" is selected', async () => {
-    component = await renderWithData();
-    userEvent.click(component.getByTestId('perPolicy'));
-
-    // policy selector should show up
-    expect(component.getByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
-  });
-
-  it('should call onChange when a policy is selected from the policy selection', async () => {
-    component = await renderWithData();
-
-    const policyId = policiesRequest.items[0].id;
-    userEvent.click(component.getByTestId('perPolicy'));
-    userEvent.click(component.getByTestId(`policy-${policyId}`));
-    expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
-  });
-
-  it('should have global policy by default', async () => {
-    component = await renderWithData();
-
-    expect(component.getByTestId('globalPolicy')).toBeChecked();
-    expect(component.getByTestId('perPolicy')).not.toBeChecked();
-  });
-
-  it('should retain the previous policy selection when switching from per-policy to global', async () => {
-    const policyId = policiesRequest.items[0].id;
-
-    component = await renderWithData();
-
-    // move to per-policy and select the first
-    userEvent.click(component.getByTestId('perPolicy'));
-    userEvent.click(component.getByTestId(`policy-${policyId}`));
-    expect(component.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
-    expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
-
-    // move back to global
-    userEvent.click(component.getByTestId('globalPolicy'));
-    expect(component.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
-    expect(getState().form.entry?.tags).toEqual([`policy:all`]);
-
-    // move back to per-policy
-    userEvent.click(component.getByTestId('perPolicy'));
-    // the previous selected policy should be selected
-    expect(component.getByTestId(`policy-${policyId}`)).toHaveAttribute(
-      'data-test-selected',
-      'true'
-    );
-    // on change called with the previous policy
-    expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
-  });
-
-  it('should hide assignment section when no license', async () => {
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-    component = await renderWithData();
-    expect(component.queryByTestId('perPolicy')).toBeNull();
-  });
-
-  it('should hide assignment section when create mode and no license even with by policy', async () => {
-    const policyId = policiesRequest.items[0].id;
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-    component = await renderWithData({ tags: [`policy:${policyId}`] });
-    expect(component.queryByTestId('perPolicy')).toBeNull();
-  });
-
-  it('should show disabled assignment section when edit mode and no license with by policy', async () => {
-    const policyId = policiesRequest.items[0].id;
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-    component = await renderWithData({ tags: [`policy:${policyId}`], item_id: '1' });
-    expect(component.queryByTestId('perPolicy')).not.toBeNull();
-    expect(component.getByTestId(`policy-${policyId}`).getAttribute('aria-disabled')).toBe('true');
-  });
-
-  it('should change from by policy to global when edit mode and no license with by policy', async () => {
-    const policyId = policiesRequest.items[0].id;
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-    component = await renderWithData({ tags: [`policy:${policyId}`], item_id: '1' });
-    userEvent.click(component.getByTestId('globalPolicy'));
-    expect(component.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
-    expect(getState().form.entry?.tags).toEqual([`policy:all`]);
-  });
-
-  it('should not show warning text when unique fields are added', async () => {
-    component = await renderWithData({
-      entries: [
+    it('should not show warning text when unique fields are added', async () => {
+      formProps.item.entries = [
         {
           field: 'event.category',
           operator: 'included',
@@ -289,14 +422,13 @@ describe('Event filter form', () => {
           type: 'match',
           value: 'some other value',
         },
-      ],
+      ];
+      rerender();
+      expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
     });
-    expect(component.queryByTestId('duplicate-fields-warning-message')).toBeNull();
-  });
 
-  it('should not show warning text when field values are not added', async () => {
-    component = await renderWithData({
-      entries: [
+    it('should not show warning text when field values are not added', async () => {
+      formProps.item.entries = [
         {
           field: 'event.category',
           operator: 'included',
@@ -309,14 +441,13 @@ describe('Event filter form', () => {
           type: 'match',
           value: '',
         },
-      ],
+      ];
+      rerender();
+      expect(renderResult.queryByTestId('duplicate-fields-warning-message')).toBeNull();
     });
-    expect(component.queryByTestId('duplicate-fields-warning-message')).toBeNull();
-  });
 
-  it('should show warning text when duplicate fields are added with values', async () => {
-    component = await renderWithData({
-      entries: [
+    it('should show warning text when duplicate fields are added with values', async () => {
+      formProps.item.entries = [
         {
           field: 'event.category',
           operator: 'included',
@@ -329,8 +460,9 @@ describe('Event filter form', () => {
           type: 'match',
           value: 'some other value',
         },
-      ],
+      ];
+      rerender();
+      expect(renderResult.findByTestId('duplicate-fields-warning-message')).not.toBeNull();
     });
-    expect(component.queryByTestId('duplicate-fields-warning-message')).not.toBeNull();
   });
 });

@@ -223,6 +223,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             aria-label={NAME_LABEL}
             id="eventFiltersFormInputName"
             defaultValue={exception?.name ?? ''}
+            data-test-subj={'eventFilters-form-name-input'}
             fullWidth
             maxLength={256}
             required={hasBeenInputNameVisited}
