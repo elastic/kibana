@@ -40,7 +40,8 @@ const errors = {
     }),
   isInvalidIntervalError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
-      defaultMessage: 'Provided x-axis interval is invalid',
+      defaultMessage:
+        'Provided x-axis interval is invalid. The interval should includes quantity and unit name like 1d, 24h, 1w.',
     }),
 };
 

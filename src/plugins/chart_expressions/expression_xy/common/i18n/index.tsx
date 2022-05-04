@@ -114,7 +114,7 @@ export const strings = {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
   getXAxisIntervalHelp: () =>
-    i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+    i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
       defaultMessage: 'Specifies the interval for x-axis',
     }),
   getDataLayerFnHelp: () =>
