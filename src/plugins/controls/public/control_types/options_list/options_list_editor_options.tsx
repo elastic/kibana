@@ -15,6 +15,7 @@ import { ControlEditorProps } from '../..';
 
 interface OptionsListEditorState {
   singleSelect?: boolean;
+  runPastTimeout?: boolean;
 }
 
 export const OptionsListEditorOptions = ({
@@ -23,6 +24,7 @@ export const OptionsListEditorOptions = ({
 }: ControlEditorProps<OptionsListEmbeddableInput>) => {
   const [state, setState] = useState<OptionsListEditorState>({
     singleSelect: initialInput?.singleSelect,
+    runPastTimeout: initialInput?.runPastTimeout,
   });
 
   return (
@@ -34,6 +36,16 @@ export const OptionsListEditorOptions = ({
           onChange={() => {
             onChange({ singleSelect: !state.singleSelect });
             setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow>
+        <EuiSwitch
+          label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+          checked={Boolean(state.runPastTimeout)}
+          onChange={() => {
+            onChange({ runPastTimeout: !state.runPastTimeout });
+            setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
           }}
         />
       </EuiFormRow>
