@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
       });
 
-      it.skip('400s if you passing status for a new case', async () => {
+      it('400s if you passing status for a new case', async () => {
         const req = getPostCaseRequest();
 
         await supertest
