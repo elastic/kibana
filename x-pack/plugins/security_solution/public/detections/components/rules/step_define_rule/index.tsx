@@ -255,6 +255,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [initIndexPattern, radioIdSelected]);
 
+  useEffect(() => {
+    if (!isReadOnlyView) {
+      const { queryBar } = getFields();
+      const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
+      queryBar.reset({
+        defaultValue: defaultQueryBar,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [radioIdSelected]);
+
   // useEffect(() => {
   //   indexFieldsSearch(index);
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -280,7 +291,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setRadioIdSelected(optionId);
   };
 
-  const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
+  const [aggFields, setAggregatableFields] = useState([]);
+
+  useEffect(() => {
+    const { fields } = indexPattern;
+    setAggregatableFields(fields);
+  }, [indexPattern]);
 
   const [
     threatIndexPatternsLoading,
@@ -381,14 +397,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
       <ThresholdInput
-        browserFields={fields}
+        browserFields={aggFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
         thresholdCardinalityField={thresholdCardinalityField}
         thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
-    [fields]
+    [aggFields]
   );
   const SourcererFlex = styled(EuiFlexItem)`
     align-items: flex-end;

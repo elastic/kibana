@@ -66,12 +66,14 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import { DataViewBase } from '@kbn/es-query';
 
 export interface AddExceptionFlyoutProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
+  dataViewId?: string;
   alertData?: AlertData;
   /**
    * The components that use this may or may not define `alertData`
@@ -127,6 +129,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   ruleName,
   ruleId,
   ruleIndices,
+  dataViewId,
   exceptionListType,
   alertData,
   isAlertDataLoading,
@@ -135,7 +138,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onRuleChange,
   alertStatus,
 }: AddExceptionFlyoutProps) {
-  const { http, unifiedSearch } = useKibana().services;
+  const { http, unifiedSearch, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -166,7 +169,28 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     }
   }, [jobs, ruleIndices]);
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
+    useFetchIndex(memoRuleIndices);
+
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
+
+  useEffect(() => {
+    if (ruleIndices != null && (dataViewId === '' || dataViewId == null)) {
+      setIndexPattern(indexIndexPatterns);
+    }
+  }, [dataViewId, indexIndexPatterns, ruleIndices]);
+
+  useEffect(() => {
+    const fetchSingleDataView = async () => {
+      if (dataViewId != null && dataViewId !== '') {
+        const dv = await data.dataViews.get(dataViewId);
+        console.error('ABOUT TO SET INDEX PATTERN TO DATA VIEW');
+        setIndexPattern(dv);
+      }
+    };
+
+    fetchSingleDataView();
+  }, [data.dataViews, dataViewId, indexIndexPatterns, setIndexPattern]);
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -513,7 +537,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns,
+                indexPatterns: indexPattern,
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,

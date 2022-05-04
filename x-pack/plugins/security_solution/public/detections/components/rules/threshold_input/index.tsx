@@ -53,7 +53,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
     () => ({
       fullWidth: true,
       noSuggestions: false,
-      options: getCategorizedFieldNames(browserFields),
+      options: browserFields.map((field) => ({ label: field.name })),
+      // options: getCategorizedFieldNames(browserFields),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
@@ -64,7 +65,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
     () => ({
       fullWidth: true,
       noSuggestions: false,
-      options: getCategorizedFieldNames(browserFields),
+      options: browserFields.map((field) => ({ label: field.name })),
+      // options: getCategorizedFieldNames(browserFields),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },

@@ -812,6 +812,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               ruleId={ruleId ?? ''}
               ruleName={rule?.name ?? ''}
               ruleIndices={ruleIndices}
+              dataViewId={rule?.data_view_id}
               availableListTypes={exceptionLists.allowedExceptionListTypes}
               commentsAccordionId={'ruleDetailsTabExceptions'}
               exceptionListsMeta={exceptionLists.lists}
