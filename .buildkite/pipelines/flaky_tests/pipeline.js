@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
+if (!configJson) {
+  console.error('+++ Triggering directly is not supported anymore');
+  console.error(`Please use the "Trigger Flaky Test Runner" UI to run the Flaky Test Runner. You can find the UI at the URL below:`);
+  console.error('\n    https://ci-stats.kibana.dev/trigger_flaky_test_runner\n')
+  process.exit(1);
+}
+
 const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
   require('./groups.json').groups
 );
@@ -54,7 +62,7 @@ function getTestSuitesFromJson(json) {
   return testSuites;
 }
 
-const testSuites = getTestSuitesFromJson(process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG);
+const testSuites = getTestSuitesFromJson(configJson);
 const totalJobs = testSuites.reduce((acc, t) => acc + t.count, initialJobs);
 
 if (totalJobs > 500) {
