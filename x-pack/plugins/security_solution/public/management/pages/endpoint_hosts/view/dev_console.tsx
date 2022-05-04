@@ -48,6 +48,11 @@ class DevCommandService implements CommandServiceInterface {
           const [apiResponse, setApiResponse] = useState<null | string>(null);
           const [uiResponse, setUiResponse] = useState<null | ReactElement>(null);
 
+          // Emulate a real action where:
+          // 1. an api request is done to create the action
+          // 2. wait for a response
+          // 3. account for component mount/unmount and prevent duplicate api calls
+
           useEffect(() => {
             (async () => {
               // Emulate an api call

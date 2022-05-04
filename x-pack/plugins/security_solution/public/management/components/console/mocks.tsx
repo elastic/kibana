@@ -7,7 +7,7 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { act } from '@testing-library/react';
@@ -112,7 +112,22 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
 };
 
 export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> => {
-  const RenderComponent: CommandExecutionComponent = ({ command }) => {
+  const RenderComponent: CommandExecutionComponent = ({
+    command,
+    status,
+    setStatus,
+    setStore,
+    store,
+  }) => {
+    useEffect(() => {
+      if (status !== 'success') {
+        new Promise((r) => setTimeout(r, 500)).then(() => {
+          setStatus('success');
+          setStore({ foo: 'bar' });
+        });
+      }
+    }, [setStatus, setStore, status]);
+
     return (
       <div data-test-subj="exec-output">
         <div data-test-subj="exec-output-cmdName">{`${command.commandDefinition.name}`}</div>
@@ -120,76 +135,81 @@ export const getCommandServiceMock = (): jest.Mocked<CommandServiceInterface> =>
         <EuiCode data-test-subj="exec-output-argsJson">
           {JSON.stringify(command.args, null, 2)}
         </EuiCode>
+        <div>{'Command render state:'}</div>
+        <div data-test-subj="exec-output-statusState">{`status: ${status}`}</div>
+        <EuiCode data-test-subj="exec-output-storeStateJson">
+          {JSON.stringify(store, null, 2)}
+        </EuiCode>
       </div>
     );
   };
 
+  const commands: CommandDefinition[] = [
+    {
+      name: 'cmd1',
+      about: 'a command with no options',
+      RenderComponent: jest.fn(RenderComponent),
+    },
+    {
+      name: 'cmd2',
+      about: 'runs cmd 2',
+      RenderComponent: jest.fn(RenderComponent),
+      args: {
+        file: {
+          about: 'Includes file in the run',
+          required: true,
+          allowMultiples: false,
+          validate: () => {
+            return true;
+          },
+        },
+        ext: {
+          about: 'optional argument',
+          required: false,
+          allowMultiples: false,
+        },
+        bad: {
+          about: 'will fail validation',
+          required: false,
+          allowMultiples: false,
+          validate: () => 'This is a bad value',
+        },
+      },
+    },
+    {
+      name: 'cmd3',
+      about: 'allows argument to be used multiple times',
+      RenderComponent: jest.fn(RenderComponent),
+      args: {
+        foo: {
+          about: 'foo stuff',
+          required: true,
+          allowMultiples: true,
+        },
+      },
+    },
+    {
+      name: 'cmd4',
+      about: 'all options optional, but at least one is required',
+      RenderComponent: jest.fn(RenderComponent),
+      mustHaveArgs: true,
+      args: {
+        foo: {
+          about: 'foo stuff',
+          required: false,
+          allowMultiples: true,
+        },
+        bar: {
+          about: 'bar stuff',
+          required: false,
+          allowMultiples: true,
+        },
+      },
+    },
+  ];
+
   return {
     getCommandList: jest.fn(() => {
-      const commands: CommandDefinition[] = [
-        {
-          name: 'cmd1',
-          about: 'a command with no options',
-          RenderComponent,
-        },
-        {
-          name: 'cmd2',
-          about: 'runs cmd 2',
-          RenderComponent,
-          args: {
-            file: {
-              about: 'Includes file in the run',
-              required: true,
-              allowMultiples: false,
-              validate: () => {
-                return true;
-              },
-            },
-            ext: {
-              about: 'optional argument',
-              required: false,
-              allowMultiples: false,
-            },
-            bad: {
-              about: 'will fail validation',
-              required: false,
-              allowMultiples: false,
-              validate: () => 'This is a bad value',
-            },
-          },
-        },
-        {
-          name: 'cmd3',
-          about: 'allows argument to be used multiple times',
-          RenderComponent,
-          args: {
-            foo: {
-              about: 'foo stuff',
-              required: true,
-              allowMultiples: true,
-            },
-          },
-        },
-        {
-          name: 'cmd4',
-          about: 'all options optional, but at least one is required',
-          RenderComponent,
-          mustHaveArgs: true,
-          args: {
-            foo: {
-              about: 'foo stuff',
-              required: false,
-              allowMultiples: true,
-            },
-            bar: {
-              about: 'bar stuff',
-              required: false,
-              allowMultiples: true,
-            },
-          },
-        },
-      ];
-
       return commands;
     }),
   };
