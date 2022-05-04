@@ -18,6 +18,7 @@ import {
   apmProgressiveLoading,
   enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
+  enableNewSyntheticsView,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -31,6 +32,19 @@ const technicalPreviewLabel = i18n.translate(
  * uiSettings definitions for Observability.
  */
 export const uiSettings: Record<string, UiSettingsParams<boolean | number | string>> = {
+  [enableNewSyntheticsView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
+      defaultMessage: 'Enable new synthetic monitoring view',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentDescription', {
+      defaultMessage:
+        'Enable new synthetic monitoring view in observability. A page refresh is required for the setting to be applied.',
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
   [enableInspectEsQueries]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
@@ -71,7 +85,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
-      defaultMessage: 'Enable the Infrastruture view feature in APM app',
+      defaultMessage: 'Enable the Infrastructure view feature in APM app',
     }),
     schema: schema.boolean(),
   },
