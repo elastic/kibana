@@ -35,7 +35,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   >();
   const {
     containerActions: { untilEmbeddableLoaded, removeEmbeddable, updateInputForChild },
-    actions: { setControlWidth },
+    actions: { setControlWidth, setControlGrow },
     useEmbeddableSelector,
     useEmbeddableDispatch,
   } = reduxContainerContext;
@@ -97,6 +97,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
           setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
           updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
+          updateGrow={(grow) => dispatch(setControlGrow({ grow, embeddableId }))}
           onTypeEditorChange={(partialInput) =>
             (inputToReturn = { ...inputToReturn, ...partialInput })
           }

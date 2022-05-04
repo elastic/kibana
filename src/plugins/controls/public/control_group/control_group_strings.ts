@@ -54,7 +54,7 @@ export const ControlGroupStrings = {
       }),
     getWidthInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
-        defaultMessage: 'Control size',
+        defaultMessage: 'Control width',
       }),
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
@@ -63,6 +63,10 @@ export const ControlGroupStrings = {
     getCancelTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
         defaultMessage: 'Cancel',
+      }),
+    getGrowSwitchTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.growSwitchTitle', {
+        defaultMessage: 'Expand width to fit available space',
       }),
   },
   management: {
@@ -80,7 +84,7 @@ export const ControlGroupStrings = {
       }),
     getDefaultWidthTitle: () =>
       i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
-        defaultMessage: 'Default size',
+        defaultMessage: 'Default width',
       }),
     getDeleteButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.delete', {

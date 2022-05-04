@@ -15,6 +15,7 @@ export interface ControlPanelState<TEmbeddableInput extends ControlInput = Contr
   extends PanelState<TEmbeddableInput> {
   order: number;
   width: ControlWidth;
+  grow: boolean;
 }
 
 export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';

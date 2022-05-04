@@ -33,6 +33,7 @@ import {
   EuiKeyPadMenuItem,
   EuiIcon,
   EuiToolTip,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
@@ -54,6 +55,7 @@ interface EditControlProps {
   onSave: (type: string) => void;
   onCancel: () => void;
   removeControl?: () => void;
+  updateGrow?: (grow: boolean) => void;
   updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
   getRelevantDataViewId?: () => string | undefined;
@@ -69,6 +71,7 @@ export const ControlEditor = ({
   onSave,
   onCancel,
   removeControl,
+  updateGrow,
   updateTitle,
   updateWidth,
   onTypeEditorChange,
@@ -84,6 +87,7 @@ export const ControlEditor = ({
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
+  const [currentGrow, setCurrentGrow] = useState(true);
   const [controlEditorValid, setControlEditorValid] = useState(false);
 
   const getControlTypeEditor = (type: string) => {
@@ -180,21 +184,20 @@ export const ControlEditor = ({
                   }}
                 />
               </EuiFormRow>
+              {updateGrow ? (
+                <EuiFormRow>
+                  <EuiSwitch
+                    label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={currentGrow}
+                    onChange={() => {
+                      setCurrentGrow(!currentGrow);
+                      updateGrow(!currentGrow);
+                    }}
+                  />
+                </EuiFormRow>
+              ) : null}
               <EuiSpacer size="l" />
-              {removeControl && (
-                <EuiButtonEmpty
-                  aria-label={`delete-${title}`}
-                  iconType="trash"
-                  flush="left"
-                  color="danger"
-                  onClick={() => {
-                    onCancel();
-                    removeControl();
-                  }}
-                >
-                  {ControlGroupStrings.management.getDeleteButtonTitle()}
-                </EuiButtonEmpty>
-              )}
             </>
           )}
         </EuiForm>
@@ -210,6 +213,23 @@ export const ControlEditor = ({
             >
               {ControlGroupStrings.manageControl.getCancelTitle()}
             </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow />
+          <EuiFlexItem grow={false}>
+            {removeControl && (
+              <EuiButtonEmpty
+                aria-label={`delete-${title}`}
+                iconType="trash"
+                flush="left"
+                color="danger"
+                onClick={() => {
+                  onCancel();
+                  removeControl();
+                }}
+              >
+                {ControlGroupStrings.management.getDeleteButtonTitle()}
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

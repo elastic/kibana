@@ -66,6 +66,7 @@ const SortableControlInner = forwardRef<
   const { panels } = useEmbeddableSelector((state) => state);
 
   const width = panels[embeddableId].width;
+  const grow = panels[embeddableId].grow;
 
   const dragHandle = (
     <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame__dragHandle">
@@ -75,7 +76,7 @@ const SortableControlInner = forwardRef<
 
   return (
     <EuiFlexItem
-      grow={width === 'auto'}
+      grow={grow}
       data-control-id={embeddableId}
       data-test-subj={`control-frame`}
       data-render-complete="true"

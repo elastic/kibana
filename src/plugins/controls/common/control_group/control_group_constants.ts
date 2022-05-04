@@ -8,5 +8,5 @@
 
 import { ControlStyle, ControlWidth } from '../types';
 
-export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'auto';
+export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'medium';
 export const DEFAULT_CONTROL_STYLE: ControlStyle = 'oneLine';
