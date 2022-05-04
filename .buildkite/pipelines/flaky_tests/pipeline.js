@@ -20,8 +20,18 @@ const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>}
   require('./groups.json').groups
 );
 
-const concurrency = 25;
-const initialJobs = 3;
+const concurrency = process.env.KIBANA_FLAKY_TEST_CONCURRENCY
+  ? parseInt(process.env.KIBANA_FLAKY_TEST_CONCURRENCY, 10)
+  : 25;
+
+if (Number.isNaN(concurrency)) {
+  throw new Error(
+    `invalid KIBANA_FLAKY_TEST_CONCURRENCY: ${process.env.KIBANA_FLAKY_TEST_CONCURRENCY}`
+  );
+}
+
+const BASE_JOBS = 1;
+const MAX_JOBS = 500;
 
 function getTestSuitesFromJson(json) {
   const fail = (errorMsg) => {
@@ -86,13 +96,13 @@ function getTestSuitesFromJson(json) {
 
 const testSuites = getTestSuitesFromJson(configJson);
 
-const totalJobs = testSuites.reduce((acc, t) => acc + t.count, initialJobs);
+const totalJobs = testSuites.reduce((acc, t) => acc + t.count, BASE_JOBS);
 
-if (totalJobs > 500) {
+if (totalJobs > MAX_JOBS) {
   console.error('+++ Too many tests');
   console.error(
-    `Buildkite builds can only contain 500 steps in total. Found ${totalJobs} in total. Make sure your test runs are less than ${
-      500 - initialJobs
+    `Buildkite builds can only contain ${MAX_JOBS} jobs in total. Found ${totalJobs} based on this config. Make sure your test runs are less than ${
+      MAX_JOBS - BASE_JOBS
     }`
   );
   process.exit(1);
