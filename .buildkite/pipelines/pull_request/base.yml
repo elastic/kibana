@@ -15,57 +15,16 @@ steps:
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
 
-  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    label: 'Pick Test Group Run Order'
-    agents:
-      queue: kibana-default
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/lint.sh
-    label: 'Linting'
-    agents:
-      queue: n2-2
-    key: linting
-    timeout_in_minutes: 90
-
-  - command: .buildkite/scripts/steps/lint_with_types.sh
-    label: 'Linting (with types)'
-    agents:
-      queue: c2-16
-    key: linting_with_types
-    timeout_in_minutes: 90
-
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    agents:
-      queue: c2-8
-    key: checks
-    timeout_in_minutes: 120
-
-  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
-    label: 'Build Storybooks'
-    agents:
-      queue: c2-4
-    key: storybooks
-    timeout_in_minutes: 60
-
-  - command: .buildkite/scripts/steps/build_api_docs.sh
-    label: 'Build API Docs'
+  - command: .buildkite/scripts/steps/test/ftr_configs.sh
+    label: 'FTR Config'
     agents:
       queue: n2-4-spot
-    key: build_api_docs
-    timeout_in_minutes: 60
+    parallelism: 184
+    depends_on: build
+    timeout_in_minutes: 90
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
-
-  - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
-    label: 'Build Webpack Bundle Analyzer reports'
-    agents:
-      queue: c2-4
-    key: webpack_bundle_analyzer
-    timeout_in_minutes: 60
+        - exit_status: '*'
+          limit: 1
