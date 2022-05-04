@@ -579,7 +579,7 @@ describe('StatusService', () => {
         expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(1);
         expect(analyticsMock.reportEvent.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
-            "core.overall_status_changed",
+            "core-overall_status_changed",
             Object {
               "status_level": "available",
               "status_summary": "All services are available",

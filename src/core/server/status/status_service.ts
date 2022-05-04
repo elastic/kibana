@@ -232,7 +232,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       },
     };
 
-    const overallStatusChangedEventName = 'core.overall_status_changed';
+    const overallStatusChangedEventName = 'core-overall_status_changed';
 
     analytics.registerEventType({ eventType: overallStatusChangedEventName, schema });
     analytics.registerContextProvider({ name: 'status info', context$, schema });

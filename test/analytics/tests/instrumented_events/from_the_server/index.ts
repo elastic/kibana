@@ -13,6 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // Add tests for Server-instrumented events here:
     loadTestFile(require.resolve('./core_context_providers'));
     loadTestFile(require.resolve('./core.kibana_started'));
-    loadTestFile(require.resolve('./core.overall_status_changed'));
+    loadTestFile(require.resolve('./core-overall_status_changed'));
   });
 }

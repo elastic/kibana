@@ -13,18 +13,18 @@ import { FtrProviderContext } from '../../../services';
 export default function ({ getService }: FtrProviderContext) {
   const ebtServerHelper = getService('kibana_ebt_server');
 
-  describe('core.overall_status_changed', () => {
+  describe('core-overall_status_changed', () => {
     let initialEvent: Event;
     let secondEvent: Event;
 
     before(async () => {
       [initialEvent, secondEvent] = await ebtServerHelper.getLastEvents(2, [
-        'core.overall_status_changed',
+        'core-overall_status_changed',
       ]);
     });
 
     it('should emit the initial "degraded" event with the context set to `initializing`', () => {
-      expect(initialEvent.event_type).to.eql('core.overall_status_changed');
+      expect(initialEvent.event_type).to.eql('core-overall_status_changed');
       expect(initialEvent.context).to.have.property('status_level', 'initializing');
       expect(initialEvent.context).to.have.property('status_summary', 'Kibana is starting up');
       expect(initialEvent.properties).to.have.property('status_level', 'degraded');
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should emit the 2nd event as `available` with the context set to the previous values', () => {
-      expect(secondEvent.event_type).to.eql('core.overall_status_changed');
+      expect(secondEvent.event_type).to.eql('core-overall_status_changed');
       expect(secondEvent.context).to.have.property(
         'status_level',
         initialEvent.properties.status_level
