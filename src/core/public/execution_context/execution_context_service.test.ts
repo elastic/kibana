@@ -27,6 +27,7 @@ describe('ExecutionContextService', () => {
   });
 
   it('should extend the analytics context', async () => {
+    expect(analytics.registerContextProvider).toHaveBeenCalledTimes(1);
     const context$ = analytics.registerContextProvider.mock.calls[0][0].context$;
     execContext.set({
       type: 'ghf',

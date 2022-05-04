@@ -13,9 +13,11 @@ describe('setup.getElasticsearchInfo()', () => {
   it('returns elasticsearch info from injectedMetadata', () => {
     const setup = new InjectedMetadataService({
       injectedMetadata: {
-        cluster_uuid: 'foo',
-        cluster_name: 'cluster_name',
-        cluster_version: 'version',
+        clusterInfo: {
+          cluster_uuid: 'foo',
+          cluster_name: 'cluster_name',
+          cluster_version: 'version',
+        },
       },
     } as any).setup();
 
@@ -28,14 +30,12 @@ describe('setup.getElasticsearchInfo()', () => {
 
   it('returns elasticsearch info as undefined if not present in the injectedMetadata', () => {
     const setup = new InjectedMetadataService({
-      injectedMetadata: {},
+      injectedMetadata: {
+        clusterInfo: {},
+      },
     } as any).setup();
 
-    expect(setup.getElasticsearchInfo()).toEqual({
-      cluster_uuid: undefined,
-      cluster_name: undefined,
-      cluster_version: undefined,
-    });
+    expect(setup.getElasticsearchInfo()).toEqual({});
   });
 });
 

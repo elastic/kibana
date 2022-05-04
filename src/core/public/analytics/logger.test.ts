@@ -61,20 +61,20 @@ describe('createLogger', () => {
   test('when isDev === true, it should log everything', () => {
     const logger = createLogger(true);
     logger.fatal('fatal');
-    expect(logErrorSpy).toHaveBeenCalled();
+    expect(logErrorSpy).toHaveBeenCalledTimes(1);
     logger.error('error');
-    expect(logErrorSpy).toHaveBeenCalled();
+    expect(logErrorSpy).toHaveBeenCalledTimes(2); // fatal + error
     logger.warn('warn');
-    expect(logWarnSpy).toHaveBeenCalled();
+    expect(logWarnSpy).toHaveBeenCalledTimes(1);
     logger.info('info');
-    expect(logInfoSpy).toHaveBeenCalled();
+    expect(logInfoSpy).toHaveBeenCalledTimes(1);
     logger.debug('debug');
-    expect(logDebugSpy).toHaveBeenCalled();
+    expect(logDebugSpy).toHaveBeenCalledTimes(1);
     logger.trace('trace');
-    expect(logTraceSpy).toHaveBeenCalled();
+    expect(logTraceSpy).toHaveBeenCalledTimes(1);
     logger.log({} as LogRecord);
-    expect(logLogSpy).toHaveBeenCalled();
+    expect(logLogSpy).toHaveBeenCalledTimes(1);
     logger.get().warn('warn');
-    expect(logWarnSpy).toHaveBeenCalled();
+    expect(logWarnSpy).toHaveBeenCalledTimes(2);
   });
 });

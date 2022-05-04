@@ -37,6 +37,7 @@ import {
   AnalyticsServiceConstructor,
   MockAnalyticsService,
   analyticsServiceStartMock,
+  fetchOptionalMemoryInfoMock,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -241,18 +242,11 @@ describe('#start()', () => {
   });
 
   it('reports the event Loaded Kibana (with memory)', async () => {
-    // @ts-expect-error 2339
-    window.performance.memory = {
-      get jsHeapSizeLimit() {
-        return 3;
-      },
-      get totalJSHeapSize() {
-        return 2;
-      },
-      get usedJSHeapSize() {
-        return 1;
-      },
-    };
+    fetchOptionalMemoryInfoMock.mockReturnValue({
+      memory_js_heap_size_limit: 3,
+      memory_js_heap_size_total: 2,
+      memory_js_heap_size_used: 1,
+    });
 
     await startCore();
     expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);

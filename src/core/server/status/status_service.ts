@@ -232,7 +232,9 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       },
     };
 
-    analytics.registerEventType({ eventType: 'status_changed', schema });
+    const overallStatusChangedEventName = 'core.overall_status_changed';
+
+    analytics.registerEventType({ eventType: overallStatusChangedEventName, schema });
     analytics.registerContextProvider({ name: 'status info', context$, schema });
 
     this.overall$!.pipe(
@@ -240,7 +242,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       map(({ level, summary }) => ({ status_level: level.toString(), status_summary: summary })),
       // Emit the event before spreading the status to the context.
       // This way we see from the context the previous status and the current one.
-      tap((analyticsPayload) => analytics.reportEvent('status_changed', analyticsPayload))
+      tap((statusPayload) => analytics.reportEvent(overallStatusChangedEventName, statusPayload))
     ).subscribe(context$);
   }
 }

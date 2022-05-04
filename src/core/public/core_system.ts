@@ -34,6 +34,7 @@ import type { InternalApplicationSetup, InternalApplicationStart } from './appli
 import { ExecutionContextService } from './execution_context';
 import type { AnalyticsServiceSetup } from './analytics';
 import { AnalyticsService } from './analytics';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -277,7 +278,7 @@ export class CoreSystem {
 
       analytics.reportEvent('Loaded Kibana', {
         kibana_version: this.coreContext.env.packageInfo.version,
-        ...this.fetchOptionalMemoryInfo(),
+        ...fetchOptionalMemoryInfo(),
       });
 
       return {
@@ -332,19 +333,5 @@ export class CoreSystem {
         },
       },
     });
-  }
-
-  private fetchOptionalMemoryInfo() {
-    // Get performance information from the browser (non-standard property).
-    // Only available in Google Chrome and MS Edge for now.
-    // @ts-expect-error 2339
-    const memory = window.performance.memory;
-    if (memory) {
-      return {
-        memory_js_heap_size_limit: memory.jsHeapSizeLimit,
-        memory_js_heap_size_total: memory.totalJSHeapSize,
-        memory_js_heap_size_used: memory.usedJSHeapSize,
-      };
-    }
   }
 }

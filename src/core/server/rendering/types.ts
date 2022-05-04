@@ -39,9 +39,11 @@ export interface InjectedMetadata {
   basePath: string;
   serverBasePath: string;
   publicBaseUrl?: string;
-  cluster_uuid?: string;
-  cluster_name?: string;
-  cluster_version?: string;
+  clusterInfo: {
+    cluster_uuid?: string;
+    cluster_name?: string;
+    cluster_version?: string;
+  };
   env: {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;

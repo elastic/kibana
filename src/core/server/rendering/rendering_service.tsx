@@ -98,13 +98,14 @@ export class RenderingService {
       user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
 
-    const elasticearchInfo = await (elasticsearch &&
-      firstValueFrom(
-        elasticsearch.clusterInfo$.pipe(
-          timeout(50), // If not available, just return undefined
-          catchError(() => of({}))
-        )
-      ));
+    const clusterInfo =
+      (await (elasticsearch &&
+        firstValueFrom(
+          elasticsearch.clusterInfo$.pipe(
+            timeout(50), // If not available, just return undefined
+            catchError(() => of({}))
+          )
+        ))) ?? {};
 
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
     const themeVersion: ThemeVersion = 'v8';
@@ -135,7 +136,7 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         env,
-        ...elasticearchInfo,
+        clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
