@@ -17,14 +17,9 @@ export function registerConfigDataRoute({ router, config, log }: RouteDependenci
     async (context, request, response) => {
       const data = await callEnterpriseSearchConfigAPI({ request, config, log });
 
-      if ('responseStatus' in data) {
+      if ('responseStatus' in data || !Object.keys(data).length) {
         return response.customError({
-          statusCode: data.responseStatus,
-          body: 'Error fetching data from Enterprise Search',
-        });
-      } else if (!Object.keys(data).length) {
-        return response.customError({
-          statusCode: 502,
+          statusCode: data.responseStatus ?? 502,
           body: 'Error fetching data from Enterprise Search',
         });
       } else {
