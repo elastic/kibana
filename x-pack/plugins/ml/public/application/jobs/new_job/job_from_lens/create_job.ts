@@ -149,15 +149,16 @@ async function createADJobFromLensSavedObject(
 }
 
 function getFields(state: LensSavedObjectAttributes['state']) {
-  const compatibleLayers = (state.visualization as { layers: XYDataLayerConfig[] }).layers.filter(
+  const visualization = state.visualization as { layers: XYDataLayerConfig[] };
+  const indexpattern = state.datasourceStates.indexpattern as IndexPatternPersistedState;
+
+  const compatibleLayers = visualization.layers.filter(
     (l) => l.layerType === COMPATIBLE_LAYER_TYPE && COMPATIBLE_SERIES_TYPES.includes(l.seriesType)
   );
 
   const compatibleLayerIds = compatibleLayers.map((l) => l.layerId);
 
-  const [layer] = Object.entries(
-    (state.datasourceStates.indexpattern as IndexPatternPersistedState).layers
-  )
+  const [layer] = Object.entries(indexpattern.layers)
     .filter(([id]) => compatibleLayerIds.includes(id))
     .map(([, l]) => l);
 
