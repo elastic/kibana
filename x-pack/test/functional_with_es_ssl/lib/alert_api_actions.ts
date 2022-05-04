@@ -8,6 +8,8 @@
 import type { ObjectRemover } from './object_remover';
 import { getTestAlertData, getTestActionData } from './get_test_data';
 
+const FUTURE_SNOOZE_TIME = '9999-12-31T06:00:00.000Z';
+
 export async function createAlertManualCleanup({
   supertest,
   overwrites = {},
@@ -83,5 +85,16 @@ export async function disableAlert({ supertest, alertId }: { supertest: any; ale
   const { body: alert } = await supertest
     .post(`/api/alerting/rule/${alertId}/_disable`)
     .set('kbn-xsrf', 'foo');
+  return alert;
+}
+
+export async function snoozeAlert({ supertest, alertId }: { supertest: any; alertId: string }) {
+  const { body: alert } = await supertest
+    .post(`/internal/alerting/rule/${alertId}/_snooze`)
+    .set('kbn-xsrf', 'foo')
+    .set('content-type', 'application/json')
+    .send({
+      snooze_end_time: FUTURE_SNOOZE_TIME,
+    });
   return alert;
 }

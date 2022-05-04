@@ -88,7 +88,7 @@ describe('context successors', function () {
 
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
         }
       );
@@ -225,7 +225,7 @@ describe('context successors', function () {
 
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
