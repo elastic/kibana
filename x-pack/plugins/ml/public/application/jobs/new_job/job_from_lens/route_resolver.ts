@@ -6,6 +6,8 @@
  */
 
 import rison from 'rison-node';
+import { Query } from '@kbn/data-plugin/public';
+import { Filter } from '@kbn/es-query';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { canCreateAndStashADJob } from './create_job';
 import { getUiSettings, getDataViews, getSavedObjectsClient } from '../../../util/dependency_cache';
@@ -15,8 +17,8 @@ export async function resolver(
   vis: any | undefined,
   from: string,
   to: string,
-  queryRisonString: any,
-  filtersRisonString: any
+  queryRisonString: string,
+  filtersRisonString: string
 ) {
   let viz: LensSavedObjectAttributes;
   if (lensId) {
@@ -27,13 +29,14 @@ export async function resolver(
     throw new Error('Cannot create visualization');
   }
 
-  let query;
-  let filters;
+  let query: Query;
+  let filters: Filter[];
   try {
-    query = rison.decode(queryRisonString);
-    filters = rison.decode(filtersRisonString);
+    query = rison.decode(queryRisonString) as Query;
+    filters = rison.decode(filtersRisonString) as Filter[];
   } catch (error) {
-    // ignore errors
+    query = { language: 'lucene', query: '' };
+    filters = [];
   }
 
   const dataViewClient = getDataViews();

@@ -9,6 +9,9 @@ import moment from 'moment';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
+import { Query } from '@kbn/data-plugin/public';
+import { Filter } from '@kbn/es-query';
+
 import type {
   LensSavedObjectAttributes,
   FieldBasedIndexPatternColumn,
@@ -35,8 +38,8 @@ const COMPATIBLE_LAYER_TYPES = [
 
 async function createADJobFromLensSavedObject(
   vis: LensSavedObjectAttributes,
-  query: any,
-  filters: any,
+  query: Query,
+  filters: Filter[],
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient
 ) {
@@ -126,8 +129,8 @@ export async function canCreateAndStashADJob(
   vis: LensSavedObjectAttributes,
   startString: string,
   endString: string,
-  query: any,
-  filters: any,
+  query: Query,
+  filters: Filter[],
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient
 ) {
@@ -157,16 +160,16 @@ export async function canCreateAndStashADJob(
 
 export async function canCreateADJob(
   vis: LensSavedObjectAttributes,
-  query: any,
-  filters: any,
+  query: Query | undefined,
+  filters: Filter[] | undefined,
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient
 ) {
   try {
     const jobItems = await createADJobFromLensSavedObject(
       vis,
-      query,
-      filters,
+      query ?? { language: 'lucene', query: '' },
+      filters ?? [],
       dataViewClient,
       kibanaConfig
     );
@@ -214,7 +217,7 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   const { query, filters, timeRange } = embeddable.getInput();
 
   // @ts-expect-error savedVis is private in Embeddable
-  const vis = embeddable.savedVis;
+  const vis = embeddable.savedVis as LensSavedObjectAttributes;
 
   if (timeRange === undefined) {
     throw Error('');
@@ -227,11 +230,5 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
     to,
     query,
     filters,
-  } as {
-    vis: LensSavedObjectAttributes;
-    from: string;
-    to: string;
-    query: any;
-    filters: any;
   };
 }
