@@ -28,6 +28,7 @@ import {
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
+  useGetSecuritySolutionUrl,
 } from '../link_to';
 import {
   FlowTarget,
@@ -524,30 +525,35 @@ interface LinkProps {
   href: string;
 }
 
+type GetSecuritySolutionProps = (
+  params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
+) => LinkProps;
+
 /**
  * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
  */
-export const useSecuritySolutionLink = ({
-  deepLinkId,
-  path,
-  onClick: onClickProps,
-}: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }): LinkProps => {
-  const { formatUrl } = useFormatUrl(deepLinkId);
+export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { navigateTo } = useNavigateTo();
 
-  return useMemo(() => {
-    const url = formatUrl(path ?? '');
-    return {
-      href: url,
-      onClick: (ev: MouseEvent) => {
-        ev.preventDefault();
-        navigateTo({ url });
-        if (onClickProps) {
-          onClickProps(ev);
-        }
-      },
-    };
-  }, [path, formatUrl, navigateTo, onClickProps]);
+  const getSecuritySolutionProps = useCallback<GetSecuritySolutionProps>(
+    ({ deepLinkId, path, onClick: onClickProps }) => {
+      const url = getSecuritySolutionUrl({ deepLinkId, path });
+      return {
+        href: url,
+        onClick: (ev: MouseEvent) => {
+          ev.preventDefault();
+          navigateTo({ url });
+          if (onClickProps) {
+            onClickProps(ev);
+          }
+        },
+      };
+    },
+    [getSecuritySolutionUrl, navigateTo]
+  );
+
+  return getSecuritySolutionProps;
 };
 
 /**
@@ -562,7 +568,12 @@ export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
     onClick: onClickProps,
     ...rest
   }) => {
-    const { onClick, href } = useSecuritySolutionLink({ deepLinkId, path, onClick: onClickProps });
+    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId,
+      path,
+      onClick: onClickProps,
+    });
     return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
   };
   return SecuritySolutionLink;

@@ -58,6 +58,7 @@ import {
   USERS_PATH,
   THREAT_HUNTING_PATH,
   DASHBOARDS_PATH,
+  MANAGE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -130,6 +131,18 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     keywords: [
       i18n.translate('xpack.securitySolution.search.dashboards', {
         defaultMessage: 'Dashboards',
+      }),
+    ],
+  },
+  {
+    id: SecurityPageName.manageLanding,
+    title: MANAGE,
+    path: MANAGE_PATH,
+    navLinkStatus: AppNavLinkStatus.hidden,
+    features: [FEATURE.general],
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.manage', {
+        defaultMessage: 'Manage',
       }),
     ],
   },

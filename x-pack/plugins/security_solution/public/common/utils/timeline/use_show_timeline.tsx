@@ -13,6 +13,9 @@ const HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   '/administration',
   '/rules/create',
   '/get_started',
+  '/threat_hunting',
+  '/dashboards',
+  '/manage',
 ];
 
 const isHiddenTimelinePath = (currentPath: string): boolean => {

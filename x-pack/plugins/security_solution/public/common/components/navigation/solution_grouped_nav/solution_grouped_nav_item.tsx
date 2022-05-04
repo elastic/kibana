@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink, EuiListGroupItem } from '@elastic/eui';
 import { useNavigation } from '../../../lib/kibana';
-import { useSecuritySolutionLink } from '../../links';
+import { useGetSecuritySolutionLinkProps } from '../../links';
 import { SecurityPageName } from '../../../../../common/constants';
 
 export type NavItemCategories = Array<{ label: string; itemIds: string[] }>;
@@ -41,79 +41,80 @@ export const isDefaultNavItem = (navItem: NavItem): navItem is DefaultNavItem =>
   !isCustomNavItem(navItem);
 
 export const useNavItems: () => NavItem[] = () => {
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   return [
     {
       id: SecurityPageName.dashboardsLanding,
       label: 'Dashboards',
-      ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.dashboardsLanding }),
+      ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.dashboardsLanding }),
       items: [
         {
           id: 'overview',
           label: 'Overview',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.overview }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.overview }),
         },
         {
           id: 'detection_response',
           label: 'Detection & Response',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.detectionAndResponse }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.detectionAndResponse }),
         },
         // {
         //   id: SecurityPageName.cloudPostureFindings,
         //   label: 'Cloud Posture Findings',
         //   description: 'The description goes here',
-        //   ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.cloudPostureFindings }),
+        //   ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.cloudPostureFindings }),
         // },
       ],
     },
     {
       id: SecurityPageName.alerts,
       label: 'Alerts',
-      ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.alerts }),
+      ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.alerts }),
     },
     {
       id: SecurityPageName.timelines,
       label: 'Investigations',
-      ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.timelines }),
+      ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.timelines }),
     },
     {
       id: SecurityPageName.case,
       label: 'Cases',
-      ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.case }),
+      ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.case }),
     },
     {
       id: SecurityPageName.threatHuntingLanding,
       label: 'Threat Hunting',
-      ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.threatHuntingLanding }),
+      ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.threatHuntingLanding }),
       items: [
         {
           id: SecurityPageName.hosts,
           label: 'Hosts',
           description:
             'Computer or other device that communicates with other hosts on a network. Hosts on a network include clients and servers -- that send or receive data, services or applications.',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.hosts }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.hosts }),
         },
         {
           id: SecurityPageName.network,
           label: 'Network',
           description:
             'The action or process of interacting with others to exchange information and develop professional or social contacts.',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.network }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.network }),
         },
         {
           id: SecurityPageName.users,
           label: 'Users',
           description: 'Sudo commands dashboard from the Logs System integration.',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.users }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.users }),
         },
       ],
     },
     // TODO: implement footer and move management
     {
-      id: SecurityPageName.administration,
+      id: SecurityPageName.manageLanding,
       label: 'Manage',
-      ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.administration }),
+      ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.manageLanding }),
       categories: [
         { label: 'SIEM', itemIds: [SecurityPageName.rules, SecurityPageName.exceptions] },
         {
@@ -133,49 +134,49 @@ export const useNavItems: () => NavItem[] = () => {
           id: SecurityPageName.rules,
           label: 'Rules',
           description: 'The description here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.rules }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.rules }),
         },
         {
           id: SecurityPageName.exceptions,
           label: 'Exceptions',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.exceptions }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.exceptions }),
         },
         {
           id: SecurityPageName.endpoints,
           label: 'Endpoints',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.endpoints }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.endpoints }),
         },
         {
           id: SecurityPageName.policies,
           label: 'Policies',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.policies }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.policies }),
         },
         {
           id: SecurityPageName.trustedApps,
           label: 'Trusted applications',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.trustedApps }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.trustedApps }),
         },
         {
           id: SecurityPageName.eventFilters,
           label: 'Event filters',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.eventFilters }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.eventFilters }),
         },
         {
           id: SecurityPageName.blocklist,
           label: 'Blocklist',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.blocklist }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.blocklist }),
         },
         {
           id: SecurityPageName.hostIsolationExceptions,
           label: 'Host Isolation IP exceptions',
           description: 'The description goes here',
-          ...useSecuritySolutionLink({ deepLinkId: SecurityPageName.hostIsolationExceptions }),
+          ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.hostIsolationExceptions }),
         },
       ],
     },

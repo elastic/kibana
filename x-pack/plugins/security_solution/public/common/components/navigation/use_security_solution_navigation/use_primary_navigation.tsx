@@ -13,6 +13,7 @@ import { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 import { SolutionGroupedNav } from '../solution_grouped_nav';
 import { useNavItems } from '../solution_grouped_nav/solution_grouped_nav_item';
+import { useIsGroupedNavigationEnabled } from '../helpers';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
@@ -29,6 +30,7 @@ export const usePrimaryNavigation = ({
   timeline,
   timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
+  const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
     (): string => ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '',
     [pageName, tabName, navTabs]
@@ -62,13 +64,16 @@ export const usePrimaryNavigation = ({
   return {
     name: translatedNavTitle,
     icon: 'logoSecurity',
-    items: navItems,
-    children: (
-      <SolutionGroupedNav
-        items={navLinkItems}
-        // footerItems={footerNavLinkItems} // TODO
-        selectedId={selectedTabId}
-      />
-    ),
+    ...(isGroupedNavigationEnabled
+      ? {
+          children: (
+            <SolutionGroupedNav
+              items={navLinkItems}
+              // footerItems={footerNavLinkItems} // TODO
+              selectedId={selectedTabId}
+            />
+          ),
+        }
+      : { items: navItems }),
   };
 };

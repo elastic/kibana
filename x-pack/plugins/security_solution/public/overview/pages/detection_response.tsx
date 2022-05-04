@@ -11,7 +11,8 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useUserInfo } from '../../detections/components/user_info';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
 import { useKibana, useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { HostAlertsTable, UserAlertsTable } from '../components/detection_response';
@@ -48,9 +49,10 @@ const NoPrivilegePage: React.FC = () => {
 
 const DetectionResponseComponent = () => {
   const { indicesExist, indexPattern, loading: isSourcererLoading } = useSourcererDataView();
-  const { signalIndexName, canUserREAD, hasIndexRead } = useUserInfo();
+  const { signalIndexName } = useSignalIndex();
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadCases = useGetUserCasesPermissions()?.read;
-  const canReadAlerts = canUserREAD && hasIndexRead;
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivilegePage />;
