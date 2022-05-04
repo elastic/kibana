@@ -47,7 +47,6 @@ import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_butt
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
-const SuperUpdateButton = React.memo(EuiSuperUpdateButton);
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
@@ -364,7 +363,7 @@ export const QueryBarTopRow = React.memo(
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <EuiFlexItem grow={false}>
-          <SuperUpdateButton
+          <EuiSuperUpdateButton
             iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
             iconOnly
             aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}

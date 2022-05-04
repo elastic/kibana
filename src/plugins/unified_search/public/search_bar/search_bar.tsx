@@ -31,6 +31,8 @@ import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { SearchBarStyles } from './search_bar.styles';
 
+import '../index.scss';
+
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
