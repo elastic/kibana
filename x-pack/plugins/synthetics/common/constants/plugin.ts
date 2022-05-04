@@ -21,4 +21,7 @@ export const PLUGIN = {
   TITLE: i18n.translate('xpack.synthetics.uptimeFeatureCatalogueTitle', {
     defaultMessage: 'Uptime',
   }),
+  SYNTHETICS: i18n.translate('xpack.synthetics.syntheticsFeatureCatalogueTitle', {
+    defaultMessage: 'Synthetics',
+  }),
 };
