@@ -18863,7 +18863,6 @@
     "xpack.ml.jobsList.alertingRules.tooltipContent": "ジョブ{rulesCount}はアラート{rulesCount, plural, other  { ルール}}に関連付けられています",
     "xpack.ml.jobsList.analyticsSpacesLabel": "スペース",
     "xpack.ml.jobsList.auditMessageColumn.screenReaderDescription": "この列は、過去24時間にエラーまたは警告があった場合にアイコンを表示します",
-    "xpack.ml.jobsList.breadcrumb": "ジョブ",
     "xpack.ml.jobsList.cannotSelectRowForJobMessage": "ジョブID {jobId}を選択できません",
     "xpack.ml.jobsList.cloneJobErrorMessage": "{jobId} のクローンを作成できませんでした。ジョブが見つかりませんでした",
     "xpack.ml.jobsList.closeActionStatusText": "閉じる",
