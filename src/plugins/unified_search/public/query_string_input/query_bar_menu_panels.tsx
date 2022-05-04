@@ -476,7 +476,7 @@ export function QueryBarMenuPanels({
           language={language}
           onSelectLanguage={onSelectLanguage}
           nonKqlMode={nonKqlMode}
-          isOnMenu={true}
+          isOnTopBarMenu={true}
         />
       ),
     },

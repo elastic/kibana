@@ -316,12 +316,8 @@ export const LensTopNavMenu = ({
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
-      if (closeFieldEditor.current) {
-        closeFieldEditor.current();
-      }
-      if (closeDataViewEditor.current) {
-        closeDataViewEditor.current();
-      }
+      closeFieldEditor.current?.();
+      closeDataViewEditor.current?.();
     };
   }, []);
 

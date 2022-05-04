@@ -23,7 +23,7 @@ export interface Props {
   intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
   /**
-   * Applies extra styles neccsary when couple with the query bar
+   * Applies extra styles necessary when coupled with the query bar
    */
   afterQueryBar?: boolean;
 }
