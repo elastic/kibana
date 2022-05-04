@@ -11,6 +11,7 @@ import { Filter } from '@kbn/es-query';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { canCreateAndStashADJob } from './create_job';
 import { getUiSettings, getDataViews, getSavedObjectsClient } from '../../../util/dependency_cache';
+import { getDefaultQuery } from '../utils/new_job_utils';
 
 export async function resolver(
   lensSavedObjectId: string | undefined,
@@ -34,7 +35,7 @@ export async function resolver(
   try {
     query = rison.decode(queryRisonString) as Query;
   } catch (error) {
-    query = { language: 'lucene', query: '' };
+    query = getDefaultQuery();
   }
   try {
     filters = rison.decode(filtersRisonString) as Filter[];

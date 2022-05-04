@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep } from 'lodash';
 import {
   Query,
@@ -22,7 +23,7 @@ import { getQueryFromSavedSearchObject } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.
 
-const DEFAULT_QUERY = {
+const DEFAULT_DSL_QUERY: estypes.QueryDslQueryContainer = {
   bool: {
     must: [
       {
@@ -32,7 +33,16 @@ const DEFAULT_QUERY = {
   },
 };
 
+const DEFAULT_QUERY: Query = {
+  query: '',
+  language: 'lucene',
+};
+
 export function getDefaultDatafeedQuery() {
+  return cloneDeep(DEFAULT_DSL_QUERY);
+}
+
+export function getDefaultQuery() {
   return cloneDeep(DEFAULT_QUERY);
 }
 
@@ -45,16 +55,10 @@ export function createSearchItems(
   // a lucene query_string.
   // Using a blank query will cause match_all:{} to be used
   // when passed through luceneStringToDsl
-  const query: Query = {
-    query: '',
-    language: 'lucene',
-  };
-  const combinedQuery: any = getDefaultDatafeedQuery();
-
   if (savedSearch === null) {
     return {
-      query,
-      combinedQuery,
+      query: getDefaultQuery(),
+      combinedQuery: getDefaultDatafeedQuery(),
     };
   }
 
@@ -67,10 +71,7 @@ export function createQueries(
   indexPattern: DataViewBase | undefined,
   kibanaConfig: IUiSettingsClient
 ) {
-  let query: Query = {
-    query: '',
-    language: 'lucene',
-  };
+  let query = getDefaultQuery();
   let combinedQuery: any = getDefaultDatafeedQuery();
 
   query = data.query;

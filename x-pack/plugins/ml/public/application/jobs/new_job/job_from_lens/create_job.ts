@@ -24,7 +24,7 @@ import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
-import { createQueries } from '../utils/new_job_utils';
+import { createQueries, getDefaultQuery } from '../utils/new_job_utils';
 
 const COMPATIBLE_SERIES_TYPES = [
   'line',
@@ -180,7 +180,7 @@ export async function canCreateADJob(
   try {
     const jobItems = await createADJobFromLensSavedObject(
       vis,
-      query ?? { language: 'lucene', query: '' },
+      query ?? getDefaultQuery(),
       filters ?? [],
       dataViewClient,
       kibanaConfig
