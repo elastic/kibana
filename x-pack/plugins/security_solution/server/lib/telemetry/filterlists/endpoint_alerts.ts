@@ -17,9 +17,7 @@ const baseAllowlistFields: AllowlistFields = {
   command_line: true,
   hash: true,
   pid: true,
-  pe: {
-    original_file_name: true,
-  },
+  pe: true,
   uptime: true,
   Ext: {
     architecture: true,
@@ -27,6 +25,7 @@ const baseAllowlistFields: AllowlistFields = {
     dll: true,
     malware_signature: true,
     memory_region: true,
+    protection: true,
     real: {
       entity_id: true,
     },
