@@ -29,7 +29,7 @@ import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
-import { SearchBarStyles } from './search_bar.styles';
+import { searchBarStyles } from './search_bar.styles';
 
 import '../index.scss';
 
@@ -343,7 +343,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
   public render() {
     const { theme } = this.props;
-    const styles = SearchBarStyles(theme);
+    const styles = searchBarStyles(theme);
     const cssStyles = [
       styles.uniSearchBar,
       this.props.displayStyle && styles[this.props.displayStyle],

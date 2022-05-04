@@ -9,7 +9,7 @@
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const SearchBarStyles = ({ euiTheme }: UseEuiTheme) => {
+export const searchBarStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
     uniSearchBar: css`
       padding: ${euiTheme.size.s};

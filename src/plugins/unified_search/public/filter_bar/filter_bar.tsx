@@ -13,7 +13,7 @@ import React, { useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import FilterItems from './filter_item/filter_items';
 
-import { FilterBarStyles } from './filter_bar.styles';
+import { filterBarStyles } from './filter_bar.styles';
 
 export interface Props {
   filters: Filter[];
@@ -30,7 +30,7 @@ export interface Props {
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const euiTheme = useEuiTheme();
-  const styles = FilterBarStyles(euiTheme, props.afterQueryBar);
+  const styles = filterBarStyles(euiTheme, props.afterQueryBar);
   const groupRef = useRef<HTMLDivElement>(null);
 
   return (

@@ -9,7 +9,7 @@
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const FilterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boolean) => {
+export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boolean) => {
   return {
     group: css`
       gap: ${euiTheme.size.xs};
