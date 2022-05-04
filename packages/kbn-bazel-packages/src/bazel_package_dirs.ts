@@ -24,6 +24,7 @@ export const BAZEL_PACKAGE_DIRS = [
   'packages/shared-ux/*',
   'packages/analytics',
   'packages/analytics/shippers',
+  'packages/analytics/shippers/elastic_v3',
 ];
 
 /**

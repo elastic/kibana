@@ -20,4 +20,5 @@ export class CustomShipper implements IShipper {
     });
   }
   optIn(isOptedIn: boolean) {}
+  shutdown() {}
 }

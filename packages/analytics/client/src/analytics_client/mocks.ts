@@ -18,6 +18,7 @@ function createMockedAnalyticsClient(): jest.Mocked<IAnalyticsClient> {
     removeContextProvider: jest.fn(),
     registerShipper: jest.fn(),
     telemetryCounter$: new Subject(),
+    shutdown: jest.fn(),
   };
 }
 

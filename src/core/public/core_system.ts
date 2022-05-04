@@ -300,6 +300,7 @@ export class CoreSystem {
     this.application.stop();
     this.deprecations.stop();
     this.theme.stop();
+    this.analytics.stop();
     this.rootDomElement.textContent = '';
   }
 }

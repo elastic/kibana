@@ -211,4 +211,8 @@ export interface IAnalyticsClient {
    * Observable to emit the stats of the processed events.
    */
   readonly telemetryCounter$: Observable<TelemetryCounter>;
+  /**
+   * Stops the client.
+   */
+  shutdown: () => void;
 }
