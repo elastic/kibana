@@ -79,12 +79,11 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
           .set('kbn-xsrf', 'true')
           .send(options);
       }
-      if (result.status === 500 || result.status === 200) {
+      if ((result.status === 500 || result.status === 200) && result.body) {
         return result;
       }
       throw new Error('try again');
     });
-
     if (body.isRunning) {
       const result = await retry.try(async () => {
         const resp = await supertestWithoutAuth
