@@ -1,8 +1,6 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[{minor-version}]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
@@ -129,15 +127,16 @@ image::images/highlights-maps-custom-icon-2.png[custom phone icon added to a map
 === Alerting
 
 [float]
-==== Temporarily pause rules
+==== Snooze rules
 
 *Alerting* introduces the ability to snooze rules to suppress notifications
 and actions for a user-defined duration. You'll never miss an
 action because you forgot to unmute a rule while handling problems that arose
-unexpectedly or during known downtimes.
+unexpectedly or during known downtimes. For more information, check
+{kibana-ref}/create-and-manage-rules.html#controlling-rules[Snooze and disable rules].
 
 [role="screenshot"]
-image::images/highlights-alerting-snooze.png["UI for enabling snooze mode", width=50%]
+image::images/highlights-alerting-snooze.png["UI for enabling snooze mode"]
 
 [float]
 ==== View rule history
@@ -205,8 +204,9 @@ For more information, check {kibana-ref}/cases.html[Cases].
 
 From 8.2, users are able to test certain trained models in {kib}. The new action 
 is introduced under *Machine learning > Trained Models* and it accepts 
-user-specified input to test models. Initially supported models are `lang_ident` 
-(language identification) and `bert_base_ner` (named entity recognition).
+user-specified input to test models. Initially supported models are
+`lang_ident_model_1` (language identification) and third party named entity
+recognition (NER) models.
 
 [role="screenshot"]
 image::images/test-trained-model.gif[Testing trained models in the ML UI]

@@ -28,8 +28,6 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.2.0]]
 == {kib} 8.2.0
 
-coming::[8.2.0]
-
 Review the following information about the {kib} 8.2.0 release.
 
 [float]
@@ -67,7 +65,7 @@ Alerting::
 * Limit the executable actions per rule execution {kibana-pull}128079[#128079] and {kibana-pull}126902[#126902]
 
 Cases::
-* Adds Cases to the Stack Management page as a technical preview feature{kibana-pull}125224[#125224]
+* Adds Cases to the Stack Management page as a technical preview feature {kibana-pull}125224[#125224]
 
 Dashboard::
 * Adds time slider control {kibana-pull}128305[#128305]
