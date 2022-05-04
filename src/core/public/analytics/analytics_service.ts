@@ -19,7 +19,7 @@ import { createLogger } from './logger';
  * {@link AnalyticsClient}
  * @public
  */
-export type AnalyticsServiceSetup = AnalyticsClient;
+export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
 /**
  * Exposes the public APIs of the AnalyticsClient during the start phase
  * {@link AnalyticsClient}
@@ -75,6 +75,10 @@ export class AnalyticsService {
       reportEvent: this.analyticsClient.reportEvent,
       telemetryCounter$: this.analyticsClient.telemetryCounter$,
     };
+  }
+
+  public stop() {
+    this.analyticsClient.shutdown();
   }
 
   /**
