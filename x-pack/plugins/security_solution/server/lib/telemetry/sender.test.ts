@@ -59,7 +59,7 @@ describe('TelemetryEventsSender', () => {
             test: 'me',
             another: 'nope',
             pe: {
-                original_file_name: 'malware.exe',
+              original_file_name: 'malware.exe',
             },
             Ext: {
               bytes_compressed: 'data up to 4mb',
@@ -93,7 +93,7 @@ describe('TelemetryEventsSender', () => {
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
             Ext: {
-                protection: 'PsProtectedSignerAntimalware-Light',
+              protection: 'PsProtectedSignerAntimalware-Light',
             },
           },
           Responses: '{ "result": 0 }', // >= 7.15
@@ -139,7 +139,7 @@ describe('TelemetryEventsSender', () => {
             created: 0,
             path: 'X',
             pe: {
-                original_file_name: 'malware.exe',
+              original_file_name: 'malware.exe',
             },
             Ext: {
               bytes_compressed: 'data up to 4mb',
@@ -169,7 +169,7 @@ describe('TelemetryEventsSender', () => {
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
             Ext: {
-                protection: 'PsProtectedSignerAntimalware-Light',
+              protection: 'PsProtectedSignerAntimalware-Light',
             },
           },
           Responses: '{ "result": 0 }',
