@@ -8,4 +8,5 @@
 export * from './agent_policy_debugger';
 export * from './integration_debugger';
 export * from './saved_objects_debugger';
+export * from './preconfiguration_debugger';
 export * from './fleet_indices_debugger';

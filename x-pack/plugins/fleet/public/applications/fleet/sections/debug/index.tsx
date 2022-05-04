@@ -22,6 +22,7 @@ import { ReactQueryDevtools } from 'react-query/devtools';
 import {
   AgentPolicyDebugger,
   IntegrationDebugger,
+  PreconfigurationDebugger,
   FleetIndicesDebugger,
   SavedObjectsDebugger,
 } from './components';
@@ -76,6 +77,15 @@ export const DebugPage: React.FunctionComponent = () => {
             paddingSize="l"
           >
             <FleetIndicesDebugger />
+          </EuiAccordion>
+          <EuiSpacer />
+          <EuiAccordion
+            id="preconfigurationDebugger"
+            buttonContent="Preconfiguration Debugger"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <PreconfigurationDebugger />
           </EuiAccordion>
 
           <EuiHorizontalRule />
