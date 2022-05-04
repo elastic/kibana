@@ -166,10 +166,11 @@ export class VisualizeEmbeddableFactory
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const startDeps = await this.deps.start();
-    const savedObject = await withHandlingMissedSavedObject(
+
+    return await withHandlingMissedSavedObject(
       startDeps.core,
-      async () =>
-        await getSavedVisualization(
+      async () => {
+        const savedObject = await getSavedVisualization(
           {
             savedObjectsClient: startDeps.core.savedObjects.client,
             search: startDeps.plugins.data.search,
@@ -178,36 +179,37 @@ export class VisualizeEmbeddableFactory
             savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss?.getTaggingApi(),
           },
           savedObjectId
-        ),
+        );
+
+        if (savedObject instanceof ErrorEmbeddable) {
+          return savedObject;
+        }
+
+        if (savedObject.sharingSavedObjectProps?.outcome === 'conflict') {
+          return new ErrorEmbeddable(
+            i18n.translate('visualizations.embeddable.legacyURLConflict.errorMessage', {
+              defaultMessage: `This visualization has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+              values: { json: savedObject.sharingSavedObjectProps?.errorJSON },
+            }),
+            input,
+            parent
+          );
+        }
+
+        const visState = convertToSerializedVis(savedObject);
+        const vis = await createVisAsync(savedObject.visState.type, visState);
+
+        return await createVisEmbeddableFromObject(this.deps)(
+          vis,
+          input,
+          await this.getAttributeService(),
+          parent
+        );
+      },
       input,
       parent,
       { id: savedObjectId, type: SAVED_VIS_TYPE },
       { type: DATA_VIEW_SAVED_OBJECT_TYPE }
-    );
-
-    if (savedObject instanceof ErrorEmbeddable) {
-      return savedObject;
-    }
-
-    if (savedObject.sharingSavedObjectProps?.outcome === 'conflict') {
-      return new ErrorEmbeddable(
-        i18n.translate('visualizations.embeddable.legacyURLConflict.errorMessage', {
-          defaultMessage: `This visualization has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
-          values: { json: savedObject.sharingSavedObjectProps?.errorJSON },
-        }),
-        input,
-        parent
-      );
-    }
-
-    const visState = convertToSerializedVis(savedObject);
-    const vis = await createVisAsync(savedObject.visState.type, visState);
-
-    return createVisEmbeddableFromObject(this.deps)(
-      vis,
-      input,
-      await this.getAttributeService(),
-      parent
     );
   }
 

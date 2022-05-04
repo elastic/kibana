@@ -17,13 +17,18 @@ import {
   shouldShowRelinkSavedObjectError,
 } from '../components/relink_saved_object';
 
+const defaultOnRelink = () => {
+  window.location.reload();
+};
+
 export const withHandlingMissedSavedObject = async (
   core: CoreStart,
   fn: Function,
   input: Partial<VisualizeInput> & { id: string },
   parent: IContainer | undefined,
   rootSavedObjectMeta: RelinkSavedObjectMeta,
-  partialMissedSavedObjectMeta: Pick<RelinkSavedObjectMeta, 'type' | 'name'>
+  partialMissedSavedObjectMeta: Pick<RelinkSavedObjectMeta, 'type' | 'name'>,
+  onRelink: () => void = defaultOnRelink
 ) => {
   try {
     return await fn();
@@ -43,10 +48,7 @@ export const withHandlingMissedSavedObject = async (
         parent,
         canSaveVisualization ? (
           <RelinkSavedObject
-            onRelink={() => {
-              // @todo: find a better way to do that
-              window.location.reload();
-            }}
+            onRelink={onRelink}
             rootSavedObjectMeta={rootSavedObjectMeta}
             missedSavedObjectMeta={missedSavedObjectMeta}
             services={{

@@ -64,7 +64,7 @@ export const RelinkSavedObject = ({
   const title = useMemo(
     () =>
       i18n.translate('visualizations.relinkSavedObject.title', {
-        defaultMessage: 'Rewire the {type}',
+        defaultMessage: 'Replace {type}',
         values: {
           type: missedSavedObjectMeta.name ?? missedSavedObjectMeta.type,
         },

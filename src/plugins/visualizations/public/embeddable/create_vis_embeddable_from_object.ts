@@ -39,9 +39,7 @@ export const createVisEmbeddableFromObject =
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
     try {
       const visId = vis.id as string;
-
       const editPath = visId ? urlFor(visId) : '#/edit_by_value';
-
       const editUrl = visId ? getHttp().basePath.prepend(`/app/visualize${urlFor(visId)}`) : '';
       const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
 
@@ -49,24 +47,25 @@ export const createVisEmbeddableFromObject =
         return new DisabledLabEmbeddable(vis.title, input);
       }
 
-      let indexPatterns: DataView[] = [];
-
-      if (vis.type.getUsedIndexPattern) {
-        indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
-      } else if (vis.data.indexPattern) {
-        indexPatterns = [vis.data.indexPattern];
-      }
-
-      const capabilities = {
-        visualizeSave: Boolean(getCapabilities().visualize.save),
-        dashboardSave: Boolean(getCapabilities().dashboard?.showWriteControls),
-      };
       const startDeps = await deps.start();
 
       return await withHandlingMissedSavedObject(
         startDeps.core,
         async () => {
-          return await createVisualizeEmbeddableAsync(
+          let indexPatterns: DataView[] = [];
+
+          if (vis.type.getUsedIndexPattern) {
+            indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
+          } else if (vis.data.indexPattern) {
+            indexPatterns = [vis.data.indexPattern];
+          }
+
+          const capabilities = {
+            visualizeSave: Boolean(getCapabilities().visualize.save),
+            dashboardSave: Boolean(getCapabilities().dashboard?.showWriteControls),
+          };
+
+          return createVisualizeEmbeddableAsync(
             getTimeFilter(),
             {
               vis,
@@ -83,8 +82,17 @@ export const createVisEmbeddableFromObject =
         },
         input,
         parent,
-        { id: input.id, type: SAVED_VIS_TYPE },
-        { type: DATA_VIEW_SAVED_OBJECT_TYPE }
+        visId ? { id: visId, type: SAVED_VIS_TYPE } : { id: parent?.id ?? '', type: 'dashboard' },
+        { type: DATA_VIEW_SAVED_OBJECT_TYPE },
+        async () => {
+          if (visId) {
+            await startDeps.core.application.navigateToUrl(editUrl, {
+              forceRedirect: true,
+              skipAppLeave: true,
+            });
+          }
+          window.location.reload();
+        }
       );
     } catch (e) {
       return e instanceof ErrorEmbeddable ? e : new ErrorEmbeddable(e, input, parent);
