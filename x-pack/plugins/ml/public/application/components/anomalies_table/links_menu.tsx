@@ -8,6 +8,7 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
+import { escapeKuery } from '@kbn/es-query';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -36,7 +37,7 @@ import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_util
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 // @ts-ignore
-import { escapeDoubleQuotes } from '../../explorer/explorer_utils';
+import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import type {
@@ -75,15 +76,29 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const getMapsLink = async (anomaly: AnomaliesTableRecord) => {
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
-    const anomalyBucketStart = moment(anomaly.time).toISOString();
+    const anomalyBucketStartMoment = moment(anomaly.time).tz(getDateFormatTz());
+    const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
+    const anomalyBucketEnd = anomalyBucketStartMoment
+      .add(anomaly.source.bucket_span, 'seconds')
+      .toISOString();
     const timeRange = data.query.timefilter.timefilter.getTime();
+
     // Set 'from' in timeRange to start bucket time for the specific anomaly
     timeRange.from = anomalyBucketStart;
+    timeRange.to = anomalyBucketEnd;
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator?.getLocation({
       initialLayers,
       timeRange,
+      ...(anomaly.entityName && anomaly.entityValue
+        ? {
+            query: {
+              language: SEARCH_QUERY_LANGUAGE.KUERY,
+              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}`,
+            },
+          }
+        : {}),
     });
     return location;
   };
@@ -604,7 +619,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key="view_in_maps"
-            icon="logoMaps"
+            icon="gisApp"
             onClick={async () => {
               const mapsLink = await getMapsLink(anomaly);
               await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
@@ -613,7 +628,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           >
             <FormattedMessage
               id="xpack.ml.anomaliesTable.linksMenu.viewInMapsLabel"
-              defaultMessage="View in maps"
+              defaultMessage="View in Maps"
             />
           </EuiContextMenuItem>
         );
