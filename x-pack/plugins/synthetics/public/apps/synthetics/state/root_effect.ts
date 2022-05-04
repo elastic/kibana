@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { all, fork } from 'redux-saga/effects';
+import { fetchIndexStatusEffect } from './index_status';
 
-export const SCREENSHOT_IMAGE_ALT = (pageName: string) =>
-  i18n.translate('xpack.securitySolution.landing.threatHunting.pageImageAlt', {
-    values: { pageName },
-    defaultMessage: '{pageName} page screenshot',
-  });
+export const rootEffect = function* root(): Generator {
+  yield all([fork(fetchIndexStatusEffect)]);
+};
