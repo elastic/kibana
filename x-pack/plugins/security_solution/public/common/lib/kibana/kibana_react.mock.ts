@@ -158,6 +158,10 @@ export const createStartServicesMock = (
     theme: {
       theme$: themeServiceMock.createTheme$(),
     },
+    timelines: {
+      getLastUpdated: jest.fn(),
+      getFieldBrowser: jest.fn(),
+    },
   } as unknown as StartServices;
 };
 
