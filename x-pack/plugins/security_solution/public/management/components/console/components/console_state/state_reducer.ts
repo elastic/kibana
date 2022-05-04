@@ -19,10 +19,12 @@ export const initiateState = ({
   commands,
   scrollToBottom,
   dataTestSubj,
+  HelpComponent,
 }: InitialStateInterface): ConsoleDataState => {
   return {
     commands: getBuiltinCommands().concat(commands),
     scrollToBottom,
+    HelpComponent,
     dataTestSubj,
     commandHistory: [],
   };

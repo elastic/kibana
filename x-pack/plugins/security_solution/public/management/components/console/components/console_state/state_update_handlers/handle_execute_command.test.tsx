@@ -15,13 +15,13 @@ import { ConsoleProps } from '../../../types';
 describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let commandServiceMock: ConsoleTestSetup['commandServiceMock'];
+  let commands: ConsoleTestSetup['commands'];
   let enterCommand: ConsoleTestSetup['enterCommand'];
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
-    ({ commandServiceMock, enterCommand } = testSetup);
+    ({ commands, enterCommand } = testSetup);
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
@@ -34,17 +34,16 @@ describe('When a Console command is entered by the user', () => {
     await waitFor(() => {
       expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
         // `+2` to account for builtin commands
-        commandServiceMock.getCommandList().length + 2
+        commands.length + 2
       );
     });
   });
 
   it('should display custom help output when Command service has `getHelp()` defined', async () => {
-    commandServiceMock.HelpComponent = () => {
+    const HelpComponent: React.FunctionComponent = () => {
       return <div data-test-subj="custom-help">{'help output'}</div>;
     };
-    commandServiceMock.HelpComponent.displayName = 'helpContent';
-    render();
+    render({ HelpComponent });
     enterCommand('help');
 
     await waitFor(() => {
@@ -72,8 +71,7 @@ describe('When a Console command is entered by the user', () => {
   });
 
   it('should should custom command `--help` output when Command service defines `getCommandUsage()`', async () => {
-    const commandList = commandServiceMock.getCommandList();
-    const cmd2 = commandList.find((command) => command.name === 'cmd2');
+    const cmd2 = commands.find((command) => command.name === 'cmd2');
 
     if (cmd2) {
       cmd2.HelpComponent = () => {
@@ -81,8 +79,6 @@ describe('When a Console command is entered by the user', () => {
       };
       cmd2.HelpComponent.displayName = 'HelpComponent';
     }
-
-    commandServiceMock.getCommandList.mockReturnValue(commandList);
 
     render();
     enterCommand('cmd2 --help');
