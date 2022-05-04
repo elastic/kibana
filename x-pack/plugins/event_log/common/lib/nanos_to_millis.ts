@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+const ONE_MILLION = BigInt(1000 * 1000);
 
-export const SCREENSHOT_IMAGE_ALT = (pageName: string) =>
-  i18n.translate('xpack.securitySolution.landing.threatHunting.pageImageAlt', {
-    values: { pageName },
-    defaultMessage: '{pageName} page screenshot',
-  });
+export function nanosToMillis(nanos: string | number): number {
+  return Number(BigInt(nanos) / ONE_MILLION);
+}
