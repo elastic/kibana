@@ -60,4 +60,4 @@ Related Dashboard: `[Osquery Manager] OSSEC rootkit pack`
 |Monitor for evidence of Windows attacks.
 |https://github.com/osquery/osquery/tree/master/packs[Osquery]
 |8.2
-
+|===
