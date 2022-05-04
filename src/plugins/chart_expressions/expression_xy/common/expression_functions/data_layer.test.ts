@@ -103,4 +103,16 @@ describe('dataLayerConfig', () => {
       )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
+
+  test('throws the error if showLines is provided to the not line/area chart', async () => {
+    const { data } = sampleArgs();
+
+    expect(
+      dataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', showLines: true },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
 });

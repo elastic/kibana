@@ -8,4 +8,6 @@ exports[`dataLayerConfig throws the error if markSizeAccessor is provided to the
 
 exports[`dataLayerConfig throws the error if pointsRadius is provided to the not line/area chart 1`] = `"\`pointsRadius\` can be applied only for line or area charts"`;
 
+exports[`dataLayerConfig throws the error if showLines is provided to the not line/area chart 1`] = `"Lines visibility can be controlled only at line charts"`;
+
 exports[`dataLayerConfig throws the error if showPoints is provided to the not line/area chart 1`] = `"\`showPoints\` can be applied only for line or area charts"`;
