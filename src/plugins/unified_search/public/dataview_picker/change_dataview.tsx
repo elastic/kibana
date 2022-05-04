@@ -63,6 +63,7 @@ export function ChangeDataView({
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
+  const [triggerLabel, setTriggerLabel] = useState('');
   const kibana = useKibana<IDataPluginServices>();
   const { application, data, storage } = kibana.services;
   const styles = ChangeDataViewStyles({ fullWidth: trigger.fullWidth });
@@ -95,6 +96,12 @@ export function ChangeDataView({
     fetchDataViews();
   }, [data, currentDataViewId]);
 
+  useEffect(() => {
+    if (trigger.label) {
+      setTriggerLabel(trigger.label);
+    }
+  }, [trigger.label]);
+
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
@@ -113,7 +120,7 @@ export function ChangeDataView({
         fullWidth={fullWidth}
         {...rest}
       >
-        {label}
+        {triggerLabel}
       </EuiButton>
     );
   };
