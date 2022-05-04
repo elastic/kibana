@@ -94,6 +94,7 @@ export function getErrorsForHistogramField(
 ) {
   // check if has field of histogram type
   const column = layer.columns[columnId];
+  if (!column) return;
   const { operationType } = column;
   const operationDefinition = operationType ? operationDefinitionMap[operationType] : undefined;
   const fieldNames =
