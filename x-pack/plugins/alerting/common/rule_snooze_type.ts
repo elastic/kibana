@@ -8,7 +8,7 @@
 export type RuleSnooze = Array<{
   startTime: string;
   duration: number;
-  timeZone?: string;
+  timeZone: string;
   id?: string;
   rRule?: string;
 }>;

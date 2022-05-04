@@ -1709,6 +1709,7 @@ export class RulesClient {
             snoozeSchedule: (attributes.snoozeSchedule ?? []).concat({
               startTime: new Date().toISOString(),
               duration: Date.parse(snoozeEndTime) - Date.now(),
+              timeZone: 'UTC',
             }),
             muteAll: false,
           };

@@ -186,6 +186,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     snoozeSchedule: {
+      type: 'nested',
       properties: {
         id: {
           type: 'keyword',
