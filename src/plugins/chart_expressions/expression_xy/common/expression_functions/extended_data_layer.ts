@@ -7,11 +7,9 @@
  */
 
 import { ExtendedDataLayerFn } from '../types';
-import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
+import { EXTENDED_DATA_LAYER } from '../constants';
 import { strings } from '../i18n';
 import { commonDataLayerArgs } from './common_data_layer_args';
-import { validateDataLayer } from './validate';
-import { getShowLines } from '../helpers';
 
 export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   name: EXTENDED_DATA_LAYER,
@@ -30,20 +28,8 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
       help: strings.getLayerIdHelp(),
     },
   },
-  fn(input, args) {
-    const table = args.table ?? input;
-
-    validateDataLayer(args, table);
-
-    const showLines = getShowLines(args);
-
-    return {
-      type: EXTENDED_DATA_LAYER,
-      ...args,
-      accessors: args.accessors ?? [],
-      layerType: LayerTypes.DATA,
-      table,
-      showLines,
-    };
+  async fn(input, args, context) {
+    const { extendedDataLayerFn } = await import('./extended_data_layer_fn');
+    return await extendedDataLayerFn(input, args, context);
   },
 };

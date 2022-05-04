@@ -13,9 +13,7 @@ import {
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { Filter } from '@kbn/es-query';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from '@kbn/data-plugin/public';
+import type { Query, Filter } from '@kbn/es-query';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { PersistableFilter } from '../../common';
@@ -499,10 +497,6 @@ const fixValueLabelsInXY: SavedObjectMigrationFn<
   LensDocShape830<XYVisualizationStatePre830>,
   LensDocShape830<XYVisualizationState830 | unknown>
 > = (doc) => {
-  if (doc.attributes.visualizationType !== 'lnsXY') {
-    return doc;
-  }
-
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
 };

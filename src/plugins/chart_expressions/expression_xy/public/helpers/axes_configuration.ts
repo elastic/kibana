@@ -8,12 +8,7 @@
 
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
-import {
-  CommonXYDataLayerConfig,
-  CommonXYReferenceLineLayerConfig,
-  ExtendedYConfig,
-  YConfig,
-} from '../../common';
+import { AxisExtentConfig, CommonXYDataLayerConfig, ExtendedYConfig, YConfig } from '../../common';
 import { isDataLayer } from './visualization';
 
 export interface Series {
@@ -39,9 +34,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>
-) {
+export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -111,7 +104,7 @@ export function groupAxesByType(
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
+  layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {
@@ -138,4 +131,18 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
+}
+
+export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
+  const inclusiveZeroError =
+    extent &&
+    hasBarOrArea &&
+    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
+      (extent.upperBound !== undefined && extent.upperBound) < 0);
+  const boundaryError =
+    extent &&
+    extent.lowerBound !== undefined &&
+    extent.upperBound !== undefined &&
+    extent.upperBound <= extent.lowerBound;
+  return { inclusiveZeroError, boundaryError };
 }

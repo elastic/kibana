@@ -19,7 +19,7 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       validate: { body: bodySchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const template = request.body as TypeOf<typeof bodySchema>;
 
       try {
