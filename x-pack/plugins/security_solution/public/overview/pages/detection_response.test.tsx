@@ -49,14 +49,22 @@ jest.mock('../../common/containers/sourcerer', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 
-const defaultUseUserInfoReturn = {
-  signalIndexName: '',
-  canUserREAD: true,
+const defaultUseAlertsPrivilegesReturn = {
+  hasKibanaREAD: true,
   hasIndexRead: true,
 };
-const mockUseUserInfo = jest.fn(() => defaultUseUserInfoReturn);
-jest.mock('../../detections/components/user_info', () => ({
-  useUserInfo: () => mockUseUserInfo(),
+
+const defaultUseSignalIndexReturn = {
+  signalIndexName: '',
+};
+
+const mockUseSignalIndex = jest.fn(() => defaultUseSignalIndexReturn);
+jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => ({
+  useSignalIndex: () => mockUseSignalIndex(),
+}));
+const mockUseAlertsPrivileges = jest.fn(() => defaultUseAlertsPrivilegesReturn);
+jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
+  useAlertsPrivileges: () => mockUseAlertsPrivileges(),
 }));
 
 const defaultUseCasesPermissionsReturn = { read: true };
@@ -73,7 +81,8 @@ describe('DetectionResponse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
-    mockUseUserInfo.mockReturnValue(defaultUseUserInfoReturn);
+    mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
+    mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
     mockUseCasesPermissions.mockReturnValue(defaultUseCasesPermissionsReturn);
   });
 
@@ -133,9 +142,9 @@ describe('DetectionResponse', () => {
   });
 
   it('should not render alerts data sections if user has not index read permission', () => {
-    mockUseUserInfo.mockReturnValue({
-      ...defaultUseUserInfoReturn,
+    mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: false,
+      hasKibanaREAD: true,
     });
 
     const result = render(
@@ -157,9 +166,9 @@ describe('DetectionResponse', () => {
   });
 
   it('should not render alerts data sections if user has not kibana read permission', () => {
-    mockUseUserInfo.mockReturnValue({
-      ...defaultUseUserInfoReturn,
-      canUserREAD: false,
+    mockUseAlertsPrivileges.mockReturnValue({
+      hasIndexRead: true,
+      hasKibanaREAD: false,
     });
 
     const result = render(
@@ -203,8 +212,8 @@ describe('DetectionResponse', () => {
 
   it('should render page permissions message if user has any read permission', () => {
     mockUseCasesPermissions.mockReturnValue({ read: false });
-    mockUseUserInfo.mockReturnValue({
-      ...defaultUseUserInfoReturn,
+    mockUseAlertsPrivileges.mockReturnValue({
+      hasKibanaREAD: true,
       hasIndexRead: false,
     });
 
