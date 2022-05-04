@@ -257,7 +257,12 @@ export class ElasticV3ServerShipper implements IShipper {
     return queue;
   }
 
-  private async sendEvents(events: Event[]) {
+  /**
+   * Sends the events to the remote URL and updates the telemetry counters based on the response.
+   * @param events The events to send.
+   * @protected This can be directly called from other custom shipper extensions.
+   */
+  protected async sendEvents(events: Event[]) {
     try {
       const code = await this.makeRequest(events);
       this.reportTelemetryCounters(events, { code });

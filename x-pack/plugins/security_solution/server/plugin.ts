@@ -125,7 +125,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     // Cache up to three artifacts with a max retention of 5 mins each
     this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryEventsSender = new TelemetryEventsSender(
+      this.logger,
+      context.env.packageInfo.version
+    );
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
     this.logger.debug('plugin initialized');
@@ -320,6 +323,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.telemetryEventsSender.setup(
+      core.analytics,
       this.telemetryReceiver,
       plugins.telemetry,
       plugins.taskManager,
