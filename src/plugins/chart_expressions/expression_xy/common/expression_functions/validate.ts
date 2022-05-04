@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isValidInterval } from '@kbn/data-plugin/common';
 import { AxisExtentModes, ValueLabelModes } from '../constants';
 import {
   AxisExtentConfigResult,
@@ -36,6 +37,10 @@ const errors = {
   dataBoundsForNotLineChartError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',
+    }),
+  isInvalidIntervalError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
+      defaultMessage: 'Provided x-axis interval is invalid',
     }),
 };
 
@@ -99,5 +104,11 @@ export const validateValueLabels = (
 ) => {
   if ((!hasBar || !hasNotHistogramBars) && valueLabels !== ValueLabelModes.HIDE) {
     throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
+  }
+};
+
+export const validateXAxisInterval = (xAxisInterval?: string) => {
+  if (xAxisInterval && !isValidInterval(xAxisInterval)) {
+    throw new Error(errors.isInvalidIntervalError());
   }
 };

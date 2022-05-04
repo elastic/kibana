@@ -203,6 +203,7 @@ export interface XYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  xAxisInterval?: string;
 }
 
 export interface LayeredXYArgs {
@@ -226,6 +227,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  xAxisInterval?: string;
 }
 
 export interface XYProps {

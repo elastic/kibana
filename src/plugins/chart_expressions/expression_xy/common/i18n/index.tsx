@@ -113,6 +113,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getXAxisIntervalHelp: () =>
+    i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+      defaultMessage: 'Specifies the interval for x-axis',
+    }),
   getDataLayerFnHelp: () =>
     i18n.translate('expressionXY.dataLayer.help', {
       defaultMessage: `Configure a layer in the xy chart`,

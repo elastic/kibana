@@ -18,6 +18,7 @@ import {
   validateExtent,
   validateFillOpacity,
   validateValueLabels,
+  validateXAxisInterval,
 } from './validate';
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
@@ -47,6 +48,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
   validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
   validateFillOpacity(args.fillOpacity, hasArea);
+  validateXAxisInterval(args.xAxisInterval);
 
   const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
 

@@ -10,11 +10,13 @@ import { XY_VIS_RENDERER } from '../constants';
 import { appendLayerIds } from '../helpers';
 import { LayeredXyVisFn } from '../types';
 import { logDatatables } from '../utils';
+import { validateXAxisInterval } from './validate';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
 
   logDatatables(layers, handlers);
+  validateXAxisInterval(args.xAxisInterval);
 
   return {
     type: 'render',
