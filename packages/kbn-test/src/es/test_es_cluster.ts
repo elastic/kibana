@@ -301,7 +301,7 @@ export function createTestEsCluster<
 
       const uuid = Uuid.v4();
       const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${uuid}.tar.gz`);
-      log.error('[es] debug files found, archiving install to', debugPath);
+      log.error(`[es] debug files found, archiving install to ${debugPath}`);
       const archiver = createArchiver('tar', { gzip: true });
       const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
       archiver.directory(config.installPath, `es_debug_${uuid}`);
