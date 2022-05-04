@@ -13,6 +13,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     describe('', function () {
       this.tags('ciGroup11');
 
+      // !!NOTE: For new routes that do any updates on a rule, please ensure that you are including the legacy
+      // action migration code. We are monitoring legacy action telemetry to clean up once we see their
+      // existence being near 0.
       loadTestFile(require.resolve('./aliases'));
       loadTestFile(require.resolve('./add_actions'));
       loadTestFile(require.resolve('./update_actions'));
@@ -33,6 +36,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./get_rule_execution_events'));
       loadTestFile(require.resolve('./import_rules'));
       loadTestFile(require.resolve('./import_export_rules'));
+      loadTestFile(require.resolve('./legacy_actions_migrations'));
       loadTestFile(require.resolve('./read_rules'));
       loadTestFile(require.resolve('./resolve_read_rules'));
       loadTestFile(require.resolve('./update_rules'));

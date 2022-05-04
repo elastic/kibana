@@ -23,8 +23,17 @@ import { patchRulesBulkRoute } from './patch_rules_bulk_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { legacyMigrate } from '../../rules/utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe('patch_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -40,6 +49,8 @@ describe('patch_rules_bulk', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // update succeeds
 
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
     patchRulesBulkRoute(server.router, ml, logger);
   });
 
@@ -54,6 +65,7 @@ describe('patch_rules_bulk', () => {
 
     test('returns an error in the response when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(
         getPatchBulkRequest(),
         requestContextMock.convertContext(context)
@@ -148,6 +160,8 @@ describe('patch_rules_bulk', () => {
 
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
+
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
