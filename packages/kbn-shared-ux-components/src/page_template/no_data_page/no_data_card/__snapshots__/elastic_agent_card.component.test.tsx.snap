@@ -3,82 +3,31 @@
 exports[`ElasticAgentCardComponent props button 1`] = `
 <NoDataCard
   button="Button"
-  currentAppId$={
-    Observable {
-      "source": Subject {
-        "closed": false,
-        "currentObservers": null,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   image="test-file-stub"
-  navigateToUrl={[MockFunction]}
   title="Add Elastic Agent"
 />
 `;
 
 exports[`ElasticAgentCardComponent props href 1`] = `
 <NoDataCard
-  currentAppId$={
-    Observable {
-      "source": Subject {
-        "closed": false,
-        "currentObservers": null,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   href="some path"
   image="test-file-stub"
-  navigateToUrl={[MockFunction]}
   title="Add Elastic Agent"
 />
 `;
 
 exports[`ElasticAgentCardComponent renders 1`] = `
 <NoDataCard
-  currentAppId$={
-    Observable {
-      "source": Subject {
-        "closed": false,
-        "currentObservers": null,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   image="test-file-stub"
-  navigateToUrl={[MockFunction]}
   title="Add Elastic Agent"
 />
 `;
 
 exports[`ElasticAgentCardComponent renders with canAccessFleet false 1`] = `
 <NoDataCard
-  currentAppId$={
-    Observable {
-      "source": Subject {
-        "closed": false,
-        "currentObservers": null,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
   description={
     <EuiTextColor
       color="default"
@@ -88,7 +37,6 @@ exports[`ElasticAgentCardComponent renders with canAccessFleet false 1`] = `
   }
   image="test-file-stub"
   isDisabled={true}
-  navigateToUrl={[MockFunction]}
   title={
     <EuiTextColor
       color="default"

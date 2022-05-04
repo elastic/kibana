@@ -8,26 +8,11 @@
 
 import { defaultConfig } from '@kbn/storybook';
 
-const storybookConfig = {
+module.exports = {
   ...defaultConfig,
   stories: [
-    '../../../../packages/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../packages/kbn-shared-ux*/**/*.stories.+(tsx|mdx)',
+    '../../../shared-ux/**/*.stories.+(tsx|mdx)',
+    '../../../kbn-shared-ux*/**/*.stories.+(tsx|mdx)',
     '../../../../src/plugins/shared_ux/**/*.stories.+(tsx|mdx)',
   ],
-
-  // @ts-ignore
-  webpackFinal: (config: any, options: any) => {
-    const { webpackFinal } = defaultConfig;
-    return {
-      ...(webpackFinal ? webpackFinal(config, options) : {}),
-
-      watch: true,
-      watchOptions: {
-        ignored: ['^(?!.*shared-ux)'],
-      },
-    };
-  },
 };
-
-module.exports = storybookConfig;
