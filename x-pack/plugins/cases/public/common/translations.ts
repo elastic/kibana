@@ -267,6 +267,12 @@ export const CASE_ALERT_SUCCESS_TOAST = (title: string) =>
     defaultMessage: 'An alert has been added to "{title}"',
   });
 
+export const CASE_ALERT_PLURAL_SUCCESS_TOAST = (title: string) =>
+  i18n.translate('xpack.cases.actions.caseAlertSuccessToast', {
+    values: { title },
+    defaultMessage: 'Alerts have been added to "{title}"',
+  });
+
 export const CASE_ALERT_SUCCESS_SYNC_TEXT = i18n.translate(
   'xpack.cases.actions.caseAlertSuccessSyncText',
   {
