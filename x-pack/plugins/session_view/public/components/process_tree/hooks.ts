@@ -71,16 +71,22 @@ export class ProcessImpl implements Process {
     this.alerts = this.alerts.concat(alert);
   }
 
+  addChild(child: Process) {
+    this.children = this.children.concat(child);
+  }
+
   clearSearch() {
     this.searchMatched = null;
   }
 
   getChildren(verboseMode: boolean) {
-    let children = this.children;
+    return this.getChildrenMemo(this.children, this.orphans, verboseMode);
+  }
 
+  getChildrenMemo = memoizeOne((children: Process[], orphans: Process[], verboseMode: boolean) => {
     // if there are orphans, we just render them inline with the other child processes (currently only session leader does this)
-    if (this.orphans.length) {
-      children = [...children, ...this.orphans];
+    if (orphans.length) {
+      children = [...children, ...orphans];
     }
     // When verboseMode is false, we filter out noise via a few techniques.
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
@@ -104,7 +110,7 @@ export class ProcessImpl implements Process {
     }
 
     return children.sort(sortProcesses);
-  }
+  });
 
   isVerbose() {
     const {

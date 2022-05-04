@@ -97,7 +97,7 @@ interface SingleSearchAfterAndAudit {
   track_total_hits?: boolean | undefined;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
-  sort?: [{ [column: string]: string }];
+  sort?: estypes.SortOptions | undefined;
   lastSortIds?: Array<string | number> | undefined;
 }
 
@@ -616,7 +616,7 @@ export class AlertsClient {
     track_total_hits?: boolean | undefined;
     _source?: string[] | undefined;
     size?: number | undefined;
-    sort?: [{ [column: string]: string }] | undefined;
+    sort?: estypes.SortOptions | undefined;
     lastSortIds?: string[] | undefined;
   }) {
     try {

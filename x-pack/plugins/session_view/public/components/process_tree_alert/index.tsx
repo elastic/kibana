@@ -31,6 +31,7 @@ export const ProcessTreeAlert = ({
 }: ProcessTreeAlertDeps) => {
   const styles = useStyles({ isInvestigated, isSelected });
 
+  const { event } = alert;
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export const ProcessTreeAlert = ({
       />
       <EuiIcon type="alert" color="danger" />
       <EuiText css={styles.alertName} size="s">
-        {dataOrDash(name)}
+        {dataOrDash(name)} (event.action: {event?.action})
       </EuiText>
       <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
         {dataOrDash(status)}

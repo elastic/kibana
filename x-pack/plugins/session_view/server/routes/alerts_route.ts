@@ -15,8 +15,10 @@ import {
   ALERTS_PER_PAGE,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   ALERT_UUID_PROPERTY,
+  ALERT_ORIGINAL_TIME_PROPERTY,
   PREVIEW_ALERTS_INDEX,
 } from '../../common/constants';
+
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
 export const registerAlertsRoute = (
@@ -31,26 +33,26 @@ export const registerAlertsRoute = (
           sessionEntityId: schema.string(),
           investigatedAlertId: schema.maybe(schema.string()),
           cursor: schema.maybe(schema.string()),
-          forward: schema.maybe(schema.boolean()),
+          range: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
     async (_context, request, response) => {
       const client = await ruleRegistry.getRacClientWithRequest(request);
-      const { sessionEntityId, investigatedAlertId, cursor, forward } = request.query;
-      const body = await doSearch(client, sessionEntityId, investigatedAlertId, cursor, forward);
+      const { sessionEntityId, investigatedAlertId, range, cursor } = request.query;
+      const body = await searchAlerts(client, sessionEntityId, investigatedAlertId, range, cursor);
 
       return response.ok({ body });
     }
   );
 };
 
-export const doSearch = async (
+export const searchAlerts = async (
   client: AlertsClient,
   sessionEntityId: string,
   investigatedAlertId?: string,
-  cursor?: string,
-  forward?: boolean
+  range?: string[],
+  cursor?: string
 ) => {
   const indices = (await client.getAuthorizedAlertsIndices(['siem']))?.filter(
     (index) => index !== PREVIEW_ALERTS_INDEX
@@ -65,11 +67,6 @@ export const doSearch = async (
       bool: {
         // OR condition
         should: [
-          {
-            term: {
-              [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId,
-            },
-          },
           // to ensure the investigated alert is always returned (due to maximum loaded alerts per session)
           investigatedAlertId && {
             term: {
@@ -77,12 +74,27 @@ export const doSearch = async (
             },
           },
         ].filter((item) => !!item),
+        must: [
+          {
+            term: {
+              [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId,
+            },
+          },
+          range && {
+            range: {
+              [ALERT_ORIGINAL_TIME_PROPERTY]: {
+                gte: range[0],
+                lte: range[1],
+              },
+            },
+          },
+        ],
       },
     },
     track_total_hits: true,
     size: ALERTS_PER_PAGE,
     index: indices.join(','),
-    sort: [{ 'kibana.alert.original_time': forward ? 'asc' : 'desc' }],
+    sort: { [ALERT_ORIGINAL_TIME_PROPERTY]: 'asc' },
     lastSortIds: cursor ? [cursor] : undefined,
   });
 

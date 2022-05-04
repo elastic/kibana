@@ -96,18 +96,10 @@ export const buildProcessTree = (
 
     if (parentProcess) {
       process.parent = parentProcess; // handy for recursive operations (like auto expand)
-
-      if (backwardDirection) {
-        parentProcess.children.unshift(process);
-      } else {
-        parentProcess.children.push(process);
-      }
-    } else if (!orphans?.includes(process)) {
-      // if no parent process, process is probably orphaned
-      if (backwardDirection) {
-        orphans?.unshift(process);
-      } else {
-        orphans?.push(process);
+      parentProcess.addChild(process);
+    } else {
+      if (!orphans.includes(process)) {
+        orphans.push(process);
       }
     }
   });
@@ -120,13 +112,16 @@ export const buildProcessTree = (
 
     if (parentProcessId) {
       const parentProcess = processMap[parentProcessId];
-      process.parent = parentProcess; // handy for recursive operations (like auto expand)
-      if (parentProcess !== undefined) {
-        parentProcess.children.push(process);
+
+      if (parentProcess) {
+        process.parent = parentProcess;
+        parentProcess.addChild(process);
+
+        return;
       }
-    } else {
-      newOrphans.push(process);
     }
+
+    newOrphans.push(process);
   });
 
   return newOrphans;

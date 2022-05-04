@@ -113,7 +113,7 @@ export const useFetchSessionViewAlerts = (
 
       const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
-      return events;
+      return [] || events;
     },
     {
       refetchOnWindowFocus: false,

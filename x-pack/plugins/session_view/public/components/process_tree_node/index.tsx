@@ -202,17 +202,7 @@ export function ProcessTreeNode({
     }
   }, [hasExec, process.parent]);
 
-  const children = useMemo(() => {
-    if (searchResults) {
-      // noop
-      // Only used to break cache on this memo when search changes. We need this ref
-      // to avoid complaints from the useEffect dependency eslint rule.
-      // This fixes an issue when verbose mode is OFF and there are matching results on
-      // hidden processes.
-    }
-
-    return process.getChildren(verboseMode);
-  }, [process, verboseMode, searchResults]);
+  const children = process.getChildren(verboseMode);
 
   if (!processDetails?.process) {
     return null;
@@ -229,7 +219,7 @@ export function ProcessTreeNode({
     user,
   } = processDetails.process;
 
-  const shouldRenderChildren = childrenExpanded && children?.length > 0;
+  const shouldRenderChildren = isSessionLeader || (childrenExpanded && children?.length > 0);
   const childrenTreeDepth = depth + 1;
 
   const showUserEscalation = !isSessionLeader && !!user?.name && user.name !== parent?.user?.name;

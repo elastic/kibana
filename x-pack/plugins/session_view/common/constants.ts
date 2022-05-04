@@ -14,6 +14,7 @@ export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
 export const ALERT_UUID_PROPERTY = 'kibana.alert.uuid';
 export const KIBANA_DATE_FORMAT = 'MMM DD, YYYY @ HH:mm:ss.SSS';
+export const ALERT_ORIGINAL_TIME_PROPERTY = 'kibana.alert.original_time';
 export const ALERT_STATUS = {
   OPEN: 'open',
   ACKNOWLEDGED: 'acknowledged',
@@ -41,11 +42,11 @@ export const PROCESS_EVENTS_PER_PAGE = 1000;
 // causes a session to only list and highlight up to 1000 alerts, even though there could
 // be far greater than this amount. UX should be added to let the end user know this is
 // happening and to revise their rule to be more specific.
-export const ALERTS_PER_PAGE = 501;
+export const ALERTS_PER_PAGE = 2000;
 
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  500+
-export const ALERT_COUNT_THRESHOLD = 500;
+export const ALERT_COUNT_THRESHOLD = 999;
 
 // react-query caching keys
 export const QUERY_KEY_PROCESS_EVENTS = 'sessionViewProcessEvents';
