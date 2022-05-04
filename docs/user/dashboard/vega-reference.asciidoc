@@ -246,6 +246,7 @@ url: {
   name: World Countries
 }
 // The result is either a topojson file or a geojson file. 
+// Refer to the Default format for the file at https://maps.elastic.co
 // Get its features to use this data source with the "shape" marks
 // https://vega.github.io/vega/docs/marks/shape/
 // For a topojson file use
