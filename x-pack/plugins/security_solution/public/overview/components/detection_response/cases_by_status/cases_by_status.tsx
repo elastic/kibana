@@ -151,54 +151,46 @@ const CasesByStatusComponent: React.FC = () => {
   );
 
   return (
-    // To Do remove this div once togglequery is updated: #131405
-    <div>
-      <EuiPanel hasBorder>
-        <HeaderSection
-          id={CASES_BY_STATUS_ID}
-          title={CASES_BY_STATUS_SECTION_TITLE}
-          titleSize="s"
-          toggleStatus={toggleStatus}
-          toggleQuery={setToggleStatus}
-          subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
-          showInspectButton={false}
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <LinkButton href={caseUrl} onClick={goToCases}>
-                {VIEW_CASES}
-              </LinkButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </HeaderSection>
-        {!isLoading && toggleStatus && (
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="center"
-            direction="column"
-            gutterSize="s"
-          >
-            <EuiFlexItem>
-              {totalCounts !== 0 && (
-                <EuiText className="eui-textCenter" size="s" grow={false}>
-                  <>
-                    <b>
-                      <FormattedNumber value={totalCounts} />
-                    </b>{' '}
-                    <span> {CASES(totalCounts)}</span>
-                  </>
-                </EuiText>
-              )}
-            </EuiFlexItem>
-            <StyledEuiFlexItem grow={false}>
-              <Wrapper data-test-subj="chart-wrapper">
-                <BarChart configs={barchartConfigs} barChart={chartData} />
-              </Wrapper>
-            </StyledEuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </EuiPanel>
-    </div>
+    <EuiPanel hasBorder>
+      <HeaderSection
+        id={CASES_BY_STATUS_ID}
+        title={CASES_BY_STATUS_SECTION_TITLE}
+        titleSize="s"
+        toggleStatus={toggleStatus}
+        toggleQuery={setToggleStatus}
+        subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+        showInspectButton={false}
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <LinkButton href={caseUrl} onClick={goToCases}>
+              {VIEW_CASES}
+            </LinkButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </HeaderSection>
+      {!isLoading && toggleStatus && (
+        <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
+          <EuiFlexItem>
+            {totalCounts !== 0 && (
+              <EuiText className="eui-textCenter" size="s" grow={false}>
+                <>
+                  <b>
+                    <FormattedNumber value={totalCounts} />
+                  </b>{' '}
+                  <span> {CASES(totalCounts)}</span>
+                </>
+              </EuiText>
+            )}
+          </EuiFlexItem>
+          <StyledEuiFlexItem grow={false}>
+            <Wrapper data-test-subj="chart-wrapper">
+              <BarChart configs={barchartConfigs} barChart={chartData} />
+            </Wrapper>
+          </StyledEuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </EuiPanel>
   );
 };
 
