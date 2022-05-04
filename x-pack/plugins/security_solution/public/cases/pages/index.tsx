@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { TimelineId } from '../../../common/types/timeline';
@@ -94,10 +94,6 @@ const CaseContainerComponent: React.FC = () => {
   }, [dispatch]);
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
-
-  useEffect(() => {
-    cases.api.cases.getCasesMetrics({ features: ['mttr'] }).then(console.log);
-  });
 
   return (
     <SecuritySolutionPageWrapper noPadding>
