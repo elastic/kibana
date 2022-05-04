@@ -14,8 +14,7 @@ Object {
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  min-height: 20px;
-  padding: 4px 16px;
+  padding: 0 16px;
   box-sizing: content-box;
   cursor: pointer;
   background: none;
@@ -29,14 +28,25 @@ Object {
   background: rgba(0,119,204,0.04);
 }
 
-.emotion-0 button {
+.emotion-0.emotion-0 button {
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
   margin-right: 8px;
 }
 
+.emotion-0.emotion-0 button:hover,
+.emotion-0.emotion-0 button:focus,
+.emotion-0.emotion-0 button:focus-within {
+  background-color: rgba(0,109,228,0.2);
+}
+
 .emotion-1 {
+  padding: 4px 0;
+  color: #1a1c21;
+}
+
+.emotion-2 {
   text-transform: capitalize;
 }
 
@@ -65,12 +75,12 @@ Object {
           data-euiicon-type="alert"
         />
         <div
-          class="euiText euiText--small"
+          class="euiText euiText--small emotion-1"
         >
           cmd test alert
         </div>
         <span
-          class="euiBadge euiBadge--iconLeft emotion-1"
+          class="euiBadge euiBadge--iconLeft emotion-2"
           style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
           title="open"
         >
@@ -98,8 +108,7 @@ Object {
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  min-height: 20px;
-  padding: 4px 16px;
+  padding: 0 16px;
   box-sizing: content-box;
   cursor: pointer;
   background: none;
@@ -113,14 +122,25 @@ Object {
   background: rgba(0,119,204,0.04);
 }
 
-.emotion-0 button {
+.emotion-0.emotion-0 button {
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
   margin-right: 8px;
 }
 
+.emotion-0.emotion-0 button:hover,
+.emotion-0.emotion-0 button:focus,
+.emotion-0.emotion-0 button:focus-within {
+  background-color: rgba(0,109,228,0.2);
+}
+
 .emotion-1 {
+  padding: 4px 0;
+  color: #1a1c21;
+}
+
+.emotion-2 {
   text-transform: capitalize;
 }
 
@@ -148,12 +168,12 @@ Object {
         data-euiicon-type="alert"
       />
       <div
-        class="euiText euiText--small"
+        class="euiText euiText--small emotion-1"
       >
         cmd test alert
       </div>
       <span
-        class="euiBadge euiBadge--iconLeft emotion-1"
+        class="euiBadge euiBadge--iconLeft emotion-2"
         style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
         title="open"
       >
