@@ -601,7 +601,7 @@ describe('send_email module', () => {
 
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClientM);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
-    expect(connectorTokenClientM.deleteConnectorTokens.mock.calls.length).toBe(1);
+    expect(connectorTokenClientM.updateOrReplace.mock.calls.length).toBe(1);
 
     delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
     sendEmailGraphApiMock.mock.calls[0].pop();

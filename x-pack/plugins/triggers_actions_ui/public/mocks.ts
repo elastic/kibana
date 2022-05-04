@@ -26,6 +26,8 @@ import {
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
+import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
+import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -63,6 +65,12 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRuleStatusDropdown: (props) => {
       return getRuleStatusDropdownLazy(props);
+    },
+    getRuleStatusFilter: (props) => {
+      return getRuleStatusFilterLazy(props);
+    },
+    getRuleTagBadge: (props) => {
+      return getRuleTagBadgeLazy(props);
     },
   };
 }
