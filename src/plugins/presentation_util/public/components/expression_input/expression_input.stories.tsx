@@ -34,6 +34,7 @@ const font: ExpressionFunctionParameter<Style> = {
   help: 'The CSS font properties for the content. For example, font-family or font-weight.',
   types: ['style'],
   default: '{font}',
+  deprecated: false,
   aliases: [],
   multi: false,
   resolve: true,
