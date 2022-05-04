@@ -104,7 +104,6 @@ export interface DataLayerArgs {
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
-  // palette will always be set on the expression
   palette: PaletteOutput;
   yConfig?: YConfigResult[];
 }
@@ -125,7 +124,6 @@ export interface ExtendedDataLayerArgs {
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
-  // palette will always be set on the expression
   palette: PaletteOutput;
   // palette will always be set on the expression
   yConfig?: YConfigResult[];
@@ -152,11 +150,11 @@ export interface LegendConfig {
   /**
    * Horizontal Alignment of the legend when it is set inside chart
    */
-  horizontalAlignment?: HorizontalAlignment;
+  horizontalAlignment?: typeof HorizontalAlignment.Right | typeof HorizontalAlignment.Left;
   /**
    * Vertical Alignment of the legend when it is set inside chart
    */
-  verticalAlignment?: VerticalAlignment;
+  verticalAlignment?: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
   /**
    * Number of columns when legend is set inside chart
    */
@@ -299,10 +297,6 @@ export type XYExtendedLayerConfig =
   | ExtendedReferenceLineLayerConfig
   | ExtendedAnnotationLayerConfig;
 
-export type XYLayerConfigResult =
-  | DataLayerConfigResult
-  | ReferenceLineLayerConfigResult
-  | AnnotationLayerConfigResult;
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult
@@ -394,7 +388,7 @@ export type LayeredXyVisFn = ExpressionFunctionDefinition<
   typeof LAYERED_XY_VIS,
   Datatable,
   LayeredXYArgs,
-  XYRender
+  Promise<XYRender>
 >;
 
 export type DataLayerFn = ExpressionFunctionDefinition<

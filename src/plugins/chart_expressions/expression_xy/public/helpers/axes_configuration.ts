@@ -8,12 +8,7 @@
 
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
-import {
-  CommonXYDataLayerConfig,
-  CommonXYReferenceLineLayerConfig,
-  ExtendedYConfig,
-  YConfig,
-} from '../../common';
+import { AxisExtentConfig, CommonXYDataLayerConfig, ExtendedYConfig, YConfig } from '../../common';
 import { isDataLayer } from './visualization';
 
 export interface Series {
@@ -39,9 +34,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>
-) {
+export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -111,7 +104,7 @@ export function groupAxesByType(
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
+  layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {

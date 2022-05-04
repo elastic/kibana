@@ -348,6 +348,10 @@ export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): L
 export const commonFixValueLabelsInXY = (
   attributes: LensDocShape830<VisStatePre830>
 ): LensDocShape830<VisState830> => {
+  if (attributes.visualizationType !== 'lnsXY') {
+    return attributes as LensDocShape830<VisState830>;
+  }
+
   const newAttributes: LensDocShape830<VisStatePre830> = cloneDeep(attributes);
   const { visualization } = newAttributes.state;
   const { valueLabels } = visualization;

@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { WithLayerId } from '../types';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
