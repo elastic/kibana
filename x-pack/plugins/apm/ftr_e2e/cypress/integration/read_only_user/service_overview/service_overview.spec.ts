@@ -213,7 +213,6 @@ describe('Service Overview', () => {
       });
     });
 
-    // The enviroment changed to a combobox with suggestion box, cypress is not able to find production to click
     it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
