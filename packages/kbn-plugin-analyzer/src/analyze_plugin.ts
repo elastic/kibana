@@ -11,19 +11,29 @@ import { infraPluginHttpRouteAnalyzer } from './analyzers/infra_plugin_http_rout
 import { Analyzer } from './analyzers/types';
 
 export async function analyzePlugin(pluginTsconfigPath: string) {
+  // eslint-disable-next-line no-console
+  console.log('Loading project...');
   const pluginProject = createPluginProject(pluginTsconfigPath);
 
+  // eslint-disable-next-line no-console
+  console.log('Analyzing plugin...');
   const analysisResults = await Promise.all(
     analyzers.map((analyzer) => analyzer.apply(pluginProject))
   );
 
+  // eslint-disable-next-line no-console
   console.log(JSON.stringify(analysisResults, null, 2));
 }
 
 function createPluginProject(pluginTsconfigPath: string) {
   const project = new Project({
     tsConfigFilePath: pluginTsconfigPath,
+    skipLoadingLibFiles: true,
+    skipAddingFilesFromTsConfig: true,
   });
+
+  // project.enableLogging();
+  project.addSourceFilesFromTsConfig(pluginTsconfigPath);
 
   return project;
 }

@@ -24,8 +24,12 @@ const argumentParser = yargs().command(
         type: 'string',
         normalize: true,
       })
-      .require(['pluginTsconfigPath']),
+      .demandOption(['pluginTsconfigPath']),
   async (args) => {
-    await analyzePlugin(args.pluginTsconfigPath);
+    try {
+      await analyzePlugin(args.pluginTsconfigPath);
+    } catch (err) {
+      console.error(err);
+    }
   }
 );

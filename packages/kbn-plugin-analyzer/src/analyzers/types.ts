@@ -8,9 +8,31 @@
 
 import { Project } from 'ts-morph';
 
-export interface AnalysisResult {}
+export interface AnalysisError {
+  message: string;
+}
+
+export interface AnalysisResult {
+  features: PluginFeature[];
+  errors: AnalysisError[];
+}
 
 export interface Analyzer {
   name: string;
   apply(pluginProject: Project): Promise<AnalysisResult>;
+}
+
+export type PluginFeature = GenericFeature | HttpRouteFeature;
+
+export interface BaseFeature {
+  sourceFilePath: string;
+  lineNumber: number;
+}
+
+export interface GenericFeature extends BaseFeature {
+  description: string;
+}
+
+export interface HttpRouteFeature extends BaseFeature {
+  path: string;
 }
