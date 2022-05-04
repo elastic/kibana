@@ -41,6 +41,7 @@ type GetTableColumns = (params: {
 
 const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuery';
 
+// To Do remove this styled component once togglequery is updated: #131405
 const StyledEuiPanel = styled(EuiPanel)`
   height: fit-content;
 `;

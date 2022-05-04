@@ -11,12 +11,13 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useUserInfo } from '../../detections/components/user_info';
 import { HeaderPage } from '../../common/components/header_page';
 import { useKibana, useGetUserCasesPermissions } from '../../common/lib/kibana';
 
 import { EmptyPage } from '../../common/components/empty_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
@@ -24,8 +25,6 @@ import { UserAlertsTable } from '../components/detection_response/user_alerts_ta
 import * as i18n from './translations';
 import { CasesTable } from '../components/detection_response/cases_table';
 import { CasesByStatus } from '../components/detection_response/cases_by_status';
-import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const NoPrivilegePage: React.FC = () => {
   const { docLinks } = useKibana().services;

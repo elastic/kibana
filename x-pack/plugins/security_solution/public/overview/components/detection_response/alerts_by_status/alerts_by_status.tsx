@@ -49,6 +49,7 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
   padding-top: 45px;
 `;
 
+// To Do remove this styled component once togglequery is updated: #131405
 const StyledEuiPanel = styled(EuiPanel)`
   height: fit-content;
 `;

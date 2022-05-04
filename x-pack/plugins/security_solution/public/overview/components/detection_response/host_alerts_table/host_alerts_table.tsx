@@ -41,6 +41,7 @@ interface HostAlertsTableProps {
 
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
+// To Do remove this styled component once togglequery is updated: #131405
 const StyledEuiPanel = styled(EuiPanel)`
   height: fit-content;
 `;

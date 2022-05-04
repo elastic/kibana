@@ -151,6 +151,7 @@ const CasesByStatusComponent: React.FC = () => {
   );
 
   return (
+    // To Do remove this div once togglequery is updated: #131405
     <div>
       <EuiPanel hasBorder>
         <HeaderSection

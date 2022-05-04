@@ -55,12 +55,6 @@ describe('formatted_date', () => {
       expect(wrapper.text()).toEqual(expectedResult);
     });
 
-    test('it renders the date with the default configuration', () => {
-      const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
-
-      expect(wrapper.text()).toEqual('Feb 25, 2019 @ 22:27:05.000');
-    });
-
     test('it renders a UTC ISO8601 date string supplied when no date format configuration exists', () => {
       mockUseDateFormat.mockImplementation(() => '');
       const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
