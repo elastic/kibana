@@ -25,8 +25,8 @@ import {
   AgentPolicyDebugger,
   IntegrationDebugger,
   PreconfigurationDebugger,
-  FleetIndicesDebugger,
-  SavedObjectsDebugger,
+  FleetIndexDebugger,
+  SavedObjectDebugger,
 } from './components';
 
 // TODO: Evaluate moving this react-query initialization up to the main Fleet app
@@ -45,14 +45,14 @@ const panels = [
     component: <IntegrationDebugger />,
   },
   {
-    title: 'Saved Objects Debugger',
-    id: 'savedObjectsDebugger',
-    component: <SavedObjectsDebugger />,
+    title: 'Saved Object Debugger',
+    id: 'savedObjectDebugger',
+    component: <SavedObjectDebugger />,
   },
   {
-    title: 'Fleet Indices Debugger',
-    id: 'fleetIndicesDebugger',
-    component: <FleetIndicesDebugger />,
+    title: 'Fleet Index Debugger',
+    id: 'fleetIndexDebugger',
+    component: <FleetIndexDebugger />,
   },
   {
     title: 'Preconfiguration Debugger',

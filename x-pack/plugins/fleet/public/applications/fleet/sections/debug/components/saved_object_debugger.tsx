@@ -55,7 +55,7 @@ const fetchSavedObjects = async (type?: string, name?: string) => {
   return response.data?.hits;
 };
 
-export const SavedObjectsDebugger: React.FunctionComponent = () => {
+export const SavedObjectDebugger: React.FunctionComponent = () => {
   const types = [
     { value: 'ingest-agent-policies', text: 'Agent policy' },
     { value: 'ingest-package-policies', text: 'Integration policy' },
@@ -83,8 +83,8 @@ export const SavedObjectsDebugger: React.FunctionComponent = () => {
     <>
       <EuiText grow={false}>
         <p>
-          Search for Saved objects by selecting a type and its name. Use the code block below to
-          diagnose any potential issues.
+          Search for Fleet-related saved objects by selecting a type and name. Use the code block
+          below to diagnose any potential issues.
         </p>
       </EuiText>
 

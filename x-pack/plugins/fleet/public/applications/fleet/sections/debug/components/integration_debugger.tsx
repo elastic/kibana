@@ -19,7 +19,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { useMutation, useQuery } from 'react-query';

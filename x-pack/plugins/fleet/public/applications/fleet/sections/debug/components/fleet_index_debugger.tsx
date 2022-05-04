@@ -36,7 +36,7 @@ const fetchIndex = async (index?: string) => {
   return response;
 };
 
-export const FleetIndicesDebugger = () => {
+export const FleetIndexDebugger = () => {
   const indices = [
     { label: '.fleet-agents', value: '.fleet-agents' },
     { label: '.fleet-actions', value: '.fleet-actions' },
