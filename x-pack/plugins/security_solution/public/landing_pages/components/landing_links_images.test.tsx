@@ -10,7 +10,6 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { LandingLinksImages, NavItem } from './landing_links_images';
-import { SCREENSHOT_IMAGE_ALT } from './translations';
 
 const DEFAULT_NAV_ITEM: NavItem = {
   id: SecurityPageName.overview,
@@ -32,7 +31,7 @@ jest.mock('../../common/lib/kibana/kibana_react', () => {
 });
 
 describe('LandingLinksImages', () => {
-  test('renders', () => {
+  it('renders', () => {
     const label = 'test label';
 
     const { queryByText } = render(
@@ -44,16 +43,16 @@ describe('LandingLinksImages', () => {
     expect(queryByText(label)).toBeInTheDocument();
   });
 
-  test('renders image', () => {
+  it('renders image', () => {
     const image = 'test_image.jpeg';
     const label = 'TEST_LABEL';
 
-    const { getByAltText } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, image, label }]} />
       </TestProviders>
     );
 
-    expect(getByAltText(SCREENSHOT_IMAGE_ALT(label))).toHaveAttribute('src', image);
+    expect(getByTestId('LandingLinksImage')).toHaveAttribute('src', image);
   });
 });
