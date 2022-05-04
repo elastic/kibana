@@ -6,7 +6,7 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { RuleAggregations } from '../../../types';
+import { RuleAggregations, RuleStatus } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
 
@@ -29,15 +29,22 @@ export async function loadRuleAggregations({
   searchText,
   typesFilter,
   actionTypesFilter,
+  ruleExecutionStatusesFilter,
   ruleStatusesFilter,
 }: {
   http: HttpSetup;
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
-  ruleStatusesFilter?: string[];
+  ruleExecutionStatusesFilter?: string[];
+  ruleStatusesFilter?: RuleStatus[];
 }): Promise<RuleAggregations> {
-  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, ruleStatusesFilter });
+  const filters = mapFiltersToKql({
+    typesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+  });
   const res = await http.get<AsApiContract<RuleAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
