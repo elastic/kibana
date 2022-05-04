@@ -64,4 +64,11 @@ export const sessionsDefaultModel: SubsetTimelineModel = {
   columns: sessionsHeaders,
   defaultColumns: sessionsHeaders,
   excludedRowRendererIds: Object.values(RowRendererId),
+  sort: [
+    {
+      columnId: 'process.entry_leader.start',
+      columnType: 'date',
+      sortDirection: 'desc',
+    },
+  ],
 };
