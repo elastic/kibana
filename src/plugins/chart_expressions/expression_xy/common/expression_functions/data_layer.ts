@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DataLayerFn } from '../types';
-import { DATA_LAYER, LayerTypes } from '../constants';
+import { DATA_LAYER } from '../constants';
 import { strings } from '../i18n';
 import { commonDataLayerArgs } from './common_data_layer_args';
-import { validateMarkSizeForChartType } from './validate';
 
 export const dataLayerFunction: DataLayerFn = {
   name: DATA_LAYER,
@@ -20,16 +18,8 @@ export const dataLayerFunction: DataLayerFn = {
   help: strings.getDataLayerFnHelp(),
   inputTypes: ['datatable'],
   args: { ...commonDataLayerArgs },
-  fn(table, args) {
-    validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
-    validateAccessor(args.markSizeAccessor, table.columns);
-
-    return {
-      type: DATA_LAYER,
-      ...args,
-      accessors: args.accessors ?? [],
-      layerType: LayerTypes.DATA,
-      table,
-    };
+  async fn(table, args, context) {
+    const { dataLayerFn } = await import('./data_layer_fn');
+    return await dataLayerFn(table, args, context);
   },
 };
