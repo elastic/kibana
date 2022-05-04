@@ -7,62 +7,48 @@
 
 import { EventEmitter } from 'events';
 import { TileRequest } from './types';
-import type { ILayer } from '../../classes/layers/layer';
 
 export class VectorTileAdapter extends EventEmitter {
-  private _layerLabels: Record<string, string> = {};
-  private _tileRequests: TileRequest[] = [];
+  private _layers: Record<string, { label: string; tileUrl: string }> = {};
+  private _tiles: Array<{ x: number; y: number; z: number }> = [];
 
-  async addTileRequest(layer: ILayer, tileZXYKey: string, tileUrl: string) {
-    const index = this._tileRequests.findIndex(tileRequest => {
-      return tileRequest.layerId === layer.getId() && tileRequest.tileZXYKey === tileZXYKey;
-    });
-    if (index >= 0) {
-      // remove tile request if it already exists
-      this._tileRequests = this._tileRequests.splice(index, 1);
-    }
-
-    this._tileRequests.push({
-      layerId: layer.getId(),
-      tileUrl,
-      tileZXYKey,
-    });
-    this._layerLabels[layer.getId()] = await layer.getDisplayName();
+  addLayer(layerId: string, label: string, tileUrl: string) {
+    this._layers[layerId] = { label, tileUrl };
     this._onChange();
   }
 
   removeLayer(layerId: string) {
-    delete this._layerLabels[layerId];
-    this._tileRequests = this._tileRequests.filter((tileRequest) => {
-      return tileRequest.layerId !== layerId;
-    });
+    delete this._layers[layerId];
     this._onChange();
   }
 
-  reset() {
-    console.log(`reset`);
-    this._tileRequests = [];
-    this._layerLabels = {};
+  setTiles(tiles: Array<{ x: number; y: number; z: number }>) {
+    this._tiles = tiles;
     this._onChange();
   }
 
   getLayerOptions(): Array<{ value: string; label: string }> {
-    return Object.keys(this._layerLabels).map((layerId) => {
+    return Object.keys(this._layers).map((layerId) => {
       return {
         value: layerId,
-        label: this._layerLabels[layerId],
+        label: this._layers[layerId].label,
       };
     });
   }
 
   getTileRequests(layerId: string): TileRequest[] {
-    return this._tileRequests
-      .filter((tileRequest) => {
-        return tileRequest.layerId === layerId;
-      })
-      .sort((a, b) => {
-        return a.tileZXYKey.localeCompare(b.tileZXYKey);
-      });
+    if (!this._layers[layerId]) {
+      return [];
+    }
+
+    const { tileUrl } = this._layers[layerId];
+    return this._tiles.map((tile) => {
+      return {
+        layerId,
+        tileUrl,
+        ...tile,
+      };
+    });
   }
 
   _onChange() {

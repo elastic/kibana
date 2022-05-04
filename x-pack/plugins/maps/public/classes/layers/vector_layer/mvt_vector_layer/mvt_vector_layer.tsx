@@ -227,6 +227,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
     await syncMvtSourceData({
       layerId: this.getId(),
+      layerName: await this.getDisplayName(),
       prevDataRequest: this.getSourceDataRequest(),
       requestMeta: await this._getVectorSourceRequestMeta(
         syncContext.isForceRefresh,

@@ -24,12 +24,14 @@ export interface MvtSourceData {
 
 export async function syncMvtSourceData({
   layerId,
+  layerName,
   prevDataRequest,
   requestMeta,
   source,
   syncContext,
 }: {
   layerId: string;
+  layerName: string;
   prevDataRequest: DataRequest | undefined;
   requestMeta: VectorSourceRequestMeta;
   source: IMvtVectorSource;
@@ -71,6 +73,9 @@ export async function syncMvtSourceData({
         : prevData.refreshToken;
 
     const tileUrl = await source.getTileUrl(requestMeta, refreshToken);
+    if (source.isESSource()) {
+      source.getInspectorAdapters()?.vectorTiles.addLayer(layerId, layerName, tileUrl);
+    }
     const sourceData = {
       tileUrl,
       tileSourceLayer: source.getTileSourceLayer(),

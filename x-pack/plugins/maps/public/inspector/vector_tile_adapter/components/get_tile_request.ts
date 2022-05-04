@@ -19,17 +19,7 @@ function getSearchParams(url: string): URLSearchParams {
   return new URLSearchParams(queryString);
 }
 
-function getZXY(zxyString: string) {
-  const split = zxyString.split('/');
-  if (split.length !== 3) {
-    throw new Error('Unable to extract {z}/{x}/{y} coordinates from tile request');
-  }
-
-  return { z: parseInt(split[0], 10), x: parseInt(split[1], 10), y: parseInt(split[2], 10) };
-}
-
 export function getTileRequest(tileRequest: TileRequest): { path?: string; body?: object } {
-  const { z, x, y } = getZXY(tileRequest.tileZXYKey);
   const searchParams = getSearchParams(tileRequest.tileUrl);
   const encodedRequestBody = searchParams.has('requestBody')
     ? (searchParams.get('requestBody') as string)
@@ -52,9 +42,9 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
       gridPrecision: parseInt(searchParams.get('gridPrecision') as string, 10),
       index,
       renderAs: searchParams.get('renderAs') as RENDER_AS,
-      x,
-      y,
-      z,
+      x: tileRequest.x,
+      y: tileRequest.y,
+      z: tileRequest.z,
     });
   }
 
@@ -63,9 +53,9 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
       encodedRequestBody,
       geometryFieldName,
       index,
-      x,
-      y,
-      z,
+      x: tileRequest.x,
+      y: tileRequest.y,
+      z: tileRequest.z,
     });
   }
 
