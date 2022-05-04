@@ -81,9 +81,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   }
 
   const { commands } = state;
-
-  // Get the command definition; first by using the builtin command service (case its an internal command)
-  // if nothing is returned, then try to get it from the command definition provided on input
   const commandDefinition: CommandDefinition | undefined = commands.find(
     (definition) => definition.name === parsedInput.name
   );

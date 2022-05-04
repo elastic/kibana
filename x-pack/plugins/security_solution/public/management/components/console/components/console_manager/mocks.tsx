@@ -20,7 +20,7 @@ export const getNewConsoleRegistrationMock = (
     meta: { about: 'for unit testing ' },
     consoleProps: {
       'data-test-subj': 'testRunningConsole',
-      commandService: getCommandListMock(),
+      commands: getCommandListMock(),
     },
     onBeforeTerminate: jest.fn(),
     ...overrides,
