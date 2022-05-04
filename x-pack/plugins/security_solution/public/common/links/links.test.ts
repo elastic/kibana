@@ -6,9 +6,9 @@
  */
 
 import {
+  getAncestorLinksInfo,
   getDeepLinks,
   getInitialDeepLinks,
-  getNavLinkHierarchy,
   getNavLinkItems,
   needsUrlState,
 } from './links';
@@ -17,7 +17,6 @@ import { Capabilities } from '@kbn/core/types';
 import { AppDeepLink } from '@kbn/core/public';
 import { mockGlobalState } from '../mock';
 import { NavLinkItem } from './types';
-// import { navTabs as navTabsArtifact } from '../../app/home/home_navigations';
 
 const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
 const basicLicense = 'basic';
@@ -290,19 +289,53 @@ describe('security app link helpers', () => {
     });
   });
 
-  describe.only('getNavLinkHierarchy', () => {
-    it('returns true when url state exists for page', () => {
-      const hierarchy = getNavLinkHierarchy(SecurityPageName.hosts);
+  describe('getAncestorLinksInfo', () => {
+    it('finds flattened links for hosts', () => {
+      const hierarchy = getAncestorLinksInfo(SecurityPageName.hosts);
       expect(hierarchy).toEqual([
         {
+          features: ['siem.show'],
+          globalNavEnabled: false,
+          globalSearchKeywords: ['Threat hunting'],
           id: 'explore',
           path: 'to do',
           title: 'Explore',
         },
         {
+          globalNavEnabled: true,
+          globalNavOrder: 9002,
+          globalSearchEnabled: true,
+          globalSearchKeywords: ['Hosts'],
           id: 'hosts',
           path: '/hosts',
           title: 'Hosts',
+        },
+      ]);
+    });
+    it('finds flattened links for uncommonProcesses', () => {
+      const hierarchy = getAncestorLinksInfo(SecurityPageName.uncommonProcesses);
+      expect(hierarchy).toEqual([
+        {
+          features: ['siem.show'],
+          globalNavEnabled: false,
+          globalSearchKeywords: ['Threat hunting'],
+          id: 'explore',
+          path: 'to do',
+          title: 'Explore',
+        },
+        {
+          globalNavEnabled: true,
+          globalNavOrder: 9002,
+          globalSearchEnabled: true,
+          globalSearchKeywords: ['Hosts'],
+          id: 'hosts',
+          path: '/hosts',
+          title: 'Hosts',
+        },
+        {
+          id: 'uncommon_processes',
+          path: '/hosts/uncommonProcesses',
+          title: 'Uncommon Processes',
         },
       ]);
     });

@@ -60,3 +60,7 @@ export interface LinkProps {
   isBasic: boolean;
   capabilities?: Capabilities;
 }
+
+export type LinkInfo = Omit<LinkItem, 'links'>;
+export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };
+export type NormalizedLinks = Record<SecurityPageName, NormalizedLink>;

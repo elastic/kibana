@@ -9,10 +9,17 @@ import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { get } from 'lodash';
 import { SecurityPageName } from '../../../common/constants';
-import { UrlStateType } from '../components/url_state/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { appLinks } from './structure';
-import { Feature, LinkItem, LinkProps, NavLinkItem } from './types';
+import {
+  Feature,
+  LinkInfo,
+  LinkItem,
+  LinkProps,
+  NavLinkItem,
+  NormalizedLink,
+  NormalizedLinks,
+} from './types';
 
 const createDeepLink = (link: LinkItem, linkProps?: LinkProps): AppDeepLink => ({
   id: link.id,
@@ -125,118 +132,68 @@ export const getNavLinkItems = (
   });
 };
 
-const flattenLinkItems = (
-  id: SecurityPageName,
-  linkItems: LinkItem[],
-  parentLinkItem?: LinkItem
-): Array<Omit<LinkItem, 'links'>> =>
-  linkItems.reduce((linkItemFound: Array<Omit<LinkItem, 'links'>>, linkItem) => {
-    let topLevelItems = [...linkItemFound];
-    const parentLinkItems = [];
-    if (id === linkItem.id) {
-      // omit links from result
-      const { links, ...rest } = linkItem;
-      topLevelItems = [...topLevelItems, ...(parentLinkItem != null ? [parentLinkItem] : []), rest];
-    }
-    if (linkItem.links) {
-      if (parentLinkItem != null) {
-        parentLinkItems.push(parentLinkItem);
+/**
+ * Recursive function to create the `NormalizedLinks` structure from a `LinkItem` array parameter
+ */
+const getNormalizedLinks = (
+  currentLinks: LinkItem[],
+  parentId?: SecurityPageName
+): NormalizedLinks => {
+  const result = currentLinks.reduce<Partial<NormalizedLinks>>(
+    (normalized, { links, ...currentLink }) => {
+      normalized[currentLink.id] = {
+        ...currentLink,
+        parentId,
+      };
+      if (links && links.length > 0) {
+        Object.assign(normalized, getNormalizedLinks(links, currentLink.id));
       }
-      topLevelItems = [...topLevelItems, ...flattenLinkItems(id, linkItem.links, parentLinkItem)];
-    }
-    return topLevelItems;
-  }, []);
-
-export const getNavLinkHierarchy = (id: SecurityPageName): Array<Omit<NavLinkItem, 'links'>> => {
-  const hierarchy = flattenLinkItems(id, appLinks);
-
-  return hierarchy.map((linkItem) => createNavLinkItem(linkItem));
+      return normalized;
+    },
+    {}
+  );
+  return result as NormalizedLinks;
 };
 
-const urlKeys: Array<{ key: UrlStateType; pages: SecurityPageName[] }> = [
-  {
-    key: 'administration',
-    pages: [
-      SecurityPageName.administration,
-      SecurityPageName.endpoints,
-      SecurityPageName.policies,
-      SecurityPageName.trustedApps,
-      SecurityPageName.eventFilters,
-      SecurityPageName.hostIsolationExceptions,
-      SecurityPageName.blocklist,
-    ],
-  },
-  {
-    key: 'alerts',
-    pages: [SecurityPageName.alerts],
-  },
-  {
-    key: 'cases',
-    pages: [SecurityPageName.case],
-  },
-  {
-    key: 'detection_response',
-    pages: [SecurityPageName.detectionAndResponse],
-  },
-  {
-    key: 'exceptions',
-    pages: [SecurityPageName.exceptions],
-  },
-  {
-    key: 'get_started',
-    pages: [SecurityPageName.landing],
-  },
-  {
-    key: 'host',
-    pages: [
-      SecurityPageName.hosts,
-      SecurityPageName.hostsAuthentications,
-      SecurityPageName.uncommonProcesses,
-      SecurityPageName.hostsAnomalies,
-      SecurityPageName.hostsEvents,
-      SecurityPageName.hostsExternalAlerts,
-      SecurityPageName.hostsRisk,
-      SecurityPageName.sessions,
-    ],
-  },
-  {
-    key: 'network',
-    pages: [
-      SecurityPageName.network,
-      SecurityPageName.networkDns,
-      SecurityPageName.networkHttp,
-      SecurityPageName.networkTls,
-      SecurityPageName.networkExternalAlerts,
-      SecurityPageName.networkAnomalies,
-    ],
-  },
-  {
-    key: 'overview',
-    pages: [SecurityPageName.overview],
-  },
-  {
-    key: 'rules',
-    pages: [SecurityPageName.rules],
-  },
-  {
-    key: 'timeline',
-    pages: [SecurityPageName.timelines],
-  },
-  {
-    key: 'users',
-    pages: [
-      SecurityPageName.users,
-      SecurityPageName.usersAuthentications,
-      SecurityPageName.usersAnomalies,
-      SecurityPageName.usersRisk,
-      SecurityPageName.usersEvents,
-      SecurityPageName.usersExternalAlerts,
-    ],
-  },
-];
-const findUrlKey = (id: SecurityPageName) => {
-  const urlKeyObj = urlKeys.find((p) => p.pages.includes(id));
-  return urlKeyObj ? urlKeyObj.key : undefined;
+/**
+ * Normalized indexed version of the global `links` array, referencing the parent by id, instead of having nested links children
+ */
+const normalizedLinks: Readonly<NormalizedLinks> = Object.freeze(getNormalizedLinks(appLinks));
+
+/**
+ * Returns the `NormalizedLink` from a link id parameter.
+ * The object reference is frozen to make sure it is not mutated by the caller.
+ */
+const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> =>
+  Object.freeze(normalizedLinks[id]);
+
+/**
+ * Returns the `LinkInfo` from a link id parameter
+ */
+export const getLinkInfo = (id: SecurityPageName): LinkInfo => {
+  // discards the parentId and creates the linkInfo copy.
+  const { parentId, ...linkInfo } = getNormalizedLink(id);
+  return linkInfo;
 };
 
-export const needsUrlState = (id: SecurityPageName): boolean => findUrlKey(id) != null;
+/**
+ * Returns the `LinkInfo` of all the ancestors to the parameter id link, also included.
+ */
+export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
+  const ancestors: LinkInfo[] = [];
+  let currentId: SecurityPageName | undefined = id;
+  while (currentId) {
+    const { parentId, ...linkInfo } = getNormalizedLink(currentId);
+    ancestors.push(linkInfo);
+    currentId = parentId;
+  }
+  return ancestors.reverse();
+};
+
+/**
+ * Returns `true` if the links needs to carry the application state in the url.
+ * Defaults to `true` if the `skipUrlState` property of the `LinkItem` is `undefined`.
+ */
+export const needsUrlState = (id: SecurityPageName): boolean => {
+  return !getNormalizedLink(id).skipUrlState;
+};
