@@ -5,18 +5,22 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiSpacer,
+  EuiTableActionsColumnType,
+  EuiTitle,
+  EuiToolTip,
+  PropsOf,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
+import * as TEXT from '../translations';
+import { CspFinding } from '../types';
 
-interface Props {
-  title?: string;
-}
-
-export const PageWrapper: React.FC<Props> = ({
-  children,
-  title = <FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />,
-}) => {
+export const PageWrapper: React.FC = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -24,11 +28,87 @@ export const PageWrapper: React.FC<Props> = ({
         padding: ${euiTheme.size.l};
       `}
     >
-      <EuiTitle size="l">
-        <h2>{title}</h2>
-      </EuiTitle>
-      <EuiSpacer />
       {children}
     </div>
   );
 };
+
+export const PageTitle: React.FC = ({ children }) => (
+  <EuiTitle size="l">
+    <div>
+      {children}
+      <EuiSpacer />
+    </div>
+  </EuiTitle>
+);
+
+export const PageTitleText = ({ title }: { title: React.ReactNode }) => <h2>{title}</h2>;
+
+export const getExpandColumn = <T extends unknown>({
+  onClick,
+}: {
+  onClick(item: T): void;
+}): EuiTableActionsColumnType<T> => ({
+  width: '40px',
+  actions: [
+    {
+      name: 'Expand',
+      description: 'Expand',
+      type: 'icon',
+      icon: 'expand',
+      onClick,
+    },
+  ],
+});
+
+export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => [
+  {
+    field: 'resource_id',
+    name: TEXT.RESOURCE_ID,
+    truncateText: true,
+    width: '15%',
+    sortable: true,
+    render: (filename: string) => (
+      <EuiToolTip position="top" content={filename}>
+        <span>{filename}</span>
+      </EuiToolTip>
+    ),
+  },
+  {
+    field: 'result.evaluation',
+    name: TEXT.RESULT,
+    width: '100px',
+    sortable: true,
+    render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
+      <CspEvaluationBadge type={type} />
+    ),
+  },
+  {
+    field: 'rule.name',
+    name: TEXT.RULE,
+    sortable: true,
+  },
+  {
+    field: 'cluster_id',
+    name: TEXT.CLUSTER_ID,
+    truncateText: true,
+    sortable: true,
+  },
+  {
+    field: 'rule.section',
+    name: TEXT.CIS_SECTION,
+    sortable: true,
+    truncateText: true,
+  },
+  {
+    field: '@timestamp',
+    name: TEXT.LAST_CHECKED,
+    truncateText: true,
+    sortable: true,
+    render: (timestamp: number) => (
+      <EuiToolTip position="top" content={timestamp}>
+        <span>{moment(timestamp).fromNow()}</span>
+      </EuiToolTip>
+    ),
+  },
+];
