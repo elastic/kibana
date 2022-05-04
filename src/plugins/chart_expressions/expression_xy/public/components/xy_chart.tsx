@@ -41,7 +41,6 @@ import {
   getDataLayers,
   Series,
   getFormattedTablesByLayers,
-  validateExtent,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -174,8 +173,6 @@ export function XYChart({
     );
     return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
   }
-
-  const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
