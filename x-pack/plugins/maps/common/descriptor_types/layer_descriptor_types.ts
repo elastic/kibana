@@ -55,7 +55,6 @@ export type LayerDescriptor = {
   alpha?: number;
   attribution?: Attribution;
   id: string;
-  colorTheme?: string;
   label?: string | null;
   locale?: string | null;
   areLabelsOnTop?: boolean;

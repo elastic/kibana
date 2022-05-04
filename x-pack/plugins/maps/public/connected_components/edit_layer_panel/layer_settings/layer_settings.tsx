@@ -7,7 +7,6 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
-  EuiColorPicker,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiTitle,
@@ -33,7 +32,6 @@ export interface Props {
   layer: ILayer;
   clearLayerAttribution: (layerId: string) => void;
   setLayerAttribution: (id: string, attribution: Attribution) => void;
-  updateColorTheme: (layerId: string, color: string) => void;
   updateLabel: (layerId: string, label: string) => void;
   updateLocale: (layerId: string, locale: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
@@ -58,10 +56,6 @@ export function LayerSettings(props: Props) {
     const { key } = options[0];
     if (key) props.updateLocale(layerId, key);
   };
-
-  const onColorThemeChange = (color: string) => {
-    props.updateColorTheme(layerId, color);
-  }
 
   const onZoomChange = (value: [string, string]) => {
     props.updateMinZoom(layerId, Math.max(minVisibilityZoom, parseInt(value[0], 10)));
@@ -196,8 +190,8 @@ export function LayerSettings(props: Props) {
       const i18nLabel = i18n.translate(`xpack.maps.layerPanel.settingsPanel.labelLanguage${key}`, {
         defaultMessage: label,
       });
-      return { key, label: i18nLabel, value: omtCode };
-    }));
+      return { key, label: i18nLabel };
+    });
 
     return (
       <EuiFormRow
@@ -217,27 +211,6 @@ export function LayerSettings(props: Props) {
     );
   };
 
-  const renderColorPicker = () => {
-    if (!props.layer.supportsColorTheme()) {
-      return null;
-    }
-
-    return (
-      <EuiFormRow
-        display="columnCompressed"
-        label="Color theme"
-        helpText="Apply a color theme to the basemap"
-      >
-        <EuiColorPicker
-          color={props.layer.getColorTheme()}
-          mode='default'
-          onChange={onColorThemeChange}
-          compressed
-        />
-      </EuiFormRow>
-    )
-  }
-
   return (
     <Fragment>
       <EuiPanel>
@@ -256,7 +229,6 @@ export function LayerSettings(props: Props) {
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
         {renderShowLocaleSelector()}
-        {renderColorPicker()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
       </EuiPanel>

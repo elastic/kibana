@@ -11,7 +11,6 @@ import { LayerSettings } from './layer_settings';
 import {
   clearLayerAttribution,
   setLayerAttribution,
-  updateLayerColorTheme,
   updateLayerLabel,
   updateLayerLocale,
   updateLayerMaxZoom,
@@ -27,7 +26,6 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
     clearLayerAttribution: (id: string) => dispatch(clearLayerAttribution(id)),
     setLayerAttribution: (id: string, attribution: Attribution) =>
       dispatch(setLayerAttribution(id, attribution)),
-    updateColorTheme: (id: string, color: string) => dispatch(updateLayerColorTheme(id, color)),
     updateLabel: (id: string, label: string) => dispatch(updateLayerLabel(id, label)),
     updateLocale: (id: string, locale: string) => dispatch(updateLayerLocale(id, locale)),
     updateMinZoom: (id: string, minZoom: number) => dispatch(updateLayerMinZoom(id, minZoom)),

@@ -460,15 +460,6 @@ function updateLayerType(layerId: string, newLayerType: string) {
   };
 }
 
-export function updateLayerColorTheme(id: string, color: string) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id,
-    propName: 'colorTheme',
-    newValue: color,
-  };
-}
-
 export function updateLayerLabel(id: string, newLabel: string) {
   return {
     type: UPDATE_LAYER_PROP,

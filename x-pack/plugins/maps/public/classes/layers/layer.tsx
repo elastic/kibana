@@ -52,7 +52,6 @@ export interface ILayer {
   supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
-  getColorTheme(): string | null;
   getLabel(): string;
   getLocale(): string | null;
   hasLegendDetails(): Promise<boolean>;
@@ -105,7 +104,6 @@ export interface ILayer {
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
   supportsLabelLocales: () => boolean;
-  supportsColorTheme: () => boolean;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -148,7 +146,6 @@ export class AbstractLayer implements ILayer {
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
       alpha: _.get(options, 'alpha', 0.75),
-      colorTheme: _.get(options, 'colorTheme'),
       locale: _.get(options, 'locale'),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
@@ -257,10 +254,6 @@ export class AbstractLayer implements ILayer {
 
   getCurrentStyle(): IStyle {
     throw new Error('Should implement AbstractLayer#getCurrentStyle');
-  }
-
-  getColorTheme(): string | null {
-    return this._descriptor.colorTheme ?? null;
   }
 
   getLabel(): string {
@@ -483,10 +476,6 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelLocales(): boolean {
-    return false;
-  }
-
-  supportsColorTheme(): boolean {
     return false;
   }
 
