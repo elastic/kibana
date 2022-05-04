@@ -115,11 +115,9 @@ export const makeLensEmbeddableFactory =
             '8.3.0': (state) => {
               const lensState = state as unknown as { attributes: LensDocShape810<VisState820> };
               let migratedLensState = commonLockOldMetricVisSettings(lensState.attributes);
-              if (migratedLensState.visualizationType !== 'lnsXY') {
-                migratedLensState = commonFixValueLabelsInXY(
-                  migratedLensState as LensDocShape810<VisStatePre830>
-                );
-              }
+              migratedLensState = commonFixValueLabelsInXY(
+                migratedLensState as LensDocShape810<VisStatePre830>
+              );
               return {
                 ...lensState,
                 attributes: migratedLensState,

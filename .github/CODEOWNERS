@@ -79,7 +79,6 @@
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/unified_search/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
-/x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
@@ -133,7 +132,7 @@
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/plugins/uptime @elastic/uptime
+/x-pack/plugins/synthetics @elastic/uptime
 /x-pack/plugins/ux @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
@@ -415,6 +414,7 @@
 /x-pack/plugins/security_solution/cypress/integration/urls @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/event_details @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/events_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting-investigations

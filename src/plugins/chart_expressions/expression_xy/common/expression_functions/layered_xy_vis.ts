@@ -9,17 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import { LayeredXyVisFn } from '../types';
 import {
-  XY_VIS_RENDERER,
   EXTENDED_DATA_LAYER,
   EXTENDED_REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
 } from '../constants';
-import { logDatatables } from '../utils';
 import { commonXYArgs } from './common_xy_args';
-import { validateMarkSizeRatioLimits } from './validate';
 import { strings } from '../i18n';
-import { appendLayerIds } from '../helpers';
 
 export const layeredXyVisFunction: LayeredXyVisFn = {
   name: LAYERED_XY_VIS,
@@ -36,26 +32,8 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
       multi: true,
     },
   },
-  fn(data, args, handlers) {
-    const layers = appendLayerIds(args.layers ?? [], 'layers');
-
-    logDatatables(layers, handlers);
-
-    validateMarkSizeRatioLimits(args.markSizeRatio);
-
-    return {
-      type: 'render',
-      as: XY_VIS_RENDERER,
-      value: {
-        args: {
-          ...args,
-          layers,
-          ariaLabel:
-            args.ariaLabel ??
-            (handlers.variables?.embeddableTitle as string) ??
-            handlers.getExecutionContext?.()?.description,
-        },
-      },
-    };
+  async fn(data, args, handlers) {
+    const { layeredXyVisFn } = await import('./layered_xy_vis_fn');
+    return await layeredXyVisFn(data, args, handlers);
   },
 };

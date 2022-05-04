@@ -310,6 +310,9 @@ export interface DocLinks {
     gdalTutorial: string;
   }>;
   readonly monitoring: Record<string, string>;
+  readonly reporting: Readonly<{
+    cloudMinimumRequirements: string;
+  }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
@@ -397,5 +400,10 @@ export interface DocLinks {
   };
   readonly legal: {
     readonly privacyStatement: string;
+  };
+  readonly kibanaUpgradeSavedObjects: {
+    readonly resolveMigrationFailures: string;
+    readonly repeatedTimeoutRequests: string;
+    readonly routingAllocationDisabled: string;
   };
 }

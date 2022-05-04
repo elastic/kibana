@@ -10,7 +10,7 @@ import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { ExtendedYConfig, YConfig } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentConfig, ExtendedYConfig, YConfig } from '@kbn/expression-xy-plugin/common';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import {
   State,
@@ -30,7 +30,7 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
+import { getUniqueLabels } from './annotations/helpers';
 import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
@@ -86,7 +86,7 @@ const simplifiedLayerExpression = {
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
     ...layer,
     hide: true,
-    yConfig: layer.yConfig?.map(({ lineWidth, ...rest }) => ({
+    yConfig: layer.yConfig?.map(({ ...rest }) => ({
       ...rest,
       lineWidth: 1,
       icon: undefined,
@@ -96,12 +96,6 @@ const simplifiedLayerExpression = {
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
     ...layer,
     hide: true,
-    annotations: layer.annotations?.map(({ lineWidth, ...rest }) => ({
-      ...rest,
-      lineWidth: 1,
-      icon: undefined,
-      textVisibility: false,
-    })),
   }),
 };
 
@@ -234,9 +228,10 @@ export const buildExpression = (
                         : [],
                     // ensure that even if the user types more than 5 columns
                     // we will only show 5
-                    floatingColumns: state.legend.floatingColumns
-                      ? [Math.min(5, state.legend.floatingColumns)]
-                      : [],
+                    floatingColumns:
+                      state.legend.floatingColumns && state.legend.isInside
+                        ? [Math.min(5, state.legend.floatingColumns)]
+                        : [],
                     maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
                     shouldTruncate: [
                       state.legend.shouldTruncate ??
@@ -252,50 +247,8 @@ export const buildExpression = (
           emphasizeFitting: [state.emphasizeFitting || false],
           curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
-          yLeftExtent: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisExtentConfig',
-                  arguments: {
-                    mode: [state?.yLeftExtent?.mode || 'full'],
-                    lowerBound:
-                      state?.yLeftExtent?.lowerBound !== undefined
-                        ? [state?.yLeftExtent?.lowerBound]
-                        : [],
-                    upperBound:
-                      state?.yLeftExtent?.upperBound !== undefined
-                        ? [state?.yLeftExtent?.upperBound]
-                        : [],
-                  },
-                },
-              ],
-            },
-          ],
-          yRightExtent: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisExtentConfig',
-                  arguments: {
-                    mode: [state?.yRightExtent?.mode || 'full'],
-                    lowerBound:
-                      state?.yRightExtent?.lowerBound !== undefined
-                        ? [state?.yRightExtent?.lowerBound]
-                        : [],
-                    upperBound:
-                      state?.yRightExtent?.upperBound !== undefined
-                        ? [state?.yRightExtent?.upperBound]
-                        : [],
-                  },
-                },
-              ],
-            },
-          ],
+          yLeftExtent: [axisExtentConfigToExpression(state.yLeftExtent, validDataLayers)],
+          yRightExtent: [axisExtentConfigToExpression(state.yRightExtent, validDataLayers)],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',
@@ -436,19 +389,7 @@ const annotationLayerToExpression = (
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
           annotations: layer.annotations
-            ? layer.annotations.map(
-                (ann): Ast =>
-                  eventAnnotationService.toExpression({
-                    time: ann.key.timestamp,
-                    label: ann.label || defaultAnnotationLabel,
-                    textVisibility: ann.textVisibility,
-                    icon: ann.icon,
-                    lineStyle: ann.lineStyle,
-                    lineWidth: ann.lineWidth,
-                    color: ann.color,
-                    isHidden: Boolean(ann.isHidden),
-                  })
-              )
+            ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
             : [],
         },
       },
@@ -570,3 +511,21 @@ const extendedYConfigToExpression = (yConfig: ExtendedYConfig, defaultColor?: st
     ],
   };
 };
+
+const axisExtentConfigToExpression = (
+  extent: AxisExtentConfig | undefined,
+  layers: ValidXYDataLayerConfig[]
+): Ast => ({
+  type: 'expression',
+  chain: [
+    {
+      type: 'function',
+      function: 'axisExtentConfig',
+      arguments: {
+        mode: [extent?.mode ?? 'full'],
+        lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
+        upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
+      },
+    },
+  ],
+});

@@ -27,29 +27,29 @@ import { readRules } from '../../rules/read_rules';
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
+describe('perform_bulk_action', () => {
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const mockRule = getFindResultWithSingleHit(isRuleRegistryEnabled).data[0];
+  const mockRule = getFindResultWithSingleHit().data[0];
 
   beforeEach(() => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    performBulkActionRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {
     it('returns 200 when performing bulk action with all dependencies present', async () => {
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
@@ -67,7 +67,10 @@ describe.each([
 
     it("returns 200 when provided filter query doesn't match any rules", async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
@@ -87,7 +90,10 @@ describe.each([
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({ data: [], total: Infinity })
       );
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message: 'More than 10000 rules matched the filter query. Try to narrow it down.',
@@ -105,7 +111,10 @@ describe.each([
         })
       );
 
-      const response = await server.inject(getBulkActionEditRequest(), context);
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -138,7 +147,10 @@ describe.each([
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Bulk edit failed',
@@ -172,7 +184,10 @@ describe.each([
           .fn()
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -222,7 +237,7 @@ describe.each([
         },
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -273,7 +288,7 @@ describe.each([
         },
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -325,7 +340,10 @@ describe.each([
           .mockImplementationOnce(() => ({ valid: true }))
           .mockImplementationOnce(() => ({ valid: true })),
       });
-      const response = await server.inject(getBulkActionEditRequest(), context);
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -372,7 +390,10 @@ describe.each([
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('a'.repeat(1_300));
       });
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body.attributes.errors[0].message.length).toEqual(1000);
     });
@@ -392,7 +413,7 @@ describe.each([
         },
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -489,7 +510,7 @@ describe.each([
         },
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual('More than 100 ids sent for bulk edit action.');
@@ -506,7 +527,7 @@ describe.each([
         },
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
@@ -524,7 +545,10 @@ describe.each([
       })
     );
 
-    const response = await server.inject(getBulkActionEditRequest(), context);
+    const response = await server.inject(
+      getBulkActionEditRequest(),
+      requestContextMock.convertContext(context)
+    );
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import uuid from 'uuid/v4';
-import type { Map as MbMap, AnyLayer as MbLayer } from '@kbn/mapbox-gl';
+import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/data-plugin/common';
 import { Feature, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
@@ -366,7 +366,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     isForceRefresh: boolean,
     dataFilters: DataFilters,
     source: IVectorSource,
-    style: IVectorStyle
+    style: IVectorStyle,
+    isFeatureEditorOpenForLayer: boolean
   ): Promise<VectorSourceRequestMeta> {
     const fieldNames = [
       ...source.getFieldNames(),
@@ -378,7 +379,14 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     if (timesliceMaskFieldName) {
       fieldNames.push(timesliceMaskFieldName);
     }
-    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery(), isForceRefresh);
+    return buildVectorRequestMeta(
+      source,
+      fieldNames,
+      dataFilters,
+      this.getQuery(),
+      isForceRefresh,
+      isFeatureEditorOpenForLayer
+    );
   }
 
   async _syncSourceStyleMeta(
@@ -542,6 +550,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     registerCancelCallback,
     dataFilters,
     isForceRefresh,
+    isFeatureEditorOpenForLayer,
   }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
@@ -552,7 +561,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       joinSource.getFieldNames(),
       dataFilters,
       joinSource.getWhereQuery(),
-      isForceRefresh
+      isForceRefresh,
+      isFeatureEditorOpenForLayer
     ) as VectorJoinSourceRequestMeta;
 
     const prevDataRequest = this.getDataRequest(sourceDataId);
@@ -673,7 +683,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
-  _getJoinFilterExpression(): unknown | undefined {
+  _getJoinFilterExpression(): FilterSpecification | undefined {
     return undefined;
   }
 
@@ -698,7 +708,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
       markerLayerId = pointLayerId;
       if (!pointLayer) {
-        const mbLayer: MbLayer = {
+        const mbLayer: LayerSpecification = {
           id: pointLayerId,
           type: 'circle',
           source: sourceId,
@@ -716,7 +726,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     } else {
       markerLayerId = symbolLayerId;
       if (!symbolLayer) {
-        const mbLayer: MbLayer = {
+        const mbLayer: LayerSpecification = {
           id: symbolLayerId,
           type: 'symbol',
           source: sourceId,
@@ -768,7 +778,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const lineLayerId = this._getMbLineLayerId();
 
     if (!mbMap.getLayer(fillLayerId)) {
-      const mbLayer: MbLayer = {
+      const mbLayer: LayerSpecification = {
         id: fillLayerId,
         type: 'fill',
         source: sourceId,
@@ -780,7 +790,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer, labelLayerId);
     }
     if (!mbMap.getLayer(lineLayerId)) {
-      const mbLayer: MbLayer = {
+      const mbLayer: LayerSpecification = {
         id: lineLayerId,
         type: 'line',
         source: sourceId,
@@ -824,7 +834,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const labelLayerId = this._getMbLabelLayerId();
     const labelLayer = mbMap.getLayer(labelLayerId);
     if (!labelLayer) {
-      const mbLayer: MbLayer = {
+      const mbLayer: LayerSpecification = {
         id: labelLayerId,
         type: 'symbol',
         source: this.getId(),

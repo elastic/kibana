@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`XYChart component annotations should render basic annotation 1`] = `
+exports[`XYChart component annotations should render basic line annotation 1`] = `
 <LineAnnotation
   dataValues={
     Array [
@@ -22,7 +22,7 @@ exports[`XYChart component annotations should render basic annotation 1`] = `
           "label": "Annotation",
           "roundedTimestamp": 1647591917100,
           "time": "2022-03-18T08:25:17.140Z",
-          "type": "manual_event_annotation",
+          "type": "manual_point_event_annotation",
         }
       }
       hasReducedPadding={false}
@@ -49,7 +49,51 @@ exports[`XYChart component annotations should render basic annotation 1`] = `
 />
 `;
 
-exports[`XYChart component annotations should render grouped annotations preserving the shared styles 1`] = `
+exports[`XYChart component annotations should render basic range annotation 1`] = `
+Array [
+  <RectAnnotation
+    customTooltipDetails={[Function]}
+    dataValues={Array []}
+    hideTooltips={false}
+    id="__endzones__"
+    style={
+      Object {
+        "fill": "#69707d",
+        "opacity": 0.2,
+        "stroke": "#69707d",
+        "strokeWidth": 0,
+      }
+    }
+    zIndex={2}
+  />,
+  <RectAnnotation
+    customTooltip={[Function]}
+    dataValues={
+      Array [
+        Object {
+          "coordinates": Object {
+            "x0": 1647591917140,
+            "x1": 1648715117140,
+          },
+          "details": "Event range",
+        },
+      ]
+    }
+    id="event_range"
+    key="event_range"
+    outside={false}
+    outsideDimension={4}
+    style={
+      Object {
+        "fill": "#F04E981A",
+        "opacity": 1,
+      }
+    }
+  />,
+]
+`;
+
+exports[`XYChart component annotations should render grouped line annotations preserving the shared styles 1`] = `
 <LineAnnotation
   customTooltipDetails={[Function]}
   dataValues={
@@ -78,7 +122,7 @@ exports[`XYChart component annotations should render grouped annotations preserv
           "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "type": "manual_event_annotation",
+          "type": "manual_point_event_annotation",
         }
       }
       hasReducedPadding={true}
@@ -108,7 +152,7 @@ exports[`XYChart component annotations should render grouped annotations preserv
 />
 `;
 
-exports[`XYChart component annotations should render grouped annotations with default styles 1`] = `
+exports[`XYChart component annotations should render grouped line annotations with default styles 1`] = `
 <LineAnnotation
   customTooltipDetails={[Function]}
   dataValues={
@@ -137,7 +181,7 @@ exports[`XYChart component annotations should render grouped annotations with de
           "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "type": "manual_event_annotation",
+          "type": "manual_point_event_annotation",
         }
       }
       hasReducedPadding={true}
@@ -164,7 +208,7 @@ exports[`XYChart component annotations should render grouped annotations with de
 />
 `;
 
-exports[`XYChart component annotations should render simplified annotation when hide is true 1`] = `
+exports[`XYChart component annotations should render simplified annotations when hide is true 1`] = `
 <LineAnnotation
   dataValues={
     Array [
@@ -178,27 +222,6 @@ exports[`XYChart component annotations should render simplified annotation when 
   domainType="xDomain"
   id="annotation"
   key="annotation"
-  marker={
-    <Marker
-      config={
-        Object {
-          "axisMode": "bottom",
-          "label": "Annotation",
-          "roundedTimestamp": 1647591917100,
-          "time": "2022-03-18T08:25:17.140Z",
-          "type": "manual_event_annotation",
-        }
-      }
-      hasReducedPadding={false}
-      isHorizontal={true}
-      label="Annotation"
-    />
-  }
-  markerBody={
-    <MarkerBody
-      isHorizontal={true}
-    />
-  }
   markerPosition="top"
   style={
     Object {
@@ -213,6 +236,50 @@ exports[`XYChart component annotations should render simplified annotation when 
 />
 `;
 
+exports[`XYChart component annotations should render simplified annotations when hide is true 2`] = `
+Array [
+  <RectAnnotation
+    customTooltipDetails={[Function]}
+    dataValues={Array []}
+    hideTooltips={false}
+    id="__endzones__"
+    style={
+      Object {
+        "fill": "#69707d",
+        "opacity": 0.2,
+        "stroke": "#69707d",
+        "strokeWidth": 0,
+      }
+    }
+    zIndex={2}
+  />,
+  <RectAnnotation
+    customTooltip={[Function]}
+    dataValues={
+      Array [
+        Object {
+          "coordinates": Object {
+            "x0": 1647591917140,
+            "x1": 1648715117140,
+          },
+          "details": "Event range",
+        },
+      ]
+    }
+    id="event_range"
+    key="event_range"
+    outside={false}
+    outsideDimension={2}
+    style={
+      Object {
+        "fill": "#F04E981A",
+        "opacity": 1,
+      }
+    }
+  />,
+]
+`;
+
 exports[`XYChart component it renders area 1`] = `
 <Chart
   renderer="canvas"
@@ -222,6 +289,14 @@ exports[`XYChart component it renders area 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -325,29 +400,33 @@ exports[`XYChart component it renders area 1`] = `
     histogramMode={false}
   />
   <DataLayers
-    areLayersAlreadyFormatted={
-      Object {
-        "first": Object {
-          "a": false,
-          "b": false,
-          "c": false,
-          "d": false,
-        },
-      }
-    }
     chartHasMoreThanOneBarSeries={false}
     formatFactory={
       [MockFunction] {
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -464,7 +543,135 @@ exports[`XYChart component it renders area 1`] = `
               },
             },
           },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
       }
     }
     layers={
@@ -624,6 +831,14 @@ exports[`XYChart component it renders bar 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -727,29 +942,33 @@ exports[`XYChart component it renders bar 1`] = `
     histogramMode={false}
   />
   <DataLayers
-    areLayersAlreadyFormatted={
-      Object {
-        "first": Object {
-          "a": false,
-          "b": false,
-          "c": false,
-          "d": false,
-        },
-      }
-    }
     chartHasMoreThanOneBarSeries={true}
     formatFactory={
       [MockFunction] {
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -866,7 +1085,135 @@ exports[`XYChart component it renders bar 1`] = `
               },
             },
           },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
       }
     }
     layers={
@@ -1026,6 +1373,14 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -1129,29 +1484,33 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     histogramMode={false}
   />
   <DataLayers
-    areLayersAlreadyFormatted={
-      Object {
-        "first": Object {
-          "a": false,
-          "b": false,
-          "c": false,
-          "d": false,
-        },
-      }
-    }
     chartHasMoreThanOneBarSeries={true}
     formatFactory={
       [MockFunction] {
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -1268,7 +1627,135 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
             },
           },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
       }
     }
     layers={
@@ -1428,6 +1915,14 @@ exports[`XYChart component it renders line 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -1531,29 +2026,33 @@ exports[`XYChart component it renders line 1`] = `
     histogramMode={false}
   />
   <DataLayers
-    areLayersAlreadyFormatted={
-      Object {
-        "first": Object {
-          "a": false,
-          "b": false,
-          "c": false,
-          "d": false,
-        },
-      }
-    }
     chartHasMoreThanOneBarSeries={false}
     formatFactory={
       [MockFunction] {
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -1670,7 +2169,135 @@ exports[`XYChart component it renders line 1`] = `
               },
             },
           },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
       }
     }
     layers={
@@ -1830,6 +2457,14 @@ exports[`XYChart component it renders stacked area 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -1933,29 +2568,33 @@ exports[`XYChart component it renders stacked area 1`] = `
     histogramMode={false}
   />
   <DataLayers
-    areLayersAlreadyFormatted={
-      Object {
-        "first": Object {
-          "a": false,
-          "b": false,
-          "c": false,
-          "d": false,
-        },
-      }
-    }
     chartHasMoreThanOneBarSeries={false}
     formatFactory={
       [MockFunction] {
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -2072,7 +2711,135 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
             },
           },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
       }
     }
     layers={
@@ -2232,6 +2999,14 @@ exports[`XYChart component it renders stacked bar 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -2335,29 +3110,33 @@ exports[`XYChart component it renders stacked bar 1`] = `
     histogramMode={false}
   />
   <DataLayers
-    areLayersAlreadyFormatted={
-      Object {
-        "first": Object {
-          "a": false,
-          "b": false,
-          "c": false,
-          "d": false,
-        },
-      }
-    }
     chartHasMoreThanOneBarSeries={true}
     formatFactory={
       [MockFunction] {
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -2474,7 +3253,135 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
             },
           },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
       }
     }
     layers={
@@ -2634,6 +3541,14 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -2737,29 +3652,33 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     histogramMode={false}
   />
   <DataLayers
-    areLayersAlreadyFormatted={
-      Object {
-        "first": Object {
-          "a": false,
-          "b": false,
-          "c": false,
-          "d": false,
-        },
-      }
-    }
     chartHasMoreThanOneBarSeries={true}
     formatFactory={
       [MockFunction] {
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -2876,7 +3795,135 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
             },
           },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
       }
     }
     layers={
