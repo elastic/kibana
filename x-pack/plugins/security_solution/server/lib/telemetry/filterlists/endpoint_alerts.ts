@@ -30,6 +30,8 @@ const baseAllowlistFields: AllowlistFields = {
       entity_id: true,
     },
     token: {
+      elevation: true,
+      elevation_type: true,
       integrity_level_name: true,
     },
   },
@@ -44,9 +46,8 @@ const allowlistBaseEventFields: AllowlistFields = {
     path: true,
     code_signature: true,
     malware_signature: true,
-    pe: {
-      original_file_name: true,
-    },
+    hash: true,
+    pe: true,
   },
   dns: true,
   event: true,
