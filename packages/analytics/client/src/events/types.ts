@@ -49,6 +49,9 @@ export interface EventContext {
    */
   entityId?: string;
 
+  /**
+   * Additional keys are allowed.
+   */
   [key: string]: unknown;
 }
 
