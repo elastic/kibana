@@ -347,7 +347,7 @@ describe('security app link helpers', () => {
       expect(needsUrl).toEqual(true);
     });
     it('returns false when url state does not exist for page', () => {
-      const needsUrl = needsUrlState(SecurityPageName.caseConfigure);
+      const needsUrl = needsUrlState(SecurityPageName.landing);
       expect(needsUrl).toEqual(false);
     });
   });

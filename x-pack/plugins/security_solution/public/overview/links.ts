@@ -40,6 +40,7 @@ export const landingLinks: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
+  skipUrlState: true,
 };
 
 export const detectionResponseLinks: LinkItem = {

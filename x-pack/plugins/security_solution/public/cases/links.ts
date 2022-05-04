@@ -20,7 +20,6 @@ export const getCasesLinkItems = (): LinkItem => {
       },
       [SecurityPageName.caseConfigure]: {
         features: [FEATURE.casesCrud],
-        skipUrlState: true,
         isPremium: true,
       },
       [SecurityPageName.caseCreate]: {
