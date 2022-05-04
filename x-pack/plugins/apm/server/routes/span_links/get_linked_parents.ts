@@ -20,7 +20,7 @@ import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction
 import { Setup } from '../../lib/helpers/setup_request';
 import { getBufferedTimerange } from './utils';
 
-async function fetchOutgoingSpans({
+async function fetchLinkedParentsOfSpan({
   traceId,
   setup,
   start,
@@ -40,7 +40,7 @@ async function fetchOutgoingSpans({
     end,
   });
 
-  const response = await apmEventClient.search('get_outgoing_span_links', {
+  const response = await apmEventClient.search('fetch_linked_parents_of_span', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
@@ -68,7 +68,7 @@ function getSpanId(source: TransactionRaw | SpanRaw) {
     : (source as TransactionRaw).transaction?.id;
 }
 
-export async function getOutgoingSpanLinksCountBySpanId({
+export async function getLinkedParentsOfSpanCountBySpanId({
   traceId,
   setup,
   start,
@@ -79,7 +79,7 @@ export async function getOutgoingSpanLinksCountBySpanId({
   start: number;
   end: number;
 }) {
-  const outgoingSpans = await fetchOutgoingSpans({
+  const outgoingSpans = await fetchLinkedParentsOfSpan({
     traceId,
     setup,
     start,
@@ -100,20 +100,20 @@ export async function getOutgoingSpanLinksCountBySpanId({
   );
 }
 
-export async function getOutgoingSpanLinks({
+export async function getLinkedParentsOfSpan({
   traceId,
+  spanId,
   setup,
   start,
   end,
-  spanId,
 }: {
   traceId: string;
+  spanId: string;
   setup: Setup;
   start: number;
   end: number;
-  spanId: string;
 }) {
-  const outgoingSpan = await fetchOutgoingSpans({
+  const outgoingSpan = await fetchLinkedParentsOfSpan({
     traceId,
     spanId,
     setup,

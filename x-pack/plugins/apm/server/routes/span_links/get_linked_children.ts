@@ -15,7 +15,7 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 
-export async function getIncomingSpanLinks({
+export async function getLinkedChildrenOfSpan({
   setup,
   traceId,
   spanId,

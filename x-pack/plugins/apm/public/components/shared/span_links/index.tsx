@@ -52,7 +52,7 @@ export function SpanLinks({
     (callApmApi) => {
       if (selectedLinkType === 'incoming') {
         return callApmApi(
-          'GET /internal/apm/traces/{traceId}/span_links/{spanId}/incoming',
+          'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
           {
             params: {
               path: { traceId, spanId },
@@ -62,7 +62,7 @@ export function SpanLinks({
         );
       }
       return callApmApi(
-        'GET /internal/apm/traces/{traceId}/span_links/{spanId}/outgoing',
+        'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
         {
           params: {
             path: { traceId, spanId },
