@@ -13,8 +13,7 @@ import { groupBy } from 'lodash';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { IconPosition, ReferenceLineLayerArgs, YAxisMode } from '../../common/types';
-import type { LensMultiTable } from '../../common/types';
+import type { CommonXYReferenceLineLayerConfig, IconPosition, YAxisMode } from '../../common/types';
 import {
   LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
@@ -89,8 +88,7 @@ export function getBaseIconPlacement(
 }
 
 export interface ReferenceLineAnnotationsProps {
-  layers: ReferenceLineLayerArgs[];
-  data: LensMultiTable;
+  layers: CommonXYReferenceLineLayerConfig[];
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
@@ -99,7 +97,6 @@ export interface ReferenceLineAnnotationsProps {
 
 export const ReferenceLineAnnotations = ({
   layers,
-  data,
   formatters,
   axesMap,
   isHorizontal,
@@ -111,11 +108,10 @@ export const ReferenceLineAnnotations = ({
         if (!layer.yConfig) {
           return [];
         }
-        const { columnToLabel, yConfig: yConfigs, layerId } = layer;
+        const { columnToLabel, yConfig: yConfigs, table } = layer;
         const columnToLabelMap: Record<string, string> = columnToLabel
           ? JSON.parse(columnToLabel)
           : {};
-        const table = data.tables[layerId];
 
         const row = table.rows[0];
 
@@ -194,8 +190,8 @@ export const ReferenceLineAnnotations = ({
           annotations.push(
             <LineAnnotation
               {...props}
-              id={`${layerId}-${yConfig.forAccessor}-line`}
-              key={`${layerId}-${yConfig.forAccessor}-line`}
+              id={`${layer.layerId}-${yConfig.forAccessor}-line`}
+              key={`${layer.layerId}-${yConfig.forAccessor}-line`}
               dataValues={table.rows.map(() => ({
                 dataValue: row[yConfig.forAccessor],
                 header: columnToLabelMap[yConfig.forAccessor],
@@ -225,8 +221,8 @@ export const ReferenceLineAnnotations = ({
             annotations.push(
               <RectAnnotation
                 {...props}
-                id={`${layerId}-${yConfig.forAccessor}-rect`}
-                key={`${layerId}-${yConfig.forAccessor}-rect`}
+                id={`${layer.layerId}-${yConfig.forAccessor}-rect`}
+                key={`${layer.layerId}-${yConfig.forAccessor}-rect`}
                 dataValues={table.rows.map(() => {
                   const nextValue = shouldCheckNextReferenceLine
                     ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
