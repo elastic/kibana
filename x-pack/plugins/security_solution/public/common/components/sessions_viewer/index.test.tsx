@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
-import { TEST_ID, SessionsView } from '.';
+import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
 import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
 import { SessionsComponentsProps } from './types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
@@ -111,6 +111,28 @@ describe('SessionsView', () => {
       expect(wrapper.getByTestId(`${TEST_PREFIX}:timelineId`)).toHaveTextContent(
         'hosts-page-sessions'
       );
+    });
+  });
+
+  it('passes in the right filters to TGrid', async () => {
+    render(
+      <TestProviders>
+        <SessionsView {...testProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(callFilters).toHaveBeenCalledWith([
+        {
+          ...defaultSessionsFilter,
+          query: {
+            ...defaultSessionsFilter.query,
+            bool: {
+              ...defaultSessionsFilter.query.bool,
+              filter: defaultSessionsFilter.query.bool.filter.concat(JSON.parse(filterQuery)),
+            },
+          },
+        },
+      ]);
     });
   });
 });
