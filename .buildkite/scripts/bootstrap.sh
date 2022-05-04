@@ -6,6 +6,12 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
+
+if [[ -d ~/.kibana/node_modules ]]; then
+  echo "Using ~/.kibana/node_modules as a starting point"
+  mv ~/.kibana/node_modules ./
+fi
+
 if ! yarn kbn bootstrap; then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
