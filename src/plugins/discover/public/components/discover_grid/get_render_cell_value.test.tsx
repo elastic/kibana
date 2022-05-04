@@ -92,7 +92,9 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<span class=\\"dscDiscoverGrid__cellValue\\">100</span>"`
+    );
   });
 
   it('renders bytes column correctly using _source when details is true', () => {
