@@ -25,8 +25,21 @@ import { SavedObjectNamesCombo } from './saved_object_names_combo';
 
 const fetchSavedObjects = async (type?: string, name?: string) => {
   if (!type || !name) return;
-  const path = `/.kibana/_search?q=${type}.name:${name}`;
-  const body = {};
+  const path = `/.kibana/_search`;
+  const body = {
+    query: {
+      bool: {
+        must: {
+          match: { [`${type}.name`]: name },
+        },
+        filter: {
+          term: {
+            type,
+          },
+        },
+      },
+    },
+  };
   const response = await sendRequest({
     method: 'post',
     path: `/api/console/proxy`,
