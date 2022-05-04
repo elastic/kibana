@@ -7,12 +7,12 @@
 
 import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
+import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   generateExternalSpanLinks,
   generateIncomeEventsSpanLinks,
   getSpanLinksFromEvents,
-  SpanLinks,
 } from './helper';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'contains outgoing span links',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      let externalSpanLinks: SpanLinks;
+      let externalSpanLinks: SpanLink[];
       let serviceBTraceId: string;
       let serviceBTransactionId: string;
       before(async () => {

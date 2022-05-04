@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { apm, ApmFields, timerange } from '@elastic/apm-synthtrace';
+import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import uuid from 'uuid';
 
 export function generateIncomeEventsSpanLinks() {
@@ -40,13 +41,11 @@ export function generateExternalSpanLinks(numberOfLinks: number) {
     .map(() => ({ span: { id: uuid() }, trace: { id: uuid() } }));
 }
 
-export type SpanLinks = ReturnType<typeof getSpanLinksFromEvents>;
-
 export function getSpanLinksFromEvents(events: ApmFields[]) {
   return events
     .map((event) => {
       const spanId = event['span.id'] || event['transaction.id'];
       return spanId ? { span: { id: spanId }, trace: { id: event['trace.id'] } } : undefined;
     })
-    .filter((_) => _) as Array<{ span: { id: string }; trace: { id: string } }>;
+    .filter((_) => _) as SpanLink[];
 }
