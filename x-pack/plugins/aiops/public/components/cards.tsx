@@ -37,7 +37,7 @@ export const Cards: FC<CardsProps> = ({ cards }) => {
                 <div>
                   <img
                     src={imageUrls[entity as keyof typeof imageUrls]}
-                    alt={i18n.translate('aiops.streamFetch.entityCardImgAlt', {
+                    alt={i18n.translate('xpack.aiops.streamFetch.entityCardImgAlt', {
                       defaultMessage: '{entity} fighting.',
                       values: { entity },
                     })}
@@ -45,7 +45,7 @@ export const Cards: FC<CardsProps> = ({ cards }) => {
                 </div>
               }
               title={entity}
-              description={i18n.translate('aiops.streamFetch.entityCardDescription', {
+              description={i18n.translate('xpack.aiops.streamFetch.entityCardDescription', {
                 defaultMessage: '{entity} killed {value} orcs.',
                 values: { entity, value },
               })}
@@ -69,10 +69,10 @@ export const CancelCard: FC = () => (
           />
         </div>
       }
-      title={i18n.translate('aiops.streamFetch.cancelTitle', {
+      title={i18n.translate('xpack.aiops.streamFetch.cancelTitle', {
         defaultMessage: 'Oh no, you gave up!',
       })}
-      description={i18n.translate('aiops.streamFetch.cancelDescription', {
+      description={i18n.translate('xpack.aiops.streamFetch.cancelDescription', {
         defaultMessage: 'Orcs win.',
       })}
       onClick={() => {}}
@@ -94,7 +94,7 @@ export const WinCard: FC<WinCardProps> = ({ description }) => (
           />
         </div>
       }
-      title={i18n.translate('aiops.streamFetch.winTitle', {
+      title={i18n.translate('xpack.aiops.streamFetch.winTitle', {
         defaultMessage: 'You win!',
       })}
       description={description}

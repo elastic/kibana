@@ -74,7 +74,7 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
               <EuiTitle>
                 <h2>
                   <FormattedMessage
-                    id="aiops.congratulationsTitle"
+                    id="xpack.aiops.congratulationsTitle"
                     defaultMessage="Single endpoint streaming demo"
                   />
                 </h2>
@@ -87,13 +87,13 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
                       {!state.isRunning && (
                         <FormattedMessage
-                          id="aiops.startbuttonText"
+                          id="xpack.aiops.startbuttonText"
                           defaultMessage="Commence fighting!"
                         />
                       )}
                       {state.isRunning && (
                         <FormattedMessage
-                          id="aiops.cancelbuttonText"
+                          id="xpack.aiops.cancelbuttonText"
                           defaultMessage="Flee from the battle!"
                         />
                       )}
@@ -113,7 +113,7 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
                   {state.isRunning && <Cards cards={state.entities} />}
                   {!state.isRunning && state.progress === 100 && (
                     <WinCard
-                      description={i18n.translate('aiops.streamFetch.winCardDescription', {
+                      description={i18n.translate('xpack.aiops.streamFetch.winCardDescription', {
                         defaultMessage: 'You defeated {defeatedOrcs} orcs.',
                         values: {
                           defeatedOrcs: Object.values(state.entities).reduce((p, c) => p + c, 0),

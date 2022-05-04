@@ -53,7 +53,7 @@ export const streamFetch = async <T = unknown>(
       } catch (error) {
         if (error.name !== 'AbortError') {
           notifications.toasts.addDanger(
-            i18n.translate('aiops.streamFetch.errorMessage', {
+            i18n.translate('xpack.aiops.streamFetch.errorMessage', {
               defaultMessage: 'An error occurred.',
             })
           );
