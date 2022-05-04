@@ -60,7 +60,7 @@ export const setupValueSuggestionProvider = (
   }
 
   const requestSuggestions = memoize(
-    <T = unknown>(
+    (
       index: string,
       field: IFieldType,
       query: string,
@@ -71,8 +71,14 @@ export const setupValueSuggestionProvider = (
       )
     ) => {
       usageCollector?.trackRequest();
+      const reportInfo = {
+        timeTookMs: new Date().getTime(),
+        resCount: 0,
+      };
+
+
       return core.http
-        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<string[]>(`/api/kibana/suggestions/values/${index}`, {
           method: 'POST',
           body: JSON.stringify({
             query,
@@ -84,6 +90,11 @@ export const setupValueSuggestionProvider = (
           signal,
         })
         .then((r) => {
+          reportInfo.timeTookMs = new Date().getTime() - reportInfo.timeTookMs;
+          reportInfo.resCount = r.length;
+          // consider sending a hash of the index being queried
+          core.analytics.reportEvent('autocomplete-results', reportInfo);
+
           usageCollector?.trackResult();
           return r;
         });

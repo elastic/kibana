@@ -31,6 +31,7 @@ import {
   ThemeServiceSetup,
   ToastsSetup,
   ExecutionContextSetup,
+  AnalyticsClient,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
@@ -97,6 +98,7 @@ export class SearchInterceptor {
    */
   private application!: ApplicationStart;
   private docLinks!: DocLinksStart;
+  private analytics!: AnalyticsClient;
   private batchedFetch!: BatchedFunc<
     { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
@@ -111,6 +113,7 @@ export class SearchInterceptor {
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
       this.docLinks = coreStart.docLinks;
+      this.analytics = coreStart.analytics as AnalyticsClient;
     });
 
     this.batchedFetch = deps.bfetch.batchedFunction({
@@ -253,6 +256,7 @@ export class SearchInterceptor {
 
     return pollSearch(search, cancel, {
       ...options,
+      analytics: this.analytics,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
       tap((response) => (id = response.id)),

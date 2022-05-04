@@ -7,7 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
+import type { AnalyticsClient, IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
@@ -37,6 +37,7 @@ import {
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
+  analytics: AnalyticsClient,
   usage?: SearchUsage,
   useInternalUser: boolean = false
 ): ISearchStrategy => {
@@ -92,7 +93,10 @@ export const enhancedEsSearchStrategyProvider = (
       }
     };
 
-    return pollSearch(search, cancel, options).pipe(
+    return pollSearch(search, cancel, {
+        ...options,
+        analytics
+    }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
       catchError((e) => {

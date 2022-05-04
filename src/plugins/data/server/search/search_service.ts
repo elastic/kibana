@@ -196,12 +196,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
       this.initializerContext.config.legacy.globalConfig$,
       this.logger,
+      core.analytics,
       usage,
       true
     );
 
-    this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
-    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger, core.analytics));
+    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger, core.analytics));
 
     registerBsearchRoute(
       bfetch,

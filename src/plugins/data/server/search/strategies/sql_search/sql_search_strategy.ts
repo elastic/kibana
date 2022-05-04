@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { AnalyticsClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { SqlGetAsyncRequest, SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
@@ -22,6 +22,7 @@ import { toAsyncKibanaSearchResponse } from './response_utils';
 
 export const sqlSearchStrategyProvider = (
   logger: Logger,
+  analytics: AnalyticsClient,
   useInternalUser: boolean = false
 ): ISearchStrategy<SqlSearchStrategyRequest, SqlSearchStrategyResponse> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
@@ -81,7 +82,10 @@ export const sqlSearchStrategyProvider = (
       }
     };
 
-    return pollSearch(search, cancel, options).pipe(
+    return pollSearch(search, cancel, {
+      ...options,
+      analytics,
+    }).pipe(
       tap((response) => (id = response.id)),
       catchError((e) => {
         throw getKbnServerError(e);

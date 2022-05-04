@@ -20,11 +20,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
+import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart, CoreStart, AnalyticsServiceStart } from '@kbn/core/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
+import { useKibana } from '..';
 
 export interface TableListViewProps<V> {
   createItem?(): void;
@@ -84,10 +85,18 @@ class TableListView<V extends {}> extends React.Component<
   TableListViewState<V>
 > {
   private pagination = {};
+  private analytics: AnalyticsServiceStart;
   private _isMounted = false;
 
   constructor(props: TableListViewProps<V>) {
     super(props);
+    
+    const {
+      services: {
+        analytics
+      },
+    } = useKibana<CoreStart>();
+    this.analytics = analytics;
 
     this.pagination = {
       initialPageIndex: 0,
@@ -122,7 +131,14 @@ class TableListView<V extends {}> extends React.Component<
 
   debouncedFetch = debounce(async (filter: string) => {
     try {
+      const reportTime = new Date().getTime();
+
       const response = await this.props.findItems(filter);
+
+      this.analytics.reportEvent('list-data-loaded', {
+        resHitCount: response.hits.length,
+        timeTookMs: new Date().getTime() - reportTime,
+      });
 
       if (!this._isMounted) {
         return;

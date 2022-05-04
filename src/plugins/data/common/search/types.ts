@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { AnalyticsClient, KibanaExecutionContext } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
@@ -141,6 +141,8 @@ export interface ISearchOptions {
   inspector?: IInspectorInfo;
 
   executionContext?: KibanaExecutionContext;
+
+  analytics?: AnalyticsClient;
 }
 
 /**

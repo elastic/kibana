@@ -8,7 +8,7 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs/operators';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { AnalyticsClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
@@ -22,7 +22,8 @@ import { getDefaultSearchParams } from '../es_search';
 import { getDefaultAsyncGetParams, getIgnoreThrottled } from '../ese_search/request_utils';
 
 export const eqlSearchStrategyProvider = (
-  logger: Logger
+  logger: Logger,
+  analytics: AnalyticsClient,
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = esClient.asCurrentUser.eql;
@@ -73,7 +74,10 @@ export const eqlSearchStrategyProvider = (
         }
       };
 
-      return pollSearch(search, cancel, options).pipe(tap((response) => (id = response.id)));
+      return pollSearch(search, cancel, {
+        ...options,
+        analytics,
+      }).pipe(tap((response) => (id = response.id)));
     },
 
     extend: async (id, keepAlive, options, { esClient }) => {

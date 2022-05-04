@@ -15,7 +15,7 @@ import { isErrorResponse, isPartialResponse } from '..';
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
   cancel?: () => void,
-  { pollInterval = 1000, abortSignal }: IAsyncSearchOptions = {}
+  { pollInterval = 1000, abortSignal, strategy, analytics }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   return defer(() => {
     if (abortSignal?.aborted) {
@@ -32,6 +32,15 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
       })
     );
 
+    const reportInfo = {
+      strategy: strategy || 'default',
+      status: '',
+      timeTookMs: new Date().getTime(),
+      pollCount: 0,
+      resHitCount: 0,
+      resAggCount: 0,
+    };
+
     return from(search()).pipe(
       expand(() => timer(pollInterval).pipe(switchMap(search))),
       tap((response) => {
@@ -39,7 +48,18 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
           throw response ? new Error('Received partial response') : new AbortError();
         }
       }),
+      tap(() => {
+        reportInfo.pollCount++;
+      }),
       takeWhile<Response>(isPartialResponse, true),
+      tap((response) => {
+        reportInfo.timeTookMs = new Date().getTime() - reportInfo.timeTookMs;
+        reportInfo.status = isErrorResponse(response) ? 'err' : 'ok';
+        const { hits, aggregations } = response.rawResponse;
+        reportInfo.resHitCount = hits?.hits?.length ?? 0;
+        reportInfo.resAggCount = aggregations ? Object.keys(aggregations).length : 0;
+        analytics?.reportEvent('search-result', reportInfo);
+      }),
       takeUntil<Response>(aborted$)
     );
   });
