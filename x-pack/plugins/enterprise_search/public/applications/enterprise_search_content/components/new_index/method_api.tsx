@@ -17,14 +17,16 @@
 
 import React, { useState } from 'react';
 
-import { EuiCode, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCodeBlock, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
 export const MethodApi: React.FC = () => {
   const [endpoint, setEndpoint] = useState('');
+  const apiKey = 1212312313; // TODO change this
 
   const onNameChange = (value: string) => {
     setEndpoint(value.split(' ').join('-').toLowerCase());
@@ -77,11 +79,26 @@ export const MethodApi: React.FC = () => {
         {endpoint && (
           <>
             <EuiSpacer size="m" />
-            <EuiCode>https://my-es-url.aws.com/23782837/es/{endpoint}</EuiCode>
+            <EuiCodeBlock language="bash" fontSize="m" isCopyable>
+              {`\
+curl -X POST 'https://my-es-url.aws.com/23782837/es/${endpoint}' \\
+  -H 'Content-Type: application/json' \\
+  -H 'Authorization: Bearer ${apiKey}' \\
+  -d '${DOCUMENTS_API_JSON_EXAMPLE}'
+# Returns
+# [
+#   {
+#     "id": "park_rocky-mountain",
+#     "errors": []
+#   },
+#   {
+#     "id": "park_saguaro",
+#     "errors": []
+#   }
+# ]`}
+            </EuiCodeBlock>
           </>
         )}
-        <EuiSpacer size="l" />
-        <p>The existing API instructions should render here.</p>
       </EuiPanel>
     </NewSearchIndexTemplate>
   );
