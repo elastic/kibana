@@ -60,7 +60,7 @@ describe('TelemetryEventsSender', () => {
             another: 'nope',
             pe: {
                 original_file_name: 'malware.exe',
-            }
+            },
             Ext: {
               bytes_compressed: 'data up to 4mb',
               bytes_compressed_present: 'data up to 4mb',
@@ -140,7 +140,7 @@ describe('TelemetryEventsSender', () => {
             path: 'X',
             pe: {
                 original_file_name: 'malware.exe',
-            }
+            },
             Ext: {
               bytes_compressed: 'data up to 4mb',
               bytes_compressed_present: 'data up to 4mb',
