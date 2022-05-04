@@ -51,20 +51,21 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   };
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
-    let darkMode = false;
+    let theme = 'system';
     const themeVersion: ThemeVersion = 'v8';
 
     try {
       const authenticated = isAuthenticated(request);
-      darkMode = authenticated ? await uiSettingsClient.get('theme:darkMode') : false;
+      theme = authenticated ? await uiSettingsClient.get('theme') : 'system';
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
     }
 
     const themeTag = getThemeTag({
       themeVersion,
-      darkMode,
+      theme,
     });
+
     const buildHash = packageInfo.buildNum;
     const regularBundlePath = `${serverBasePath}/${buildHash}/bundles`;
 

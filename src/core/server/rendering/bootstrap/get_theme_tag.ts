@@ -14,10 +14,10 @@ import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
  */
 export const getThemeTag = ({
   themeVersion,
-  darkMode,
+  theme,
 }: {
   themeVersion: ThemeVersion;
-  darkMode: boolean;
+  theme: string;
 }) => {
-  return `${themeVersion}${darkMode ? 'dark' : 'light'}`;
+  return `${themeVersion}${theme}`;
 };

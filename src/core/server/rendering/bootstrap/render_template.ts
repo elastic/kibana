@@ -17,6 +17,16 @@ export const renderTemplate = ({
   jsDependencyPaths,
   publicPathMap,
 }: BootstrapTemplateData) => {
+  const __kbnThemeTag__ = themeTag.includes('system')
+    ? `Object.defineProperty(window, '__kbnThemeTag__', {
+      get: () => {
+        const prefix = '${themeTag.slice(0, themeTag.indexOf('system'))}';
+        const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        return prefix + theme;
+      }
+    });`
+    : `window.__kbnThemeTag__ = ${themeTag};`;
+
   return `
 function kbnBundlesLoader() {
   var modules = {};
@@ -49,7 +59,7 @@ function kbnBundlesLoader() {
 
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
-window.__kbnThemeTag__ = "${themeTag}";
+${__kbnThemeTag__}
 window.__kbnPublicPath__ = ${publicPathMap};
 window.__kbnBundles__ = kbnBundlesLoader();
 

@@ -9,20 +9,28 @@
 import { getThemeTag } from './get_theme_tag';
 
 describe('getThemeTag', () => {
-  it('returns the correct value for version:v8 and darkMode:false', () => {
+  it('returns the correct value for version:v8 and theme:light', () => {
     expect(
       getThemeTag({
         themeVersion: 'v8',
-        darkMode: false,
+        theme: 'light',
       })
     ).toEqual('v8light');
   });
-  it('returns the correct value for version:v8 and darkMode:true', () => {
+  it('returns the correct value for version:v8 and theme:dark', () => {
     expect(
       getThemeTag({
         themeVersion: 'v8',
-        darkMode: true,
+        theme: 'dark',
       })
     ).toEqual('v8dark');
+  });
+  it('returns the correct value for version:v8 and theme:system', () => {
+    expect(
+      getThemeTag({
+        themeVersion: 'v8',
+        theme: 'system',
+      })
+    ).toEqual('system');
   });
 });
