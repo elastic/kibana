@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { WebhookActionConnector } from '../types';
+import { CasesWebhookActionConnector, WebhookActionConnector } from '../types';
 import WebhookActionConnectorFields from './webhook_connectors';
 
 describe('WebhookActionConnectorFields renders', () => {
@@ -18,16 +18,19 @@ describe('WebhookActionConnectorFields renders', () => {
         password: 'pass',
       },
       id: 'test',
-      actionTypeId: '.webhook',
+      actionTypeId: '.webhook-cases',
       isPreconfigured: false,
-      name: 'webhook',
+      isDeprecated: false,
+      name: 'cases webhook',
       config: {
         method: 'PUT',
         url: 'http:\\test',
+        incident:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
         headers: { 'content-type': 'text' },
         hasAuth: true,
       },
-    } as WebhookActionConnector;
+    } as CasesWebhookActionConnector;
     const wrapper = mountWithIntl(
       <WebhookActionConnectorFields
         action={actionConnector}
@@ -51,8 +54,9 @@ describe('WebhookActionConnectorFields renders', () => {
   test('should display a message on create to remember credentials', () => {
     const actionConnector = {
       secrets: {},
-      actionTypeId: '.webhook',
+      actionTypeId: '.webhook-cases',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         hasAuth: true,
       },
@@ -60,7 +64,7 @@ describe('WebhookActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <WebhookActionConnectorFields
         action={actionConnector}
-        errors={{ url: [], method: [], user: [], password: [] }}
+        errors={{ url: [], method: [], user: [], incident: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -81,10 +85,13 @@ describe('WebhookActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'webhook',
       config: {
         method: 'PUT',
         url: 'http:\\test',
+        incident:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
         headers: { 'content-type': 'text' },
         hasAuth: true,
       },
@@ -114,10 +121,13 @@ describe('WebhookActionConnectorFields renders', () => {
       actionTypeId: '.webhook',
       isPreconfigured: false,
       isMissingSecrets: true,
+      isDeprecated: false,
       name: 'webhook',
       config: {
         method: 'PUT',
         url: 'http:\\test',
+        incident:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
         headers: { 'content-type': 'text' },
         hasAuth: true,
       },

@@ -13,6 +13,12 @@ export const URL_REQUIRED = i18n.translate(
     defaultMessage: 'URL is required.',
   }
 );
+export const INCIDENT_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredIncidentText',
+  {
+    defaultMessage: 'Incident object is required.',
+  }
+);
 
 export const URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.invalidUrlTextField',

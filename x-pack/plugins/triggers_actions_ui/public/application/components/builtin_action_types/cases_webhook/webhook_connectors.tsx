@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { CasesWebhookActionConnector } from '../types';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -35,7 +36,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<CasesWebhookActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { user, password } = action.secrets;
-  const { method, url, headers, hasAuth } = action.config;
+  const { method, url, incident, headers, hasAuth } = action.config;
+  console.log('incident here', incident);
 
   const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
@@ -230,6 +232,9 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
   const isUserInvalid: boolean =
     user !== undefined && errors.user !== undefined && errors.user.length > 0;
 
+  const isIncidentInvalid: boolean =
+    errors.url !== undefined && errors.url.length > 0 && url !== undefined;
+
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -238,7 +243,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.methodTextFieldLabel',
               {
-                defaultMessage: 'Method',
+                defaultMessage: 'Create Incident Method',
               }
             )}
           >
@@ -263,7 +268,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.urlTextFieldLabel',
               {
-                defaultMessage: 'URL',
+                defaultMessage: 'Incident URL',
               }
             )}
           >
@@ -280,6 +285,55 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               onBlur={() => {
                 if (!url) {
                   editActionConfig('url', '');
+                }
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            id="incident"
+            fullWidth
+            error={errors.incident}
+            isInvalid={isIncidentInvalid}
+            label={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.urlTextFieldLabel',
+              {
+                defaultMessage: 'Incident Object',
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.urlTextFieldLabel',
+              {
+                defaultMessage:
+                  'JSON object to post incident. Sub $SUM where the summary/title should go and $DESC where the description should go',
+              }
+            )}
+          >
+            <JsonEditorWithMessageVariables
+              inputTargetValue={incident}
+              paramsProperty={'body'}
+              label={i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyFieldLabel',
+                {
+                  defaultMessage: 'JSON',
+                }
+              )}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyCodeEditorAriaLabel',
+                {
+                  defaultMessage: 'Code editor',
+                }
+              )}
+              errors={errors.incident as string[]}
+              onDocumentsChange={(json: string) => {
+                editActionConfig('incident', json);
+              }}
+              onBlur={() => {
+                if (!incident) {
+                  editActionConfig('incident', '');
                 }
               }}
             />

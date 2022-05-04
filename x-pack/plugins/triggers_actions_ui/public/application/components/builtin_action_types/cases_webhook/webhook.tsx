@@ -50,6 +50,7 @@ export function getActionType(): ActionTypeModel<
       const configErrors = {
         url: new Array<string>(),
         method: new Array<string>(),
+        incident: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
@@ -64,6 +65,9 @@ export function getActionType(): ActionTypeModel<
       }
       if (action.config.url && !isValidUrl(action.config.url)) {
         configErrors.url = [...configErrors.url, translations.URL_INVALID];
+      }
+      if (!action.config.incident) {
+        configErrors.incident.push(translations.INCIDENT_REQUIRED);
       }
       if (!action.config.method) {
         configErrors.method.push(translations.METHOD_REQUIRED);
@@ -87,12 +91,16 @@ export function getActionType(): ActionTypeModel<
     ): Promise<GenericValidationResult<CasesWebhookActionParams>> => {
       const translations = await import('./translations');
       const errors = {
-        body: new Array<string>(),
+        summary: new Array<string>(),
+        description: new Array<string>(),
       };
       const validationResult = { errors };
       validationResult.errors = errors;
-      if (!actionParams.body?.length) {
-        errors.body.push(translations.BODY_REQUIRED);
+      if (!actionParams.summary?.length) {
+        errors.summary.push(translations.BODY_REQUIRED);
+      }
+      if (!actionParams.description?.length) {
+        errors.description.push(translations.BODY_REQUIRED);
       }
       return validationResult;
     },

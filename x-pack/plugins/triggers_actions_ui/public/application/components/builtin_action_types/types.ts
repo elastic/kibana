@@ -73,7 +73,8 @@ export interface WebhookActionParams {
 }
 
 export interface CasesWebhookActionParams {
-  body?: string;
+  summary: string;
+  description: string;
 }
 
 export interface EmailConfig {
@@ -139,6 +140,7 @@ export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig
 export interface CasesWebhookConfig {
   method: string;
   url: string;
+  incident: string;
   headers: Record<string, string>;
   hasAuth: boolean;
 }

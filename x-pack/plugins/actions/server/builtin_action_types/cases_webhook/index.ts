@@ -11,14 +11,15 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-import { nullableType } from './lib/nullable';
-import { isOk, promiseResult, Result } from './lib/result_type';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { Logger } from '../../../../../src/core/server';
-import { request } from './lib/axios_utils';
-import { renderMustacheString } from '../lib/mustache_renderer';
+import { Logger } from '@kbn/core/server';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_rersponse_retry_header';
+import { nullableType } from '../lib/nullable';
+import { isOk, promiseResult, Result } from '../lib/result_type';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { request } from '../lib/axios_utils';
+import { renderMustacheString } from '../../lib/mustache_renderer';
+import { createExternalService } from './service';
 
 // config definition
 export enum CasesWebhookMethods {
@@ -47,6 +48,7 @@ const configSchemaProps = {
       defaultValue: CasesWebhookMethods.POST,
     }
   ),
+  incident: schema.string(), // stringified object
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
 };
@@ -73,7 +75,8 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
-  body: schema.maybe(schema.string()),
+  summary: schema.string(),
+  description: schema.string(),
 });
 
 export const ActionTypeId = '.cases-webhook';
@@ -107,9 +110,11 @@ function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
-  if (!params.body) return params;
+  if (!params.summary) return params;
+  if (!params.description) return params;
   return {
-    body: renderMustacheString(params.body, variables, 'json'),
+    summary: renderMustacheString(params.summary, variables, 'json'),
+    description: renderMustacheString(params.description, variables, 'json'),
   };
 }
 
@@ -153,29 +158,23 @@ export async function executor(
   execOptions: CasesWebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const { method, url, headers = {}, hasAuth } = execOptions.config;
-  const { body: data } = execOptions.params;
+  const { summary, description } = execOptions.params;
 
-  const secrets: ActionTypeSecretsType = execOptions.secrets;
-  const basicAuth =
-    hasAuth && isString(secrets.user) && isString(secrets.password)
-      ? { auth: { username: secrets.user, password: secrets.password } }
-      : {};
-
-  const axiosInstance = axios.create();
-
-  const result: Result<AxiosResponse, AxiosError> = await promiseResult(
-    request({
-      axios: axiosInstance,
-      method,
-      url,
-      logger,
-      ...basicAuth,
-      headers,
-      data,
-      configurationUtilities,
-    })
+  const externalService = createExternalService(
+    {
+      config: execOptions.config,
+      secrets: execOptions.secrets,
+    },
+    logger,
+    configurationUtilities
   );
+
+  console.log('call createIncident');
+  const result = await externalService.createIncident({
+    summary,
+    description,
+  });
+  console.log('result', result);
 
   if (isOk(result)) {
     const {
