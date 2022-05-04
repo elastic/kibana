@@ -497,10 +497,12 @@ describe('<SnapshotRestoreHome />', () => {
       const snapshot1 = fixtures.getSnapshot({
         repository: REPOSITORY_NAME,
         snapshot: `a${getRandomString()}`,
+        featureStates: ['kibana'],
       });
       const snapshot2 = fixtures.getSnapshot({
         repository: REPOSITORY_NAME,
         snapshot: `b${getRandomString()}`,
+        includeGlobalState: 0,
       });
       const snapshots = [snapshot1, snapshot2];
 
@@ -707,6 +709,29 @@ describe('<SnapshotRestoreHome />', () => {
             find('snapshotDetail.closeButton').simulate('click');
 
             expect(exists('snapshotDetail')).toBe(false);
+          });
+
+          test('should show feature states if include global state is enabled', async () => {
+            const { find, exists } = testBed;
+
+            // Assert against first snapshot shown in the table, which should have includeGlobalState enabled
+            expect(exists('featureStates')).toBe(true);
+            expect(find('featureStates.value').text()).toBe('kibana');
+
+            // Close the flyout
+            find('snapshotDetail.closeButton').simulate('click');
+
+            // Replace the get snapshot details api call with the payload of the second snapshot which we're about to click
+            httpRequestsMockHelpers.setGetSnapshotResponse(
+              snapshot2.repository,
+              snapshot2.snapshot,
+              snapshot2
+            );
+
+            // Now we will assert against the second result of the table which shouldnt have includeGlobalState
+            await testBed.actions.clickSnapshotAt(1);
+
+            expect(exists('featureStates')).toBe(false);
           });
 
           describe('tabs', () => {

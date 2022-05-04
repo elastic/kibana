@@ -13,6 +13,7 @@ export const getSnapshot = ({
   uuid = getRandomString(),
   state = 'SUCCESS',
   indexFailures = [],
+  includeGlobalState = 1,
   featureStates = [],
   totalIndices = getRandomNumber(),
   totalDataStreams = getRandomNumber(),
@@ -23,6 +24,7 @@ export const getSnapshot = ({
   state: string;
   indexFailures: any[];
   featureStates: string[];
+  includeGlobalState: number;
   totalIndices: number;
   totalDataStreams: number;
 }> = {}) => ({
@@ -34,7 +36,7 @@ export const getSnapshot = ({
   indices: new Array(totalIndices).fill('').map(getRandomString),
   dataStreams: new Array(totalDataStreams).fill('').map(getRandomString),
   featureStates,
-  includeGlobalState: 1,
+  includeGlobalState,
   state,
   startTime: '2019-05-23T06:25:15.896Z',
   startTimeInMillis: 1558592715896,
