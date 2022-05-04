@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { extractUnknownDocFailureReason } from './extract_errors';
+import {
+  extractUnknownDocFailureReason,
+  fatalReasonClusterRoutingAllocationUnsupported,
+  fatalReasonDocumentExceedsMaxBatchSizeBytes,
+} from './extract_errors';
 
 describe('extractUnknownDocFailureReason', () => {
   it('generates the correct error message', () => {
@@ -35,5 +39,34 @@ describe('extractUnknownDocFailureReason', () => {
       { \\"delete\\" : { \\"_id\\" : \\"anotherUnknownType:42\\" } }
       '"
     `);
+  });
+});
+
+describe('fatalReasonDocumentExceedsMaxBatchSizeBytes', () => {
+  it('generate the correct error message', () => {
+    expect(
+      fatalReasonDocumentExceedsMaxBatchSizeBytes({
+        _id: 'abc',
+        docSizeBytes: 106954752,
+        maxBatchSizeBytes: 104857600,
+      })
+    ).toMatchInlineSnapshot(
+      `"The document with _id \\"abc\\" is 106954752 bytes which exceeds the configured maximum batch size of 104857600 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value."`
+    );
+  });
+});
+
+describe('fatalReasonClusterRoutingAllocationUnsupported', () => {
+  it('generates the correct error message', () => {
+    const errorMessages = fatalReasonClusterRoutingAllocationUnsupported({
+      errorMessage: '[some-error] message',
+      docSectionLink: 'linkToDocsSection',
+    });
+    expect(errorMessages.fatalReason).toMatchInlineSnapshot(
+      `"[some-error] message To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}. Refer to linkToDocsSection for more information on how to resolve the issue."`
+    );
+    expect(errorMessages.logsErrorMessage).toMatchInlineSnapshot(
+      `"[some-error] message Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'. Refer to linkToDocsSection for more information on how to resolve the issue."`
+    );
   });
 });
