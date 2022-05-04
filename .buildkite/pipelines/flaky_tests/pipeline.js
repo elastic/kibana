@@ -127,6 +127,9 @@ for (const testSuite of testSuites) {
       },
       label: `FTR Config: ${testSuite.ftrConfig}`,
       parallelism: testSuite.count,
+      concurrency: concurrency,
+      concurrency_group: process.env.UUID,
+      concurrency_method: 'eager',
       agents: {
         queue: 'n2-4-spot-2',
       },
