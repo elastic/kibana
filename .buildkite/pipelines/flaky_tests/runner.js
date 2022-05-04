@@ -6,45 +6,12 @@
  * Side Public License, v 1.
  */
 
-const { execSync } = require('child_process');
 const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */ (
   require('./groups.json').groups
 );
 
 const concurrency = 25;
-const defaultCount = concurrency * 2;
 const initialJobs = 3;
-
-function getTestSuitesFromMetadata() {
-  const keys = execSync('buildkite-agent meta-data keys')
-    .toString()
-    .split('\n')
-    .filter((k) => k.startsWith('ftsr-suite/'));
-
-  const overrideCount = execSync(`buildkite-agent meta-data get 'ftsr-override-count'`)
-    .toString()
-    .trim();
-
-  const testSuites = [];
-  for (const key of keys) {
-    if (!key) {
-      continue;
-    }
-
-    const value =
-      overrideCount && overrideCount !== '0'
-        ? overrideCount
-        : execSync(`buildkite-agent meta-data get '${key}'`).toString().trim();
-
-    const count = value === '' ? defaultCount : parseInt(value);
-    testSuites.push({
-      key: key.replace('ftsr-suite/', ''),
-      count: count,
-    });
-  }
-
-  return testSuites;
-}
 
 function getTestSuitesFromJson(json) {
   const fail = (errorMsg) => {
@@ -87,10 +54,7 @@ function getTestSuitesFromJson(json) {
   return testSuites;
 }
 
-const testSuites = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG
-  ? getTestSuitesFromJson(process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG)
-  : getTestSuitesFromMetadata();
-
+const testSuites = getTestSuitesFromJson(process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG);
 const totalJobs = testSuites.reduce((acc, t) => acc + t.count, initialJobs);
 
 if (totalJobs > 500) {
