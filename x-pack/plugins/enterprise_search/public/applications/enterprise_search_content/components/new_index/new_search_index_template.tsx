@@ -8,11 +8,10 @@
 /**
  * TODO:
  * - Need to add documentation URLs (search for `#`s)
- * - Replace `onNameChange` logic with that from App Search
  * - Need to implement the logic for the attaching search engines functionality
  */
 
-import React, { useState, ChangeEvent, useEffect } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -32,9 +31,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SearchIndicesLogic } from '../search_indices';
-
 import { SUPPORTED_LANGUAGES } from './constants';
+import { NewSearchIndexLogic } from './new_search_index_logic';
 
 export interface ISearchIndex {
   description: React.ReactNode;
@@ -53,18 +51,13 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
   type,
   onNameChange,
 }) => {
-  const { searchEngines } = useValues(SearchIndicesLogic);
-  const { loadSearchEngines } = useActions(SearchIndicesLogic);
-  useEffect(() => {
-    loadSearchEngines();
-  });
+  const { searchEngineSelectOptions, name, language, rawName } = useValues(NewSearchIndexLogic);
+  const { setRawName, setLanguage } = useActions(NewSearchIndexLogic);
 
   const [selectedSearchEngines, setSelectedSearchEngines] = useState([] as string[]);
-  const [name, setName] = useState('');
-  const [language, setLanguage] = useState('Universal');
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
+    setRawName(e.target.value);
     if (onNameChange) {
       onNameChange(e.target.value);
     }
@@ -126,7 +119,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                   )}
                   fullWidth
                   isInvalid={false}
-                  value={name}
+                  value={rawName}
                   onChange={(event) => handleNameChange(event)}
                 />
               </EuiFormRow>
@@ -150,7 +143,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {searchEngines.length !== 0 && (
+        {searchEngineSelectOptions.length !== 0 && (
           <EuiFlexItem grow>
             <EuiFormRow
               label={i18n.translate(
@@ -170,7 +163,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
             >
               <EuiComboBox
                 fullWidth
-                options={searchEngines.map((s) => ({ label: s.name }))}
+                options={searchEngineSelectOptions}
                 onChange={(options) => {
                   setSelectedSearchEngines(options.map(({ value }) => value as string));
                 }}

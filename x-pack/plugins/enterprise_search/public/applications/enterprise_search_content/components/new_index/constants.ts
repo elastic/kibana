@@ -183,3 +183,5 @@ export const SUPPORTED_LANGUAGES = [
     ),
   },
 ];
+
+export const DEFAULT_LANGUAGE = 'Universal';

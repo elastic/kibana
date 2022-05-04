@@ -21,6 +21,8 @@ import { EuiCodeBlock, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url/external_url';
+
 import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
@@ -31,6 +33,8 @@ export const MethodApi: React.FC = () => {
   const onNameChange = (value: string) => {
     setEndpoint(value.split(' ').join('-').toLowerCase());
   };
+
+  const searchIndexApiUrl = getEnterpriseSearchUrl('/api/ent/v1/search_indices/');
 
   return (
     <NewSearchIndexTemplate
@@ -81,7 +85,7 @@ export const MethodApi: React.FC = () => {
             <EuiSpacer size="m" />
             <EuiCodeBlock language="bash" fontSize="m" isCopyable>
               {`\
-curl -X POST 'https://my-es-url.aws.com/23782837/es/${endpoint}' \\
+curl -X POST '${searchIndexApiUrl}${endpoint}' \\
   -H 'Content-Type: application/json' \\
   -H 'Authorization: Bearer ${apiKey}' \\
   -d '${DOCUMENTS_API_JSON_EXAMPLE}'
