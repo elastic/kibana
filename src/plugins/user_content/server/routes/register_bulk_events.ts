@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
 import { withApiBaseBath } from '../../common';
+import { incrementViewsCounters } from '../lib';
 import { streamEvent } from './schemas';
 
 import type { RouteDependencies } from './types';
@@ -28,16 +29,22 @@ export const registerBulkEventsRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const { body } = req;
 
-      const { userContentEventsStream } = await depsFromPluginStartPromise;
+      const { userContentEventsStream, savedObjectRepository } = await depsFromPluginStartPromise;
 
-      userContentEventsStream.bulkRegisterEvents(
-        body.map(({ type, soId }) => ({
+      const events = body.map(({ type, soId, soType }) => {
+        if (type.startsWith('viewed')) {
+          incrementViewsCounters(soType, soId, savedObjectRepository);
+        }
+
+        return {
           type,
           data: {
             so_id: soId,
           },
-        }))
-      );
+        };
+      });
+
+      userContentEventsStream.bulkRegisterEvents(events);
 
       return res.ok({
         body: 'ok',

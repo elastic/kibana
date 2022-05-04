@@ -11,6 +11,7 @@ export {
   EVENTS_COUNT_GRANULARITY,
   userContentCommonMappings,
   defaultUserContentAttributes,
+  viewsCountRangeFields,
 } from './constants';
 
 export { withApiBaseBath } from './lib';

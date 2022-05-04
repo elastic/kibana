@@ -54,15 +54,14 @@ export class UserContentService {
     this.savedObjectClient?.post('get', async (objects) => {
       const registeredContents = [...this.contents.keys()];
 
-      const filteredToContentType: Array<{ id: string }> = objects.filter(({ type }) =>
-        registeredContents.includes(type)
-      );
+      const filteredToContentType = objects.filter(({ type }) => registeredContents.includes(type));
 
       if (filteredToContentType.length > 0) {
         this.metadataEventsService?.bulkRegisterEvents(
-          filteredToContentType.map(({ id: soId }) => ({
+          filteredToContentType.map(({ id: soId, type }) => ({
             type: 'viewed:kibana',
             soId,
+            soType: type,
           }))
         );
       }
@@ -81,6 +80,7 @@ export class UserContentService {
           return object;
         }
 
+        // Add common attributes to all user generated saved objects
         const updatedAttributes = this.addDefaultUserContentAttributes(attributes as object);
 
         return { ...object, attributes: updatedAttributes };
@@ -106,7 +106,7 @@ export class UserContentService {
 
     Object.entries(defaultUserContentAttributes).forEach(([attr, value]) => {
       if (attributes.hasOwnProperty(attr)) {
-        // Already declared, we don't want to override it
+        // Already declared, we don't override it
         return;
       }
 
