@@ -16,13 +16,19 @@ import { checkConfiguration } from './configuration';
 import { checkPackages } from './packages';
 import { checkAgents } from './agents';
 
-/*
+/**
  * Dev notes:
+ *
  *  This could potentially be a long running operation. Should we advise users
  *  to increase timeout (Kibana and ES) settings before running?
+ *
  *  How can we verify the usefulness of this health check? Can we get a snapshot of
  *  a "broken" cluster to check report?
+ *
  *  This report does not pertain to standalone usage.
+ *
+ *  Is this useful for Cloud deployments? What other conditions/checks would be
+ *  relevant for Cloud?
  */
 
 type CHECK = 'configuration' | 'packages' | 'agents' | 'policies';
