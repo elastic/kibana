@@ -14,9 +14,8 @@ export const eventTypeSchema = schema.oneOf(
   metadataEventTypes.map((eventType) => schema.literal(eventType)) as [Type<MetadataEventType>]
 );
 
-export const savedObjectIdSchema = schema.string();
-
 export const streamEvent = schema.object({
   type: eventTypeSchema,
-  soId: savedObjectIdSchema,
+  soId: schema.string(),
+  soType: schema.string(),
 });

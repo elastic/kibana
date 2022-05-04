@@ -15,10 +15,12 @@ export const metadataEventTypes = ['viewed:kibana', 'viewed:api'] as const;
 /** The **days** we want to aggregate events count */
 export const EVENTS_COUNT_GRANULARITY = [7, 14, 30, 45, 60, 90];
 
-const viewsCountMapping = EVENTS_COUNT_GRANULARITY.reduce((agg, days) => {
+export const viewsCountRangeFields = EVENTS_COUNT_GRANULARITY.map((days) => `views_${days}_days`);
+
+const viewsCountMapping = viewsCountRangeFields.reduce((agg, field) => {
   return {
     ...agg,
-    [`views_${days}_days`]: { type: 'integer' } as SavedObjectsFieldMapping,
+    [field]: { type: 'integer' } as SavedObjectsFieldMapping,
   };
 }, {} as SavedObjectsTypeMappingDefinition['properties']);
 
@@ -27,10 +29,10 @@ export const userContentCommonMappings = {
   ...viewsCountMapping,
 };
 
-const viewsCount = EVENTS_COUNT_GRANULARITY.reduce((agg, days) => {
+const viewsCount = viewsCountRangeFields.reduce((agg, field) => {
   return {
     ...agg,
-    [`views_${days}_days`]: 1,
+    [field]: 1,
   };
 }, {} as ViewsCounters);
 

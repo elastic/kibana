@@ -6,5 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { bucketsAggregationToContentEventCount } from './events_count';
-export { incrementViewsCounters } from './increment_views_counters';
+import { ISavedObjectsRepository } from '@kbn/core/server';
+
+import { viewsCountRangeFields } from '../../common';
+
+export const incrementViewsCounters = (
+  contentType: string,
+  savedObjectId: string,
+  repository: ISavedObjectsRepository
+) => {
+  repository.incrementCounter(contentType, savedObjectId, [...viewsCountRangeFields]);
+};
