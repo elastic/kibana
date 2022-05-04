@@ -31,7 +31,11 @@ export type APMLocatorPayload = t.TypeOf<typeof APMLocatorPayloadValidator>;
 
 export function getPathForServiceDetail(
   payload: APMLocatorPayload,
-  { from, to }: TimePickerTimeDefaults
+  {
+    from,
+    to,
+    isComparisonEnabledByDefault,
+  }: TimePickerTimeDefaults & { isComparisonEnabledByDefault: boolean }
 ) {
   const decodedPayload = APMLocatorPayloadValidator.decode(payload);
   if (!isRight(decodedPayload)) {
@@ -49,7 +53,7 @@ export function getPathForServiceDetail(
   const defaultQueryParams = {
     kuery: '',
     serviceGroup: '',
-    comparisonEnabled: false,
+    comparisonEnabled: isComparisonEnabledByDefault,
     rangeFrom: from,
     rangeTo: to,
   } as const;

@@ -6,17 +6,20 @@
  */
 import { Environment } from '../../common/environment_rt';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { APMLocatorDefinition, APM_APP_LOCATOR_ID } from './locator';
+import {
+  APMServiceDetailLocator,
+  APM_APP_LOCATOR_ID,
+} from './service_detail_locator';
 
 describe('APMLocatorDefinition', () => {
-  let locator: APMLocatorDefinition;
+  let locator: APMServiceDetailLocator;
 
   beforeEach(() => {
     const uiSettingsMock = {
       get: () => ({ from: 'now-15m', to: 'now' }),
     } as unknown as IUiSettingsClient;
 
-    locator = new APMLocatorDefinition(uiSettingsMock);
+    locator = new APMServiceDetailLocator(uiSettingsMock);
   });
 
   it('locator has the right ID and app', async () => {

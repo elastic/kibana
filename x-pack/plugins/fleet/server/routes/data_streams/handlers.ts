@@ -37,6 +37,10 @@ interface ESDataStreamInfo {
   hidden: boolean;
 }
 
+const hasASingleBucket = (
+  bucket: estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>['buckets']
+): bucket is [{ key: string; value?: number }] => Array.isArray(bucket) && bucket.length === 1;
+
 export const getListHandler: RequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
   const { savedObjects, elasticsearch } = await context.core;
@@ -182,7 +186,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
             environment: {
               terms: {
                 field: 'service.environment',
-                size: 1,
+                size: 2,
                 missing: 'ENVIRONMENT_NOT_DEFINED',
               },
             },
@@ -210,14 +214,13 @@ export const getListHandler: RequestHandler = async (context, request, response)
         (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
       dataStreamResponse.type =
         (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
-      const environmentValue =
-        (environment.buckets as Array<{ key?: string; value?: number }>)[0]?.key || null;
-      const serviceNameBuckets = serviceName.buckets as Array<{ key?: string; value?: number }>;
 
-      if (serviceNameBuckets.length === 1 && environmentValue) {
+      if (hasASingleBucket(serviceName.buckets)) {
         dataStreamResponse.serviceDetails = {
-          serviceName: serviceNameBuckets[0].key!,
-          environment: environmentValue,
+          serviceName: serviceName.buckets[0].key,
+          environment: hasASingleBucket(environment.buckets)
+            ? serviceName.buckets[0].key
+            : 'ENVIRONMENT_ALL',
         };
       }
 

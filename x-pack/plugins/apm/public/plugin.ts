@@ -58,7 +58,7 @@ import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import type { ConfigSchema } from '.';
-import { APMLocatorDefinition } from './locator/locator';
+import { APMServiceDetailLocator } from './locator/service_detail_locator';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -305,7 +305,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     registerApmAlerts(observabilityRuleTypeRegistry);
 
     const locator = plugins.share.url.locators.create(
-      new APMLocatorDefinition(core.uiSettings)
+      new APMServiceDetailLocator(core.uiSettings)
     );
 
     return {

@@ -13,11 +13,10 @@ import type { DataStream } from '../../../../types';
 import { useKibanaLink } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 
-import { useAPMServiceHref } from '../../../../hooks/use_apm_service_href';
+import { useAPMServiceDetailHref } from '../../../../hooks/use_apm_service_href';
 
 export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
   const { dashboards } = datastream;
-  const panels = [];
   const actionNameSingular = (
     <FormattedMessage
       id="xpack.fleet.dataStreamList.viewDashboardActionText"
@@ -42,68 +41,81 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     }
   );
 
-  const { isReady, href } = useAPMServiceHref(datastream);
+  const { isSuccessful, href } = useAPMServiceDetailHref(datastream);
 
-  if (isReady && href) {
-    panels.push({
-      id: 0,
-      items: [
-        {
-          icon: 'apmApp',
-          href,
-          name: viewServiceInApmActionTitle,
-        },
-      ],
-    });
-  } else if (!dashboards || dashboards.length === 0) {
-    panels.push({
-      id: 0,
-      items: [
-        {
-          icon: 'dashboardApp',
-          disabled: true,
-          name: actionNameSingular,
-        },
-      ],
-    });
-  } else if (dashboards.length === 1) {
-    panels.push({
-      id: 0,
-      items: [
-        {
-          icon: 'dashboardApp',
-          /* eslint-disable-next-line react-hooks/rules-of-hooks */
-          href: useKibanaLink(`/dashboard/${dashboards[0].id || ''}`),
-          name: actionNameSingular,
-        },
-      ],
-    });
-  } else {
-    panels.push(
+  if (isSuccessful && href) {
+    const apmItem = [
+      {
+        id: 0,
+        items: [
+          {
+            icon: 'apmApp',
+            href,
+            name: viewServiceInApmActionTitle,
+          },
+        ],
+      },
+    ];
+    return <ContextMenuActions panels={apmItem} />;
+  }
+
+  if (!dashboards || dashboards.length === 0) {
+    const disabledItems = [
       {
         id: 0,
         items: [
           {
             icon: 'dashboardApp',
-            panel: 1,
-            name: actionNamePlural,
+            disabled: true,
+            name: actionNameSingular,
           },
         ],
       },
-      {
-        id: 1,
-        title: panelTitle,
-        items: dashboards.map((dashboard) => {
-          return {
-            icon: 'dashboardApp',
-            /* eslint-disable-next-line react-hooks/rules-of-hooks */
-            href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),
-            name: dashboard.title,
-          };
-        }),
-      }
-    );
+    ];
+    return <ContextMenuActions panels={disabledItems} />;
   }
 
-  return <ContextMenuActions panels={panels} />;
+  if (dashboards.length === 1) {
+    const panelItems = [
+      {
+        id: 0,
+        items: [
+          {
+            icon: 'dashboardApp',
+            /* eslint-disable-next-line react-hooks/rules-of-hooks */
+            href: useKibanaLink(`/dashboard/${dashboards[0].id || ''}`),
+            name: actionNameSingular,
+          },
+        ],
+      },
+    ];
+    return <ContextMenuActions panels={panelItems} />;
+  }
+
+  const panelItems = [
+    {
+      id: 0,
+      items: [
+        {
+          icon: 'dashboardApp',
+          panel: 1,
+          name: actionNamePlural,
+        },
+      ],
+    },
+    {
+      id: 1,
+      title: panelTitle,
+      items: dashboards.map((dashboard) => {
+        return {
+          icon: 'dashboardApp',
+          /* eslint-disable-next-line react-hooks/rules-of-hooks */
+          href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),
+          name: dashboard.title,
+        };
+      }),
+    },
+  ];
+
+  return <ContextMenuActions panels={panelItems} />;
 });

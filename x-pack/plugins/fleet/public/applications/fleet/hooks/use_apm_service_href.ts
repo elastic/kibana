@@ -19,15 +19,14 @@ type APMDataStream = Overwrite<
 export const isAPMIntegration = (datastream: DataStream): datastream is APMDataStream =>
   Boolean(datastream.package === 'apm' && datastream.serviceDetails);
 
-export const useAPMServiceHref = (datastream: DataStream) => {
+export const useAPMServiceDetailHref = (datastream: DataStream) => {
   const apmLocator = useLocator(LOCATORS_IDS.APM_LOCATOR);
 
   const { error, loading, value } = useAsync(() => {
-    if (!isAPMIntegration(datastream)) return Promise.resolve();
-
+    if (!isAPMIntegration(datastream) || !apmLocator) return Promise.resolve();
     const { serviceName, environment } = datastream.serviceDetails;
 
-    return apmLocator!.getUrl({
+    return apmLocator.getUrl({
       serviceName,
       serviceOverviewTab: datastream.type,
       query: {
@@ -36,5 +35,5 @@ export const useAPMServiceHref = (datastream: DataStream) => {
     });
   });
 
-  return { isReady: !error && !loading, href: value };
+  return { isSuccessful: !error && !loading, href: value };
 };

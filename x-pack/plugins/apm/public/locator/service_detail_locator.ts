@@ -7,6 +7,7 @@
 import { IUiSettingsClient } from '@kbn/core/public';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { enableComparisonByDefault } from '@kbn/observability-plugin/common';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import type { APMLocatorPayload } from './helpers';
 
@@ -14,7 +15,7 @@ const helpersModule = import('./helpers');
 
 export const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 
-export class APMLocatorDefinition
+export class APMServiceDetailLocator
   implements LocatorDefinition<APMLocatorPayload>
 {
   id = APM_APP_LOCATOR_ID;
@@ -30,8 +31,14 @@ export class APMLocatorDefinition
     const defaultTimeRange = this.uiSettings.get<TimePickerTimeDefaults>(
       UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
     );
+    const isComparisonEnabledByDefault = this.uiSettings.get<boolean>(
+      enableComparisonByDefault
+    );
 
-    const path = getPathForServiceDetail(payload, defaultTimeRange);
+    const path = getPathForServiceDetail(payload, {
+      ...defaultTimeRange,
+      isComparisonEnabledByDefault,
+    });
 
     return {
       app: 'apm',
