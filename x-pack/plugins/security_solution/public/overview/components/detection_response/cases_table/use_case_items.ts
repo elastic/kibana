@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react';
 
 import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { AllCases } from '@kbn/cases-plugin/common/ui';
+import { Cases } from '@kbn/cases-plugin/common/ui';
 
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -62,7 +62,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
         });
 
         if (isSubscribed) {
-          setItems(parseCases(casesResponse as unknown as AllCases));
+          setItems(parseCases(casesResponse));
           setUpdatedAt(Date.now());
         }
       } catch (error) {
@@ -92,7 +92,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
   return { items, isLoading, updatedAt };
 };
 
-function parseCases(casesResponse: AllCases): CaseItem[] {
+function parseCases(casesResponse: Cases): CaseItem[] {
   const allCases = casesResponse.cases || [];
 
   return allCases.reduce<CaseItem[]>((accumulated, currentCase) => {
@@ -100,10 +100,8 @@ function parseCases(casesResponse: AllCases): CaseItem[] {
       id: currentCase.id,
       name: currentCase.title,
       note: currentCase.description,
-      // @ts-ignore [TO-DO] Need a ticket number, or is this ok?. Incorrect data shape coming in.
-      createdAt: currentCase.created_at,
-      // @ts-ignore
-      createdBy: currentCase.created_by.username || '',
+      createdAt: currentCase.createdAt,
+      createdBy: currentCase.createdBy.username || '—',
       status: currentCase.status,
     });
 

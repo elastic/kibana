@@ -112,6 +112,10 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
+const StyledEuiPanel = styled(EuiPanel)`
+  height: 258px;
+`;
+
 const CasesByStatusComponent: React.FC = () => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(CASES_BY_STATUS_ID);
   const { getAppUrl, navigateTo } = useNavigation();
@@ -151,7 +155,7 @@ const CasesByStatusComponent: React.FC = () => {
   );
 
   return (
-    <EuiPanel hasBorder>
+    <StyledEuiPanel hasBorder>
       <HeaderSection
         id={CASES_BY_STATUS_ID}
         title={CASES_BY_STATUS_SECTION_TITLE}
@@ -190,7 +194,7 @@ const CasesByStatusComponent: React.FC = () => {
           </StyledEuiFlexItem>
         </EuiFlexGroup>
       )}
-    </EuiPanel>
+    </StyledEuiPanel>
   );
 };
 
