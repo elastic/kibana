@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiHorizontalRule, EuiPage, EuiPageBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiListGroup,
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
@@ -54,6 +62,35 @@ export const DebugPage: React.FunctionComponent = () => {
           <EuiSpacer size="xl" />
           <FleetIndicesDebugger />
           <EuiSpacer size="xl" />
+
+          <EuiHorizontalRule />
+
+          <EuiTitle size="l">
+            <h2>Useful Links</h2>
+          </EuiTitle>
+
+          <EuiSpacer size="m" />
+
+          <EuiListGroup
+            listItems={[
+              {
+                label: 'Download Health Check Report',
+                href: '/api/fleet/health_check',
+                target: '_blank',
+                download: 'fleet_health_check_report.txt',
+              },
+              {
+                label: 'View Agents in Fleet UI',
+                href: '/app/fleet/agents',
+                target: '_blank',
+              },
+              {
+                label: 'Troubleshooting Guide',
+                href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
+                target: '_blank',
+              },
+            ]}
+          />
         </EuiPageBody>
       </EuiPage>
       <ReactQueryDevtools initialIsOpen={false} />
