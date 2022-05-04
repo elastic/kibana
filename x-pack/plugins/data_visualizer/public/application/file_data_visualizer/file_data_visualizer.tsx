@@ -11,14 +11,14 @@ import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_data_visualizer_view';
-import { AsyncLinkCards } from '../common/components/results_links';
+import { GetAdditionalLinks } from '../common/components/results_links';
 
 interface Props {
-  asyncLinkCards?: AsyncLinkCards;
+  getAdditionalLinks?: GetAdditionalLinks;
 }
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
-export const FileDataVisualizer: FC<Props> = ({ asyncLinkCards }) => {
+export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, discover, share, security, fileUpload, cloud } =
     getPluginsStart();
@@ -45,7 +45,7 @@ export const FileDataVisualizer: FC<Props> = ({ asyncLinkCards }) => {
             savedObjectsClient={coreStart.savedObjects.client}
             http={coreStart.http}
             fileUpload={fileUpload}
-            asyncLinkCards={asyncLinkCards}
+            getAdditionalLinks={getAdditionalLinks}
             capabilities={coreStart.application.capabilities}
           />
         </CloudContext>

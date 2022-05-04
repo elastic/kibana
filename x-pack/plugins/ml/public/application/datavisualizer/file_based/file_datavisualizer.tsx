@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   FileDataVisualizerSpec,
-  AsyncLinkCardParams,
-  AsyncLinkCards,
+  GetAdditionalLinksParams,
+  GetAdditionalLinks,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
@@ -39,9 +39,9 @@ export const FileDataVisualizerPage: FC = () => {
 
   const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
 
-  const asyncLinkCards: AsyncLinkCards = useMemo(
+  const getAdditionalLinks: GetAdditionalLinks = useMemo(
     () => [
-      async ({ dataViewId, globalState }: AsyncLinkCardParams) => [
+      async ({ dataViewId, globalState }: GetAdditionalLinksParams) => [
         {
           id: 'create_ml_job',
           title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.anomalyDetectionTitle', {
@@ -115,7 +115,7 @@ export const FileDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <FileDataVisualizer asyncLinkCards={asyncLinkCards} />
+          <FileDataVisualizer getAdditionalLinks={getAdditionalLinks} />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

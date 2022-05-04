@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   IndexDataVisualizerSpec,
   ResultLink,
-  AsyncLinkCards,
-  AsyncLinkCardParams,
+  GetAdditionalLinks,
+  GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useMlKibana, useTimefilter, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
@@ -62,7 +62,7 @@ export const IndexDataVisualizerPage: FC = () => {
     dataViewId,
     dataViewTitle,
     globalState,
-  }: AsyncLinkCardParams): Promise<ResultLink[]> => {
+  }: GetAdditionalLinksParams): Promise<ResultLink[]> => {
     return [
       {
         id: 'create_ml_ad_job',
@@ -134,7 +134,7 @@ export const IndexDataVisualizerPage: FC = () => {
     ];
   };
 
-  const getAsyncRecognizedModuleCards = async (params: AsyncLinkCardParams) => {
+  const getAsyncRecognizedModuleCards = async (params: GetAdditionalLinksParams) => {
     const { dataViewId, dataViewTitle } = params;
     const modules = await http.fetch<RecognizerModule[]>(
       `/api/ml/modules/recognize/${dataViewTitle}`,
@@ -176,7 +176,7 @@ export const IndexDataVisualizerPage: FC = () => {
     );
   };
 
-  const asyncLinkCards: AsyncLinkCards = useMemo(
+  const getAdditionalLinks: GetAdditionalLinks = useMemo(
     () => [getAsyncRecognizedModuleCards, getAsyncMLCards],
     [mlLocator]
   );
@@ -190,7 +190,7 @@ export const IndexDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <IndexDataVisualizer asyncLinkCards={asyncLinkCards} />
+          <IndexDataVisualizer getAdditionalLinks={getAdditionalLinks} />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

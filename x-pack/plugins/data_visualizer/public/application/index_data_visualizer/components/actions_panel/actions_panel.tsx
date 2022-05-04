@@ -16,21 +16,21 @@ import { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useUrlState } from '../../../common/util/url_state';
 import { LinkCard } from '../../../common/components/link_card';
-import { AsyncLinkCards } from '../../../common/components/results_links';
+import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { isDefined } from '../../../common/util/is_defined';
 
 interface Props {
   dataView: DataView;
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
-  asyncLinkCards?: AsyncLinkCards;
+  getAdditionalLinks?: GetAdditionalLinks;
 }
 
 export const ActionsPanel: FC<Props> = ({
   dataView,
   searchString,
   searchQueryLanguage,
-  asyncLinkCards,
+  getAdditionalLinks,
 }) => {
   const [globalState] = useUrlState('_g');
 
@@ -72,9 +72,9 @@ export const ActionsPanel: FC<Props> = ({
       setDiscoverLink(discoverUrl);
     };
 
-    if (Array.isArray(asyncLinkCards) && indexPatternId !== undefined) {
+    if (Array.isArray(getAdditionalLinks) && indexPatternId !== undefined) {
       Promise.all(
-        asyncLinkCards.map(async (asyncCardGetter) => {
+        getAdditionalLinks.map(async (asyncCardGetter) => {
           const results = await asyncCardGetter({
             dataViewId: indexPatternId,
             dataViewTitle: indexPatternTitle,
@@ -110,7 +110,7 @@ export const ActionsPanel: FC<Props> = ({
     capabilities,
     discover,
     data.query,
-    asyncLinkCards,
+    getAdditionalLinks,
   ]);
 
   // Note we use display:none for the DataRecognizer section as it needs to be

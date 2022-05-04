@@ -19,14 +19,14 @@ import { isDefined } from '../../util/is_defined';
 
 type LinkType = 'file' | 'index';
 
-export interface AsyncLinkCardParams {
+export interface GetAdditionalLinksParams {
   dataViewId: string;
   dataViewTitle?: string;
   globalState?: any;
 }
 
-export type AsyncLinkCards = Array<
-  (params: AsyncLinkCardParams) => Promise<ResultLink[] | undefined>
+export type GetAdditionalLinks = Array<
+  (params: GetAdditionalLinksParams) => Promise<ResultLink[] | undefined>
 >;
 
 export interface ResultLink {
@@ -47,7 +47,7 @@ interface Props {
   timeFieldName?: string;
   createDataView: boolean;
   showFilebeatFlyout(): void;
-  asyncLinkCards?: AsyncLinkCards;
+  getAdditionalLinks?: GetAdditionalLinks;
 }
 
 interface GlobalState {
@@ -64,7 +64,7 @@ export const ResultsLinks: FC<Props> = ({
   timeFieldName,
   createDataView,
   showFilebeatFlyout,
-  asyncLinkCards,
+  getAdditionalLinks,
 }) => {
   const {
     services: {
@@ -106,9 +106,9 @@ export const ResultsLinks: FC<Props> = ({
 
     getDiscoverUrl();
 
-    if (Array.isArray(asyncLinkCards)) {
+    if (Array.isArray(getAdditionalLinks)) {
       Promise.all(
-        asyncLinkCards.map(async (asyncCardGetter) => {
+        getAdditionalLinks.map(async (asyncCardGetter) => {
           const results = await asyncCardGetter({
             dataViewId,
           });
