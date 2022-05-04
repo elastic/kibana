@@ -49,6 +49,7 @@ import {
   getAxesConfiguration,
   GroupsConfiguration,
   getLinesCausedPaddings,
+  validateExtent,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -321,8 +322,11 @@ export function XYChart({
     let min: number = NaN;
     let max: number = NaN;
     if (extent.mode === 'custom') {
-      min = extent.lowerBound ?? NaN;
-      max = extent.upperBound ?? NaN;
+      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
+      if (!inclusiveZeroError && !boundaryError) {
+        min = extent.lowerBound ?? NaN;
+        max = extent.upperBound ?? NaN;
+      }
     }
 
     return {
