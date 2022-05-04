@@ -47,9 +47,16 @@ const ruleTypeMetric = {
   },
 };
 
-const scheduledActionsPercentilesAgg = {
+const generatedActionsPercentilesAgg = {
   percentiles: {
-    field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+    field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+    percents: [50, 90, 99],
+  },
+};
+
+const alertsPercentilesAgg = {
+  percentiles: {
+    field: 'kibana.alert.rule.execution.metrics.total_number_of_alerts',
     percents: [50, 90, 99],
   },
 };
@@ -425,14 +432,16 @@ export async function getExecutionsPerDayCount(
         avgTotalSearchDuration: {
           avg: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
         },
-        percentileScheduledActions: scheduledActionsPercentilesAgg,
+        percentileScheduledActions: generatedActionsPercentilesAgg,
+        percentileAlerts: alertsPercentilesAgg,
         aggsByType: {
           terms: {
             field: 'rule.category',
             size: NUM_ALERTING_RULE_TYPES,
           },
           aggs: {
-            percentileScheduledActions: scheduledActionsPercentilesAgg,
+            percentileScheduledActions: generatedActionsPercentilesAgg,
+            percentileAlerts: alertsPercentilesAgg,
           },
         },
       },
@@ -465,9 +474,13 @@ export async function getExecutionsPerDayCount(
     searchResult.aggregations.avgTotalSearchDuration.value
   );
 
-  const aggsScheduledActionsPercentiles =
+  const aggsGeneratedActionsPercentiles =
     // @ts-expect-error aggegation type is not specified
     searchResult.aggregations.percentileScheduledActions.values;
+
+  const aggsAlertsPercentiles =
+    // @ts-expect-error aggegation type is not specified
+    searchResult.aggregations.percentileAlerts.values;
 
   const aggsByTypeBuckets =
     // @ts-expect-error aggegation type is not specified
@@ -571,20 +584,35 @@ export async function getExecutionsPerDayCount(
       }),
       {}
     ),
-    scheduledActionsPercentiles: Object.keys(aggsScheduledActionsPercentiles).reduce(
+    generatedActionsPercentiles: Object.keys(aggsGeneratedActionsPercentiles).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (acc: any, curr: string) => ({
         ...acc,
         ...(percentileFieldNameMapping[curr]
-          ? { [percentileFieldNameMapping[curr]]: aggsScheduledActionsPercentiles[curr] }
+          ? { [percentileFieldNameMapping[curr]]: aggsGeneratedActionsPercentiles[curr] }
           : {}),
       }),
       {}
     ),
-    scheduledActionsPercentilesByType: parsePercentileAggsByRuleType(
+    generatedActionsPercentilesByType: parsePercentileAggsByRuleType(
       aggsByTypeBuckets,
       'percentileScheduledActions.values'
+    ),
+    alertsPercentiles: Object.keys(aggsAlertsPercentiles).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (acc: any, curr: string) => ({
+        ...acc,
+        ...(percentileFieldNameMapping[curr]
+          ? { [percentileFieldNameMapping[curr]]: aggsAlertsPercentiles[curr] }
+          : {}),
+      }),
+      {}
+    ),
+    alertsPercentilesByType: parsePercentileAggsByRuleType(
+      aggsByTypeBuckets,
+      'percentileAlerts.values'
     ),
   };
 }

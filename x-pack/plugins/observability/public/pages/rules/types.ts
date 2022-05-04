@@ -45,6 +45,8 @@ export interface StatusFilterProps {
 
 export interface ExecutionStatusProps {
   executionStatus: RuleExecutionStatus;
+  item: RuleTableItem;
+  licenseType: string;
 }
 
 export interface LastRunProps {
@@ -84,4 +86,11 @@ export interface RulesTableProps {
   sort: EuiTableSortingType<RuleTableItem>['sort'];
   onSortChange: (changedSort: EuiTableSortingType<RuleTableItem>['sort']) => void;
   isLoading: boolean;
+}
+
+export interface RuleState {
+  isLoading: boolean;
+  data: Rule[];
+  error: string | null;
+  totalItemCount: number;
 }

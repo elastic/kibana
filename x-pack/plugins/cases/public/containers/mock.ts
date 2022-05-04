@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
-import type { ResolvedCase, CaseMetrics, CaseMetricsFeature } from '../../common/ui/types';
+import type {
+  ResolvedCase,
+  SingleCaseMetrics,
+  SingleCaseMetricsFeature,
+  AlertComment,
+} from '../../common/ui/types';
 import {
   Actions,
   ActionTypes,
@@ -65,7 +70,7 @@ export const basicComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
-export const alertComment: Comment = {
+export const alertComment: AlertComment = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
   type: CommentType.alert,
@@ -149,6 +154,7 @@ export const basicCase: Case = {
     fields: null,
   },
   description: 'Security banana Issue',
+  duration: null,
   externalService: null,
   status: CaseStatuses.open,
   tags,
@@ -183,7 +189,7 @@ export const basicResolvedCase: ResolvedCase = {
   aliasTargetId: `${basicCase.id}_2`,
 };
 
-export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
+export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
   'alerts.count',
   'alerts.users',
   'alerts.hosts',
@@ -191,9 +197,9 @@ export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
   'connectors',
 ];
 
-export const basicCaseStatusFeatures: CaseMetricsFeature[] = ['lifespan'];
+export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = ['lifespan'];
 
-export const basicCaseMetrics: CaseMetrics = {
+export const basicCaseMetrics: SingleCaseMetrics = {
   alerts: {
     count: 12,
     hosts: {
@@ -240,6 +246,7 @@ export const mockCase: Case = {
     type: ConnectorTypes.none,
     fields: null,
   },
+  duration: null,
   description: 'Security banana Issue',
   externalService: null,
   status: CaseStatuses.open,
@@ -323,7 +330,7 @@ export const cases: Case[] = [
   caseWithAlertsSyncOff,
 ];
 
-export const allCases: AllCases = {
+export const allCases: Cases = {
   cases,
   page: 1,
   perPage: 5,
@@ -378,6 +385,7 @@ export const basicCaseSnake: CaseResponse = {
   connector: { id: 'none', name: 'My Connector', type: ConnectorTypes.none, fields: null },
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
+  duration: null,
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,

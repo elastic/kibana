@@ -28,6 +28,7 @@ export type DataFilters = {
   timeslice?: Timeslice;
   zoom: number;
   isReadOnly: boolean;
+  joinKeyFilter?: Filter;
 };
 
 export type VectorSourceRequestMeta = DataFilters & {
@@ -40,6 +41,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   sourceQuery?: Query;
   sourceMeta: object | null;
   isForceRefresh: boolean;
+  isFeatureEditorOpenForLayer: boolean;
 };
 
 export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;
@@ -77,7 +79,10 @@ export type VectorTileLayerMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataRequestMeta = Partial<
+export type DataRequestMeta = {
+  // request stop time in milliseconds since epoch
+  requestStopTime?: number;
+} & Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
