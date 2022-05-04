@@ -161,7 +161,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
         const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+        const reportData = await PageObjects.reporting.getRawScreenshotReportData(url);
         const reportFileName = 'small_dashboard_preserve_layout';
         const sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
@@ -190,7 +190,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
         const url = await PageObjects.reporting.getReportURL(200000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+        const reportData = await PageObjects.reporting.getRawScreenshotReportData(url);
         const reportFileName = 'large_dashboard_preserve_layout';
         const sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
@@ -285,7 +285,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
         const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+        const reportData = await PageObjects.reporting.getRawScreenshotReportData(url);
         sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
           'png',
