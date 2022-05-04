@@ -4,7 +4,7 @@
 This section lists all prebuilt packs available for Osquery Manager. 
 Each pack is also available as a saved object, with the name `Pack: <pack-name>`.
 
-For information about how to work with prebuilt packs, refer to <<osquery, osquery-prebuilt-packs>>.
+For more information, refer to <<osquery-prebuilt-packs>>.
 
 
 |===
@@ -36,7 +36,7 @@ Dashboard: `[Osquery Manager] Compliance pack`
 |`ossec-rootkit`
 a|Run rootkit detection queries to monitor for compromise.
 
-Related Dashboard: `[Osquery Manager] OSSEC rootkit pack`
+Dashboard: `[Osquery Manager] OSSEC rootkit pack`
 
 |https://github.com/osquery/osquery/tree/master/packs[Osquery]
 |8.2
