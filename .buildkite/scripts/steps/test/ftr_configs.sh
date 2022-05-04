@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/steps/test/test_group_env.sh
 
 export JOB_NUM=$((BUILDKITE_PARALLEL_JOB+1))
 export JOB=ftr-configs-${JOB_NUM}
