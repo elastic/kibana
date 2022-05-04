@@ -304,7 +304,24 @@ export function createTestEsCluster<
       log.error(`[es] debug files found, archiving install to ${debugPath}`);
       const archiver = createArchiver('tar', { gzip: true });
       const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
-      archiver.directory(config.installPath, `es_debug_${uuid}`);
+
+      const archiveDirname = `es_debug_${uuid}`;
+      for (const name of Fs.readdirSync(config.installPath)) {
+        if (name === 'modules' || name === 'jdk') {
+          // drop these large and unnecessary directories
+          continue;
+        }
+
+        const src = Path.resolve(config.installPath, name);
+        const dest = Path.join(archiveDirname, name);
+        const stat = Fs.statSync(src);
+        if (stat.isDirectory()) {
+          archiver.directory(src, dest);
+        } else {
+          archiver.file(src, { name: dest });
+        }
+      }
+
       archiver.finalize();
       await promise;
 
