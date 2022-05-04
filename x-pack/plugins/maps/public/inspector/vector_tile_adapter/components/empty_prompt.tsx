@@ -31,7 +31,7 @@ export function EmptyPrompt() {
           <p>
             <FormattedMessage
               id="xpack.maps.inspector.vectorTile.noRequestsLoggedDescription.whatDoesItUsuallyMeanText"
-              defaultMessage="This usually means that there are no visible layers that request data from Elasticsearch vector tile search API."
+              defaultMessage="This usually means that there are no visible layers that request data from vector tile search API."
             />
           </p>
         </React.Fragment>

@@ -13,6 +13,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiSpacer, EuiTabs, EuiTab } from
 import { EmptyPrompt } from './empty_prompt';
 import type { TileRequest } from '../types';
 import { TileRequestTab } from './tile_request_tab';
+import { RequestsViewCallout } from './requests_view_callout';
 
 interface Props {
   adapters: Adapters;
@@ -140,9 +141,14 @@ class VectorTileInspector extends Component<Props, State> {
 
   render() {
     return this.state.layerOptions.length === 0 ? (
-      <EmptyPrompt />
+      <>
+        <RequestsViewCallout />
+        <EmptyPrompt />
+      </>
     ) : (
       <>
+        <RequestsViewCallout />
+        <EuiSpacer />
         <EuiComboBox
           singleSelection={true}
           options={this.state.layerOptions}
