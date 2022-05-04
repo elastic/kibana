@@ -22,7 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, toExpression } from '@kbn/interpreter';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';
@@ -39,7 +39,10 @@ import {
   DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { prependDatasourceExpression } from './expression_helpers';
+import {
+  getDatasourceExpressionsByLayers,
+  prependDatasourceExpression,
+} from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import {
   getMissingIndexPattern,
@@ -485,6 +488,7 @@ function getPreviewExpression(
   visualizableState: VisualizableState,
   visualization: Visualization,
   datasources: Record<string, Datasource>,
+  datasourceStates: DatasourceStates,
   frame: FramePublicAPI
 ) {
   if (!visualization.toPreviewExpression) {
@@ -518,6 +522,19 @@ function getPreviewExpression(
     });
   }
 
+  if (visualization.shouldBuildDatasourceExpressionManually?.()) {
+    const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+      datasources,
+      datasourceStates
+    );
+
+    return visualization.toPreviewExpression(
+      visualizableState.visualizationState,
+      suggestionFrameApi.datasourceLayers,
+      datasourceExpressionsByLayers ?? undefined
+    );
+  }
+
   return visualization.toPreviewExpression(
     visualizableState.visualizationState,
     suggestionFrameApi.datasourceLayers
@@ -534,10 +551,25 @@ function preparePreviewExpression(
   const suggestionDatasourceId = visualizableState.datasourceId;
   const suggestionDatasourceState = visualizableState.datasourceState;
 
+  const datasourceStatesWithSuggestions = suggestionDatasourceId
+    ? {
+        ...datasourceStates,
+        [suggestionDatasourceId]: {
+          isLoading: false,
+          state: suggestionDatasourceState,
+        },
+      }
+    : datasourceStates;
+
+  const previewExprDatasourcesStates = visualization.shouldBuildDatasourceExpressionManually?.()
+    ? datasourceStatesWithSuggestions
+    : datasourceStates;
+
   const expression = getPreviewExpression(
     visualizableState,
     visualization,
     datasourceMap,
+    previewExprDatasourcesStates,
     framePublicAPI
   );
 
@@ -545,19 +577,9 @@ function preparePreviewExpression(
     return;
   }
 
-  const expressionWithDatasource = prependDatasourceExpression(
-    expression,
-    datasourceMap,
-    suggestionDatasourceId
-      ? {
-          ...datasourceStates,
-          [suggestionDatasourceId]: {
-            isLoading: false,
-            state: suggestionDatasourceState,
-          },
-        }
-      : datasourceStates
-  );
+  if (visualization.shouldBuildDatasourceExpressionManually?.()) {
+    return typeof expression === 'string' ? fromExpression(expression) : expression;
+  }
 
-  return expressionWithDatasource;
+  return prependDatasourceExpression(expression, datasourceMap, datasourceStatesWithSuggestions);
 }
