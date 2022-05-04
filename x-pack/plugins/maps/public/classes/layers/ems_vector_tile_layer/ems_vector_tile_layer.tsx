@@ -12,7 +12,13 @@ import _ from 'lodash';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
 import { AbstractLayer } from '../layer';
-import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
+import {
+  AUTOSELECT_EMS_LOCALE,
+  DEFAULT_EMS_LOCALE,
+  SOURCE_DATA_REQUEST_ID,
+  LAYER_TYPE,
+  LAYER_STYLE_TYPE,
+} from '../../../../common/constants';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
@@ -52,7 +58,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
-    tileLayerDescriptor.locale = _.get(options, 'locale', 'en');
+    tileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
   }
@@ -86,6 +92,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return this._style;
   }
 
+  getLocale() {
+    return this._descriptor.locale ?? DEFAULT_EMS_LOCALE;
+  }
+
   _canSkipSync({
     prevDataRequest,
     nextMeta,
@@ -97,7 +107,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       return false;
     }
     const prevMeta = prevDataRequest.getMeta() as SourceRequestMeta;
-    if (!prevMeta || !('locale' in prevMeta)) {
+    if (!prevMeta) {
       return false;
     }
 
@@ -392,9 +402,11 @@ export class EmsVectorTileLayer extends AbstractLayer {
   _setLanguage(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     const locale = this.getLocale();
     let textProperty;
-    if (locale === null || locale === 'default') {
-      return;
-    } else if (locale === 'autoselect') {
+    if (locale === null || locale === DEFAULT_EMS_LOCALE) {
+      if (mbLayer.type === 'symbol') {
+        textProperty = mbLayer.layout?.['text-field'];
+      }
+    } else if (locale === AUTOSELECT_EMS_LOCALE) {
       textProperty = TMSService.transformLanguageProperty(mbLayer, i18n.getLocale());
     } else {
       textProperty = TMSService.transformLanguageProperty(mbLayer, locale);

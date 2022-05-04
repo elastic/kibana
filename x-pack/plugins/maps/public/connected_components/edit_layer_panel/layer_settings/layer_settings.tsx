@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { TMSService } from '@elastic/ems-client';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { Attribution } from '../../../../common/descriptor_types';
-import { MAX_ZOOM } from '../../../../common/constants';
+import { AUTOSELECT_EMS_LOCALE, DEFAULT_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
 import { AttributionFormRow } from './attribution_form_row';
@@ -171,27 +171,32 @@ export function LayerSettings(props: Props) {
 
     const options = [
       {
-        key: 'default',
+        key: DEFAULT_EMS_LOCALE,
         label: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageDefault', {
           defaultMessage: 'Default',
         }),
-        value: 'default',
+        value: DEFAULT_EMS_LOCALE,
       },
       {
-        key: 'autoselect',
+        key: AUTOSELECT_EMS_LOCALE,
         label: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselect', {
           defaultMessage: 'Autoselect based on Kibana locale',
         }),
-        value: 'autoselect',
-      }
+        value: AUTOSELECT_EMS_LOCALE,
+      },
     ];
 
-    options.push(...Object.entries(TMSService.SupportedLanguages).map(([key, { label, omtCode }]) => {
-      const i18nLabel = i18n.translate(`xpack.maps.layerPanel.settingsPanel.labelLanguage${key}`, {
-        defaultMessage: label,
-      });
-      return { key, label: i18nLabel };
-    });
+    options.push(
+      ...TMSService.SupportedLanguages.map(({ key, label, omt }) => {
+        const i18nLabel = i18n.translate(
+          `xpack.maps.layerPanel.settingsPanel.labelLanguage${key}`,
+          {
+            defaultMessage: label,
+          }
+        );
+        return { key, label: i18nLabel, value: omt };
+      })
+    );
 
     return (
       <EuiFormRow
