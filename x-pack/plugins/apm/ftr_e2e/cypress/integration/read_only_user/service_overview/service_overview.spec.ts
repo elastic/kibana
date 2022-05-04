@@ -214,21 +214,25 @@ describe('Service Overview', () => {
     });
 
     // The enviroment changed to a combobox with suggestion box, cypress is not able to find production to click
-    it.skip('with the correct environment when changing the environment', () => {
+    it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
       cy.intercept('GET', 'internal/apm/suggestions?*').as(
         'suggestionsRequest'
       );
 
-      cy.get('[data-test-subj="environmentFilter"]').type('pro').click();
+      cy.get('[data-test-subj="environmentFilter"]').type('production');
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: ['@suggestionsRequest'],
-        value: 'fieldValue=pro',
+        value: 'fieldValue=production',
       });
 
-      cy.contains('button', 'production').click();
+      cy.get(
+        '[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]'
+      )
+        .contains('production')
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,
