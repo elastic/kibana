@@ -5,6 +5,20 @@
  * 2.0.
  */
 
+/**
+ * When using these execution events as templates be sure to replace all the following fields with their updated values
+ *
+ * E.g.
+ *  set(e, '@timestamp', dateTimes[i]);
+ *  set(e, 'event.start', dateTimes[i]);
+ *  set(e, 'event.end', dateTimes[i]);
+ *  set(e, 'rule.id', id);
+ *  set(e, 'kibana.saved_objects[0].id', id);
+ */
+
+/**
+ * Rule executed without issue
+ */
 export const successfulExecution = [
   {
     '@timestamp': '2022-03-17T22:59:31.360Z',
@@ -226,30 +240,24 @@ export const successfulExecution = [
   },
 ];
 
+/**
+ * Rule execution identified gap since last execution
+ */
 export const failedGapExecution = [
   {
-    '@timestamp': '2022-03-17T12:36:16.413Z',
+    '@timestamp': '2022-03-17T12:36:14.868Z',
     event: {
       provider: 'alerting',
-      action: 'execute',
+      action: 'execute-start',
       kind: 'alert',
       category: ['siem'],
       start: '2022-03-17T12:36:14.868Z',
-      outcome: 'success',
-      end: '2022-03-17T12:36:16.413Z',
-      duration: 1545000000,
     },
     kibana: {
       alert: {
         rule: {
           execution: {
             uuid: '38fa2d4a-94d3-4ea3-80d6-d1284eb98357',
-            metrics: {
-              number_of_triggered_actions: 0,
-              number_of_searches: 6,
-              es_search_duration_ms: 2,
-              total_search_duration_ms: 15,
-            },
           },
         },
       },
@@ -265,9 +273,6 @@ export const failedGapExecution = [
         scheduled: '2022-03-17T12:27:10.060Z',
         schedule_delay: 544808000000,
       },
-      alerting: {
-        status: 'ok',
-      },
       server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
       version: '8.2.0',
     },
@@ -276,22 +281,21 @@ export const failedGapExecution = [
       license: 'basic',
       category: 'siem.queryRule',
       ruleset: 'siem',
-      name: 'Lots of Execution Events',
     },
-    message:
-      "rule executed: siem.queryRule:fb1fc150-a292-11ec-a2cf-c1b28b0392b0: 'Lots of Execution Events'",
+    message: 'rule execution start: "fb1fc150-a292-11ec-a2cf-c1b28b0392b0"',
     ecs: {
       version: '1.8.0',
     },
   },
   {
-    '@timestamp': '2022-03-17T12:36:15.382Z',
+    '@timestamp': '2022-03-17T12:36:14.888Z',
     event: {
       provider: 'securitySolution.ruleExecution',
-      kind: 'metric',
-      action: 'execution-metrics',
-      sequence: 1,
+      kind: 'event',
+      action: 'status-change',
+      sequence: 0,
     },
+    message: '',
     rule: {
       id: 'fb1fc150-a292-11ec-a2cf-c1b28b0392b0',
       name: 'Lots of Execution Events',
@@ -301,9 +305,8 @@ export const failedGapExecution = [
       alert: {
         rule: {
           execution: {
-            metrics: {
-              execution_gap_duration_s: 245,
-            },
+            status: 'running',
+            status_order: 15,
             uuid: '38fa2d4a-94d3-4ea3-80d6-d1284eb98357',
           },
         },
@@ -364,14 +367,13 @@ export const failedGapExecution = [
     },
   },
   {
-    '@timestamp': '2022-03-17T12:36:14.888Z',
+    '@timestamp': '2022-03-17T12:36:15.382Z',
     event: {
       provider: 'securitySolution.ruleExecution',
-      kind: 'event',
-      action: 'status-change',
-      sequence: 0,
+      kind: 'metric',
+      action: 'execution-metrics',
+      sequence: 1,
     },
-    message: '',
     rule: {
       id: 'fb1fc150-a292-11ec-a2cf-c1b28b0392b0',
       name: 'Lots of Execution Events',
@@ -381,8 +383,9 @@ export const failedGapExecution = [
       alert: {
         rule: {
           execution: {
-            status: 'running',
-            status_order: 15,
+            metrics: {
+              execution_gap_duration_s: 245,
+            },
             uuid: '38fa2d4a-94d3-4ea3-80d6-d1284eb98357',
           },
         },
@@ -403,19 +406,28 @@ export const failedGapExecution = [
     },
   },
   {
-    '@timestamp': '2022-03-17T12:36:14.868Z',
+    '@timestamp': '2022-03-17T12:36:16.413Z',
     event: {
       provider: 'alerting',
-      action: 'execute-start',
+      action: 'execute',
       kind: 'alert',
       category: ['siem'],
       start: '2022-03-17T12:36:14.868Z',
+      outcome: 'success',
+      end: '2022-03-17T12:36:16.413Z',
+      duration: 1545000000,
     },
     kibana: {
       alert: {
         rule: {
           execution: {
             uuid: '38fa2d4a-94d3-4ea3-80d6-d1284eb98357',
+            metrics: {
+              number_of_triggered_actions: 0,
+              number_of_searches: 6,
+              es_search_duration_ms: 2,
+              total_search_duration_ms: 15,
+            },
           },
         },
       },
@@ -431,6 +443,9 @@ export const failedGapExecution = [
         scheduled: '2022-03-17T12:27:10.060Z',
         schedule_delay: 544808000000,
       },
+      alerting: {
+        status: 'ok',
+      },
       server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
       version: '8.2.0',
     },
@@ -439,14 +454,19 @@ export const failedGapExecution = [
       license: 'basic',
       category: 'siem.queryRule',
       ruleset: 'siem',
+      name: 'Lots of Execution Events',
     },
-    message: 'rule execution start: "fb1fc150-a292-11ec-a2cf-c1b28b0392b0"',
+    message:
+      "rule executed: siem.queryRule:fb1fc150-a292-11ec-a2cf-c1b28b0392b0: 'Lots of Execution Events'",
     ecs: {
       version: '1.8.0',
     },
   },
 ];
 
+/**
+ * Rule execution resulted in partial warning, e.g. missing index pattern
+ */
 export const partialWarningExecution = [
   {
     '@timestamp': '2022-03-16T23:28:36.012Z',
@@ -623,6 +643,115 @@ export const partialWarningExecution = [
       ruleset: 'siem',
     },
     message: 'rule execution start: "f78f3550-a186-11ec-89a1-0bce95157aba"',
+    ecs: {
+      version: '1.8.0',
+    },
+  },
+];
+
+/**
+ * Rule execution failed because rule is disabled (configure 1s interval/lookback then rule
+ * is disabled while running)
+ */
+export const failedRanAfterDisabled = [
+  {
+    '@timestamp': '2022-04-21T02:00:55.400Z',
+    event: {
+      provider: 'alerting',
+      action: 'execute',
+      kind: 'alert',
+      category: ['siem'],
+      start: '2022-04-21T02:00:55.397Z',
+      end: '2022-04-21T02:00:55.400Z',
+      duration: 3000000,
+      reason: 'disabled',
+      outcome: 'failure',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          rule_type_id: 'siem.queryRule',
+          consumer: 'siem',
+          execution: {
+            uuid: '50eb8b2e-8334-4387-b77f-d47fdb7fbe2d',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: 'a890e240-b9fb-11ec-8598-338317271cf4',
+          type_id: 'siem.queryRule',
+        },
+      ],
+      space_ids: ['default'],
+      task: {
+        scheduled: '2022-04-21T02:00:53.325Z',
+        schedule_delay: 2072000000,
+      },
+      alerting: {
+        status: 'error',
+      },
+      server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+      version: '8.3.0',
+    },
+    rule: {
+      id: 'a890e240-b9fb-11ec-8598-338317271cf4',
+      license: 'basic',
+      category: 'siem.queryRule',
+      ruleset: 'siem',
+    },
+    error: {
+      message: 'Rule failed to execute because rule ran after it was disabled.',
+    },
+    message: 'siem.queryRule:a890e240-b9fb-11ec-8598-338317271cf4: execution failed',
+    ecs: {
+      version: '1.8.0',
+    },
+  },
+  {
+    '@timestamp': '2022-04-21T02:00:55.397Z',
+    event: {
+      provider: 'alerting',
+      action: 'execute-start',
+      kind: 'alert',
+      category: ['siem'],
+      start: '2022-04-21T02:00:55.397Z',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          rule_type_id: 'siem.queryRule',
+          consumer: 'siem',
+          execution: {
+            uuid: '50eb8b2e-8334-4387-b77f-d47fdb7fbe2d',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: 'a890e240-b9fb-11ec-8598-338317271cf4',
+          type_id: 'siem.queryRule',
+        },
+      ],
+      space_ids: ['default'],
+      task: {
+        scheduled: '2022-04-21T02:00:53.325Z',
+        schedule_delay: 2072000000,
+      },
+      server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+      version: '8.3.0',
+    },
+    rule: {
+      id: 'a890e240-b9fb-11ec-8598-338317271cf4',
+      license: 'basic',
+      category: 'siem.queryRule',
+      ruleset: 'siem',
+    },
+    message: 'rule execution start: "a890e240-b9fb-11ec-8598-338317271cf4"',
     ecs: {
       version: '1.8.0',
     },

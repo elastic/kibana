@@ -95,6 +95,7 @@ describe('VisualizationActions', () => {
             addError: jest.fn(),
             addSuccess: jest.fn(),
             addWarning: jest.fn(),
+            remove: jest.fn(),
           },
         },
         http: jest.fn(),

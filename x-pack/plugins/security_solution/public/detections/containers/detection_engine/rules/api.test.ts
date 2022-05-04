@@ -630,7 +630,7 @@ describe('Detections Rules API', () => {
         start: '2001-01-01T17:00:00.000Z',
         end: '2001-01-02T17:00:00.000Z',
         queryText: '',
-        statusFilters: '',
+        statusFilters: [],
         signal: abortCtrl.signal,
       });
 
@@ -659,7 +659,7 @@ describe('Detections Rules API', () => {
         start: 'now-30',
         end: 'now',
         queryText: '',
-        statusFilters: '',
+        statusFilters: [],
         signal: abortCtrl.signal,
       });
       expect(response).toEqual(responseMock);
