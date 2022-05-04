@@ -14,17 +14,17 @@ import { getUiSettings, getDataViews, getSavedObjectsClient } from '../../../uti
 
 export async function resolver(
   lensId: string | undefined,
-  vis: any | undefined,
+  visRisonString: string | undefined,
   from: string,
   to: string,
   queryRisonString: string,
   filtersRisonString: string
 ) {
-  let viz: LensSavedObjectAttributes;
+  let vis: LensSavedObjectAttributes;
   if (lensId) {
-    viz = await getLensSavedObject(lensId);
-  } else if (vis) {
-    viz = rison.decode(vis) as unknown as LensSavedObjectAttributes;
+    vis = await getLensSavedObject(lensId);
+  } else if (visRisonString) {
+    vis = rison.decode(visRisonString) as unknown as LensSavedObjectAttributes;
   } else {
     throw new Error('Cannot create visualization');
   }
@@ -42,7 +42,7 @@ export async function resolver(
   const dataViewClient = getDataViews();
   const kibanaConfig = getUiSettings();
 
-  await canCreateAndStashADJob(viz, from, to, query, filters, dataViewClient, kibanaConfig);
+  await canCreateAndStashADJob(vis, from, to, query, filters, dataViewClient, kibanaConfig);
 }
 
 async function getLensSavedObject(id: string) {
