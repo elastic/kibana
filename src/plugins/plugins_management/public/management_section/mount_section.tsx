@@ -51,6 +51,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
 
     if (!allowed) {
       coreStart.application.navigateToApp('home');
+      
       return null;
     }
     return children! as React.ReactElement;
