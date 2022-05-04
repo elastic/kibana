@@ -322,6 +322,19 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       className="euiCollapsibleNav"
       closeButtonPosition="outside"
       data-test-subj="collapsibleNav"
+      focusTrapProps={
+        Object {
+          "shards": Array [
+            Object {
+              "current": <button
+                aria-controls="collapsibe-nav"
+                aria-expanded="true"
+                aria-pressed="true"
+              />,
+            },
+          ],
+        }
+      }
       hideCloseButton={false}
       id="collapsibe-nav"
       onClose={[Function]}
