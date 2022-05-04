@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       describe('when the endpoint count link is clicked', () => {
         it('navigates to the endpoint list page filtered by policy', async () => {
-          const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[1];
+          const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
           await endpointCount.click();
           await pageObjects.endpoint.ensureIsOnEndpointListPage();
         });
