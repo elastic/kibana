@@ -27,5 +27,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...kibanaCommonTestsConfig.get('kbnTestServer'),
       serverArgs: [...kibanaCommonTestsConfig.get('kbnTestServer.serverArgs')],
     },
+
+    junit: {
+      reportName: 'Saved Object Field Count',
+    },
   };
 }
