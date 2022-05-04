@@ -254,6 +254,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             </EuiButton>
           )
         }
+        data-test-subj={getTestId('container')}
       >
         {isFlyoutOpened && (
           <ArtifactFlyout

@@ -14,12 +14,16 @@ import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_packag
 import { FleetIntegrations } from './fleet_integrations_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { HostsPageObject } from '../../security_solution_ftr/page_objects/hosts';
+import { HostIsolationExceptionsPageProvider } from './host_isolation_exceptions_page';
+import { BlocklistPageProvider } from './blocklist_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   endpoint: EndpointPageProvider,
   policy: EndpointPolicyPageProvider,
   trustedApps: TrustedAppsPageProvider,
+  hostIsolationExceptions: HostIsolationExceptionsPageProvider,
+  blocklist: BlocklistPageProvider,
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
   fleetIntegrations: FleetIntegrations,
