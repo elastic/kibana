@@ -22,6 +22,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -51,13 +52,6 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   actionGroups: [],
   defaultActionGroupId: 'default',
   producer: 'test',
-  config: {
-    run: {
-      actions: {
-        max: 1000,
-      },
-    },
-  },
   async executor() {},
 };
 
@@ -121,61 +115,6 @@ describe('Alerting Plugin', () => {
 
       expect(setupContract.getConfig()).toEqual({
         minimumScheduleInterval: { value: '1m', enforce: false },
-      });
-    });
-
-    it(`applies the default config if there is no rule type specific config `, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
-        ...generateAlertingConfig(),
-        rules: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
-          run: {
-            actions: {
-              max: 123,
-            },
-          },
-        },
-      });
-      plugin = new AlertingPlugin(context);
-
-      const setupContract = await plugin.setup(setupMocks, mockPlugins);
-
-      const ruleType = { ...sampleRuleType };
-      setupContract.registerType(ruleType);
-
-      expect(ruleType.config).toEqual({
-        run: {
-          actions: { max: 123 },
-        },
-      });
-    });
-
-    it(`applies rule type specific config if defined in config`, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
-        ...generateAlertingConfig(),
-        rules: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
-          run: {
-            actions: { max: 123 },
-            ruleTypeOverrides: [{ id: sampleRuleType.id, timeout: '1d' }],
-          },
-        },
-      });
-      plugin = new AlertingPlugin(context);
-
-      const setupContract = await plugin.setup(setupMocks, mockPlugins);
-
-      const ruleType = { ...sampleRuleType };
-      setupContract.registerType(ruleType);
-
-      expect(ruleType.config).toEqual({
-        run: {
-          id: sampleRuleType.id,
-          actions: {
-            max: 123,
-          },
-          timeout: '1d',
-        },
       });
     });
 
@@ -277,6 +216,7 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           features: mockFeatures(),
+          spaces: spacesMock.createStart(),
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
@@ -316,6 +256,7 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           features: mockFeatures(),
+          spaces: spacesMock.createStart(),
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
@@ -366,6 +307,7 @@ describe('Alerting Plugin', () => {
         actions: actionsMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
         features: mockFeatures(),
+        spaces: spacesMock.createStart(),
         licensing: licensingMock.createStart(),
         eventLog: eventLogMock.createStart(),
         taskManager: taskManagerMock.createStart(),
