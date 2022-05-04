@@ -14,6 +14,7 @@ import { appContextService } from '../../services';
 
 import { checkConfiguration } from './configuration';
 import { checkPackages } from './packages';
+import { checkAgents } from './agents';
 
 /*
  * Dev notes:
@@ -108,6 +109,19 @@ export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, un
     updateReport(``);
     updateReport(`---`);
 
+    // Check agents
+    updateReport(``);
+    await checkAgents({
+      soClient,
+      esClient,
+      logger,
+      updateReport,
+      updateStatus: updateStatus('agents'),
+    });
+
+    updateReport(``);
+    updateReport(`---`);
+
     // Check packages
     updateReport(``);
     await checkPackages({
@@ -121,8 +135,7 @@ export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, un
     updateReport(``);
     updateReport(`---`);
 
-    // Check agents
-    // Check policies
+    // Check policies -- not sure if still needed
 
     // Finish
     updateReport(``);
