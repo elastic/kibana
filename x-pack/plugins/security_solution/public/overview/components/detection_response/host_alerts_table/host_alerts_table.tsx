@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import {
   EuiBasicTable,
@@ -40,6 +41,11 @@ interface HostAlertsTableProps {
 
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
+// To Do remove this styled component once togglequery is updated: #131405
+const StyledEuiPanel = styled(EuiPanel)`
+  height: fit-content;
+`;
+
 export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(
@@ -62,8 +68,9 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
   );
 
   return (
+    // <div>
     <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
-      <EuiPanel hasBorder data-test-subj="severityHostAlertsPanel">
+      <StyledEuiPanel hasBorder data-test-subj="severityHostAlertsPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
           title={i18n.HOST_ALERTS_SECTION_TITLE}
@@ -89,8 +96,9 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
             </EuiButton>
           </>
         )}
-      </EuiPanel>
+      </StyledEuiPanel>
     </HoverVisibilityContainer>
+    // </div>
   );
 });
 

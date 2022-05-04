@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { HostAlertsTable } from './host_alerts_table';
-export { UserAlertsTable } from './user_alerts_table';
+export { CasesTable } from './cases_table';

@@ -191,7 +191,7 @@ function parseHostsData(
     return [
       ...accumalatedAlertsByHost,
       {
-        hostName: currentHost.key,
+        hostName: currentHost.key || '—',
         totalAlerts: currentHost.doc_count,
         low: currentHost.low.doc_count,
         medium: currentHost.medium.doc_count,
