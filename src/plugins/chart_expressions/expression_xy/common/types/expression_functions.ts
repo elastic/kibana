@@ -339,24 +339,6 @@ export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
 export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
 
-export type DataLayerConfig = DataLayerConfigResult & WithLayerId;
-export type ReferenceLineLayerConfig = ReferenceLineLayerConfigResult & WithLayerId;
-export type AnnotationLayerConfig = AnnotationLayerConfigResult & WithLayerId;
-
-export type ExtendedDataLayerConfig = ExtendedDataLayerConfigResult & WithLayerId;
-export type ExtendedReferenceLineLayerConfig = ExtendedReferenceLineLayerConfigResult & WithLayerId;
-export type ExtendedAnnotationLayerConfig = ExtendedAnnotationLayerConfigResult & WithLayerId;
-
-export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette'> & {
-  type: typeof EXTENDED_DATA_LAYER;
-  layerType: typeof LayerTypes.DATA;
-  palette: PaletteOutput;
-  table: Datatable;
-};
-
-export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
-export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
-
 export type XAxisConfigResult = AxisConfig & { type: typeof X_AXIS_CONFIG };
 export type YAxisConfigResult = YAxisConfig & { type: typeof Y_AXIS_CONFIG };
 
