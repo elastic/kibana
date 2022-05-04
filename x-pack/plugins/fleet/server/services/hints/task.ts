@@ -12,13 +12,24 @@ import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
+
 import partition from 'lodash/partition';
+
+import type { Agent, FullAgentPolicy, PackageInfo } from '../../types';
+
+import { getAgentById } from '../agents';
+import { getFullAgentPolicy } from '../agent_policies';
+import { getPackageInfo } from '../epm/packages';
 const FLEET_POLL_HINTS_INDEX_TASK_ID = 'FLEET:sync-task';
 const FLEET_POLL_HINTS_INDEX_TASK_TYPE = 'FLEET:poll-hints-index';
 const POLL_INTERVAL = '5s';
 const ANNOTATION_PREFIX = 'elastic.co.hints/';
 const VALID_HINTS = Object.freeze(['host', 'package']);
 
+interface ParsedAnnotations {
+  host?: string;
+  package?: string;
+}
 type HintStatus = 'complete' | 'error';
 interface Hint {
   _id: string;
@@ -161,26 +172,33 @@ const updateSingleDoc = async (esClient: ElasticsearchClient, id: string, update
   });
 };
 
-const updateHintsById = async (esClient: ElasticsearchClient, hints: Hint[], update: any) => {
+const updateHintsById = async (
+  esClient: ElasticsearchClient,
+  hints: Hint[],
+  update: any,
+  logger?: Logger
+) => {
   const ids = hints.map((h) => h._id);
   try {
     await Promise.all(ids.map((id) => updateSingleDoc(esClient, id, update)));
   } catch (e) {
-    console.log('CAUGHR UPDATE ERROR ' + JSON.stringify(e));
+    logger?.info(`Error updating hints ${ids} by id: ${e}`);
     throw e;
   }
 };
-const setHintsAsReceived = (esClient: ElasticsearchClient, hints: Hint[]) => {
-  // const updateScript = `ctx._source['fleet'] = [ 'received_at' : ${Date.now()}L ]`;
+const setHintsAsReceived = (esClient: ElasticsearchClient, hints: Hint[], logger?: Logger) => {
   const update = { fleet: { received_at: Date.now() } };
-  return updateHintsById(esClient, hints, update);
+  return updateHintsById(esClient, hints, update, logger);
 };
 
-const setHintsAsComplete = (esClient: ElasticsearchClient, hints: Hint[]) => {
-  // const updateScript = `ctx._source.fleet.status = 'complete'`;
+const setHintsAsComplete = (
+  esClient: ElasticsearchClient,
+  hintsIn: Hint[] | Hint,
+  logger?: Logger
+) => {
+  const hints = Array.isArray(hintsIn) ? hintsIn : [hintsIn];
   const update = { fleet: { status: 'complete' } };
-  console.log('UPDATE SCRIPT = ' + JSON.stringify(update));
-  return updateHintsById(esClient, hints, update);
+  return updateHintsById(esClient, hints, update, logger);
 };
 
 const hintHasAutodiscoverAnnotations = (hint: Hint) => {
@@ -189,20 +207,115 @@ const hintHasAutodiscoverAnnotations = (hint: Hint) => {
   );
 };
 
+const parseAnnotations = (hint: Hint): ParsedAnnotations => {
+  const result = {} as ParsedAnnotations;
+  const annotations = hint.kubernetes.annotations || {};
+  Object.entries(annotations).map(([key, val]) => {
+    if (!key.startsWith(ANNOTATION_PREFIX)) return;
+
+    const parsedKey = key.slice(ANNOTATION_PREFIX.length);
+
+    if (VALID_HINTS.includes(parsedKey)) {
+      // @ts-ignore
+      result[parsedKey] = val;
+    }
+  });
+
+  return result;
+};
+
+const getAgentForHint = async (
+  esClient: ElasticsearchClient,
+  hint: Hint,
+  logger?: Logger
+): Promise<Agent | null> => {
+  let agent: Agent | null = null;
+  try {
+    agent = await getAgentById(esClient, hint.agent_id);
+  } catch (e) {
+    logger?.error(e);
+  }
+
+  return agent;
+};
+const getPolicyForAgent = async (
+  soClient: SavedObjectsClientContract,
+  agent: Agent,
+  logger?: Logger
+): Promise<FullAgentPolicy | null> => {
+  let policy: FullAgentPolicy | null = null;
+  if (!agent.policy_id) return policy;
+  try {
+    policy = await getFullAgentPolicy(soClient, agent.policy_id);
+  } catch (e) {
+    logger?.error(e);
+  }
+
+  return policy;
+};
+
+const getPackage = async (
+  soClient: SavedObjectsClientContract,
+  pkgName: string,
+  logger?: Logger
+): Promise<PackageInfo | null> => {
+  let packageInfo: PackageInfo | null = null;
+  try {
+    packageInfo = await getPackageInfo({ savedObjectsClient: soClient, pkgName, pkgVersion: '' });
+  } catch (e) {
+    logger?.info(`Error getting package ${pkgName}: ${e}`);
+  }
+
+  return packageInfo;
+};
+
 const processHints = async (params: HintTaskDeps & { logger?: Logger }) => {
   const { esClient, soClient, logger } = params;
   const hints = await getNewHints(esClient);
   if (!hints.length) return;
 
-  await setHintsAsReceived(esClient, hints);
+  await setHintsAsReceived(esClient, hints, logger);
 
   const [annotatedHints, emptyHints] = partition(hints, hintHasAutodiscoverAnnotations);
 
   if (emptyHints.length) {
-    await setHintsAsComplete(esClient, emptyHints);
+    await setHintsAsComplete(esClient, emptyHints, logger);
   }
 
   if (!annotatedHints.length) return;
 
-  console.log('FOUND INTERESTING HINTS ', JSON.stringify(annotatedHints));
+  const results = await Promise.all(
+    annotatedHints.map(async (hint) => {
+      const parsedAnnotations = parseAnnotations(hint);
+
+      if (!parsedAnnotations.package) {
+        logger?.info(`No package annotation found for hint ${hint._id}`);
+        return;
+      }
+
+      const agent = await getAgentForHint(esClient, hint, logger);
+
+      if (!agent) {
+        logger?.info(`No agent found for ${hint.agent_id}`);
+        return;
+      }
+
+      const agentPolicy = await getPolicyForAgent(soClient, agent, logger);
+
+      if (!agentPolicy) {
+        logger?.info(`No agent policy found for agent ${hint.agent_id} policy ${agent.policy_id}`);
+        return;
+      }
+
+      const packageInfo = await getPackage(soClient, parsedAnnotations.package);
+
+      if (!packageInfo) {
+        logger?.info(`No package found ${parsedAnnotations.package}`);
+        return;
+      }
+
+      logger?.info(`Finished processing ${hint._id}`);
+    })
+  );
+  setHintsAsComplete(esClient, annotatedHints, logger);
 };
