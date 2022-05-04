@@ -2932,15 +2932,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common":
   version "0.0.0"
   uid ""
 
 "@kbn/analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser":
   version "0.0.0"
   uid ""
 
@@ -3197,6 +3197,10 @@
   uid ""
 
 "@kbn/server-route-repository@link:bazel-bin/packages/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-avatar-solution@link:bazel-bin/packages/shared-ux/avatar/solution":
   version "0.0.0"
   uid ""
 
@@ -6044,15 +6048,15 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6281,6 +6285,10 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-avatar-solution@link:bazel-bin/packages/shared-ux/avatar/solution/npm_module_types":
   version "0.0.0"
   uid ""
 

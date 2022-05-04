@@ -5,5 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { KibanaSolutionAvatar } from './solution_avatar';
-export type { KibanaSolutionAvatarProps } from './solution_avatar';
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/avatar/solution'],
+};
