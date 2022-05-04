@@ -33,6 +33,7 @@ export const getCasesMetricRoute = createCasesRoute({
 
       return response.ok({
         body: await client.metrics.getCasesMetrics({
+          ...request.query,
           features: Array.isArray(features) ? features : [features],
         }),
       });
