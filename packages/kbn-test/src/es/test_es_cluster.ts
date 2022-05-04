@@ -9,6 +9,12 @@
 import Path from 'path';
 import { format } from 'url';
 import del from 'del';
+import Uuid from 'uuid';
+import globby from 'globby';
+import createArchiver from 'archiver';
+import Fs from 'fs';
+import { pipeline } from 'stream/promises';
+import type { ChildProcess } from 'child_process';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
@@ -42,6 +48,7 @@ interface Node {
   start: (installPath: string, opts: Record<string, unknown>) => Promise<void>;
   stop: () => Promise<void>;
   kill: () => Promise<void>;
+  _process?: ChildProcess;
 }
 
 export interface ICluster {
@@ -277,6 +284,53 @@ export function createTestEsCluster<
       );
 
       log.info('[es] stopped');
+
+      await this.captureDebugFiles();
+    }
+
+    async captureDebugFiles() {
+      const debugGlobs = [
+        ...this.nodes.flatMap((n) =>
+          n._process?.pid
+            ? [
+                `core.${n._process.pid}`,
+                `hs_err_pid${n._process.pid}.log`,
+                `replay_pid${n._process.pid}.log`,
+              ]
+            : []
+        ),
+      ];
+
+      if (!debugGlobs.length) {
+        return;
+      }
+
+      const debugFiles = await globby(debugGlobs, {
+        cwd: config.installPath,
+        absolute: true,
+      });
+
+      if (!debugFiles.length) {
+        return;
+      }
+
+      const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${Uuid.v4()}.tar.gz`);
+      log.info('[es] debug files found, archiving to', debugPath);
+
+      const archiver = createArchiver('tar', { gzip: true });
+      const output = Fs.createWriteStream(debugPath);
+      const promise = pipeline(archiver, output);
+      for (const path of debugFiles) {
+        archiver.append(path, { name: Path.basename(path) });
+      }
+
+      archiver.finalize();
+      await promise;
+
+      // cleanup the captured debug files
+      for (const path of debugFiles) {
+        Fs.rmSync(path, { force: true });
+      }
     }
 
     async cleanup() {
