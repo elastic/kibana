@@ -13,6 +13,7 @@ import {
   AreaSeries,
   Axis,
   BarSeries,
+  ColorVariant,
   Fit,
   GeometryValue,
   HorizontalAlignment,
@@ -680,6 +681,40 @@ describe('XYChart component', () => {
       />
     );
     expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
+  });
+
+  test('applies the mark size ratio', () => {
+    const { args } = sampleArgs();
+    const markSizeRatioArg = { markSizeRatio: 50 };
+    const component = shallow(
+      <XYChart {...defaultProps} args={{ ...args, ...markSizeRatioArg }} />
+    );
+    expect(component.find(Settings).at(0).prop('theme')).toEqual(
+      expect.objectContaining(markSizeRatioArg)
+    );
+  });
+
+  test('applies the mark size accessor', () => {
+    const { args } = sampleArgs();
+    const markSizeAccessorArg = { markSizeAccessor: 'b' };
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{ ...args, layers: [{ ...args.layers[0], ...markSizeAccessorArg }] }}
+      />
+    );
+    const dataLayers = component.find(DataLayers).dive();
+    const lineArea = dataLayers.find(LineSeries).at(0);
+    expect(lineArea.prop('markSizeAccessor')).toEqual(markSizeAccessorArg.markSizeAccessor);
+    const expectedSeriesStyle = expect.objectContaining({
+      point: expect.objectContaining({
+        visible: true,
+        fill: ColorVariant.Series,
+      }),
+    });
+
+    expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
+    expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
   });
 
   test('it renders bar', () => {
