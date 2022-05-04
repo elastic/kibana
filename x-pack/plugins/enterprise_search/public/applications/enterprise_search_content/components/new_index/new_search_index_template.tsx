@@ -84,10 +84,10 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
           </EuiTitle>
           <EuiText size="s" color="subdued">
             <p>
-              {description}{' '}
+              {description}
               <EuiLink target="_blank" href="#">
                 {i18n.translate(
-                  'xpack.enterprppiseSearch.content.newIndex.newSearchIndexTemplate.learnMore.linkText',
+                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMore.linkText',
                   {
                     defaultMessage: 'Learn more',
                   }
@@ -104,7 +104,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputLabel',
                   {
                     defaultMessage: 'Name your {type}',
-                    values: { type: type.toLowerCase() },
+                    values: { type },
                   }
                 )}
                 fullWidth
@@ -114,7 +114,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputPlaceholder',
                     {
                       defaultMessage: 'Set a name for the {type}',
-                      values: { type: type.toLowerCase() },
+                      values: { type },
                     }
                   )}
                   fullWidth

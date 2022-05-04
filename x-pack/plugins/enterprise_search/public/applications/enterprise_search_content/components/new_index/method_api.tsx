@@ -42,18 +42,8 @@ export const MethodApi: React.FC = () => {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.enterpriseSearch.content.newIndex.methodApi.description"
-            defaultMessage="The {documentsAPILink} can be used to add new documents to your engine, update documents, retrieve documents by id, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
+            defaultMessage="Your API endpoint can be used to add new documents to your index, update documents, retrieve documents by ID, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
             values={{
-              documentsAPILink: (
-                <EuiLink href="#" target="_blank">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.methodApi.description.documentsAPILink',
-                    {
-                      defaultMessage: 'documents API',
-                    }
-                  )}
-                </EuiLink>
-              ),
               clientLibrariesLink: (
                 <EuiLink href="#" target="_blank">
                   {i18n.translate(
@@ -69,7 +59,7 @@ export const MethodApi: React.FC = () => {
         </EuiText>
       }
       docsUrl="#"
-      type="API Endpoint"
+      type="API endpoint"
       onNameChange={(value: string) => onNameChange(value)}
     >
       <EuiPanel hasBorder>
