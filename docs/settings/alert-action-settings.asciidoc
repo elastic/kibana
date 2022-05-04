@@ -202,13 +202,13 @@ Specifies the minimum schedule interval for rules. This minimum is applied to al
 +
 `<count>[s,m,h,d]` 
 +
-For example, `20m`, `24h`, `7d`. Default: `1m`.
+For example, `20m`, `24h`, `7d`. This duration cannot exceed `1d`. Default: `1m`.
 
 `xpack.alerting.rules.minimumScheduleInterval.enforce`::
 Specifies the behavior when a new or changed rule has a schedule interval less than the value defined in `xpack.alerting.rules.minimumScheduleInterval.value`. If `false`, rules with schedules less than the interval will be created but warnings will be logged. If `true`, rules with schedules less than the interval cannot be created. Default: `false`.
 
 `xpack.alerting.rules.run.actions.max`::
-Specifies the maximum number of actions that a rule can trigger each time detection checks run.
+Specifies the maximum number of actions that a rule can generate each time detection checks run.
 
 `xpack.alerting.rules.run.timeout`::
 Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
