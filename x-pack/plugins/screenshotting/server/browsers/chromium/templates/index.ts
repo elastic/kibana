@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import fs from 'fs/promises';
 import path from 'path';
 import Handlebars from 'handlebars';
@@ -36,6 +37,8 @@ async function getDefaultFooterLogo(): Promise<string> {
 
 interface FooterTemplateInput {
   base64FooterLogo: string;
+  hasCustomLogo: boolean;
+  poweredByElasticCopy: string;
 }
 
 interface GetFooterArgs {
@@ -46,5 +49,15 @@ export async function getFooterTemplate({ logo }: GetFooterArgs): Promise<string
   const template = await compileTemplate<FooterTemplateInput>(
     path.resolve(__dirname, './footer.handlebars.html')
   );
-  return template({ base64FooterLogo: logo || (await getDefaultFooterLogo()) });
+  const hasCustomLogo = Boolean(logo);
+  return template({
+    base64FooterLogo: hasCustomLogo ? logo! : await getDefaultFooterLogo(),
+    hasCustomLogo,
+    poweredByElasticCopy: i18n.translate(
+      'xpack.screenshotting.exportTypes.printablePdf.footer.logoDescription',
+      {
+        defaultMessage: 'Powered by Elastic',
+      }
+    ),
+  });
 }
