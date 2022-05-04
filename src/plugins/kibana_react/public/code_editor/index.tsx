@@ -7,7 +7,13 @@
  */
 
 import React from 'react';
-import { EuiDelayRender, EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
+import {
+  EuiDelayRender,
+  EuiErrorBoundary,
+  EuiLoadingContent,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
+} from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { Props } from './code_editor';
@@ -41,14 +47,12 @@ export type CodeEditorProps = Props;
  * @see CodeEditorField to render a code editor in the same style as other EUI form fields.
  */
 export const CodeEditor: React.FunctionComponent<Props> = (props) => {
-  const { services } = useKibana();
-  const theme = useObservable(services.theme!.theme$);
-  const darkMode = theme?.darkMode || false;
+  const { colorMode } = useEuiTheme();
 
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
-        <LazyBaseEditor {...props} useDarkTheme={darkMode} />
+        <LazyBaseEditor {...props} useDarkTheme={colorMode === COLOR_MODES_STANDARD.dark} />
       </React.Suspense>
     </EuiErrorBoundary>
   );
