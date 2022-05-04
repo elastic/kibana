@@ -12,7 +12,8 @@ import semverGte from 'semver/functions/gte';
 
 import type { Response } from 'node-fetch';
 
-import { splitPkgKey as split } from '../../../../common';
+import type { SuggestionSignals } from '../../../../common';
+import { splitPkgKey as split, SuggestionSignalFields } from '../../../../common';
 
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -66,8 +67,30 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 
   setKibanaVersion(url);
 
-  return fetchUrl(url.toString()).then(JSON.parse);
+  return (
+    fetchUrl(url.toString())
+      .then<RegistrySearchResults>(JSON.parse)
+      // Add fake signals to packages
+      .then(appendFakeSignals)
+  );
 }
+
+const FAKE_SIGNALS: Record<string, SuggestionSignals | undefined> = {
+  nginx: {
+    'process.name': ['*nginx*'],
+    'container.image.name': ['*nginx*'],
+  },
+  postgresql: {
+    'process.name': ['*postgres*'],
+    'container.image.name': ['*postgres*'],
+  },
+};
+
+const appendFakeSignals = (results: RegistrySearchResults): RegistrySearchResults =>
+  results.map((item) => ({
+    ...item,
+    suggestion_signals: FAKE_SIGNALS[item.name],
+  }));
 
 interface FetchFindLatestPackageOptions {
   ignoreConstraints?: boolean;

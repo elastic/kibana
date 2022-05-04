@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+} from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
+
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   isPackageLimited,
@@ -15,11 +23,17 @@ import {
 } from '../../../../common';
 import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { SUGGESTION_SIGNAL_FIELDS } from '../../../../common';
 import type {
   ArchivePackage,
   RegistryPackage,
+  RegistrySearchResult,
   EpmPackageAdditions,
   GetCategoriesRequest,
+  PackageList,
+  PackageListItem,
+  SuggestionSignalFields,
+  Installable,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError, PackageNotFoundError } from '../../../errors';
@@ -42,21 +56,38 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
   return Registry.fetchCategories(options);
 }
 
+function escapeStringRegexp(str: string) {
+  // Escape characters with special meaning either inside or outside character sets.
+  // Use a simple backslash escape when it’s always valid, and a `\xnn` escape when the simpler form would be disallowed by Unicode patterns’ stricter grammar.
+  return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d');
+}
+
 export async function getPackages(
   options: {
+    esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
     excludeInstallStatus?: boolean;
+    includeSuggestions?: boolean;
   } & Registry.SearchParams
-) {
-  const { savedObjectsClient, experimental, category, excludeInstallStatus = false } = options;
-  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
-    return items.map((item) =>
-      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
-    );
-  });
-  // get the installed packages
-  const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
-  const packageList = registryItems
+): Promise<PackageList> {
+  const {
+    esClient,
+    savedObjectsClient,
+    experimental,
+    category,
+    excludeInstallStatus = false,
+    includeSuggestions = false,
+  } = options;
+  const [registryItems, packageSavedObjects] = await Promise.all([
+    Registry.fetchList({ category, experimental }).then((items) => {
+      return items.map((item) =>
+        Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
+      );
+    }),
+    getPackageSavedObjects(savedObjectsClient),
+  ]);
+
+  let packages = registryItems
     .map((item) =>
       createInstallableFrom(
         item,
@@ -65,13 +96,29 @@ export async function getPackages(
     )
     .sort(sortByName);
 
+  if (includeSuggestions) {
+    const suggestionScores = await getSuggestionScores({
+      esClient,
+      // Avoid calculating suggestions for packages that are already installed
+      packages: packages.filter((i) => i.status === installationStatuses.NotInstalled),
+    });
+
+    packages = packages.map((installable) => {
+      return {
+        ...installable,
+        suggestionScore:
+          suggestionScores.find((score) => score.id === installable.id)?.suggestionScore || 0,
+      };
+    });
+  }
+
   if (!excludeInstallStatus) {
-    return packageList;
+    return packages;
   }
 
   // Exclude the `installStatus` value if the `excludeInstallStatus` query parameter is set to true
   // to better facilitate response caching
-  const packageListWithoutStatus = packageList.map((pkg) => {
+  const packageListWithoutStatus = packages.map((pkg) => {
     const newPkg = {
       ...pkg,
       status: undefined,
@@ -83,12 +130,106 @@ export async function getPackages(
   return packageListWithoutStatus;
 }
 
+export async function getSuggestionScores(options: {
+  esClient: ElasticsearchClient;
+  packages: Array<Installable<RegistrySearchResult>>;
+}): Promise<Array<Pick<PackageListItem, 'id' | 'suggestionScore'>>> {
+  const { esClient, packages } = options;
+  const itemsWithSignals = packages.filter(({ suggestion_signals }) => suggestion_signals);
+
+  const queryResults = Object.fromEntries(
+    await Promise.all(
+      SUGGESTION_SIGNAL_FIELDS.map(
+        async (
+          field
+        ): Promise<[SuggestionSignalFields, Array<{ key: string; doc_count: number }>]> => {
+          const searchValues = itemsWithSignals
+            .filter(({ suggestion_signals }) => suggestion_signals && field in suggestion_signals)
+            .flatMap((item) => item.suggestion_signals![field]);
+
+          const searchRequest: SearchRequest = {
+            index: 'logs-*-*,metrics-*-*',
+            size: 0,
+            query: {
+              bool: {
+                should: searchValues.map((value) => ({
+                  wildcard: { [field]: value },
+                })),
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: 'now-1h',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            aggs: {
+              sample: {
+                sampler: {
+                  shard_size: 100,
+                },
+                aggs: {
+                  top_values: {
+                    terms: {
+                      field,
+                      size: 50,
+                    },
+                  },
+                },
+              },
+            },
+          };
+
+          /** naive implementation, may be possible to optimize further (eg. random sampler when doc count is high) */
+          const response = await esClient.search<
+            null,
+            { sample: { top_values: { buckets: Array<{ key: string; doc_count: number }> } } }
+          >(searchRequest);
+
+          // Use top values to rank the signals
+          return [field, response.aggregations?.sample.top_values.buckets ?? []];
+        }
+      )
+    )
+  );
+
+  // detect buckets that match the signals and add doc count to score
+  return itemsWithSignals.map(({ name, suggestion_signals }) => {
+    let suggestionScore = 0;
+
+    SUGGESTION_SIGNAL_FIELDS.map((field) => {
+      const buckets = queryResults[field];
+      const signals = suggestion_signals![field] || [];
+
+      signals.forEach((signal) => {
+        // Replace wildcards with regex wildcard and escape all other regexp characters
+        const regex = new RegExp(escapeStringRegexp(signal).replace(/\*/g, '.*'));
+        buckets.forEach(({ key, doc_count }) => {
+          if (key.match(regex)) {
+            suggestionScore += doc_count;
+          }
+        });
+      });
+    });
+
+    return {
+      id: name,
+      suggestionScore,
+    };
+  });
+}
+
 // Get package names for packages which cannot have more than one package policy on an agent policy
 export async function getLimitedPackages(options: {
+  esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
-  const { savedObjectsClient } = options;
+  const { esClient, savedObjectsClient } = options;
   const allPackages = await getPackages({
+    esClient,
     savedObjectsClient,
     experimental: true,
   });

@@ -248,6 +248,7 @@ export type RegistrySearchResult = Pick<
   | 'data_streams'
   | 'policy_templates'
   | 'categories'
+  | 'suggestion_signals'
 >;
 
 export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;

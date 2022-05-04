@@ -26,6 +26,8 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
+import useObservable from 'react-use/lib/useObservable';
+
 import { useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
@@ -184,8 +186,13 @@ export const AvailablePackages: React.FC = memo(() => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
   useBreadcrumbs('integrations_all');
 
-  const { http } = useStartServices();
+  const { http, uiSettings } = useStartServices();
   const addBasePath = http.basePath.prepend;
+
+  const enableSuggestions = useObservable(
+    uiSettings.get$('integrations:enableSuggestions'),
+    uiSettings.get('integrations:enableSuggestions')
+  );
 
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
@@ -215,6 +222,7 @@ export const AvailablePackages: React.FC = memo(() => {
   } = useGetPackages({
     category: '',
     excludeInstallStatus: true,
+    includeSuggestions: enableSuggestions,
   });
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),

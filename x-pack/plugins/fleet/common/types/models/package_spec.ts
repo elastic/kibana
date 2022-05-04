@@ -7,6 +7,10 @@
 
 import type { RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
 
+export const SUGGESTION_SIGNAL_FIELDS = ['process.name', 'container.image.name'] as const;
+export type SuggestionSignalFields = typeof SUGGESTION_SIGNAL_FIELDS[number];
+export type SuggestionSignals = Record<SuggestionSignalFields, string[] | undefined>;
+
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
   format_version: string;
@@ -24,6 +28,7 @@ export interface PackageSpecManifest {
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
   owner: { github: string };
+  suggestion_signals?: SuggestionSignals;
 }
 
 export type PackageSpecCategory =

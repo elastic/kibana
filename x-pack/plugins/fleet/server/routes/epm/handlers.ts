@@ -87,8 +87,10 @@ export const getListHandler: FleetRequestHandler<
   TypeOf<typeof GetPackagesRequestSchema.query>
 > = async (context, request, response) => {
   try {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const savedObjectsClient = (await context.fleet).epm.internalSoClient;
     const res = await getPackages({
+      esClient,
       savedObjectsClient,
       ...request.query,
     });
@@ -100,7 +102,10 @@ export const getListHandler: FleetRequestHandler<
       body,
       // Only cache responses where the installation status is excluded, otherwise the request
       // needs up-to-date information on whether the package is installed so we can't cache it
-      headers: request.query.excludeInstallStatus ? { ...CACHE_CONTROL_10_MINUTES_HEADER } : {},
+      headers:
+        request.query.excludeInstallStatus && !request.query.includeSuggestions
+          ? { ...CACHE_CONTROL_10_MINUTES_HEADER }
+          : {},
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
@@ -109,8 +114,9 @@ export const getListHandler: FleetRequestHandler<
 
 export const getLimitedListHandler: FleetRequestHandler = async (context, request, response) => {
   try {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const savedObjectsClient = (await context.fleet).epm.internalSoClient;
-    const res = await getLimitedPackages({ savedObjectsClient });
+    const res = await getLimitedPackages({ esClient, savedObjectsClient });
     const body: GetLimitedPackagesResponse = {
       items: res,
       response: res,

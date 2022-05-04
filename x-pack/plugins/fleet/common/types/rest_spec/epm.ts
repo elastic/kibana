@@ -33,6 +33,7 @@ export interface GetPackagesRequest {
     category?: string;
     experimental?: boolean;
     excludeInstallStatus?: boolean;
+    includeSuggestions?: boolean;
   };
 }
 

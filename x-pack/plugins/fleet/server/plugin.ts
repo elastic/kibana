@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
@@ -221,6 +222,17 @@ export class FleetPlugin
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
+
+    core.uiSettings.register({
+      'integrations:enableSuggestions': {
+        schema: schema.boolean(),
+        category: ['management'],
+        name: 'Enable integration suggestions',
+        value: false,
+        description:
+          'Find related integrations to data you are ingesting. May have performance problems on larger clusters.',
+      },
+    });
 
     // Register feature
     if (deps.features) {
