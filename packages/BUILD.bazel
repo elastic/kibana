@@ -109,6 +109,7 @@ filegroup(
     "//packages/kbn-utility-types:build",
     "//packages/kbn-utils:build",
     "//packages/shared-ux/button/exit_full_screen:build",
+    "//packages/shared-ux/link/redirect_app:build",
   ],
 )
 
@@ -201,6 +202,7 @@ filegroup(
     "//packages/kbn-utility-types:build_types",
     "//packages/kbn-utils:build_types",
     "//packages/shared-ux/button/exit_full_screen:build_types",
+    "//packages/shared-ux/link/redirect_app:build_types",
   ],
 )
 

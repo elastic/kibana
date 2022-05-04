@@ -15,8 +15,6 @@ export const LazyToolbarButton = React.lazy(() =>
   }))
 );
 
-export const RedirectAppLinks = React.lazy(() => import('./redirect_app_links'));
-
 /**
  * A `ToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can
  * be used directly by consumers and will load the `LazyToolbarButton` component lazily with

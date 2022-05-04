@@ -2,16 +2,14 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-shared-ux-button-exit-full-screen"
-PKG_REQUIRE_NAME = "@kbn/shared-ux-button-exit-full-screen"
+PKG_DIRNAME = "redirect_app"
+PKG_REQUIRE_NAME = "@kbn/shared-ux-link-redirect-app"
 
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.scss",
     "src/**/*.mdx",
-    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
@@ -41,16 +39,10 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
   "@npm//@storybook/addon-actions",
-  "@npm//classnames",
-  "@npm//enzyme",
   "@npm//react-use",
   "@npm//react",
-  "@npm//url-loader",
-  "//packages/kbn-i18n-react",
-  "//packages/kbn-i18n",
+  "@npm//rxjs",
   "//packages/kbn-shared-ux-utility",
 ]
 
@@ -65,18 +57,13 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@emotion/css",
-  "@npm//@emotion/react",
   "@npm//@storybook/addon-actions",
-  "@npm//@types/classnames",
-  "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
+  "@npm//rxjs",
   "@npm//react-use",
   "//packages/kbn-ambient-ui-types",
-  "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
 ]
 
@@ -91,6 +78,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
