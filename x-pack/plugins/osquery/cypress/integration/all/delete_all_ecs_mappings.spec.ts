@@ -8,6 +8,7 @@
 import { navigateTo } from '../../tasks/navigation';
 import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { ROLES } from '../../test';
 
 describe('ALL - Delete ECS Mappings', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
@@ -16,7 +17,7 @@ describe('ALL - Delete ECS Mappings', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
   });
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
     navigateTo('/app/osquery/saved_queries');
   });
 
@@ -30,7 +31,10 @@ describe('ALL - Delete ECS Mappings', () => {
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.react('EuiButtonIcon', { props: { id: 'labels-trash' } }).click();
+    cy.react('ECSComboboxFieldComponent', { props: { field: { value: 'labels' } } })
+      .parents('[data-test-subj="ECSMappingEditorForm"]')
+      .react('EuiButtonIcon', { props: { iconType: 'trash' } })
+      .click();
     cy.react('EuiButton').contains('Update query').click();
     cy.wait(5000);
 

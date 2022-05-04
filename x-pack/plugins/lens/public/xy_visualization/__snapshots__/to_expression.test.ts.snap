@@ -30,9 +30,6 @@ Object {
         "curveType": Array [
           "LINEAR",
         ],
-        "description": Array [
-          "",
-        ],
         "emphasizeFitting": Array [
           true,
         ],
@@ -113,11 +110,39 @@ Object {
                   "layerId": Array [
                     "first",
                   ],
+                  "palette": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "name": Array [
+                              "default",
+                            ],
+                          },
+                          "function": "system_palette",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
                   "seriesType": Array [
                     "area",
                   ],
                   "splitAccessor": Array [
                     "d",
+                  ],
+                  "table": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {},
+                          "function": "kibana",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
                   ],
                   "xAccessor": Array [
                     "a",
@@ -130,7 +155,7 @@ Object {
                     "linear",
                   ],
                 },
-                "function": "dataLayer",
+                "function": "extendedDataLayer",
                 "type": "function",
               },
             ],
@@ -188,9 +213,6 @@ Object {
             "type": "expression",
           },
         ],
-        "title": Array [
-          "",
-        ],
         "valueLabels": Array [
           "hide",
         ],
@@ -247,7 +269,7 @@ Object {
           "",
         ],
       },
-      "function": "xyVis",
+      "function": "layeredXyVis",
       "type": "function",
     },
   ],

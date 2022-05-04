@@ -15,7 +15,7 @@ import type {
   HttpSetup,
   NotificationsSetup,
   Toast,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import {
   SESSION_CHECK_MS,

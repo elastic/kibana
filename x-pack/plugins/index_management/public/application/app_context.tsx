@@ -8,8 +8,8 @@
 import React, { createContext, useContext } from 'react';
 import { Observable } from 'rxjs';
 import SemVer from 'semver/classes/semver';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   ApplicationStart,
   CoreTheme,
@@ -17,8 +17,9 @@ import {
   ScopedHistory,
   DocLinksStart,
   IUiSettingsClient,
-} from 'src/core/public';
-import { SharePluginStart } from 'src/plugins/share/public';
+  ExecutionContextStart,
+} from '@kbn/core/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
@@ -29,6 +30,7 @@ export interface AppDependencies {
   core: {
     fatalErrors: FatalErrorsStart;
     getUrlForApp: ApplicationStart['getUrlForApp'];
+    executionContext: ExecutionContextStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;

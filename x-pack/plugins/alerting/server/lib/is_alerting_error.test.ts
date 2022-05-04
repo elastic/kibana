@@ -7,9 +7,9 @@
 
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from './is_alerting_error';
 import { ErrorWithReason } from './error_with_reason';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import uuid from 'uuid';
-import { AlertExecutionStatusErrorReasons } from '../types';
+import { RuleExecutionStatusErrorReasons } from '../types';
 
 describe('isAlertSavedObjectNotFoundError', () => {
   const id = uuid.v4();
@@ -27,7 +27,7 @@ describe('isAlertSavedObjectNotFoundError', () => {
   });
 
   test('identifies SavedObjects Not Found errors wrapped in an ErrorWithReason', () => {
-    const error = new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, errorSONF);
+    const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Read, errorSONF);
     expect(isAlertSavedObjectNotFoundError(error, id)).toBe(true);
   });
 });
@@ -48,7 +48,7 @@ describe('isEsUnavailableError', () => {
   });
 
   test('identifies es unavailable errors wrapped in an ErrorWithReason', () => {
-    const error = new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, errorSONF);
+    const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Read, errorSONF);
     expect(isEsUnavailableError(error, id)).toBe(true);
   });
 });

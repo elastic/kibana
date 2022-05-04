@@ -80,29 +80,8 @@
             "label": "getMeta",
             "description": [],
             "signature": [
-              "() => Partial<",
-              "DataFilters",
-              " & { applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; fieldNames: string[]; geogridPrecision?: number | undefined; timesliceMaskField?: string | undefined; sourceQuery?: ",
-              "Query",
-              " | undefined; sourceMeta: object | null; isForceRefresh: boolean; } & ",
-              "VectorJoinSourceRequestMeta",
-              " & { dynamicStyleFields: string[]; isTimeAware: boolean; sourceQuery: ",
-              "Query",
-              "; timeFilters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              "; } & ",
-              "ESSearchSourceResponseMeta",
-              " & ",
-              "ESGeoLineSourceResponseMeta",
-              " & ",
-              "VectorTileLayerMeta",
-              ">"
+              "() => ",
+              "DataRequestMeta"
             ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
             "deprecated": false,
@@ -1188,6 +1167,20 @@
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.BoundsRequestMeta.joinKeyFilter",
+            "type": "Object",
+            "tags": [],
+            "label": "joinKeyFilter",
+            "description": [],
+            "signature": [
+              "Filter",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1719,7 +1712,7 @@
             "label": "getHtmlDisplayValue",
             "description": [],
             "signature": [
-              "() => string"
+              "() => React.ReactNode"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
@@ -3009,6 +3002,20 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-public.MAPS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "MAPS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"MAPS_APP_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/maps/public/locators.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-public.RenderWizardArguments",
         "type": "Type",
         "tags": [],
@@ -3037,7 +3044,7 @@
         "label": "SourceEditorArgs",
         "description": [],
         "signature": [
-          "{ clearJoins: () => void; currentLayerType: string; hasJoins: boolean; onChange: (...args: ",
+          "{ currentLayerType: string; numberOfJoins: number; onChange: (...args: ",
           "OnSourceChangeArgs",
           "[]) => Promise<void>; }"
         ],
@@ -3412,6 +3419,34 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_ID",
+        "description": [],
+        "signature": [
+          "\"maps\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.DECIMAL_DEGREES_PRECISION",
+        "type": "number",
+        "tags": [],
+        "label": "DECIMAL_DEGREES_PRECISION",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "maps",
         "id": "def-common.EMSFileSourceDescriptor",

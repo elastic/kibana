@@ -11,10 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { capitalize, sortBy } from 'lodash';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, ReactNode, useCallback } from 'react';
 import {
   EuiBasicTable,
-  EuiBadge,
   EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -23,7 +22,6 @@ import {
   EuiSpacer,
   EuiLink,
   EuiEmptyPrompt,
-  EuiCallOut,
   EuiButtonEmpty,
   EuiHealth,
   EuiText,
@@ -31,21 +29,36 @@ import {
   EuiTableSortingType,
   EuiButtonIcon,
   EuiHorizontalRule,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiSelectableOption,
   EuiIcon,
+  EuiScreenReaderOnly,
+  RIGHT_ALIGNMENT,
+  EuiDescriptionList,
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
+  EuiTableActionsColumnType,
+  EuiCallOut,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
 import {
+  RuleExecutionStatus,
+  RuleExecutionStatusValues,
+  ALERTS_FEATURE_ID,
+  RuleExecutionStatusErrorReasons,
+  formatDuration,
+  parseDuration,
+  MONITORING_HISTORY_LIMIT,
+} from '@kbn/alerting-plugin/common';
+import {
   ActionType,
   Rule,
   RuleTableItem,
   RuleType,
   RuleTypeIndex,
+  RuleStatus,
   Pagination,
   Percentiles,
   TriggersActionsUiConfig,
@@ -56,7 +69,7 @@ import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../commo
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
-import { RuleStatusFilter, getHealthColor } from './rule_status_filter';
+import { RuleExecutionStatusFilter, getHealthColor } from './rule_execution_status_filter';
 import {
   loadRules,
   loadRuleAggregations,
@@ -72,15 +85,6 @@ import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capab
 import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import {
-  AlertExecutionStatus,
-  AlertExecutionStatusValues,
-  ALERTS_FEATURE_ID,
-  AlertExecutionStatusErrorReasons,
-  formatDuration,
-  parseDuration,
-  MONITORING_HISTORY_LIMIT,
-} from '../../../../../../alerting/common';
 import { rulesStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
@@ -89,11 +93,14 @@ import { CenterJustifiedSpinner } from '../../../components/center_justified_spi
 import { ManageLicenseModal } from './manage_license_modal';
 import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
 import { RuleStatusDropdown } from './rule_status_dropdown';
+import { RuleTagBadge } from './rule_tag_badge';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
 import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { RuleStatusFilter } from './rule_status_filter';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 const ENTER_KEY = 13;
 
@@ -149,12 +156,18 @@ export const RulesList: React.FunctionComponent = () => {
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<string[]>([]);
+  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
-  const [dismissRuleErrors, setDismissRuleErrors] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
+  const [showErrors, setShowErrors] = useState(false);
+
+  const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
   useEffect(() => {
     (async () => {
@@ -181,7 +194,7 @@ export const RulesList: React.FunctionComponent = () => {
     ruleTypeId: string;
   } | null>(null);
   const [rulesStatusesTotal, setRulesStatusesTotal] = useState<Record<string, number>>(
-    AlertExecutionStatusValues.reduce(
+    RuleExecutionStatusValues.reduce(
       (prev: Record<string, number>, status: string) =>
         ({
           ...prev,
@@ -218,6 +231,7 @@ export const RulesList: React.FunctionComponent = () => {
     percentileOptions,
     JSON.stringify(typesFilter),
     JSON.stringify(actionTypesFilter),
+    JSON.stringify(ruleExecutionStatusesFilter),
     JSON.stringify(ruleStatusesFilter),
   ]);
 
@@ -277,6 +291,7 @@ export const RulesList: React.FunctionComponent = () => {
           searchText,
           typesFilter,
           actionTypesFilter,
+          ruleExecutionStatusesFilter,
           ruleStatusesFilter,
           sort,
         });
@@ -295,6 +310,7 @@ export const RulesList: React.FunctionComponent = () => {
           isEmpty(searchText) &&
           isEmpty(typesFilter) &&
           isEmpty(actionTypesFilter) &&
+          isEmpty(ruleExecutionStatusesFilter) &&
           isEmpty(ruleStatusesFilter)
         );
 
@@ -321,6 +337,7 @@ export const RulesList: React.FunctionComponent = () => {
         searchText,
         typesFilter,
         actionTypesFilter,
+        ruleExecutionStatusesFilter,
         ruleStatusesFilter,
       });
       if (rulesAggs?.ruleExecutionStatus) {
@@ -343,25 +360,23 @@ export const RulesList: React.FunctionComponent = () => {
       <RuleStatusDropdown
         disableRule={async () => await disableRule({ http, id: item.id })}
         enableRule={async () => await enableRule({ http, id: item.id })}
-        snoozeRule={async (snoozeEndTime: string | -1) =>
-          await snoozeRule({ http, id: item.id, snoozeEndTime })
-        }
+        snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
+          await snoozeRule({ http, id: item.id, snoozeEndTime });
+        }}
         unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
-        item={item}
+        rule={item}
         onRuleChanged={() => loadRulesData()}
+        isEditable={item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)}
       />
     );
   };
 
-  const renderAlertExecutionStatus = (
-    executionStatus: AlertExecutionStatus,
-    item: RuleTableItem
-  ) => {
+  const renderRuleExecutionStatus = (executionStatus: RuleExecutionStatus, item: RuleTableItem) => {
     const healthColor = getHealthColor(executionStatus.status);
     const tooltipMessage =
       executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
     const isLicenseError =
-      executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+      executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
     const statusMessage = isLicenseError
       ? ALERT_STATUS_LICENSE_ERROR
       : rulesStatusesTranslationsMapping[executionStatus.status];
@@ -413,7 +428,7 @@ export const RulesList: React.FunctionComponent = () => {
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip',
             {
-              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} execution durations (mm:ss).`,
+              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} run durations (mm:ss).`,
               values: {
                 percentileOrdinal: percentileOrdinals[selectedPercentile!],
                 sampleLimit: MONITORING_HISTORY_LIMIT,
@@ -455,7 +470,73 @@ export const RulesList: React.FunctionComponent = () => {
     };
   };
 
-  const getRulesTableColumns = () => {
+  const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
+    const hasErrorMessage = _executionStatus.status === 'error';
+    const errorMessage = _executionStatus?.error?.message;
+    const isLicenseError =
+      _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
+    const statusMessage = isLicenseError ? ALERT_STATUS_LICENSE_ERROR : null;
+
+    return [
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.expandRow.title"
+            defaultMessage="Error from last run"
+          />
+        ),
+        description: (
+          <>
+            {errorMessage}
+            {hasErrorMessage && statusMessage && <EuiSpacer size="xs" />}
+            {statusMessage}
+          </>
+        ),
+      },
+    ];
+  };
+
+  const toggleErrorMessage = (_executionStatus: RuleExecutionStatus, ruleItem: RuleTableItem) => {
+    setItemIdToExpandedRowMap((itemToExpand) => {
+      const _itemToExpand = { ...itemToExpand };
+      if (_itemToExpand[ruleItem.id]) {
+        delete _itemToExpand[ruleItem.id];
+      } else {
+        _itemToExpand[ruleItem.id] = (
+          <EuiDescriptionList listItems={buildErrorListItems(_executionStatus)} />
+        );
+      }
+      return _itemToExpand;
+    });
+  };
+
+  const toggleRuleErrors = useCallback(() => {
+    setShowErrors((prevValue) => {
+      if (!prevValue) {
+        const rulesToExpand = rulesState.data.reduce((acc, ruleItem) => {
+          if (ruleItem.executionStatus.status === 'error') {
+            return {
+              ...acc,
+              [ruleItem.id]: (
+                <EuiDescriptionList listItems={buildErrorListItems(ruleItem.executionStatus)} />
+              ),
+            };
+          }
+          return acc;
+        }, {});
+        setItemIdToExpandedRowMap(rulesToExpand);
+      } else {
+        setItemIdToExpandedRowMap({});
+      }
+      return !prevValue;
+    });
+  }, [showErrors, rulesState]);
+
+  const getRulesTableColumns = (): Array<
+    | EuiTableFieldDataColumnType<RuleTableItem>
+    | EuiTableComputedColumnType<RuleTableItem>
+    | EuiTableActionsColumnType<RuleTableItem>
+  > => {
     return [
       {
         field: 'name',
@@ -517,40 +598,12 @@ export const RulesList: React.FunctionComponent = () => {
         'data-test-subj': 'rulesTableCell-tagsPopover',
         render: (tags: string[], item: RuleTableItem) => {
           return tags.length > 0 ? (
-            <EuiPopover
-              button={
-                <EuiBadge
-                  data-test-subj="ruleTagsBadge"
-                  color="hollow"
-                  iconType="tag"
-                  iconSide="left"
-                  tabIndex={-1}
-                  onClick={() => setTagPopoverOpenIndex(item.index)}
-                  onClickAriaLabel="Tags"
-                  iconOnClick={() => setTagPopoverOpenIndex(item.index)}
-                  iconOnClickAriaLabel="Tags"
-                >
-                  {tags.length}
-                </EuiBadge>
-              }
-              anchorPosition="upCenter"
+            <RuleTagBadge
               isOpen={tagPopoverOpenIndex === item.index}
-              closePopover={() => setTagPopoverOpenIndex(-1)}
-            >
-              <EuiPopoverTitle data-test-subj="ruleTagsPopoverTitle">Tags</EuiPopoverTitle>
-              <div style={{ width: '300px' }} />
-              {tags.map((tag: string, index: number) => (
-                <EuiBadge
-                  data-test-subj="ruleTagsPopoverTag"
-                  key={index}
-                  color="hollow"
-                  iconType="tag"
-                  iconSide="left"
-                >
-                  {tag}
-                </EuiBadge>
-              ))}
-            </EuiPopover>
+              tags={tags}
+              onClick={() => setTagPopoverOpenIndex(item.index)}
+              onClose={() => setTagPopoverOpenIndex(-1)}
+            />
           ) : null;
         },
       },
@@ -562,7 +615,7 @@ export const RulesList: React.FunctionComponent = () => {
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle',
               {
-                defaultMessage: 'Start time of the last execution.',
+                defaultMessage: 'Start time of the last run.',
               }
             )}
           >
@@ -718,7 +771,7 @@ export const RulesList: React.FunctionComponent = () => {
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
               {
-                defaultMessage: 'How often this rule executes successfully.',
+                defaultMessage: 'How often this rule runs successfully.',
               }
             )}
           >
@@ -749,19 +802,19 @@ export const RulesList: React.FunctionComponent = () => {
         truncateText: false,
         width: '120px',
         'data-test-subj': 'rulesTableCell-lastResponse',
-        render: (_executionStatus: AlertExecutionStatus, item: RuleTableItem) => {
-          return renderAlertExecutionStatus(item.executionStatus, item);
+        render: (_executionStatus: RuleExecutionStatus, item: RuleTableItem) => {
+          return renderRuleExecutionStatus(item.executionStatus, item);
         },
       },
       {
         field: 'enabled',
         name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.statusTitle',
-          { defaultMessage: 'Status' }
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.stateTitle',
+          { defaultMessage: 'State' }
         ),
         sortable: true,
         truncateText: false,
-        width: '200px',
+        width: '10%',
         'data-test-subj': 'rulesTableCell-status',
         render: (_enabled: boolean | undefined, item: RuleTableItem) => {
           return renderRuleStatusDropdown(item.enabled, item);
@@ -769,12 +822,12 @@ export const RulesList: React.FunctionComponent = () => {
       },
       {
         name: '',
-        width: '10%',
+        width: '90px',
         render(item: RuleTableItem) {
           return (
-            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
               <EuiFlexItem grow={false} className="ruleSidebarItem">
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
                   {item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId) ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarEditAction">
                       <EuiButtonIcon
@@ -828,6 +881,30 @@ export const RulesList: React.FunctionComponent = () => {
           );
         },
       },
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '40px',
+        isExpander: true,
+        name: (
+          <EuiScreenReaderOnly>
+            <span>Expand rows</span>
+          </EuiScreenReaderOnly>
+        ),
+        render: (item: RuleTableItem) => {
+          const _executionStatus = item.executionStatus;
+          const hasErrorMessage = _executionStatus.status === 'error';
+          const isLicenseError =
+            _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
+
+          return isLicenseError || hasErrorMessage ? (
+            <EuiButtonIcon
+              onClick={() => toggleErrorMessage(_executionStatus, item)}
+              aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+              iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+            />
+          ) : null;
+        },
+      },
     ];
   };
 
@@ -863,6 +940,15 @@ export const RulesList: React.FunctionComponent = () => {
     );
   };
 
+  const getRuleStatusFilter = () => {
+    if (isRuleStatusFilterEnabled) {
+      return [
+        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusesFilter} />,
+      ];
+    }
+    return [];
+  };
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
@@ -874,15 +960,16 @@ export const RulesList: React.FunctionComponent = () => {
         })
       )}
     />,
+    ...getRuleStatusFilter(),
     <ActionTypeFilter
       key="action-type-filter"
       actionTypes={actionTypes}
       onChange={(ids: string[]) => setActionTypesFilter(ids)}
     />,
-    <RuleStatusFilter
+    <RuleExecutionStatusFilter
       key="rule-status-filter"
-      selectedStatuses={ruleStatusesFilter}
-      onChange={(ids: string[]) => setRuleStatusesFilter(ids)}
+      selectedStatuses={ruleExecutionStatusesFilter}
+      onChange={(ids: string[]) => setRuleExecutionStatusesFilter(ids)}
     />,
     <EuiButtonEmpty
       data-test-subj="refreshRulesButton"
@@ -906,6 +993,34 @@ export const RulesList: React.FunctionComponent = () => {
 
   const table = (
     <>
+      {rulesStatusesTotal.error > 0 ? (
+        <>
+          <EuiCallOut color="danger" size="s" data-test-subj="rulesErrorBanner">
+            <p>
+              <EuiIcon color="danger" type="alert" />
+              &nbsp;
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle"
+                defaultMessage="Error found in {totalStatusesError, plural, one {# rule} other {# rules}}."
+                values={{
+                  totalStatusesError: rulesStatusesTotal.error,
+                }}
+              />
+              &nbsp;
+              <EuiLink color="primary" onClick={() => setRuleExecutionStatusesFilter(['error'])}>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
+                  defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"
+                  values={{
+                    totalStatusesError: rulesStatusesTotal.error,
+                  }}
+                />
+              </EuiLink>
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       <EuiFlexGroup gutterSize="s">
         {selectedIds.length > 0 && authorizedToModifySelectedRules && (
           <EuiFlexItem grow={false}>
@@ -974,122 +1089,110 @@ export const RulesList: React.FunctionComponent = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      {!dismissRuleErrors && rulesStatusesTotal.error > 0 ? (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiCallOut
-              color="danger"
-              size="s"
-              title={
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle"
-                  defaultMessage="Error found in {totalStatusesError, plural, one {# rule} other {# rules}}."
+                  id="xpack.triggersActionsUI.sections.rulesList.totalItemsCountDescription"
+                  defaultMessage="Showing: {pageSize} of {totalItemCount} rules."
+                  values={{
+                    totalItemCount: rulesState.totalItemCount,
+                    pageSize: rulesState.data.length,
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesActiveDescription"
+                  defaultMessage="Active: {totalStatusesActive}"
+                  values={{
+                    totalStatusesActive: rulesStatusesTotal.active,
+                  }}
+                />
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="danger" data-test-subj="totalErrorRulesCount">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesErrorDescription"
+                  defaultMessage="Error: {totalStatusesError}"
+                  values={{ totalStatusesError: rulesStatusesTotal.error }}
+                />
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription"
+                  defaultMessage="Warning: {totalStatusesWarning}"
+                  values={{
+                    totalStatusesWarning: rulesStatusesTotal.warning,
+                  }}
+                />
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesOkDescription"
+                  defaultMessage="Ok: {totalStatusesOk}"
+                  values={{ totalStatusesOk: rulesStatusesTotal.ok }}
+                />
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="accent" data-test-subj="totalPendingRulesCount">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesPendingDescription"
+                  defaultMessage="Pending: {totalStatusesPending}"
+                  values={{
+                    totalStatusesPending: rulesStatusesTotal.pending,
+                  }}
+                />
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color="subdued" data-test-subj="totalUnknownRulesCount">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesUnknownDescription"
+                  defaultMessage="Unknown: {totalStatusesUnknown}"
+                  values={{
+                    totalStatusesUnknown: rulesStatusesTotal.unknown,
+                  }}
+                />
+              </EuiHealth>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {rulesStatusesTotal.error > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiLink data-test-subj="expandRulesError" color="primary" onClick={toggleRuleErrors}>
+              {!showErrors && (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
+                  defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
                   values={{
                     totalStatusesError: rulesStatusesTotal.error,
                   }}
                 />
-              }
-              iconType="rule"
-              data-test-subj="rulesErrorBanner"
-            >
-              <EuiButton
-                type="primary"
-                size="s"
-                color="danger"
-                onClick={() => setRuleStatusesFilter(['error'])}
-              >
+              )}
+              {showErrors && (
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.viewBunnerButtonLabel"
-                  defaultMessage="View"
+                  id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
+                  defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
+                  values={{
+                    totalStatusesError: rulesStatusesTotal.error,
+                  }}
                 />
-              </EuiButton>
-              <EuiButtonEmpty color="danger" onClick={() => setDismissRuleErrors(true)}>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.dismissBunnerButtonLabel"
-                  defaultMessage="Dismiss"
-                />
-              </EuiButtonEmpty>
-            </EuiCallOut>
+              )}
+            </EuiLink>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.totalItemsCountDescription"
-              defaultMessage="Showing: {pageSize} of {totalItemCount} rules."
-              values={{
-                totalItemCount: rulesState.totalItemCount,
-                pageSize: rulesState.data.length,
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.totalStatusesActiveDescription"
-              defaultMessage="Active: {totalStatusesActive}"
-              values={{
-                totalStatusesActive: rulesStatusesTotal.active,
-              }}
-            />
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="danger" data-test-subj="totalErrorRulesCount">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.totalStatusesErrorDescription"
-              defaultMessage="Error: {totalStatusesError}"
-              values={{ totalStatusesError: rulesStatusesTotal.error }}
-            />
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription"
-              defaultMessage="Warning: {totalStatusesWarning}"
-              values={{
-                totalStatusesWarning: rulesStatusesTotal.warning,
-              }}
-            />
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.totalStatusesOkDescription"
-              defaultMessage="Ok: {totalStatusesOk}"
-              values={{ totalStatusesOk: rulesStatusesTotal.ok }}
-            />
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="accent" data-test-subj="totalPendingRulesCount">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.totalStatusesPendingDescription"
-              defaultMessage="Pending: {totalStatusesPending}"
-              values={{
-                totalStatusesPending: rulesStatusesTotal.pending,
-              }}
-            />
-          </EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="subdued" data-test-subj="totalUnknownRulesCount">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.totalStatusesUnknownDescription"
-              defaultMessage="Unknown: {totalStatusesUnknown}"
-              values={{
-                totalStatusesUnknown: rulesStatusesTotal.unknown,
-              }}
-            />
-          </EuiHealth>
-        </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
 
@@ -1148,6 +1251,8 @@ export const RulesList: React.FunctionComponent = () => {
             setSort(changedSort);
           }
         }}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        isExpandable={true}
       />
       {manageLicenseModalOpts && (
         <ManageLicenseModal

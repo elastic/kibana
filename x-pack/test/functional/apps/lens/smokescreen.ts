@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
+  const config = getService('config');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -145,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
-      await testSubjects.existOrFail('empty-workspace');
+      await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
     it('should edit settings of xy line chart', async () => {
@@ -239,14 +240,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.changeAxisSide('right');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      let data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y.length).to.eql(2);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
 
       await PageObjects.lens.changeAxisSide('left');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y.length).to.eql(1);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(false);
 
@@ -261,18 +260,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openVisualOptions();
       await testSubjects.click('lns_valueLabels_inside');
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-
       // check for value labels
-      let data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0].labels).not.to.eql(0);
 
       // switch to stacked bar chart
       await PageObjects.lens.switchToVisualization('bar_stacked');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // check for value labels
-      data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0].labels.length).to.eql(0);
     });
 
@@ -282,16 +278,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
-      await PageObjects.lens.waitForVisualization('xyVisChart');
 
-      let data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
 
-      data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
     });
 
@@ -686,8 +680,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow to change index pattern', async () => {
-      await PageObjects.lens.switchFirstLayerIndexPattern('log*');
-      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('log*');
+      let indexPatternString;
+      if (config.get('esTestCluster.ccs')) {
+        indexPatternString = 'ftr-remote:log*';
+      } else {
+        indexPatternString = 'log*';
+      }
+      await PageObjects.lens.switchFirstLayerIndexPattern(indexPatternString);
+      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal(indexPatternString);
     });
 
     it('should show a download button only when the configuration is valid', async () => {

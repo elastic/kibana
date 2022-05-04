@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { AlertServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import sampleAggsJsonResponse from './es_sample_response.json';
 import sampleShapesJsonResponse from './es_sample_response_shapes.json';
 import sampleAggsJsonResponseWithNesting from './es_sample_response_with_nesting.json';
@@ -525,8 +525,8 @@ describe('geo_containment', () => {
       }
     });
 
-    const alertServicesWithSearchMock: AlertServicesMock = {
-      ...alertsMock.createAlertServices(),
+    const alertServicesWithSearchMock: RuleExecutorServicesMock = {
+      ...alertsMock.createRuleExecutorServices(),
       // @ts-ignore
       alertFactory: alertFactory(contextKeys, testAlertActionArr),
       // @ts-ignore

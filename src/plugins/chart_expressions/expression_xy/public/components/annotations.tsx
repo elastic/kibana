@@ -16,20 +16,26 @@ import {
   AnnotationTooltipFormatter,
   LineAnnotation,
   Position,
+  RectAnnotation,
 } from '@elastic/charts';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
-import classnames from 'classnames';
-import type { EventAnnotationArgs } from '../../../../event_annotation/common';
-import type { FieldFormat } from '../../../../field_formats/common';
-import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type {
+  ManualPointEventAnnotationArgs,
+  ManualRangeEventAnnotationOutput,
+} from '@kbn/event-annotation-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationRangeColor,
+} from '@kbn/event-annotation-plugin/public';
 import type {
   AnnotationLayerArgs,
-  AnnotationLayerConfigResult,
-  IconPosition,
-  YAxisMode,
-} from '../../common/types';
-import { annotationsIconSet, hasIcon, isNumericalString } from '../helpers';
+  CommonXYAnnotationLayerConfig,
+  CollectiveConfig,
+} from '../../common';
+
+import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
 const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
@@ -40,19 +46,15 @@ const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInte
 };
 
 export interface AnnotationsProps {
-  groupedAnnotations: CollectiveConfig[];
+  groupedLineAnnotations: CollectiveConfig[];
+  rangeAnnotations: ManualRangeEventAnnotationOutput[];
   formatter?: FieldFormat;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
   hide?: boolean;
   minInterval?: number;
   isBarChart?: boolean;
-}
-
-interface CollectiveConfig extends EventAnnotationArgs {
-  roundedTimestamp: number;
-  axisMode: 'bottom';
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
+  outsideDimension: number;
 }
 
 const groupVisibleConfigsByInterval = (
@@ -61,9 +63,11 @@ const groupVisibleConfigsByInterval = (
   firstTimestamp?: number
 ) => {
   return layers
-    .flatMap(({ annotations }) => annotations.filter((a) => !a.isHidden))
+    .flatMap(({ annotations }) =>
+      annotations.filter((a) => !a.isHidden && a.type === 'manual_point_event_annotation')
+    )
     .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf())
-    .reduce<Record<string, EventAnnotationArgs[]>>((acc, current) => {
+    .reduce<Record<string, ManualPointEventAnnotationArgs[]>>((acc, current) => {
       const roundedTimestamp = getRoundedTimestamp(
         moment(current.time).valueOf(),
         firstTimestamp,
@@ -78,7 +82,7 @@ const groupVisibleConfigsByInterval = (
 
 const createCustomTooltipDetails =
   (
-    config: EventAnnotationArgs[],
+    config: ManualPointEventAnnotationArgs[],
     formatter?: FieldFormat
   ): AnnotationTooltipFormatter | undefined =>
   () => {
@@ -101,8 +105,8 @@ const createCustomTooltipDetails =
     );
   };
 
-function getCommonProperty<T, K extends keyof EventAnnotationArgs>(
-  configArr: EventAnnotationArgs[],
+function getCommonProperty<T, K extends keyof ManualPointEventAnnotationArgs>(
+  configArr: ManualPointEventAnnotationArgs[],
   propertyName: K,
   fallbackValue: T
 ) {
@@ -113,9 +117,9 @@ function getCommonProperty<T, K extends keyof EventAnnotationArgs>(
   return fallbackValue;
 }
 
-const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
+const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[]) => {
   return {
-    color: getCommonProperty<EventAnnotationArgs['color'], 'color'>(
+    color: getCommonProperty<ManualPointEventAnnotationArgs['color'], 'color'>(
       configArr,
       'color',
       defaultAnnotationColor
@@ -126,8 +130,22 @@ const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
   };
 };
 
+export const getRangeAnnotations = (layers: CommonXYAnnotationLayerConfig[]) => {
+  return layers
+    .flatMap(({ annotations }) =>
+      annotations.filter(
+        (a): a is ManualRangeEventAnnotationOutput =>
+          a.type === 'manual_range_event_annotation' && !a.isHidden
+      )
+    )
+    .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf());
+};
+
+export const OUTSIDE_RECT_ANNOTATION_WIDTH = 8;
+export const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
+
 export const getAnnotationsGroupedByInterval = (
-  layers: AnnotationLayerConfigResult[],
+  layers: CommonXYAnnotationLayerConfig[],
   minInterval?: number,
   firstTimestamp?: number,
   formatter?: FieldFormat
@@ -153,18 +171,23 @@ export const getAnnotationsGroupedByInterval = (
   });
 };
 
+// todo: remove when closed https://github.com/elastic/elastic-charts/issues/1647
+RectAnnotation.displayName = 'RectAnnotation';
+
 export const Annotations = ({
-  groupedAnnotations,
+  groupedLineAnnotations,
+  rangeAnnotations,
   formatter,
   isHorizontal,
   paddingMap,
   hide,
   minInterval,
   isBarChart,
+  outsideDimension,
 }: AnnotationsProps) => {
   return (
     <>
-      {groupedAnnotations.map((annotation) => {
+      {groupedLineAnnotations.map((annotation) => {
         const markerPositionVertical = Position.Top;
         const markerPosition = isHorizontal
           ? mapVerticalToHorizontalPlacement(markerPositionVertical)
@@ -176,7 +199,12 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
-        const strokeWidth = annotation.lineWidth || 1;
+        const strokeWidth = hide ? 1 : annotation.lineWidth || 1;
+        const dataValue = isGrouped
+          ? moment(
+              isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
+            ).valueOf()
+          : moment(exactTimestamp).valueOf();
         return (
           <LineAnnotation
             id={id}
@@ -208,9 +236,7 @@ export const Annotations = ({
             markerPosition={markerPosition}
             dataValues={[
               {
-                dataValue: moment(
-                  isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
-                ).valueOf(),
+                dataValue,
                 header,
                 details: annotation.label,
               },
@@ -232,126 +258,40 @@ export const Annotations = ({
           />
         );
       })}
+      {rangeAnnotations.map(({ label, time, color, endTime, outside }) => {
+        const id = snakeCase(label);
+
+        return (
+          <RectAnnotation
+            id={id}
+            key={id}
+            customTooltip={() => (
+              <div className="echTooltip">
+                <EuiText size="xs" className="echTooltip__header">
+                  <h4>
+                    {formatter
+                      ? `${formatter.convert(time)} — ${formatter?.convert(endTime)}`
+                      : `${moment(time).toISOString()} — ${moment(endTime).toISOString()}`}
+                  </h4>
+                </EuiText>
+                <div className="xyAnnotationTooltipDetail">{label}</div>
+              </div>
+            )}
+            dataValues={[
+              {
+                coordinates: {
+                  x0: moment(time).valueOf(),
+                  x1: moment(endTime).valueOf(),
+                },
+                details: label,
+              },
+            ]}
+            style={{ fill: color || defaultAnnotationRangeColor, opacity: 1 }}
+            outside={Boolean(outside)}
+            outsideDimension={outsideDimension}
+          />
+        );
+      })}
     </>
   );
 };
-
-export function MarkerBody({
-  label,
-  isHorizontal,
-}: {
-  label: string | undefined;
-  isHorizontal: boolean;
-}) {
-  if (!label) {
-    return null;
-  }
-  if (isHorizontal) {
-    return (
-      <div className="eui-textTruncate" style={{ maxWidth: LINES_MARKER_SIZE * 3 }}>
-        {label}
-      </div>
-    );
-  }
-  return (
-    <div
-      className="xyDecorationRotatedWrapper"
-      style={{
-        width: LINES_MARKER_SIZE,
-      }}
-    >
-      <div
-        className="eui-textTruncate xyDecorationRotatedWrapper__label"
-        style={{
-          maxWidth: LINES_MARKER_SIZE * 3,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function NumberIcon({ number }: { number: number }) {
-  return (
-    <EuiFlexGroup
-      justifyContent="spaceAround"
-      className="xyAnnotationNumberIcon"
-      gutterSize="none"
-      alignItems="center"
-    >
-      <EuiText color="ghost" className="xyAnnotationNumberIcon__text">
-        {number < 10 ? number : `9+`}
-      </EuiText>
-    </EuiFlexGroup>
-  );
-}
-
-export const AnnotationIcon = ({
-  type,
-  rotateClassName = '',
-  isHorizontal,
-  renderedInChart,
-  ...rest
-}: {
-  type: string;
-  rotateClassName?: string;
-  isHorizontal?: boolean;
-  renderedInChart?: boolean;
-} & EuiIconProps) => {
-  if (isNumericalString(type)) {
-    return <NumberIcon number={Number(type)} />;
-  }
-  const iconConfig = annotationsIconSet.find((i) => i.value === type);
-  if (!iconConfig) {
-    return null;
-  }
-  return (
-    <EuiIcon
-      {...rest}
-      type={iconConfig.icon || type}
-      className={classnames(
-        { [rotateClassName]: iconConfig.shouldRotate },
-        {
-          lensAnnotationIconFill: renderedInChart && iconConfig.canFill,
-        }
-      )}
-    />
-  );
-};
-
-interface MarkerConfig {
-  axisMode?: YAxisMode;
-  icon?: string;
-  textVisibility?: boolean;
-  iconPosition?: IconPosition;
-}
-
-export function Marker({
-  config,
-  isHorizontal,
-  hasReducedPadding,
-  label,
-  rotateClassName,
-}: {
-  config: MarkerConfig;
-  isHorizontal: boolean;
-  hasReducedPadding: boolean;
-  label?: string;
-  rotateClassName?: string;
-}) {
-  if (hasIcon(config.icon)) {
-    return (
-      <AnnotationIcon type={config.icon} rotateClassName={rotateClassName} renderedInChart={true} />
-    );
-  }
-
-  // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (config.textVisibility) {
-    if (hasReducedPadding) {
-      return <MarkerBody label={label} isHorizontal={isHorizontal} />;
-    }
-    return <EuiIcon type="empty" />;
-  }
-  return null;
-}

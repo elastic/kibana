@@ -8,6 +8,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
+import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
 
@@ -68,16 +69,13 @@ export const ProcessTreeAlert = ({
       <EuiButtonIcon
         iconType="expand"
         aria-label="expand"
-        css={styles.alertRowItem}
         data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
         onClick={handleExpandClick}
       />
-      <EuiIcon type="alert" css={styles.alertRowItem} />
-      <EuiText size="s" css={styles.alertRuleName}>
-        {name}
-      </EuiText>
+      <EuiIcon type="alert" color="danger" />
+      <EuiText size="s">{dataOrDash(name)}</EuiText>
       <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
-        {status}
+        {dataOrDash(status)}
       </EuiBadge>
     </EuiText>
   );

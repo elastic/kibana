@@ -7,14 +7,11 @@
 
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
-import {
-  AxesSettingsConfig,
-  AxisExtentConfig,
-} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
 import { LegendSettingsPopover } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -24,6 +21,7 @@ import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
+import { LegendSettingsPopoverProps } from '../../shared_components/legend_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -297,14 +295,15 @@ export const XyToolbar = memo(function XyToolbar(
   ).truncateText;
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <VisualOptionsPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}
           />
+
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
@@ -382,8 +381,10 @@ export const XyToolbar = memo(function XyToolbar(
             }}
             onAlignmentChange={(value) => {
               const [vertical, horizontal] = value.split('_');
-              const verticalAlignment = vertical as VerticalAlignment;
-              const horizontalAlignment = horizontal as HorizontalAlignment;
+              const verticalAlignment = vertical as LegendSettingsPopoverProps['verticalAlignment'];
+              const horizontalAlignment =
+                horizontal as LegendSettingsPopoverProps['horizontalAlignment'];
+
               setState({
                 ...state,
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },
@@ -410,8 +411,9 @@ export const XyToolbar = memo(function XyToolbar(
           />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -449,6 +451,7 @@ export const XyToolbar = memo(function XyToolbar(
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
             />
           </TooltipWrapper>
+
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
@@ -470,6 +473,7 @@ export const XyToolbar = memo(function XyToolbar(
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
           />
+
           <TooltipWrapper
             tooltipContent={
               shouldRotate

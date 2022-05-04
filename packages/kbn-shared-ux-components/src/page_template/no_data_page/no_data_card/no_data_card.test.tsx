@@ -17,13 +17,6 @@ describe('NoDataCard', () => {
   });
 
   describe('props', () => {
-    test('recommended', () => {
-      const component = render(
-        <NoDataCard recommended title="Card title" description="Description" />
-      );
-      expect(component).toMatchSnapshot();
-    });
-
     test('button', () => {
       const component = render(
         <NoDataCard button="Button" title="Card title" description="Description" />

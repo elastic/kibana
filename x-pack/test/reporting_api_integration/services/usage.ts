@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { indexTimestamp } from '../../../plugins/reporting/server/lib/store/index_timestamp';
+import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
 import {
   AvailableTotal,
   JobTypes,
   LayoutCounts,
   ReportingUsageType,
-} from '../../../plugins/reporting/server/usage/types';
+} from '@kbn/reporting-plugin/server/usage/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // NOTE: the usage stats come from an HTTP API, which converts key names to snake_case

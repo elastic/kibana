@@ -14,6 +14,7 @@ import {
   createFailingAlert,
   disableAlert,
   muteAlert,
+  snoozeAlert,
 } from '../../lib/alert_api_actions';
 import { ObjectRemover } from '../../lib/object_remover';
 import { generateUniqueKey } from '../../lib/get_test_data';
@@ -462,8 +463,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
       });
-      await testSubjects.click('ruleStatusFilterButton');
-      await testSubjects.click('ruleStatuserrorFilerOption'); // select Error status filter
+      await testSubjects.click('ruleExecutionStatusFilterButton');
+      await testSubjects.click('ruleExecutionStatuserrorFilterOption'); // select Error status filter
       await retry.try(async () => {
         const filterErrorOnlyResults =
           await pageObjects.triggersActionsUI.getAlertsListWithStatus();
@@ -500,10 +501,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         expect(alertsErrorBannerExistErrors).to.have.length(1);
         expect(
-          await (
-            await alertsErrorBannerExistErrors[0].findByCssSelector('.euiCallOutHeader')
-          ).getVisibleText()
-        ).to.equal('Error found in 1 rule.');
+          await (await alertsErrorBannerExistErrors[0].findByTagName('p')).getVisibleText()
+        ).to.equal(' Error found in 1 rule. Show rule with error');
       });
 
       await refreshAlertsList();
@@ -513,6 +512,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
       expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
       expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
+    });
+
+    it('Expand error in rules table when there is rule with an error associated', async () => {
+      const createdAlert = await createAlert({ supertest, objectRemover });
+      await retry.try(async () => {
+        await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.length).to.equal(1);
+        expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
+        expect(refreshResults[0].interval).to.equal('1 min');
+        expect(refreshResults[0].status).to.equal('Ok');
+        expect(refreshResults[0].duration).to.match(/\d{2,}:\d{2}/);
+      });
+
+      let expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
+      expect(expandRulesErrorLink).to.have.length(0);
+
+      await createFailingAlert({ supertest, objectRemover });
+      await retry.try(async () => {
+        await refreshAlertsList();
+        expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
+        expect(expandRulesErrorLink).to.have.length(1);
+      });
+      await refreshAlertsList();
+      await testSubjects.click('expandRulesError');
+      const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
+      expect(expandedRow).to.have.length(1);
+      expect(await (await expandedRow[0].findByTagName('div')).getVisibleText()).to.equal(
+        'Error from last run\nFailed to execute alert type'
+      );
     });
 
     it('should filter alerts by the alert type', async () => {
@@ -571,6 +600,64 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('actionType.slackFilterOption');
 
       await testSubjects.missingOrFail('centerJustifiedSpinner');
+    });
+
+    it('should filter alerts by the rule status', async () => {
+      const assertRulesLength = async (length: number) => {
+        return await retry.try(async () => {
+          const rules = await pageObjects.triggersActionsUI.getAlertsList();
+          expect(rules.length).to.equal(length);
+        });
+      };
+
+      // Enabled alert
+      await createAlert({
+        supertest,
+        objectRemover,
+      });
+      const disabledAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
+      const snoozedAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
+
+      await disableAlert({
+        supertest,
+        alertId: disabledAlert.id,
+      });
+      await snoozeAlert({
+        supertest,
+        alertId: snoozedAlert.id,
+      });
+
+      await refreshAlertsList();
+      await assertRulesLength(3);
+
+      // Select enabled
+      await testSubjects.click('ruleStatusFilterButton');
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await assertRulesLength(1);
+
+      // Select disabled
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await assertRulesLength(1);
+
+      // Select snoozed
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await testSubjects.click('ruleStatusFilterOption-snoozed');
+      await assertRulesLength(1);
+
+      // Select disabled and snoozed
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await assertRulesLength(2);
+
+      // Select all 3
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await assertRulesLength(3);
     });
   });
 };

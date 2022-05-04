@@ -10,8 +10,8 @@ import { cloneDeep, defaults, mergeWith, compact } from 'lodash';
 import $ from 'jquery';
 import moment, { Moment } from 'moment-timezone';
 
-import { TimefilterContract } from 'src/plugins/data/public';
-import { IUiSettingsClient } from 'kibana/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from '../helpers/xaxis_formatter';

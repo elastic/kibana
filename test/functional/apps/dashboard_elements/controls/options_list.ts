@@ -100,8 +100,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.editExistingControl(firstId);
 
-        await dashboardControls.optionsListEditorSetDataView('animals-*');
-        await dashboardControls.optionsListEditorSetfield('animal.keyword');
+        const saveButton = await testSubjects.find('control-editor-save');
+        expect(await saveButton.isEnabled()).to.be(true);
+        await dashboardControls.controlsEditorSetDataView('animals-*');
+        expect(await saveButton.isEnabled()).to.be(false);
+        await dashboardControls.controlsEditorSetfield('animal.keyword');
         await dashboardControls.controlEditorSave();
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
@@ -111,6 +114,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.ensureFieldEditorModalIsClosed();
           expect(indexPatternSelectExists).to.be(false);
         });
+      });
+
+      it('editing field clears selections', async () => {
+        const secondId = (await dashboardControls.getAllControlIds())[1];
+        await dashboardControls.optionsListOpenPopover(secondId);
+        await dashboardControls.optionsListPopoverSelectOption('hiss');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
+
+        await dashboardControls.editExistingControl(secondId);
+        await dashboardControls.controlsEditorSetfield('animal.keyword');
+        await dashboardControls.controlEditorSave();
+
+        const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
+        expect(selectionString).to.be('Select...');
+      });
+
+      it('editing other control settings keeps selections', async () => {
+        const secondId = (await dashboardControls.getAllControlIds())[1];
+        await dashboardControls.optionsListOpenPopover(secondId);
+        await dashboardControls.optionsListPopoverSelectOption('dog');
+        await dashboardControls.optionsListPopoverSelectOption('cat');
+        await dashboardControls.optionsListEnsurePopoverIsClosed(secondId);
+
+        await dashboardControls.editExistingControl(secondId);
+        await dashboardControls.controlEditorSetTitle('Animal');
+        await dashboardControls.controlEditorSetWidth('large');
+        await dashboardControls.controlEditorSave();
+
+        const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
+        expect(selectionString).to.be('dog, cat');
       });
 
       it('deletes an existing control', async () => {

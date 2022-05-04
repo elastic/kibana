@@ -11,7 +11,7 @@
         "tags": [],
         "label": "AxesSettingsConfig",
         "description": [],
-        "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "children": [
           {
@@ -21,7 +21,7 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -31,7 +31,7 @@
             "tags": [],
             "label": "yLeft",
             "description": [],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -41,7 +41,95 @@
             "tags": [],
             "label": "yRight",
             "description": [],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.AxisConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "AxisConfig",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.AxisConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.AxisConfig.hide",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hide",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.AxisExtentConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "AxisExtentConfig",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.AxisExtentConfig.mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "\"custom\" | \"full\" | \"dataBounds\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.AxisExtentConfig.lowerBound",
+            "type": "number",
+            "tags": [],
+            "label": "lowerBound",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.AxisExtentConfig.upperBound",
+            "type": "number",
+            "tags": [],
+            "label": "upperBound",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -96,10 +184,181 @@
             "description": [],
             "signature": [
               "{ emptyAsNull?: boolean | undefined; format?: ",
-              "FormatParams",
+              "ValueFormatConfig",
               " | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/cardinality.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.DataLayerArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataLayerArgs",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.accessors",
+            "type": "Array",
+            "tags": [],
+            "label": "accessors",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.seriesType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "seriesType",
+            "description": [],
+            "signature": [
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.xAccessor",
+            "type": "string",
+            "tags": [],
+            "label": "xAccessor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.hide",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hide",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.splitAccessor",
+            "type": "string",
+            "tags": [],
+            "label": "splitAccessor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.columnToLabel",
+            "type": "string",
+            "tags": [],
+            "label": "columnToLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.yScaleType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "yScaleType",
+            "description": [],
+            "signature": [
+              "\"time\" | \"log\" | \"sqrt\" | \"linear\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.xScaleType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "xScaleType",
+            "description": [],
+            "signature": [
+              "\"time\" | \"linear\" | \"ordinal\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.isHistogram",
+            "type": "boolean",
+            "tags": [],
+            "label": "isHistogram",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.palette",
+            "type": "Object",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              "PaletteOutput",
+              "<{ [key: string]: unknown; }>"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DataLayerArgs.yConfig",
+            "type": "Array",
+            "tags": [],
+            "label": "yConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.YConfigResult",
+                "text": "YConfigResult"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -226,7 +485,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              "> | undefined) => Record<\"enabled\" | \"disabled\", { kuery: ",
+              "> | undefined) => Record<\"disabled\" | \"enabled\", { kuery: ",
               "Query",
               "[][]; lucene: ",
               "Query",
@@ -804,6 +1063,49 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.LabelsOrientationConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "LabelsOrientationConfig",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LabelsOrientationConfig.x",
+            "type": "number",
+            "tags": [],
+            "label": "x",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LabelsOrientationConfig.yLeft",
+            "type": "number",
+            "tags": [],
+            "label": "yLeft",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LabelsOrientationConfig.yRight",
+            "type": "number",
+            "tags": [],
+            "label": "yRight",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.LastValueIndexPatternColumn",
         "type": "Interface",
         "tags": [],
@@ -850,7 +1152,9 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ sortField: string; showArrayValues: boolean; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
+              "{ sortField: string; showArrayValues: boolean; format?: ",
+              "ValueFormatConfig",
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/last_value.tsx",
             "deprecated": false
@@ -865,7 +1169,7 @@
         "tags": [],
         "label": "LegendConfig",
         "description": [],
-        "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "children": [
           {
@@ -877,7 +1181,7 @@
             "description": [
               "\nFlag whether the legend should be shown. If there is just a single series, it will be hidden"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -892,7 +1196,7 @@
             "signature": [
               "\"top\" | \"bottom\" | \"left\" | \"right\""
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -907,7 +1211,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -922,7 +1226,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -938,7 +1242,7 @@
               "HorizontalAlignment",
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -954,7 +1258,7 @@
               "VerticalAlignment",
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -969,7 +1273,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -984,7 +1288,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -999,7 +1303,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -1014,7 +1318,67 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/legend_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LensMultiTable",
+        "type": "Interface",
+        "tags": [],
+        "label": "LensMultiTable",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LensMultiTable.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"lens_multitable\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LensMultiTable.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "tables",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LensMultiTable.dateRange",
+            "type": "Object",
+            "tags": [],
+            "label": "dateRange",
+            "description": [],
+            "signature": [
+              "{ fromDate: Date; toDate: Date; } | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -1406,7 +1770,9 @@
             "signature": [
               "{ tinymathAst: string | ",
               "TinymathAST",
-              "; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
+              "; format?: ",
+              "ValueFormatConfig",
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
             "deprecated": false
@@ -1586,13 +1952,7 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -1663,6 +2023,75 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.ReferenceLineLayerArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReferenceLineLayerArgs",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ReferenceLineLayerArgs.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ReferenceLineLayerArgs.accessors",
+            "type": "Array",
+            "tags": [],
+            "label": "accessors",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ReferenceLineLayerArgs.columnToLabel",
+            "type": "string",
+            "tags": [],
+            "label": "columnToLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ReferenceLineLayerArgs.yConfig",
+            "type": "Array",
+            "tags": [],
+            "label": "yConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.YConfigResult",
+                "text": "YConfigResult"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.SharedPieLayerState",
         "type": "Interface",
         "tags": [],
@@ -1705,7 +2134,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"hidden\" | \"value\""
+              "\"percent\" | \"value\" | \"hidden\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -1886,7 +2315,9 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ value?: string | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
+              "{ value?: string | undefined; format?: ",
+              "ValueFormatConfig",
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/static_value.tsx",
             "deprecated": false
@@ -1960,13 +2391,7 @@
             "label": "mainPalette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -2172,9 +2597,51 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; parentFormat?: { id: string; } | undefined; }"
+              "{ size: number; accuracyMode?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: ",
+              "ValueFormatConfig",
+              " | undefined; parentFormat?: { id: string; } | undefined; }"
             ],
             "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.ValidLayer",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidLayer",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ValidLayer",
+            "text": "ValidLayer"
+          },
+          " extends ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.DataLayerConfigResult",
+            "text": "DataLayerConfigResult"
+          }
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ValidLayer.xAccessor",
+            "type": "string",
+            "tags": [],
+            "label": "xAccessor",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -2223,13 +2690,7 @@
             ],
             "signature": [
               "(addNewLayer: () => string, state?: T | undefined, mainPalette?: ",
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined) => T"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -2271,13 +2732,7 @@
                 "label": "mainPalette",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "charts",
-                    "scope": "common",
-                    "docId": "kibChartsPluginApi",
-                    "section": "def-common.PaletteOutput",
-                    "text": "PaletteOutput"
-                  },
+                  "PaletteOutput",
                   "<{ [key: string]: unknown; }> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
@@ -2296,13 +2751,7 @@
             "description": [],
             "signature": [
               "((state: T) => ",
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -3320,15 +3769,9 @@
             "label": "toExpression",
             "description": [],
             "signature": [
-              "(state: T, datasourceLayers: Record<string, ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.DatasourcePublicAPI",
-                "text": "DatasourcePublicAPI"
-              },
-              ">, attributes?: Partial<{ title: string; description: string; }> | undefined) => string | ",
+              "(state: T, datasourceLayers: ",
+              "DatasourceLayers",
+              ", attributes?: Partial<{ title: string; description: string; }> | undefined) => string | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -3363,15 +3806,7 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.DatasourcePublicAPI",
-                    "text": "DatasourcePublicAPI"
-                  },
-                  ">"
+                  "DatasourceLayers"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -3404,15 +3839,9 @@
               "\nExpression to render a preview version of the chart in very constrained space.\nIf there is no expression provided, the preview icon is used."
             ],
             "signature": [
-              "((state: T, datasourceLayers: Record<string, ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.DatasourcePublicAPI",
-                "text": "DatasourcePublicAPI"
-              },
-              ">) => string | ",
+              "((state: T, datasourceLayers: ",
+              "DatasourceLayers",
+              ") => string | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -3447,15 +3876,7 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.DatasourcePublicAPI",
-                    "text": "DatasourcePublicAPI"
-                  },
-                  ">"
+                  "DatasourceLayers"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -3474,15 +3895,9 @@
               "\nThe frame will call this function on all visualizations at few stages (pre-build/build error) in order\nto provide more context to the error and show it to the user"
             ],
             "signature": [
-              "(state: T, datasourceLayers?: Record<string, ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.DatasourcePublicAPI",
-                "text": "DatasourcePublicAPI"
-              },
-              "> | undefined) => { shortMessage: string; longMessage: React.ReactNode; }[] | undefined"
+              "(state: T, datasourceLayers?: ",
+              "DatasourceLayers",
+              " | undefined) => { shortMessage: string; longMessage: React.ReactNode; }[] | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -3509,15 +3924,8 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.DatasourcePublicAPI",
-                    "text": "DatasourcePublicAPI"
-                  },
-                  "> | undefined"
+                  "DatasourceLayers",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -3726,6 +4134,755 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.XYAnnotationLayerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYAnnotationLayerConfig",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYAnnotationLayerConfig.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYAnnotationLayerConfig.layerType",
+            "type": "string",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"annotations\""
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYAnnotationLayerConfig.annotations",
+            "type": "Array",
+            "tags": [],
+            "label": "annotations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "eventAnnotation",
+                "scope": "common",
+                "docId": "kibEventAnnotationPluginApi",
+                "section": "def-common.EventAnnotationConfig",
+                "text": "EventAnnotationConfig"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYAnnotationLayerConfig.hide",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hide",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.XYArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYArgs",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.xTitle",
+            "type": "string",
+            "tags": [],
+            "label": "xTitle",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.yTitle",
+            "type": "string",
+            "tags": [],
+            "label": "yTitle",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.yRightTitle",
+            "type": "string",
+            "tags": [],
+            "label": "yRightTitle",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.yLeftExtent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "yLeftExtent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisExtentConfig",
+                "text": "AxisExtentConfig"
+              },
+              " & { type: \"axisExtentConfig\"; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.yRightExtent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "yRightExtent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisExtentConfig",
+                "text": "AxisExtentConfig"
+              },
+              " & { type: \"axisExtentConfig\"; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.legend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "legend",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.LegendConfig",
+                "text": "LegendConfig"
+              },
+              " & { type: \"legendConfig\"; }"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.valueLabels",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueLabels",
+            "description": [],
+            "signature": [
+              "\"hide\" | \"inside\" | \"outside\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.layers",
+            "type": "Array",
+            "tags": [],
+            "label": "layers",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.XYLayerConfigResult",
+                "text": "XYLayerConfigResult"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.endValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "endValue",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.EndValue",
+                "text": "EndValue"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.emphasizeFitting",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emphasizeFitting",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.fittingFunction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fittingFunction",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.FittingFunction",
+                "text": "FittingFunction"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.axisTitlesVisibilitySettings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "axisTitlesVisibilitySettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisTitlesVisibilityConfigResult",
+                "text": "AxisTitlesVisibilityConfigResult"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.tickLabelsVisibilitySettings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tickLabelsVisibilitySettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.TickLabelsConfigResult",
+                "text": "TickLabelsConfigResult"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.gridlinesVisibilitySettings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "gridlinesVisibilitySettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.GridlinesConfigResult",
+                "text": "GridlinesConfigResult"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.labelsOrientation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "labelsOrientation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.LabelsOrientationConfigResult",
+                "text": "LabelsOrientationConfigResult"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.curveType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "curveType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.XYCurveType",
+                "text": "XYCurveType"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.fillOpacity",
+            "type": "number",
+            "tags": [],
+            "label": "fillOpacity",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.hideEndzones",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideEndzones",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.valuesInLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valuesInLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYArgs.ariaLabel",
+            "type": "string",
+            "tags": [],
+            "label": "ariaLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.XYChartProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYChartProps",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYChartProps.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.LensMultiTable",
+                "text": "LensMultiTable"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYChartProps.args",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.XYArgs",
+                "text": "XYArgs"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.XYDataLayerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYDataLayerConfig",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.accessors",
+            "type": "Array",
+            "tags": [],
+            "label": "accessors",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.layerType",
+            "type": "string",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"data\""
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.seriesType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "seriesType",
+            "description": [],
+            "signature": [
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.xAccessor",
+            "type": "string",
+            "tags": [],
+            "label": "xAccessor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.hide",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hide",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.yConfig",
+            "type": "Array",
+            "tags": [],
+            "label": "yConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.YConfig",
+                "text": "YConfig"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.splitAccessor",
+            "type": "string",
+            "tags": [],
+            "label": "splitAccessor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYDataLayerConfig.palette",
+            "type": "Object",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              "PaletteOutput",
+              "<{ [key: string]: unknown; }> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.XYReferenceLineLayerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYReferenceLineLayerConfig",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYReferenceLineLayerConfig.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYReferenceLineLayerConfig.accessors",
+            "type": "Array",
+            "tags": [],
+            "label": "accessors",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYReferenceLineLayerConfig.yConfig",
+            "type": "Array",
+            "tags": [],
+            "label": "yConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.YConfig",
+                "text": "YConfig"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYReferenceLineLayerConfig.layerType",
+            "type": "string",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"referenceLine\""
+            ],
+            "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.XYRender",
+        "type": "Interface",
+        "tags": [],
+        "label": "XYRender",
+        "description": [],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYRender.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"render\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYRender.as",
+            "type": "string",
+            "tags": [],
+            "label": "as",
+            "description": [],
+            "signature": [
+              "\"xyVis\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYRender.value",
+            "type": "Object",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.XYChartProps",
+                "text": "XYChartProps"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.XYState",
         "type": "Interface",
         "tags": [],
@@ -3742,7 +4899,7 @@
             "label": "preferredSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -3755,7 +4912,13 @@
             "label": "legend",
             "description": [],
             "signature": [
-              "LegendConfig"
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.LegendConfig",
+                "text": "LegendConfig"
+              }
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -3788,7 +4951,14 @@
             "label": "fittingFunction",
             "description": [],
             "signature": [
-              "\"None\" | \"Linear\" | \"Zero\" | \"Carry\" | \"Lookahead\" | undefined"
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.FittingFunction",
+                "text": "FittingFunction"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -3814,7 +4984,14 @@
             "label": "endValue",
             "description": [],
             "signature": [
-              "\"None\" | \"Zero\" | \"Nearest\" | undefined"
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.EndValue",
+                "text": "EndValue"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
             "deprecated": false
@@ -3827,7 +5004,13 @@
             "label": "yLeftExtent",
             "description": [],
             "signature": [
-              "AxisExtentConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisExtentConfig",
+                "text": "AxisExtentConfig"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -3841,7 +5024,13 @@
             "label": "yRightExtent",
             "description": [],
             "signature": [
-              "AxisExtentConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxisExtentConfig",
+                "text": "AxisExtentConfig"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -3855,7 +5044,13 @@
             "label": "layers",
             "description": [],
             "signature": [
-              "XYLayerConfig",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYLayerConfig",
+                "text": "XYLayerConfig"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -3908,7 +5103,13 @@
             "label": "axisTitlesVisibilitySettings",
             "description": [],
             "signature": [
-              "AxesSettingsConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxesSettingsConfig",
+                "text": "AxesSettingsConfig"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -3922,7 +5123,13 @@
             "label": "tickLabelsVisibilitySettings",
             "description": [],
             "signature": [
-              "AxesSettingsConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxesSettingsConfig",
+                "text": "AxesSettingsConfig"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -3936,7 +5143,13 @@
             "label": "gridlinesVisibilitySettings",
             "description": [],
             "signature": [
-              "AxesSettingsConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.AxesSettingsConfig",
+                "text": "AxesSettingsConfig"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -3950,7 +5163,13 @@
             "label": "labelsOrientation",
             "description": [],
             "signature": [
-              "LabelsOrientationConfig",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.LabelsOrientationConfig",
+                "text": "LabelsOrientationConfig"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -3964,7 +5183,13 @@
             "label": "curveType",
             "description": [],
             "signature": [
-              "XYCurveType",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.XYCurveType",
+                "text": "XYCurveType"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -4019,7 +5244,7 @@
         "tags": [],
         "label": "YConfig",
         "description": [],
-        "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "children": [
           {
@@ -4029,7 +5254,7 @@
             "tags": [],
             "label": "forAccessor",
             "description": [],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -4040,10 +5265,16 @@
             "label": "axisMode",
             "description": [],
             "signature": [
-              "YAxisMode",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.YAxisMode",
+                "text": "YAxisMode"
+              },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -4056,7 +5287,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -4069,7 +5300,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -4082,7 +5313,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -4093,10 +5324,16 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              "LineStyle",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.LineStyle",
+                "text": "LineStyle"
+              },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -4107,10 +5344,16 @@
             "label": "fill",
             "description": [],
             "signature": [
-              "FillStyle",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.FillStyle",
+                "text": "FillStyle"
+              },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -4121,10 +5364,16 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "IconPosition",
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.IconPosition",
+                "text": "IconPosition"
+              },
               " | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           },
           {
@@ -4137,7 +5386,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -4162,10 +5411,66 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"average\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "FormatParams",
+          "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.AxisExtentConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "AxisExtentConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.AxisExtentConfig",
+            "text": "AxisExtentConfig"
+          },
+          " & { type: \"axisExtentConfig\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.AxisExtentMode",
+        "type": "Type",
+        "tags": [],
+        "label": "AxisExtentMode",
+        "description": [],
+        "signature": [
+          "\"custom\" | \"full\" | \"dataBounds\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.AxisTitlesVisibilityConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "AxisTitlesVisibilityConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.AxesSettingsConfig",
+            "text": "AxesSettingsConfig"
+          },
+          " & { type: \"axisTitlesVisibilityConfig\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4202,7 +5507,7 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"count\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "FormatParams",
+          "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/count.tsx",
@@ -4223,6 +5528,27 @@
           " & { operationType: \"cumulative_sum\"; }"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/cumulative_sum.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.DataLayerConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "DataLayerConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.DataLayerArgs",
+            "text": "DataLayerArgs"
+          },
+          " & { type: \"dataLayer\"; layerType: \"data\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4292,6 +5618,34 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.FillStyle",
+        "type": "Type",
+        "tags": [],
+        "label": "FillStyle",
+        "description": [],
+        "signature": [
+          "\"above\" | \"below\" | \"none\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.FittingFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "FittingFunction",
+        "description": [],
+        "signature": [
+          "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.GaugeVisualizationState",
         "type": "Type",
         "tags": [],
@@ -4346,6 +5700,27 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.GridlinesConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "GridlinesConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.AxesSettingsConfig",
+            "text": "AxesSettingsConfig"
+          },
+          " & { type: \"gridlinesConfig\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.HeatmapVisualizationState",
         "type": "Type",
         "tags": [],
@@ -4377,6 +5752,76 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.IconPosition",
+        "type": "Type",
+        "tags": [],
+        "label": "IconPosition",
+        "description": [],
+        "signature": [
+          "\"above\" | \"below\" | \"left\" | \"right\" | \"auto\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LabelsOrientationConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "LabelsOrientationConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.LabelsOrientationConfig",
+            "text": "LabelsOrientationConfig"
+          },
+          " & { type: \"labelsOrientationConfig\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LayerType",
+        "type": "Type",
+        "tags": [],
+        "label": "LayerType",
+        "description": [],
+        "signature": [
+          "\"data\" | \"annotations\" | \"referenceLine\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LegendConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "LegendConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.LegendConfig",
+            "text": "LegendConfig"
+          },
+          " & { type: \"legendConfig\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.LensEmbeddableInput",
         "type": "Type",
         "tags": [],
@@ -4388,6 +5833,20 @@
           "LensByReferenceInput"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LineStyle",
+        "type": "Type",
+        "tags": [],
+        "label": "LineStyle",
+        "description": [],
+        "signature": [
+          "\"solid\" | \"dashed\" | \"dotted\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4407,7 +5866,7 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"max\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "FormatParams",
+          "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -4430,7 +5889,7 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"median\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "FormatParams",
+          "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -4453,7 +5912,7 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"min\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "FormatParams",
+          "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
@@ -4571,15 +6030,36 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.ReferenceLineLayerConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ReferenceLineLayerConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.ReferenceLineLayerArgs",
+            "text": "ReferenceLineLayerArgs"
+          },
+          " & { type: \"referenceLineLayer\"; layerType: \"referenceLine\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.SeriesType",
         "type": "Type",
         "tags": [],
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"area\" | \"line\" | \"bar\" | \"bar_horizontal\" | \"bar_stacked\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"bar_horizontal_percentage_stacked\" | \"area_stacked\" | \"area_percentage_stacked\""
+          "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
         ],
-        "path": "x-pack/plugins/lens/common/expressions/xy_chart/series_type.ts",
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4599,10 +6079,48 @@
             "text": "FieldBasedIndexPatternColumn"
           },
           " & { operationType: \"sum\"; params?: { emptyAsNull?: boolean | undefined; format?: ",
-          "FormatParams",
+          "ValueFormatConfig",
           " | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.TickLabelsConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "TickLabelsConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.AxesSettingsConfig",
+            "text": "AxesSettingsConfig"
+          },
+          " & { type: \"tickLabelsConfig\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.TimeScaleIndexPatternColumn",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeScaleIndexPatternColumn",
+        "description": [],
+        "signature": [
+          "FormattedIndexPatternColumn",
+          " & ",
+          "ReferenceBasedIndexPatternColumn",
+          " & { operationType: \"normalize_by_unit\"; params: { unit?: string | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/time_scale.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4688,6 +6206,34 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.ValueLabelMode",
+        "type": "Type",
+        "tags": [],
+        "label": "ValueLabelMode",
+        "description": [],
+        "signature": [
+          "\"hide\" | \"inside\" | \"outside\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.XScaleType",
+        "type": "Type",
+        "tags": [],
+        "label": "XScaleType",
+        "description": [],
+        "signature": [
+          "\"time\" | \"linear\" | \"ordinal\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.XYCurveType",
         "type": "Type",
         "tags": [],
@@ -4696,7 +6242,7 @@
         "signature": [
           "\"LINEAR\" | \"CURVE_MONOTONE_X\""
         ],
-        "path": "x-pack/plugins/lens/common/expressions/xy_chart/xy_args.ts",
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4708,13 +6254,31 @@
         "label": "XYLayerConfig",
         "description": [],
         "signature": [
-          "XYDataLayerConfig",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.XYDataLayerConfig",
+            "text": "XYDataLayerConfig"
+          },
           " | ",
-          "XYReferenceLineLayerConfig",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.XYReferenceLineLayerConfig",
+            "text": "XYReferenceLineLayerConfig"
+          },
           " | ",
-          "XYAnnotationLayerConfig"
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.XYAnnotationLayerConfig",
+            "text": "XYAnnotationLayerConfig"
+          }
         ],
-        "path": "x-pack/plugins/lens/common/expressions/xy_chart/layer_config/index.ts",
+        "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4728,7 +6292,42 @@
         "signature": [
           "\"bottom\" | \"left\" | \"right\" | \"auto\""
         ],
-        "path": "x-pack/plugins/lens/common/expressions/xy_chart/axis_config.ts",
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.YConfigResult",
+        "type": "Type",
+        "tags": [],
+        "label": "YConfigResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.YConfig",
+            "text": "YConfig"
+          },
+          " & { type: \"yConfig\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.YScaleType",
+        "type": "Type",
+        "tags": [],
+        "label": "YScaleType",
+        "description": [],
+        "signature": [
+          "\"time\" | \"log\" | \"sqrt\" | \"linear\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -5734,7 +7333,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"sum\" | \"median\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"filters\" | \"count\" | \"sum\" | \"max\" | \"min\" | \"median\" | \"date_histogram\" | \"percentile\" | \"average\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -5748,7 +7347,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"filters\" | \"max\" | \"min\" | \"count\" | \"sum\" | \"avg\" | \"median\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
+          "\"filters\" | \"count\" | \"sum\" | \"avg\" | \"max\" | \"min\" | \"median\" | \"date_histogram\" | \"percentile\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -5763,37 +7362,13 @@
         "description": [],
         "signature": [
           "{ columns: { palette?: ",
-          {
-            "pluginId": "charts",
-            "scope": "common",
-            "docId": "kibChartsPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
-          },
+          "PaletteOutput",
           "<",
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.CustomPaletteParams",
-            "text": "CustomPaletteParams"
-          },
+          "CustomPaletteParams",
           "> | undefined; colorMode?: \"none\" | \"text\" | \"cell\" | undefined; }[]; } | { palette?: ",
-          {
-            "pluginId": "charts",
-            "scope": "common",
-            "docId": "kibChartsPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
-          },
+          "PaletteOutput",
           "<",
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.CustomPaletteParams",
-            "text": "CustomPaletteParams"
-          },
+          "CustomPaletteParams",
           "> | undefined; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -6082,203 +7657,6 @@
               "{ key: KeyType; count: number; }[]"
             ],
             "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.ColorStop",
-        "type": "Interface",
-        "tags": [],
-        "label": "ColorStop",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.ColorStop.color",
-            "type": "string",
-            "tags": [],
-            "label": "color",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.ColorStop.stop",
-            "type": "number",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.CustomPaletteParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "CustomPaletteParams",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.reverse",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "reverse",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.rangeType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "rangeType",
-            "description": [],
-            "signature": [
-              "\"number\" | \"percent\" | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.continuity",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "continuity",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteContinuity",
-                "text": "PaletteContinuity"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.progression",
-            "type": "string",
-            "tags": [],
-            "label": "progression",
-            "description": [],
-            "signature": [
-              "\"fixed\" | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.rangeMin",
-            "type": "number",
-            "tags": [],
-            "label": "rangeMin",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.rangeMax",
-            "type": "number",
-            "tags": [],
-            "label": "rangeMax",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.stops",
-            "type": "Array",
-            "tags": [],
-            "label": "stops",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.ColorStop",
-                "text": "ColorStop"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.colorStops",
-            "type": "Array",
-            "tags": [],
-            "label": "colorStops",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.ColorStop",
-                "text": "ColorStop"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.steps",
-            "type": "number",
-            "tags": [],
-            "label": "steps",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
           }
         ],
@@ -6589,21 +7967,9 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<",
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.CustomPaletteParams",
-                "text": "CustomPaletteParams"
-              },
+              "CustomPaletteParams",
               "> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -6845,13 +8211,7 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -6904,7 +8264,7 @@
             "label": "numberDisplay",
             "description": [],
             "signature": [
-              "\"percent\" | \"hidden\" | \"value\""
+              "\"percent\" | \"value\" | \"hidden\""
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
@@ -7151,13 +8511,7 @@
         "label": "CustomPaletteParamsConfig",
         "description": [],
         "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.CustomPaletteParams",
-            "text": "CustomPaletteParams"
-          },
+          "CustomPaletteParams",
           " & { maxSteps?: number | undefined; }"
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
@@ -7338,7 +8692,7 @@
         "label": "NumberDisplayType",
         "description": [],
         "signature": [
-          "\"percent\" | \"hidden\" | \"value\""
+          "\"percent\" | \"value\" | \"hidden\""
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
@@ -7398,28 +8752,6 @@
           "\"lens\""
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.RequiredPaletteParamTypes",
-        "type": "Type",
-        "tags": [],
-        "label": "RequiredPaletteParamTypes",
-        "description": [],
-        "signature": [
-          "Required<",
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.CustomPaletteParams",
-            "text": "CustomPaletteParams"
-          },
-          "> & { maxSteps?: number | undefined; }"
-        ],
-        "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

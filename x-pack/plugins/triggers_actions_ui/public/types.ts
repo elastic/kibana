@@ -6,11 +6,19 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'kibana/public';
-import { ComponentType } from 'react';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IconType } from '@elastic/eui';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { ComponentType } from 'react';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { IconType } from '@elastic/eui';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
+  EuiDataGridCellValueElementProps,
+} from '@elastic/eui';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -18,41 +26,45 @@ import {
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AsApiContract,
-} from '../../actions/common';
-import { TypeRegistry } from './application/type_registry';
+} from '@kbn/actions-plugin/common';
 import {
   ActionGroup,
-  AlertActionParam,
-  SanitizedAlert,
+  RuleActionParam,
+  SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
-  AlertAction as RuleAction,
-  AlertAggregations,
+  RuleAction,
+  RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType as RuleNotifyWhenType,
-  AlertTypeParams as RuleTypeParams,
+  RuleNotifyWhenType,
+  RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
-} from '../../alerting/common';
+} from '@kbn/alerting-plugin/common';
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { TypeRegistry } from './application/type_registry';
+import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
+import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
+import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
-  SanitizedAlert<Params>,
+  AlertingSanitizedRule<Params>,
   'alertTypeId'
 > & {
-  ruleTypeId: SanitizedAlert['alertTypeId'];
+  ruleTypeId: AlertingSanitizedRule['alertTypeId'];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
 type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
 };
-type RuleAggregations = Omit<AlertAggregations, 'alertExecutionStatus'> & {
-  ruleExecutionStatus: AlertAggregations['alertExecutionStatus'];
+type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
+  ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];
 };
 
 export type {
@@ -69,6 +81,9 @@ export type {
   RuleTypeParams,
   ResolvedRule,
   SanitizedRule,
+  RuleStatusDropdownProps,
+  RuleStatusFilterProps,
+  RuleTagBadgeProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -85,6 +100,9 @@ export type ActionTypeRegistryContract<
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
+export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
+  TypeRegistry<AlertsTableConfigurationRegistry>
+>;
 
 export type ActionConnectorFieldsCallbacks = {
   beforeActionConnectorSave?: () => Promise<void>;
@@ -113,7 +131,7 @@ export enum RuleFlyoutCloseReason {
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
-  editAction: (key: string, value: AlertActionParam, index: number) => void;
+  editAction: (key: string, value: RuleActionParam, index: number) => void;
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
@@ -181,6 +199,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
+  isDeprecated: boolean;
   isMissingSecrets?: boolean;
 }
 
@@ -274,6 +293,8 @@ export interface RuleTypeParamsExpressionProps<
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
@@ -287,6 +308,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
+  defaultRecoveryMessage?: string;
 }
 
 export interface IErrorObject {
@@ -355,3 +377,59 @@ export interface TriggersActionsUiConfig {
     enforce: boolean;
   };
 }
+
+export enum AlertsField {
+  name = 'kibana.alert.rule.name',
+  reason = 'kibana.alert.reason',
+}
+
+export type AlertsData = Record<AlertsField, any[]>;
+
+export interface FetchAlertData {
+  activePage: number;
+  alerts: AlertsData[];
+  alertsCount: number;
+  isInitializing: boolean;
+  isLoading: boolean;
+  getInspectQuery: () => { request: {}; response: {} };
+  onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  onSortChange: (sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => void;
+  refresh: () => void;
+}
+
+export interface BulkActionsObjectProp {
+  alertStatusActions?: boolean;
+  onAlertStatusActionSuccess?: void;
+  onAlertStatusActionFailure?: void;
+}
+
+export interface AlertsTableProps {
+  configurationId: string;
+  consumers: AlertConsumers[];
+  bulkActions: BulkActionsObjectProp;
+  // defaultCellActions: TGridCellAction[];
+  deletedEventIds: string[];
+  disabledCellActions: string[];
+  pageSize: number;
+  pageSizeOptions: number[];
+  leadingControlColumns: EuiDataGridControlColumn[];
+  renderCellValue: (props: RenderCellValueProps) => React.ReactNode;
+  showCheckboxes: boolean;
+  trailingControlColumns: EuiDataGridControlColumn[];
+  useFetchAlertsData: () => FetchAlertData;
+  alerts: AlertsData[];
+  'data-test-subj': string;
+}
+
+export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
+  alert: AlertsData;
+  field: AlertsField;
+};
+
+export interface AlertsTableConfigurationRegistry {
+  id: string;
+  columns: EuiDataGridColumn[];
+}
+
+export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

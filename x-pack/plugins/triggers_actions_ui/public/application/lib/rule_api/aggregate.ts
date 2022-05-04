@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
-import { RuleAggregations } from '../../../types';
+import { HttpSetup } from '@kbn/core/public';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { RuleAggregations, RuleStatus } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteBodyRes: RewriteRequestCase<RuleAggregations> = ({
   rule_execution_status: ruleExecutionStatus,
   rule_enabled_status: ruleEnabledStatus,
   rule_muted_status: ruleMutedStatus,
+  rule_snoozed_status: ruleSnoozedStatus,
   ...rest
 }: any) => ({
   ...rest,
   ruleExecutionStatus,
   ruleEnabledStatus,
   ruleMutedStatus,
+  ruleSnoozedStatus,
 });
 
 export async function loadRuleAggregations({
@@ -27,15 +29,22 @@ export async function loadRuleAggregations({
   searchText,
   typesFilter,
   actionTypesFilter,
+  ruleExecutionStatusesFilter,
   ruleStatusesFilter,
 }: {
   http: HttpSetup;
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
-  ruleStatusesFilter?: string[];
+  ruleExecutionStatusesFilter?: string[];
+  ruleStatusesFilter?: RuleStatus[];
 }): Promise<RuleAggregations> {
-  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, ruleStatusesFilter });
+  const filters = mapFiltersToKql({
+    typesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+  });
   const res = await http.get<AsApiContract<RuleAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {

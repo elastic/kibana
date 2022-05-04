@@ -6,20 +6,23 @@
  */
 
 import { uniq, map } from 'lodash';
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
   AgentService,
-} from '../../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import type {
   GetAgentPoliciesResponseItem,
   PackagePolicy,
   AgentPolicy,
   ListResult,
-} from '../../../../fleet/common';
-import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
+} from '@kbn/fleet-plugin/common';
+import {
+  BENCHMARKS_ROUTE_PATH,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+} from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
   benchmarksInputSchema,
@@ -146,12 +149,12 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
       validate: { query: benchmarksInputSchema },
     },
     async (context, request, response) => {
-      if (!context.fleet.authz.fleet.all) {
+      if (!(await context.fleet).authz.fleet.all) {
         return response.forbidden();
       }
 
       try {
-        const soClient = context.core.savedObjects.client;
+        const soClient = (await context.core).savedObjects.client;
         const { query } = request;
 
         const agentService = cspContext.service.agentService;
@@ -165,7 +168,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
         const packagePolicies = await getPackagePolicies(
           soClient,
           packagePolicyService,
-          CIS_KUBERNETES_PACKAGE_NAME,
+          CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
           query
         );
 
