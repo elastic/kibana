@@ -13,18 +13,18 @@ import { canCreateAndStashADJob } from './create_job';
 import { getUiSettings, getDataViews, getSavedObjectsClient } from '../../../util/dependency_cache';
 
 export async function resolver(
-  lensId: string | undefined,
-  visRisonString: string | undefined,
+  lensSavedObjectId: string | undefined,
+  lensSavedObjectRisonString: string | undefined,
   from: string,
   to: string,
   queryRisonString: string,
   filtersRisonString: string
 ) {
   let vis: LensSavedObjectAttributes;
-  if (lensId) {
-    vis = await getLensSavedObject(lensId);
-  } else if (visRisonString) {
-    vis = rison.decode(visRisonString) as unknown as LensSavedObjectAttributes;
+  if (lensSavedObjectId) {
+    vis = await getLensSavedObject(lensSavedObjectId);
+  } else if (lensSavedObjectRisonString) {
+    vis = rison.decode(lensSavedObjectRisonString) as unknown as LensSavedObjectAttributes;
   } else {
     throw new Error('Cannot create visualization');
   }
@@ -33,9 +33,12 @@ export async function resolver(
   let filters: Filter[];
   try {
     query = rison.decode(queryRisonString) as Query;
-    filters = rison.decode(filtersRisonString) as Filter[];
   } catch (error) {
     query = { language: 'lucene', query: '' };
+  }
+  try {
+    filters = rison.decode(filtersRisonString) as Filter[];
+  } catch (error) {
     filters = [];
   }
 
