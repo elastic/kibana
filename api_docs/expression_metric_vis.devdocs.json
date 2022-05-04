@@ -150,13 +150,7 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<",
               {
                 "pluginId": "charts",
