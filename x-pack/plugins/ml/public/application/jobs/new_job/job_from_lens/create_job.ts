@@ -26,7 +26,7 @@ import { stashJobForCloning } from '../common/job_creator/util/general';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 
-const COMPATIBLE_LAYER_TYPES = [
+const COMPATIBLE_SERIES_TYPES = [
   'line',
   'bar',
   'bar_stacked',
@@ -35,6 +35,8 @@ const COMPATIBLE_LAYER_TYPES = [
   'area_stacked',
   'area_percentage_stacked',
 ];
+
+const COMPATIBLE_LAYER_TYPE = 'data';
 
 async function createADJobFromLensSavedObject(
   vis: LensSavedObjectAttributes,
@@ -45,14 +47,20 @@ async function createADJobFromLensSavedObject(
 ) {
   const dataView = await getDataViewFromLens(vis, dataViewClient);
   if (dataView === null) {
-    throw Error('');
+    throw Error('No data views can be found in the visualization.');
   }
 
   const state = vis.state;
   const visualization = state.visualization as { layers: XYDataLayerConfig[] };
-  const compatibleLayers = visualization.layers.filter((l) =>
-    COMPATIBLE_LAYER_TYPES.includes(l.seriesType)
+  const compatibleLayers = visualization.layers.filter(
+    (l) => l.layerType === COMPATIBLE_LAYER_TYPE && COMPATIBLE_SERIES_TYPES.includes(l.seriesType)
   );
+
+  if (compatibleLayers.length === 0) {
+    throw Error(
+      'Visualization does not contain any layers which can be used for creating an anomaly detection job.'
+    );
+  }
 
   const compatibleLayerIds = compatibleLayers.map((l) => l.layerId);
 
@@ -62,18 +70,20 @@ async function createADJobFromLensSavedObject(
     .map(([, l]) => l);
 
   if (layer === undefined) {
-    throw Error('');
+    throw Error(
+      'Visualization does not contain any layers which can be used for creating an anomaly detection job.'
+    );
   }
 
   const { columns } = layer as { columns: Record<string, FieldBasedIndexPatternColumn> };
   const cols = Object.entries(columns);
   const timeFieldCol = cols.find(([, c]) => c.dataType === 'date');
   if (timeFieldCol === undefined) {
-    throw Error('');
+    throw Error('Cannot find a date field.');
   }
   const [, timeField] = timeFieldCol;
   if (timeField.sourceField !== dataView.timeFieldName) {
-    throw Error('');
+    throw Error('Selected time field must be the default time field configured for data view.');
   }
 
   const [firstCompatibleLayer] = compatibleLayers;
@@ -98,7 +108,9 @@ async function createADJobFromLensSavedObject(
   jobConfig.analysis_config.detectors = fields.map(({ operationType, sourceField }) => {
     const func = lensOperationToMlFunction(operationType);
     if (func === null) {
-      throw Error('');
+      throw Error(
+        `Selected function ${operationType} is not supported by anomaly detection detectors`
+      );
     }
     return {
       function: func,
