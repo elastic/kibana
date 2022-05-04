@@ -12804,7 +12804,7 @@
     "xpack.fleet.epm.assetTitles.maps": "マップ",
     "xpack.fleet.epm.assetTitles.mlModels": "MLモデル",
     "xpack.fleet.epm.assetTitles.mlModules": "機械学習モジュール",
-    "xpack.fleet.epm.assetTitles.osqueryPackAsset": "Osqueryパック",
+    "xpack.fleet.epm.assetTitles.osqueryPackAssets": "Osqueryパック",
     "xpack.fleet.epm.assetTitles.savedSearches": "保存された検索",
     "xpack.fleet.epm.assetTitles.securityRules": "セキュリティルール",
     "xpack.fleet.epm.assetTitles.tag": "タグ",

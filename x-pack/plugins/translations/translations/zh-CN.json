@@ -12829,7 +12829,7 @@
     "xpack.fleet.epm.assetTitles.maps": "Maps",
     "xpack.fleet.epm.assetTitles.mlModels": "ML 模型",
     "xpack.fleet.epm.assetTitles.mlModules": "ML 模块",
-    "xpack.fleet.epm.assetTitles.osqueryPackAsset": "Osquery 包",
+    "xpack.fleet.epm.assetTitles.osqueryPackAssets": "Osquery 包",
     "xpack.fleet.epm.assetTitles.savedSearches": "已保存的搜索",
     "xpack.fleet.epm.assetTitles.securityRules": "安全规则",
     "xpack.fleet.epm.assetTitles.tag": "标签",

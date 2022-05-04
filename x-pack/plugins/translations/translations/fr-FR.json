@@ -12796,7 +12796,7 @@
     "xpack.fleet.epm.assetTitles.maps": "Cartes",
     "xpack.fleet.epm.assetTitles.mlModels": "Modèles ML",
     "xpack.fleet.epm.assetTitles.mlModules": "Modules ML",
-    "xpack.fleet.epm.assetTitles.osqueryPackAsset": "Packs Osquery",
+    "xpack.fleet.epm.assetTitles.osqueryPackAssets": "Packs Osquery",
     "xpack.fleet.epm.assetTitles.savedSearches": "Recherches enregistrées",
     "xpack.fleet.epm.assetTitles.securityRules": "Règles de sécurité",
     "xpack.fleet.epm.assetTitles.tag": "Balise",
