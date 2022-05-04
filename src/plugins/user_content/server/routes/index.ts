@@ -8,7 +8,7 @@
 
 import { HttpServiceSetup } from '@kbn/core/server';
 
-import type { UserContentEventsStream } from '../types';
+import type { DepsFromPluginStart } from '../types';
 import type { MetadataEventsService } from '../services';
 import type { RouteDependencies } from './types';
 import { registerRegisterEventRoute } from './register_event';
@@ -17,18 +17,21 @@ import { registerUpdateViewsCountRoute } from './update_views_count';
 
 interface RegisterRouteOptions {
   http: HttpServiceSetup;
-  userContentEventStreamPromise: Promise<UserContentEventsStream>;
+  depsFromPluginStartPromise: Promise<DepsFromPluginStart>;
   metadataEventsService: MetadataEventsService;
 }
 
 export function registerRoutes({
   http,
-  userContentEventStreamPromise,
+  depsFromPluginStartPromise,
   metadataEventsService,
 }: RegisterRouteOptions) {
   const router = http.createRouter();
 
-  const routeDeps: RouteDependencies = { userContentEventStreamPromise, metadataEventsService };
+  const routeDeps: RouteDependencies = {
+    depsFromPluginStartPromise,
+    metadataEventsService,
+  };
 
   registerRegisterEventRoute(router, routeDeps);
   registerBulkEventsRoute(router, routeDeps);

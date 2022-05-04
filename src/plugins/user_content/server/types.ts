@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import {
   MetadataEventsStream,
   MetadataEventsStreamsPluginStart,
@@ -23,3 +24,8 @@ export interface UserContentStartDependencies {
 }
 
 export type UserContentEventsStream = MetadataEventsStream<UserContentMetadataEvent>;
+
+export interface DepsFromPluginStart {
+  userContentEventsStream: UserContentEventsStream;
+  savedObjectRepository: ISavedObjectsRepository;
+}

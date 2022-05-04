@@ -12,7 +12,7 @@ import {
   UserContentPluginSetup,
   UserContentPluginStart,
   UserContentStartDependencies,
-  UserContentEventsStream,
+  DepsFromPluginStart,
 } from './types';
 import { registerRoutes } from './routes';
 import { MetadataEventsService } from './services';
@@ -22,7 +22,7 @@ export class UserContentPlugin
     Plugin<UserContentPluginSetup, UserContentPluginStart, {}, UserContentStartDependencies>
 {
   private readonly logger: Logger;
-  private userContentEventStream$ = new Subject<UserContentEventsStream>();
+  private depsFromPluginStart$ = new Subject<DepsFromPluginStart>();
   private metadataEventsService: MetadataEventsService;
 
   constructor(private readonly context: PluginInitializerContext) {
@@ -33,16 +33,16 @@ export class UserContentPlugin
   public setup({ http }: CoreSetup) {
     this.logger.debug('Setting up UserContent plugin');
 
-    const userContentEventStreamPromise = firstValueFrom(this.userContentEventStream$);
+    const depsFromPluginStartPromise = firstValueFrom(this.depsFromPluginStart$);
 
     registerRoutes({
       http,
-      userContentEventStreamPromise,
+      depsFromPluginStartPromise,
       metadataEventsService: this.metadataEventsService,
     });
 
     this.metadataEventsService.init({
-      userContentEventStreamPromise,
+      depsFromPluginStartPromise,
     });
 
     return {};
@@ -51,8 +51,10 @@ export class UserContentPlugin
   public start(core: CoreStart, { metadataEventsStreams }: UserContentStartDependencies) {
     this.logger.debug('Starting up UserContent plugin');
 
-    const userContentEventStream = metadataEventsStreams.registerEventStream('userContent');
-    this.userContentEventStream$.next(userContentEventStream);
+    const savedObjectRepository = core.savedObjects.createInternalRepository();
+
+    const userContentEventsStream = metadataEventsStreams.registerEventStream('userContent');
+    this.depsFromPluginStart$.next({ userContentEventsStream, savedObjectRepository });
 
     return {};
   }
