@@ -86,9 +86,10 @@ export async function createTestUserService(ctx: FtrProviderContext, role: Role,
     log.debug('===============creating roles and users===============');
 
     // create the defined roles (need to map array to create roles)
-    for (const [name, definition] of Object.entries(config.get('security.roles'))) {
-      await role.create(name, definition);
-    }
+    const createRoles = Object.entries(config.get('security.roles')).map(([name, definition]) => {
+      return role.create(name, definition);
+    });
+    await Promise.all(createRoles);
 
     // when configured to setup remote roles, load the remote es service and set them up directly via es
     const remoteEsRoles: undefined | Record<string, any> = config.get('security.remoteEsRoles');
