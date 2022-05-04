@@ -30,8 +30,8 @@ export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['ap
         getCases({ http, query, signal }),
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal): Promise<CasesStatus> =>
         getCasesStatus({ http, query, signal }),
-      getCasesMetrics: (query: CasesMetricsRequest): Promise<CasesMetrics> =>
-        getCasesMetrics({ http, query }),
+      getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal): Promise<CasesMetrics> =>
+        getCasesMetrics({ http, signal, query }),
     },
   };
 };

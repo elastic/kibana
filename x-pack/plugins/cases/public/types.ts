@@ -78,7 +78,7 @@ export interface CasesUiStart {
     cases: {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<Cases>;
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
-      getCasesMetrics: (query: CasesMetricsRequest) => Promise<CasesMetrics>;
+      getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
     };
   };
   ui: {

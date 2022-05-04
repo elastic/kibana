@@ -52,8 +52,9 @@ export const getCasesStatus = async ({
 
 export const getCasesMetrics = async ({
   http,
+  signal,
   query,
 }: HTTPService & { query: CasesMetricsRequest }): Promise<CasesMetrics> => {
-  const res = await http.get<CasesMetricsResponse>(CASE_METRICS_URL, { query });
+  const res = await http.get<CasesMetricsResponse>(CASE_METRICS_URL, { signal, query });
   return convertToCamelCase(decodeCasesMetricsResponse(res));
 };
