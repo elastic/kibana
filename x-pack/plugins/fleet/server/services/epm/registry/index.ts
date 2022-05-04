@@ -84,6 +84,10 @@ const FAKE_SIGNALS: Record<string, SuggestionSignals | undefined> = {
     'process.name': ['*postgres*'],
     'container.image.name': ['*postgres*'],
   },
+  redis: {
+    'process.name': ['*redis*'],
+    'container.image.name': ['*redis*'],
+  },
 };
 
 const appendFakeSignals = (results: RegistrySearchResults): RegistrySearchResults =>
