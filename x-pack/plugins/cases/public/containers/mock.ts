@@ -9,8 +9,8 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 
 import type {
   ResolvedCase,
-  CaseMetrics,
-  CaseMetricsFeature,
+  SingleCaseMetrics,
+  SingleCaseMetricsFeature,
   AlertComment,
 } from '../../common/ui/types';
 import {
@@ -189,7 +189,7 @@ export const basicResolvedCase: ResolvedCase = {
   aliasTargetId: `${basicCase.id}_2`,
 };
 
-export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
+export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
   'alerts.count',
   'alerts.users',
   'alerts.hosts',
@@ -197,9 +197,9 @@ export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
   'connectors',
 ];
 
-export const basicCaseStatusFeatures: CaseMetricsFeature[] = ['lifespan'];
+export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = ['lifespan'];
 
-export const basicCaseMetrics: CaseMetrics = {
+export const basicCaseMetrics: SingleCaseMetrics = {
   alerts: {
     count: 12,
     hosts: {
