@@ -100,7 +100,7 @@ export interface RulesStatusAggregation {
     doc_count: number;
   };
 }
-export const getCspRulesStatus = async (
+export const getCspRulesStatus = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
 ): Promise<SavedObjectsFindResponse<CspRuleSchema, RulesStatusAggregation>> => {
@@ -169,14 +169,16 @@ const createBenchmarks = (
   agentPolicies: GetAgentPoliciesResponseItem[],
   cspPackagePolicies: PackagePolicy[]
 ): Promise<Benchmark[]> => {
+  const cspPackagePoliciesMap = new Map(
+    cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
+  );
   return Promise.all(
     agentPolicies.flatMap((agentPolicy) => {
       const cspPackagesOnAgent = agentPolicy.package_policies
-        .map((pckPolicy) => {
-          return cspPackagePolicies.find((cspPackagePolicy) => cspPackagePolicy.id === pckPolicy);
+        .map((pckPolicyId) => {
+          if (typeof pckPolicyId === 'string') return cspPackagePoliciesMap.get(pckPolicyId);
         })
         .filter(isNonNullable);
-
       const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
         const cspRulesStatus = await addPackagePolicyCspRules(soClient, cspPackage);
         const benchmark = createBenchmarkEntry(agentPolicy, cspPackage, cspRulesStatus);
