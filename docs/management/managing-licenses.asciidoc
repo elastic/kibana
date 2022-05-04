@@ -29,7 +29,7 @@ Licenses are valid for a specific time period.
 If monitoring is enabled, expiration warnings are displayed prominently in {kib}.
 
 If your license expires, your subscription level reverts to Basic and
-you will no longer be able to use <<{subscriptions}, Platinum or Enterprise features>>.
+you will no longer be able to use https://www.elastic.co/subscriptions[Platinum or Enterprise features].
 
 [discrete]
 [[update-license]]
