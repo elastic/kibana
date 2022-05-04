@@ -515,6 +515,7 @@ export const getUserAction = (
           description: 'a desc',
           connector: { ...getJiraConnector() },
           status: CaseStatuses.open,
+          severity: CaseSeverity.LOW,
           title: 'a title',
           tags: ['a tag'],
           settings: { syncAlerts: true },
