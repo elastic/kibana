@@ -5,16 +5,18 @@
  * 2.0.
  */
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiButton,
   EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
+  EuiTourStep,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -94,6 +96,8 @@ export function OverviewPage({ routeParams }: Props) {
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
+  const [isGuidedSetupTourVisible, setGuidedSetupTourVisible] = useState(false);
+  const hideGuidedSetupTour = useCallback(() => setGuidedSetupTourVisible(false), []);
   const { isGuidedSetupProgressDismissed } = useGuidedSetupProgress();
 
   const bucketSize = useMemo(
@@ -113,9 +117,9 @@ export function OverviewPage({ routeParams }: Props) {
     if (isGuidedSetupProgressDismissed) {
       trackMetric({ metric: 'guided_setup_view_details_after_dismiss' });
     }
-
+    hideGuidedSetupTour();
     setIsFlyoutVisible(true);
-  }, [trackMetric, isGuidedSetupProgressDismissed]);
+  }, [trackMetric, isGuidedSetupProgressDismissed, hideGuidedSetupTour]);
 
   const onTimeRangeRefresh = useCallback(() => {
     return refetch.current && refetch.current();
@@ -162,6 +166,8 @@ export function OverviewPage({ routeParams }: Props) {
           ? {
               children: (
                 <PageHeader
+                  showTour={isGuidedSetupTourVisible}
+                  onTourDismiss={hideGuidedSetupTour}
                   handleGuidedSetupClick={handleGuidedSetupClick}
                   onTimeRangeRefresh={onTimeRangeRefresh}
                 />
@@ -173,7 +179,10 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
-          <ObservabilityStatusProgress onViewDetailsClick={() => setIsFlyoutVisible(true)} />
+          <ObservabilityStatusProgress
+            onViewDetailsClick={() => setIsFlyoutVisible(true)}
+            onDismissClick={() => setGuidedSetupTourVisible(true)}
+          />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <SectionContainer
@@ -264,12 +273,21 @@ export function OverviewPage({ routeParams }: Props) {
 }
 
 interface PageHeaderProps {
+  showTour?: boolean;
+  onTourDismiss: () => void;
   handleGuidedSetupClick: () => void;
   onTimeRangeRefresh: () => void;
 }
 
-function PageHeader({ handleGuidedSetupClick, onTimeRangeRefresh }: PageHeaderProps) {
+function PageHeader({
+  showTour = false,
+  onTourDismiss,
+  handleGuidedSetupClick,
+  onTimeRangeRefresh,
+}: PageHeaderProps) {
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
+  const buttonRef = useRef();
+
   return (
     <EuiFlexGroup wrap gutterSize="s" justifyContent="flexEnd">
       <EuiFlexItem grow={1}>
@@ -287,12 +305,48 @@ function PageHeader({ handleGuidedSetupClick, onTimeRangeRefresh }: PageHeaderPr
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
-        <EuiButton color="text" iconType="wrench" onClick={handleGuidedSetupClick}>
+        <EuiButton
+          // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
+          buttonRef={buttonRef}
+          color="text"
+          iconType="wrench"
+          onClick={handleGuidedSetupClick}
+        >
           <FormattedMessage
             id="xpack.observability.overview.guidedSetupButton"
             defaultMessage="Guided setup"
           />
         </EuiButton>
+        {showTour ? (
+          <EuiTourStep
+            // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
+            anchor={() => buttonRef.current}
+            isStepOpen
+            title={i18n.translate('xpack.observability.overview.guidedSetupTourTitle', {
+              defaultMessage: 'Guided setup is always available',
+            })}
+            content={
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.observability.overview.guidedSetupTourContent"
+                  defaultMessage="If you're ever in doubt you can always access the integration status and view next steps by clicking on this action."
+                />
+              </EuiText>
+            }
+            step={1}
+            stepsTotal={1}
+            maxWidth={400}
+            onFinish={onTourDismiss}
+            footerAction={
+              <EuiButtonEmpty color="text" flush="right" size="xs" onClick={onTourDismiss}>
+                <FormattedMessage
+                  id="xpack.observability.overview.guidedSetupTourDismissButton"
+                  defaultMessage="Dismiss"
+                />
+              </EuiButtonEmpty>
+            }
+          />
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
