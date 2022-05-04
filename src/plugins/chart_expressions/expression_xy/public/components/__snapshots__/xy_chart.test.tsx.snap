@@ -18,8 +18,8 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     <Marker
       config={
         Object {
-          "axisMode": "bottom",
           "label": "Annotation",
+          "position": "bottom",
           "roundedTimestamp": 1647591917100,
           "time": "2022-03-18T08:25:17.140Z",
           "type": "manual_point_event_annotation",
@@ -112,13 +112,13 @@ exports[`XYChart component annotations should render grouped line annotations pr
     <Marker
       config={
         Object {
-          "axisMode": "bottom",
           "color": "red",
           "customTooltipDetails": [Function],
           "icon": "3",
           "label": "Event 1",
           "lineStyle": "dashed",
           "lineWidth": 3,
+          "position": "bottom",
           "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
@@ -171,13 +171,13 @@ exports[`XYChart component annotations should render grouped line annotations wi
     <Marker
       config={
         Object {
-          "axisMode": "bottom",
           "color": "#f04e98",
           "customTooltipDetails": [Function],
           "icon": "2",
           "label": "Event 1",
           "lineStyle": "solid",
           "lineWidth": 1,
+          "position": "bottom",
           "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
@@ -349,6 +349,7 @@ exports[`XYChart component it renders area 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -366,6 +367,7 @@ exports[`XYChart component it renders area 1`] = `
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
@@ -384,6 +386,7 @@ exports[`XYChart component it renders area 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": -90,
           "visible": false,
@@ -682,6 +685,9 @@ exports[`XYChart component it renders area 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": false,
+          "isPercentage": false,
+          "isStacked": false,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -780,6 +786,10 @@ exports[`XYChart component it renders area 1`] = `
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -803,17 +813,25 @@ exports[`XYChart component it renders area 1`] = `
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "left",
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }
@@ -890,6 +908,7 @@ exports[`XYChart component it renders bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -907,6 +926,7 @@ exports[`XYChart component it renders bar 1`] = `
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
@@ -925,6 +945,7 @@ exports[`XYChart component it renders bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": -90,
           "visible": false,
@@ -1223,6 +1244,568 @@ exports[`XYChart component it renders bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": false,
+          "isPercentage": false,
+          "isStacked": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar",
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+          "yScaleType": "linear",
+        },
+      ]
+    }
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
+      }
+    }
+    shouldShowValueLabels={true}
+    syncColors={false}
+    timeZone="UTC"
+    valueLabels="hide"
+    yAxesConfiguration={
+      Array [
+        Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "I",
+                ],
+                Array [
+                  "J",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "I",
+                },
+                Object {
+                  "type": "return",
+                  "value": "J",
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "labelsOrientation": -90,
+          "position": "left",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "axisId": undefined,
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "axisId": undefined,
+              "layer": "first",
+            },
+          ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
+        },
+      ]
+    }
+  />
+</Chart>
+`;
+
+exports[`XYChart component it renders horizontal bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
+    baseTheme={Object {}}
+    debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
+    legendPosition="top"
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    onPointerUpdate={[Function]}
+    rotation={90}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
+      }
+    }
+    tooltip={
+      Object {
+        "boundary": undefined,
+        "headerFormatter": [Function],
+      }
+    }
+  />
+  <Component
+    gridLine={
+      Object {
+        "strokeWidth": 1,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="right"
+    style={
+      Object {
+        "axisTitle": Object {
+          "padding": undefined,
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "fill": undefined,
+          "padding": undefined,
+          "rotation": 0,
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    timeAxisLayerCount={0}
+    title="c"
+  />
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "includeDataFromIds": Array [],
+        "max": NaN,
+        "min": NaN,
+        "padding": undefined,
+      }
+    }
+    gridLine={
+      Object {
+        "visible": undefined,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "padding": undefined,
+          "visible": undefined,
+        },
+        "tickLabel": Object {
+          "fill": undefined,
+          "padding": undefined,
+          "rotation": undefined,
+          "visible": undefined,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    ticks={5}
+    title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <DataLayers
+    chartHasMoreThanOneBarSeries={true}
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            undefined,
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
+      }
+    }
+    layers={
+      Array [
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "isHorizontal": true,
+          "isPercentage": false,
+          "isStacked": false,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -1344,555 +1927,16 @@ exports[`XYChart component it renders bar 1`] = `
             },
           },
           "groupId": "left",
-          "position": "left",
-          "series": Array [
-            Object {
-              "accessor": "a",
-              "layer": "first",
-            },
-            Object {
-              "accessor": "b",
-              "layer": "first",
-            },
-          ],
-        },
-      ]
-    }
-  />
-</Chart>
-`;
-
-exports[`XYChart component it renders horizontal bar 1`] = `
-<Chart
-  renderer="canvas"
->
-  <Settings
-    allowBrushingLastHistogramBin={false}
-    ariaUseDefaultSummary={true}
-    baseTheme={Object {}}
-    debugState={false}
-    externalPointerEvents={
-      Object {
-        "tooltip": Object {
-          "placement": "right",
-          "visible": false,
-        },
-      }
-    }
-    legendAction={
-      Object {
-        "$$typeof": Symbol(react.memo),
-        "compare": null,
-        "type": [Function],
-      }
-    }
-    legendPosition="top"
-    onBrushEnd={[Function]}
-    onElementClick={[Function]}
-    onPointerUpdate={[Function]}
-    rotation={90}
-    showLegend={false}
-    showLegendExtra={false}
-    theme={
-      Object {
-        "background": Object {
-          "color": undefined,
-        },
-        "barSeriesStyle": Object {},
-        "chartMargins": Object {},
-        "legend": Object {
-          "labelOptions": Object {
-            "maxLines": 0,
-          },
-        },
-      }
-    }
-    tooltip={
-      Object {
-        "boundary": undefined,
-        "headerFormatter": [Function],
-      }
-    }
-  />
-  <Component
-    gridLine={
-      Object {
-        "strokeWidth": 1,
-        "visible": true,
-      }
-    }
-    hide={false}
-    id="x"
-    position="left"
-    style={
-      Object {
-        "axisTitle": Object {
-          "padding": undefined,
-          "visible": true,
-        },
-        "tickLabel": Object {
-          "padding": undefined,
-          "rotation": 0,
-          "visible": true,
-        },
-      }
-    }
-    tickFormat={[Function]}
-    timeAxisLayerCount={0}
-    title="c"
-  />
-  <Component
-    domain={
-      Object {
-        "fit": false,
-        "includeDataFromIds": Array [],
-        "max": NaN,
-        "min": NaN,
-      }
-    }
-    gridLine={
-      Object {
-        "visible": false,
-      }
-    }
-    groupId="left"
-    id="left"
-    key="left"
-    position="bottom"
-    style={
-      Object {
-        "axisTitle": Object {
-          "padding": undefined,
-          "visible": true,
-        },
-        "tickLabel": Object {
-          "padding": undefined,
-          "rotation": -90,
-          "visible": false,
-        },
-      }
-    }
-    tickFormat={[Function]}
-    ticks={5}
-    title="a"
-  />
-  <XyEndzones
-    darkMode={false}
-    histogramMode={false}
-  />
-  <DataLayers
-    chartHasMoreThanOneBarSeries={true}
-    formatFactory={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Object {
-              "id": "number",
-              "params": Object {
-                "pattern": "0,0.000",
-              },
-            },
-          ],
-          Array [
-            Object {
-              "id": "number",
-              "params": Object {
-                "pattern": "000,0",
-              },
-            },
-          ],
-          Array [
-            Object {
-              "id": "string",
-            },
-          ],
-          Array [
-            undefined,
-          ],
-          Array [
-            Object {
-              "id": "string",
-            },
-          ],
-          Array [
-            Object {
-              "id": "number",
-              "params": Object {
-                "pattern": "0,0.000",
-              },
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Object {
-              "convert": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "I",
-                  ],
-                  Array [
-                    "J",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "I",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "J",
-                  },
-                ],
-              },
-            },
-          },
-          Object {
-            "type": "return",
-            "value": Object {
-              "convert": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "I",
-                  ],
-                  Array [
-                    "J",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "I",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "J",
-                  },
-                ],
-              },
-            },
-          },
-          Object {
-            "type": "return",
-            "value": Object {
-              "convert": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "I",
-                  ],
-                  Array [
-                    "J",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "I",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "J",
-                  },
-                ],
-              },
-            },
-          },
-          Object {
-            "type": "return",
-            "value": Object {
-              "convert": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "I",
-                  ],
-                  Array [
-                    "J",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "I",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "J",
-                  },
-                ],
-              },
-            },
-          },
-          Object {
-            "type": "return",
-            "value": Object {
-              "convert": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "I",
-                  ],
-                  Array [
-                    "J",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "I",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "J",
-                  },
-                ],
-              },
-            },
-          },
-          Object {
-            "type": "return",
-            "value": Object {
-              "convert": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "I",
-                  ],
-                  Array [
-                    "J",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": "I",
-                  },
-                  Object {
-                    "type": "return",
-                    "value": "J",
-                  },
-                ],
-              },
-            },
-          },
-        ],
-      }
-    }
-    formattedDatatables={
-      Object {
-        "first": Object {
-          "formattedColumns": Object {
-            "c": true,
-          },
-          "table": Object {
-            "columns": Array [
-              Object {
-                "id": "a",
-                "meta": Object {
-                  "params": Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                  "type": "number",
-                },
-                "name": "a",
-              },
-              Object {
-                "id": "b",
-                "meta": Object {
-                  "params": Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                  "type": "number",
-                },
-                "name": "b",
-              },
-              Object {
-                "id": "c",
-                "meta": Object {
-                  "field": "order_date",
-                  "params": Object {
-                    "id": "string",
-                  },
-                  "sourceParams": Object {
-                    "params": Object {
-                      "interval": "auto",
-                    },
-                    "type": "date-histogram",
-                  },
-                  "type": "date",
-                },
-                "name": "c",
-              },
-              Object {
-                "id": "d",
-                "meta": Object {
-                  "type": "string",
-                },
-                "name": "ColD",
-              },
-            ],
-            "rows": Array [
-              Object {
-                "a": 1,
-                "b": 2,
-                "c": "I",
-                "d": "Foo",
-              },
-              Object {
-                "a": 1,
-                "b": 5,
-                "c": "J",
-                "d": "Bar",
-              },
-            ],
-            "type": "datatable",
-          },
-        },
-      }
-    }
-    layers={
-      Array [
-        Object {
-          "accessors": Array [
-            "a",
-            "b",
-          ],
-          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
-          "isHistogram": false,
-          "layerId": "first",
-          "layerType": "data",
-          "palette": Object {
-            "name": "mock",
-            "params": Object {},
-            "type": "palette",
-          },
-          "seriesType": "bar_horizontal",
-          "splitAccessor": "d",
-          "table": Object {
-            "columns": Array [
-              Object {
-                "id": "a",
-                "meta": Object {
-                  "params": Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                  "type": "number",
-                },
-                "name": "a",
-              },
-              Object {
-                "id": "b",
-                "meta": Object {
-                  "params": Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                  "type": "number",
-                },
-                "name": "b",
-              },
-              Object {
-                "id": "c",
-                "meta": Object {
-                  "field": "order_date",
-                  "params": Object {
-                    "id": "string",
-                  },
-                  "sourceParams": Object {
-                    "params": Object {
-                      "interval": "auto",
-                    },
-                    "type": "date-histogram",
-                  },
-                  "type": "date",
-                },
-                "name": "c",
-              },
-              Object {
-                "id": "d",
-                "meta": Object {
-                  "type": "string",
-                },
-                "name": "ColD",
-              },
-            ],
-            "rows": Array [
-              Object {
-                "a": 1,
-                "b": 2,
-                "c": "I",
-                "d": "Foo",
-              },
-              Object {
-                "a": 1,
-                "b": 5,
-                "c": "J",
-                "d": "Bar",
-              },
-            ],
-            "type": "datatable",
-          },
-          "type": "dataLayer",
-          "xAccessor": "c",
-          "xScaleType": "ordinal",
-          "yScaleType": "linear",
-        },
-      ]
-    }
-    paletteService={
-      Object {
-        "get": [Function],
-        "getAll": [Function],
-      }
-    }
-    shouldShowValueLabels={true}
-    syncColors={false}
-    timeZone="UTC"
-    valueLabels="hide"
-    yAxesConfiguration={
-      Array [
-        Object {
-          "formatter": Object {
-            "convert": [MockFunction] {
-              "calls": Array [
-                Array [
-                  "I",
-                ],
-                Array [
-                  "J",
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": "I",
-                },
-                Object {
-                  "type": "return",
-                  "value": "J",
-                },
-              ],
-            },
-          },
-          "groupId": "left",
           "position": "bottom",
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -1972,6 +2016,7 @@ exports[`XYChart component it renders line 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -1989,6 +2034,7 @@ exports[`XYChart component it renders line 1`] = `
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
@@ -2007,6 +2053,7 @@ exports[`XYChart component it renders line 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": -90,
           "visible": false,
@@ -2305,6 +2352,9 @@ exports[`XYChart component it renders line 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": false,
+          "isPercentage": false,
+          "isStacked": false,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -2403,6 +2453,10 @@ exports[`XYChart component it renders line 1`] = `
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -2426,17 +2480,25 @@ exports[`XYChart component it renders line 1`] = `
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "left",
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }
@@ -2513,6 +2575,7 @@ exports[`XYChart component it renders stacked area 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -2530,6 +2593,7 @@ exports[`XYChart component it renders stacked area 1`] = `
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
@@ -2548,6 +2612,7 @@ exports[`XYChart component it renders stacked area 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": -90,
           "visible": false,
@@ -2846,6 +2911,9 @@ exports[`XYChart component it renders stacked area 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": false,
+          "isPercentage": false,
+          "isStacked": true,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -2853,7 +2921,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "params": Object {},
             "type": "palette",
           },
-          "seriesType": "area_stacked",
+          "seriesType": "area",
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -2944,6 +3012,10 @@ exports[`XYChart component it renders stacked area 1`] = `
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -2967,17 +3039,25 @@ exports[`XYChart component it renders stacked area 1`] = `
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "left",
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }
@@ -3054,6 +3134,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -3071,6 +3152,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
@@ -3089,6 +3171,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": -90,
           "visible": false,
@@ -3387,6 +3470,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": false,
+          "isPercentage": false,
+          "isStacked": true,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -3394,7 +3480,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "params": Object {},
             "type": "palette",
           },
-          "seriesType": "bar_stacked",
+          "seriesType": "bar",
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -3485,6 +3571,10 @@ exports[`XYChart component it renders stacked bar 1`] = `
     yAxesConfiguration={
       Array [
         Object {
+          "extent": Object {
+            "mode": "full",
+            "type": "axisExtentConfig",
+          },
           "formatter": Object {
             "convert": [MockFunction] {
               "calls": Array [
@@ -3508,17 +3598,25 @@ exports[`XYChart component it renders stacked bar 1`] = `
             },
           },
           "groupId": "left",
+          "labelsOrientation": -90,
           "position": "left",
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],
+          "showGridLines": false,
+          "showLabels": false,
+          "showTitle": true,
+          "title": "",
+          "type": "yAxisConfig",
         },
       ]
     }
@@ -3587,7 +3685,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     }
     hide={false}
     id="x"
-    position="left"
+    position="right"
     style={
       Object {
         "axisTitle": Object {
@@ -3595,6 +3693,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           "visible": true,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
           "rotation": 0,
           "visible": true,
@@ -3612,11 +3711,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": undefined,
       }
     }
     groupId="left"
@@ -3627,12 +3727,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": -90,
-          "visible": false,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -3928,6 +4029,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": true,
+          "isPercentage": false,
+          "isStacked": true,
           "layerId": "first",
           "layerType": "data",
           "palette": Object {
@@ -3935,7 +4039,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "params": Object {},
             "type": "palette",
           },
-          "seriesType": "bar_horizontal_stacked",
+          "seriesType": "bar",
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -4053,10 +4157,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           "series": Array [
             Object {
               "accessor": "a",
+              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
+              "axisId": undefined,
               "layer": "first",
             },
           ],

@@ -42,6 +42,7 @@ import {
   AxisConfiguration,
   getAxisPosition,
   getFormattedTablesByLayers,
+  validateExtent,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -273,7 +274,6 @@ export function XYChart({
         ...config,
         position: getAxisGroupConfig(yAxesConfiguration, config)?.position,
       })),
-    ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
@@ -330,8 +330,11 @@ export function XYChart({
     let min: number = NaN;
     let max: number = NaN;
     if (extent.mode === 'custom') {
-      min = extent.lowerBound ?? NaN;
-      max = extent.upperBound ?? NaN;
+      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
+      if (!inclusiveZeroError && !boundaryError) {
+        min = extent.lowerBound ?? NaN;
+        max = extent.upperBound ?? NaN;
+      }
     }
 
     return {

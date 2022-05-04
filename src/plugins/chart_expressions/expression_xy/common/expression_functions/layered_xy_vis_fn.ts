@@ -16,12 +16,6 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
 
   logDatatables(layers, handlers);
 
-  args.axes?.forEach((axis) => {
-    if (axis.extent) {
-      validateExtentForDataBounds(axis.extent, layers);
-    }
-  });
-
   return {
     type: 'render',
     as: XY_VIS_RENDERER,
