@@ -12,6 +12,7 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
   COMPARE_ALL_OPTIONS,
+  IFieldSubTypeMulti,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -179,7 +180,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     dataView: DataView;
     field: OptionsListField;
   }> => {
-    const { dataViewId, fieldName, textFieldName } = this.getInput();
+    const { dataViewId, fieldName } = this.getInput();
+
     if (!this.dataView || this.dataView.id !== dataViewId) {
       this.dataView = await this.dataViewsService.get(dataViewId);
       if (this.dataView === undefined) {
@@ -192,6 +194,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     if (!this.field || this.field.name !== fieldName) {
       const originalField = this.dataView.getFieldByName(fieldName);
+      const parentFieldName = (originalField?.subType as IFieldSubTypeMulti)?.multi?.parent;
+      const parentField = this.dataView.getFieldByName(parentFieldName);
+      const textFieldName = parentField?.esTypes?.includes('text') ? parentField.name : undefined;
       (originalField as OptionsListField).textFieldName = textFieldName;
       this.field = originalField;
 
@@ -235,7 +240,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         },
         this.abortController.signal
       );
-
     if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
       this.updateComponentState({
         availableOptions: suggestions,
