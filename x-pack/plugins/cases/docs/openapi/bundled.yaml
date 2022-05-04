@@ -1601,6 +1601,10 @@ components:
     basicAuth:
       type: http
       scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
   parameters:
     kbn_xsrf:
       schema:
@@ -1786,3 +1790,4 @@ components:
             connector_name: Jira
 security:
   - basicAuth: []
+  - apiKeyAuth: []

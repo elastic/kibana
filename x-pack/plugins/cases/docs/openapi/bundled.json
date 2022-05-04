@@ -1864,6 +1864,11 @@
       "basicAuth": {
         "type": "http",
         "scheme": "basic"
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "ApiKey"
       }
     },
     "parameters": {
@@ -2083,6 +2088,9 @@
   "security": [
     {
       "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
     }
   ]
 }

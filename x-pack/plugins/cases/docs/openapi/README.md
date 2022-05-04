@@ -14,7 +14,7 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
 ## Tools
 
 It is possible to validate the docs before bundling them with the following
-command in the `x-pack/plugins/cases/common/openapi/` folder:
+command in the `x-pack/plugins/cases/docs/openapi/` folder:
 
   ```
     npx swagger-cli validate entrypoint.yaml

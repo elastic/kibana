@@ -81,5 +81,10 @@ components:
     basicAuth:
       type: http
       scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
 security:
   - basicAuth: []
+  - apiKeyAuth: []
