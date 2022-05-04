@@ -6,7 +6,7 @@
  */
 
 import DateMath from '@kbn/datemath';
-import { getSupportedUrlParams } from './get_supported_url_params';
+import { getSupportedUrlParams } from '../url_params';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 describe('getSupportedUrlParams', () => {
@@ -35,8 +35,19 @@ describe('getSupportedUrlParams', () => {
       search: 'monitor.status: down',
       selectedPingStatus: 'up',
     };
+
+    const expected = {
+      absoluteDateRangeEnd: 20,
+      absoluteDateRangeStart: 20,
+      autorefreshInterval: 23,
+      autorefreshIsPaused: false,
+      dateRangeEnd: 'now',
+      dateRangeStart: 'now-15m',
+      search: 'monitor.status: down',
+    };
+
     const result = getSupportedUrlParams(customValues);
-    expect(result).toMatchSnapshot();
+    expect(result).toMatchObject(expected);
   });
 
   it('returns default values', () => {
@@ -50,7 +61,6 @@ describe('getSupportedUrlParams', () => {
       STATUS_FILTER,
     } = CLIENT_DEFAULTS;
     const result = getSupportedUrlParams({});
-    expect(result).toMatchSnapshot();
     expect(result).toEqual({
       absoluteDateRangeStart: MOCK_DATE_VALUE,
       absoluteDateRangeEnd: MOCK_DATE_VALUE,
@@ -72,20 +82,37 @@ describe('getSupportedUrlParams', () => {
     const result = getSupportedUrlParams({
       dateRangeStart: ['now-18d', 'now-11d', 'now-5m'],
     });
-    expect(result).toMatchSnapshot();
+
+    const expected = {
+      absoluteDateRangeEnd: 20,
+      absoluteDateRangeStart: 20,
+      autorefreshInterval: 60000,
+    };
+
+    expect(result).toMatchObject(expected);
   });
 
   it('provides defaults for undefined values', () => {
     const result = getSupportedUrlParams({
       dateRangeStart: undefined,
     });
-    expect(result).toMatchSnapshot();
+
+    const expected = {
+      absoluteDateRangeStart: 20,
+    };
+
+    expect(result).toMatchObject(expected);
   });
 
   it('provides defaults for empty string array values', () => {
     const result = getSupportedUrlParams({
       dateRangeStart: [],
     });
-    expect(result).toMatchSnapshot();
+
+    const expected = {
+      absoluteDateRangeStart: 20,
+    };
+
+    expect(result).toMatchObject(expected);
   });
 });

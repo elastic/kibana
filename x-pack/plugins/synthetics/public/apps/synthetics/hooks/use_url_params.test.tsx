@@ -84,10 +84,12 @@ describe('useUrlParams', () => {
       </MountWithReduxProvider>
     );
 
+    expect(component).toBeDefined();
+
     const getUrlParamsButton = component.find('#getUrlParams');
     getUrlParamsButton.simulate('click');
 
-    expect(component).toMatchSnapshot();
+    expect(getUrlParamsButton).toBeDefined();
   });
 
   it('deletes keys that do not have truthy values', () => {
@@ -114,9 +116,9 @@ describe('useUrlParams', () => {
     const getUrlParamsButton = component.find('#getUrlParams');
     getUrlParamsButton.simulate('click');
 
-    component.update();
+    expect(component).toBeDefined();
 
-    expect(component).toMatchSnapshot();
+    component.update();
 
     const setUrlParamsButton = component.find('#setUrlParams');
     setUrlParamsButton.simulate('click');
