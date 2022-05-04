@@ -41,9 +41,10 @@ export function StorageExplorer() {
     IndexLifecyclePhase.Hot
   );
 
+  const euiPaletteColorBlindRotations = 3;
   const chartTheme = useChartTheme();
   const groupedPalette = euiPaletteColorBlind({
-    rotations: 3,
+    rotations: euiPaletteColorBlindRotations,
   });
 
   const { data, status } = useFetcher(
@@ -229,8 +230,13 @@ export function StorageExplorer() {
                 {
                   groupByRollup: (d: Datum) => d.serviceName,
                   shape: {
-                    fillColor: (d) =>
-                      groupedPalette[d.parent.sortIndex * 3 + d.sortIndex],
+                    fillColor: (d) => {
+                      return groupedPalette[
+                        Math.floor(
+                          d.sortIndex % (10 * euiPaletteColorBlindRotations)
+                        )
+                      ];
+                    },
                   },
                 },
               ]}
