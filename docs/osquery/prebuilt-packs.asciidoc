@@ -1,119 +1,63 @@
 [[prebuilt-packs]]
 == Prebuilt packs reference
 
-This section lists all prebuilt packs available for Osquery Manager.
+This section lists all prebuilt packs available for Osquery Manager. 
+Each pack is also available as a saved object, with the name `Pack: <pack-name>`.
+
+For information about how to work with prebuilt packs, refer to <<osquery, osquery-prebuilt-packs>>.
 
 
-[float]
-[[hardware-monitoring]]
-=== Hardware Monitoring 
+|===
+|Name |Description |Source |Added
 
-* _Pack name_: `hardware-monitoring`
+|`hardware-monitoring`
+|Monitor for hardware changes.
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
-* _Saved object name_: `Pack: hardware-monitoring`
+|`incident-response`
+|Detect and respond to breaches.
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
-* _Description_: Monitor for hardware changes.
+|`it-compliance`
+a|Identify outdated and vulnerable software.
 
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
+Dashboard: `[Osquery Manager] Compliance pack`
 
-[float]
-[[incident-response]]
-=== Incident Response
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
-* _Pack name_: `incident-response`
+|`osquery-monitoring`
+|Monitor Osquery info and performance.
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
-* _Saved object name_: `Pack: incident-response`
+|`ossec-rootkit`
+a|Run rootkit detection queries to monitor for compromise.
 
-* _Description_: Detect and respond to breaches.
+Related Dashboard: `[Osquery Manager] OSSEC rootkit pack`
 
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
-[float]
-[[it-compliance]]
-=== IT Compliance
+|`osx-attacks`
+|Identify compromised macOS systems.
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
-* _Pack name_: `it-compliance`
+|`unwanted-chrome-extensions`
+|Monitor for malicious Chrome extensions.
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
-* _Saved object name_: `Pack: it-compliance`
+|`vuln-management`
+|Identify system vulnerabilities.
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
-* _Related Dashboard_: `[Osquery Manager] Compliance pack`
-
-* _Description_: Identify outdated and vulnerable software.
-
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
-
-[float]
-[[osquery-monitoring]]
-=== Osquery Monitoring
-
-* _Pack name_: `osquery-monitoring`
-
-* _Saved object name_: `Pack: osquery-monitoring`
-
-* _Description_: Monitor Osquery info and performance.
-
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
-
-[float]
-[[ossec-rootkit]]
-=== OSSEC Rootkit
-
-* _Pack name_: `ossec-rootkit`
-
-* _Saved object name_: `Pack: ossec-rootkit`
-
-* _Related Dashboard_: `[Osquery Manager] OSSEC rootkit pack`
-
-* _Description_: Run rootkit detection queries to monitor for compromise.
-
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
-
-[float]
-[[osx-attacks]]
-=== OSX Attacks
-
-* _Pack name_: `osx-attacks`
-
-* _Saved object name_: `Pack: osx-attacks`
-
-* _Description_: Identify compromised macOS systems.
-
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
-
-[float]
-[[unwanted-chrome-extensions]]
-=== Unwanted Chrome Extensions
-
-* _Pack name_: `unwanted-chrome-extensions`
-
-* _Saved object name_: `Pack: unwanted-chrome-extensions`
-
-* _Description_: Monitor for malicious Chrome extensions.
-
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
-
-[float]
-[[vulnerability-management]]
-=== Vulnerability Management
-
-* _Pack name_: `vuln-management`
-
-* _Saved object name_: `Pack: vuln-management`
-
-* _Description_: Identify system vulnerabilities.
-
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
-
-[float]
-[[windows-attacks]]
-=== Windows Attacks
-
-* _Pack name_: `windows-attacks`
-
-* _Saved object name_: `Pack: windows-attacks`
-
-* _Description_: Monitor for evidence of Windows attacks.
-
-* _Source_: https://github.com/osquery/osquery/tree/master/packs[Osquery]
-
+|`windows-attacks`
+|Monitor for evidence of Windows attacks.
+|https://github.com/osquery/osquery/tree/master/packs[Osquery]
+|8.2
 
