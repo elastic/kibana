@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AxisExtentModes, ValueLabelModes } from '../constants';
+import { AxisExtentModes, ValueLabelModes, XScaleTypes } from '../constants';
 import {
   AxisExtentConfigResult,
   DataLayerConfigResult,
@@ -113,7 +113,9 @@ export const validateAddTimeMarker = (
 ) => {
   const isTimeViz = Boolean(
     dataLayers.every(
-      (l) => l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date'
+      (l) =>
+        l.table.columns.find((col) => col.id === l.xAccessor)?.meta.type === 'date' &&
+        (!l.xScaleType || l.xScaleType === XScaleTypes.TIME)
     )
   );
   if (addTimeMarker && !isTimeViz) {
