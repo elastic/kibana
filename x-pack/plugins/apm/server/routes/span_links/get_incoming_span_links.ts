@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   SPAN_ID,
   SPAN_LINKS,
@@ -17,10 +18,14 @@ export async function getIncomingSpanLinks({
   setup,
   traceId,
   spanId,
+  start,
+  end,
 }: {
   traceId: string;
   spanId: string;
   setup: Setup;
+  start: number;
+  end: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -34,6 +39,7 @@ export async function getIncomingSpanLinks({
       query: {
         bool: {
           filter: [
+            ...rangeQuery(start, end),
             { term: { [TRACE_ID]: traceId } },
             { exists: { field: SPAN_LINKS } },
             {

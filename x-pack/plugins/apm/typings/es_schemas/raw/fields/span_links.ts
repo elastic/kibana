@@ -9,5 +9,3 @@ export interface SpanLink {
   trace: { id: string };
   span: { id: string };
 }
-
-export type SpanLinks = SpanLink[];

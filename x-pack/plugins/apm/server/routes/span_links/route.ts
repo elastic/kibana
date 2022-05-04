@@ -14,12 +14,13 @@ import { getOutgoingSpanLinks } from './get_outgoing_span_links';
 import { SpanLinkDetails } from '../../../common/span_links';
 
 const incomingSpanLinksRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/span_links/incoming',
+  endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/incoming',
   params: t.type({
-    query: t.intersection([
-      kueryRt,
-      t.type({ traceId: t.string, spanId: t.string }),
-    ]),
+    path: t.type({
+      traceId: t.string,
+      spanId: t.string,
+    }),
+    query: t.intersection([kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -28,37 +29,37 @@ const incomingSpanLinksRoute = createApmServerRoute({
     spanLinksDetails: SpanLinkDetails[];
   }> => {
     const {
-      params: { query },
+      params: { query, path },
     } = resources;
     const setup = await setupRequest(resources);
     const incomingSpanLinks = await getIncomingSpanLinks({
       setup,
-      traceId: query.traceId,
-      spanId: query.spanId,
+      traceId: path.traceId,
+      spanId: path.spanId,
+      start: query.start,
+      end: query.end,
     });
-
-    if (!incomingSpanLinks.length) {
-      return { spanLinksDetails: [] };
-    }
 
     return {
       spanLinksDetails: await getSpanLinksDetails({
         setup,
         spanLinks: incomingSpanLinks,
         kuery: query.kuery,
+        start: query.start,
+        end: query.end,
       }),
     };
   },
 });
 
 const outgoingSpanLinksRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/span_links/outgoing',
+  endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/outgoing',
   params: t.type({
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      t.type({ traceId: t.string, spanId: t.string }),
-    ]),
+    path: t.type({
+      traceId: t.string,
+      spanId: t.string,
+    }),
+    query: t.intersection([kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -67,26 +68,24 @@ const outgoingSpanLinksRoute = createApmServerRoute({
     spanLinksDetails: SpanLinkDetails[];
   }> => {
     const {
-      params: { query },
+      params: { query, path },
     } = resources;
     const setup = await setupRequest(resources);
     const ougoingSpanLinks = await getOutgoingSpanLinks({
       setup,
-      traceId: query.traceId,
-      spanId: query.spanId,
+      traceId: path.traceId,
+      spanId: path.spanId,
       start: query.start,
       end: query.end,
     });
-
-    if (!ougoingSpanLinks.length) {
-      return { spanLinksDetails: [] };
-    }
 
     return {
       spanLinksDetails: await getSpanLinksDetails({
         setup,
         spanLinks: ougoingSpanLinks,
         kuery: query.kuery,
+        start: query.start,
+        end: query.end,
       }),
     };
   },

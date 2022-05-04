@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { chunk, isEmpty } from 'lodash';
 import {
   SERVICE_NAME,
@@ -23,21 +23,31 @@ import {
 import { Environment } from '../../../common/environment_rt';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SpanLinkDetails } from '../../../common/span_links';
-import { SpanLinks } from '../../../typings/es_schemas/raw/fields/span_links';
+import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getBufferedTimerange } from './utils';
 
 async function fetchSpanLinksDetails({
   setup,
   kuery,
   spanLinks,
+  start,
+  end,
 }: {
   setup: Setup;
   kuery: string;
-  spanLinks: SpanLinks;
+  spanLinks: SpanLink[];
+  start: number;
+  end: number;
 }) {
   const { apmEventClient } = setup;
+
+  const { startWithBuffer, endWithBuffer } = getBufferedTimerange({
+    start,
+    end,
+  });
 
   const response = await apmEventClient.search('get_span_links_details', {
     apm: {
@@ -62,6 +72,7 @@ async function fetchSpanLinksDetails({
       query: {
         bool: {
           filter: [
+            ...rangeQuery(startWithBuffer, endWithBuffer),
             ...kqlQuery(kuery),
             {
               bool: {
@@ -75,6 +86,7 @@ async function fetchSpanLinksDetails({
                             { term: { [SPAN_ID]: item.span.id } },
                             { term: { [TRANSACTION_ID]: item.span.id } },
                           ],
+                          minimum_should_match: 1,
                         },
                       },
                     ],
@@ -94,62 +106,71 @@ export async function getSpanLinksDetails({
   setup,
   spanLinks,
   kuery,
+  start,
+  end,
 }: {
   setup: Setup;
-  spanLinks: SpanLinks;
+  spanLinks: SpanLink[];
   kuery: string;
+  start: number;
+  end: number;
 }): Promise<SpanLinkDetails[]> {
+  if (!spanLinks.length) {
+    return [];
+  }
+
   // chunk span links to avoid too_many_nested_clauses problem
   const spanLinksChunks = chunk(spanLinks, 500);
-  const chunckedResponse = await Promise.all(
+  const chunckedResponses = await Promise.all(
     spanLinksChunks.map((spanLinksChunk) =>
-      fetchSpanLinksDetails({ setup, kuery, spanLinks: spanLinksChunk })
+      fetchSpanLinksDetails({
+        setup,
+        kuery,
+        spanLinks: spanLinksChunk,
+        start,
+        end,
+      })
     )
   );
 
-  const response = chunckedResponse.flat();
+  const linkedSpans = chunckedResponses.flat();
 
   // Creates a map for all span links details found
-  const spanLinksDetailsMap = response.reduce<Record<string, SpanLinkDetails>>(
-    (acc, { _source: source }) => {
-      const commontProps = {
-        traceId: source.trace.id,
-        serviceName: source.service.name,
-        agentName: source.agent.name,
-        environment: source.service.environment as Environment,
-        transactionId: source.transaction?.id,
+  const spanLinksDetailsMap = linkedSpans.reduce<
+    Record<string, SpanLinkDetails>
+  >((acc, { _source: source }) => {
+    const commonProps = {
+      traceId: source.trace.id,
+      serviceName: source.service.name,
+      agentName: source.agent.name,
+      environment: source.service.environment as Environment,
+      transactionId: source.transaction?.id,
+    };
+
+    if (source.processor.event === ProcessorEvent.transaction) {
+      const transaction = source as TransactionRaw;
+      const key = `${transaction.trace.id}:${transaction.transaction.id}`;
+      acc[key] = {
+        ...commonProps,
+        spanId: transaction.transaction.id,
+        spanName: transaction.transaction.name,
+        duration: transaction.transaction.duration.us,
       };
-
-      if (source.processor.event === ProcessorEvent.transaction) {
-        const transaction = source as TransactionRaw;
-        const key = `${transaction.trace.id}:${transaction.transaction.id}`;
-        return {
-          ...acc,
-          [key]: {
-            ...commontProps,
-            spanId: transaction.transaction.id,
-            spanName: transaction.transaction.name,
-            duration: transaction.transaction.duration.us,
-          },
-        };
-      }
-
+    } else {
       const span = source as SpanRaw;
       const key = `${span.trace.id}:${span.span.id}`;
-      return {
-        ...acc,
-        [key]: {
-          ...commontProps,
-          spanId: span.span.id,
-          spanName: span.span.name,
-          duration: span.span.duration.us,
-          spanSubtype: span.span.subtype,
-          spanType: span.span.type,
-        },
+      acc[key] = {
+        ...commonProps,
+        spanId: span.span.id,
+        spanName: span.span.name,
+        duration: span.span.duration.us,
+        spanSubtype: span.span.subtype,
+        spanType: span.span.type,
       };
-    },
-    {}
-  );
+    }
+
+    return acc;
+  }, {});
 
   // When kuery is set, returns only the items found in the uery
   if (!isEmpty(kuery)) {

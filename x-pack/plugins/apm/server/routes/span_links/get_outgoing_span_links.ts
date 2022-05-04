@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import moment from 'moment';
 import {
   PROCESSOR_EVENT,
   SPAN_ID,
@@ -19,6 +18,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getBufferedTimerange } from './utils';
 
 async function fetchOutgoingSpans({
   traceId,
@@ -35,8 +35,10 @@ async function fetchOutgoingSpans({
 }) {
   const { apmEventClient } = setup;
 
-  const startWithBuffer = moment(start).subtract(4, 'days').valueOf();
-  const endWithBuffer = moment(end).add(4, 'days').valueOf();
+  const { startWithBuffer, endWithBuffer } = getBufferedTimerange({
+    start,
+    end,
+  });
 
   const response = await apmEventClient.search('get_outgoing_span_links', {
     apm: {

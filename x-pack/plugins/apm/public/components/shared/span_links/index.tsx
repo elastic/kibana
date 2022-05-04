@@ -43,18 +43,20 @@ export function SpanLinks({ spanLinksCount, traceId, spanId }: Props) {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
+      const params = {
+        path: { traceId, spanId },
+        query: { kuery, start, end },
+      };
       if (selectedLinkType === 'incoming') {
-        return callApmApi('GET /internal/apm/span_links/incoming', {
-          params: {
-            query: { kuery, traceId, spanId },
-          },
-        });
+        return callApmApi(
+          'GET /internal/apm/traces/{traceId}/span_links/{spanId}/incoming',
+          { params }
+        );
       }
-      return callApmApi('GET /internal/apm/span_links/outgoing', {
-        params: {
-          query: { kuery, traceId, spanId, start, end },
-        },
-      });
+      return callApmApi(
+        'GET /internal/apm/traces/{traceId}/span_links/{spanId}/outgoing',
+        { params }
+      );
     },
     [selectedLinkType, kuery, traceId, spanId, start, end]
   );

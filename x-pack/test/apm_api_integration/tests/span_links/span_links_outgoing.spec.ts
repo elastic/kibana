@@ -33,12 +33,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     spanId: string;
   }) {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/span_links/outgoing',
+      endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/outgoing',
       params: {
-        query: {
-          kuery,
+        path: {
           traceId,
           spanId,
+        },
+        query: {
+          kuery,
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
         },
