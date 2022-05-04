@@ -46,6 +46,7 @@ export type {
   SavedObjectsBulkResolveObject,
   SavedObjectsResolveResponse,
   SavedObjectsTypeMappingDefinition,
+  SavedObjectsFieldMapping,
 } from '../../server';
 
 export type {
