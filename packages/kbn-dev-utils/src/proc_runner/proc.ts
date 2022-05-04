@@ -97,9 +97,10 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
         }
         // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
         if (code > 0 && !(code === 143 || code === 130)) {
-          throw createFailError(`[${name}] exited with code ${code}`, {
-            exitCode: code,
-          });
+          // throw createFailError(`[${name}] exited with code ${code}`, {
+          //   exitCode: code,
+          // });
+          log.error(`[${name}] exited with code ${code}`);
         }
 
         return code;
