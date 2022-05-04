@@ -5,19 +5,47 @@
  * 2.0.
  */
 import React from 'react';
-import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
-import { allNavigationItems } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { FindingsContainer } from './findings_container';
+import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
+import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import { allNavigationItems, findingsNavigation } from '../../common/navigation/constants';
 import { CspPageTemplate } from '../../components/csp_page_template';
+import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
+import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 
 export const Findings = () => {
-  const dataViewQuery = useKubebeatDataView();
-  useCspBreadcrumbs([allNavigationItems.findings]);
+  const location = useLocation();
+  const dataViewQuery = useLatestFindingsDataView();
+
+  if (!dataViewQuery.data) return <CspPageTemplate paddingSize="none" query={dataViewQuery} />;
 
   return (
     <CspPageTemplate paddingSize="none" query={dataViewQuery}>
-      {dataViewQuery.data && <FindingsContainer dataView={dataViewQuery.data} />}
+      <Switch>
+        <Route
+          exact
+          path={allNavigationItems.findings.path}
+          component={() => (
+            <Redirect
+              to={{
+                pathname: findingsNavigation.findings_default.path,
+                search: location.search,
+              }}
+            />
+          )}
+        />
+        <Route
+          path={findingsNavigation.findings_default.path}
+          render={() => <LatestFindingsContainer dataView={dataViewQuery.data} />}
+        />
+        <Route
+          path={findingsNavigation.findings_by_resource.path}
+          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data} />}
+        />
+        <Route
+          path={'*'}
+          component={() => <Redirect to={findingsNavigation.findings_default.path} />}
+        />
+      </Switch>
     </CspPageTemplate>
   );
 };
