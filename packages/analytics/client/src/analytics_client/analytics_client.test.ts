@@ -316,7 +316,7 @@ describe('AnalyticsClient', () => {
 
     test(
       'Spreads the context updates to the shipper (only after opt-in)',
-      fakeSchedulers(async (advance) => {
+      fakeSchedulers((advance) => {
         const extendContextMock = jest.fn();
         analyticsClient.registerShipper(MockedShipper, { extendContextMock });
         expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
@@ -345,7 +345,7 @@ describe('AnalyticsClient', () => {
 
     test(
       'Does not spread the context if opt-in === false',
-      fakeSchedulers(async (advance) => {
+      fakeSchedulers((advance) => {
         const extendContextMock = jest.fn();
         analyticsClient.registerShipper(MockedShipper, { extendContextMock });
         expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
@@ -357,7 +357,7 @@ describe('AnalyticsClient', () => {
 
     test(
       'Handles errors in the shipper',
-      fakeSchedulers(async (advance) => {
+      fakeSchedulers((advance) => {
         const extendContextMock = jest.fn().mockImplementation(() => {
           throw new Error('Something went terribly wrong');
         });
