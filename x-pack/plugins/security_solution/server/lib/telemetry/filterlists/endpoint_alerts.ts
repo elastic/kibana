@@ -61,6 +61,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     mtime: true,
     directory: true,
     hash: true,
+    pe: true,
     Ext: {
       bytes_compressed: true,
       bytes_compressed_present: true,
