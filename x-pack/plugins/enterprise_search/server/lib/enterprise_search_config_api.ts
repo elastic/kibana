@@ -26,6 +26,10 @@ interface Params {
 interface Return extends InitialAppData {
   publicUrl?: string;
 }
+interface ResponseError {
+  responseStatus: number;
+  responseStatusText: string;
+}
 
 /**
  * Calls an internal Enterprise Search API endpoint which returns
@@ -38,7 +42,7 @@ export const callEnterpriseSearchConfigAPI = async ({
   config,
   log,
   request,
-}: Params): Promise<Return> => {
+}: Params): Promise<Return | ResponseError> => {
   if (!config.host) return {};
 
   const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.`;
@@ -63,6 +67,14 @@ export const callEnterpriseSearchConfigAPI = async ({
     };
 
     const response = await fetch(enterpriseSearchUrl, options);
+
+    if (!response.ok) {
+      return {
+        responseStatus: response.status,
+        responseStatusText: response.statusText,
+      };
+    }
+
     const data = await response.json();
 
     warnMismatchedVersions(data?.version?.number, log);
