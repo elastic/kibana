@@ -6,6 +6,9 @@
  */
 
 import React, { useReducer, useRef } from 'react';
+
+import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
@@ -26,7 +29,6 @@ import {
 
 import { CoreStart } from '@kbn/core/public';
 
-import { Cards, WinCard, CancelCard } from './cards';
 import { streamFetch } from './stream_fetch';
 import {
   initialState,
@@ -63,6 +65,15 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
     dispatch(setIsRunning(false));
   };
 
+  const chartData = Object.entries(state.entities)
+    .map(([x, y]) => {
+      return {
+        x,
+        y,
+      };
+    })
+    .sort((a, b) => b.y - a.y);
+
   // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
@@ -88,13 +99,13 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
                       {!state.isRunning && (
                         <FormattedMessage
                           id="xpack.aiops.startbuttonText"
-                          defaultMessage="Commence fighting!"
+                          defaultMessage="Start development"
                         />
                       )}
                       {state.isRunning && (
                         <FormattedMessage
                           id="xpack.aiops.cancelbuttonText"
-                          defaultMessage="Flee from the battle!"
+                          defaultMessage="Stop development"
                         />
                       )}
                     </EuiButton>
@@ -109,20 +120,35 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer />
-                <EuiFlexGroup gutterSize="l">
-                  {state.isRunning && <Cards cards={state.entities} />}
-                  {!state.isRunning && state.progress === 100 && (
-                    <WinCard
-                      description={i18n.translate('xpack.aiops.streamFetch.winCardDescription', {
-                        defaultMessage: 'You defeated {defeatedOrcs} orcs.',
-                        values: {
-                          defeatedOrcs: Object.values(state.entities).reduce((p, c) => p + c, 0),
-                        },
+                <div style={{ height: '300px' }}>
+                  <Chart>
+                    <Settings rotation={90} />
+                    <Axis
+                      id="entities"
+                      position={Position.Bottom}
+                      title={i18n.translate('xpack.aiops.barChart.commitsTitle', {
+                        defaultMessage: 'Commits',
                       })}
+                      showOverlappingTicks
                     />
-                  )}
-                  {state.isCancelled && <CancelCard />}
-                </EuiFlexGroup>
+                    <Axis
+                      id="left2"
+                      title={i18n.translate('xpack.aiops.barChart.developersTitle', {
+                        defaultMessage: 'Developers',
+                      })}
+                      position={Position.Left}
+                    />
+
+                    <BarSeries
+                      id="commits"
+                      xScaleType={ScaleType.Linear}
+                      yScaleType={ScaleType.Linear}
+                      xAccessor="x"
+                      yAccessors={['y']}
+                      data={chartData}
+                    />
+                  </Chart>
+                </div>
               </EuiText>
             </EuiPageContentBody>
           </EuiPageContent>

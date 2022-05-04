@@ -52,8 +52,17 @@ export function defineRoutes(router: IRouter) {
         stream.push(JSON.stringify(d) + '\n');
       }
 
-      const entities = ['Frodo', 'Aragorn', 'Eowyn', 'Galadriel'];
-      const actions = ['add', 'add', 'add', 'add', 'add', 'delete'];
+      const entities = [
+        'kimchy',
+        's1monw',
+        'martijnvg',
+        'jasontedor',
+        'nik9000',
+        'javanna',
+        'rjernst',
+        'jrodewig',
+      ];
+      const actions = [...Array(19).fill('add'), 'delete'];
 
       async function runStream() {
         let progress = 0;
@@ -84,7 +93,7 @@ export function defineRoutes(router: IRouter) {
             }
 
             pushStreamUpdate();
-          }, Math.floor(Math.random() * 500));
+          }, Math.floor(Math.random() * 250));
         }
 
         pushStreamUpdate();

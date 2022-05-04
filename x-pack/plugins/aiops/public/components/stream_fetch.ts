@@ -24,7 +24,7 @@ export const streamFetch = async <T = unknown>(
 
   if (stream.body !== null) {
     const reader = stream.body.pipeThrough(new TextDecoderStream()).getReader();
-    const bufferBounce = 500;
+    const bufferBounce = 100;
     let partial = '';
     let actionBuffer: T[] = [];
     let lastCall = 0;
