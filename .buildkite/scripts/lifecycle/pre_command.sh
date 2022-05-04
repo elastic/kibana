@@ -132,6 +132,9 @@ export SYNTHETICS_REMOTE_KIBANA_URL
 KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
 export KIBANA_BUILDBUDDY_CI_API_KEY
 
+# Prevent Browserlist from logging on CI about outdated database versions
+export BROWSERSLIST_IGNORE_OLD_DATA=true
+
 # By default, all steps should set up these things to get a full environment before running
 # It can be skipped for pipeline upload steps though, to make job start time a little faster
 if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
