@@ -30,6 +30,10 @@
   }
 }
 
+.dscDiscoverGrid__cellValue {
+  font-family: $euiCodeFontFamily;
+}
+
 .dscDiscoverGrid__footer {
   background-color: $euiColorLightShade;
   padding: $euiSize / 2 $euiSize;
