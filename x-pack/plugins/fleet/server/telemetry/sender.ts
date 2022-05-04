@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
+import { timer } from 'rxjs';
+import { takeWhile, tap } from 'rxjs/operators';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 
@@ -29,8 +32,9 @@ export class TelemetryEventsSender {
 
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
-  private intervalId?: NodeJS.Timeout;
   private isSending = false;
+  private isStopping = false;
+  private localTaskSub?: Subscription;
   private queuesPerChannel: { [channel: string]: TelemetryQueue<any> } = {};
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
@@ -50,16 +54,17 @@ export class TelemetryEventsSender {
     this.clusterInfo = await this.fetchClusterInfo();
 
     this.logger.debug(`Starting local task`);
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
+    this.localTaskSub = timer(this.initialCheckDelayMs, this.checkIntervalMs)
+      .pipe(
+        takeWhile(() => !this.isStopping),
+        tap(() => this.sendIfDue())
+      )
+      .subscribe();
   }
 
   public stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
+    this.isStopping = true;
+    this.localTaskSub?.unsubscribe();
   }
 
   public queueTelemetryEvents<T extends FleetTelemetryChannel>(
@@ -78,7 +83,7 @@ export class TelemetryEventsSender {
   }
 
   private async sendIfDue() {
-    if (this.isSending) {
+    if (this.isSending || this.isStopping) {
       return;
     }
 

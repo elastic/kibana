@@ -422,6 +422,8 @@ export class FleetPlugin
 
         await plugins.licensing.license$.pipe(take(1)).toPromise();
 
+        // FIXME this setup procedure might get stuck if we stop the server half way through
+        // we should be able to cancel pending async operations
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
           core.elasticsearch.client.asInternalUser
