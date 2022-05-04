@@ -15,10 +15,16 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { useLatestFindings } from './use_latest_findings';
 import type { FindingsGroupByNoneQuery } from './use_latest_findings';
-import type { FindingsBaseURLQuery } from '../types';
+import type { CspFinding, FindingsBaseURLQuery } from '../types';
 import { useFindingsCounter } from '../use_findings_count';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { getBaseQuery } from '../utils';
+import {
+  getBaseQuery,
+  getEsPaginationFromEui,
+  getEsSortFromEui,
+  getEuiPaginationFromEs,
+  getEuiSortFromEs,
+} from '../utils';
 import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
@@ -75,11 +81,17 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
         />
         <EuiSpacer />
         <FindingsTable
-          {...urlQuery}
-          setQuery={setUrlQuery}
           data={findingsGroupByNone.data}
           error={findingsGroupByNone.error}
           loading={findingsGroupByNone.isLoading}
+          pagination={getEuiPaginationFromEs({
+            size: urlQuery.size,
+            from: urlQuery.from,
+            total: findingsGroupByNone.data?.total,
+          })}
+          setPagination={(page) => setUrlQuery(getEsPaginationFromEui(page))}
+          sorting={getEuiSortFromEs(urlQuery.sort)}
+          setSorting={(sort) => setUrlQuery({ sort: getEsSortFromEui<CspFinding>(sort) })}
         />
       </PageWrapper>
     </div>

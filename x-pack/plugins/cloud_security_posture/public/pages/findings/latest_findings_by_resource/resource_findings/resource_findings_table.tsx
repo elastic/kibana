@@ -8,14 +8,11 @@ import React, { useCallback } from 'react';
 import { EuiEmptyPrompt, EuiBasicTable, type Criteria } from '@elastic/eui';
 import { extractErrorMessage } from '../../../../../common/utils/helpers';
 import * as TEXT from '../../translations';
-import type { ResourceFindingsResult, ResourceFindingsQuery } from './use_resource_findings';
+import type { ResourceFindingsResult } from './use_resource_findings';
 import { getFindingsColumns } from '../../layout/findings_layout';
-import type { CspFinding } from '../../types';
-import { getEuiPaginationFromEs } from '../../utils';
+import type { CspFinding, Pagination } from '../../types';
 
-interface Props extends ResourceFindingsResult, ResourceFindingsQuery {
-  setPagination(pagination: Criteria<CspFinding>['page']): void;
-}
+interface Props extends ResourceFindingsResult, Pagination<CspFinding> {}
 
 const columns = getFindingsColumns();
 
@@ -23,12 +20,11 @@ const ResourceFindingsTableComponent = ({
   error,
   data,
   loading,
-  size,
-  from,
+  pagination,
   setPagination,
 }: Props) => {
   const onTableChange = useCallback(
-    (params: Criteria<CspFinding>) => setPagination(params.page),
+    (params: Criteria<CspFinding>) => setPagination(params.page!),
     [setPagination]
   );
 
@@ -42,7 +38,7 @@ const ResourceFindingsTableComponent = ({
       items={data?.page || []}
       columns={columns}
       onChange={onTableChange}
-      pagination={getEuiPaginationFromEs({ size, from, total: data?.total })}
+      pagination={pagination}
     />
   );
 };

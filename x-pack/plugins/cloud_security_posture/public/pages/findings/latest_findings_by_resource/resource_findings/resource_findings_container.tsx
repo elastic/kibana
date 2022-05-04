@@ -18,7 +18,7 @@ import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery } from '../../types';
-import { getBaseQuery } from '../../utils';
+import { getBaseQuery, getEsPaginationFromEui, getEuiPaginationFromEs } from '../../utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 
@@ -83,14 +83,15 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
         </PageTitle>
         <EuiSpacer />
         <ResourceFindingsTable
-          size={urlQuery.size}
-          from={urlQuery.from}
           loading={resourceFindings.isFetching}
           data={resourceFindings.data}
           error={resourceFindings.error}
-          setPagination={(pagination) =>
-            setUrlQuery({ from: pagination?.index, size: pagination?.size })
-          }
+          pagination={getEuiPaginationFromEs({
+            size: urlQuery.size,
+            from: urlQuery.from,
+            total: resourceFindings.data?.total,
+          })}
+          setPagination={(page) => setUrlQuery(getEsPaginationFromEui(page))}
         />
       </PageWrapper>
     </div>
