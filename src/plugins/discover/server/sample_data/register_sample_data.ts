@@ -11,6 +11,12 @@ import type { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { APP_ICON } from '../../common';
 import { getSavedSearchFullPathUrl } from '../../common/services/saved_searches';
 
+function getDiscoverUrlForSampleDataset(objId: string) {
+  // TODO: remove the time range from the URL query when saved search objects start supporting time range configuration
+  // https://github.com/elastic/kibana/issues/9761
+  return `${getSavedSearchFullPathUrl(objId)}?_g=(time:(from:now-7d,to:now))`;
+}
+
 export function registerSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
   const linkLabel = i18n.translate('discover.sampleData.viewLinkLabel', {
     defaultMessage: 'Discover',
@@ -27,7 +33,7 @@ export function registerSampleData(sampleDataRegistry: SampleDataRegistrySetup) 
       addAppLinksToSampleDataset(sampleDataset.id, [
         {
           sampleObject: sampleSavedSearchObject,
-          getPath: getSavedSearchFullPathUrl,
+          getPath: getDiscoverUrlForSampleDataset,
           label: linkLabel,
           icon: APP_ICON,
           order: -1,
