@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
   const SPACE1 = 'space1';
 
   // Failing: See https://github.com/elastic/kibana/issues/129219
-  describe.skip('ruleRegistryAlertsSearchStrategy', () => {
+  describe('ruleRegistryAlertsSearchStrategy', () => {
     let kibanaVersion: string;
     before(async () => {
       kibanaVersion = await kbnClient.version.get();
