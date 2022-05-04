@@ -18,14 +18,9 @@ import {
 } from '../../../common/api';
 import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
-
+import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
 import { ApiProps } from '../types';
-import {
-  convertArrayToCamelCase,
-  convertToCamelCase,
-  decodeCaseConfigurationsResponse,
-  decodeCaseConfigureResponse,
-} from '../utils';
+import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
 import { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {

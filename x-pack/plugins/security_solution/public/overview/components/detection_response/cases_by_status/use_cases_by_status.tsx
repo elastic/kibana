@@ -5,16 +5,11 @@
  * 2.0.
  */
 
+import { CasesStatus } from '@kbn/cases-plugin/common/ui';
 import { useState, useEffect } from 'react';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
-
-export interface CasesCounts {
-  count_open_cases?: number;
-  count_in_progress_cases?: number;
-  count_closed_cases?: number;
-}
 
 export interface UseCasesByStatusProps {
   skip?: boolean;
@@ -37,24 +32,28 @@ export const useCasesByStatus = ({ skip = false }) => {
 
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
-  const [casesCounts, setCasesCounts] = useState<CasesCounts | null>(null);
+  const [casesCounts, setCasesCounts] = useState<CasesStatus | null>(null);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     const fetchCases = async () => {
       try {
-        const casesResponse = await cases.api.cases.getAllCasesMetrics({
-          from,
-          to,
-          owner: APP_ID,
-        });
+        const casesResponse = await cases.api.cases.getCasesStatus(
+          {
+            from,
+            to,
+            owner: APP_ID,
+          },
+          abortCtrl.signal
+        );
+
         if (isSubscribed) {
           setCasesCounts(casesResponse);
         }
       } catch (error) {
         if (isSubscribed) {
-          setCasesCounts({});
+          setCasesCounts(null);
         }
       }
       if (isSubscribed) {
@@ -80,14 +79,14 @@ export const useCasesByStatus = ({ skip = false }) => {
   }, [cases.api.cases, from, skip, to]);
 
   return {
-    closed: casesCounts?.count_closed_cases ?? 0,
-    inProgress: casesCounts?.count_in_progress_cases ?? 0,
+    closed: casesCounts?.countClosedCases ?? 0,
+    inProgress: casesCounts?.countInProgressCases ?? 0,
     isLoading,
-    open: casesCounts?.count_open_cases ?? 0,
+    open: casesCounts?.countOpenCases ?? 0,
     totalCounts:
-      (casesCounts?.count_closed_cases ?? 0) +
-      (casesCounts?.count_in_progress_cases ?? 0) +
-      (casesCounts?.count_open_cases ?? 0),
+      (casesCounts?.countClosedCases ?? 0) +
+      (casesCounts?.countInProgressCases ?? 0) +
+      (casesCounts?.countOpenCases ?? 0),
     updatedAt,
   };
 };

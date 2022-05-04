@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { createClientAPI } from '.';
-import { allCases, casesStatus } from '../../containers/mock';
+import { allCases, casesStatus, allCasesSnake } from '../../containers/mock';
 
 describe('createClientAPI', () => {
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('createClientAPI', () => {
     describe('find', () => {
       const http = httpServiceMock.createStartContract({ basePath: '' });
       const api = createClientAPI({ http });
-      http.get.mockResolvedValue(allCases);
+      http.get.mockResolvedValue(allCasesSnake);
 
       it('should return the correct response', async () => {
         expect(await api.cases.find({ from: 'now-1d' })).toEqual(allCases);

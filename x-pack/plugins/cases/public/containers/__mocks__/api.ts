@@ -7,7 +7,7 @@
 
 import {
   ActionLicense,
-  AllCases,
+  Cases,
   BulkUpdateStatus,
   Case,
   CasesStatus,
@@ -84,7 +84,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<AllCases> => Promise.resolve(allCases);
+}: FetchCasesProps): Promise<Cases> => Promise.resolve(allCases);
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> =>
   Promise.resolve(basicCasePost);
