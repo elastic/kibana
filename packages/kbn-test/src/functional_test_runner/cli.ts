@@ -9,7 +9,9 @@
 import { resolve } from 'path';
 import { inspect } from 'util';
 
-import { run, createFlagError, Flags, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';

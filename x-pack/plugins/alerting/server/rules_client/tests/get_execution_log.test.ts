@@ -131,7 +131,7 @@ const aggregateResults = {
               numTriggeredActions: {
                 value: 5.0,
               },
-              numScheduledActions: {
+              numGeneratedActions: {
                 value: 5.0,
               },
               outcomeAndMessage: {
@@ -216,7 +216,7 @@ const aggregateResults = {
               numTriggeredActions: {
                 value: 5.0,
               },
-              numScheduledActions: {
+              numGeneratedActions: {
                 value: 5.0,
               },
               outcomeAndMessage: {
@@ -296,7 +296,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.105Z',
         end: '2022-03-23T17:37:07.105Z',
-        duration: 0,
+        duration: '0',
         outcome: 'failure',
       },
       kibana: {
@@ -345,7 +345,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.101Z',
         end: '2022-03-23T17:37:07.102Z',
-        duration: 1000000,
+        duration: '1000000',
         outcome: 'failure',
       },
       kibana: {
@@ -394,7 +394,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.098Z',
         end: '2022-03-23T17:37:07.098Z',
-        duration: 0,
+        duration: '0',
         outcome: 'failure',
       },
       kibana: {
@@ -443,7 +443,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.095Z',
         end: '2022-03-23T17:37:07.096Z',
-        duration: 1000000,
+        duration: '1000000',
         outcome: 'failure',
       },
       kibana: {
@@ -492,7 +492,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.084Z',
         end: '2022-03-23T17:37:07.086Z',
-        duration: 2000000,
+        duration: '2000000',
         outcome: 'failure',
       },
       kibana: {
@@ -543,7 +543,7 @@ const findResults = {
         start: '2022-03-23T17:23:05.131Z',
         outcome: 'failure',
         end: '2022-03-23T17:23:05.248Z',
-        duration: 117000000,
+        duration: '117000000',
         reason: 'execute',
       },
       kibana: {
@@ -635,7 +635,7 @@ describe('getExecutionLogForRule()', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -654,7 +654,7 @@ describe('getExecutionLogForRule()', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -929,7 +929,7 @@ describe('getExecutionLogForRule()', () => {
         getExecutionLogByIdParams({ sort: [{ foo: { order: 'desc' } }] })
       )
     ).rejects.toMatchInlineSnapshot(
-      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]]`
+      `[Error: Invalid sort field "foo" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions]]`
     );
   });
 

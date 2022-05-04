@@ -79,7 +79,6 @@
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/unified_search/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
-/x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
@@ -133,7 +132,7 @@
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/plugins/uptime @elastic/uptime
+/x-pack/plugins/synthetics @elastic/uptime
 /x-pack/plugins/ux @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime
@@ -220,12 +219,14 @@
 /packages/kbn-ambient-ui-types/ @elastic/kibana-operations
 /packages/kbn-ambient-storybook-types/ @elastic/kibana-operations
 /packages/kbn-bazel-packages/ @elastic/kibana-operations
+/packages/kbn-bazel-runner/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-es/ @elastic/kibana-operations
 /packages/kbn-eslint-plugin-imports/ @elastic/kibana-operations
 /packages/kbn-generate/ @elastic/kibana-operations
+/packages/kbn-import-resolver/ @elastic/kibana-operations
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
@@ -268,7 +269,7 @@
 /x-pack/plugins/saved_objects_tagging/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
-/packages/elastic-analytics/ @elastic/kibana-core
+/packages/analytics/ @elastic/kibana-core
 /packages/kbn-config-schema/ @elastic/kibana-core
 /packages/kbn-std/ @elastic/kibana-core
 /packages/kbn-config/ @elastic/kibana-core
@@ -413,6 +414,7 @@
 /x-pack/plugins/security_solution/cypress/integration/urls @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/event_details @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/events_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting-investigations
@@ -522,9 +524,8 @@
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-solution-platform
 /packages/kbn-securitysolution* @elastic/security-solution-platform
 
-
-## Security Solution sub teams - Security Threat Intelligence
-/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-threat-intelligence
+## Security Threat Intelligence - Under Security Platform
+/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-solution-platform
 
 ## Security Solution cross teams ownership
 /x-pack/plugins/security_solution/cypress/downloads @elastic/security-detections-response @elastic/security-threat-hunting
@@ -581,7 +582,7 @@ x-pack/plugins/security_solution/public/common/components/sessions_viewer @elast
 /x-pack/plugins/osquery @elastic/security-asset-management
 
 # Cloud Security Posture
-/x-pack/plugins/cloud_security_posture/ @elastic/cloud-security-posture-control-plane
+/x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
