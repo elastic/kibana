@@ -70,7 +70,7 @@ export function InfraTabs() {
     <>
       <EuiTabbedContent
         tabs={tabs}
-        initialSelectedTab={tabs[2]}
+        initialSelectedTab={tabs[0]}
         autoFocus="selected"
         onTabClick={(tab) => {}}
       />
@@ -105,18 +105,32 @@ function useTabs({
     [start, end]
   );
 
-  const hostFilter = useMemo(
+  const hostsFilter = useMemo(
     (): QueryDslQueryContainer => ({
       bool: {
         should: [
           { terms: { 'host.name': hostNames } },
-          { terms: { 'container.id': containerIds } },
+          {
+            terms: {
+              'container.id': containerIds,
+            },
+          },
           { terms: { 'kubernetes.pod.name': podNames } },
         ],
         minimum_should_match: 1,
       },
     }),
     [hostNames, containerIds, podNames]
+  );
+  const testFilter = useMemo(
+    () => ({
+      bool: {
+        filter: [
+          { terms: { 'host.name': ['gke-edge-oblt-pool-1-9a60016d-lwwa'] } },
+        ],
+      },
+    }),
+    []
   );
   const podsFilter = useMemo(
     () => ({
@@ -157,7 +171,7 @@ function useTabs({
       name: 'Hosts',
       content:
         HostMetricsTable &&
-        HostMetricsTable({ timerange, filterClauseDsl: hostFilter }),
+        HostMetricsTable({ timerange, filterClauseDsl: testFilter }),
     },
   ];
 
