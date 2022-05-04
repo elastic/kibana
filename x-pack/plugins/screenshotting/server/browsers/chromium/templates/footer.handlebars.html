@@ -13,7 +13,7 @@
     left: 50%;
     transform: translateX(-50%);
 
-    bottom: 1mm;
+    bottom: 3mm;
 
     text-align: center;
   }
@@ -21,16 +21,30 @@
     position: absolute;
 
     left: 2mm;
-    bottom: 1mm;
+    bottom: 3mm;
 
-    height: 6, 86mm;
+    height: 6.86mm;
     width: 20mm;
 
-    content: url('data:image/png;base64,{{ logo }}');
+    background-size: 20mm 6.86mm;
+
+    content: url('data:image/png;base64,{{base64FooterLogo}}');
+  }
+
+  div.poweredByElastic {
+    position: absolute;
+    color: #aaa;
+    font-size: 2mm;
+
+    left: 2mm;
+    bottom: 0;
   }
 </style>
 <div class="container">
   <div class="logo"></div>
+  {{#if hasCustomLogo}}
+    <div class="poweredByElastic">{{poweredByElasticCopy}}</div>
+  {{/if}}
   <div class="pages">
     <span class="pageNumber"></span>&nbsp;of&nbsp;<span class="totalPages"></span>
   </div>
