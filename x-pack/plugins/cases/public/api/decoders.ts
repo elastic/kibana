@@ -16,6 +16,8 @@ import {
   CasesFindResponseRt,
   CasesStatusResponse,
   CasesStatusResponseRt,
+  CasesMetricsResponse,
+  CasesMetricsResponseRt,
 } from '../../common/api';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
@@ -24,5 +26,11 @@ export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
 export const decodeCasesStatusResponse = (respCase?: CasesStatusResponse) =>
   pipe(
     CasesStatusResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
+  pipe(
+    CasesMetricsResponseRt.decode(metrics),
     fold(throwErrors(createToasterPlainError), identity)
   );
