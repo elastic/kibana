@@ -30,7 +30,7 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
       const lastOccurrence = recurrenceRule.before(new Date(now), true);
       if (!lastOccurrence) continue;
       const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
-      if (lastOccurrenceEndTime > now) return new Date(lastOccurrenceEndTime);
+      if (now < lastOccurrenceEndTime) return new Date(lastOccurrenceEndTime);
     }
   }
 
