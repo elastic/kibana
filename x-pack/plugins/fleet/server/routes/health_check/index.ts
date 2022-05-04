@@ -22,6 +22,7 @@ import { checkAgents } from './agents';
  *  to increase timeout (Kibana and ES) settings before running?
  *  How can we verify the usefulness of this health check? Can we get a snapshot of
  *  a "broken" cluster to check report?
+ *  This report does not pertain to standalone usage.
  */
 
 type CHECK = 'configuration' | 'packages' | 'agents' | 'policies';
