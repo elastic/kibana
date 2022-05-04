@@ -9,5 +9,5 @@ export { store, storage } from './store';
 
 export type { RooState as AppState } from './root_reducer';
 
-export type { UiAction, UiSelector } from './ui';
-export type { IndexStatusAction, IndexStatusSelector } from './index_status';
+export * from './ui';
+export * from './index_status';

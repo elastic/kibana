@@ -7,12 +7,12 @@
 
 import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { IndexStatusAction, IndexStatusSelector } from '../../../state';
+import { getIndexStatus, selectIndexState } from '../../../state';
 import { SyntheticsRefreshContext } from '../../../contexts';
 // import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 
 export const useHasData = () => {
-  const { loading, error, data } = useSelector(IndexStatusSelector.getState);
+  const { loading, error, data } = useSelector(selectIndexState);
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
   // const { settings } = useSelector(selectDynamicSettings); // TODO: Add state for dynamicSettings
@@ -21,7 +21,7 @@ export const useHasData = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(IndexStatusAction.getIndexStatus());
+    dispatch(getIndexStatus());
   }, [dispatch, lastRefresh]);
 
   /* useEffect(() => {

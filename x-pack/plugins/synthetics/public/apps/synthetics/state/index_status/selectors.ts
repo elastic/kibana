@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createSelector } from 'reselect';
 import type { RooState } from '../root_reducer';
 
-export const getState = (appState: RooState) => appState.indexStatus;
+const getState = (appState: RooState) => appState.indexStatus;
+export const selectIndexState = createSelector(getState, (state) => state);

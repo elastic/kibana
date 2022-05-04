@@ -38,6 +38,6 @@ export const indexStatusReducer = createReducer(initialState, (builder) => {
     });
 });
 
-export * as IndexStatusAction from './actions';
-export * as IndexStatusEffect from './effects';
-export * as IndexStatusSelector from './selectors';
+export * from './actions';
+export * from './effects';
+export * from './selectors';

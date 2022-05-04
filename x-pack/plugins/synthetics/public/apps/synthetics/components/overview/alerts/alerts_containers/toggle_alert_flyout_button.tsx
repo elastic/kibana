@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { UiAction } from '../../../../state';
+import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../../state';
 import {
   ToggleAlertFlyoutButtonComponent,
   ToggleAlertFlyoutButtonProps,
@@ -20,10 +20,10 @@ export const ToggleAlertFlyoutButton: React.FC<ToggleAlertFlyoutButtonProps> = (
       {...props}
       setAlertFlyoutVisible={(value: boolean | string) => {
         if (typeof value === 'string') {
-          dispatch(UiAction.setAlertFlyoutType(value));
-          dispatch(UiAction.setAlertFlyoutVisible(true));
+          dispatch(setAlertFlyoutType(value));
+          dispatch(setAlertFlyoutVisible(true));
         } else {
-          dispatch(UiAction.setAlertFlyoutVisible(value));
+          dispatch(setAlertFlyoutVisible(value));
         }
       }}
     />

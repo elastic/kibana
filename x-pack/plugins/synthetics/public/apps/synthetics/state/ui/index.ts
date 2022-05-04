@@ -62,5 +62,5 @@ export const uiReducer = createReducer(initialState, (builder) => {
     });
 });
 
-export * as UiAction from './actions';
-export * as UiSelector from './selectors';
+export * from './actions';
+export * from './selectors';

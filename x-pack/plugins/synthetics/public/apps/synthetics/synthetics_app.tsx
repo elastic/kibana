@@ -29,7 +29,7 @@ import {
 } from './contexts';
 
 import { PageRouter } from './routes';
-import { store, storage, UiAction } from './state';
+import { store, storage, setBasePath } from './state';
 import { kibanaService } from './utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 
@@ -67,7 +67,7 @@ const Application = (props: SyntheticsAppProps) => {
   kibanaService.core = core;
   kibanaService.theme = props.appMountParameters.theme$;
 
-  store.dispatch(UiAction.setBasePath(basePath));
+  store.dispatch(setBasePath(basePath));
 
   return (
     <EuiErrorBoundary>

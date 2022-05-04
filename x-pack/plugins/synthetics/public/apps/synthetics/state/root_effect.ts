@@ -6,8 +6,8 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
-import { IndexStatusEffect } from './index_status';
+import { fetchIndexStatusEffect } from './index_status';
 
 export const rootEffect = function* root(): Generator {
-  yield all([fork(IndexStatusEffect.fetchIndexStatusEffect)]);
+  yield all([fork(fetchIndexStatusEffect)]);
 };

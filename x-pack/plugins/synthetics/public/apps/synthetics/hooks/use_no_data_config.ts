@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { KibanaPageTemplateProps, useKibana } from '@kbn/kibana-react-plugin/public';
 import { SyntheticsSettingsContext } from '../contexts';
 import { ClientPluginsStart } from '../../../plugin';
-import { IndexStatusSelector } from '../state';
+import { selectIndexState } from '../state';
 
 export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
   const { basePath } = useContext(SyntheticsSettingsContext);
@@ -20,7 +20,7 @@ export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
     services: { docLinks },
   } = useKibana<ClientPluginsStart>();
 
-  const { data } = useSelector(IndexStatusSelector.getState);
+  const { data } = useSelector(selectIndexState);
 
   // Returns no data config when there is no historical data
   if (data && !data.indexExists) {

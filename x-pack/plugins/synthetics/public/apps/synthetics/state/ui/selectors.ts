@@ -9,9 +9,9 @@ import { createSelector } from 'reselect';
 import type { RooState } from '../root_reducer';
 
 const uiStateSelector = (appState: RooState) => appState.ui;
-export const getBasePath = createSelector(uiStateSelector, ({ basePath }) => basePath);
+export const selectBasePath = createSelector(uiStateSelector, ({ basePath }) => basePath);
 
-export const isIntegrationsPopupOpen = createSelector(
+export const selectIsIntegrationsPopupOpen = createSelector(
   uiStateSelector,
   ({ integrationsPopoverOpen }) => integrationsPopoverOpen
 );
@@ -26,8 +26,8 @@ export const selectAlertFlyoutType = createSelector(
   ({ alertFlyoutType }) => alertFlyoutType
 );
 
-export const esKuerySelector = createSelector(uiStateSelector, ({ esKuery }) => esKuery);
+export const selectEsKuery = createSelector(uiStateSelector, ({ esKuery }) => esKuery);
 
-export const searchTextSelector = createSelector(uiStateSelector, ({ searchText }) => searchText);
+export const selectSearchText = createSelector(uiStateSelector, ({ searchText }) => searchText);
 
-export const monitorIdSelector = createSelector(uiStateSelector, ({ monitorId }) => monitorId);
+export const selectMonitorId = createSelector(uiStateSelector, ({ monitorId }) => monitorId);

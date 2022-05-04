@@ -7,17 +7,21 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { UiAction, UiSelector } from '../../../../state';
+import {
+  selectAlertFlyoutVisibility,
+  selectAlertFlyoutType,
+  setAlertFlyoutVisible,
+} from '../../../../state';
 import { SyntheticsAlertsFlyoutWrapperComponent } from '../synthetics_alerts_flyout_wrapper';
 
 export const SyntheticsAlertsFlyoutWrapper: React.FC = () => {
   const dispatch = useDispatch();
   const setAddFlyoutVisibility = (value: React.SetStateAction<boolean>) =>
     // @ts-ignore the value here is a boolean, and it works with the action creator function
-    dispatch(UiAction.setAlertFlyoutVisible(value));
+    dispatch(setAlertFlyoutVisible(value));
 
-  const alertFlyoutVisible = useSelector(UiSelector.selectAlertFlyoutVisibility);
-  const alertTypeId = useSelector(UiSelector.selectAlertFlyoutType);
+  const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
+  const alertTypeId = useSelector(selectAlertFlyoutType);
 
   return (
     <SyntheticsAlertsFlyoutWrapperComponent

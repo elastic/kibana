@@ -57,7 +57,7 @@ export const makeBaseBreadcrumb = (
       href: observabilityPath,
     },
     {
-      text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
+      text: i18n.translate('xpack.synthetics.breadcrumbs.legacyOverviewBreadcrumbText', {
         defaultMessage: 'Uptime',
       }),
       href: uptimePath,
