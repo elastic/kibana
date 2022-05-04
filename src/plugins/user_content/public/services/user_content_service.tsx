@@ -5,9 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React, { ReactNode } from 'react';
+import { cloneDeep, isObjectLike } from 'lodash';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { SavedObjectsClientContract } from '@kbn/core/public';
 
-import { EVENTS_COUNT_GRANULARITY, ViewsCounters } from '../../common';
+import { defaultUserContentAttributes } from '../../common';
+import { GetUserContentTableColumnsDefinitionsOptions } from '../types';
 import { MetadataEventsService } from './metadata_events_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -46,6 +50,33 @@ export class UserContentService {
     }
 
     this.contents.set(contentType, content);
+  }
+
+  /**
+   * Get the table column for user generated content
+   *
+   * @param options Options to return the column
+   * @returns EuiBasicTableColumn definition to be used in EuiMemoryTable
+   */
+  getUserContentTableColumnsDefinitions({
+    contentType,
+    selectedViewsRange,
+  }: GetUserContentTableColumnsDefinitionsOptions): Array<
+    EuiBasicTableColumn<Record<string, unknown>>
+  > {
+    if (!this.contents.has(contentType)) {
+      return [];
+    }
+    const viewsCountColumn: EuiBasicTableColumn<Record<string, unknown>> = {
+      field: selectedViewsRange,
+      name: 'Views',
+      render: (field: string, record: Record<string, unknown>) => (
+        <span>{record[selectedViewsRange] as ReactNode}</span>
+      ),
+      sortable: true,
+    };
+
+    return [viewsCountColumn];
   }
 
   private registerSavedObjectHooks() {

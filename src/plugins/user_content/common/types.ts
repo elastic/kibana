@@ -8,7 +8,7 @@
 
 import type { MetadataEvent } from '@kbn/metadata-events-streams-plugin/common';
 
-import { metadataEventTypes } from './constants';
+import { metadataEventTypes, viewsCountRangeFields } from './constants';
 
 /** The allowed event types to be registered in the stream */
 export type MetadataEventType = typeof metadataEventTypes[number];
@@ -25,3 +25,5 @@ export interface UserContentMetadataEvent extends MetadataEvent<MetadataEventTyp
 export interface ViewsCounters {
   [daysRange: string]: number;
 }
+
+export type ViewsCountRangeField = typeof viewsCountRangeFields[number];
