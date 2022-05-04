@@ -324,6 +324,7 @@ export function createTestEsCluster<
         })
       );
 
+      await this.captureDebugFiles();
       await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
     }
