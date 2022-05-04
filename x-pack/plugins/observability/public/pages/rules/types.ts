@@ -9,7 +9,7 @@ import { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
 import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import { RuleTableItem, Rule, RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 
-export interface StatusFilterProps {
+export interface LastResponseFilterProps {
   selectedStatuses: string[];
   onChange?: (selectedRuleStatusesIds: string[]) => void;
 }
