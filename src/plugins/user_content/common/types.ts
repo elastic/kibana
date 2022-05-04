@@ -18,6 +18,8 @@ export interface UserContentMetadataEvent extends MetadataEvent<MetadataEventTyp
   data: {
     /** The saved object id */
     so_id: string;
+    /** The saved object type */
+    so_type: string;
     [key: string]: unknown;
   };
 }

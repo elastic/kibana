@@ -5,12 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ViewsCounters } from '../../common';
+import { ViewsCounters, UserContentMetadataEvent } from '../../common';
+
 export interface ContentEventCount {
-  [savedObjectId: string]: ViewsCounters;
+  [savedObjectId: string]: {
+    type: string;
+    counters: ViewsCounters;
+  };
 }
 
 /**
@@ -35,19 +38,22 @@ export interface ContentEventCount {
  *
  * OUT = {
  *   "abc-123": {
- *     "7_days": 6,
- *     "14_days": 13,
+ *     "views_7_days": 6,
+ *     "views_14_days": 13,
  *   }
  * }
  */
 export const bucketsAggregationToContentEventCount = (
   buckets: estypes.AggregationsStringTermsBucket[],
+  hits: Array<estypes.SearchHit<UserContentMetadataEvent>>,
   daysRanges: number[]
 ): ContentEventCount => {
   const daysRangesSorted = daysRanges.sort((a, b) => a - b);
 
   const aggregated = buckets.reduce((eventCountById, savedObjectBucket) => {
     const { key: savedObjectId } = savedObjectBucket;
+    const soType = hits.find((doc) => doc._source?.data?.so_id === savedObjectId)?._source?.data
+      .so_type;
 
     // Sub aggregation "eventsCount"
     const eventsCount = savedObjectBucket.eventsCount as estypes.AggregationsRangeAggregate;
@@ -61,16 +67,16 @@ export const bucketsAggregationToContentEventCount = (
       );
     }
 
-    // We sort in reverse order the "from" as 7 days has a bigger millisecond since epoch
+    // We sort in reverse order the "from" as "7" days has a bigger millisecond since epoch than "90"
     const byDaysBucketsSorted = byDaysBuckets.sort(({ from: a }, { from: b }) => b! - a!);
 
     const aggregateByDays = byDaysBucketsSorted.reduce((byDays, item, index) => {
       const day = daysRangesSorted[index];
-      byDays[`${day}_days`] = item.doc_count;
+      byDays[`views_${day}_days`] = item.doc_count;
       return byDays;
     }, {} as { [dayRange: string]: number });
 
-    eventCountById[savedObjectId] = aggregateByDays;
+    eventCountById[savedObjectId] = { type: soType!, counters: aggregateByDays };
 
     return eventCountById;
   }, {} as ContentEventCount);

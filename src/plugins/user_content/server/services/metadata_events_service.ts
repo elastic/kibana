@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 
 import { UserContentEventsStream, DepsFromPluginStart } from '../types';
-import { EVENTS_COUNT_GRANULARITY } from '../../common';
+import { EVENTS_COUNT_GRANULARITY, UserContentMetadataEvent } from '../../common';
 import { bucketsAggregationToContentEventCount } from '../lib';
 
 export class MetadataEventsService {
@@ -39,15 +39,19 @@ export class MetadataEventsService {
     const { userContentEventsStream } = await this.depsFromPluginStartPromise;
 
     try {
-      const buckets = await this.fetchEventsCount(
+      const { buckets, hits } = await this.fetchEventsCount(
         ['viewed:kibana', 'viewed:api'],
         userContentEventsStream
       );
 
-      return bucketsAggregationToContentEventCount(buckets, EVENTS_COUNT_GRANULARITY);
+      return bucketsAggregationToContentEventCount(
+        buckets,
+        hits,
+        EVENTS_COUNT_GRANULARITY as unknown as number[]
+      );
     } catch (e) {
       this.logger.error(e);
-      return `Error updating user content view count.`;
+      return 'error';
     }
   }
 
@@ -100,15 +104,15 @@ export class MetadataEventsService {
       },
     };
 
-    const result = await eventStream.search({
+    const result = (await eventStream.search({
       // @ts-expect-error Query should be declared at the root and not under "body"
       query,
       aggs,
-    });
+    })) as estypes.SearchResponse<UserContentMetadataEvent>;
 
     const { buckets } = result.aggregations!
       .userContent as estypes.AggregationsStringTermsAggregate;
 
-    return buckets as estypes.AggregationsStringTermsBucket[];
+    return { buckets: buckets as estypes.AggregationsStringTermsBucket[], hits: result.hits.hits };
   }
 }

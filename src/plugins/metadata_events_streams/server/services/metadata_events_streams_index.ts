@@ -167,6 +167,10 @@ export class MetadataEventsStreamsIndex {
                       so_id: {
                         type: 'keyword',
                       },
+                      // Saved object type
+                      so_type: {
+                        type: 'keyword',
+                      },
                     },
                   },
                 },

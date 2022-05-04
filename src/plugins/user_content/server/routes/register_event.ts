@@ -45,6 +45,7 @@ export const registerRegisterEventRoute = (
         type: params.eventType,
         data: {
           so_id: body.soId,
+          so_type: body.soType,
         },
       });
 
