@@ -45,6 +45,8 @@ export interface StatusFilterProps {
 
 export interface ExecutionStatusProps {
   executionStatus: RuleExecutionStatus;
+  item: RuleTableItem;
+  licenseType: string;
 }
 
 export interface LastRunProps {
