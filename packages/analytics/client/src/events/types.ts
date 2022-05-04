@@ -36,7 +36,10 @@ export interface EventContext {
    * The current entity ID (dashboard ID, visualization ID, etc.).
    */
   entityId?: string;
-  // TODO: Extend with known keys
+
+  /**
+   * Additional keys are allowed.
+   */
   [key: string]: unknown;
 }
 

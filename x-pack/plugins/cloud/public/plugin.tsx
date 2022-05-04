@@ -44,6 +44,7 @@ export interface CloudConfigType {
   full_story: {
     enabled: boolean;
     org_id?: string;
+    eventTypesAllowlist?: string[];
   };
   /** Configuration to enable live chat in Cloud-enabled instances of Kibana. */
   chat: {
@@ -224,7 +225,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
    * @private
    */
   private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
-    const { enabled, org_id: fullStoryOrgId } = this.config.full_story;
+    const { enabled, org_id: fullStoryOrgId, eventTypesAllowlist } = this.config.full_story;
     if (!enabled || !fullStoryOrgId) {
       return; // do not load any FullStory code in the browser if not enabled
     }
@@ -232,6 +233,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
     const { FullStoryShipper } = await import('@kbn/analytics-shippers-fullstory');
     analytics.registerShipper(FullStoryShipper, {
+      eventTypesAllowlist,
       fullStoryOrgId,
       // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
       scriptUrl: basePath.prepend(

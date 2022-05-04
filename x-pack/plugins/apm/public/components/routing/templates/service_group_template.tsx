@@ -89,7 +89,7 @@ export function ServiceGroupTemplate({
         ) : (
           serviceGroupName ||
           i18n.translate('xpack.apm.serviceGroup.allServices.title', {
-            defaultMessage: 'Services',
+            defaultMessage: 'All services',
           })
         )}
       </EuiFlexItem>

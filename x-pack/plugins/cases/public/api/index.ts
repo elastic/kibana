@@ -6,16 +6,22 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { Cases, CasesStatus } from '../../common/ui';
-import { CASE_FIND_URL, CASE_STATUS_URL } from '../../common/constants';
+import { Cases, CasesStatus, CasesMetrics } from '../../common/ui';
+import { CASE_FIND_URL, CASE_METRICS_URL, CASE_STATUS_URL } from '../../common/constants';
 import {
   CasesFindRequest,
   CasesFindResponse,
+  CasesMetricsRequest,
+  CasesMetricsResponse,
   CasesStatusRequest,
   CasesStatusResponse,
 } from '../../common/api';
 import { convertAllCasesToCamel, convertToCamelCase } from './utils';
-import { decodeCasesFindResponse, decodeCasesStatusResponse } from './decoders';
+import {
+  decodeCasesFindResponse,
+  decodeCasesMetricsResponse,
+  decodeCasesStatusResponse,
+} from './decoders';
 
 export interface HTTPService {
   http: HttpStart;
@@ -42,4 +48,13 @@ export const getCasesStatus = async ({
   });
 
   return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
+};
+
+export const getCasesMetrics = async ({
+  http,
+  signal,
+  query,
+}: HTTPService & { query: CasesMetricsRequest }): Promise<CasesMetrics> => {
+  const res = await http.get<CasesMetricsResponse>(CASE_METRICS_URL, { signal, query });
+  return convertToCamelCase(decodeCasesMetricsResponse(res));
 };

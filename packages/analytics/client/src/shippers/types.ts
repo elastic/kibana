@@ -25,7 +25,7 @@ export interface IShipper {
   optIn: (isOptedIn: boolean) => void;
   /**
    * Perform any necessary calls to the persisting/analytics solution to set the event's context.
-   * @param newContext
+   * @param newContext The full new context to set {@link EventContext}
    */
   extendContext?: (newContext: EventContext) => void;
   /**
