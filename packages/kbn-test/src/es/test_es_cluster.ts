@@ -289,23 +289,7 @@ export function createTestEsCluster<
     }
 
     async captureDebugFiles() {
-      const debugGlobs = [
-        ...this.nodes.flatMap((n) =>
-          n._process?.pid
-            ? [
-                `core.${n._process.pid}`,
-                `hs_err_pid${n._process.pid}.log`,
-                `replay_pid${n._process.pid}.log`,
-              ]
-            : []
-        ),
-      ];
-
-      if (!debugGlobs.length) {
-        return;
-      }
-
-      const debugFiles = await globby(debugGlobs, {
+      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
         cwd: config.installPath,
         absolute: true,
       });
@@ -314,16 +298,12 @@ export function createTestEsCluster<
         return;
       }
 
-      const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${Uuid.v4()}.tar.gz`);
-      log.info('[es] debug files found, archiving to', debugPath);
-
+      const uuid = Uuid.v4();
+      const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${uuid}.tar.gz`);
+      log.info('[es] debug files found, archiving install to', debugPath);
       const archiver = createArchiver('tar', { gzip: true });
-      const output = Fs.createWriteStream(debugPath);
-      const promise = pipeline(archiver, output);
-      for (const path of debugFiles) {
-        archiver.append(path, { name: Path.basename(path) });
-      }
-
+      const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
+      archiver.directory(config.installPath, `es_debug_${uuid}`);
       archiver.finalize();
       await promise;
 
