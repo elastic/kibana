@@ -62,31 +62,31 @@ export const formatUncommonProcessesData = (
   hit: HostsUncommonProcessHit,
   fieldMap: Readonly<Record<string, string>>
 ): HostsUncommonProcessesEdges => {
-      let flattenedFields = {
-        node: {
-          _id: '',
-          instances: 0,
-          process: {},
-          hosts: [{}],
-        },
-        cursor: {
-          value: '',
-          tiebreaker: null,
-        },
-      }
-      const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
-      const processFlattenedFields = getFlattenedFields(
-        UNCOMMON_PROCESSES_FIELDS,
-        hit.fields,
-        fieldMap
-      );
+  let flattenedFields = {
+    node: {
+      _id: '',
+      instances: 0,
+      process: {},
+      hosts: [{}],
+    },
+    cursor: {
+      value: '',
+      tiebreaker: null,
+    },
+  };
+  const instancesCount = typeof hit.total === 'number' ? hit.total : hit.total.value;
+  const processFlattenedFields = getFlattenedFields(
+    UNCOMMON_PROCESSES_FIELDS,
+    hit.fields,
+    fieldMap
+  );
 
-      flattenedFields = set('node', processFlattenedFields, flattenedFields);
-      flattenedFields.node._id = hit._id;
-      flattenedFields.node.instances = instancesCount;
-      flattenedFields.node.hosts = hit.host;
-      if (hit.cursor) {
-        flattenedFields.cursor.value = hit.cursor;
-      }
-      return flattenedFields;
-    };
+  flattenedFields = set('node', processFlattenedFields, flattenedFields);
+  flattenedFields.node._id = hit._id;
+  flattenedFields.node.instances = instancesCount;
+  flattenedFields.node.hosts = hit.host;
+  if (hit.cursor) {
+    flattenedFields.cursor.value = hit.cursor;
+  }
+  return flattenedFields;
+};

@@ -105,8 +105,8 @@ export const mockSearchStrategyResponse = {
                           fields: {
                             'process.args': [
                               'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.631.0.exe',
-                                'WD',
-                                '/q',
+                              'WD',
+                              '/q',
                             ],
                             'process.name': ['AM_Delta_Patch_1.323.631.0.exe'],
                             '@timestamp': '2020-09-07T04:22:11.834Z',
@@ -139,8 +139,8 @@ export const mockSearchStrategyResponse = {
                     fields: {
                       'process.args': [
                         'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.673.0.exe',
-                          'WD',
-                          '/q',
+                        'WD',
+                        '/q',
                       ],
                       'process.name': ['AM_Delta_Patch_1.323.673.0.exe'],
                       '@timestamp': '2020-09-07T04:22:11.834Z',
@@ -170,8 +170,8 @@ export const mockSearchStrategyResponse = {
                           fields: {
                             'process.args': [
                               'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.673.0.exe',
-                                'WD',
-                                '/q',
+                              'WD',
+                              '/q',
                             ],
                             'process.name': ['AM_Delta_Patch_1.323.673.0.exe'],
                             'host.name': ['siem-windows'],
@@ -202,9 +202,7 @@ export const mockSearchStrategyResponse = {
                     _id: 'cinEZnQBB-gskclyvNmU',
                     _score: null,
                     fields: {
-                      'process.args': [
-                        'C:\\Windows\\system32\\devicecensus.exe',
-                      ],
+                      'process.args': ['C:\\Windows\\system32\\devicecensus.exe'],
                       'process.name': ['DeviceCensus.exe'],
                       'user.name': ['SYSTEM'],
                     },
@@ -230,9 +228,7 @@ export const mockSearchStrategyResponse = {
                           _id: 'cinEZnQBB-gskclyvNmU',
                           _score: 0,
                           fields: {
-                            'process.args': [
-                              'C:\\Windows\\system32\\devicecensus.exe',
-                            ],
+                            'process.args': ['C:\\Windows\\system32\\devicecensus.exe'],
                             'process.name': ['DeviceCensus.exe'],
                             'host.name': ['siem-windows'],
                             'user.name': ['SYSTEM'],
@@ -262,9 +258,7 @@ export const mockSearchStrategyResponse = {
                     _id: 'HNKSZHQBA6bGZw2uCtRk',
                     _score: null,
                     fields: {
-                      'process.args': [
-                        'C:\\Windows\\system32\\disksnapshot.exe', '-z'
-                      ],
+                      'process.args': ['C:\\Windows\\system32\\disksnapshot.exe', '-z'],
                       'process.name': ['DiskSnapshot.exe'],
                       'user.name': ['SYSTEM'],
                     },
@@ -290,9 +284,7 @@ export const mockSearchStrategyResponse = {
                           _id: 'HNKSZHQBA6bGZw2uCtRk',
                           _score: 0,
                           fields: {
-                            'process.args': [
-                              'C:\\Windows\\system32\\disksnapshot.exe', '-z'
-                            ],
+                            'process.args': ['C:\\Windows\\system32\\disksnapshot.exe', '-z'],
                             'process.name': ['DiskSnapshot.exe'],
                             'host.name': ['siem-windows'],
                             'user.name': ['SYSTEM'],
@@ -324,7 +316,7 @@ export const mockSearchStrategyResponse = {
                     fields: {
                       'process.args': [
                         'C:\\Windows\\TEMP\\88C4F57A-8744-4EA6-824E-88FEF8A0E9DD\\dismhost.exe',
-                          '{6BB79B50-2038-4A10-B513-2FAC72FF213E}',
+                        '{6BB79B50-2038-4A10-B513-2FAC72FF213E}',
                       ],
                       'process.name': ['DismHost.exe'],
                       'user.name': ['SYSTEM'],
@@ -353,7 +345,7 @@ export const mockSearchStrategyResponse = {
                           fields: {
                             'process.args': [
                               'C:\\Windows\\TEMP\\88C4F57A-8744-4EA6-824E-88FEF8A0E9DD\\dismhost.exe',
-                                '{6BB79B50-2038-4A10-B513-2FAC72FF213E}',
+                              '{6BB79B50-2038-4A10-B513-2FAC72FF213E}',
                             ],
                             'process.name': ['DismHost.exe'],
                             'host.name': ['siem-windows'],
@@ -386,8 +378,8 @@ export const mockSearchStrategyResponse = {
                     fields: {
                       'process.args': [
                         'C:\\Windows\\System32\\sihclient.exe',
-                          '/cv',
-                          '33nfV21X50ie84HvATAt1w.0.1',
+                        '/cv',
+                        '33nfV21X50ie84HvATAt1w.0.1',
                       ],
                       'process.name': ['SIHClient.exe'],
                       'user.name': ['SYSTEM'],
@@ -416,8 +408,8 @@ export const mockSearchStrategyResponse = {
                           fields: {
                             'process.args': [
                               'C:\\Windows\\System32\\sihclient.exe',
-                                '/cv',
-                                '33nfV21X50ie84HvATAt1w.0.1',
+                              '/cv',
+                              '33nfV21X50ie84HvATAt1w.0.1',
                             ],
                             'process.name': ['SIHClient.exe'],
                             'host.name': ['siem-windows'],
@@ -508,9 +500,7 @@ export const mockSearchStrategyResponse = {
                     _id: 'Pi68Z3QBc39KFIJb3txa',
                     _score: null,
                     fields: {
-                      'process.args': [
-                        'C:\\Windows\\system32\\usoclient.exe', 'StartScan'
-                      ],
+                      'process.args': ['C:\\Windows\\system32\\usoclient.exe', 'StartScan'],
                       'process.name': ['UsoClient.exe'],
                       'user.name': ['SYSTEM'],
                     },
@@ -536,9 +526,7 @@ export const mockSearchStrategyResponse = {
                           _id: 'Pi68Z3QBc39KFIJb3txa',
                           _score: 0,
                           fields: {
-                            'process.args': [
-                              'C:\\Windows\\system32\\usoclient.exe', 'StartScan'
-                            ],
+                            'process.args': ['C:\\Windows\\system32\\usoclient.exe', 'StartScan'],
                             'process.name': ['UsoClient.exe'],
                             'host.name': ['siem-windows'],
                             'user.name': ['SYSTEM'],
@@ -568,9 +556,7 @@ export const mockSearchStrategyResponse = {
                     _id: 'Ziw-Z3QBB-gskcly0vqU',
                     _score: null,
                     fields: {
-                      'process.args': [
-                        '/etc/cron.daily/apt-compat'
-                      ],
+                      'process.args': ['/etc/cron.daily/apt-compat'],
                       'process.name': ['apt-compat'],
                       'user.name': ['root'],
                       'user.id': [0],
@@ -597,9 +583,7 @@ export const mockSearchStrategyResponse = {
                           _id: 'Ziw-Z3QBB-gskcly0vqU',
                           _score: 0,
                           fields: {
-                            'process.args': [
-                              '/etc/cron.daily/apt-compat'
-                            ],
+                            'process.args': ['/etc/cron.daily/apt-compat'],
                             'process.name': ['apt-compat'],
                             'host.name': ['siem-windows'],
                             'user.name': ['root'],
@@ -630,9 +614,7 @@ export const mockSearchStrategyResponse = {
                     _id: 'aSw-Z3QBB-gskcly0vqU',
                     _score: null,
                     fields: {
-                      'process.args': [
-                        '/etc/cron.daily/bsdmainutils'
-                      ],
+                      'process.args': ['/etc/cron.daily/bsdmainutils'],
                       'process.name': ['bsdmainutils'],
                       'user.name': ['root'],
                       'user.id': [0],
@@ -659,9 +641,7 @@ export const mockSearchStrategyResponse = {
                           _id: 'aSw-Z3QBB-gskcly0vqU',
                           _score: 0,
                           fields: {
-                            'process.args': [
-                              '/etc/cron.daily/bsdmainutils'
-                            ],
+                            'process.args': ['/etc/cron.daily/bsdmainutils'],
                             'process.name': ['bsdmainutils'],
                             'host.name': ['siem-windows'],
                             'user.name': ['root'],
@@ -726,8 +706,8 @@ export const formattedSearchStrategyResponse = {
                     fields: {
                       'process.args': [
                         'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.631.0.exe',
-                          'WD',
-                          '/q',
+                        'WD',
+                        '/q',
                       ],
                       'process.name': ['AM_Delta_Patch_1.323.631.0.exe'],
                       'user.name': ['SYSTEM'],
@@ -756,8 +736,8 @@ export const formattedSearchStrategyResponse = {
                           fields: {
                             'process.args': [
                               'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.631.0.exe',
-                                'WD',
-                                '/q',
+                              'WD',
+                              '/q',
                             ],
                             'process.name': ['AM_Delta_Patch_1.323.631.0.exe'],
                             'host.name': ['siem-windows'],
@@ -790,8 +770,8 @@ export const formattedSearchStrategyResponse = {
                     fields: {
                       'process.args': [
                         'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.673.0.exe',
-                          'WD',
-                          '/q',
+                        'WD',
+                        '/q',
                       ],
                       'process.name': ['AM_Delta_Patch_1.323.673.0.exe'],
                       'user.name': ['SYSTEM'],
@@ -1724,7 +1704,7 @@ export const formattedSearchStrategyResponse = {
                   host_count: { cardinality: { field: 'host.name' } },
                   hosts: {
                     terms: { field: 'host.name' },
-                    aggregations: { host: { top_hits: { size: 1, _source: false, } } },
+                    aggregations: { host: { top_hits: { size: 1, _source: false } } },
                   },
                 },
               },
