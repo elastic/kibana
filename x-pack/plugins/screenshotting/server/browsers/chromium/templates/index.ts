@@ -5,11 +5,46 @@
  * 2.0.
  */
 
-import fs from 'fs';
-import { resolve } from 'path';
+import fs from 'fs/promises';
+import path from 'path';
+import Handlebars from 'handlebars';
+import { assetPath } from '../../../constants';
 
-export const getHeaderTemplate = (title: string) =>
-  `<span style="font-size: 8px; color: #8d8e8e; font-family: system-ui; text-align: center; width: 100%;">${title}</span>`;
+async function compileTemplate<T>(pathToTemplate: string): Promise<Handlebars.TemplateDelegate<T>> {
+  const contentsBuffer = await fs.readFile(pathToTemplate);
+  return Handlebars.compile(contentsBuffer.toString());
+}
 
-export const getFooterTemplate = () =>
-  fs.readFileSync(resolve(__dirname, './footer.html')).toString();
+interface HeaderTemplateInput {
+  title: string;
+}
+interface GetHeaderArgs {
+  title: string;
+}
+
+export async function getHeaderTemplate({ title }: GetHeaderArgs): Promise<string> {
+  const template = await compileTemplate<HeaderTemplateInput>(
+    path.resolve(__dirname, './header.handlebars.html')
+  );
+  return template({ title });
+}
+
+async function getDefaultFooterLogo(): Promise<string> {
+  const logoBuffer = await fs.readFile(path.resolve(assetPath, 'img', 'logo-grey.png'));
+  return logoBuffer.toString('base64');
+}
+
+interface FooterTemplateInput {
+  base64FooterLogo: string;
+}
+
+interface GetFooterArgs {
+  logo?: string;
+}
+
+export async function getFooterTemplate({ logo }: GetFooterArgs): Promise<string> {
+  const template = await compileTemplate<FooterTemplateInput>(
+    path.resolve(__dirname, './footer.handlebars.html')
+  );
+  return template({ base64FooterLogo: logo || (await getDefaultFooterLogo()) });
+}

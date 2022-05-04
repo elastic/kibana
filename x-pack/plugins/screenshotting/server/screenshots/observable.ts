@@ -244,7 +244,12 @@ export class ScreenshotObservableHandler {
           try {
             screenshots =
               this.layout.id === LayoutTypes.PRINT
-                ? await getPdf(this.driver, this.logger, this.getTitle(data.timeRange))
+                ? await getPdf(
+                    this.driver,
+                    this.logger,
+                    this.getTitle(data.timeRange),
+                    (this.options as PdfScreenshotOptions).logo
+                  )
                 : await getScreenshots(this.driver, this.logger, elements);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);

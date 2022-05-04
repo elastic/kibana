@@ -156,15 +156,15 @@ export class HeadlessChromiumDriver {
     return !this.page.isClosed();
   }
 
-  async printA4Pdf({ title }: { title: string }): Promise<Buffer> {
+  async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
     return this.page.pdf({
       format: 'a4',
       preferCSSPageSize: true,
       scale: 1,
       landscape: false,
       displayHeaderFooter: true,
-      headerTemplate: getHeaderTemplate(title),
-      footerTemplate: getFooterTemplate(),
+      headerTemplate: await getHeaderTemplate({ title }),
+      footerTemplate: await getFooterTemplate({ logo }),
     });
   }
 
