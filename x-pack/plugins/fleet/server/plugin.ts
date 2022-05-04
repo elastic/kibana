@@ -9,6 +9,11 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
+import type { TaskManagerStartContract, TaskInstance } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  TaskManagerSetupContract,
+} from '@kbn/task-manager-plugin/server';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
@@ -100,6 +105,7 @@ export interface FleetSetupDeps {
   usageCollection?: UsageCollectionSetup;
   spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface FleetStartDeps {
@@ -108,6 +114,7 @@ export interface FleetStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface FleetAppContext {
@@ -130,6 +137,8 @@ export interface FleetAppContext {
   telemetryEventsSender: TelemetryEventsSender;
 }
 
+const FLEET_POLL_HINTS_INDEX_TASK_ID = 'helloworld';
+const FLEET_POLL_HINTS_INDEX_TASK_TYPE = 'FLEET:poll-hints-index';
 export type FleetSetupContract = void;
 
 const allSavedObjectTypes = [
@@ -221,6 +230,7 @@ export class FleetPlugin
 
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
+    this.registerSyncTask(deps.taskManager);
 
     // Register feature
     if (deps.features) {
@@ -412,7 +422,7 @@ export class FleetPlugin
           level: ServiceStatusLevels.available,
           summary: 'Fleet is setting up',
         });
-
+        this.scheduleSyncTask(plugins.taskManager, core.elasticsearch.client.asInternalUser);
         await plugins.licensing.license$.pipe(take(1)).toPromise();
 
         await setupFleet(
@@ -472,6 +482,81 @@ export class FleetPlugin
     licenseService.stop();
     this.telemetryEventsSender.stop();
     this.fleetStatus$.complete();
+  }
+
+  public registerSyncTask(
+    taskManager: TaskManagerSetupContract,
+    internalEsClient: ElasticsearchClient
+  ) {
+    const service = this;
+
+    taskManager.registerTaskDefinitions({
+      [FLEET_POLL_HINTS_INDEX_TASK_TYPE]: {
+        title: 'Fleet - Poll Hints Index',
+        description: 'This task periodically pushes saved monitors to Synthetics Service.',
+        timeout: '1m',
+        maxAttempts: 3,
+        maxConcurrency: 1,
+
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          return {
+            async run() {
+              const { state } = taskInstance;
+
+              // await service.registerServiceLocations();
+
+              // const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
+              // service.isAllowed = allowed;
+              // service.signupUrl = signupUrl;
+
+              // if (service.isAllowed) {
+              //   service.setupIndexTemplates();
+              //   service.syncErrors = await service.pushConfigs();
+              // }
+              console.log('///////////////// HELLO WORLD FROM A TASK');
+
+              return { state };
+            },
+            async cancel() {
+              service.logger?.warn(`Task ${FLEET_POLL_HINTS_INDEX_TASK_ID} timed out`);
+            },
+          };
+        },
+      },
+    });
+  }
+
+  public async scheduleSyncTask(
+    taskManager: TaskManagerStartContract
+  ): Promise<TaskInstance | null> {
+    const interval = '1s';
+
+    try {
+      await taskManager.removeIfExists(FLEET_POLL_HINTS_INDEX_TASK_ID);
+      const taskInstance = await taskManager.ensureScheduled({
+        id: FLEET_POLL_HINTS_INDEX_TASK_ID,
+        taskType: FLEET_POLL_HINTS_INDEX_TASK_TYPE,
+        schedule: {
+          interval,
+        },
+        params: {},
+        state: {},
+        scope: ['uptime'],
+      });
+
+      this.logger?.info(
+        `Task ${FLEET_POLL_HINTS_INDEX_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}.`
+      );
+
+      return taskInstance;
+    } catch (e) {
+      this.logger?.error(
+        `Error running task: ${FLEET_POLL_HINTS_INDEX_TASK_ID}, `,
+        e?.message() ?? e
+      );
+
+      return null;
+    }
   }
 
   private setupAgentService(internalEsClient: ElasticsearchClient): AgentService {
