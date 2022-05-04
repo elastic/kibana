@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiAccordion,
   EuiHorizontalRule,
   EuiListGroup,
   EuiPage,
@@ -41,27 +42,41 @@ export const DebugPage: React.FunctionComponent = () => {
             Be aware that these debugging tools can be destructive in nature, and you should proceed with caution.`}
           />
 
-          <EuiSpacer size="xl" />
-          <AgentPolicyDebugger />
-          <EuiSpacer size="xl" />
-
-          <EuiHorizontalRule />
-
-          <EuiSpacer size="xl" />
-          <IntegrationDebugger />
-          <EuiSpacer size="xl" />
-
-          <EuiHorizontalRule />
-
-          <EuiSpacer size="xl" />
-          <SavedObjectsDebugger />
-          <EuiSpacer size="xl" />
-
-          <EuiHorizontalRule />
-
-          <EuiSpacer size="xl" />
-          <FleetIndicesDebugger />
-          <EuiSpacer size="xl" />
+          <EuiAccordion
+            id="agentPolicyDebugger"
+            buttonContent="Agent Policy Debugger"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <AgentPolicyDebugger />
+          </EuiAccordion>
+          <EuiSpacer />
+          <EuiAccordion
+            id="integrationDebugger"
+            buttonContent="Integration Debugger"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <IntegrationDebugger />
+          </EuiAccordion>
+          <EuiSpacer />
+          <EuiAccordion
+            id="savedObjectsDebugger"
+            buttonContent="Saved Objects"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <SavedObjectsDebugger />
+          </EuiAccordion>
+          <EuiSpacer />
+          <EuiAccordion
+            id="fleetIndicesDebugger"
+            buttonContent="Fleet Indices"
+            initialIsOpen={true}
+            paddingSize="l"
+          >
+            <FleetIndicesDebugger />
+          </EuiAccordion>
 
           <EuiHorizontalRule />
 
