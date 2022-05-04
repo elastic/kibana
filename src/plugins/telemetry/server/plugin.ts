@@ -9,6 +9,7 @@
 import { URL } from 'url';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { AbortController } from 'abort-controller';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   TelemetryCollectionManagerPluginSetup,
@@ -93,6 +94,8 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   private security?: SecurityPluginStart;
 
+  private abortController = new AbortController();
+
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
@@ -159,7 +162,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         const internalRepositoryClient = await firstValueFrom(this.savedObjectsInternalClient$);
         let telemetrySavedObject: TelemetrySavedObject = false; // if an error occurs while fetching opt-in status, a `false` result indicates that Kibana cannot opt-in
         try {
-          telemetrySavedObject = await getTelemetrySavedObject(internalRepositoryClient);
+          telemetrySavedObject = await getTelemetrySavedObject(internalRepositoryClient, {
+            requestOptions: { signal: this.abortController.signal },
+          });
         } catch (err) {
           this.logger.debug('Failed to check telemetry opt-in status: ' + err.message);
         }
@@ -178,6 +183,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         return isOptedIn === true;
       },
     };
+  }
+
+  public stop() {
+    this.abortController.abort();
+    this.fetcherTask.stop();
   }
 
   private startFetcher(

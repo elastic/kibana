@@ -138,5 +138,7 @@ export class Plugin implements PluginType {
     }
   }
 
-  public stop() {}
+  public stop() {
+    this.telemetryEventsSender.stop();
+  }
 }
