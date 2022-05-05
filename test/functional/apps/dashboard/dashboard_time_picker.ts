@@ -43,10 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Visualization updated when time picker changes', async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
-      await pieChart.expectPieSliceCount(0);
+      await pieChart.expectPieSliceCount(0, false);
 
       await PageObjects.timePicker.setHistoricalDataRange();
-      await pieChart.expectPieSliceCount(10);
+      await pieChart.expectPieSliceCount(10, false);
     });
 
     it('Saved search updated when time picker changes', async () => {
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '2015-09-19 06:31:44.000',
         '2015-09-23 18:31:44.000'
       );
-      await pieChart.expectPieSliceCount(10);
+      await pieChart.expectPieSliceCount(10, false);
     });
   });
 }

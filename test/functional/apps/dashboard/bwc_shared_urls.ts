@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await pieChart.expectPieSliceCount(0);
+        await pieChart.expectPieSliceCount(0, false);
         await dashboardExpect.panelCount(2);
         await PageObjects.dashboard.waitForRenderComplete();
       });
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await pieChart.expectPieSliceCount(5);
+        await pieChart.expectPieSliceCount(5, false);
         await dashboardExpect.panelCount(2);
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await pieChart.expectPieSliceCount(5);
+        await pieChart.expectPieSliceCount(5, false);
         await dashboardExpect.panelCount(2);
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);

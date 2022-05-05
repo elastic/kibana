@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // because filters are preserved during navigation, we expect that only one slice is displayed (filter is still applied)
         expect(await filterBar.getFilterCount()).to.be(1);
-        await pieChart.expectPieSliceCount(1);
+        await pieChart.expectPieSliceCount(1, false);
         // check that new time range duration was applied
         const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);

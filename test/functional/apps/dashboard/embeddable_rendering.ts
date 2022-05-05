@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let visNames: string[] = [];
 
   const expectAllDataRenders = async () => {
-    await pieChart.expectPieSliceCount(16);
+    await pieChart.expectPieSliceCount(16, false);
     await dashboardExpect.metricValuesExist(['7,544']);
     await dashboardExpect.seriesElementCount(14);
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const expectNoDataRenders = async () => {
-    await pieChart.expectPieSliceCount(0);
+    await pieChart.expectPieSliceCount(0, false);
     await dashboardExpect.seriesElementCount(0);
     await dashboardExpect.dataTableNoResult();
     await dashboardExpect.savedSearchNoResult();

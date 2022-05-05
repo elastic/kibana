@@ -244,7 +244,7 @@ export class VisualizeChartPageObject extends FtrService {
     return items.map(({ name }) => name);
   }
 
-  public async getLegendEntries() {
+  public async getLegendEntries(newLibrary: boolean = true) {
     const isVisTypePieChart = await this.isNewLibraryChart(partitionVisChartSelector);
     const isVisTypeHeatmapChart = await this.isNewLibraryChart(heatmapChartSelector);
 

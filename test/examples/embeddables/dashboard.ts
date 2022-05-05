@@ -116,10 +116,12 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('pie charts', async () => {
+      let isNewLibrary = false;
       if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
         await elasticChart.setNewChartUiDebugFlag();
+        isNewLibrary = true;
       }
-      await pieChart.expectPieSliceCount(5);
+      await pieChart.expectPieSliceCount(5, isNewLibrary);
     });
 
     it('markdown', async () => {
