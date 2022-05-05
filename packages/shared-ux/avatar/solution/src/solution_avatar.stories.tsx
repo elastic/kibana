@@ -7,27 +7,58 @@
  */
 
 import React from 'react';
-import { KibanaSolutionAvatar, KibanaSolutionAvatarProps } from './solution_avatar';
+import { KibanaSolutionAvatar, IconTypeProps, KnownSolutionProps } from './solution_avatar';
 
 export default {
   title: 'Solution Avatar',
   description: 'A wrapper around EuiAvatar, specifically to stylize Elastic Solutions',
 };
 
-type Params = Pick<KibanaSolutionAvatarProps, 'size' | 'name'>;
-
-export const PureComponent = (params: Params) => {
-  return <KibanaSolutionAvatar {...params} />;
-};
-
-PureComponent.argTypes = {
-  name: {
-    control: 'text',
-    defaultValue: 'Kibana',
-  },
+const argTypes = {
   size: {
-    control: 'radio',
+    control: 'select',
     options: ['s', 'm', 'l', 'xl', 'xxl'],
     defaultValue: 'xxl',
   },
+};
+
+type KnownSolutionParams = Pick<KnownSolutionProps, 'size' | 'name'>;
+
+export const SolutionAvatar = (params: KnownSolutionParams) => {
+  return <KibanaSolutionAvatar {...params} />;
+};
+
+SolutionAvatar.argTypes = {
+  name: {
+    control: 'select',
+    options: ['Elastic', 'Kibana', 'Observability', 'Maps', 'Cloud', 'Security'],
+    defaultValue: 'Elastic',
+  },
+  ...argTypes,
+};
+
+type IconTypeParams = Pick<IconTypeProps, 'size' | 'name' | 'iconType'>;
+
+export const IconTypeAvatar = (params: IconTypeParams) => {
+  return <KibanaSolutionAvatar {...params} />;
+};
+
+IconTypeAvatar.argTypes = {
+  iconType: {
+    control: 'select',
+    options: [
+      'logoElastic',
+      'logoKibana',
+      'logoObservability',
+      'logoMaps',
+      'logoCloud',
+      'logoSecurity',
+    ],
+    defaultValue: 'logoElastic',
+  },
+  name: {
+    control: 'text',
+    defaultValue: 'Elastic',
+  },
+  ...argTypes,
 };

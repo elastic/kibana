@@ -11,7 +11,16 @@ date: 2022-05-04
 
 A wrapper around `EuiAvatar` tailored for use in Kibana solutions.
 
+## Usage
+
+If using for a known solution, (e.g. one whose logo is in EUI as `logoSomeSolution`), you can simply set the `name` prop:
+
 ```tsx
-<KibanaSolutionAvatar name="Kibana" size="m" />
+<KibanaSolutionAvatar name="Kibana" size="xl" />
 ```
 
+If the name provided does not match a known solution, you *must* set the `iconType` prop:
+
+```tsx
+<KibanaSolutionAvatar name="Hello World!" size="xl" iconType="logoElastic" />
+```

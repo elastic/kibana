@@ -9,6 +9,8 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
+export { KibanaSolutionAvatarProps } from './solution_avatar';
+
 /**
  * The Lazily-loaded `KibanaSolutionAvatar` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.

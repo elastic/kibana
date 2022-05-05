@@ -8,22 +8,60 @@
 import './solution_avatar.scss';
 
 import React from 'react';
-
-import { DistributiveOmit, EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 import classNames from 'classnames';
 
-export type KibanaSolutionAvatarProps = DistributiveOmit<EuiAvatarProps, 'size'> & {
+import { DistributiveOmit, EuiAvatar, EuiAvatarProps, IconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+
+type FilterStartingWith<Set, Needle extends string> = Set extends `${Needle}${infer _X}`
+  ? Set
+  : never;
+
+type ExtractSolutionName<SolutionString extends string> =
+  SolutionString extends `logo${infer Solution}` ? Solution : { error: 'Cannot parse logo' };
+
+type SolutionNameType = ExtractSolutionName<FilterStartingWith<EuiIconType, 'logo'>>;
+
+export type KnownSolutionProps = DistributiveOmit<EuiAvatarProps, 'size' | 'name' | 'iconType'> & {
   /**
    * Any EuiAvatar size available, or `xxl` for custom large, brand-focused version
    */
   size?: EuiAvatarProps['size'] | 'xxl';
+  name: SolutionNameType;
 };
+
+export type IconTypeProps = DistributiveOmit<EuiAvatarProps, 'size' | 'name' | 'iconType'> & {
+  /**
+   * Any EuiAvatar size available, or `xxl` for custom large, brand-focused version
+   */
+  size?: EuiAvatarProps['size'] | 'xxl';
+  name?: string;
+  iconType: IconType;
+};
+
+const isKnown = (props: any): props is KnownSolutionProps => {
+  return typeof props.iconType === 'undefined';
+};
+
+export type KibanaSolutionAvatarProps = KnownSolutionProps | IconTypeProps;
 
 /**
  * Applies extra styling to a typical EuiAvatar.
  * The `name` value will be appended to 'logo' to configure the `iconType` unless `iconType` is provided.
  */
-export const KibanaSolutionAvatar = ({ className, size, ...rest }: KibanaSolutionAvatarProps) => {
+export const KibanaSolutionAvatar = (props: KibanaSolutionAvatarProps) => {
+  const { className, size, ...rest } = props;
+
+  // If the name is a known solution, use the name to set the correct IconType.
+  // Create an empty object so `iconType` remains undefined or inherited from `props`.
+  const icon: {
+    iconType?: IconType;
+  } = {};
+
+  if (isKnown(props)) {
+    icon.iconType = `logo${rest.name}`;
+  }
+
   return (
     // @ts-ignore Complains about ExclusiveUnion between `iconSize` and `iconType`, but works fine
     <EuiAvatar
@@ -37,8 +75,8 @@ export const KibanaSolutionAvatar = ({ className, size, ...rest }: KibanaSolutio
       size={size === 'xxl' ? 'xl' : size}
       iconSize={size}
       color="plain"
-      iconType={`logo${rest.name}`}
       {...rest}
+      {...icon}
     />
   );
 };
