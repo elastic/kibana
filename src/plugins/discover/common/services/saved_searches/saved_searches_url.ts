@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-/**
- * Roll total indices every 24h
- */
-export const ROLL_TOTAL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
+export const getSavedSearchUrl = (id?: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
 
-/**
- * Start rolling indices after 5 minutes up
- */
-export const ROLL_INDICES_START = 5 * 60 * 1000;
+export const getSavedSearchFullPathUrl = (id?: string) => `/app/discover${getSavedSearchUrl(id)}`;

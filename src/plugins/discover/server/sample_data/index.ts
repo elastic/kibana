@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { registerUiCountersRollups } from './register_rollups';
+export { registerSampleData } from './register_sample_data';
