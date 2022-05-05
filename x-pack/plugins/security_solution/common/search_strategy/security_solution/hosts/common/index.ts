@@ -68,7 +68,7 @@ export interface HostOsHitsItem {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      _source: { host: { os: Maybe<OsEcs> } };
+      fields: { host: { os: Maybe<OsEcs> } };
       sort?: [number];
       _index?: string;
       _type?: string;

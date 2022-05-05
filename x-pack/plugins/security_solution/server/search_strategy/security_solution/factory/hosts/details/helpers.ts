@@ -127,32 +127,8 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
     ? hostFieldsMap[fieldName].replace(/\./g, '_')
     : fieldName.replace(/\./g, '_');
 
-  if (
-    [
-      'host.ip',
-      'host.mac',
-      'cloud.instance.id',
-      'cloud.machine.type',
-      'cloud.provider',
-      'cloud.region',
-    ].includes(fieldName) &&
-    has(aggField, bucket)
-  ) {
-    const data: HostBuckets = get(aggField, bucket);
-    return data.buckets.map((obj) => obj.key);
-  } else if (has(`${aggField}.buckets`, bucket)) {
+  if (has(`${aggField}.buckets`, bucket)) {
     return getFirstItem(get(`${aggField}`, bucket));
-  } else if (['host.name', 'host.os.name', 'host.os.version', 'endpoint.id'].includes(fieldName)) {
-    switch (fieldName) {
-      case 'host.name':
-        return get('key', bucket) || null;
-      case 'host.os.name':
-        return get('os.hits.hits[0].fields.host.os.name', bucket) || null;
-      case 'host.os.version':
-        return get('os.hits.hits[0].fields.host.os.version', bucket) || null;
-      case 'endpoint.id':
-        return get('endpoint_id.value.buckets[0].key', bucket) || null;
-    }
   } else if (has(aggField, bucket)) {
     const valueObj: HostValue = get(aggField, bucket);
     return valueObj.value_as_string;

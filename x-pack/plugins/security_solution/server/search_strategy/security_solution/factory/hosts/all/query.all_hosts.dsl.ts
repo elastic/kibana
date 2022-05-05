@@ -12,8 +12,10 @@ import {
   SortField,
   HostsFields,
 } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
+import { HOSTS_FIELDS } from './helpers';
+import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 
 export const buildHostsQuery = ({
   defaultIndex,
@@ -22,6 +24,9 @@ export const buildHostsQuery = ({
   sort,
   timerange: { from, to },
 }: HostsRequestOptions): ISearchRequestParams => {
+  const esFields = reduceFields(HOSTS_FIELDS, {
+    ...hostFieldsMap,
+  });
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -68,8 +73,7 @@ export const buildHostsQuery = ({
       query: { bool: { filter } },
       _source: false,
       fields: [
-        'host.os.*',
-        'host.name',
+        ...esFields,
         {
           field: '@timestamp',
           format: 'strict_date_optional_time',
