@@ -9,8 +9,8 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../common/endpoint/constants';
-import { SecuritySolutionRequestHandlerContext } from '../../types';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../common/endpoint/constants';
+import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import {
   ActivityLog,
   ActivityLogEntry,
@@ -19,7 +19,7 @@ import {
   EndpointActionResponse,
   EndpointPendingActions,
   LogsEndpointActionResponse,
-} from '../../../common/endpoint/types';
+} from '../../../../common/endpoint/types';
 import {
   catchAndWrapError,
   categorizeActionResults,
@@ -28,8 +28,9 @@ import {
   getActionResponsesResult,
   getTimeSortedData,
   getUniqueLogData,
-} from '../utils';
-import { EndpointMetadataService } from './metadata';
+} from '../../utils';
+import { EndpointMetadataService } from '../metadata';
+import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
 
@@ -194,7 +195,7 @@ export const getPendingActionCounts = async (
     .search<EndpointAction>(
       {
         index: AGENT_ACTIONS_INDEX,
-        size: 10000,
+        size: ACTIONS_SEARCH_PAGE_SIZE,
         from: 0,
         body: {
           query: {
@@ -294,7 +295,7 @@ const hasEndpointResponseDoc = async ({
     .search<LogsEndpointActionResponse>(
       {
         index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-        size: 10000,
+        size: ACTIONS_SEARCH_PAGE_SIZE,
         body: {
           query: {
             bool: {
@@ -336,7 +337,7 @@ const fetchActionResponses = async (
     .search<EndpointActionResponse>(
       {
         index: AGENT_ACTIONS_RESULTS_INDEX,
-        size: 10000,
+        size: ACTIONS_SEARCH_PAGE_SIZE,
         from: 0,
         body: {
           query: {
