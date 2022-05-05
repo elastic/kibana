@@ -23,13 +23,13 @@ export interface GenericFeature extends BaseFeature {
 }
 
 export const formatCommonFeatureProperties = (feature: BaseFeature) =>
-  `at: ${feature.location.sourceFilePath}:${feature.location.lineNumber}`;
+  `Location: ${feature.location.sourceFilePath}:${feature.location.lineNumber}`;
 
 export const formatEitherWithError = <Value>(
   eitherWithError: either.Either<Error, Value>,
   formatValue: (value: Value) => string
 ): string => {
-  return either.fold((e: Error) => e.message, formatValue)(eitherWithError);
+  return either.fold((e: Error) => `Error: ${e.message}`, formatValue)(eitherWithError);
 };
 
 export const formatGenericFeature = (feature: GenericFeature): string => `## Generic feature

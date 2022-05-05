@@ -16,4 +16,4 @@ export interface HttpRouteFeature extends BaseFeature {
 
 export const formatHttpRouteFeature = (feature: HttpRouteFeature): string => `## HTTP route
 ${formatCommonFeatureProperties(feature)}
-path: ${formatEitherWithError(feature.path, (path) => path)}`;
+Path: ${formatEitherWithError(feature.path, (path) => path)}`;
