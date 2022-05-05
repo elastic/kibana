@@ -39,15 +39,16 @@ export class Metric extends Component {
   }
 
   componentDidMount() {
-    this.handleResize();
+    this.handleResize(true);
   }
 
-  handleResize() {
+  handleResize(notifyRender = false) {
     // Bingo!
     const newState = calculateCoordinates(this.inner, this.resize, this.state);
     this.setState(newState, () => {
-      // TODO only call on `componentDidMount`
-      this.props.initialRender();
+      if (notifyRender) {
+        this.props.initialRender();
+      }
     });
   }
 
