@@ -10,6 +10,7 @@ import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTableConfigurationRegistry } from '../../../../types';
 import { TypeRegistry } from '../../../type_registry';
 
+const AlertsPageFlyoutHeader = lazy(() => import('./alerts_page_flyout_header'));
 const AlertsPageFlyoutBody = lazy(() => import('./alerts_page_flyout_body'));
 
 export function registerAlertsTableConfiguration({
@@ -40,6 +41,13 @@ export function registerAlertsTableConfiguration({
         displayAsText: 'Reason',
       },
     ],
-    flyoutBody: AlertsPageFlyoutBody,
+    internalFlyout: {
+      header: AlertsPageFlyoutHeader,
+      body: AlertsPageFlyoutBody,
+    },
+    externalFlyout: {
+      header: AlertsPageFlyoutHeader,
+      body: AlertsPageFlyoutBody,
+    },
   });
 }

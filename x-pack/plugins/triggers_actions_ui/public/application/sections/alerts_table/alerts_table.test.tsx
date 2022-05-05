@@ -5,9 +5,15 @@
  * 2.0.
  */
 import React from 'react';
+import { get } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
-import { AlertsData, AlertsField } from '../../../types';
+import {
+  AlertsData,
+  AlertsField,
+  AlertsTableFlyoutState,
+  AlertsTableFlyoutBaseProps,
+} from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { render } from '@testing-library/react';
@@ -17,16 +23,24 @@ jest.mock('../../../common/lib/kibana');
 
 const columns = [
   {
-    id: 'kibana.alert.rule.name',
+    id: AlertsField.name,
     displayAsText: 'Name',
   },
   {
-    id: 'kibana.alert.rule.category',
-    displayAsText: 'Category',
+    id: AlertsField.reason,
+    displayAsText: 'Reason',
   },
 ];
 
-const flyoutBody = () => <h2>Test flyout body</h2>;
+const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
+  <ul>
+    {columns.map((column) => (
+      <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
+        {get(alert, column.id, [])[0]}
+      </li>
+    ))}
+  </ul>
+);
 
 const hookUseKibanaMock = useKibana as jest.Mock;
 const alertsTableConfigurationRegistryMock =
@@ -36,7 +50,7 @@ alertsTableConfigurationRegistryMock.has.mockImplementation((plugin: string) => 
 });
 alertsTableConfigurationRegistryMock.get.mockImplementation((plugin: string) => {
   if (plugin === PLUGIN_ID) {
-    return { columns, flyoutBody };
+    return { columns, externalFlyout: { body: FlyoutBody }, internalFlyout: { body: FlyoutBody } };
   }
   return {};
 });
@@ -93,6 +107,7 @@ describe('AlertsTable', () => {
     showCheckboxes: false,
     trailingControlColumns: [],
     alerts,
+    flyoutState: AlertsTableFlyoutState.internal,
     useFetchAlertsData,
     'data-test-subj': 'testTable',
   };

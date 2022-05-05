@@ -35,7 +35,16 @@ const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const emptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
   columns: [],
-  flyoutBody: () => null,
+  externalFlyout: {
+    header: () => null,
+    body: () => null,
+    footer: () => null,
+  },
+  internalFlyout: {
+    header: () => null,
+    body: () => null,
+    footer: () => null,
+  },
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
@@ -124,6 +133,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           <AlertsFlyout
             alert={props.alerts[flyoutAlertIndex]}
             alertsCount={alertsCount}
+            state={props.flyoutState}
             onClose={handleFlyoutClose}
             alertsTableConfiguration={alertsTableConfiguration}
             flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}

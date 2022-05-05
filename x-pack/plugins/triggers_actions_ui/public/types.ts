@@ -420,6 +420,7 @@ export interface AlertsTableProps {
   useFetchAlertsData: () => FetchAlertData;
   alerts: AlertsData[];
   'data-test-subj': string;
+  flyoutState: AlertsTableFlyoutState;
 }
 
 export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
@@ -430,13 +431,38 @@ export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
-  flyoutBody:
-    | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-    | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+  externalFlyout: {
+    header?:
+      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+    body:
+      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+    footer?:
+      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+  };
+  internalFlyout: {
+    header?:
+      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+    body:
+      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+    footer?:
+      | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+      | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>;
+  };
 }
 
 export interface AlertsTableFlyoutBaseProps {
   alert: AlertsData;
+  isLoading: boolean;
+}
+
+export enum AlertsTableFlyoutState {
+  internal = 'internal',
+  external = 'external',
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

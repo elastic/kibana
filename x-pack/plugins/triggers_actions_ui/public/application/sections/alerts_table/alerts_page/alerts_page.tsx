@@ -24,7 +24,7 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AlertsData, RenderCellValueProps } from '../../../../types';
+import { AlertsData, RenderCellValueProps, AlertsTableFlyoutState } from '../../../../types';
 
 const consumers = [
   AlertConsumers.APM,
@@ -152,6 +152,7 @@ const AlertsPage: React.FunctionComponent = () => {
     useFetchAlertsData,
     alerts,
     'data-test-subj': 'internalAlertsPage',
+    flyoutState: AlertsTableFlyoutState.internal,
   };
 
   return (
