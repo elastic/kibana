@@ -118,7 +118,7 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"dscDiscoverGrid__cellValue\\">100</span>"`
+      `"<span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span>"`
     );
   });
 
@@ -143,7 +143,7 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"dscDiscoverGrid__cellValue\\">100</span>"`
+      `"<span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span>"`
     );
   });
 
@@ -730,7 +730,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(componentWithDetails).toMatchInlineSnapshot(`
       <span
-        className="dscDiscoverGrid__cellValue"
+        className="dscDiscoverGrid__cellPopoverValue"
         dangerouslySetInnerHTML={
           Object {
             "__html": Array [

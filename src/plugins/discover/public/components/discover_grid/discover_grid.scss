@@ -34,6 +34,11 @@
   font-family: $euiCodeFontFamily;
 }
 
+.dscDiscoverGrid__cellPopoverValue {
+  font-family: $euiCodeFontFamily;
+  font-size: $euiFontSizeXS;
+}
+
 .dscDiscoverGrid__footer {
   background-color: $euiColorLightShade;
   padding: $euiSize / 2 $euiSize;

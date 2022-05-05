@@ -178,7 +178,7 @@ function renderPopoverContent({
 
   return (
     <span
-      className={CELL_CLASS}
+      className="dscDiscoverGrid__cellPopoverValue"
       // formatFieldValue guarantees sanitized values
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{
