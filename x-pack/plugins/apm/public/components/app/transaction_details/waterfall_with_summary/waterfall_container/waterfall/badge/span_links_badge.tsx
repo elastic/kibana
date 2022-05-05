@@ -9,12 +9,15 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 
-export function SpanLinksBadge({ outgoing, incoming }: SpanLinksCount) {
-  if (!outgoing && !incoming) {
+export function SpanLinksBadge({
+  linkedParents,
+  linkedChildren,
+}: SpanLinksCount) {
+  if (!linkedParents && !linkedChildren) {
     return null;
   }
 
-  const total = outgoing + incoming;
+  const total = linkedParents + linkedChildren;
   return (
     <EuiToolTip
       title={i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.title', {
@@ -25,16 +28,22 @@ export function SpanLinksBadge({ outgoing, incoming }: SpanLinksCount) {
       content={
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.incoming', {
-              defaultMessage: '{incoming} incoming',
-              values: { incoming },
-            })}
+            {i18n.translate(
+              'xpack.apm.waterfall.spanLinks.tooltip.linkedChildren',
+              {
+                defaultMessage: '{linkedChildren} linkedChildren',
+                values: { linkedChildren },
+              }
+            )}
           </EuiFlexItem>
           <EuiFlexItem>
-            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.outgoing', {
-              defaultMessage: '{outgoing} outgoing',
-              values: { outgoing },
-            })}
+            {i18n.translate(
+              'xpack.apm.waterfall.spanLinks.tooltip.linkedParents',
+              {
+                defaultMessage: '{linkedParents} outgoing',
+                values: { linkedParents },
+              }
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       }

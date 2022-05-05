@@ -22,8 +22,8 @@ interface IWaterfallGroup {
 const ROOT_ID = 'root';
 
 export interface SpanLinksCount {
-  incoming: number;
-  outgoing: number;
+  linkedChildren: number;
+  linkedParents: number;
 }
 
 export enum WaterfallLegendType {
@@ -122,8 +122,8 @@ function getTransactionItem(
     legendValues: getLegendValues(transaction),
     color: '',
     spanLinksCount: {
-      outgoing: outgoingSpanLinksCount,
-      incoming: transaction.span?.links?.length ?? 0,
+      linkedParents: outgoingSpanLinksCount,
+      linkedChildren: transaction.span?.links?.length ?? 0,
     },
   };
 }
@@ -143,8 +143,8 @@ function getSpanItem(
     legendValues: getLegendValues(span),
     color: '',
     spanLinksCount: {
-      outgoing: outgoingSpanLinksCount,
-      incoming: span.span.links?.length ?? 0,
+      linkedParents: outgoingSpanLinksCount,
+      linkedChildren: span.span.links?.length ?? 0,
     },
   };
 }

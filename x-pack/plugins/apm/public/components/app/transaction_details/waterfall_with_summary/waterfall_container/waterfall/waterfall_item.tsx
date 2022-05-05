@@ -239,8 +239,8 @@ export function WaterfallItem({
           />
         )}
         <SpanLinksBadge
-          outgoing={item.spanLinksCount.outgoing}
-          incoming={item.spanLinksCount.incoming}
+          linkedParents={item.spanLinksCount.linkedParents}
+          linkedChildren={item.spanLinksCount.linkedChildren}
         />
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>

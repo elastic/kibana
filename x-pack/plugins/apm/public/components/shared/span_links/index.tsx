@@ -43,7 +43,7 @@ export function SpanLinks({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
-    spanLinksCount.incoming ? 'incoming' : 'outgoing'
+    spanLinksCount.linkedChildren ? 'incoming' : 'outgoing'
   );
 
   const [kuery, setKuery] = useState('');
@@ -79,18 +79,18 @@ export function SpanLinks({
       {
         value: 'incoming',
         text: i18n.translate('xpack.apm.spanLinks.combo.incomingLinks', {
-          defaultMessage: 'Incoming links ({incomingLinksSize})',
-          values: { incomingLinksSize: spanLinksCount.incoming },
+          defaultMessage: 'Incoming links ({linkedChildren})',
+          values: { linkedChildren: spanLinksCount.linkedChildren },
         }),
-        disabled: !spanLinksCount.incoming,
+        disabled: !spanLinksCount.linkedChildren,
       },
       {
         value: 'outgoing',
         text: i18n.translate('xpack.apm.spanLinks.combo.outgoingLinks', {
-          defaultMessage: 'Outgoing links ({outgoingLinksSize})',
-          values: { outgoingLinksSize: spanLinksCount.outgoing },
+          defaultMessage: 'Outgoing links ({linkedParents})',
+          values: { linkedParents: spanLinksCount.linkedParents },
         }),
-        disabled: !spanLinksCount.outgoing,
+        disabled: !spanLinksCount.linkedParents,
       },
     ],
     [spanLinksCount]

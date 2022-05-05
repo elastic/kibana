@@ -409,8 +409,8 @@ describe('waterfall_helpers', () => {
           legendValues,
           color: '',
           spanLinksCount: {
-            incoming: 0,
-            outgoing: 0,
+            linkedChildren: 0,
+            linkedParents: 0,
           },
         },
         {
@@ -435,8 +435,8 @@ describe('waterfall_helpers', () => {
           legendValues,
           color: '',
           spanLinksCount: {
-            incoming: 0,
-            outgoing: 0,
+            linkedChildren: 0,
+            linkedParents: 0,
           },
         },
         {
@@ -461,8 +461,8 @@ describe('waterfall_helpers', () => {
           legendValues,
           color: '',
           spanLinksCount: {
-            incoming: 0,
-            outgoing: 0,
+            linkedChildren: 0,
+            linkedParents: 0,
           },
         },
         {
@@ -481,8 +481,8 @@ describe('waterfall_helpers', () => {
           legendValues,
           color: '',
           spanLinksCount: {
-            incoming: 0,
-            outgoing: 0,
+            linkedChildren: 0,
+            linkedParents: 0,
           },
         },
         {
@@ -502,8 +502,8 @@ describe('waterfall_helpers', () => {
           legendValues,
           color: '',
           spanLinksCount: {
-            incoming: 0,
-            outgoing: 0,
+            linkedChildren: 0,
+            linkedParents: 0,
           },
         },
       ];

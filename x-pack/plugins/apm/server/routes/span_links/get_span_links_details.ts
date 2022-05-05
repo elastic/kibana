@@ -92,6 +92,7 @@ async function fetchSpanLinksDetails({
                     ],
                   },
                 })),
+                minimum_should_match: 1,
               },
             },
           ],

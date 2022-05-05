@@ -24,7 +24,7 @@ export function getSpanLinksTabContent({
   spanId,
   processorEvent,
 }: Props) {
-  if (!spanLinksCount.incoming && !spanLinksCount.outgoing) {
+  if (!spanLinksCount.linkedChildren && !spanLinksCount.linkedParents) {
     return;
   }
 
@@ -40,7 +40,7 @@ export function getSpanLinksTabContent({
     ),
     append: (
       <EuiNotificationBadge color="subdued">
-        {spanLinksCount.incoming + spanLinksCount.outgoing}
+        {spanLinksCount.linkedChildren + spanLinksCount.linkedParents}
       </EuiNotificationBadge>
     ),
     content: (
