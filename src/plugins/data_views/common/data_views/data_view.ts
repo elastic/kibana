@@ -11,7 +11,7 @@
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
+import { calculateObjectHash, CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import {
   FieldFormatsStartCommon,
   FieldFormat,
@@ -53,7 +53,7 @@ export interface TimeBasedDataView extends DataView {
 }
 
 export class DataView implements IIndexPattern {
-  public id?: string;
+  private _id?: string;
   public title: string = '';
   public fieldFormatMap: Record<string, any>;
   /**
@@ -100,7 +100,7 @@ export class DataView implements IIndexPattern {
     this.flattenHit = flattenHitWrapper(this, metaFields);
 
     // set values
-    this.id = spec.id;
+    this._id = spec.id;
     this.fieldFormatMap = spec.fieldFormats || {};
 
     this.version = spec.version;
@@ -112,9 +112,21 @@ export class DataView implements IIndexPattern {
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = spec.fieldAttrs || {};
-    this.allowNoIndex = spec.allowNoIndex || false;
+    this.allowNoIndex = spec.allowNoIndex;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
     this.namespaces = spec.namespaces || [];
+  }
+
+  public get id() {
+    return this._id || calculateObjectHash(this.toSpec());
+  }
+
+  public set id(id: string) {
+    this._id = id;
+  }
+
+  isPersisted() {
+    return !!this._id;
   }
 
   /**
@@ -201,21 +213,20 @@ export class DataView implements IIndexPattern {
    * Create static representation of index pattern
    */
   public toSpec(): DataViewSpec {
-    return {
-      id: this.id,
-      version: this.version,
+    const spec: DataViewSpec = {};
 
-      title: this.title,
-      timeFieldName: this.timeFieldName,
-      sourceFilters: this.sourceFilters,
-      fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
-      typeMeta: this.typeMeta,
-      type: this.type,
-      fieldFormats: this.fieldFormatMap,
-      runtimeFieldMap: this.runtimeFieldMap,
-      fieldAttrs: this.fieldAttrs,
-      allowNoIndex: this.allowNoIndex,
-    };
+    if (this._id) spec.id = this._id;
+    if (this.version) spec.version = this.version;
+    if (this.title) spec.title = this.title;
+    if (this.timeFieldName) spec.timeFieldName = this.timeFieldName;
+    if (this.sourceFilters) spec.sourceFilters = this.sourceFilters;
+    if (this.type) spec.type = this.type;
+    if (this.typeMeta) spec.typeMeta = this.typeMeta;
+    if (Object.keys(this.runtimeFieldMap).length > 0) spec.runtimeFieldMap = this.runtimeFieldMap;
+    if (Object.keys(this.fieldFormatMap).length > 0) spec.fieldFormats = this.fieldFormatMap;
+    if (Object.keys(this.fieldAttrs).length > 0) spec.fieldAttrs = this.fieldAttrs;
+
+    return spec;
   }
 
   /**

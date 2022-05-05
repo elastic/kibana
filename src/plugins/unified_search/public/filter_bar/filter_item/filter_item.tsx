@@ -72,8 +72,9 @@ export function FilterItem(props: FilterItemProps) {
   useEffect(() => {
     const index = props.filter.meta.index;
     let isSubscribed = true;
-    if (index) {
-      getIndexPatterns()
+    if (index && index.includes('-')) {
+      const indexPatternsService = getIndexPatterns();
+      indexPatternsService
         .get(index)
         .then((indexPattern) => {
           if (isSubscribed) {

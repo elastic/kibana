@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { calculateObjectHash, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   DEFAULT_ASSETS_TO_IGNORE,
@@ -581,6 +581,11 @@ export class DataViewsService {
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(META_FIELDS);
 
+    const objectHash = spec.id ? undefined : calculateObjectHash(spec);
+    if (!spec.id && this.dataViewCache.get(objectHash as string)) {
+      return this.dataViewCache.get(objectHash as string)!;
+    }
+
     const indexPattern = new DataView({
       spec,
       fieldFormats: this.fieldFormats,
@@ -592,7 +597,38 @@ export class DataViewsService {
       await this.refreshFields(indexPattern);
     }
 
+    // if someone was to create data view from spec and he gets a cached version, then modifies it
+    // one who originally created the data view is affected as well as one trying to load data view from spec
+    // the next time (he gets the changes someone did) .... this is very bad.
+    if (!spec.id) {
+      this.dataViewCache.set(objectHash as string, Promise.resolve(indexPattern));
+    }
+
     return indexPattern;
+  }
+
+  async clone(dataView: DataView) {
+    const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get(META_FIELDS);
+
+    return new DataView({
+      spec: dataView.toSpec(),
+      fieldFormats: this.fieldFormats,
+      shortDotsEnable,
+      metaFields,
+    });
+  }
+
+  getAllMigrations() {
+    return {};
+  }
+
+  extract(state: unknown) {
+    return { state, references: [] };
+  }
+
+  inject(state: unknown, references: unknown) {
+    return state;
   }
 
   /**

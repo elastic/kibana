@@ -71,7 +71,7 @@ export function generateFilters(
   field: IFieldType | string,
   values: any,
   operation: string,
-  index: string
+  index: DataView
 ): Filter[] {
   values = Array.isArray(values) ? _.uniq(values) : [values];
   const fieldObj = (
@@ -97,10 +97,9 @@ export function generateFilters(
     } else if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
       // When dealing with range fields, the filter type depends on the data passed in. If it's an
       // object we assume that it's a min/max value
-      const tmpIndexPattern = { id: index } as IIndexPattern;
 
       filter = buildFilter(
-        tmpIndexPattern,
+        index,
         fieldObj,
         FILTERS.RANGE_FROM_VALUE,
         false,
@@ -110,7 +109,6 @@ export function generateFilters(
         FilterStateStore.APP_STATE
       );
     } else {
-      const tmpIndexPattern = { id: index } as IIndexPattern;
       // exists filter special case:  fieldname = '_exists' and value = fieldname
       const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
       const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
@@ -119,7 +117,7 @@ export function generateFilters(
       const isNullFilter = value === null || value === undefined;
 
       filter = buildFilter(
-        tmpIndexPattern,
+        index,
         actualFieldObj,
         isNullFilter ? FILTERS.EXISTS : filterType,
         isNullFilter ? !negate : negate,
