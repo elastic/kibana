@@ -1,0 +1,105 @@
+{
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "kubernetes_dynamic_annotations": {
+            "match": "kubernetes.annotations.*",
+            "runtime": {
+              "type": "keyword"
+            }
+          }
+        },
+        {
+          "kubernetes_dynamic_annotations": {
+            "match": "kubernetes.labels.*",
+            "runtime": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "received_at": {
+          "type": "date"
+        },
+        "last_update": {
+          "type": "date"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "result" : {
+          "properties": {
+            "package_policy_id" : { "type" : "keyword" },
+            "agent_policy_id" : { "type" : "keyword"},
+            "package" : { 
+              "properties" : { 
+                "name" : { "type" : "keyword"}, 
+                "version" : { "type" : "keyword"} 
+              }
+            }
+          }
+        },
+        "agent_id": {
+          "type": "keyword"
+        },
+        "container": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "image": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "runtime": {
+              "type": "keyword"
+            }
+          }
+        },
+        "orchestrator": {
+          "properties": {
+            "cluster": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "url": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "kubernetes": {
+          "properties": {
+            "namespace": {
+              "type": "keyword"
+            },
+            "annotations": {
+              "properties": {}
+            },
+            "labels": {
+              "properties": {}
+            },
+            "pod": {
+              "properties": {
+                "ip": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "uid": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
