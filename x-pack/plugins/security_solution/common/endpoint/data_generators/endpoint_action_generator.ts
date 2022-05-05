@@ -15,15 +15,18 @@ const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
   generate(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    const timeStamp = new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp']
+      ? new Date(overrides['@timestamp'])
+      : new Date(this.randomPastDate());
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
         agent: {
-          id: [this.randomUUID()],
+          id: [this.seededUUIDv4()],
         },
         EndpointActions: {
-          action_id: this.randomUUID(),
+          action_id: this.seededUUIDv4(),
           expiration: this.randomFutureDate(timeStamp),
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
