@@ -109,6 +109,8 @@ export const DebugPage: React.FunctionComponent = () => {
             listItems={[
               {
                 label: 'Download Health Check Report',
+                disabled: true,
+                iconType: 'download',
                 href: '/api/fleet/health_check',
                 target: '_blank',
                 download: 'fleet_health_check_report.txt',
@@ -116,11 +118,13 @@ export const DebugPage: React.FunctionComponent = () => {
               {
                 label: 'View Agents in Fleet UI',
                 href: '/app/fleet/agents',
+                iconType: 'agentApp',
                 target: '_blank',
               },
               {
                 label: 'Troubleshooting Guide',
                 href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
+                iconType: 'popout',
                 target: '_blank',
               },
             ]}

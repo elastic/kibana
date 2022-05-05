@@ -119,7 +119,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         </p>
 
         <p>
-          You may reset a single preconfigured policy or use the {'"Reset All"'} button to reset all
+          You may reset a single preconfigured policy or use the {'"Reset all"'} button to reset all
           preconfigured policies at once.
         </p>
       </EuiText>
@@ -165,7 +165,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <div>
             <EuiButton color="danger" onClick={() => setIsResetAllModalVisible(true)}>
-              Reset All
+              Reset all
             </EuiButton>
           </div>
         </EuiFlexItem>
@@ -186,12 +186,12 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
       {isResetAllModalVisible && (
         <EuiConfirmModal
-          title={`Reset All preconfigured policies`}
+          title={`Reset all preconfigured policies`}
           onCancel={() => setIsResetAllModalVisible(false)}
           onConfirm={() => resetAllPoliciesMutation.mutate()}
           isLoading={resetAllPoliciesMutation.isLoading}
           cancelButtonText="Cancel"
-          confirmButtonText="Reset All"
+          confirmButtonText="Reset all"
         >
           Are you sure you want to reset all preconfigured policies?
         </EuiConfirmModal>
