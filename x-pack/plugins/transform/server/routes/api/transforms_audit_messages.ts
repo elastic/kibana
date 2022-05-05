@@ -78,7 +78,8 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
       }
 
       try {
-        const resp = await ctx.core.elasticsearch.client.asCurrentUser.search<AuditMessage>({
+        const esClient = (await ctx.core).elasticsearch.client;
+        const resp = await esClient.asCurrentUser.search<AuditMessage>({
           index: ML_DF_NOTIFICATION_INDEX_PATTERN,
           ignore_unavailable: true,
           size: SIZE,

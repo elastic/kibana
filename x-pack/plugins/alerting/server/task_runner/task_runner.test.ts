@@ -134,6 +134,11 @@ describe('Task Runner', () => {
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
     usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 10000,
+      },
+    },
   };
 
   const ephemeralTestParams: Array<
@@ -231,11 +236,15 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(3);
+    expect(logger.debug).toHaveBeenCalledTimes(4);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfScheduledActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -307,7 +316,7 @@ describe('Task Runner', () => {
       expect(enqueueFunction).toHaveBeenCalledWith(generateEnqueueFunctionInput());
 
       const logger = customTaskRunnerFactoryInitializerParams.logger;
-      expect(logger.debug).toHaveBeenCalledTimes(4);
+      expect(logger.debug).toHaveBeenCalledTimes(5);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
         2,
@@ -315,7 +324,11 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         3,
-        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfScheduledActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      );
+      expect(logger.debug).nthCalledWith(
+        4,
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"triggeredActionsStatus":"complete"}'
       );
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -331,7 +344,7 @@ describe('Task Runner', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
         2,
         generateEventLog({
-          duration: 0,
+          duration: '0',
           start: DATE_1970,
           action: EVENT_LOG_ACTIONS.newInstance,
           actionSubgroup: 'subDefault',
@@ -343,7 +356,7 @@ describe('Task Runner', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
         3,
         generateEventLog({
-          duration: 0,
+          duration: '0',
           start: DATE_1970,
           action: EVENT_LOG_ACTIONS.activeInstance,
           actionGroupId: 'default',
@@ -371,7 +384,9 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 1,
+          numberOfGeneratedActions: 1,
+          numberOfActiveAlerts: 1,
+          numberOfNewAlerts: 1,
           task: true,
           consumer: 'bar',
         })
@@ -411,7 +426,7 @@ describe('Task Runner', () => {
     expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(5);
+    expect(logger.debug).toHaveBeenCalledTimes(6);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -423,7 +438,11 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfScheduledActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      5,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"triggeredActionsStatus":"complete"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -440,7 +459,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       2,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
@@ -451,7 +470,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       3,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
@@ -466,7 +485,9 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
+        numberOfActiveAlerts: 1,
+        numberOfNewAlerts: 1,
         task: true,
         consumer: 'bar',
       })
@@ -576,7 +597,7 @@ describe('Task Runner', () => {
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
       const logger = customTaskRunnerFactoryInitializerParams.logger;
-      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
         2,
@@ -588,7 +609,11 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfScheduledActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"triggeredActionsStatus":"complete"}'
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -693,7 +718,7 @@ describe('Task Runner', () => {
       await taskRunner.run();
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       const logger = customTaskRunnerFactoryInitializerParams.logger;
-      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(
         3,
         `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`
@@ -777,7 +802,8 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
+        numberOfActiveAlerts: 1,
         task: true,
         consumer: 'bar',
       })
@@ -842,7 +868,8 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 1,
+          numberOfGeneratedActions: 1,
+          numberOfActiveAlerts: 1,
           task: true,
           consumer: 'bar',
         })
@@ -916,7 +943,8 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 1,
+          numberOfGeneratedActions: 1,
+          numberOfActiveAlerts: 1,
           task: true,
           consumer: 'bar',
         })
@@ -997,7 +1025,7 @@ describe('Task Runner', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
         2,
         generateEventLog({
-          duration: 0,
+          duration: '0',
           start: DATE_1970,
           action: EVENT_LOG_ACTIONS.newInstance,
           actionGroupId: 'default',
@@ -1008,7 +1036,7 @@ describe('Task Runner', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
         3,
         generateEventLog({
-          duration: 0,
+          duration: '0',
           start: DATE_1970,
           action: EVENT_LOG_ACTIONS.activeInstance,
           actionGroupId: 'default',
@@ -1034,7 +1062,9 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 1,
+          numberOfGeneratedActions: 1,
+          numberOfActiveAlerts: 1,
+          numberOfNewAlerts: 1,
           task: true,
           consumer: 'bar',
         })
@@ -1079,7 +1109,7 @@ describe('Task Runner', () => {
                 state: {
                   bar: false,
                   start: DATE_1969,
-                  duration: 80000000000,
+                  duration: '80000000000',
                 },
               },
               '2': {
@@ -1087,7 +1117,7 @@ describe('Task Runner', () => {
                 state: {
                   bar: false,
                   start: '1969-12-31T06:00:00.000Z',
-                  duration: 70000000000,
+                  duration: '70000000000',
                 },
               },
             },
@@ -1104,7 +1134,7 @@ describe('Task Runner', () => {
       );
 
       const logger = customTaskRunnerFactoryInitializerParams.logger;
-      expect(logger.debug).toHaveBeenCalledTimes(5);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
       expect(logger.debug).nthCalledWith(
         2,
@@ -1116,7 +1146,11 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":2,"numberOfScheduledActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}'
       );
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -1135,7 +1169,7 @@ describe('Task Runner', () => {
         2,
         generateEventLog({
           action: EVENT_LOG_ACTIONS.recoveredInstance,
-          duration: 64800000000000,
+          duration: '64800000000000',
           instanceId: '2',
           start: '1969-12-31T06:00:00.000Z',
           end: DATE_1970,
@@ -1183,7 +1217,9 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 2,
-          numberOfScheduledActions: 2,
+          numberOfGeneratedActions: 2,
+          numberOfActiveAlerts: 1,
+          numberOfRecoveredAlerts: 1,
           task: true,
           consumer: 'bar',
         })
@@ -1257,7 +1293,11 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        `ruleExecutionStatus for test:${alertId}: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":2,"numberOfScheduledActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
+        `ruleRunStatus for test:${alertId}: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        `ruleRunMetrics for test:${alertId}: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}`
       );
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -1379,7 +1419,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: DATE_1969,
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -1387,7 +1427,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -1419,7 +1459,7 @@ describe('Task Runner', () => {
       generateEventLog({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         actionGroupId: 'default',
-        duration: 64800000000000,
+        duration: '64800000000000',
         instanceId: '2',
         start: '1969-12-31T06:00:00.000Z',
         end: DATE_1970,
@@ -1445,7 +1485,9 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 2,
+        numberOfGeneratedActions: 2,
+        numberOfActiveAlerts: 1,
+        numberOfRecoveredAlerts: 1,
         task: true,
         consumer: 'bar',
       })
@@ -1453,7 +1495,7 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('validates params before executing the alert type', async () => {
+  test('validates params before running the rule type', async () => {
     const taskRunner = new TaskRunner(
       {
         ...ruleType,
@@ -1541,7 +1583,7 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('rescheduled the Alert if the schedule has update during a task run', async () => {
+  test('rescheduled the rule if the schedule has update during a task run', async () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
@@ -2003,7 +2045,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       2,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
@@ -2014,7 +2056,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       3,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
@@ -2025,7 +2067,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       4,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
@@ -2036,7 +2078,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       5,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
@@ -2051,7 +2093,9 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
+        numberOfActiveAlerts: 2,
+        numberOfNewAlerts: 2,
         task: true,
         consumer: 'bar',
       })
@@ -2088,7 +2132,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: DATE_1969,
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -2096,7 +2140,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -2141,7 +2185,7 @@ describe('Task Runner', () => {
       generateEventLog({
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
-        duration: 64800000000000,
+        duration: '64800000000000',
         start: '1969-12-31T06:00:00.000Z',
         instanceId: '2',
         consumer: 'bar',
@@ -2154,7 +2198,8 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
+        numberOfActiveAlerts: 2,
         task: true,
         consumer: 'bar',
       })
@@ -2246,7 +2291,8 @@ describe('Task Runner', () => {
         status: 'active',
         consumer: 'bar',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
+        numberOfActiveAlerts: 2,
         task: true,
       })
     );
@@ -2269,7 +2315,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: DATE_1969,
-                duration: 80000000000,
+                duration: '80000000000',
               },
             },
             '2': {
@@ -2277,7 +2323,7 @@ describe('Task Runner', () => {
               state: {
                 bar: false,
                 start: '1969-12-31T06:00:00.000Z',
-                duration: 70000000000,
+                duration: '70000000000',
               },
             },
           },
@@ -2320,7 +2366,7 @@ describe('Task Runner', () => {
       3,
       generateEventLog({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
-        duration: 64800000000000,
+        duration: '64800000000000',
         start: '1969-12-31T06:00:00.000Z',
         end: DATE_1970,
         consumer: 'bar',
@@ -2336,7 +2382,8 @@ describe('Task Runner', () => {
         status: 'ok',
         consumer: 'bar',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
+        numberOfRecoveredAlerts: 2,
         task: true,
       })
     );
@@ -2422,7 +2469,8 @@ describe('Task Runner', () => {
         status: 'ok',
         consumer: 'bar',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
+        numberOfRecoveredAlerts: 2,
         task: true,
       })
     );
@@ -2480,11 +2528,15 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(3);
+    expect(logger.debug).toHaveBeenCalledTimes(4);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfScheduledActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -2641,13 +2693,11 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
     expect(runnerResult.monitoring?.execution.history.length).toBe(200);
   });
+
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {
-    const ruleTypeWithConfig = {
-      ...ruleType,
-      config: {
-        execution: {
-          actions: { max: 3 },
-        },
+    const actionsConfigMap = {
+      default: {
+        max: 3,
       },
     };
 
@@ -2705,21 +2755,22 @@ describe('Task Runner', () => {
       ...mockedRuleTypeSavedObject,
       actions: mockActions,
     } as jest.ResolvedValue<unknown>);
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeWithConfig);
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
 
     const taskRunner = new TaskRunner(
-      ruleTypeWithConfig,
+      ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
+      {
+        ...taskRunnerFactoryInitializerParams,
+        actionsConfigMap,
+      },
       inMemoryMetrics
     );
 
     const runnerResult = await taskRunner.run();
 
-    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(
-      ruleTypeWithConfig.config.execution.actions.max
-    );
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(actionsConfigMap.default.max);
 
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -2738,13 +2789,22 @@ describe('Task Runner', () => {
               },
             },
             state: {
-              duration: 0,
+              duration: '0',
               start: '1970-01-01T00:00:00.000Z',
             },
           },
         },
       })
     );
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(6);
+
+    expect(logger.debug).nthCalledWith(
+      3,
+      'Rule "1" skipped scheduling action "4" because the maximum number of allowed actions has been reached.'
+    );
+
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(7);
 
@@ -2759,7 +2819,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       2,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.newInstance,
         actionGroupId: 'default',
@@ -2770,7 +2830,7 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
       3,
       generateEventLog({
-        duration: 0,
+        duration: '0',
         start: DATE_1970,
         action: EVENT_LOG_ACTIONS.activeInstance,
         actionGroupId: 'default',
@@ -2818,13 +2878,147 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'warning',
-        numberOfTriggeredActions: ruleTypeWithConfig.config.execution.actions.max,
-        numberOfScheduledActions: mockActions.length,
+        numberOfTriggeredActions: actionsConfigMap.default.max,
+        numberOfGeneratedActions: mockActions.length,
+        numberOfActiveAlerts: 1,
+        numberOfNewAlerts: 1,
         reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         task: true,
         consumer: 'bar',
       })
     );
+  });
+
+  test('Actions circuit breaker kicked in with connectorType specific config and multiple alerts', async () => {
+    const actionsConfigMap = {
+      default: {
+        max: 30,
+      },
+      '.server-log': {
+        max: 1,
+      },
+    };
+
+    const warning = {
+      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      message: translations.taskRunner.warning.maxExecutableActions,
+    };
+
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        executorServices.alertFactory.create('2').scheduleActions('default');
+      }
+    );
+
+    rulesClient.get.mockResolvedValue({
+      ...mockedRuleTypeSavedObject,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: '2',
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: '3',
+          actionTypeId: '.server-log',
+        },
+        {
+          group: 'default',
+          id: '4',
+          actionTypeId: 'any-action',
+        },
+        {
+          group: 'default',
+          id: '5',
+          actionTypeId: 'any-action',
+        },
+      ],
+    } as jest.ResolvedValue<unknown>);
+
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
+
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      {
+        ...taskRunnerFactoryInitializerParams,
+        actionsConfigMap,
+      },
+      inMemoryMetrics
+    );
+
+    const runnerResult = await taskRunner.run();
+
+    // 1x(.server-log) and 2x(any-action) per alert
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(5);
+
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(...generateSavedObjectParams({ status: 'warning', warning }));
+
+    expect(runnerResult).toEqual(
+      generateRunnerResult({
+        state: true,
+        history: [true],
+        alertInstances: {
+          '1': {
+            meta: {
+              lastScheduledActions: {
+                date: new Date(DATE_1970),
+                group: 'default',
+              },
+            },
+            state: {
+              duration: '0',
+              start: '1970-01-01T00:00:00.000Z',
+            },
+          },
+          '2': {
+            meta: {
+              lastScheduledActions: {
+                date: new Date(DATE_1970),
+                group: 'default',
+              },
+            },
+            state: {
+              duration: '0',
+              start: '1970-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      })
+    );
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(6);
+
+    expect(logger.debug).nthCalledWith(
+      3,
+      'Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type .server-log has been reached.'
+    );
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(11);
   });
 
   test('increments monitoring metrics after execution', async () => {

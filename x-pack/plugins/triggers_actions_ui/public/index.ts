@@ -18,6 +18,7 @@ export type {
   RuleType,
   RuleTypeIndex,
   RuleTypeModel,
+  RuleStatus,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
@@ -30,6 +31,7 @@ export type {
   RuleTypeParams,
   AsApiContract,
   RuleTableItem,
+  AlertsTableConfigurationRegistryContract,
 } from './types';
 
 export {
@@ -57,6 +59,8 @@ export { enableRule } from './application/lib/rule_api/enable';
 export { disableRule } from './application/lib/rule_api/disable';
 export { muteRule } from './application/lib/rule_api/mute';
 export { unmuteRule } from './application/lib/rule_api/unmute';
+export { snoozeRule } from './application/lib/rule_api/snooze';
+export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 

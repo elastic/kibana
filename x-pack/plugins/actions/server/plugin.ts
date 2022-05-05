@@ -93,6 +93,10 @@ import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
+import {
+  isConnectorDeprecated,
+  ConnectorWithOptionalDeprecation,
+} from './lib/is_conector_deprecated';
 
 export interface PluginSetupContract {
   registerType<
@@ -221,10 +225,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
       if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
-        this.preconfiguredActions.push({
+        const rawPreconfiguredConnector: ConnectorWithOptionalDeprecation = {
           ...this.actionsConfig.preconfigured[preconfiguredId],
           id: preconfiguredId,
           isPreconfigured: true,
+        };
+        this.preconfiguredActions.push({
+          ...rawPreconfiguredConnector,
+          isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
         });
       } else {
         this.logger.warn(
@@ -306,6 +314,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     defineRoutes(
       core.http.createRouter<ActionsRequestHandlerContext>(),
       this.licenseState,
+      actionsConfigUtils,
       this.usageCounter
     );
 
@@ -554,6 +563,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { taskManager, encryptedSavedObjects }] =
         await core.getStartServices();
+      const coreContext = await context.core;
+
       return {
         getActionsClient: () => {
           if (isESOCanEncrypt !== true) {
@@ -569,7 +580,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
-            scopedClusterClient: context.core.elasticsearch.client,
+            scopedClusterClient: coreContext.elasticsearch.client,
             preconfiguredActions,
             request,
             authorization: instantiateAuthorization(request),
