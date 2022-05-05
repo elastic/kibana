@@ -83,7 +83,7 @@ describe('AnalyticsService', () => {
     `);
   });
 
-  test('setup should only the APIs report and opt-in', () => {
+  test('setup should expose only the APIs report and opt-in', () => {
     expect(analyticsService.start()).toStrictEqual({
       reportEvent: expect.any(Function),
       optIn: expect.any(Function),

@@ -151,7 +151,7 @@ export class CoreSystem {
       this.docLinks.setup();
 
       const analytics = this.analytics.setup({ injectedMetadata });
-      this.registerLoadedKibanaEvent(analytics);
+      this.registerLoadedKibanaEventType(analytics);
 
       const executionContext = this.executionContext.setup({ analytics });
       const http = this.http.setup({
@@ -312,7 +312,7 @@ export class CoreSystem {
     this.rootDomElement.textContent = '';
   }
 
-  private registerLoadedKibanaEvent(analytics: AnalyticsServiceSetup) {
+  private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
     analytics.registerEventType({
       eventType: 'Loaded Kibana',
       schema: {
