@@ -7,6 +7,7 @@
 
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
+import { gte } from 'semver';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -934,24 +935,24 @@ function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
 function mapSearchSourceMigrationFunc(
   migrateSerializedSearchSourceFields: MigrateFunction<SerializedSearchSourceFields>
 ): MigrateFunction {
-  return (state) => {
-    const _state = state as { attributes: RawRule };
+  return (doc) => {
+    const _doc = doc as { attributes: RawRule };
 
-    const serializedSearchSource = _state.attributes.params.searchConfiguration;
+    const serializedSearchSource = _doc.attributes.params.searchConfiguration;
 
     if (isSerializedSearchSource(serializedSearchSource)) {
       return {
-        ..._state,
+        ..._doc,
         attributes: {
-          ..._state.attributes,
+          ..._doc.attributes,
           params: {
-            ..._state.attributes.params,
+            ..._doc.attributes.params,
             searchConfiguration: migrateSerializedSearchSourceFields(serializedSearchSource),
           },
         },
       };
     }
-    return _state;
+    return _doc;
   };
 }
 
@@ -965,7 +966,7 @@ function getSearchSourceMigrations(
 ) {
   const filteredMigrations: SavedObjectMigrationMap = {};
   for (const versionKey in searchSourceMigrations) {
-    if (versionKey >= MINIMUM_SS_MIGRATION_VERSION) {
+    if (gte(versionKey, MINIMUM_SS_MIGRATION_VERSION)) {
       const migrateSearchSource = mapSearchSourceMigrationFunc(
         searchSourceMigrations[versionKey]
       ) as unknown as AlertMigration;
@@ -974,7 +975,7 @@ function getSearchSourceMigrations(
         createEsoMigration(
           encryptedSavedObjects,
           (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> =>
-            true,
+            isEsQueryRuleType(doc),
           pipeMigrations(migrateSearchSource)
         ),
         versionKey
