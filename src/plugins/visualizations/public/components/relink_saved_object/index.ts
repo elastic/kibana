@@ -30,4 +30,4 @@ export {
   getRelinkSavedObjectErrorMessage,
 } from './relink_saved_object_utils';
 
-export type { RelinkSavedObjectMeta } from './types';
+export type { RelinkSavedObjectMeta, RelinkCallback } from './types';

@@ -13,11 +13,15 @@ import {
   SimpleSavedObject,
 } from '@kbn/core/public';
 
+/** @public **/
 export interface RelinkSavedObjectMeta {
   id: string;
   type: string;
   name?: string;
 }
+
+/** @public **/
+export type RelinkCallback = (missedSavedObjectId: string, selectedSavedObjectId: string) => void;
 
 /** @internal **/
 export type RelinkSimpleSavedObject = SimpleSavedObject<SavedObjectAttributes>;

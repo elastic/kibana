@@ -15,9 +15,13 @@ import {
   RelinkSavedObject,
   RelinkSavedObjectMeta,
   shouldShowRelinkSavedObjectError,
+  RelinkCallback,
 } from '../components/relink_saved_object';
 
-const defaultOnRelink = () => {
+const defaultOnRelink: RelinkCallback = (missedSavedObjectId, selectedSavedObjectId) => {
+  window.location.replace(
+    window.location.href.replaceAll(missedSavedObjectId, selectedSavedObjectId)
+  );
   window.location.reload();
 };
 
@@ -28,7 +32,7 @@ export const withHandlingMissedSavedObject = async (
   parent: IContainer | undefined,
   rootSavedObjectMeta: RelinkSavedObjectMeta,
   partialMissedSavedObjectMeta: Pick<RelinkSavedObjectMeta, 'type' | 'name'>,
-  onRelink: () => void = defaultOnRelink
+  onRelink: RelinkCallback = defaultOnRelink
 ) => {
   try {
     return await fn();

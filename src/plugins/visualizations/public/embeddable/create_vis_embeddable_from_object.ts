@@ -83,16 +83,7 @@ export const createVisEmbeddableFromObject =
         input,
         parent,
         visId ? { id: visId, type: SAVED_VIS_TYPE } : { id: parent?.id ?? '', type: 'dashboard' },
-        { type: DATA_VIEW_SAVED_OBJECT_TYPE },
-        async () => {
-          if (visId) {
-            await startDeps.core.application.navigateToUrl(editUrl, {
-              forceRedirect: true,
-              skipAppLeave: true,
-            });
-          }
-          window.location.reload();
-        }
+        { type: DATA_VIEW_SAVED_OBJECT_TYPE }
       );
     } catch (e) {
       return e instanceof ErrorEmbeddable ? e : new ErrorEmbeddable(e, input, parent);

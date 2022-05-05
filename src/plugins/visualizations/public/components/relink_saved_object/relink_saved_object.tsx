@@ -17,6 +17,7 @@ import type {
   RelinkSimpleSavedObject,
   RelinkSavedObjectMeta,
   RelinkSimpleSavedDeps,
+  RelinkCallback,
 } from './types';
 
 import {
@@ -27,7 +28,7 @@ import {
 export interface RelinkSavedObjectProps {
   rootSavedObjectMeta: RelinkSavedObjectMeta;
   missedSavedObjectMeta: RelinkSavedObjectMeta;
-  onRelink?: (selectedSavedObjectId: string) => void;
+  onRelink?: RelinkCallback;
   services: RelinkSimpleSavedDeps;
   getSavedObjectMetaDataForFinderUI?: GetSavedObjectMetaDataForFinderUI;
 }
@@ -80,7 +81,7 @@ export const RelinkSavedObject = ({
         await relinkSavedObject(savedObject!, missedSavedObjectMeta.id, selectedSavedObjectId, {
           savedObjectsClient: services.savedObjects.client,
         });
-        onRelink?.(selectedSavedObjectId);
+        onRelink?.(missedSavedObjectMeta.id, selectedSavedObjectId);
       } finally {
         setIsLoading(false);
       }
