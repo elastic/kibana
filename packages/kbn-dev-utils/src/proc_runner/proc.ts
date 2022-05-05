@@ -37,19 +37,7 @@ async function withTimeout(
   ms: number,
   onTimeout: () => Promise<void>
 ) {
-  const TIMEOUT = Symbol('timeout');
-  try {
-    await Promise.race([
-      attempt(),
-      new Promise((_, reject) => setTimeout(() => reject(TIMEOUT), ms)),
-    ]);
-  } catch (error) {
-    if (error === TIMEOUT) {
-      await onTimeout();
-    } else {
-      throw error;
-    }
-  }
+  await Rx.lastValueFrom(Rx.race(Rx.defer(attempt), Rx.timer(ms).pipe(Rx.mergeMap(onTimeout))));
 }
 
 export type Proc = ReturnType<typeof startProc>;
