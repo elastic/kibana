@@ -2116,12 +2116,13 @@ describe('Lens migrations', () => {
     });
   });
 
-  describe('8.3.0 - preserves default legend size for existing visualizations', () => {
+  describe('8.3.0 - convert legend sizes to strings', () => {
     const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
     const migrate = migrations['8.3.0'];
 
-    const autoLegendSize = 0;
-    const largeLegendSize = 120;
+    const autoLegendSize = 'auto';
+    const largeLegendSize = 'large';
+    const largeLegendSizePx = 180;
 
     it('works for XY visualization and heatmap', () => {
       const getDoc = (type: string, legendSize: number | undefined) =>
@@ -2143,7 +2144,7 @@ describe('Lens migrations', () => {
           .legendSize
       ).toBe(autoLegendSize);
       expect(
-        migrate(getDoc('lnsXY', largeLegendSize), context).attributes.state.visualization.legend
+        migrate(getDoc('lnsXY', largeLegendSizePx), context).attributes.state.visualization.legend
           .legendSize
       ).toBe(largeLegendSize);
 
@@ -2152,7 +2153,7 @@ describe('Lens migrations', () => {
           .legendSize
       ).toBe(autoLegendSize);
       expect(
-        migrate(getDoc('lnsHeatmap', largeLegendSize), context).attributes.state.visualization
+        migrate(getDoc('lnsHeatmap', largeLegendSizePx), context).attributes.state.visualization
           .legend.legendSize
       ).toBe(largeLegendSize);
     });
@@ -2168,7 +2169,7 @@ describe('Lens migrations', () => {
                   legendSize: undefined,
                 },
                 {
-                  legendSize: largeLegendSize,
+                  legendSize: largeLegendSizePx,
                 },
               ],
             },

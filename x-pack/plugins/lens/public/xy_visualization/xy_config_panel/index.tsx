@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
-import { LegendSizes } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -297,7 +297,7 @@ export const XyToolbar = memo(function XyToolbar(
 
   const legendSize = state.legend.legendSize;
 
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

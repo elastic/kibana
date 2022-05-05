@@ -14,7 +14,7 @@ import {
   DateHistogramParams,
   HistogramParams,
   DEFAULT_LEGEND_SIZE,
-  LegendSizes,
+  LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
@@ -212,10 +212,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     addTimeMarker: vis.params.addTimeMarker,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
-    legendSize:
-      vis.params.legendSize === LegendSizes.AUTO
-        ? undefined
-        : vis.params.legendSize ?? DEFAULT_LEGEND_SIZE,
+    legendSize: LegendSizeToPixels[vis.params.legendSize ?? DEFAULT_LEGEND_SIZE],
     addLegend: vis.params.addLegend,
     addTooltip: vis.params.addTooltip,
     legendPosition: vis.params.legendPosition,

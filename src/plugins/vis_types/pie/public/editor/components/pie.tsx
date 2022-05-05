@@ -31,7 +31,7 @@ import {
   LongLegendOptions,
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
-import { LegendSizes, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   PartitionVisParams,
   LabelPositions,
@@ -98,7 +98,7 @@ const PieOptions = (props: PieOptionsProps) => {
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
 
   const legendSize = stateParams.legendSize;
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const getLegendDisplay = useCallback(
     (isVisible: boolean) => (isVisible ? LegendDisplay.SHOW : LegendDisplay.HIDE),

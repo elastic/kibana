@@ -217,8 +217,6 @@ export const commonUpdatePieVisApi = (visState: any) => {
 };
 
 export const commonPreserveOldLegendSizeDefault = (visState: any) => {
-  const autoLegendSize = 0;
-
   const visualizationTypesWithLegends = [
     'pie',
     'area',
@@ -228,12 +226,20 @@ export const commonPreserveOldLegendSizeDefault = (visState: any) => {
     'heatmap',
   ];
 
+  const pixelsToLegendSize: Record<string, string> = {
+    undefined: 'auto',
+    '80': 'small',
+    '130': 'medium',
+    '180': 'large',
+    '230': 'xlarge',
+  };
+
   if (visualizationTypesWithLegends.includes(visState?.type)) {
     return {
       ...visState,
       params: {
         ...visState.params,
-        legendSize: visState.params?.legendSize ?? autoLegendSize,
+        legendSize: pixelsToLegendSize[visState.params?.legendSize],
       },
     };
   }

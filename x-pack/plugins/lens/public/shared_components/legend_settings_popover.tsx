@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { ToolbarPopover } from '.';
 import { LegendLocationSettings } from './legend_location_settings';
 import { ColumnsNumberSetting } from './columns_number_setting';
@@ -122,11 +123,11 @@ export interface LegendSettingsPopoverProps {
   /**
    * Legend size in pixels
    */
-  legendSize?: number;
+  legendSize?: LegendSize;
   /**
    * Callback on legend size change
    */
-  onLegendSizeChange: (size?: number) => void;
+  onLegendSizeChange: (size?: LegendSize) => void;
   /**
    * Whether to show auto legend size option. Should only be true for pre 8.3 visualizations that already had it as their setting.
    * (We're trying to get people to stop using it so it can eventually be removed.)

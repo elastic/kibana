@@ -9,7 +9,7 @@ import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { LegendSizes } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps } from '../types';
 import {
   LegendSettingsPopover,
@@ -53,7 +53,7 @@ export const HeatmapToolbar = memo(
 
     const legendSize = state?.legend.legendSize;
 
-    const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
+    const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

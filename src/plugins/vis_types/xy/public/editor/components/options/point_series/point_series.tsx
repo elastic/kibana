@@ -20,7 +20,7 @@ import {
 } from '@kbn/vis-default-editor-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
-import { LegendSizes } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { VisParams } from '../../../../types';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
@@ -44,7 +44,7 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
 
   const legendSize = stateParams.legendSize;
 
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
 

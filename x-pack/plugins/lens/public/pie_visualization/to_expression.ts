@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
+import { DEFAULT_LEGEND_SIZE, LegendSizeToPixels } from '@kbn/visualizations-plugin/public';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
@@ -135,20 +135,24 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   layer,
   datasourceLayers,
   paletteService
-) => ({
-  labels: generateCommonLabelsAstArgs(state, attributes, layer),
-  buckets: operations.map((o) => o.columnId).map(prepareDimension),
-  metric: layer.metric ? [prepareDimension(layer.metric)] : [],
-  legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
-  legendPosition: [layer.legendPosition || Position.Right],
-  maxLegendLines: [layer.legendMaxLines ?? 1],
-  legendSize: [layer.legendSize || DEFAULT_LEGEND_SIZE],
-  nestedLegend: [!!layer.nestedLegend],
-  truncateLegend: [
-    layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
-  ],
-  palette: generatePaletteAstArguments(paletteService, state.palette),
-});
+) => {
+  const legendSizeInPixels = LegendSizeToPixels[layer.legendSize ?? DEFAULT_LEGEND_SIZE];
+
+  return {
+    labels: generateCommonLabelsAstArgs(state, attributes, layer),
+    buckets: operations.map((o) => o.columnId).map(prepareDimension),
+    metric: layer.metric ? [prepareDimension(layer.metric)] : [],
+    legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
+    legendPosition: [layer.legendPosition || Position.Right],
+    maxLegendLines: [layer.legendMaxLines ?? 1],
+    legendSize: legendSizeInPixels !== undefined ? [legendSizeInPixels] : [],
+    nestedLegend: [!!layer.nestedLegend],
+    truncateLegend: [
+      layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
+    ],
+    palette: generatePaletteAstArguments(paletteService, state.palette),
+  };
+};
 
 const generatePieVisAst: GenerateExpressionAstFunction = (...rest) => ({
   type: 'expression',

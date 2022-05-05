@@ -260,10 +260,19 @@ export const commonPreserveOldLegendSizeDefault = (
 ): LensDocShape830<VisState830> => {
   const newAttributes = cloneDeep(attributes);
 
+  const pixelsToLegendSize: Record<string, string> = {
+    undefined: 'auto',
+    '80': 'small',
+    '130': 'medium',
+    '180': 'large',
+    '230': 'xlarge',
+  };
+
   if (['lnsXY', 'lnsHeatmap'].includes(newAttributes.visualizationType + '')) {
     const legendConfig = (newAttributes.state.visualization as { legend: { legendSize: number } })
       .legend;
-    legendConfig.legendSize = legendConfig.legendSize ?? 0;
+    (legendConfig.legendSize as unknown as string) =
+      pixelsToLegendSize[String(legendConfig.legendSize)];
   }
 
   if (newAttributes.visualizationType === 'lnsPie') {
@@ -271,7 +280,7 @@ export const commonPreserveOldLegendSizeDefault = (
       .layers;
 
     layers.forEach((layer) => {
-      layer.legendSize = layer.legendSize ?? 0;
+      (layer.legendSize as unknown as string) = pixelsToLegendSize[String(layer.legendSize)];
     });
   }
 

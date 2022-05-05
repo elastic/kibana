@@ -2560,8 +2560,9 @@ describe('migration visualization', () => {
         savedObjectMigrationContext
       );
 
-    const autoLegendSize = 0;
-    const largeLegendSize = 120;
+    const autoLegendSize = 'auto';
+    const largeLegendSize = 'large';
+    const largeLegendSizePx = 180;
 
     test.each([
       ['pie', undefined, autoLegendSize],
@@ -2570,18 +2571,18 @@ describe('migration visualization', () => {
       ['horizontal_bar', undefined, autoLegendSize],
       ['line', undefined, autoLegendSize],
       ['heatmap', undefined, autoLegendSize],
-      ['pie', largeLegendSize, largeLegendSize],
-      ['area', largeLegendSize, largeLegendSize],
-      ['histogram', largeLegendSize, largeLegendSize],
-      ['horizontal_bar', largeLegendSize, largeLegendSize],
-      ['line', largeLegendSize, largeLegendSize],
-      ['heatmap', largeLegendSize, largeLegendSize],
+      ['pie', largeLegendSizePx, largeLegendSize],
+      ['area', largeLegendSizePx, largeLegendSize],
+      ['histogram', largeLegendSizePx, largeLegendSize],
+      ['horizontal_bar', largeLegendSizePx, largeLegendSize],
+      ['line', largeLegendSizePx, largeLegendSize],
+      ['heatmap', largeLegendSizePx, largeLegendSize],
     ])(
       'given a %s visualization with current legend size of %s -- sets legend size to %s',
       (
         visualizationType: string,
         currentLegendSize: number | undefined,
-        expectedLegendSize: number
+        expectedLegendSize: string
       ) => {
         const visState = JSON.parse(
           migrate(getDoc(visualizationType, currentLegendSize)).attributes.visState

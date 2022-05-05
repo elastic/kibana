@@ -9,7 +9,7 @@ import React from 'react';
 import { LegendSizeSettings } from './legend_size_settings';
 import { EuiSuperSelect } from '@elastic/eui';
 import { shallow } from 'enzyme';
-import { DEFAULT_LEGEND_SIZE, LegendSizes } from '@kbn/visualizations-plugin/public';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/public';
 
 describe('legend size settings', () => {
   it('renders nothing if not vertical legend', () => {
@@ -41,18 +41,18 @@ describe('legend size settings', () => {
   });
 
   it('reflects current setting in select', () => {
-    const CURRENT_SIZE = LegendSizes.SMALL;
+    const CURRENT_SIZE = LegendSize.SMALL;
 
     const instance = shallow(
       <LegendSizeSettings
-        legendSize={Number(CURRENT_SIZE)}
+        legendSize={CURRENT_SIZE}
         onLegendSizeChange={() => {}}
         isVerticalLegend={true}
         showAutoOption={false}
       />
     );
 
-    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(CURRENT_SIZE.toString());
+    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(CURRENT_SIZE);
   });
 
   it('allows user to select a new option', () => {
@@ -69,10 +69,10 @@ describe('legend size settings', () => {
 
     const onChange = instance.find(EuiSuperSelect).props().onChange;
 
-    onChange(LegendSizes.EXTRA_LARGE);
+    onChange(LegendSize.EXTRA_LARGE);
     onChange(DEFAULT_LEGEND_SIZE);
 
-    expect(onSizeChange).toHaveBeenNthCalledWith(1, Number(LegendSizes.EXTRA_LARGE));
+    expect(onSizeChange).toHaveBeenNthCalledWith(1, LegendSize.EXTRA_LARGE);
     expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
   });
 
@@ -80,7 +80,7 @@ describe('legend size settings', () => {
     const getOptions = (showAutoOption: boolean) =>
       shallow(
         <LegendSizeSettings
-          legendSize={LegendSizes.LARGE}
+          legendSize={LegendSize.LARGE}
           onLegendSizeChange={() => {}}
           isVerticalLegend={true}
           showAutoOption={showAutoOption}
@@ -89,7 +89,7 @@ describe('legend size settings', () => {
         .find(EuiSuperSelect)
         .props().options;
 
-    const autoOption = expect.objectContaining({ value: LegendSizes.AUTO.toString() });
+    const autoOption = expect.objectContaining({ value: LegendSize.AUTO });
 
     expect(getOptions(true)).toContainEqual(autoOption);
     expect(getOptions(false)).not.toContainEqual(autoOption);

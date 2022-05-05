@@ -26,7 +26,7 @@ import {
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
 import { colorSchemas } from '@kbn/charts-plugin/public';
-import { LegendSizes, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';
@@ -43,7 +43,7 @@ const HeatmapOptions = (props: HeatmapOptionsProps) => {
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
 
   const legendSize = stateParams.legendSize;
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const setValueAxisScale = useCallback(
     <T extends keyof ValueAxis['scale']>(paramName: T, value: ValueAxis['scale'][T]) =>

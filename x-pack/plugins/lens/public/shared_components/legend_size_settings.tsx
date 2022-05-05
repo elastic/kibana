@@ -8,36 +8,36 @@
 import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { DEFAULT_LEGEND_SIZE, LegendSizes } from '@kbn/visualizations-plugin/public';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/public';
 
 interface LegendSizeSettingsProps {
-  legendSize: number | undefined;
-  onLegendSizeChange: (size?: number) => void;
+  legendSize?: LegendSize;
+  onLegendSizeChange: (size?: LegendSize) => void;
   isVerticalLegend: boolean;
   showAutoOption: boolean;
 }
 
-const legendSizeOptions: Array<{ value: string; inputDisplay: string }> = [
+const legendSizeOptions: Array<{ value: LegendSize; inputDisplay: string }> = [
   {
-    value: LegendSizes.SMALL.toString(),
+    value: LegendSize.SMALL,
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.small', {
       defaultMessage: 'Small',
     }),
   },
   {
-    value: LegendSizes.MEDIUM.toString(),
+    value: LegendSize.MEDIUM,
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.medium', {
       defaultMessage: 'Medium',
     }),
   },
   {
-    value: LegendSizes.LARGE.toString(),
+    value: LegendSize.LARGE,
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.large', {
       defaultMessage: 'Large',
     }),
   },
   {
-    value: LegendSizes.EXTRA_LARGE.toString(),
+    value: LegendSize.EXTRA_LARGE,
     inputDisplay: i18n.translate(
       'xpack.lens.shared.legendSizeSetting.legendSizeOptions.extraLarge',
       {
@@ -60,8 +60,7 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option: string) =>
-      onLegendSizeChange(Number(option) === DEFAULT_LEGEND_SIZE ? undefined : Number(option)),
+    (option: LegendSize) => onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : option),
     [onLegendSizeChange]
   );
 
@@ -70,7 +69,7 @@ export const LegendSizeSettings = ({
   const options = showAutoOption
     ? [
         {
-          value: LegendSizes.AUTO.toString(),
+          value: LegendSize.AUTO,
           inputDisplay: i18n.translate(
             'xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto',
             {
@@ -92,7 +91,7 @@ export const LegendSizeSettings = ({
     >
       <EuiSuperSelect
         compressed
-        valueOfSelected={legendSize?.toString() || DEFAULT_LEGEND_SIZE.toString()}
+        valueOfSelected={legendSize ?? DEFAULT_LEGEND_SIZE}
         options={options}
         onChange={onLegendSizeOptionChange}
       />

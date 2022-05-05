@@ -59,28 +59,28 @@ export type ExpressionValuePartitionLabels = ExpressionValueBoxed<
 export type PieVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof PIE_VIS_EXPRESSION_NAME,
   Datatable,
-  PieVisConfig,
+  Omit<PieVisConfig, 'legendSize'> & { legendSize: number | undefined },
   ExpressionValueRender<RenderValue>
 >;
 
 export type TreemapVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof TREEMAP_VIS_EXPRESSION_NAME,
   Datatable,
-  TreemapVisConfig,
+  Omit<TreemapVisConfig, 'legendSize'> & { legendSize: number | undefined },
   ExpressionValueRender<RenderValue>
 >;
 
 export type MosaicVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof MOSAIC_VIS_EXPRESSION_NAME,
   Datatable,
-  MosaicVisConfig,
+  Omit<MosaicVisConfig, 'legendSize'> & { legendSize: number | undefined },
   ExpressionValueRender<RenderValue>
 >;
 
 export type WaffleVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof WAFFLE_VIS_EXPRESSION_NAME,
   Datatable,
-  WaffleVisConfig,
+  Omit<WaffleVisConfig, 'legendSize'> & { legendSize: number | undefined },
   ExpressionValueRender<RenderValue>
 >;
 

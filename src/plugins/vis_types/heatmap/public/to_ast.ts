@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '@kbn/visualizations-plugin/public';
+import {
+  VisToExpressionAst,
+  getVisSchemas,
+  SchemaConfig,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './utils/palette';
@@ -21,7 +26,7 @@ const prepareLegend = (params: HeatmapVisParams) => {
     position: params.legendPosition,
     shouldTruncate: params.truncateLegend ?? true,
     maxLines: params.maxLegendLines ?? 1,
-    legendSize: params.legendSize ?? DEFAULT_LEGEND_SIZE,
+    legendSize: LegendSizeToPixels[params.legendSize ?? DEFAULT_LEGEND_SIZE],
   });
 
   return buildExpression([legend]);

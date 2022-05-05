@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { LegendSizes } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
@@ -76,7 +76,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
 
   const legendSize = layer.legendSize;
 
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSizes.AUTO);
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {

@@ -27,12 +27,20 @@ export const VisualizeConstants = {
   APP_ID: 'visualize',
 };
 
-export const LegendSizes = {
-  AUTO: 0,
-  SMALL: 80,
-  MEDIUM: 130,
-  LARGE: 180,
-  EXTRA_LARGE: 230,
+export enum LegendSize {
+  AUTO = 'auto',
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
+  EXTRA_LARGE = 'xlarge',
+}
+
+export const LegendSizeToPixels = {
+  [LegendSize.AUTO]: undefined,
+  [LegendSize.SMALL]: 80,
+  [LegendSize.MEDIUM]: 130,
+  [LegendSize.LARGE]: 180,
+  [LegendSize.EXTRA_LARGE]: 230,
 } as const;
 
-export const DEFAULT_LEGEND_SIZE = LegendSizes.MEDIUM;
+export const DEFAULT_LEGEND_SIZE = LegendSize.MEDIUM;
