@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultDataRange();
 
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
       });
 
       it('redirects from legacy hash in wrong app', async () => {
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultDataRange();
 
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
       });
 
       it('resolves markdown link', async () => {
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultDataRange();
 
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
       });
 
       it('back button works', async () => {
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultDataRange();
 
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
       });
     });
   });

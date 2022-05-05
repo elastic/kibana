@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let isNewChartsLibraryEnabled = false;
 
     before(async function () {
+      await PageObjects.visualize.initTests();
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled(
         'visualization:visualize:legacyHeatmapChartsLibrary'
       );
@@ -31,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await browser.refresh();
       }
-      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickHeatmapChart');

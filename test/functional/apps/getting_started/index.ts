@@ -21,24 +21,23 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     // TODO: Remove when vislib is removed
     describe('new charts library', function () {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': false,
-        });
-        await browser.refresh();
-      });
+      loadTestFile(require.resolve('./_shakespeare'));
+    });
 
-      after(async () => {
+    describe('old charts library', () => {
+      before(async () => {
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();
       });
 
-      loadTestFile(require.resolve('./_shakespeare'));
-    });
-
-    describe('', () => {
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:legacyPieChartsLibrary': false,
+        });
+        await browser.refresh();
+      });
       loadTestFile(require.resolve('./_shakespeare'));
     });
   });

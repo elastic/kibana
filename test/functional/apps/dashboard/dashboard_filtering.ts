@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('filters on pie charts', async () => {
-        await pieChart.expectPieSliceCount(0, false);
+        await pieChart.expectPieSliceCount(0);
       });
 
       it('area, bar and heatmap charts filtered', async () => {
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('filters on pie charts', async () => {
-        await pieChart.expectPieSliceCount(0, false);
+        await pieChart.expectPieSliceCount(0);
       });
 
       it('area, bar and heatmap charts filtered', async () => {
@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('pie charts', async () => {
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
       });
 
       it('area, bar and heatmap charts', async () => {
@@ -262,7 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
@@ -274,7 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // We are on the visualize page, not dashboard, so can't use "PageObjects.dashboard.waitForRenderComplete();"
         // as that expects an item with the `data-shared-items-count` tag.
         await renderable.waitForRender();
-        await pieChart.expectPieSliceCount(3, false);
+        await pieChart.expectPieSliceCount(3);
 
         await PageObjects.visualize.saveVisualizationExpectSuccess(
           'Rendering Test: animal sounds pie'
@@ -282,7 +282,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.expectPieSliceCount(3, false);
+        await pieChart.expectPieSliceCount(3);
       });
 
       it('Nested visualization filter pills filters data as expected', async () => {
@@ -292,12 +292,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await renderable.waitForRender();
         await pieChart.filterOnPieSlice('grr');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await pieChart.expectPieSliceCount(1, false);
+        await pieChart.expectPieSliceCount(1);
 
         await PageObjects.visualize.saveVisualizationExpectSuccess('animal sounds pie');
         await PageObjects.header.clickDashboard();
 
-        await pieChart.expectPieSliceCount(1, false);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it('Removing filter pills and query unfiters data as expected', async () => {
@@ -309,21 +309,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         await filterBar.removeFilter('sound.keyword');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
 
         await PageObjects.visualize.saveVisualizationExpectSuccess(
           'Rendering Test: animal sounds pie'
         );
         await PageObjects.header.clickDashboard();
 
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
       });
 
       it('Pie chart linked to saved search filters data', async () => {
         await dashboardAddPanel.addVisualization(
           'Filter Test: animals: linked to search with filter'
         );
-        await pieChart.expectPieSliceCount(7, false);
+        await pieChart.expectPieSliceCount(7);
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
@@ -331,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
       });
     });
   });

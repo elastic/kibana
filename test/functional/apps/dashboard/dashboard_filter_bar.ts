@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
 
-        await pieChart.expectPieSliceCount(1, false);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it('are preserved after saving a dashboard', async () => {
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
 
-        await pieChart.expectPieSliceCount(1, false);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it('are preserved after opening a dashboard saved with filters', async () => {
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
-        await pieChart.expectPieSliceCount(1, false);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it("restoring filters doesn't break back button", async () => {
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goForward();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.expectPieSliceCount(1, false);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it("saving with pinned filter doesn't unpin them", async () => {
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           saveAsNew: true,
         });
         expect(await filterBar.isFilterPinned(filterKey)).to.be(true);
-        await pieChart.expectPieSliceCount(1, false);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it("navigating to a dashboard with global filter doesn't unpin it if same filter is saved with dashboard", async () => {
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await filterBar.isFilterPinned('bytes')).to.be(true);
-        await pieChart.expectPieSliceCount(1, false);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it("pinned filters aren't saved", async () => {
@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard('saved with pinned filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await filterBar.getFilterCount()).to.be(0);
-        await pieChart.expectPieSliceCount(5, false);
+        await pieChart.expectPieSliceCount(5);
       });
     });
 
