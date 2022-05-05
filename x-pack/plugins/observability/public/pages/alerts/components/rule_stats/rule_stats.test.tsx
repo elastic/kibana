@@ -9,7 +9,7 @@ import { renderRuleStats } from './rule_stats';
 import { render } from '@testing-library/react';
 
 describe('Rule stats', () => {
-  test('renders all rule stats', () => {
+  test('renders all rule stats', async () => {
     const stats = renderRuleStats(
       {
         total: 11,
@@ -23,7 +23,7 @@ describe('Rule stats', () => {
     );
     expect(stats.length).toEqual(6);
   });
-  test('no disabled rules', async () => {
+  test('disabled count is not clickable, when there are no disabled rules', async () => {
     const stats = renderRuleStats(
       {
         total: 11,
@@ -42,7 +42,7 @@ describe('Rule stats', () => {
     expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(0);
   });
 
-  test('disabled rules are present', async () => {
+  test('disabled count is clickable, when there are disabled rules', async () => {
     const stats = renderRuleStats(
       {
         total: 11,
@@ -62,11 +62,45 @@ describe('Rule stats', () => {
     expect(container.getElementsByClassName('euiStat__title--primary').length).toBe(1);
   });
 
-  test('no snoozed rules', () => {});
+  test('snoozed count is not clickable, when there are no snoozed rules', async () => {
+    const stats = renderRuleStats(
+      {
+        total: 11,
+        disabled: 0,
+        muted: 0,
+        error: 0,
+        snoozed: 0,
+      },
+      '/app/observability/alerts/rules',
+      false
+    );
+    const { findByText, container } = render(stats[3]);
+    const snoozedElement = await findByText('Snoozed');
+    expect(snoozedElement).toBeInTheDocument();
+    expect(container.getElementsByClassName('euiStat').length).toBe(1);
+    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(0);
+  });
 
-  test('snoozed rules are present', () => {});
+  test('snoozed count is clickable, when there are snoozed rules', () => {});
 
-  test('no error rules', () => {});
+  test('errors count is not clickable, when there are no error rules', async () => {
+    const stats = renderRuleStats(
+      {
+        total: 11,
+        disabled: 0,
+        muted: 0,
+        error: 0,
+        snoozed: 0,
+      },
+      '/app/observability/alerts/rules',
+      false
+    );
+    const { findByText, container } = render(stats[2]);
+    const errorsElement = await findByText('Errors');
+    expect(errorsElement).toBeInTheDocument();
+    expect(container.getElementsByClassName('euiStat').length).toBe(1);
+    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(0);
+  });
 
-  test('error rules are present', () => {});
+  test('errors count is clickable, when there are error rules', () => {});
 });
