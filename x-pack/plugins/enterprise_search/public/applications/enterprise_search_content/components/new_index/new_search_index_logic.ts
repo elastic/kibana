@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
 import { Engine } from '../../../app_search/components/engine/types';
 import { formatApiName } from '../../utils/format_api_name';
 
@@ -20,11 +22,15 @@ export interface NewSearchIndexValues extends Pick<SearchIndicesValues, 'searchE
   rawName: string;
   name: string;
   language: string;
+  selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
 }
 
 export interface NewSearchIndexActions {
   setRawName(rawName: string): { rawName: string };
   setLanguage(language: string): { language: string };
+  setSelectedSearchEngineOptions(selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>): {
+    selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
+  };
 }
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
@@ -35,6 +41,9 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
   actions: {
     setRawName: (rawName) => ({ rawName }),
     setLanguage: (language) => ({ language }),
+    setSelectedSearchEngineOptions: (selectedSearchEngines) => ({
+      selectedSearchEngines,
+    }),
   },
   reducers: {
     language: [
@@ -49,6 +58,12 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
         setRawName: (_, { rawName }) => rawName,
       },
     ],
+    selectedSearchEngines: [
+      [],
+      {
+        setSelectedSearchEngineOptions: (_, { selectedSearchEngines }) => selectedSearchEngines,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     name: [() => [selectors.rawName], (rawName) => formatApiName(rawName)],
@@ -57,6 +72,7 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
       (searchEngines) =>
         searchEngines.map((s: Engine) => ({
           label: s.name,
+          value: s,
         })),
     ],
   }),

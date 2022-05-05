@@ -8,10 +8,10 @@
 /**
  * TODO:
  * - Need to add documentation URLs (search for `#`s)
- * - Need to implement the logic for the attaching search engines functionality
+ * - Bind create index button
  */
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -31,6 +31,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { Engine } from '../../../app_search/components/engine/types';
+
 import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
 
@@ -43,6 +45,7 @@ export interface ISearchIndex {
 
 export interface ISearchEngineOption {
   label: string;
+  value: Engine;
 }
 
 export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
@@ -51,10 +54,10 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
   type,
   onNameChange,
 }) => {
-  const { searchEngineSelectOptions, name, language, rawName } = useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguage } = useActions(NewSearchIndexLogic);
-
-  const [selectedSearchEngines, setSelectedSearchEngines] = useState([] as string[]);
+  const { searchEngineSelectOptions, name, language, rawName, selectedSearchEngines } =
+    useValues(NewSearchIndexLogic);
+  const { setRawName, setLanguage, setSelectedSearchEngineOptions } =
+    useActions(NewSearchIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -165,9 +168,9 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                 fullWidth
                 options={searchEngineSelectOptions}
                 onChange={(options) => {
-                  setSelectedSearchEngines(options.map(({ value }) => value as string));
+                  setSelectedSearchEngineOptions(options);
                 }}
-                selectedOptions={selectedSearchEngines.map((engineName) => ({ label: engineName }))}
+                selectedOptions={selectedSearchEngines}
               />
             </EuiFormRow>
           </EuiFlexItem>
