@@ -17,6 +17,9 @@ import {
   CommentResponse,
   CaseResponse,
   CommentResponseAlertsType,
+  CasesFindResponse,
+  CasesStatusResponse,
+  CasesMetricsResponse,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -61,6 +64,9 @@ export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
+export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
+export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
+export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 
 export interface ResolvedCase {
   case: Case;
@@ -82,19 +88,6 @@ export interface FilterOptions {
   tags: string[];
   reporters: User[];
   owner: string[];
-}
-
-export interface CasesStatus {
-  countClosedCases: number | null;
-  countOpenCases: number | null;
-  countInProgressCases: number | null;
-}
-
-export interface AllCases extends CasesStatus {
-  cases: Case[];
-  page: number;
-  perPage: number;
-  total: number;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;

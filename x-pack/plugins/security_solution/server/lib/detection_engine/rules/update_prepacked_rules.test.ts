@@ -7,13 +7,23 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
+import { getRuleMock, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
+import { legacyMigrate } from './utils';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 jest.mock('./patch_rules');
+
+jest.mock('./utils', () => {
+  const actual = jest.requireActual('./utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe('updatePrepackagedRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -24,6 +34,8 @@ describe('updatePrepackagedRules', () => {
     rulesClient = rulesClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
     ruleExecutionLog = ruleExecutionLogMock.forRoutes.create();
+
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
