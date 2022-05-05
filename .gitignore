@@ -98,4 +98,4 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
-
+/packages/kbn-synthetic-package-map/synthetic-packages.json
