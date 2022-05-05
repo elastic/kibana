@@ -157,7 +157,7 @@ describe('Cloud Plugin', () => {
           config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg1' },
           currentUserProps: {
             username: '1234',
-            authentication_realm: { name: 'cloud-saml-kibana' },
+            authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
           },
         });
 
@@ -167,7 +167,7 @@ describe('Cloud Plugin', () => {
           config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
           currentUserProps: {
             username: '1234',
-            authentication_realm: { name: 'cloud-saml-kibana' },
+            authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
           },
         });
 

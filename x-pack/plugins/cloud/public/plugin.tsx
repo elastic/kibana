@@ -405,6 +405,7 @@ export const loadFullStoryUserId = async ({
 
     if (
       getIsCloudEnabled(cloudDeploymentId) &&
+      currentUser.authentication_realm?.type === 'saml' &&
       currentUser.authentication_realm?.name === 'cloud-saml-kibana'
     ) {
       return currentUser.username;
