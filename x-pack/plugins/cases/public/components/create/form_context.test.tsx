@@ -182,6 +182,7 @@ describe('Create case', () => {
         </FormContext>
       );
       expect(renderResult.getByTestId('caseTitle')).toBeTruthy();
+      expect(renderResult.getByTestId('caseSeverity')).toBeTruthy();
       expect(renderResult.getByTestId('caseDescription')).toBeTruthy();
       expect(renderResult.getByTestId('caseTags')).toBeTruthy();
       expect(renderResult.getByTestId('caseConnectors')).toBeTruthy();
@@ -283,6 +284,18 @@ describe('Create case', () => {
       await waitFor(() =>
         expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
       );
+    });
+
+    it('should select LOW as the default severity', async () => {
+      const renderResult = mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+      expect(renderResult.getByTestId('caseSeverity')).toBeTruthy();
+      // there should be 2 low elements. one for the options popover and one for the displayed one.
+      expect(renderResult.getAllByTestId('case-severity-selection-low').length).toBe(2);
     });
 
     it('should select the default connector set in the configuration', async () => {
