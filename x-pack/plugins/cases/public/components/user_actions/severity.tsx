@@ -16,6 +16,9 @@ import { severities } from '../severity/config';
 const getLabelTitle = (userAction: UserActionResponse<SeverityUserAction>) => {
   const severity = userAction.payload.severity;
   const severityData = severities[severity];
+  if (severityData === undefined) {
+    return null;
+  }
   return (
     <EuiFlexGroup
       gutterSize="s"
