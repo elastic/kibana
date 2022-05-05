@@ -7,8 +7,8 @@
 
 import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
-import { ProcessorEvent } from '@kbn/apm-plugin/common/processor_event';
 import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
+import { ProcessorEvent } from '@kbn/apm-plugin/common/processor_event';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   generateExternalSpanLinks,
@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function getIncomingSpanDetails({
+  async function getLinkedChildrenSpanDetails({
     kuery,
     traceId,
     spanId,
@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       it('handles empty state', async () => {
-        const response = await getIncomingSpanDetails({
+        const response = await getLinkedChildrenSpanDetails({
           kuery: '',
           traceId: 'foo',
           spanId: 'bar',
@@ -71,16 +71,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       let externalSpanLinks: SpanLink[];
-      let serviceAIncomingLinks: SpanLink[];
-      let serviceATraceId: string;
-      let serviceATransactionId: string;
-      let serviceAprocessorEvent: ProcessorEvent;
+      let serviceBTraceId: string;
+      let serviceBTransactionId: string;
+      let serviceBprocessorEvent: ProcessorEvent;
+
       before(async () => {
         const serviceBAsArray = generateIncomeEventsSpanLinks().toArray();
+        const transaction = serviceBAsArray.slice(0, 1)[0];
+        serviceBTraceId = transaction['trace.id']!;
+        serviceBTransactionId = transaction['transaction.id']!;
+        serviceBprocessorEvent = transaction['processor.event']! as ProcessorEvent;
 
         externalSpanLinks = generateExternalSpanLinks(3);
-
-        serviceAIncomingLinks = [...externalSpanLinks, ...getSpanLinksFromEvents(serviceBAsArray)];
 
         const instanceJava = apm.service('service-A', 'production', 'java').instance('instance-a');
         const serviceAEvents = timerange(start, end)
@@ -89,7 +91,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .generator((timestamp) => {
             return instanceJava
               .transaction('GET /service_A')
-              .defaults({ 'span.links': serviceAIncomingLinks })
+              .defaults({
+                'span.links': [...externalSpanLinks, ...getSpanLinksFromEvents(serviceBAsArray)],
+              })
               .timestamp(timestamp)
               .duration(1000)
               .success()
@@ -102,55 +106,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               );
           });
 
-        const serviceAAsArray = serviceAEvents.toArray();
-        const transaction = serviceAAsArray.slice(0, 1)[0];
-        serviceATraceId = transaction['trace.id']!;
-        serviceATransactionId = transaction['transaction.id']!;
-        serviceAprocessorEvent = transaction['processor.event']! as ProcessorEvent;
-
         await synthtraceEsClient.index(
-          new EntityArrayIterable(serviceBAsArray).merge(new EntityArrayIterable(serviceAAsArray))
+          new EntityArrayIterable(serviceBAsArray).merge(serviceAEvents)
         );
       });
 
       after(() => synthtraceEsClient.clean());
 
       describe('should have span links details', async () => {
-        let spanLinksDetails: Awaited<ReturnType<typeof getIncomingSpanDetails>>['body'];
+        let spanLinksDetails: Awaited<ReturnType<typeof getLinkedChildrenSpanDetails>>['body'];
         before(async () => {
-          const response = await getIncomingSpanDetails({
+          const response = await getLinkedChildrenSpanDetails({
             kuery: '',
-            traceId: serviceATraceId,
-            spanId: serviceATransactionId,
-            processorEvent: serviceAprocessorEvent,
+            traceId: serviceBTraceId,
+            spanId: serviceBTransactionId,
+            processorEvent: serviceBprocessorEvent,
           });
           expect(response.status).to.eql(200);
           spanLinksDetails = response.body;
         });
 
-        it('returns service-B as incoming span links', () => {
+        it('returns service-A as outgoing span links', () => {
           expect(
             spanLinksDetails.spanLinksDetails.filter(
-              (item) => item.details?.serviceName === 'service-B'
+              (item) => item.details?.serviceName === 'service-A'
             ).length
           ).to.be.greaterThan(0);
-        });
-
-        it('returns same order of span links requested', () => {
-          expect(
-            spanLinksDetails.spanLinksDetails.map((item) => `${item.traceId}:${item.spanId}`)
-          ).to.be.eql(serviceAIncomingLinks.map((item) => `${item.trace?.id}:${item.span.id}`));
         });
       });
 
       describe('with kuery', async () => {
-        let spanLinksDetails: Awaited<ReturnType<typeof getIncomingSpanDetails>>['body'];
+        let spanLinksDetails: Awaited<ReturnType<typeof getLinkedChildrenSpanDetails>>['body'];
         before(async () => {
-          const response = await getIncomingSpanDetails({
-            traceId: serviceATraceId,
-            spanId: serviceATransactionId,
-            kuery: 'service-B',
-            processorEvent: serviceAprocessorEvent,
+          const response = await getLinkedChildrenSpanDetails({
+            traceId: serviceBTraceId,
+            spanId: serviceBTransactionId,
+            processorEvent: serviceBprocessorEvent,
+            kuery: 'service-A',
           });
           expect(response.status).to.eql(200);
           spanLinksDetails = response.body;

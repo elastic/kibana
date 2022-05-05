@@ -56,12 +56,12 @@ export function SpanLinks({
       };
       if (selectedLinkType === 'incoming') {
         return callApmApi(
-          'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
+          'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
           { params }
         );
       }
       return callApmApi(
-        'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
+        'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
         { params }
       );
     },

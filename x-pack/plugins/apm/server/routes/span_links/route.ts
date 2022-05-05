@@ -10,54 +10,9 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getSpanLinksDetails } from './get_span_links_details';
 import { getLinkedChildrenOfSpan } from './get_linked_children';
 import { kueryRt, rangeRt } from '../default_api_types';
-import { getLinkedParentsOfSpan } from './get_linked_parents';
 import { SpanLinkDetails } from '../../../common/span_links';
 import { processorEventRt } from '../../../common/processor_event';
-
-const linkedChildrenRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      spanId: t.string,
-    }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      t.type({ processorEvent: processorEventRt }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    spanLinksDetails: SpanLinkDetails[];
-  }> => {
-    const {
-      params: { query, path },
-    } = resources;
-    const setup = await setupRequest(resources);
-    const linkedChildren = await getLinkedChildrenOfSpan({
-      setup,
-      traceId: path.traceId,
-      spanId: path.spanId,
-      start: query.start,
-      end: query.end,
-      processorEvent: query.processorEvent,
-    });
-
-    return {
-      spanLinksDetails: await getSpanLinksDetails({
-        setup,
-        spanLinks: linkedChildren,
-        kuery: query.kuery,
-        start: query.start,
-        end: query.end,
-        processorEvent: query.processorEvent,
-      }),
-    };
-  },
-});
+import { getLinkedParentsOfSpan } from './get_linked_parents';
 
 const linkedParentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
@@ -88,6 +43,7 @@ const linkedParentsRoute = createApmServerRoute({
       spanId: path.spanId,
       start: query.start,
       end: query.end,
+      processorEvent: query.processorEvent,
     });
 
     return {
@@ -103,7 +59,51 @@ const linkedParentsRoute = createApmServerRoute({
   },
 });
 
+const linkedChildrenRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+      spanId: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      t.type({ processorEvent: processorEventRt }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    spanLinksDetails: SpanLinkDetails[];
+  }> => {
+    const {
+      params: { query, path },
+    } = resources;
+    const setup = await setupRequest(resources);
+    const linkedChildren = await getLinkedChildrenOfSpan({
+      setup,
+      traceId: path.traceId,
+      spanId: path.spanId,
+      start: query.start,
+      end: query.end,
+    });
+
+    return {
+      spanLinksDetails: await getSpanLinksDetails({
+        setup,
+        spanLinks: linkedChildren,
+        kuery: query.kuery,
+        start: query.start,
+        end: query.end,
+        processorEvent: query.processorEvent,
+      }),
+    };
+  },
+});
+
 export const spanLinksRouteRepository = {
-  ...linkedChildrenRoute,
   ...linkedParentsRoute,
+  ...linkedChildrenRoute,
 };

@@ -6,54 +6,128 @@
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  PROCESSOR_EVENT,
   SPAN_ID,
   SPAN_LINKS,
+  SPAN_LINKS_TRACE_ID,
+  SPAN_LINKS_SPAN_ID,
   TRACE_ID,
   TRANSACTION_ID,
-  PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
+import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
+import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getBufferedTimerange } from './utils';
 
-export async function getLinkedChildrenOfSpan({
-  setup,
+async function fetchLinkedChildrenOfSpan({
   traceId,
-  spanId,
+  setup,
   start,
   end,
-  processorEvent,
+  spanId,
+}: {
+  traceId: string;
+  setup: Setup;
+  start: number;
+  end: number;
+  spanId?: string;
+}) {
+  const { apmEventClient } = setup;
+
+  const { startWithBuffer, endWithBuffer } = getBufferedTimerange({
+    start,
+    end,
+  });
+
+  const response = await apmEventClient.search(
+    'fetch_linked_children_of_span',
+    {
+      apm: {
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      },
+      _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
+      body: {
+        size: 1000,
+        query: {
+          bool: {
+            filter: [
+              ...rangeQuery(startWithBuffer, endWithBuffer),
+              { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
+              ...(spanId ? [{ term: { [SPAN_LINKS_SPAN_ID]: spanId } }] : []),
+            ],
+          },
+        },
+      },
+    }
+  );
+
+  return response.hits.hits;
+}
+
+function getSpanId(source: TransactionRaw | SpanRaw) {
+  return source.processor.event === ProcessorEvent.span
+    ? (source as SpanRaw).span.id
+    : (source as TransactionRaw).transaction?.id;
+}
+
+export async function getLinkedChildrenOfSpanCountBySpanId({
+  traceId,
+  setup,
+  start,
+  end,
+}: {
+  traceId: string;
+  setup: Setup;
+  start: number;
+  end: number;
+}) {
+  const outgoingSpans = await fetchLinkedChildrenOfSpan({
+    traceId,
+    setup,
+    start,
+    end,
+  });
+
+  return outgoingSpans.reduce<Record<string, number>>(
+    (acc, { _source: source }) => {
+      source.span?.links?.forEach((link) => {
+        // Ignores span links that don't belong to this trace
+        if (link.trace.id === traceId) {
+          acc[link.span.id] = (acc[link.span.id] || 0) + 1;
+        }
+      });
+      return acc;
+    },
+    {}
+  );
+}
+
+export async function getLinkedChildrenOfSpan({
+  traceId,
+  spanId,
+  setup,
+  start,
+  end,
 }: {
   traceId: string;
   spanId: string;
   setup: Setup;
   start: number;
   end: number;
-  processorEvent: ProcessorEvent;
 }) {
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search('get_span_links_details', {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    _source: [SPAN_LINKS],
-    body: {
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            { term: { [TRACE_ID]: traceId } },
-            { exists: { field: SPAN_LINKS } },
-            { term: { [PROCESSOR_EVENT]: processorEvent } },
-            ...(processorEvent === ProcessorEvent.transaction
-              ? [{ term: { [TRANSACTION_ID]: spanId } }]
-              : [{ term: { [SPAN_ID]: spanId } }]),
-          ],
-        },
-      },
-    },
+  const outgoingSpan = await fetchLinkedChildrenOfSpan({
+    traceId,
+    spanId,
+    setup,
+    start,
+    end,
   });
 
-  return response.hits.hits?.[0]?._source?.span?.links || [];
+  return outgoingSpan.map(({ _source: source }) => {
+    return {
+      trace: { id: source.trace.id },
+      span: { id: getSpanId(source) },
+    };
+  });
 }

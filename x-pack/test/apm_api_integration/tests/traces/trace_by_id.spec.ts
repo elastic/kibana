@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         exceedsMax: false,
         traceDocs: [],
         errorDocs: [],
-        outgoingSpanLinksCountBySpanId: {},
+        linkedChildrenOfSpanCountBySpanId: {},
       });
     });
   });
@@ -198,7 +198,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           traces = response.body;
         });
         it('returns empty outgoing links', () => {
-          expect(traces.outgoingSpanLinksCountBySpanId).to.be.empty();
+          expect(traces.linkedChildrenOfSpanCountBySpanId).to.be.empty();
         });
       });
 
@@ -216,7 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           traces = response.body;
         });
         it('return outgoing links', () => {
-          expect(traces.outgoingSpanLinksCountBySpanId).not.to.be.empty();
+          expect(traces.linkedChildrenOfSpanCountBySpanId).not.to.be.empty();
         });
       });
     }

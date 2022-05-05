@@ -109,7 +109,7 @@ function getLegendValues(transactionOrSpan: Transaction | Span) {
 
 function getTransactionItem(
   transaction: Transaction,
-  outgoingSpanLinksCount: number = 0
+  linkedChildrenCount: number = 0
 ): IWaterfallTransaction {
   return {
     docType: 'transaction',
@@ -122,15 +122,15 @@ function getTransactionItem(
     legendValues: getLegendValues(transaction),
     color: '',
     spanLinksCount: {
-      linkedParents: outgoingSpanLinksCount,
-      linkedChildren: transaction.span?.links?.length ?? 0,
+      linkedParents: transaction.span?.links?.length ?? 0,
+      linkedChildren: linkedChildrenCount,
     },
   };
 }
 
 function getSpanItem(
   span: Span,
-  outgoingSpanLinksCount: number = 0
+  linkedChildrenCount: number = 0
 ): IWaterfallSpan {
   return {
     docType: 'span',
@@ -143,8 +143,8 @@ function getSpanItem(
     legendValues: getLegendValues(span),
     color: '',
     spanLinksCount: {
-      linkedParents: outgoingSpanLinksCount,
-      linkedChildren: span.span.links?.length ?? 0,
+      linkedParents: span.span.links?.length ?? 0,
+      linkedChildren: linkedChildrenCount,
     },
   };
 }
@@ -289,20 +289,23 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
 
 const getWaterfallItems = (
   items: TraceAPIResponse['traceDocs'],
-  outgoingSpanLinksCountBySpanId: TraceAPIResponse['outgoingSpanLinksCountBySpanId']
+  linkedChildrenOfSpanCountBySpanId: TraceAPIResponse['linkedChildrenOfSpanCountBySpanId']
 ) =>
   items.map((item) => {
     const docType: 'span' | 'transaction' = item.processor.event;
     switch (docType) {
       case 'span': {
         const span = item as Span;
-        return getSpanItem(span, outgoingSpanLinksCountBySpanId[span.span.id]);
+        return getSpanItem(
+          span,
+          linkedChildrenOfSpanCountBySpanId[span.span.id]
+        );
       }
       case 'transaction':
         const transaction = item as Transaction;
         return getTransactionItem(
           transaction,
-          outgoingSpanLinksCountBySpanId[transaction.transaction.id]
+          linkedChildrenOfSpanCountBySpanId[transaction.transaction.id]
         );
     }
   });
@@ -428,7 +431,7 @@ export function getWaterfall(
 
   const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
     apiResponse.traceDocs,
-    apiResponse.outgoingSpanLinksCountBySpanId
+    apiResponse.linkedChildrenOfSpanCountBySpanId
   );
 
   const childrenByParentId = getChildrenGroupedByParentId(
