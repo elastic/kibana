@@ -24,10 +24,10 @@ import {
 } from '@elastic/eui';
 
 import classNames from 'classnames';
-import { KibanaSolutionAvatar } from '../../solution_avatar';
-import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { KibanaSolutionAvatar } from '../../solution_avatar';
+import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
 export type KibanaPageTemplateSolutionNavProps = Omit<
   EuiSideNavProps<{}>,
