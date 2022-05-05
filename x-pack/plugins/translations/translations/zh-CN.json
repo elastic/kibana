@@ -25486,7 +25486,6 @@
     "xpack.securitySolution.endpoint.policy.details.updateConfirm.message": "此操作无法撤消。是否确定要继续？",
     "xpack.securitySolution.endpoint.policy.details.updateConfirm.title": "保存并部署更改",
     "xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage": "保存这些更改会将更新应用于分配到此代理策略的所有终端。",
-    "xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle": "此操作将更新 {hostCount, plural, other {# 个主机}}",
     "xpack.securitySolution.endpoint.policy.details.updateErrorTitle": "失败！",
     "xpack.securitySolution.endpoint.policy.details.updateSuccessMessage": "集成 {name} 已更新。",
     "xpack.securitySolution.endpoint.policy.details.updateSuccessTitle": "成功！",
