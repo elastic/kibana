@@ -50,12 +50,12 @@ export default ({ getService }: FtrProviderContext) => {
         await transform.api.deleteIndices(destinationIndex);
       });
 
+      const testMeta1 = {
+        id: 'some_id_1',
+        description: 'some test case description 1',
+        feature: 'some_feature_1',
+      };
       it('should delete transform by transformId', async () => {
-        /* META
-        id: some_id
-        description: some test case description
-        feature: some_feature
-        */
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };
@@ -74,8 +74,13 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].destDataViewDeleted.success).to.eql(false);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
-      });
+      }).meta = testMeta1;
 
+      const testMeta2 = {
+        id: 'some_id_2',
+        description: 'some test case description 2',
+        feature: 'some_feature_2',
+      };
       it('should return 403 for unauthorized user', async () => {
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
@@ -92,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await transform.api.waitForTransformToExist(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
-      });
+      }).meta = testMeta2;
     });
 
     describe('single transform deletion with invalid transformId', function () {
@@ -112,7 +117,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.invalid_transform_id.transformDeleted.success).to.eql(false);
         expect(body.invalid_transform_id.transformDeleted).to.have.property('error');
-      });
+      }).meta = {
+        id: 'some_id_3',
+        description: 'some test case description 3',
+        feature: 'some_feature_3',
+      };
     });
 
     describe('bulk deletion', function () {
@@ -138,6 +147,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should delete multiple transforms by transformIds', async () => {
+        /* META
+        id: some_id
+        description: some test case description
+        feature: some_feature
+        */
         const { body, status } = await supertest
           .post(`/api/transform/delete_transforms`)
           .auth(

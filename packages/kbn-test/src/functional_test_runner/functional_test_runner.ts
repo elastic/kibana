@@ -261,7 +261,7 @@ export class FunctionalTestRunner {
       file: string;
       title: string;
       fullTitle: string;
-      meta: string[];
+      meta: object;
     }
 
     const getFullTitle = (node: Test | Suite): string => {
@@ -273,32 +273,16 @@ export class FunctionalTestRunner {
     const passes: TestEntry[] = [];
     const pending: TestEntry[] = [];
 
-    // Extract the content of a multi line meta comment in the test body.
-    // Multi line meta comments start with `/* META` and end with `*/`.
-    // Start and end line are not included in the result.
-    const extractMeta = (body: string): string[] => {
-      const meta: string[] = [];
-      const pattern = /(?:\/\* META(?:[^\*])*\*+\/)/g;
-      const match = body.match(pattern);
-      if (match) {
-        match[0]
-          .split('\n')
-          .map((l) => l.trim())
-          .filter((l) => l !== '/* META' && l !== '*/')
-          .forEach((l) => meta.push(l));
-      }
-      return meta;
-    };
-
     const collectTests = (suite: Suite) => {
       for (const subSuite of suite.suites) {
         suiteCount++;
         for (const test of subSuite.tests) {
+          if (test.meta) this.log.info(test.meta);
           const testEntry = {
             title: test.title,
             fullTitle: getFullTitle(test),
             file: test.file || '',
-            meta: extractMeta(test.body),
+            meta: test.meta || {},
           };
           if (test.pending) {
             pending.push(testEntry);

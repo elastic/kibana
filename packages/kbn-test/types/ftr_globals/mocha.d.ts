@@ -21,4 +21,8 @@ declare module 'mocha' {
      */
     onlyEsVersion(semver: string): void;
   }
+
+  interface Test {
+    meta: object;
+  }
 }

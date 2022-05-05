@@ -33,6 +33,7 @@ export interface Test {
   isPassed: () => boolean;
   pending?: boolean;
   body: string;
+  meta: object;
 }
 
 export interface Runner extends EventEmitter {
