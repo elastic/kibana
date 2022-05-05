@@ -68,7 +68,8 @@ export const buildHttpQuery = ({
       },
       _source: false,
       fields: [
-        'host.name', 'source.ip',
+        'host.name',
+        'source.ip',
         {
           field: '@timestamp',
           format: 'strict_date_optional_time',

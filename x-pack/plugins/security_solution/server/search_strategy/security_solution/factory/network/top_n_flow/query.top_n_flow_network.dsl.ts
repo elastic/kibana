@@ -69,7 +69,8 @@ export const buildTopNFlowQuery = ({
       },
       _source: false,
       fields: [
-        `${flowTarget}.geo.*`, `$${flowTarget}.as.*`,
+        `${flowTarget}.geo.*`,
+        `$${flowTarget}.as.*`,
         {
           field: '@timestamp',
           format: 'strict_date_optional_time',
