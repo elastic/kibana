@@ -34,7 +34,6 @@ export const SeveritySelector: React.FC<Props> = ({
     const severityData = severities[severity];
     return {
       value: severity,
-      disabled: isDisabled,
       inputDisplay: (
         <EuiFlexGroup
           gutterSize="xs"
@@ -52,6 +51,7 @@ export const SeveritySelector: React.FC<Props> = ({
 
   return (
     <EuiSuperSelect
+      disabled={isDisabled}
       fullWidth={true}
       isLoading={isLoading}
       options={options}
