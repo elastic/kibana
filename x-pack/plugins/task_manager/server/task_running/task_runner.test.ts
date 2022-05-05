@@ -1519,6 +1519,32 @@ describe('TaskManagerRunner', () => {
     });
   });
 
+  describe('run', () => {
+    test('Prints debug logs on task start and end', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
+    });
+  });
+
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;
