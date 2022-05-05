@@ -31,12 +31,6 @@ export const getCasesLinkItems = (): LinkItem => {
   return {
     ...rest,
     id: SecurityPageName.case,
-    links: deepLinks.map((link) => {
-      const { id: subId, ...all } = link;
-      if (subId === SecurityPageName.caseConfigure) {
-        return { ...all, id: SecurityPageName.caseConfigure };
-      }
-      return { ...all, id: SecurityPageName.caseCreate };
-    }),
+    links: deepLinks as LinkItem[],
   };
 };
