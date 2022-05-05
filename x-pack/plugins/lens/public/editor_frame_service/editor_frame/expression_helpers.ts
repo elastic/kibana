@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast, AstFunction, fromExpression } from '@kbn/interpreter';
+import { Ast, fromExpression } from '@kbn/interpreter';
 import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourceMap, DatasourceLayers } from '../../types';
 
@@ -40,46 +40,6 @@ export function getDatasourceExpressionsByLayers(
   );
 }
 
-export function prependDatasourceExpression(
-  visualizationExpression: Ast | string | null,
-  datasourceMap: DatasourceMap,
-  datasourceStates: DatasourceStates
-): Ast | null {
-  const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
-    datasourceMap,
-    datasourceStates
-  );
-
-  if (datasourceExpressionsByLayers === null || visualizationExpression === null) {
-    return null;
-  }
-
-  const parsedDatasourceExpressions = Object.entries(datasourceExpressionsByLayers);
-
-  const datafetchExpression: AstFunction = {
-    type: 'function',
-    function: 'lens_merge_tables',
-    arguments: {
-      layerIds: parsedDatasourceExpressions.map(([id]) => id),
-      tables: parsedDatasourceExpressions.map(([, expr]) => expr),
-    },
-  };
-
-  const parsedVisualizationExpression =
-    typeof visualizationExpression === 'string'
-      ? fromExpression(visualizationExpression)
-      : visualizationExpression;
-
-  return {
-    type: 'expression',
-    chain: [
-      { type: 'function', function: 'kibana', arguments: {} },
-      datafetchExpression,
-      ...parsedVisualizationExpression.chain,
-    ],
-  };
-}
-
 export function buildExpression({
   visualization,
   visualizationState,
@@ -101,31 +61,26 @@ export function buildExpression({
     return null;
   }
 
-  if (visualization.shouldBuildDatasourceExpressionManually?.()) {
-    const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
-      datasourceMap,
-      datasourceStates
-    );
+  const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+    datasourceMap,
+    datasourceStates
+  );
 
-    const visualizationExpression = visualization.toExpression(
-      visualizationState,
-      datasourceLayers,
-      {
-        title,
-        description,
-      },
-      datasourceExpressionsByLayers ?? undefined
-    );
+  const visualizationExpression = visualization.toExpression(
+    visualizationState,
+    datasourceLayers,
+    {
+      title,
+      description,
+    },
+    datasourceExpressionsByLayers ?? undefined
+  );
 
-    return typeof visualizationExpression === 'string'
-      ? fromExpression(visualizationExpression)
-      : visualizationExpression;
+  if (datasourceExpressionsByLayers === null || visualizationExpression === null) {
+    return null;
   }
 
-  const visualizationExpression = visualization.toExpression(visualizationState, datasourceLayers, {
-    title,
-    description,
-  });
-
-  return prependDatasourceExpression(visualizationExpression, datasourceMap, datasourceStates);
+  return typeof visualizationExpression === 'string'
+    ? fromExpression(visualizationExpression)
+    : visualizationExpression;
 }
