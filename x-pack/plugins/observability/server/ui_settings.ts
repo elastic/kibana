@@ -38,10 +38,13 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Enable new synthetic monitoring view',
     }),
     value: false,
-    description: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentDescription', {
-      defaultMessage:
-        'Enable new synthetic monitoring view in observability. A page refresh is required for the setting to be applied.',
-    }),
+    description: i18n.translate(
+      'xpack.observability.enableNewSyntheticsViewExperimentDescription',
+      {
+        defaultMessage:
+          'Enable new synthetic monitoring view in observability. A page refresh is required for the setting to be applied.',
+      }
+    ),
     schema: schema.boolean(),
     requiresPageReload: true,
   },
