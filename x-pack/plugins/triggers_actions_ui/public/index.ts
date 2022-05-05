@@ -18,6 +18,7 @@ export type {
   RuleType,
   RuleTypeIndex,
   RuleTypeModel,
+  RuleStatus,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
