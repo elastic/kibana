@@ -245,7 +245,8 @@ function expressionHelper(
   state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
-  attributes: Attributes = { isPreview: false }
+  attributes: Attributes = { isPreview: false },
+  datasourceExpressionsByLayers: Record<string, Ast>
 ): Ast | null {
   const layer = state.layers[0];
   const datasource = datasourceLayers[layer.layerId];
@@ -261,26 +262,55 @@ function expressionHelper(
   if (!layer.metric || !operations.length) {
     return null;
   }
+  const visualizationAst = generateExprAst(
+    state,
+    attributes,
+    operations,
+    layer,
+    datasourceLayers,
+    paletteService
+  );
 
-  return generateExprAst(state, attributes, operations, layer, datasourceLayers, paletteService);
+  const datasourceAst = datasourceExpressionsByLayers[layer.layerId];
+  return {
+    type: 'expression',
+    chain: [
+      ...(datasourceAst ? datasourceAst.chain : []),
+      ...(visualizationAst ? visualizationAst.chain : []),
+    ],
+  };
 }
 
 export function toExpression(
   state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {}
+  attributes: Partial<{ title: string; description: string }> = {},
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ) {
-  return expressionHelper(state, datasourceLayers, paletteService, {
-    ...attributes,
-    isPreview: false,
-  });
+  return expressionHelper(
+    state,
+    datasourceLayers,
+    paletteService,
+    {
+      ...attributes,
+      isPreview: false,
+    },
+    datasourceExpressionsByLayers
+  );
 }
 
 export function toPreviewExpression(
   state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ) {
-  return expressionHelper(state, datasourceLayers, paletteService, { isPreview: true });
+  return expressionHelper(
+    state,
+    datasourceLayers,
+    paletteService,
+    { isPreview: true },
+    datasourceExpressionsByLayers
+  );
 }
