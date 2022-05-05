@@ -15,7 +15,6 @@ import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { docLinks } from '../../../../../shared/doc_links';
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 jest.mock('../../../../app_logic', () => ({
@@ -23,10 +22,9 @@ jest.mock('../../../../app_logic', () => ({
 }));
 import { AppLogic } from '../../../../app_logic';
 
-import { SOURCE_NAMES, SOURCE_OBJ_TYPES } from '../../../../constants';
 import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath } from '../../../../routes';
-import { FeatureIds } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
+import { staticSourceData } from '../../source_data';
 import { SourcesLogic } from '../../sources_logic';
 
 import { ExternalConnectorLogic } from './add_external_connector/external_connector_logic';
@@ -37,7 +35,6 @@ import {
   SourceConnectData,
   OrganizationsMap,
   AddSourceValues,
-  AddSourceProps,
 } from './add_source_logic';
 
 describe('AddSourceLogic', () => {
@@ -47,8 +44,7 @@ describe('AddSourceLogic', () => {
   const { clearFlashMessages, flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES: AddSourceValues = {
-    addSourceCurrentStep: AddSourceSteps.ConfigIntroStep,
-    addSourceProps: {} as AddSourceProps,
+    addSourceCurrentStep: null,
     dataLoading: true,
     sectionLoading: true,
     buttonLoading: false,
@@ -62,11 +58,11 @@ describe('AddSourceLogic', () => {
     sourceConfigData: {} as SourceConfigData,
     sourceConnectData: {} as SourceConnectData,
     oauthConfigCompleted: false,
-    currentServiceType: '',
     githubOrganizations: [],
     selectedGithubOrganizationsMap: {} as OrganizationsMap,
     selectedGithubOrganizations: [],
     preContentSourceId: '',
+    sourceData: staticSourceData[0],
   };
 
   const sourceConnectData = {
@@ -79,39 +75,13 @@ describe('AddSourceLogic', () => {
     serviceType: 'github',
     githubOrganizations: ['foo', 'bar'],
   };
-  const DEFAULT_SERVICE_TYPE = {
-    name: SOURCE_NAMES.BOX,
-    serviceType: 'box',
-    configuration: {
-      isPublicKey: false,
-      hasOauthRedirect: true,
-      needsBaseUrl: false,
-      documentationUrl: docLinks.workplaceSearchBox,
-      applicationPortalUrl: 'https://app.box.com/developers/console',
-    },
-    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
-    features: {
-      basicOrgContext: [
-        FeatureIds.SyncFrequency,
-        FeatureIds.SyncedItems,
-        FeatureIds.GlobalAccessPermissions,
-      ],
-      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
-      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-      platinumPrivateContext: [
-        FeatureIds.Private,
-        FeatureIds.SyncFrequency,
-        FeatureIds.SyncedItems,
-      ],
-    },
-    accountContextOnly: false,
-  };
+  const DEFAULT_SERVICE_TYPE = 'box';
 
   beforeEach(() => {
     jest.clearAllMocks();
     ExternalConnectorLogic.mount();
     SourcesLogic.mount();
-    mount();
+    mount({}, { serviceType: 'box' });
   });
 
   it('has expected default values', () => {
@@ -214,7 +184,6 @@ describe('AddSourceLogic', () => {
         oauthConfigCompleted: true,
         dataLoading: false,
         sectionLoading: false,
-        currentServiceType: config.serviceType,
         githubOrganizations: config.githubOrganizations,
       });
     });
@@ -285,140 +254,49 @@ describe('AddSourceLogic', () => {
   });
 
   describe('listeners', () => {
-    it('initializeAddSource', () => {
-      const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE };
-      const getSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'getSourceConfigData');
-      const setAddSourcePropsSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceProps');
-
-      AddSourceLogic.actions.initializeAddSource(addSourceProps);
-
-      expect(setAddSourcePropsSpy).toHaveBeenCalledWith({ addSourceProps });
-      expect(getSourceConfigDataSpy).toHaveBeenCalledWith('box', addSourceProps);
-    });
-
     describe('setFirstStep', () => {
-      it('sets intro as first step', () => {
+      it('sets save config as first step', () => {
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE };
-        AddSourceLogic.actions.setFirstStep(addSourceProps);
 
-        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigIntroStep);
+        AddSourceLogic.actions.setFirstStep();
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
       });
+
       it('sets connect as first step', () => {
+        mount({}, { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'connect' });
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE, connect: true };
-        AddSourceLogic.actions.setFirstStep(addSourceProps);
+
+        AddSourceLogic.actions.setFirstStep();
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
       });
 
       it('sets configure as first step', () => {
+        mount({}, { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'configure' });
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE, configure: true };
-        AddSourceLogic.actions.setFirstStep(addSourceProps);
+
+        AddSourceLogic.actions.setFirstStep();
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConfigureOauthStep);
       });
 
-      it('sets reAuthenticate as first step', () => {
+      it('sets reauthenticate as first step', () => {
+        mount({}, { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'reauthenticate' });
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE, reAuthenticate: true };
-        AddSourceLogic.actions.setFirstStep(addSourceProps);
+
+        AddSourceLogic.actions.setFirstStep();
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ReauthenticateStep);
       });
-      it('sets SaveConfig as first step for external connectors', () => {
-        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = {
-          sourceData: {
-            ...DEFAULT_SERVICE_TYPE,
-            serviceType: 'external',
-          },
-        };
-        AddSourceLogic.actions.setFirstStep(addSourceProps);
 
-        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
-      });
-      it('sets SaveConfigStep for when external connector is available and configured', () => {
+      it('sets connect step if configured', () => {
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = {
-          sourceData: {
-            ...DEFAULT_SERVICE_TYPE,
-            externalConnectorAvailable: true,
-          },
-        };
-        AddSourceLogic.actions.setSourceConfigData({
-          ...sourceConfigData,
-          serviceType: 'external',
-          configured: false,
-        });
-        SourcesLogic.mount();
-        SourcesLogic.actions.onInitializeSources({
-          contentSources: [],
-          serviceTypes: [
-            {
-              serviceType: 'external',
-              configured: true,
-            },
-          ],
-        } as any);
-        AddSourceLogic.actions.setFirstStep(addSourceProps);
-
-        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
-      });
-      it('sets Connect step when configured and external connector is available and configured', () => {
-        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = {
-          sourceData: {
-            ...DEFAULT_SERVICE_TYPE,
-            externalConnectorAvailable: true,
-            configured: true,
-          },
-        };
-        AddSourceLogic.actions.setSourceConfigData({
-          ...sourceConfigData,
-          serviceType: 'external',
-          configured: true,
-        });
-        SourcesLogic.mount();
-        SourcesLogic.actions.onInitializeSources({
-          contentSources: [],
-          serviceTypes: [
-            {
-              serviceType: 'external',
-              configured: true,
-            },
-          ],
-        } as any);
-        AddSourceLogic.actions.setFirstStep(addSourceProps);
-
-        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
-      });
-      it('sets Connect step when external and fully configured', () => {
-        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        const addSourceProps = {
-          sourceData: {
-            ...DEFAULT_SERVICE_TYPE,
-            serviceType: 'external',
-          },
-        };
         AddSourceLogic.actions.setSourceConfigData({
           ...sourceConfigData,
           configured: true,
-          serviceType: 'external',
-          configuredFields: { clientId: 'a', clientSecret: 'b' },
         });
-        SourcesLogic.mount();
-        SourcesLogic.actions.onInitializeSources({
-          contentSources: [],
-          serviceTypes: [
-            {
-              serviceType: 'external',
-              configured: true,
-            },
-          ],
-        } as any);
-        AddSourceLogic.actions.setFirstStep(addSourceProps);
+        AddSourceLogic.actions.setFirstStep();
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
       });
@@ -540,30 +418,33 @@ describe('AddSourceLogic', () => {
           const setSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'setSourceConfigData');
           http.get.mockReturnValue(Promise.resolve(sourceConfigData));
 
-          AddSourceLogic.actions.getSourceConfigData('github');
-          expect(http.get).toHaveBeenCalledWith(
-            '/internal/workplace_search/org/settings/connectors/github'
-          );
+          AddSourceLogic.actions.getSourceConfigData();
           await nextTick();
+
+          expect(http.get).toHaveBeenCalledWith(
+            '/internal/workplace_search/org/settings/connectors/box'
+          );
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith(sourceConfigData);
         });
+
         it('calls API and sets values and calls setFirstStep if AddSourceProps is provided', async () => {
           const setSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'setSourceConfigData');
           const setFirstStepSpy = jest.spyOn(AddSourceLogic.actions, 'setFirstStep');
-          const addSourceProps = { sourceData: DEFAULT_SERVICE_TYPE };
+
           http.get.mockReturnValue(Promise.resolve(sourceConfigData));
 
-          AddSourceLogic.actions.getSourceConfigData('github', addSourceProps);
-          expect(http.get).toHaveBeenCalledWith(
-            '/internal/workplace_search/org/settings/connectors/github'
-          );
+          AddSourceLogic.actions.getSourceConfigData();
           await nextTick();
+
+          expect(http.get).toHaveBeenCalledWith(
+            '/internal/workplace_search/org/settings/connectors/box'
+          );
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith(sourceConfigData);
-          expect(setFirstStepSpy).toHaveBeenCalledWith(addSourceProps);
+          expect(setFirstStepSpy).toHaveBeenCalled();
         });
 
         itShowsServerErrorAsFlashMessage(http.get, () => {
-          AddSourceLogic.actions.getSourceConfigData('github');
+          AddSourceLogic.actions.getSourceConfigData();
         });
       });
 
@@ -578,7 +459,7 @@ describe('AddSourceLogic', () => {
           );
           http.get.mockReturnValue(Promise.resolve(sourceConnectData));
 
-          AddSourceLogic.actions.getSourceConnectData('github', successCallback);
+          AddSourceLogic.actions.getSourceConnectData(successCallback);
 
           const query = {
             index_permissions: false,
@@ -587,7 +468,7 @@ describe('AddSourceLogic', () => {
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
           expect(http.get).toHaveBeenCalledWith(
-            '/internal/workplace_search/org/sources/github/prepare',
+            '/internal/workplace_search/org/sources/box/prepare',
             {
               query,
             }
@@ -601,7 +482,7 @@ describe('AddSourceLogic', () => {
         it('passes query params', () => {
           AddSourceLogic.actions.setSourceSubdomainValue('subdomain');
           AddSourceLogic.actions.setSourceIndexPermissionsValue(true);
-          AddSourceLogic.actions.getSourceConnectData('github', successCallback);
+          AddSourceLogic.actions.getSourceConnectData(successCallback);
 
           const query = {
             index_permissions: true,
@@ -609,7 +490,7 @@ describe('AddSourceLogic', () => {
           };
 
           expect(http.get).toHaveBeenCalledWith(
-            '/internal/workplace_search/org/sources/github/prepare',
+            '/internal/workplace_search/org/sources/box/prepare',
             {
               query,
             }
@@ -617,7 +498,7 @@ describe('AddSourceLogic', () => {
         });
 
         itShowsServerErrorAsFlashMessage(http.get, () => {
-          AddSourceLogic.actions.getSourceConnectData('github', successCallback);
+          AddSourceLogic.actions.getSourceConnectData(successCallback);
         });
       });
 
@@ -832,7 +713,7 @@ describe('AddSourceLogic', () => {
         const successCallback = jest.fn();
         const errorCallback = jest.fn();
 
-        const serviceType = 'zendesk';
+        const serviceType = 'box';
         const login = 'login';
         const password = 'password';
         const indexPermissions = false;
@@ -858,7 +739,7 @@ describe('AddSourceLogic', () => {
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           http.post.mockReturnValue(Promise.resolve());
 
-          AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
+          AddSourceLogic.actions.createContentSource(successCallback, errorCallback);
 
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
@@ -874,7 +755,7 @@ describe('AddSourceLogic', () => {
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           http.post.mockReturnValue(Promise.reject('this is an error'));
 
-          AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
+          AddSourceLogic.actions.createContentSource(successCallback, errorCallback);
           await nextTick();
 
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
@@ -890,10 +771,10 @@ describe('AddSourceLogic', () => {
       });
 
       it('getSourceConnectData', () => {
-        AddSourceLogic.actions.getSourceConnectData('github', jest.fn());
+        AddSourceLogic.actions.getSourceConnectData(jest.fn());
 
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/workplace_search/account/sources/github/prepare',
+          '/internal/workplace_search/account/sources/box/prepare',
           { query: {} }
         );
       });
@@ -914,10 +795,10 @@ describe('AddSourceLogic', () => {
       });
 
       it('createContentSource', () => {
-        AddSourceLogic.actions.createContentSource('github', jest.fn());
+        AddSourceLogic.actions.createContentSource(jest.fn());
 
         expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/account/create_source', {
-          body: JSON.stringify({ service_type: 'github' }),
+          body: JSON.stringify({ service_type: 'box' }),
         });
       });
     });

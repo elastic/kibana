@@ -123,7 +123,6 @@ export interface OrganizationsMap {
 }
 
 export interface AddSourceValues {
-  addSourceProps: AddSourceProps;
   addSourceCurrentStep: AddSourceSteps | null;
   dataLoading: boolean;
   sectionLoading: boolean;

@@ -43,7 +43,7 @@ export const AddCustomSource: React.FC = () => {
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, sourceData.name || '...']}>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, sourceData.name]}>
       {currentStep === AddCustomSourceSteps.ConfigureCustomStep && <ConfigureCustom />}
       {currentStep === AddCustomSourceSteps.SaveCustomStep && <SaveCustom />}
     </Layout>

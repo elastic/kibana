@@ -36,10 +36,6 @@ describe('ExternalConnectorLogic', () => {
     formDisabled: true,
     externalConnectorUrl: '',
     externalConnectorApiKey: '',
-    sourceConfigData: {
-      name: '',
-      categories: [],
-    },
     urlValid: true,
     showInsecureUrlCallout: false,
     insecureUrl: true,
@@ -52,7 +48,6 @@ describe('ExternalConnectorLogic', () => {
     formDisabled: false,
     insecureUrl: false,
     dataLoading: false,
-    sourceConfigData,
   };
 
   beforeEach(() => {
@@ -87,7 +82,6 @@ describe('ExternalConnectorLogic', () => {
       it('saves the source config', () => {
         expect(ExternalConnectorLogic.values).toEqual({
           ...DEFAULT_VALUES_SUCCESS,
-          sourceConfigData,
         });
       });
 
@@ -104,7 +98,6 @@ describe('ExternalConnectorLogic', () => {
           ...DEFAULT_VALUES_SUCCESS,
           externalConnectorUrl: '',
           insecureUrl: true,
-          sourceConfigData: newSourceConfigData,
         });
       });
       it('sets undefined api key to empty string', () => {
@@ -119,7 +112,6 @@ describe('ExternalConnectorLogic', () => {
         expect(ExternalConnectorLogic.values).toEqual({
           ...DEFAULT_VALUES_SUCCESS,
           externalConnectorApiKey: '',
-          sourceConfigData: newSourceConfigData,
         });
       });
     });

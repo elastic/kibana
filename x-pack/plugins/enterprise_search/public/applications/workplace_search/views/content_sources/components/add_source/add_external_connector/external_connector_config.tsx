@@ -117,7 +117,7 @@ export const ExternalConnectorConfig: React.FC = () => {
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={false}>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]} isLoading={false}>
       {header}
       <EuiSpacer size="l" />
       <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl} />

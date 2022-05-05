@@ -24,10 +24,6 @@ import { SourcesLogic } from '../../sources_logic';
 
 import { AddSourceHeader } from './add_source_header';
 
-interface ConfigurationChoiceProps {
-  sourceData: SourceDataItem;
-}
-
 interface CardProps {
   title: string;
   description: string;
@@ -35,6 +31,34 @@ interface CardProps {
   to: string;
   badgeLabel?: string;
   disabledMessage?: string;
+}
+
+const ConnectorCard: React.FC<CardProps> = ({
+  title,
+  description,
+  buttonText,
+  to,
+  badgeLabel,
+  disabledMessage,
+}: CardProps) => (
+  <EuiFlexItem grow>
+    <EuiCard
+      isDisabled={!!disabledMessage}
+      hasBorder
+      title={title}
+      description={disabledMessage || description}
+      betaBadgeProps={{ label: badgeLabel }}
+      footer={
+        <EuiButtonTo color="primary" to={to} isDisabled={!!disabledMessage}>
+          {buttonText}
+        </EuiButtonTo>
+      }
+    />
+  </EuiFlexItem>
+);
+
+interface ConfigurationChoiceProps {
+  sourceData: SourceDataItem;
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
@@ -60,30 +84,6 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
     isOrganization
   )}/connector_registration`;
   const customTo = `${getSourcesPath(getAddPath('custom', serviceType), isOrganization)}`;
-
-  const ConnectorCard: React.FC<CardProps> = ({
-    title,
-    description,
-    buttonText,
-    to,
-    badgeLabel,
-    disabledMessage,
-  }: CardProps) => (
-    <EuiFlexItem grow>
-      <EuiCard
-        isDisabled={!!disabledMessage}
-        hasBorder
-        title={title}
-        description={disabledMessage || description}
-        betaBadgeProps={{ label: badgeLabel }}
-        footer={
-          <EuiButtonTo color="primary" to={to} isDisabled={!!disabledMessage}>
-            {buttonText}
-          </EuiButtonTo>
-        }
-      />
-    </EuiFlexItem>
-  );
 
   const internalConnectorProps: CardProps = {
     title: i18n.translate(
@@ -170,16 +170,26 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
       <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexStart" direction="row" responsive={false}>
-        <ConnectorCard {...internalConnectorProps} />
+        <ConnectorCard {...internalConnectorProps} data-test-subj="InternalConnectorCard" />
         {externalConnectorAvailable && (
           <ConnectorCard
             {...externalConnectorProps}
             disabledMessage={
-              externalConfigured ? "You've already configured an external connector" : undefined
+              externalConfigured
+                ? i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.alreadyConfiguredMessage',
+                    {
+                      defaultMessage: "You've already configured an external connector",
+                    }
+                  )
+                : undefined
             }
+            data-test-subj="ExternalConnectorCard"
           />
         )}
-        {customConnectorAvailable && <ConnectorCard {...customConnectorProps} />}
+        {customConnectorAvailable && (
+          <ConnectorCard {...customConnectorProps} data-test-subj="CustomConnectorCard" />
+        )}
       </EuiFlexGroup>
     </>
   );
