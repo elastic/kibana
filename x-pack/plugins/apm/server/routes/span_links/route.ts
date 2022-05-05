@@ -53,6 +53,7 @@ const linkedChildrenRoute = createApmServerRoute({
         kuery: query.kuery,
         start: query.start,
         end: query.end,
+        processorEvent: query.processorEvent,
       }),
     };
   },
@@ -65,7 +66,11 @@ const linkedParentsRoute = createApmServerRoute({
       traceId: t.string,
       spanId: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt]),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      t.type({ processorEvent: processorEventRt }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -92,6 +97,7 @@ const linkedParentsRoute = createApmServerRoute({
         kuery: query.kuery,
         start: query.start,
         end: query.end,
+        processorEvent: query.processorEvent,
       }),
     };
   },

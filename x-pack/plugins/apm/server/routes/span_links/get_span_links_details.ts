@@ -35,12 +35,14 @@ async function fetchSpanLinksDetails({
   spanLinks,
   start,
   end,
+  processorEvent,
 }: {
   setup: Setup;
   kuery: string;
   spanLinks: SpanLink[];
   start: number;
   end: number;
+  processorEvent: ProcessorEvent;
 }) {
   const { apmEventClient } = setup;
 
@@ -80,15 +82,10 @@ async function fetchSpanLinksDetails({
                   bool: {
                     filter: [
                       { term: { [TRACE_ID]: item.trace.id } },
-                      {
-                        bool: {
-                          should: [
-                            { term: { [SPAN_ID]: item.span.id } },
-                            { term: { [TRANSACTION_ID]: item.span.id } },
-                          ],
-                          minimum_should_match: 1,
-                        },
-                      },
+                      { term: { [PROCESSOR_EVENT]: processorEvent } },
+                      ...(processorEvent === ProcessorEvent.transaction
+                        ? [{ term: { [TRANSACTION_ID]: item.span.id } }]
+                        : [{ term: { [SPAN_ID]: item.span.id } }]),
                     ],
                   },
                 })),
@@ -109,12 +106,14 @@ export async function getSpanLinksDetails({
   kuery,
   start,
   end,
+  processorEvent,
 }: {
   setup: Setup;
   spanLinks: SpanLink[];
   kuery: string;
   start: number;
   end: number;
+  processorEvent: ProcessorEvent;
 }): Promise<SpanLinkDetails[]> {
   if (!spanLinks.length) {
     return [];
@@ -130,6 +129,7 @@ export async function getSpanLinksDetails({
         spanLinks: spanLinksChunk,
         start,
         end,
+        processorEvent,
       })
     )
   );

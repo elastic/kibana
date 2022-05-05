@@ -8,6 +8,7 @@
 import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
+import { ProcessorEvent } from '@kbn/apm-plugin/common/processor_event';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   generateExternalSpanLinks,
@@ -27,22 +28,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     kuery,
     traceId,
     spanId,
+    processorEvent,
   }: {
     kuery: string;
     traceId: string;
     spanId: string;
+    processorEvent: ProcessorEvent;
   }) {
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
       params: {
-        path: {
-          traceId,
-          spanId,
-        },
+        path: { traceId, spanId },
         query: {
           kuery,
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          processorEvent,
         },
       },
     });
@@ -53,7 +54,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       it('handles empty state', async () => {
-        const response = await getIncomingSpanDetails({ kuery: '', traceId: 'foo', spanId: 'bar' });
+        const response = await getIncomingSpanDetails({
+          kuery: '',
+          traceId: 'foo',
+          spanId: 'bar',
+          processorEvent: ProcessorEvent.transaction,
+        });
         expect(response.status).to.be(200);
         expect(response.body.spanLinksDetails).to.be.empty();
       });
@@ -67,11 +73,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let externalSpanLinks: SpanLink[];
       let serviceBTraceId: string;
       let serviceBTransactionId: string;
+      let serviceBprocessorEvent: ProcessorEvent;
+
       before(async () => {
         const serviceBAsArray = generateIncomeEventsSpanLinks().toArray();
         const transaction = serviceBAsArray.slice(0, 1)[0];
         serviceBTraceId = transaction['trace.id']!;
         serviceBTransactionId = transaction['transaction.id']!;
+        serviceBprocessorEvent = transaction['processor.event']! as ProcessorEvent;
 
         externalSpanLinks = generateExternalSpanLinks(3);
 
@@ -111,6 +120,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: '',
             traceId: serviceBTraceId,
             spanId: serviceBTransactionId,
+            processorEvent: serviceBprocessorEvent,
           });
           expect(response.status).to.eql(200);
           spanLinksDetails = response.body;
@@ -131,6 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const response = await getIncomingSpanDetails({
             traceId: serviceBTraceId,
             spanId: serviceBTransactionId,
+            processorEvent: serviceBprocessorEvent,
             kuery: 'service-A',
           });
           expect(response.status).to.eql(200);
