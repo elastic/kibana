@@ -101,3 +101,8 @@ export DISABLE_BOOTSTRAP_VALIDATION=true
 
 # Prevent Browserlist from logging on CI about outdated database versions
 export BROWSERSLIST_IGNORE_OLD_DATA=true
+
+# keys used to associate test group data in ci-stats with Jest execution order
+export TEST_GROUP_TYPE_UNIT="Jest Unit Tests"
+export TEST_GROUP_TYPE_INTEGRATION="Jest Integration Tests"
+export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
