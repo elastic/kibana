@@ -9,6 +9,7 @@
 import { Project } from 'ts-morph';
 import { infraPluginHttpRouteAnalyzer } from './analyzers/infra_plugin_http_route_analyzer';
 import { Analyzer } from './analyzers/types';
+import { formatFeature } from './features';
 
 export async function analyzePlugin(pluginTsconfigPath: string) {
   // eslint-disable-next-line no-console
@@ -21,8 +22,11 @@ export async function analyzePlugin(pluginTsconfigPath: string) {
     analyzers.map((analyzer) => analyzer.apply(pluginProject))
   );
 
-  // eslint-disable-next-line no-console
-  console.log(JSON.stringify(analysisResults, null, 2));
+  console.log('\n# Detected features');
+  console.log(analysisResults.flatMap((result) => result.features.map(formatFeature)).join('\n\n'));
+
+  console.log('\n# Errors');
+  console.log(analysisResults.flatMap((result) => result.errors));
 }
 
 function createPluginProject(pluginTsconfigPath: string) {

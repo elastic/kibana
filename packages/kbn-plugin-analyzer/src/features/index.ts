@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-require('source-map-support/register');
-require('@kbn/plugin-analyzer').runPluginAnalyzerCli();
+export * from './common';
+export * from './feature';
+export * from './formatter';
+export * from './http_route';

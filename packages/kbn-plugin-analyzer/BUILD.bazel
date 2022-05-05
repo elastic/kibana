@@ -36,6 +36,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//fp-ts",
   "@npm//ts-morph",
   "@npm//tslib",
 ]
@@ -52,6 +53,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
+  "@npm//fp-ts",
   "@npm//ts-morph",
   "@npm//tslib",
 ]

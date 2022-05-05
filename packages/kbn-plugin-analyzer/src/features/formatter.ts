@@ -6,5 +6,14 @@
  * Side Public License, v 1.
  */
 
-require('source-map-support/register');
-require('@kbn/plugin-analyzer').runPluginAnalyzerCli();
+import { formatGenericFeature } from './common';
+import { PluginFeature } from './feature';
+import { formatHttpRouteFeature } from './http_route';
+
+export const formatFeature = (feature: PluginFeature) => {
+  if (feature.type === 'http-route') {
+    return formatHttpRouteFeature(feature);
+  } else {
+    return formatGenericFeature(feature);
+  }
+};
