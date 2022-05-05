@@ -226,6 +226,11 @@ export const schema = Joi.object()
             wait: Joi.object()
               .regex()
               .default(/Kibana is now available/),
+
+            /**
+             * Does this test config only work when run against source?
+             */
+            alwaysUseSource: Joi.boolean().default(false),
           })
           .default(),
         env: Joi.object().unknown().default(),
