@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiLink,
+  EuiConfirmModal,
 } from '@elastic/eui';
 
 import { useMutation, useQuery } from 'react-query';
@@ -48,6 +49,8 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
   const { notifications } = useStartServices();
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<string>();
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+  const [isResetAllModalVisible, setIsResetAllModalVisible] = useState(false);
 
   const preconfiguredPolicies = useQuery(
     'debug-preconfigured-policies',
@@ -82,6 +85,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
     notifications.toasts.addSuccess('Successfully reset policy');
     queryClient.invalidateQueries('debug-preconfigured-policies');
     setSelectedPolicyId(undefined);
+    setIsResetModalVisible(false);
 
     return response.data;
   });
@@ -100,6 +104,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
     notifications.toasts.addSuccess('Successfully reset all policies');
     queryClient.invalidateQueries('debug-preconfigured-policies');
     setSelectedPolicyId(undefined);
+    setIsResetAllModalVisible(false);
 
     return response.data;
   });
@@ -150,12 +155,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
             <EuiButton
               color="warning"
               isDisabled={!selectedPolicyId}
-              isLoading={resetOnePolicyMutation.isLoading}
-              onClick={() => {
-                if (selectedPolicyId) {
-                  resetOnePolicyMutation.mutate(selectedPolicyId);
-                }
-              }}
+              onClick={() => setIsResetModalVisible(true)}
             >
               Reset
             </EuiButton>
@@ -164,16 +164,38 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
 
         <EuiFlexItem grow={false}>
           <div>
-            <EuiButton
-              color="danger"
-              isLoading={resetAllPoliciesMutation.isLoading}
-              onClick={() => resetAllPoliciesMutation.mutate()}
-            >
+            <EuiButton color="danger" onClick={() => setIsResetAllModalVisible(true)}>
               Reset All
             </EuiButton>
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {isResetModalVisible && selectedPolicy && selectedPolicyId && (
+        <EuiConfirmModal
+          title={`Reset ${selectedPolicy.name}`}
+          onCancel={() => setIsResetModalVisible(false)}
+          onConfirm={() => resetOnePolicyMutation.mutate(selectedPolicyId)}
+          isLoading={resetOnePolicyMutation.isLoading}
+          cancelButtonText="Cancel"
+          confirmButtonText="Reset"
+        >
+          Are you sure you want to reset {selectedPolicy.name}?
+        </EuiConfirmModal>
+      )}
+
+      {isResetAllModalVisible && (
+        <EuiConfirmModal
+          title={`Reset All preconfigured policies`}
+          onCancel={() => setIsResetAllModalVisible(false)}
+          onConfirm={() => resetAllPoliciesMutation.mutate()}
+          isLoading={resetAllPoliciesMutation.isLoading}
+          cancelButtonText="Cancel"
+          confirmButtonText="Reset All"
+        >
+          Are you sure you want to reset all preconfigured policies?
+        </EuiConfirmModal>
+      )}
 
       {selectedPolicyId && (
         <>
