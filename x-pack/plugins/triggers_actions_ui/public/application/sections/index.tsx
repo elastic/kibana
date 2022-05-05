@@ -32,6 +32,9 @@ export const ActionForm = suspendedComponentWithProps(
 export const RuleStatusDropdown = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_status_dropdown'))
 );
+export const RuleStatusFilter = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/rule_status_filter'))
+);
 export const RuleTagBadge = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_tag_badge'))
 );
