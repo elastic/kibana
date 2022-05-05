@@ -814,6 +814,39 @@ describe('rules_list component with items', () => {
     );
   });
 
+  it('does not render the status filter if the feature flag is off', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeFalsy();
+  });
+
+  it('renders the status filter if the experiment is on', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeTruthy();
+  });
+
+  it('can filter by rule states', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    loadRules.mockReset();
+    await setup();
+
+    expect(loadRules.mock.calls[0][0].ruleStatusesFilter).toEqual([]);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterButton"] button').simulate('click');
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[1][0].ruleStatusesFilter).toEqual(['enabled']);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[2][0].ruleStatusesFilter).toEqual(['enabled', 'snoozed']);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[3][0].ruleStatusesFilter).toEqual(['enabled']);
+  });
+
   it('does not render the tag filter is the feature flag is off', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="ruleTagFilter"]').exists()).toBeFalsy();

@@ -14,6 +14,7 @@ import {
   createFailingAlert,
   disableAlert,
   muteAlert,
+  snoozeAlert,
 } from '../../lib/alert_api_actions';
 import { ObjectRemover } from '../../lib/object_remover';
 import { generateUniqueKey } from '../../lib/get_test_data';
@@ -30,7 +31,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/131535
+  describe.skip('rules list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -462,8 +464,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
       });
-      await testSubjects.click('ruleStatusFilterButton');
-      await testSubjects.click('ruleStatuserrorFilerOption'); // select Error status filter
+      await testSubjects.click('ruleExecutionStatusFilterButton');
+      await testSubjects.click('ruleExecutionStatuserrorFilterOption'); // select Error status filter
       await retry.try(async () => {
         const filterErrorOnlyResults =
           await pageObjects.triggersActionsUI.getAlertsListWithStatus();
@@ -599,6 +601,64 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('actionType.slackFilterOption');
 
       await testSubjects.missingOrFail('centerJustifiedSpinner');
+    });
+
+    it('should filter alerts by the rule status', async () => {
+      const assertRulesLength = async (length: number) => {
+        return await retry.try(async () => {
+          const rules = await pageObjects.triggersActionsUI.getAlertsList();
+          expect(rules.length).to.equal(length);
+        });
+      };
+
+      // Enabled alert
+      await createAlert({
+        supertest,
+        objectRemover,
+      });
+      const disabledAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
+      const snoozedAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
+
+      await disableAlert({
+        supertest,
+        alertId: disabledAlert.id,
+      });
+      await snoozeAlert({
+        supertest,
+        alertId: snoozedAlert.id,
+      });
+
+      await refreshAlertsList();
+      await assertRulesLength(3);
+
+      // Select enabled
+      await testSubjects.click('ruleStatusFilterButton');
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await assertRulesLength(1);
+
+      // Select disabled
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await assertRulesLength(1);
+
+      // Select snoozed
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await testSubjects.click('ruleStatusFilterOption-snoozed');
+      await assertRulesLength(1);
+
+      // Select disabled and snoozed
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await assertRulesLength(2);
+
+      // Select all 3
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await assertRulesLength(3);
     });
 
     it('should filter alerts by the tag', async () => {

@@ -58,6 +58,7 @@ import {
   RuleTableItem,
   RuleType,
   RuleTypeIndex,
+  RuleStatus,
   Pagination,
   Percentiles,
   TriggersActionsUiConfig,
@@ -68,7 +69,7 @@ import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../commo
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
-import { RuleStatusFilter, getHealthColor } from './rule_status_filter';
+import { RuleExecutionStatusFilter, getHealthColor } from './rule_execution_status_filter';
 import {
   loadRules,
   loadRuleAggregations,
@@ -99,6 +100,7 @@ import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { RuleTagFilter } from './rule_tag_filter';
+import { RuleStatusFilter } from './rule_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 const ENTER_KEY = 13;
@@ -155,7 +157,8 @@ export const RulesList: React.FunctionComponent = () => {
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<string[]>([]);
+  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -167,7 +170,8 @@ export const RulesList: React.FunctionComponent = () => {
   );
   const [showErrors, setShowErrors] = useState(false);
 
-  const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('rulesListTagFilter');
+  const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
+  const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
   useEffect(() => {
     (async () => {
@@ -231,6 +235,7 @@ export const RulesList: React.FunctionComponent = () => {
     percentileOptions,
     JSON.stringify(typesFilter),
     JSON.stringify(actionTypesFilter),
+    JSON.stringify(ruleExecutionStatusesFilter),
     JSON.stringify(ruleStatusesFilter),
     JSON.stringify(tagsFilter),
   ]);
@@ -291,6 +296,7 @@ export const RulesList: React.FunctionComponent = () => {
           searchText,
           typesFilter,
           actionTypesFilter,
+          ruleExecutionStatusesFilter,
           ruleStatusesFilter,
           tagsFilter,
           sort,
@@ -311,6 +317,7 @@ export const RulesList: React.FunctionComponent = () => {
           isEmpty(searchText) &&
           isEmpty(typesFilter) &&
           isEmpty(actionTypesFilter) &&
+          isEmpty(ruleExecutionStatusesFilter) &&
           isEmpty(ruleStatusesFilter) &&
           isEmpty(tagsFilter)
         );
@@ -338,6 +345,7 @@ export const RulesList: React.FunctionComponent = () => {
         searchText,
         typesFilter,
         actionTypesFilter,
+        ruleExecutionStatusesFilter,
         ruleStatusesFilter,
         tagsFilter,
       });
@@ -965,6 +973,15 @@ export const RulesList: React.FunctionComponent = () => {
     }
     return [];
   };
+  
+  const getRuleStatusFilter = () => {
+    if (isRuleStatusFilterEnabled) {
+      return [
+        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusesFilter} />,
+      ];
+    }
+    return [];
+  };
 
   const toolsRight = [
     <TypeFilter
@@ -978,15 +995,16 @@ export const RulesList: React.FunctionComponent = () => {
       )}
     />,
     ...getRuleTagFilter(),
+    ...getRuleStatusFilter(),
     <ActionTypeFilter
       key="action-type-filter"
       actionTypes={actionTypes}
       onChange={(ids: string[]) => setActionTypesFilter(ids)}
     />,
-    <RuleStatusFilter
+    <RuleExecutionStatusFilter
       key="rule-status-filter"
-      selectedStatuses={ruleStatusesFilter}
-      onChange={(ids: string[]) => setRuleStatusesFilter(ids)}
+      selectedStatuses={ruleExecutionStatusesFilter}
+      onChange={(ids: string[]) => setRuleExecutionStatusesFilter(ids)}
     />,
     <EuiButtonEmpty
       data-test-subj="refreshRulesButton"
@@ -1024,7 +1042,7 @@ export const RulesList: React.FunctionComponent = () => {
                 }}
               />
               &nbsp;
-              <EuiLink color="primary" onClick={() => setRuleStatusesFilter(['error'])}>
+              <EuiLink color="primary" onClick={() => setRuleExecutionStatusesFilter(['error'])}>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
                   defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"

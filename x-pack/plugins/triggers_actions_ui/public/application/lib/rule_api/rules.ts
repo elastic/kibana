@@ -7,7 +7,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { Rule, Pagination, Sorting } from '../../../types';
+import { Rule, Pagination, Sorting, RuleStatus } from '../../../types';
 import { mapFiltersToKql } from './map_filters_to_kql';
 import { transformRule } from './common_transformations';
 
@@ -21,6 +21,7 @@ export async function loadRules({
   searchText,
   typesFilter,
   actionTypesFilter,
+  ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
   sort = { field: 'name', direction: 'asc' },
@@ -30,8 +31,9 @@ export async function loadRules({
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
-  ruleStatusesFilter?: string[];
   tagsFilter?: string[];
+  ruleExecutionStatusesFilter?: string[];
+  ruleStatusesFilter?: RuleStatus[];
   sort?: Sorting;
 }): Promise<{
   page: number;
@@ -42,8 +44,9 @@ export async function loadRules({
   const filters = mapFiltersToKql({
     typesFilter,
     actionTypesFilter,
-    ruleStatusesFilter,
     tagsFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
   });
   const res = await http.get<
     AsApiContract<{

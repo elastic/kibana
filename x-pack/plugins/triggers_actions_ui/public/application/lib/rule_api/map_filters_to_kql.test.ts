@@ -32,12 +32,60 @@ describe('mapFiltersToKql', () => {
     ]);
   });
 
+  test('should handle ruleExecutionStatusesFilter', () => {
+    expect(
+      mapFiltersToKql({
+        ruleExecutionStatusesFilter: ['alert', 'statuses', 'filter'],
+      })
+    ).toEqual(['alert.attributes.executionStatus.status:(alert or statuses or filter)']);
+  });
+
   test('should handle ruleStatusesFilter', () => {
     expect(
       mapFiltersToKql({
-        ruleStatusesFilter: ['alert', 'statuses', 'filter'],
+        ruleStatusesFilter: ['enabled'],
       })
-    ).toEqual(['alert.attributes.executionStatus.status:(alert or statuses or filter)']);
+    ).toEqual([
+      'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+
+    expect(
+      mapFiltersToKql({
+        ruleStatusesFilter: ['disabled'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(false) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+
+    expect(
+      mapFiltersToKql({
+        ruleStatusesFilter: ['snoozed'],
+      })
+    ).toEqual(['(alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)']);
+
+    expect(
+      mapFiltersToKql({
+        ruleStatusesFilter: ['enabled', 'snoozed'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+
+    expect(
+      mapFiltersToKql({
+        ruleStatusesFilter: ['disabled', 'snoozed'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+
+    expect(
+      mapFiltersToKql({
+        ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(true or false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
   });
 
   test('should handle tagsFilter', () => {
@@ -60,12 +108,12 @@ describe('mapFiltersToKql', () => {
     ]);
   });
 
-  test('should handle typesFilter, actionTypesFilter, ruleStatusesFilter and tagsFilter', () => {
+  test('should handle typesFilter, actionTypesFilter, ruleExecutionStatusesFilter, and tagsFilter', () => {
     expect(
       mapFiltersToKql({
         typesFilter: ['type', 'filter'],
         actionTypesFilter: ['action', 'types', 'filter'],
-        ruleStatusesFilter: ['alert', 'statuses', 'filter'],
+        ruleExecutionStatusesFilter: ['alert', 'statuses', 'filter'],
         tagsFilter: ['a', 'b', 'c'],
       })
     ).toEqual([

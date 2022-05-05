@@ -49,6 +49,7 @@ import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/c
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
+import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
@@ -83,6 +84,7 @@ export type {
   SanitizedRule,
   RuleStatusDropdownProps,
   RuleTagFilterProps,
+  RuleStatusFilterProps,
   RuleTagBadgeProps,
 };
 export type { ActionType, AsApiContract };
@@ -431,3 +433,5 @@ export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
 }
+
+export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

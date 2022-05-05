@@ -18,7 +18,8 @@ describe('getIsExperimentalFeatureEnabled', () => {
         rulesListDatagrid: true,
         internalAlertsTable: true,
         rulesDetailLogs: true,
-        rulesListTagFilter: true,
+        ruleTagFilter: true,
+        ruleStatusFilter: true,
         internalShareableComponentsSandbox: true,
       },
     });
@@ -39,7 +40,11 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
-    result = getIsExperimentalFeatureEnabled('rulesListTagFilter');
+    result = getIsExperimentalFeatureEnabled('ruleTagFilter');
+
+    expect(result).toEqual(true);
+
+    result = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
     expect(result).toEqual(true);
 
