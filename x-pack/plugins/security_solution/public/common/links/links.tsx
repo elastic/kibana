@@ -10,7 +10,7 @@ import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { get } from 'lodash';
 import { SecurityPageName } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { appLinks } from './structure';
+import { appLinks } from './app_links';
 import {
   Feature,
   LinkInfo,
@@ -73,6 +73,21 @@ const hasFeaturesCapability = (
   return features.some((featureKey) => get(capabilities, featureKey, false));
 };
 
+const isLinkAllowed = (link: LinkItem, linkProps?: LinkProps) =>
+  !(
+    linkProps != null &&
+    // exclude link when license is basic and link is premium
+    ((linkProps.isBasic && link.isPremium) ||
+      // exclude link when enableExperimental[hideWhenExperimentalKey] is enabled and link has hideWhenExperimentalKey
+      (link.hideWhenExperimentalKey != null &&
+        linkProps.enableExperimental[link.hideWhenExperimentalKey]) ||
+      // exclude link when enableExperimental[experimentalKey] is disabled and link has experimentalKey
+      (link.experimentalKey != null && !linkProps.enableExperimental[link.experimentalKey]) ||
+      // exclude link when link is not part of enabled feature capabilities
+      (linkProps.capabilities != null &&
+        !hasFeaturesCapability(link.features, linkProps.capabilities)))
+  );
+
 export function reduceLinks<T>({
   links,
   linkProps,
@@ -82,55 +97,41 @@ export function reduceLinks<T>({
   linkProps?: LinkProps;
   formatFunction: (link: LinkItem, linkProps?: LinkProps) => T;
 }): T[] {
-  return links.reduce((deepLinks: T[], link: LinkItem) => {
-    if (
-      linkProps != null &&
-      // exclude link when license is basic and link is premium
-      ((linkProps.isBasic && link.isPremium) ||
-        // exclude link when enableExperimental[hideWhenExperimentalKey] is enabled and link has hideWhenExperimentalKey
-        (link.hideWhenExperimentalKey != null &&
-          linkProps.enableExperimental[link.hideWhenExperimentalKey]) ||
-        // exclude link when enableExperimental[experimentalKey] is disabled and link has experimentalKey
-        (link.experimentalKey != null && !linkProps.enableExperimental[link.experimentalKey]) ||
-        // exclude link when link is not part of enabled feature capabilities
-        (linkProps.capabilities != null &&
-          !hasFeaturesCapability(link.features, linkProps.capabilities)))
-    ) {
-      return deepLinks;
-    }
-    return [...deepLinks, formatFunction(link, linkProps)];
-  }, []);
+  return links.reduce(
+    (deepLinks: T[], link: LinkItem) =>
+      isLinkAllowed(link, linkProps) ? [...deepLinks, formatFunction(link, linkProps)] : deepLinks,
+    []
+  );
 }
 
 export const getInitialDeepLinks = (): AppDeepLink[] => {
   return appLinks.map((link) => createDeepLink(link));
 };
 
+export const isLicenseBasic = (licenseType?: LicenseType) =>
+  licenseType == null || licenseType === 'basic';
+
 export const getDeepLinks = (
   enableExperimental: ExperimentalFeatures,
   licenseType?: LicenseType,
   capabilities?: Capabilities
-): AppDeepLink[] => {
-  const isBasic = licenseType === 'basic';
-  return reduceLinks<AppDeepLink>({
+): AppDeepLink[] =>
+  reduceLinks<AppDeepLink>({
     links: appLinks,
-    linkProps: { enableExperimental, isBasic, capabilities },
+    linkProps: { enableExperimental, isBasic: isLicenseBasic(licenseType), capabilities },
     formatFunction: createDeepLink,
   });
-};
 
 export const getNavLinkItems = (
   enableExperimental: ExperimentalFeatures,
   licenseType?: LicenseType,
   capabilities?: Capabilities
-): NavLinkItem[] => {
-  const isBasic = licenseType === 'basic';
-  return reduceLinks<NavLinkItem>({
+): NavLinkItem[] =>
+  reduceLinks<NavLinkItem>({
     links: appLinks,
-    linkProps: { enableExperimental, isBasic, capabilities },
+    linkProps: { enableExperimental, isBasic: isLicenseBasic(licenseType), capabilities },
     formatFunction: createNavLinkItem,
   });
-};
 
 /**
  * Recursive function to create the `NormalizedLinks` structure from a `LinkItem` array parameter

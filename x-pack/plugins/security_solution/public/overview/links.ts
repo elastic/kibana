@@ -7,12 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  DASHBOARDS_PATH,
   DETECTION_RESPONSE_PATH,
   LANDING_PATH,
   OVERVIEW_PATH,
   SecurityPageName,
 } from '../../common/constants';
-import { DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
+import { DASHBOARDS, DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
 import { FEATURE, LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
@@ -53,6 +54,19 @@ export const detectionResponseLinks: LinkItem = {
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.search.detectionAndResponse', {
       defaultMessage: 'Detection & Response',
+    }),
+  ],
+};
+
+export const dashboardsLandingLinks: LinkItem = {
+  id: SecurityPageName.dashboardsLanding,
+  title: DASHBOARDS,
+  path: DASHBOARDS_PATH,
+  globalNavEnabled: false,
+  features: [FEATURE.general],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.search.dashboards', {
+      defaultMessage: 'Dashboards',
     }),
   ],
 };

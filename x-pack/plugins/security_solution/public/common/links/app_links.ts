@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName } from '../../../common/constants';
-import { EXPLORE, INVESTIGATE } from '../../app/translations';
+import { SecurityPageName, THREAT_HUNTING_PATH } from '../../../common/constants';
+import { THREAT_HUNTING } from '../../app/translations';
 import { FEATURE, LinkItem } from './types';
 import { links as hostsLinks } from '../../hosts/links';
 import { links as detectionLinks } from '../../detections/links';
@@ -15,17 +15,23 @@ import { links as usersLinks } from '../../users/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';
 import { links as managementLinks } from '../../management/links';
-import { links as overviewLinks, landingLinks, detectionResponseLinks } from '../../overview/links';
+import {
+  links as overviewLinks,
+  landingLinks,
+  detectionResponseLinks,
+  dashboardsLandingLinks,
+} from '../../overview/links';
 
 export const appLinks: LinkItem[] = [
   overviewLinks,
   landingLinks,
+  dashboardsLandingLinks,
   detectionResponseLinks,
   detectionLinks,
   {
-    id: SecurityPageName.explore,
-    title: EXPLORE,
-    path: 'to do',
+    id: SecurityPageName.threatHuntingLanding,
+    title: THREAT_HUNTING,
+    path: THREAT_HUNTING_PATH,
     globalNavEnabled: false,
     features: [FEATURE.general],
     globalSearchKeywords: [
@@ -35,18 +41,7 @@ export const appLinks: LinkItem[] = [
     ],
     links: [hostsLinks, networkLinks, usersLinks],
   },
-  {
-    id: SecurityPageName.investigate,
-    title: INVESTIGATE,
-    path: 'to do',
-    globalNavEnabled: false,
-    features: [FEATURE.general, FEATURE.casesRead],
-    globalSearchKeywords: [
-      i18n.translate('xpack.securitySolution.search.investigate', {
-        defaultMessage: 'Investigate',
-      }),
-    ],
-    links: [timelinesLinks, getCasesLinkItems()],
-  },
+  timelinesLinks,
+  getCasesLinkItems(),
   managementLinks,
 ];

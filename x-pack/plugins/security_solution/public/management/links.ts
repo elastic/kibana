@@ -28,7 +28,7 @@ import {
 import { FEATURE, LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
-  id: SecurityPageName.administration,
+  id: SecurityPageName.manageLanding,
   title: MANAGE,
   path: MANAGEMENT_PATH,
   skipUrlState: true,

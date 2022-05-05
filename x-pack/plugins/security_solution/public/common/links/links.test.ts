@@ -9,6 +9,7 @@ import {
   getAncestorLinksInfo,
   getDeepLinks,
   getInitialDeepLinks,
+  getLinkInfo,
   getNavLinkItems,
   needsUrlState,
 } from './links';
@@ -54,7 +55,13 @@ const findNavLink = (id: SecurityPageName, navLinks: NavLinkItem[]): NavLinkItem
     return null;
   }, null);
 
-const allPages = Object.values(SecurityPageName);
+// remove filter once new nav is live
+const allPages = Object.values(SecurityPageName).filter(
+  (pageName) =>
+    pageName !== SecurityPageName.explore &&
+    pageName !== SecurityPageName.investigate &&
+    pageName !== SecurityPageName.administration
+);
 const casesPages = [
   SecurityPageName.case,
   SecurityPageName.caseConfigure,
@@ -297,9 +304,9 @@ describe('security app link helpers', () => {
           features: ['siem.show'],
           globalNavEnabled: false,
           globalSearchKeywords: ['Threat hunting'],
-          id: 'explore',
-          path: 'to do',
-          title: 'Explore',
+          id: 'threat-hunting',
+          path: '/threat_hunting',
+          title: 'Threat Hunting',
         },
         {
           globalNavEnabled: true,
@@ -319,9 +326,9 @@ describe('security app link helpers', () => {
           features: ['siem.show'],
           globalNavEnabled: false,
           globalSearchKeywords: ['Threat hunting'],
-          id: 'explore',
-          path: 'to do',
-          title: 'Explore',
+          id: 'threat-hunting',
+          path: '/threat_hunting',
+          title: 'Threat Hunting',
         },
         {
           globalNavEnabled: true,
@@ -349,6 +356,21 @@ describe('security app link helpers', () => {
     it('returns false when url state does not exist for page', () => {
       const needsUrl = needsUrlState(SecurityPageName.landing);
       expect(needsUrl).toEqual(false);
+    });
+  });
+
+  describe('getLinkInfo', () => {
+    it('gets information for an individual link', () => {
+      const linkInfo = getLinkInfo(SecurityPageName.hosts);
+      expect(linkInfo).toEqual({
+        globalNavEnabled: true,
+        globalNavOrder: 9002,
+        globalSearchEnabled: true,
+        globalSearchKeywords: ['Hosts'],
+        id: 'hosts',
+        path: '/hosts',
+        title: 'Hosts',
+      });
     });
   });
 });
