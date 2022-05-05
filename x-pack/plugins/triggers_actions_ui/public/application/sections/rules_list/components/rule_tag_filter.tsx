@@ -52,14 +52,18 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
+  const allTags = useMemo(() => {
+    return [...new Set([...tags, ...selectedTags])].sort();
+  }, [tags, selectedTags]);
+
   const options: EuiSelectableOption[] = useMemo(
     () =>
-      tags.map((tag) => ({
+      allTags.map((tag) => ({
         label: tag,
         checked: selectedTags.includes(tag) ? 'on' : undefined,
         'data-test-subj': optionDataTestSubj(tag),
       })),
-    [tags, selectedTags, optionDataTestSubj]
+    [allTags, selectedTags, optionDataTestSubj]
   );
 
   const onChangeInternal = useCallback(

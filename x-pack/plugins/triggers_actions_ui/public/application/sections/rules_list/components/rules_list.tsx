@@ -73,6 +73,7 @@ import { RuleExecutionStatusFilter, getHealthColor } from './rule_execution_stat
 import {
   loadRules,
   loadRuleAggregations,
+  loadRuleTags,
   loadRuleTypes,
   disableRule,
   enableRule,
@@ -301,7 +302,7 @@ export const RulesList: React.FunctionComponent = () => {
           tagsFilter,
           sort,
         });
-        await loadRuleTags();
+        await loadRuleTagsAggs();
         await loadRuleAggs();
         setRulesState({
           isLoading: false,
@@ -364,14 +365,14 @@ export const RulesList: React.FunctionComponent = () => {
     }
   }
 
-  async function loadRuleTags() {
+  async function loadRuleTagsAggs() {
     if (!isRuleTagFilterEnabled) {
       return;
     }
     try {
-      const rulesAggs = await loadRuleAggregations({ http });
-      if (rulesAggs?.ruleTags) {
-        setTags(rulesAggs.ruleTags);
+      const ruleTagsAggs = await loadRuleTags({ http });
+      if (ruleTagsAggs?.ruleTags) {
+        setTags(ruleTagsAggs.ruleTags);
       }
     } catch (e) {
       toasts.addDanger({

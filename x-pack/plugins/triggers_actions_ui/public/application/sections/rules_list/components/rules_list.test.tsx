@@ -33,6 +33,7 @@ jest.mock('../../../lib/rule_api', () => ({
   loadRules: jest.fn(),
   loadRuleTypes: jest.fn(),
   loadRuleAggregations: jest.fn(),
+  loadRuleTags: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -66,7 +67,7 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRules, loadRuleTypes, loadRuleAggregations } =
+const { loadRules, loadRuleTypes, loadRuleAggregations, loadRuleTags } =
   jest.requireMock('../../../lib/rule_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -398,6 +399,9 @@ describe('rules_list component with items', () => {
       ruleEnabledStatus: { enabled: 2, disabled: 0 },
       ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
       ruleMutedStatus: { muted: 0, unmuted: 2 },
+      ruleTags,
+    });
+    loadRuleTags.mockResolvedValue({
       ruleTags,
     });
 

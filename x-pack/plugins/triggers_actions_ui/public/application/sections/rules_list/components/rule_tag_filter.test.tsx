@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiFilterButton } from '@elastic/eui';
+import { EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { RuleTagFilter } from './rule_tag_filter';
 
 const onChangeMock = jest.fn();
@@ -60,5 +60,18 @@ describe('rule_tag_filter', () => {
 
     wrapper.find('[data-test-subj="ruleTagFilterOption-b"]').at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['a', 'b']);
+  });
+
+  it('renders selected tags even if they get deleted from the tags array', () => {
+    const selectedTags = ['g', 'h'];
+    const wrapper = mountWithIntl(
+      <RuleTagFilter tags={tags} selectedTags={selectedTags} onChange={onChangeMock} />
+    );
+
+    wrapper.find(EuiFilterButton).simulate('click');
+
+    expect(wrapper.find(EuiSelectable).props().options.length).toEqual(
+      tags.length + selectedTags.length
+    );
   });
 });

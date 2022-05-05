@@ -31,8 +31,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/131535
-  describe.skip('rules list', function () {
+  describe('rules list', function () {
+    const assertRulesLength = async (length: number) => {
+      return await retry.try(async () => {
+        const rules = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(rules.length).to.equal(length);
+      });
+    };
+
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -604,13 +610,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter alerts by the rule status', async () => {
-      const assertRulesLength = async (length: number) => {
-        return await retry.try(async () => {
-          const rules = await pageObjects.triggersActionsUI.getAlertsList();
-          expect(rules.length).to.equal(length);
-        });
-      };
-
       // Enabled alert
       await createAlert({
         supertest,
@@ -640,24 +639,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Select enabled
       await testSubjects.click('ruleStatusFilterButton');
       await testSubjects.click('ruleStatusFilterOption-enabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(1);
 
       // Select disabled
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await testSubjects.click('ruleStatusFilterOption-disabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(1);
 
       // Select snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await testSubjects.click('ruleStatusFilterOption-snoozed');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(1);
 
       // Select disabled and snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
 
       // Select all 3
       await testSubjects.click('ruleStatusFilterOption-enabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(3);
     });
 
@@ -700,29 +704,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click('ruleTagFilter');
+
+      // Select a -> selected: a
       await testSubjects.click('ruleTagFilterOption-a');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
 
-      let filteredRules;
-
-      await retry.try(async () => {
-        filteredRules = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filteredRules.length).to.equal(2);
-      });
-
+      // Unselect a -> selected: none
       await testSubjects.click('ruleTagFilterOption-a');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(5);
 
-      await retry.try(async () => {
-        filteredRules = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filteredRules.length).to.equal(5);
-      });
-
+      // Select a, b -> selected: a, b
       await testSubjects.click('ruleTagFilterOption-a');
       await testSubjects.click('ruleTagFilterOption-b');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(4);
 
-      await retry.try(async () => {
-        filteredRules = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filteredRules.length).to.equal(4);
-      });
+      // Unselect a, b, select c -> selected: c
+      await testSubjects.click('ruleTagFilterOption-a');
+      await testSubjects.click('ruleTagFilterOption-b');
+      await testSubjects.click('ruleTagFilterOption-c');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
     });
   });
 };
