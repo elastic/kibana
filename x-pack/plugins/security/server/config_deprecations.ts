@@ -138,4 +138,57 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
       });
     }
   },
+  (settings, _fromPath, addDeprecation, { branch }) => {
+    // TODO: remove when docs support "main"
+    const docsBranch = branch === 'main' ? 'master' : 'main';
+    const anonProviders = (settings?.xpack?.security?.authc?.providers?.anonymous ?? {}) as Record<
+      string,
+      any
+    >;
+
+    const credTypeElasticsearchAnonUser = 'elasticsearch_anonymous_user';
+    const credTypeApiKey = 'apiKey';
+
+    for (const provider of Object.entries(anonProviders)) {
+      if (
+        !!provider[1].credentials.apiKey ||
+        provider[1].credentials === credTypeElasticsearchAnonUser
+      ) {
+        const isApiKey: boolean = !!provider[1].credentials.apiKey;
+        addDeprecation({
+          configPath: `xpack.security.authc.providers.anonymous.${provider[0]}.credentials${
+            isApiKey ? '.apiKey' : ''
+          }`,
+          title: i18n.translate(
+            'xpack.security.deprecations.anonymousApiKeyOrElasticsearchAnonUserTitle',
+            {
+              values: {
+                credType: isApiKey ? `${credTypeApiKey}` : `'${credTypeElasticsearchAnonUser}'`,
+              },
+              defaultMessage: `Use of {credType} for "xpack.security.authc.providers.anonymous.credentials" is deprecated.`,
+            }
+          ),
+          message: i18n.translate(
+            'xpack.security.deprecations.anonymousApiKeyOrElasticsearchAnonUserMesage',
+            {
+              values: {
+                credType: isApiKey ? `${credTypeApiKey}` : `'${credTypeElasticsearchAnonUser}'`,
+              },
+              defaultMessage: `Support for {credType} is being removed from the 'anonymous' authentication provider. Use username and password credentials.`,
+            }
+          ),
+          level: 'warning',
+          documentationUrl: `https://www.elastic.co/guide/en/kibana/${docsBranch}/security-settings-kb.html#authentication-security-settings`,
+          correctiveActions: {
+            manualSteps: [
+              i18n.translate('xpack.security.deprecations.anonAuthCredentials.manualSteps1', {
+                defaultMessage:
+                  'Change anonymous authentication provider to use username and password credentials.',
+              }),
+            ],
+          },
+        });
+      }
+    }
+  },
 ];
