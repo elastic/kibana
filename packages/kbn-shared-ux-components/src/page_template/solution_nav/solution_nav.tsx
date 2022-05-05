@@ -13,6 +13,7 @@ import {
   EuiAvatarProps,
   EuiCollapsibleNavGroup,
   EuiFlyout,
+  EuiFlyoutProps,
   EuiSideNav,
   EuiSideNavItemType,
   EuiSideNavProps,
@@ -43,9 +44,14 @@ export type KibanaPageTemplateSolutionNavProps = Omit<
    */
   items?: EuiSideNavProps<{}>['items'];
   /**
-   *  Render children instead of default EuiSideNav
+   *  Renders the children instead of default EuiSideNav
    */
   children?: React.ReactNode;
+  /**
+   * The position of the close button when the navigation flyout is open.
+   * Note that side navigation turns into a flyout only when the screen has medium size.
+   */
+  closeFlyoutButtonPosition?: EuiFlyoutProps['closeButtonPosition'];
   /**
    * Control the collapsed state
    */
@@ -78,6 +84,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   isOpenOnDesktop = false,
   items,
   mobileBreakpoints = ['xs', 's'],
+  closeFlyoutButtonPosition = 'outside',
   name,
   onCollapse,
   ...rest
@@ -178,7 +185,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
               onClose={() => setIsSideNavOpenOnMobile(false)}
               side="left"
               size={FLYOUT_SIZE}
-              closeButtonPosition={isCustomSideNav ? 'inside' : 'outside'}
+              closeButtonPosition={closeFlyoutButtonPosition}
               className="kbnPageTemplateSolutionNav__flyout"
             >
               <div className={sideNavClasses}>

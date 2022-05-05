@@ -12,27 +12,18 @@ const primaryBackground = 'rgba(0, 119, 204, 0.1)';
 export const solutionGroupedNavStyles = (euiTheme: EuiThemeComputed<{}>) => ({
   sideNavItem: `
     font-weight: 400;
-    &.euiListGroupItem--primary {
+    &.solutionGroupedNavItem--isPrimary {
       font-weight: 700;
     }
-    .euiListGroupItem__label {
-      width: 100%;
-    }
-    &.euiListGroupItem:focus,
-    &.euiListGroupItem:focus-within,
-    &.euiListGroupItem:hover,
-    &.euiListGroupItem-isActive {
+    &:focus,
+    &:focus-within,
+    &:hover,
+    &.solutionGroupedNavItem--isActive {
       background-color: ${primaryBackground};
     }
-    &.euiListGroupItem-isActive.euiListGroupItem--primary {
-      .euiListGroupItem__button {
-        color: ${euiTheme.colors.primaryText};
-        font-weight: bold;
-      }
-    }
-    .euiButtonIcon:not([class*='isDisabled']):focus,
-    .euiButtonIcon:not([class*='isDisabled']):focus-within,
-    .euiButtonIcon:not([class*='isDisabled']):hover {
+    .solutionGroupedNavItemButton:focus,
+    .solutionGroupedNavItemButton:focus-within,
+    .solutionGroupedNavItemButton:hover {
       background-color: ${primaryBackground};
     }
   `,

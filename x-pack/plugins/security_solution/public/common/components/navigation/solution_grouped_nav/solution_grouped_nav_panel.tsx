@@ -37,11 +37,12 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
   title,
   items,
 }) => {
-  const [isTimelineBottomBarVisible] = useShowTimeline();
+  const [hasTimelineBar] = useShowTimeline();
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+  const isTimelineVisible = hasTimelineBar && isLargerBreakpoint;
 
-  const styles = groupedNavPanelStyles(isTimelineBottomBarVisible && isLargerBreakpoint);
-  const panelClasses = classNames('kbnPageTemplateSolutionNavPanel', 'eui-yScroll');
+  const styles = groupedNavPanelStyles(isTimelineVisible);
+  const panelClasses = classNames('eui-yScroll');
 
   /**
    * ESC key closes SideNav
@@ -63,6 +64,7 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
           <EuiOutsideClickDetector onOutsideClick={() => onClose()}>
             <EuiPanel
               className={panelClasses}
+              hasShadow={!isTimelineVisible}
               css={styles.panel}
               borderRadius="none"
               paddingSize="l"
@@ -78,7 +80,7 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
                   <EuiDescriptionList>
                     {items.map(({ id, href, onClick, label, description }: PortalNavItem) => (
                       <Fragment key={id}>
-                        <EuiDescriptionListTitle css={styles.portalNavItem}>
+                        <EuiDescriptionListTitle>
                           <a
                             href={href}
                             onClick={(ev) => {

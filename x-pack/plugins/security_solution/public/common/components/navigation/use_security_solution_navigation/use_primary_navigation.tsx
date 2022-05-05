@@ -73,6 +73,7 @@ export const usePrimaryNavigation = ({
               selectedId={selectedTabId}
             />
           ),
+          closeFlyoutButtonPosition: 'inside',
         }
       : { items: navItems }),
   };

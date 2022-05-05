@@ -16,7 +16,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 
-import { css } from '@emotion/react';
+import classNames from 'classnames';
 import { SolutionGroupedNavPanel } from './solution_grouped_nav_panel';
 import { solutionGroupedNavStyles } from './solution_grouped_nav.styles';
 import {
@@ -102,10 +102,17 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
       const isActive = activePortalNavId === id;
       const isCurrentNav = selectedId === id;
 
+      const itemClassNames = classNames('solutionGroupedNavItem', {
+        'solutionGroupedNavItem--isActive': isActive,
+        'solutionGroupedNavItem--isPrimary': isCurrentNav,
+      });
+      const buttonClassNames = classNames('solutionGroupedNavItemButton');
+
       return (
         // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiLink key={id} href={href} onClick={onClick} color={isCurrentNav ? 'primary' : 'text'}>
           <EuiListGroupItem
+            className={itemClassNames}
             css={styles.sideNavItem}
             isActive={isActive}
             color={isCurrentNav ? 'primary' : 'text'}
@@ -114,6 +121,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
             {...(!isMobileSize && navItemsById[id] != null
               ? {
                   extraAction: {
+                    className: buttonClassNames,
                     color: isActive ? 'primary' : 'text',
                     onClick: (ev) => {
                       ev.preventDefault();
@@ -136,13 +144,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="none"
-        direction="column"
-        css={css`
-          height: 100%;
-        `}
-      >
+      <EuiFlexGroup gutterSize="none" direction="column">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem>

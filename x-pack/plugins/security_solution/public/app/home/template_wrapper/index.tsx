@@ -68,9 +68,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
       .kbnPageTemplateSolutionNav {
         padding-bottom: ${gutterTimeline};
       }
-      .kbnPageTemplateSolutionNavPanel {
-        padding-bottom: ${gutterTimeline};
-      }
     }
   `}
 `;
