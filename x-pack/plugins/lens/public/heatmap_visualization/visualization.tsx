@@ -15,7 +15,6 @@ import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/color
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { HeatmapIcon } from '@kbn/expression-heatmap-plugin/public';
-import { DEFAULT_LEGEND_SIZE, LegendSizeToPixels } from '@kbn/visualizations-plugin/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
@@ -306,8 +305,6 @@ export const getHeatmapVisualization = ({
       return null;
     }
 
-    const legendSizeInPixels = LegendSizeToPixels[state.legend.legendSize ?? DEFAULT_LEGEND_SIZE];
-
     return {
       type: 'expression',
       chain: [
@@ -342,7 +339,7 @@ export const getHeatmapVisualization = ({
                     arguments: {
                       isVisible: [state.legend.isVisible],
                       position: [state.legend.position],
-                      legendSize: legendSizeInPixels !== undefined ? [legendSizeInPixels] : [],
+                      legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
                     },
                   },
                 ],

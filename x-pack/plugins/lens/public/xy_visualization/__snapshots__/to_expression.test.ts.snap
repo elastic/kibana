@@ -173,9 +173,7 @@ Object {
                   "isVisible": Array [
                     true,
                   ],
-                  "legendSize": Array [
-                    130,
-                  ],
+                  "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
                     "bottom",

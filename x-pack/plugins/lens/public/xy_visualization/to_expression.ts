@@ -10,7 +10,7 @@ import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { DEFAULT_LEGEND_SIZE, LegendSizeToPixels } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import type { AxisExtentConfig, YConfig, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import {
@@ -191,10 +191,6 @@ export const buildExpression = (
     return null;
   }
 
-  const legendSizeInPixels = LegendSizeToPixels[state.legend.legendSize ?? DEFAULT_LEGEND_SIZE];
-  const legendSize =
-    !state.legend.isInside && legendSizeInPixels !== undefined ? [legendSizeInPixels] : [];
-
   return {
     type: 'expression',
     chain: [
@@ -219,7 +215,11 @@ export const buildExpression = (
                       : [],
                     position: !state.legend.isInside ? [state.legend.position] : [],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize,
+                    legendSize: state.legend.isInside
+                      ? [LegendSize.AUTO]
+                      : state.legend.legendSize
+                      ? [state.legend.legendSize]
+                      : [],
                     horizontalAlignment:
                       state.legend.horizontalAlignment && state.legend.isInside
                         ? [state.legend.horizontalAlignment]

@@ -14,7 +14,7 @@ import {
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ExpressionValueVisDimension, LegendSize } from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
@@ -31,7 +31,7 @@ describe('interpreter/functions#pieVis', () => {
     addTooltip: true,
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
-    legendSize: 80,
+    legendSize: LegendSize.SMALL,
     isDonut: true,
     emptySizeRatio: EmptySizeRatios.SMALL,
     nestedLegend: true,
