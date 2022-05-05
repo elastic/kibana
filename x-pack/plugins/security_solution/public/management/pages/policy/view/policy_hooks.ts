@@ -101,3 +101,8 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
     [getPath, history]
   );
 }
+
+export const useIsPolicySettingsBarVisible = () => {
+  const policySettingsRegex = /administration\/policy\/[A-Za-z0-9-]+/;
+  return window.location.pathname.match(policySettingsRegex) !== null;
+};
