@@ -9,7 +9,7 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-export { KibanaSolutionAvatarProps } from './solution_avatar';
+export type { KibanaSolutionAvatarProps } from './solution_avatar';
 
 /**
  * The Lazily-loaded `KibanaSolutionAvatar` component.  Consumers should use `React.Suspense` or
