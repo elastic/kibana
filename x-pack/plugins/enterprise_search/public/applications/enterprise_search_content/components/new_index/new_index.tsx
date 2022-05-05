@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
+import { SearchIndicesLogic } from '../search_indices/search_indices_logic';
 
 import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
@@ -38,7 +39,6 @@ import { MethodConnector } from './method_connector';
 import { MethodCrawler } from './method_crawler';
 import { MethodEs } from './method_es';
 import { MethodJson } from './method_json';
-import { NewSearchIndexLogic } from './new_search_index_logic';
 
 interface CardLabelProps {
   title: string;
@@ -57,7 +57,7 @@ export const NewIndex: React.FC = () => {
   const [selectedMethod, setSelectedMethod] = useState({ id: '', label: '' });
   const [methodIsSelected, setMethodIsSelected] = useState(false);
 
-  const { loadSearchEngines } = useActions(NewSearchIndexLogic);
+  const { loadSearchEngines } = useActions(SearchIndicesLogic);
   useEffect(() => {
     loadSearchEngines();
   }, []);

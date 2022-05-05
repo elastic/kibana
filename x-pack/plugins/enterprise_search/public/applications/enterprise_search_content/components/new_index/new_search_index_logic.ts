@@ -10,11 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { Engine } from '../../../app_search/components/engine/types';
 import { formatApiName } from '../../utils/format_api_name';
 
-import {
-  SearchIndicesLogic,
-  SearchIndicesValues,
-  SearchIndicesActions,
-} from '../search_indices/search_indices_logic';
+import { SearchIndicesLogic, SearchIndicesValues } from '../search_indices/search_indices_logic';
 
 import { DEFAULT_LANGUAGE } from './constants';
 import { ISearchEngineOption } from './new_search_index_template';
@@ -26,7 +22,7 @@ export interface NewSearchIndexValues extends Pick<SearchIndicesValues, 'searchE
   language: string;
 }
 
-export interface NewSearchIndexActions extends Pick<SearchIndicesActions, 'loadSearchEngines'> {
+export interface NewSearchIndexActions {
   setRawName(rawName: string): { rawName: string };
   setLanguage(language: string): { language: string };
 }
@@ -35,7 +31,6 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
   path: ['enterprise_search', 'content', 'new_search_index'],
   connect: {
     values: [SearchIndicesLogic, ['searchEngines']],
-    actions: [SearchIndicesLogic, ['loadSearchEngines']],
   },
   actions: {
     setRawName: (rawName) => ({ rawName }),
