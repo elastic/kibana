@@ -35,7 +35,7 @@ export class UserContentService {
     this.savedObjectClient = savedObjectClient;
     this.metadataEventsService = metadataEventService;
 
-    this.registerSavedObjectHooks();
+    this.registerSavedObjectsHooks();
   }
 
   /**
@@ -79,7 +79,7 @@ export class UserContentService {
     return [viewsCountColumn];
   }
 
-  private registerSavedObjectHooks() {
+  private registerSavedObjectsHooks() {
     // Hook whenever user generated saved object(s) are accessed
     this.savedObjectClient?.post('get', async (objects) => {
       const registeredContents = [...this.contents.keys()];

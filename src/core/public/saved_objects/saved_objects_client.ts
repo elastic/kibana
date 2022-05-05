@@ -285,14 +285,14 @@ interface ObjectTypeAndId {
   type: string;
 }
 
-type PreGetHook = (objects: ObjectTypeAndId[]) => Promise<void>;
+type PreGetHook = (...args: Parameters<SavedObjectsClient['bulkGet']>) => Promise<void>;
 type PostGetHook = (objects: SavedObject[]) => Promise<void>;
 
 type PreCreateHook = (
   ...args: Parameters<SavedObjectsClient['bulkCreate']>
 ) => Promise<SavedObjectsBulkCreateObject[] | undefined>;
 type PostCreateHook = (
-  savedObject: Awaited<ReturnType<SavedObjectsClient['create']>>
+  objects: Array<Awaited<ReturnType<SavedObjectsClient['create']>>>
 ) => Promise<void>;
 
 interface PreHooks {
@@ -470,9 +470,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     return createRequest
       .then((resp) => this.createSavedObject(resp))
       .then(async (resp) => {
-        for (const postCreateHook of this.postHooks.create) {
-          await postCreateHook(resp);
-        }
+        await this.runPostCreateHooks([resp]);
         return resp;
       });
   };
@@ -499,13 +497,18 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       query,
       body: JSON.stringify(updatedObjects),
     });
-    return request.then((resp) => {
-      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
-      return renameKeys<
-        PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
-        SavedObjectsBatchResponse
-      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
-    });
+    return request
+      .then((resp) => {
+        resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
+        return renameKeys<
+          PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
+          SavedObjectsBatchResponse
+        >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
+      })
+      .then(async (resp) => {
+        await this.runPostCreateHooks(resp.savedObjects);
+        return resp;
+      });
   };
 
   private runPreCreateHooks = async (
@@ -515,12 +518,20 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     if (hooks.length === 0) {
       return updatedObjects;
     }
+    // Recursively call the the "pre" create hooks passing the
+    // updated saved objects
     const [preCreateHook, ...rest] = hooks;
     const result = await preCreateHook(updatedObjects);
     if (rest.length) {
       return await this.runPreCreateHooks(rest, result!);
     }
     return result!;
+  };
+
+  private runPostCreateHooks = async (objects: SimpleSavedObject[]) => {
+    for (const postCreateHook of this.postHooks.create) {
+      await postCreateHook(objects);
+    }
   };
 
   public delete = (
