@@ -50,14 +50,13 @@ const getDataViewsRouteFactory =
       {
         path,
         validate: {
-          params: schema.object(
+          query: schema.object(
             {
               size: schema.number({
                 defaultValue: 10,
                 max: 10000
               }),
-            },
-            { unknowns: 'allow' }
+            }
           ),
         },
       },
@@ -72,7 +71,7 @@ const getDataViewsRouteFactory =
             elasticsearchClient,
             req
           );
-          const { size } = req.params;
+          const { size } = req.query;
 
           const dataViews = await getDataViews({
             dataViewsService,
