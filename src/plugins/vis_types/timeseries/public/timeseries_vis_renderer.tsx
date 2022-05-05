@@ -19,9 +19,11 @@ import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common'
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
+import { getCharts, getDataViewsStart } from './services';
 
 import type { TimeseriesVisParams } from './types';
 import type { TimeseriesRenderValue } from './metrics_fn';
+import { fetchIndexPattern } from '../common/index_patterns_utils';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -52,6 +54,9 @@ export const getTimeseriesVisRenderer: (deps: {
     });
     const { visParams: model, visData, syncColors, syncTooltips } = config;
 
+    const paletteService = await getCharts().palettes.getPalettes();
+    const indexPattern = await fetchIndexPattern(model.index_pattern, getDataViewsStart());
+
     const showNoResult = !checkIfDataExists(visData, model);
 
     render(
@@ -72,6 +77,8 @@ export const getTimeseriesVisRenderer: (deps: {
               syncColors={syncColors}
               syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
+              indexPattern={indexPattern}
+              paletteService={paletteService}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>
