@@ -48,9 +48,22 @@ function TimeseriesVisualization({
   getConfig,
   syncColors,
   syncTooltips,
-  indexPattern,
-  palettesService,
 }: TimeseriesVisualizationProps) {
+  const [indexPattern, setIndexPattern] = useState<FetchedIndexPattern['indexPattern']>(null);
+  const [palettesService, setPalettesService] = useState<PaletteRegistry | null>(null);
+
+  useEffect(() => {
+    getCharts()
+      .palettes.getPalettes()
+      .then((paletteRegistry) => setPalettesService(paletteRegistry));
+  }, []);
+
+  useEffect(() => {
+    fetchIndexPattern(model.index_pattern, getDataViewsStart()).then((fetchedIndexPattern) =>
+      setIndexPattern(fetchedIndexPattern.indexPattern)
+    );
+  }, [model.index_pattern]);
+
   const onBrush = useCallback(
     async (gte: string, lte: string, series: PanelData[]) => {
       let event;
@@ -144,7 +157,7 @@ function TimeseriesVisualization({
   const [firstSeries] =
     (isVisTableData(visData) ? visData.series : visData[model.id]?.series) ?? [];
 
-  if (!VisComponent) {
+  if (!VisComponent || palettesService === null || indexPattern === null) {
     return <TimeseriesLoading />;
   }
 
