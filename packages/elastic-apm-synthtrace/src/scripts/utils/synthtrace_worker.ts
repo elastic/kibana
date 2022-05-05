@@ -15,6 +15,8 @@ import { LogLevel } from '../../lib/utils/create_logger';
 import { StreamProcessor } from '../../lib/stream_processor';
 import { Scenario } from '../scenario';
 import { EntityIterable, Fields } from '../..';
+import { StreamAggregator } from '../../lib/stream_aggregator';
+import { ServiceLatencyAggregator } from '../../lib/apm/aggregators/service_latency_aggregator';
 
 // logging proxy to main thread, ensures we see real time logging
 const l = {
@@ -61,9 +63,11 @@ async function setup() {
       parentPort?.postMessage({ workerIndex, lastTimestamp: item['@timestamp'] });
     }
   };
+  const aggregators: StreamAggregator[] = [new ServiceLatencyAggregator()];
   streamProcessor = new StreamProcessor({
     version,
     processors: StreamProcessor.apmProcessors,
+    streamAggregators: aggregators,
     maxSourceEvents: runOptions.maxDocs,
     logger: l,
     processedCallback: (processedDocuments) => {
