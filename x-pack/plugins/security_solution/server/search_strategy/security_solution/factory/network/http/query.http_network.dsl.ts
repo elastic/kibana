@@ -66,6 +66,14 @@ export const buildHttpQuery = ({
               filter,
             },
       },
+      _source: false,
+      fields: [
+        'host.name', 'source.ip',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
     size: 0,
     track_total_hits: false,
@@ -105,9 +113,7 @@ const getHttpAggs = (sortField: SortField, querySize: number) => ({
       source: {
         top_hits: {
           size: 1,
-          _source: {
-            includes: ['host.name', 'source.ip'],
-          },
+          _source: false,
         },
       },
     },

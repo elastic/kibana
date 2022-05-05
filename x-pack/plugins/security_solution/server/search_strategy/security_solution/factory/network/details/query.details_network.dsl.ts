@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { NetworkDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
 
 const getAggs = (type: string, ip: string) => {
@@ -37,7 +36,7 @@ const getAggs = (type: string, ip: string) => {
             results: {
               top_hits: {
                 size: 1,
-                _source: [`${type}.as`],
+                _source: false,
                 sort: [
                   {
                     '@timestamp': 'desc' as const,
@@ -57,7 +56,7 @@ const getAggs = (type: string, ip: string) => {
             results: {
               top_hits: {
                 size: 1,
-                _source: [`${type}.geo`],
+                _source: false,
                 sort: [
                   {
                     '@timestamp': 'desc' as const,
@@ -84,7 +83,7 @@ const getHostAggs = (ip: string) => {
         results: {
           top_hits: {
             size: 1,
-            _source: ['host'],
+            _source: false,
             sort: [
               {
                 '@timestamp': 'desc' as const,
@@ -99,7 +98,6 @@ const getHostAggs = (ip: string) => {
 
 export const buildNetworkDetailsQuery = ({
   defaultIndex,
-  docValueFields,
   ip,
 }: NetworkDetailsRequestOptions) => {
   const dslQuery = {
@@ -108,7 +106,6 @@ export const buildNetworkDetailsQuery = ({
     ignore_unavailable: true,
     track_total_hits: false,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
         ...getAggs('source', ip),
         ...getAggs('destination', ip),
@@ -120,6 +117,18 @@ export const buildNetworkDetailsQuery = ({
         },
       },
       size: 0,
+      _source: false,
+      fields: [
+        'source.as',
+        'source.geo',
+        'destination.as',
+        'destination.geo',
+        'host*',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
   };
 

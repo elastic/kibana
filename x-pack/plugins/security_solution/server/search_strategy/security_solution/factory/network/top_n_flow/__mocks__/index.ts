@@ -95,7 +95,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526378075029582',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: { as: { number: 15169, organization: { name: 'Google LLC' } } },
                       },
                     },
@@ -114,7 +114,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526378075029582',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           geo: {
                             continent_name: 'North America',
@@ -150,7 +150,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1527252060367158',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: { as: { number: 54113, organization: { name: 'Fastly' } } },
                       },
                     },
@@ -169,7 +169,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1527252060367158',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           geo: {
                             continent_name: 'North America',
@@ -206,7 +206,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526971840437636',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           as: { number: 41231, organization: { name: 'Canonical Group Limited' } },
                         },
@@ -227,7 +227,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526971840437636',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           geo: {
                             continent_name: 'Europe',
@@ -291,7 +291,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1527003062069535',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: { as: { number: 54113, organization: { name: 'Fastly' } } },
                       },
                     },
@@ -310,7 +310,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1527003062069535',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           geo: {
                             continent_name: 'North America',
@@ -347,7 +347,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526557113311472',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: { as: { number: 15169, organization: { name: 'Google LLC' } } },
                       },
                     },
@@ -366,7 +366,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526557113311472',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           geo: {
                             continent_name: 'North America',
@@ -402,7 +402,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526379128390241',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: { as: { number: 54113, organization: { name: 'Fastly' } } },
                       },
                     },
@@ -421,7 +421,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526379128390241',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           geo: {
                             continent_name: 'North America',
@@ -455,7 +455,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526555996515551',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           as: { number: 41231, organization: { name: 'Canonical Group Limited' } },
                         },
@@ -476,7 +476,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526555996515551',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           geo: {
                             continent_name: 'North America',
@@ -513,7 +513,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526584379144248',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: { as: { number: 133766, organization: { name: 'YHSRV.LLC' } } },
                       },
                     },
@@ -532,7 +532,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _index: 'filebeat-8.0.0-2020.09.02-000001',
                       _id: 'dd4fa2d4bd-1526584379144248',
                       _score: 0,
-                      _source: {
+                      fields: {
                         source: {
                           geo: {
                             continent_name: 'North America',
@@ -836,11 +836,11 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
                   },
                   location: {
                     filter: { exists: { field: 'source.geo' } },
-                    aggs: { top_geo: { top_hits: { _source: 'source.geo.*', size: 1 } } },
+                    aggs: { top_geo: { top_hits: { _source: false, size: 1 } } },
                   },
                   autonomous_system: {
                     filter: { exists: { field: 'source.as' } },
-                    aggs: { top_as: { top_hits: { _source: 'source.as.*', size: 1 } } },
+                    aggs: { top_as: { top_hits: { _source: false, size: 1 } } },
                   },
                   flows: { cardinality: { field: 'network.community_id' } },
                   destination_ips: { cardinality: { field: 'destination.ip' } },
@@ -904,11 +904,11 @@ export const expectedDsl = {
           },
           location: {
             filter: { exists: { field: 'source.geo' } },
-            aggs: { top_geo: { top_hits: { _source: 'source.geo.*', size: 1 } } },
+            aggs: { top_geo: { top_hits: { _source: false, size: 1 } } },
           },
           autonomous_system: {
             filter: { exists: { field: 'source.as' } },
-            aggs: { top_as: { top_hits: { _source: 'source.as.*', size: 1 } } },
+            aggs: { top_as: { top_hits: { _source: false, size: 1 } } },
           },
           flows: { cardinality: { field: 'network.community_id' } },
           destination_ips: { cardinality: { field: 'destination.ip' } },

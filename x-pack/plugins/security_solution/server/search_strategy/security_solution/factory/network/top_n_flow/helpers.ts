@@ -66,38 +66,38 @@ const getFlowTargetFromString = (flowAsString: string) =>
   flowAsString === 'source' ? FlowTargetSourceDest.source : FlowTargetSourceDest.destination;
 
 const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
-  result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0]._source
+  result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0].fields
     ? {
         geo: formatResponseObjectValues(
           getOr(
             '',
-            `location.top_geo.hits.hits[0]._source.${
-              Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+            `location.top_geo.hits.hits[0].fields.${
+              Object.keys(result.location.top_geo.hits.hits[0].fields)[0]
             }.geo`,
             result
           )
         ),
         flowTarget: getFlowTargetFromString(
-          Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+          Object.keys(result.location.top_geo.hits.hits[0].fields)[0]
         ),
       }
     : null;
 
 const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null =>
   result.autonomous_system.top_as.hits.hits.length > 0 &&
-  result.autonomous_system.top_as.hits.hits[0]._source
+  result.autonomous_system.top_as.hits.hits[0].fields
     ? {
         number: getOr(
           null,
-          `autonomous_system.top_as.hits.hits[0]._source.${
-            Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
+          `autonomous_system.top_as.hits.hits[0].fields.${
+            Object.keys(result.autonomous_system.top_as.hits.hits[0].fields)[0]
           }.as.number`,
           result
         ),
         name: getOr(
           '',
-          `autonomous_system.top_as.hits.hits[0]._source.${
-            Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
+          `autonomous_system.top_as.hits.hits[0].fields.${
+            Object.keys(result.autonomous_system.top_as.hits.hits[0].fields)[0]
           }.as.organization.name`,
           result
         ),

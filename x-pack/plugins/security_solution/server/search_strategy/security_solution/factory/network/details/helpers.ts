@@ -20,12 +20,12 @@ export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) 
   const lastSeen = getOr(null, `lastSeen.value_as_string`, networkHit);
   const autonomousSystem: AutonomousSystem | null = getOr(
     null,
-    `as.results.hits.hits[0]._source.${type}.as`,
+    `as.results.hits.hits[0].fields.${type}.as`,
     networkHit
   );
   const geoFields: GeoEcs | null = getOr(
     null,
-    `geo.results.hits.hits[0]._source.${type}.geo`,
+    `geo.results.hits.hits[0].fields.${type}.geo`,
     networkHit
   );
 
@@ -60,7 +60,7 @@ const formatHostEcs = (data: Record<string, unknown> | null): HostEcs | null => 
 
 export const getNetworkDetailsHostAgg = (hostDetailsHit: NetworkDetailsHostHit | {}) => {
   const hostFields: HostEcs | null = formatHostEcs(
-    getOr(null, `results.hits.hits[0]._source.host`, hostDetailsHit)
+    getOr(null, `results.hits.hits[0].fields.host`, hostDetailsHit)
   );
   return {
     host: {
