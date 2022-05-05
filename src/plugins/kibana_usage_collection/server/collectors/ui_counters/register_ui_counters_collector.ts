@@ -16,9 +16,7 @@ import {
   UsageCountersSavedObjectAttributes,
 } from '@kbn/usage-collection-plugin/server';
 
-import {
-  deserializeUiCounterName,
-} from '@kbn/usage-collection-plugin/common/ui_counters';
+import { deserializeUiCounterName } from '@kbn/usage-collection-plugin/common/ui_counters';
 
 interface UiCounterEvent {
   appName: string;
@@ -68,23 +66,23 @@ export async function fetchUiCounters({ soClient }: CollectorFetchContext) {
     });
 
   return {
-    dailyEvents: Object.values(rawUsageCounters.reduce((acc, raw) => {
-      try {
-        const event = transformRawUsageCounterObject(raw);
-        if (event) {
-          acc[raw.id] = event;
+    dailyEvents: Object.values(
+      rawUsageCounters.reduce((acc, raw) => {
+        try {
+          const event = transformRawUsageCounterObject(raw);
+          if (event) {
+            acc[raw.id] = event;
+          }
+        } catch (_) {
+          // swallow error; allows sending successfully transformed objects.
         }
-      } catch (_) {
-        // swallow error; allows sending successfully transformed objects.
-      }
-      return acc;
-    }, {} as Record<string, UiCounterEvent>)),
-  }
+        return acc;
+      }, {} as Record<string, UiCounterEvent>)
+    ),
+  };
 }
 
-export function registerUiCountersUsageCollector(
-  usageCollection: UsageCollectionSetup,
-) {
+export function registerUiCountersUsageCollector(usageCollection: UsageCollectionSetup) {
   const collector = usageCollection.makeUsageCollector<UiCountersUsage>({
     type: 'ui_counters',
     schema: {
