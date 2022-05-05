@@ -19,6 +19,7 @@ describe('Severity field selector', () => {
         selectedSeverity={CaseSeverity.MEDIUM}
         onSeverityChange={onSeverityChange}
         isLoading={false}
+        isDisabled={false}
       />
     );
 
@@ -32,6 +33,7 @@ describe('Severity field selector', () => {
         selectedSeverity={CaseSeverity.MEDIUM}
         onSeverityChange={onSeverityChange}
         isLoading={false}
+        isDisabled={false}
       />
     );
     userEvent.click(result.getByTestId('case-severity-selection'));
@@ -47,6 +49,7 @@ describe('Severity field selector', () => {
         selectedSeverity={CaseSeverity.MEDIUM}
         onSeverityChange={onSeverityChange}
         isLoading={false}
+        isDisabled={false}
       />
     );
     userEvent.click(result.getByTestId('case-severity-selection'));
