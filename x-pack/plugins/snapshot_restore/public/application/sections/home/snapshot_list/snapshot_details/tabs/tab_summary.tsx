@@ -245,7 +245,19 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <CollapsibleFeatureStatesList featureStates={featureStates} />
+              {/*
+                When a policy that includes featureStates: ['none'] is executed, the resulting
+                snapshot wont include the `none` in the featureStates array but instead will return
+                an empty array.
+              */}
+              {featureStates.length === 0 ? (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.featureStatesList.noFeatures"
+                  defaultMessage="No features"
+                />
+              ) : (
+                <CollapsibleFeatureStatesList featureStates={featureStates} />
+              )}
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         </EuiFlexGroup>

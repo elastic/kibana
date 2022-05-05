@@ -90,7 +90,7 @@ describe('<RestoreSnapshot />', () => {
       httpRequestsMockHelpers.setGetSnapshotResponse(
         REPOSITORY_NAME,
         SNAPSHOT_NAME,
-        fixtures.getSnapshot()
+        fixtures.getSnapshot({ featureStates: ['kibana'] })
       );
       await act(async () => {
         testBed = await setup(httpSetup);

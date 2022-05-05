@@ -20,7 +20,10 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
+  EuiIconTip,
   EuiTitle,
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -157,10 +160,30 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     restoreSettings?.featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[]
   );
 
+  const hasNoneOptionSelected = !!selectedFeatureStateOptions?.find((option) => option.label === 'none');
+  const onIncludeNoneSwitchChange = () => {
+    if (!hasNoneOptionSelected) {
+      setSelectedFeatureStateOptions([{ label: 'none' }]);
+      updateRestoreSettings({ featureStates: ['none'] });
+    } else {
+      setSelectedFeatureStateOptions([]);
+      updateRestoreSettings({ featureStates: [] });
+    }
+  };
+
   const onFeatureStatesChange = (selected: FeaturesOption[]) => {
     setSelectedFeatureStateOptions(selected);
     updateRestoreSettings({
       featureStates: selected.map((option) => option.label),
+    });
+  };
+
+  const onRestoreGlobalStateToggleChange = (event: EuiSwitchEvent) => {
+    const { checked } = event.target;
+
+    updateRestoreSettings({
+      includeGlobalState: checked,
+      featureStates: checked && featureStates.length === 0 ? ['none'] : undefined,
     });
   };
 
@@ -602,7 +625,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               }}
             />
 
-            {includeGlobalState && semverGt(version, '7.12.0') && (
+            {includeGlobalState && semverGt(version, '7.12.0') && featureStates.length > 0 && !hasNoneOptionSelected && (
               <>
                 <EuiSpacer size="s" />
                 <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
@@ -632,17 +655,16 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               />
             }
             checked={includeGlobalState === undefined ? false : includeGlobalState}
-            onChange={(e) => updateRestoreSettings({ includeGlobalState: e.target.checked })}
+            onChange={onRestoreGlobalStateToggleChange}
             disabled={!snapshotIncludeGlobalState}
             data-test-subj="includeGlobalStateSwitch"
           />
         </EuiFormRow>
 
-        {includeGlobalState && (
+        {includeGlobalState && featureStates.length > 0 && (
           <>
             <EuiSpacer size="m" />
             <EuiFormRow
-              fullWidth
               label={
                 <>
                   <FormattedMessage
@@ -652,17 +674,62 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   <FeatureStatesIconTip />
                 </>
               }
+              labelAppend={
+                <EuiSwitch
+                  compressed
+                  label={
+                    <>
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.restoreForm.stepLogistics.includeNoneLabel"
+                        defaultMessage="Include none"
+                      />{' '}
+                      <EuiIconTip
+                        type="questionInCircle"
+                        content={
+                          <span>
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.restoreForm.stepLogistics.includeNoneDescription"
+                              defaultMessage="If enabled, all system indices will omitted."
+                            />
+                          </span>
+                        }
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                      />
+                    </>
+                  }
+                  checked={hasNoneOptionSelected}
+                  onChange={onIncludeNoneSwitchChange}
+                />
+              }
             >
               <>
                 <EuiComboBox
                   placeholder="All features"
                   options={featureStates.map((feature) => ({ label: feature }))}
-                  selectedOptions={selectedFeatureStateOptions}
+                  selectedOptions={hasNoneOptionSelected ? [] : selectedFeatureStateOptions}
+                  isDisabled={hasNoneOptionSelected}
                   onChange={onFeatureStatesChange}
                   isClearable={true}
                 />
               </>
             </EuiFormRow>
+          </>
+        )}
+        {includeGlobalState && featureStates.length === 0 && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              size="s"
+              iconType="help"
+              color="warning"
+              data-test-subj="noFeatureStatesCallout"
+              title={i18n.translate(
+                'xpack.snapshotRestore.restoreForm.stepLogistics.noFeatureStates',
+                { defaultMessage: 'No feature states are included in this snapshot.' }
+              )}
+            />
           </>
         )}
       </EuiDescribedFormGroup>

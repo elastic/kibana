@@ -20,12 +20,25 @@ export const CollapsibleFeatureStatesList: React.FunctionComponent<Props> = ({ f
     items: featureStates,
   });
 
-  return items === 'all' || items.length === 0 ? (
-    <FormattedMessage
-      id="xpack.snapshotRestore.featureStatesList.allFeaturesLabel"
-      defaultMessage="All features"
-    />
-  ) : (
+  if (items === 'all' || items.length === 0) {
+    return (
+      <FormattedMessage
+        id="xpack.snapshotRestore.featureStatesList.allFeaturesLabel"
+        defaultMessage="All features"
+      />
+    );
+  }
+
+  if (items.find((option) => option === 'none')) {
+    return (
+      <FormattedMessage
+        id="xpack.snapshotRestore.featureStatesList.noneFeaturesLabel"
+        defaultMessage="No features"
+      />
+    );
+  }
+
+  return (
     <>
       <EuiText>
         <ul>

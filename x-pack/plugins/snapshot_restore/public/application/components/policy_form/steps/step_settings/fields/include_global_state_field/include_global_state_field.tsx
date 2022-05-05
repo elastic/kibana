@@ -15,6 +15,7 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiSpacer,
+  EuiIconTip,
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -59,6 +60,17 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
     });
   };
 
+  const hasNoneOptionSelected = !!selectedOptions?.find((option) => option.label === 'none');
+  const onIncludeNoneSwitchChange = () => {
+    if (!hasNoneOptionSelected) {
+      setSelected([{ label: 'none' }]);
+      onUpdate({ featureStates: ['none'] });
+    } else {
+      setSelected([]);
+      onUpdate({ featureStates: [] });
+    }
+  };
+
   return (
     <EuiDescribedFormGroup
       title={
@@ -91,6 +103,7 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
           checked={config.includeGlobalState === undefined || config.includeGlobalState}
           onChange={(e) => {
             onUpdate({
+              featureStates: undefined,
               includeGlobalState: e.target.checked,
             });
           }}
@@ -100,7 +113,6 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
         <>
           <EuiSpacer size="m" />
           <EuiFormRow
-            fullWidth
             label={
               <>
                 <FormattedMessage
@@ -110,12 +122,42 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
                 <FeatureStatesIconTip />
               </>
             }
+            labelAppend={
+              <EuiSwitch
+                compressed
+                label={
+                  <>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyForm.stepSettings.includeNoneLabel"
+                      defaultMessage="Include none"
+                    />{' '}
+                    <EuiIconTip
+                      type="questionInCircle"
+                      content={
+                        <span>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyForm.stepSettings.includeNoneDescription"
+                            defaultMessage="All system indices can be omitted by providing including none of the feature states"
+                          />
+                        </span>
+                      }
+                      iconProps={{
+                        className: 'eui-alignTop',
+                      }}
+                    />
+                  </>
+                }
+                checked={hasNoneOptionSelected}
+                onChange={onIncludeNoneSwitchChange}
+              />
+            }
           >
             <EuiComboBox
               data-test-subj="featureStatesDropdown"
               placeholder="All features"
               options={features}
-              selectedOptions={selectedOptions}
+              selectedOptions={hasNoneOptionSelected ? [] : selectedOptions}
+              isDisabled={hasNoneOptionSelected}
               onChange={onChange}
               isLoading={isLoadingFeatures}
               isClearable={true}
