@@ -16,5 +16,5 @@ export function plugin() {
   return new UserContentPlugin();
 }
 
-export { userContentCommonMappings, viewsCountRangeFields } from '../common';
+export { userContentCommonMappings, viewsCountRangeFields, VIEWS_TOTAL_FIELD } from '../common';
 export type { ViewsCountRangeField } from '../common';

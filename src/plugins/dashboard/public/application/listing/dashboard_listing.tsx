@@ -25,6 +25,7 @@ import {
   UserContentPluginStart,
   ViewsCountRangeField,
   viewsCountRangeFields,
+  VIEWS_TOTAL_FIELD,
 } from '@kbn/user-content-plugin/public';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
@@ -78,9 +79,7 @@ export const DashboardListing = ({
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
-  const [viewsCountRange, setViewsCountRange] = useState<ViewsCountRangeField>(
-    viewsCountRangeFields[0]
-  );
+  const [viewsCountRange, setViewsCountRange] = useState<ViewsCountRangeField>(VIEWS_TOTAL_FIELD);
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -305,7 +304,7 @@ export const DashboardListing = ({
   }, [savedObjectsTagging]);
 
   const toolsRight = useMemo<EuiSearchBarProps['toolsRight']>(() => {
-    const viewsCountOptions = viewsCountRangeFields.map((range) => {
+    const daysRangeOptions = viewsCountRangeFields.map((range) => {
       const days = /_(\d+)_/.exec(range)?.[1];
       const text = `Last ${days} days`;
 
@@ -314,6 +313,14 @@ export const DashboardListing = ({
         text,
       };
     });
+
+    const viewsCountOptions = [
+      {
+        value: VIEWS_TOTAL_FIELD,
+        text: 'Total views',
+      },
+      ...daysRangeOptions,
+    ];
 
     return [
       <EuiSelect
