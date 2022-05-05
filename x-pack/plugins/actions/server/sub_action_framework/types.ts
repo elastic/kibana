@@ -14,6 +14,11 @@ import { ActionTypeParams, Services } from '../types';
 import { BasicConnector } from './basic';
 
 export interface ServiceParams<Config, Secrets> {
+  /**
+   * The type is the connector type id. For example ".servicenow"
+   * The id is the connector's SavedObject UUID.
+   */
+  connector: { id: string; type: string };
   config: Config;
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;

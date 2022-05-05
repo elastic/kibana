@@ -7,7 +7,7 @@
 
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, AxiosError } from 'axios';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { SubAction } from './types';
@@ -18,6 +18,8 @@ const isObject = (v: unknown): v is Record<string, unknown> => {
   return typeof v === 'object' && v !== null;
 };
 
+const isAxiosError = (error: unknown): error is AxiosError => (error as AxiosError).isAxiosError;
+
 export abstract class BasicConnector<Config, Secrets> {
   [k: string]: ((params: unknown) => unknown) | unknown;
   private axiosInstance: AxiosInstance;
@@ -25,10 +27,12 @@ export abstract class BasicConnector<Config, Secrets> {
   private subActions: Map<string, SubAction> = new Map();
   private configurationUtilities: ActionsConfigurationUtilities;
   protected logger: Logger;
+  protected connector: ServiceParams<Config, Secrets>['connector'];
   protected config: Config;
   protected secrets: Secrets;
 
   constructor(params: ServiceParams<Config, Secrets>) {
+    this.connector = params.connector;
     this.logger = params.logger;
     this.config = params.config;
     this.secrets = params.secrets;
@@ -89,6 +93,8 @@ export abstract class BasicConnector<Config, Secrets> {
     return this.subActions;
   }
 
+  protected abstract getResponseErrorMessage<T>(error: AxiosError<T>): string;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected async request<R = any>({
     url,
@@ -102,35 +108,49 @@ export abstract class BasicConnector<Config, Secrets> {
     responseSchema: Type<R>;
     method?: Method;
   } & AxiosRequestConfig): Promise<AxiosResponse<R>> {
-    this.assertURL(url);
-    this.ensureUriAllowed(url);
-    const normalizedURL = this.normalizeURL(url);
+    try {
+      this.assertURL(url);
+      this.ensureUriAllowed(url);
+      const normalizedURL = this.normalizeURL(url);
 
-    const { httpAgent, httpsAgent } = getCustomAgents(
-      this.configurationUtilities,
-      this.logger,
-      url
-    );
-    const { maxContentLength, timeout } = this.configurationUtilities.getResponseSettings();
+      const { httpAgent, httpsAgent } = getCustomAgents(
+        this.configurationUtilities,
+        this.logger,
+        url
+      );
+      const { maxContentLength, timeout } = this.configurationUtilities.getResponseSettings();
 
-    // TODO: Add name of service/connector
-    this.logger.debug(`Request to external service. Method: ${method}. URL: ${normalizedURL}`);
+      this.logger.debug(
+        `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
+      );
 
-    const res = await this.axiosInstance(normalizedURL, {
-      ...config,
-      method,
-      headers: this.getHeaders(headers),
-      data: this.normalizeData(data),
-      // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
-      httpAgent,
-      httpsAgent,
-      proxy: false,
-      maxContentLength,
-      timeout,
-    });
+      const res = await this.axiosInstance(normalizedURL, {
+        ...config,
+        method,
+        headers: this.getHeaders(headers),
+        data: this.normalizeData(data),
+        // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
+        httpAgent,
+        httpsAgent,
+        proxy: false,
+        maxContentLength,
+        timeout,
+      });
 
-    responseSchema.validate(res.data);
+      responseSchema.validate(res.data);
 
-    return res;
+      return res;
+    } catch (error) {
+      if (isAxiosError(error)) {
+        this.logger.debug(
+          `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config.method}. URL: ${error.config.url}`
+        );
+
+        const errorMessage = this.getResponseErrorMessage(error);
+        throw new Error(errorMessage);
+      }
+
+      throw error;
+    }
   }
 }

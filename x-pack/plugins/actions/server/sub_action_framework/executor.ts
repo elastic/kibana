@@ -28,6 +28,7 @@ export const buildExecutor = <Config, Secrets>({
     const subActionParams = params.subActionParams;
 
     const service = new connector.Service({
+      connector: { id: actionId, type: connector.id },
       config,
       secrets,
       configurationUtilities,
