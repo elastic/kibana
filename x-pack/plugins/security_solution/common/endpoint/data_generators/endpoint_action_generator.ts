@@ -8,7 +8,13 @@
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
-import { ISOLATION_ACTIONS, LogsEndpointAction, LogsEndpointActionResponse } from '../types';
+import {
+  ActivityLogItemTypes,
+  EndpointActivityLogActionResponse,
+  ISOLATION_ACTIONS,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
+} from '../types';
 
 const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
@@ -56,7 +62,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   generateResponse(
     overrides: DeepPartial<LogsEndpointActionResponse> = {}
   ): LogsEndpointActionResponse {
-    const timeStamp = new Date();
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -74,6 +80,21 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           started_at: this.randomPastDate(),
         },
         error: undefined,
+      },
+      overrides
+    );
+  }
+
+  generateActivityLogActionResponse(
+    overrides: DeepPartial<EndpointActivityLogActionResponse>
+  ): EndpointActivityLogActionResponse {
+    return merge(
+      {
+        type: ActivityLogItemTypes.RESPONSE,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generateResponse(),
+        },
       },
       overrides
     );

@@ -204,10 +204,10 @@ export interface ActionDetails {
   isCompleted: boolean;
   /** The date when the initial action request was submitted */
   startedAt: string;
-  /** The date when the action was completed (a response ack was received) */
+  /** The date when the action was completed (a response by the endpoint (not fleet) was received) */
   completedAt: string | undefined;
   /**
-   * The list of items (actions and responses) received thus far for the action.
+   * The list of action log items (actions and responses) received thus far for the action.
    */
   logEntries: ActivityLogEntry[];
 }

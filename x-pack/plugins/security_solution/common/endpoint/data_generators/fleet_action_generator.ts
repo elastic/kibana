@@ -8,7 +8,13 @@
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
-import { EndpointAction, EndpointActionResponse, ISOLATION_ACTIONS } from '../types';
+import {
+  ActivityLogActionResponse,
+  ActivityLogItemTypes,
+  EndpointAction,
+  EndpointActionResponse,
+  ISOLATION_ACTIONS,
+} from '../types';
 
 const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
@@ -61,6 +67,25 @@ export class FleetActionGenerator extends BaseDataGenerator {
         completed_at: timeStamp.toISOString(),
         error: 'some error happened',
         '@timestamp': timeStamp.toISOString(),
+      },
+      overrides
+    );
+  }
+
+  /**
+   * An Activity Log entry as returned by the Activity log API
+   * @param overrides
+   */
+  generateActivityLogActionResponse(
+    overrides: DeepPartial<ActivityLogActionResponse> = {}
+  ): ActivityLogActionResponse {
+    return merge(
+      {
+        type: ActivityLogItemTypes.FLEET_RESPONSE,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generateResponse(),
+        },
       },
       overrides
     );
