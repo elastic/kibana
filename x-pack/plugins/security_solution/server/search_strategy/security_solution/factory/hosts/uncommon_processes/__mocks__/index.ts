@@ -804,26 +804,9 @@ export const formattedSearchStrategyResponse = {
                               '/q',
                             ],
                             'process.name': ['AM_Delta_Patch_1.323.673.0.exe'],
+                            'host.name': ['siem-windows'],
                             'user.name': ['SYSTEM'],
-                            process: {
-                              args: [
-                                'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.673.0.exe',
-                                'WD',
-                                '/q',
-                              ],
-                              name: 'AM_Delta_Patch_1.323.673.0.exe',
-                            },
                             '@timestamp': '2020-09-07T13:08:52.366Z',
-                            host: {
-                              name: 'siem-windows',
-                              id: 'ce1d3c9b-a815-4643-9641-ada0f2c00609',
-                              mac: ['42:01:0a:c8:00:0f'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              domain: 'NT AUTHORITY',
-                              name: 'SYSTEM',
-                            },
                           },
                         },
                       ],
@@ -849,13 +832,11 @@ export const formattedSearchStrategyResponse = {
                     _id: 'cinEZnQBB-gskclyvNmU',
                     _score: null,
                     fields: {
-                      process: {
-                        args: ['C:\\Windows\\system32\\devicecensus.exe'],
-                        name: 'DeviceCensus.exe',
-                      },
-                      user: {
-                        name: 'SYSTEM',
-                      },
+                      'process.args': [
+                        'C:\\Windows\\system32\\devicecensus.exe',
+                      ],
+                      'process.name': ['DeviceCensus.exe'],
+                      'user.name': ['SYSTEM'],
                     },
                     sort: [1599452000791],
                   },
@@ -879,21 +860,13 @@ export const formattedSearchStrategyResponse = {
                           _id: 'cinEZnQBB-gskclyvNmU',
                           _score: 0,
                           fields: {
-                            process: {
-                              args: ['C:\\Windows\\system32\\devicecensus.exe'],
-                              name: 'DeviceCensus.exe',
-                            },
+                            'process.args': [
+                              'C:\\Windows\\system32\\devicecensus.exe',
+                            ],
+                            'process.name': ['DeviceCensus.exe'],
+                            'host.name': ['siem-windows'],
+                            'user.name': ['SYSTEM'],
                             '@timestamp': '2020-09-07T04:13:20.791Z',
-                            host: {
-                              name: 'siem-windows',
-                              id: 'ce1d3c9b-a815-4643-9641-ada0f2c00609',
-                              mac: ['42:01:0a:c8:00:0f'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              domain: 'NT AUTHORITY',
-                              name: 'SYSTEM',
-                            },
                           },
                         },
                       ],
@@ -919,13 +892,11 @@ export const formattedSearchStrategyResponse = {
                     _id: 'HNKSZHQBA6bGZw2uCtRk',
                     _score: null,
                     fields: {
-                      process: {
-                        args: ['C:\\Windows\\system32\\disksnapshot.exe', '-z'],
-                        name: 'DiskSnapshot.exe',
-                      },
-                      user: {
-                        name: 'SYSTEM',
-                      },
+                      'process.args': [
+                        'C:\\Windows\\system32\\disksnapshot.exe', '-z'
+                      ],
+                      'process.name': ['DiskSnapshot.exe'],
+                      'user.name': ['SYSTEM'],
                     },
                     sort: [1599415124040],
                   },
@@ -949,21 +920,13 @@ export const formattedSearchStrategyResponse = {
                           _id: 'HNKSZHQBA6bGZw2uCtRk',
                           _score: 0,
                           fields: {
-                            process: {
-                              args: ['C:\\Windows\\system32\\disksnapshot.exe', '-z'],
-                              name: 'DiskSnapshot.exe',
-                            },
+                            'process.args': [
+                              'C:\\Windows\\system32\\disksnapshot.exe', '-z'
+                            ],
+                            'process.name': ['DiskSnapshot.exe'],
+                            'host.name': ['siem-windows'],
+                            'user.name': ['SYSTEM'],
                             '@timestamp': '2020-09-06T17:58:44.040Z',
-                            host: {
-                              name: 'siem-windows',
-                              id: 'ce1d3c9b-a815-4643-9641-ada0f2c00609',
-                              mac: ['42:01:0a:c8:00:0f'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              domain: 'NT AUTHORITY',
-                              name: 'SYSTEM',
-                            },
                           },
                         },
                       ],
@@ -989,16 +952,13 @@ export const formattedSearchStrategyResponse = {
                     _id: '2zncaHQBB-gskcly1QaD',
                     _score: null,
                     fields: {
-                      process: {
-                        args: [
-                          'C:\\Windows\\TEMP\\88C4F57A-8744-4EA6-824E-88FEF8A0E9DD\\dismhost.exe',
+                      'process.args': [
+                        'C:\\Windows\\TEMP\\88C4F57A-8744-4EA6-824E-88FEF8A0E9DD\\dismhost.exe',
                           '{6BB79B50-2038-4A10-B513-2FAC72FF213E}',
-                        ],
-                        name: 'DismHost.exe',
-                      },
-                      user: {
-                        name: 'SYSTEM',
-                      },
+                      ],
+                      'process.name': ['DismHost.exe'],
+                      'host.name': ['siem-windows'],
+                      'user.name': ['SYSTEM'],
                     },
                     sort: [1599487135371],
                   },
@@ -1022,24 +982,14 @@ export const formattedSearchStrategyResponse = {
                           _id: '2zncaHQBB-gskcly1QaD',
                           _score: 0,
                           fields: {
-                            process: {
-                              args: [
-                                'C:\\Windows\\TEMP\\88C4F57A-8744-4EA6-824E-88FEF8A0E9DD\\dismhost.exe',
+                            'process.args': [
+                              'C:\\Windows\\TEMP\\88C4F57A-8744-4EA6-824E-88FEF8A0E9DD\\dismhost.exe',
                                 '{6BB79B50-2038-4A10-B513-2FAC72FF213E}',
-                              ],
-                              name: 'DismHost.exe',
-                            },
+                            ],
+                            'process.name': ['DismHost.exe'],
+                            'host.name': ['siem-windows'],
+                            'user.name': ['SYSTEM'],
                             '@timestamp': '2020-09-07T13:58:55.371Z',
-                            host: {
-                              name: 'siem-windows',
-                              id: 'ce1d3c9b-a815-4643-9641-ada0f2c00609',
-                              mac: ['42:01:0a:c8:00:0f'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              domain: 'NT AUTHORITY',
-                              name: 'SYSTEM',
-                            },
                           },
                         },
                       ],
@@ -1065,17 +1015,13 @@ export const formattedSearchStrategyResponse = {
                     _id: 'gdVuZXQBA6bGZw2uFsPP',
                     _score: null,
                     fields: {
-                      process: {
-                        args: [
-                          'C:\\Windows\\System32\\sihclient.exe',
+                      'process.args': [
+                        'C:\\Windows\\System32\\sihclient.exe',
                           '/cv',
                           '33nfV21X50ie84HvATAt1w.0.1',
-                        ],
-                        name: 'SIHClient.exe',
-                      },
-                      user: {
-                        name: 'SYSTEM',
-                      },
+                      ],
+                      'process.name': ['SIHClient.exe'],
+                      'user.name': ['SYSTEM'],
                     },
                     sort: [1599429545370],
                   },
@@ -1099,25 +1045,15 @@ export const formattedSearchStrategyResponse = {
                           _id: 'gdVuZXQBA6bGZw2uFsPP',
                           _score: 0,
                           fields: {
-                            process: {
-                              args: [
-                                'C:\\Windows\\System32\\sihclient.exe',
+                            'process.args': [
+                              'C:\\Windows\\System32\\sihclient.exe',
                                 '/cv',
                                 '33nfV21X50ie84HvATAt1w.0.1',
-                              ],
-                              name: 'SIHClient.exe',
-                            },
+                            ],
+                            'process.name': ['SIHClient.exe'],
+                            'host.name': ['siem-windows'],
+                            'user.name': ['SYSTEM'],
                             '@timestamp': '2020-09-06T21:59:05.370Z',
-                            host: {
-                              name: 'siem-windows',
-                              id: 'ce1d3c9b-a815-4643-9641-ada0f2c00609',
-                              mac: ['42:01:0a:c8:00:0f'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              domain: 'NT AUTHORITY',
-                              name: 'SYSTEM',
-                            },
                           },
                         },
                       ],
@@ -1143,15 +1079,11 @@ export const formattedSearchStrategyResponse = {
                     _id: '6NmKZnQBA6bGZw2uma12',
                     _score: null,
                     fields: {
-                      process: {
-                        args: [
-                          'C:\\Windows\\system32\\speech_onecore\\common\\SpeechModelDownload.exe',
-                        ],
-                        name: 'SpeechModelDownload.exe',
-                      },
-                      user: {
-                        name: 'NETWORK SERVICE',
-                      },
+                      'process.args': [
+                        'C:\\Windows\\system32\\speech_onecore\\common\\SpeechModelDownload.exe',
+                      ],
+                      'process.name': ['SpeechModelDownload.exe'],
+                      'user.name': ['NETWORK SERVICE'],
                     },
                     sort: [1599448191225],
                   },
@@ -1175,23 +1107,13 @@ export const formattedSearchStrategyResponse = {
                           _id: '6NmKZnQBA6bGZw2uma12',
                           _score: 0,
                           fields: {
-                            process: {
-                              args: [
-                                'C:\\Windows\\system32\\speech_onecore\\common\\SpeechModelDownload.exe',
-                              ],
-                              name: 'SpeechModelDownload.exe',
-                            },
+                            'process.args': [
+                              'C:\\Windows\\system32\\speech_onecore\\common\\SpeechModelDownload.exe',
+                            ],
+                            'process.name': ['SpeechModelDownload.exe'],
+                            'host.name': ['siem-windows'],
+                            'user.name': ['NT AUTHORITY'],
                             '@timestamp': '2020-09-07T03:09:51.225Z',
-                            host: {
-                              name: 'siem-windows',
-                              id: 'ce1d3c9b-a815-4643-9641-ada0f2c00609',
-                              mac: ['42:01:0a:c8:00:0f'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              domain: 'NT AUTHORITY',
-                              name: 'NETWORK SERVICE',
-                            },
                           },
                         },
                       ],
@@ -1217,13 +1139,11 @@ export const formattedSearchStrategyResponse = {
                     _id: 'Pi68Z3QBc39KFIJb3txa',
                     _score: null,
                     fields: {
-                      process: {
-                        args: ['C:\\Windows\\system32\\usoclient.exe', 'StartScan'],
-                        name: 'UsoClient.exe',
-                      },
-                      user: {
-                        name: 'SYSTEM',
-                      },
+                      'process.args': [
+                        'C:\\Windows\\system32\\usoclient.exe', 'StartScan'
+                      ],
+                      'process.name': ['UsoClient.exe'],
+                      'user.name': ['SYSTEM'],
                     },
                     sort: [1599468262455],
                   },
@@ -1247,21 +1167,13 @@ export const formattedSearchStrategyResponse = {
                           _id: 'Pi68Z3QBc39KFIJb3txa',
                           _score: 0,
                           fields: {
-                            process: {
-                              args: ['C:\\Windows\\system32\\usoclient.exe', 'StartScan'],
-                              name: 'UsoClient.exe',
-                            },
+                            'process.args': [
+                              'C:\\Windows\\system32\\usoclient.exe', 'StartScan'
+                            ],
+                            'process.name': ['UsoClient.exe'],
+                            'host.name': ['siem-windows'],
+                            'user.name': ['SYSTEM'],
                             '@timestamp': '2020-09-07T08:44:22.455Z',
-                            host: {
-                              name: 'siem-windows',
-                              id: 'ce1d3c9b-a815-4643-9641-ada0f2c00609',
-                              mac: ['42:01:0a:c8:00:0f'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              domain: 'NT AUTHORITY',
-                              name: 'SYSTEM',
-                            },
                           },
                         },
                       ],
@@ -1287,14 +1199,10 @@ export const formattedSearchStrategyResponse = {
                     _id: 'Ziw-Z3QBB-gskcly0vqU',
                     _score: null,
                     fields: {
-                      process: {
-                        args: ['/etc/cron.daily/apt-compat'],
-                        name: 'apt-compat',
-                      },
-                      user: {
-                        name: 'root',
-                        id: 0,
-                      },
+                      'process.args': ['/etc/cron.daily/apt-compat'],
+                      'process.name': ['apt-compat'],
+                      'user.name': ['root'],
+                      'user.id': [0],
                     },
                     sort: [1599459901154],
                   },
@@ -1318,21 +1226,12 @@ export const formattedSearchStrategyResponse = {
                           _id: 'Ziw-Z3QBB-gskcly0vqU',
                           _score: 0,
                           fields: {
-                            process: {
-                              args: ['/etc/cron.daily/apt-compat'],
-                              name: 'apt-compat',
-                            },
+                            'process.args': ['/etc/cron.daily/apt-compat'],
+                            'process.name': ['apt-compat'],
+                            'host.name': ['siem-kibana'],
+                            'user.name': ['root'],
+                            'user.id': [0],
                             '@timestamp': '2020-09-07T06:25:01.154464000Z',
-                            host: {
-                              name: 'siem-kibana',
-                              id: 'e50acb49-820b-c60a-392d-2ef75f276301',
-                              mac: ['42:01:0a:8e:00:07'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              name: 'root',
-                              id: 0,
-                            },
                           },
                         },
                       ],
@@ -1358,14 +1257,11 @@ export const formattedSearchStrategyResponse = {
                     _id: 'aSw-Z3QBB-gskcly0vqU',
                     _score: null,
                     fields: {
-                      process: {
-                        args: ['/etc/cron.daily/bsdmainutils'],
-                        name: 'bsdmainutils',
-                      },
-                      user: {
-                        name: 'root',
-                        id: 0,
-                      },
+                      'process.args': ['/etc/cron.daily/bsdmainutils'],
+                      'process.name': ['bsdmainutils'],
+                      'host.name': ['siem-windows'],
+                      'user.name': ['root'],
+                      'user.id': [0],
                     },
                     sort: [1599459901155],
                   },
@@ -1389,21 +1285,12 @@ export const formattedSearchStrategyResponse = {
                           _id: 'aSw-Z3QBB-gskcly0vqU',
                           _score: 0,
                           fields: {
-                            process: {
-                              args: ['/etc/cron.daily/bsdmainutils'],
-                              name: 'bsdmainutils',
-                            },
+                            'process.args': ['/etc/cron.daily/bsdmainutils'],
+                            'process.name': ['bsdmainutils'],
+                            'host.name': ['siem-kibana'],
+                            'user.name': ['root'],
+                            'user.id': [0],
                             '@timestamp': '2020-09-07T06:25:01.155812000Z',
-                            host: {
-                              name: 'siem-kibana',
-                              id: 'e50acb49-820b-c60a-392d-2ef75f276301',
-                              mac: ['42:01:0a:8e:00:07'],
-                              architecture: 'x86_64',
-                            },
-                            user: {
-                              name: 'root',
-                              id: 0,
-                            },
                           },
                         },
                       ],
@@ -1442,7 +1329,6 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [],
           name: ['SYSTEM'],
         },
       },
@@ -1470,7 +1356,6 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [],
           name: ['SYSTEM'],
         },
       },
@@ -1494,7 +1379,6 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [],
           name: ['SYSTEM'],
         },
       },
@@ -1518,7 +1402,6 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [],
           name: ['SYSTEM'],
         },
       },
@@ -1545,7 +1428,6 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [],
           name: ['SYSTEM'],
         },
       },
@@ -1569,7 +1451,6 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [],
           name: ['SYSTEM'],
         },
       },
@@ -1593,7 +1474,6 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [],
           name: ['NETWORK SERVICE'],
         },
       },
@@ -1617,7 +1497,6 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [],
           name: ['SYSTEM'],
         },
       },
@@ -1692,6 +1571,7 @@ export const formattedSearchStrategyResponse = {
           ],
           ignore_unavailable: true,
           body: {
+            _source: false,
             aggregations: {
               process_count: { cardinality: { field: 'process.name' } },
               group_by_process: {
@@ -1796,20 +1676,19 @@ export const formattedSearchStrategyResponse = {
                 ],
               },
             },
+            fields: [
+              'process.args',
+              'process.name',
+              'user.id',
+              'user.name',
+              'host.name',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
           size: 0,
-          _source: false,
-          fields: [
-            'process.args',
-            'process.name',
-            'user.id',
-            'user.name',
-            'host.name',
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
-            },
-          ],
           track_total_hits: false,
         },
         null,
@@ -1943,19 +1822,19 @@ export const expectedDsl = {
         ],
       },
     },
+    _source: false,
+    fields: [
+      'process.args',
+      'process.name',
+      'user.id',
+      'user.name',
+      'host.name',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
   size: 0,
-  _source: false,
-  fields: [
-    'process.args',
-    'process.name',
-    'user.id',
-    'user.name',
-    'host.name',
-    {
-      field: '@timestamp',
-      format: 'strict_date_optional_time',
-    },
-  ],
   track_total_hits: false,
 };
