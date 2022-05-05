@@ -24,6 +24,8 @@ export const SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY = `${SCRIPTED_FIELD_PATH_LEGACY
 
 export const SERVICE_KEY = 'data_view';
 export const SERVICE_KEY_LEGACY = 'index_pattern';
+export const SERVICE_KEY_MULTIPLE = 'data_views';
+export const SERVICE_KEY_MULTIPLE_LEGACY = 'index_patterns';
 export type SERVICE_KEY_TYPE = typeof SERVICE_KEY | typeof SERVICE_KEY_LEGACY;
 
 export const CREATE_DATA_VIEW_COUNTER_NAME = `POST ${DATA_VIEW_PATH}`;
