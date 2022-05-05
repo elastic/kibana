@@ -10,12 +10,15 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   const { query, filters, timeRange } = embeddable.getInput();
 
-  const vis = embeddable.getSavedVis();
-
   if (timeRange === undefined) {
     throw Error('Time range not specified.');
   }
   const { to, from } = timeRange;
+
+  const vis = embeddable.getSavedVis();
+  if (vis === undefined) {
+    throw Error('Visualization cannot be found.');
+  }
 
   return {
     vis,
