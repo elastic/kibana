@@ -279,13 +279,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         clearWithKeyboard: true,
       });
 
-      let data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
 
-      data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
     });
 

@@ -44,7 +44,6 @@ export type {
   YAxisConfigResult,
   CommonXYLayerConfig,
   AnnotationLayerArgs,
-  XYLayerConfigResult,
   ExtendedYConfigResult,
   DataLayerConfigResult,
   AxisExtentConfigResult,
