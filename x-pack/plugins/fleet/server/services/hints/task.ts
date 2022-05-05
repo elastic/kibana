@@ -22,6 +22,7 @@ import { getFullAgentPolicy } from '../agent_policies';
 import { getPackageInfo } from '../epm/packages';
 
 import { packagePolicyService } from '../package_policy';
+import { incrementPackageName } from '../package_policies';
 
 import { generatePackagePolicy } from './generate_package_policy';
 
@@ -29,9 +30,10 @@ import type { Hint, ParsedAnnotations } from './types';
 const FLEET_POLL_HINTS_INDEX_TASK_ID = 'FLEET:sync-task';
 const FLEET_POLL_HINTS_INDEX_TASK_TYPE = 'FLEET:poll-hints-index';
 const POLL_INTERVAL = '5s';
+const POLICY_NAME_PREFIX = 'autodiscover-';
 const ANNOTATION_PREFIX = 'elastic.co.hints/';
 const VALID_HINTS = Object.freeze(['host', 'package']);
-
+const SUPPORTED_PACKAGES = ['nginx', 'redis', 'apache'];
 interface HintTaskDeps {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
@@ -261,6 +263,11 @@ const processHints = async (params: HintTaskDeps & { logger?: Logger }) => {
         return;
       }
 
+      if (!SUPPORTED_PACKAGES.includes(parsedAnnotations.package)) {
+        logger?.info(`Hint ${hint._id} package ${parsedAnnotations.package} not yet supported`);
+        return;
+      }
+
       const agent = await getAgentForHint(esClient, hint, logger);
 
       if (!agent) {
@@ -282,7 +289,9 @@ const processHints = async (params: HintTaskDeps & { logger?: Logger }) => {
         return;
       }
 
+      const name = await incrementPackageName(soClient, packageInfo.name, POLICY_NAME_PREFIX);
       const packagePolicy = generatePackagePolicy(
+        name,
         agent,
         agentPolicy,
         packageInfo,

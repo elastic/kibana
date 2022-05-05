@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export function getMaxPackageName(packageName: string, packagePolicies?: Array<{ name: string }>) {
+export function getMaxPackageName(
+  packageName: string,
+  packagePolicies?: Array<{ name: string }>,
+  prefix: string = ''
+) {
   // Retrieve highest number appended to package policy name and increment it by one
-  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+  const pkgPoliciesNamePattern = new RegExp(`${prefix}${packageName}-(\\d+)`);
 
   const maxPkgPolicyName = Math.max(
     ...(packagePolicies ?? [])
@@ -16,5 +20,5 @@ export function getMaxPackageName(packageName: string, packagePolicies?: Array<{
     0
   );
 
-  return `${packageName}-${maxPkgPolicyName + 1}`;
+  return `${prefix}${packageName}-${maxPkgPolicyName + 1}`;
 }

@@ -14,7 +14,8 @@ import { packagePolicyService } from '../package_policy';
 
 export async function incrementPackageName(
   soClient: SavedObjectsClientContract,
-  packageName: string
+  packageName: string,
+  prefix: string = ''
 ): Promise<string> {
   // Fetch all packagePolicies having the package name
   const packagePolicyData = await packagePolicyService.list(soClient, {
@@ -22,7 +23,7 @@ export async function incrementPackageName(
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
   });
 
-  return getMaxPackageName(packageName, packagePolicyData?.items);
+  return getMaxPackageName(packageName, packagePolicyData?.items, prefix);
 }
 
 export async function incrementPackagePolicyCopyName(
