@@ -164,10 +164,7 @@ export async function _installPackage({
       packageInfo.name,
       esReferences,
       {
-        assetsToRemove: [
-          ...ingestRefs.assetsToRemove,
-          ...templateResults.esReferences.assetsToRemove,
-        ],
+        assetsToRemove: templateResults.esReferences.assetsToRemove,
         assetsToAdd: [...ingestRefs.assetsToAdd, ...templateResults.esReferences.assetsToAdd],
       }
     );
