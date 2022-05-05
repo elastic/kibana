@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
-  describe('ml', () => {
+  describe('ml Accessibility', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
@@ -79,16 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
         const dfaJobType = 'outlier_detection';
         const dfaJobId = `ihp_ally_${Date.now()}`;
 
-        const uploadFilePath = path.join(
-          __dirname,
-          '..',
-          '..',
-          'functional',
-          'apps',
-          'ml',
-          'data_visualizer',
-          'files_to_import',
-          'artificial_server_log'
+        const uploadFilePath = require.resolve(
+          '../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
 
         before(async () => {
@@ -261,8 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.selectJobType(dfaJobType);
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
-          await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramChartEnabled(true);
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
           await a11y.testAppSnapshot();
