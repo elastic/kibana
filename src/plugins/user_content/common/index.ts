@@ -12,6 +12,7 @@ export {
   userContentCommonMappings,
   defaultUserContentAttributes,
   viewsCountRangeFields,
+  VIEWS_TOTAL_FIELD,
 } from './constants';
 
 export { withApiBaseBath } from './lib';

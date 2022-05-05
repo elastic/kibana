@@ -19,7 +19,9 @@ export const viewsCountRangeFields = EVENTS_COUNT_GRANULARITY.map(
   (days) => `views_${days}_days` as const
 );
 
-const viewsCountMapping = viewsCountRangeFields.reduce((agg, field) => {
+export const VIEWS_TOTAL_FIELD = 'views_total' as const;
+
+const viewsCountMapping = [VIEWS_TOTAL_FIELD, ...viewsCountRangeFields].reduce((agg, field) => {
   return {
     ...agg,
     [field]: { type: 'integer' } as SavedObjectsFieldMapping,
@@ -31,7 +33,7 @@ export const userContentCommonMappings = {
   ...viewsCountMapping,
 };
 
-const viewsCount = viewsCountRangeFields.reduce((agg, field) => {
+const viewsCount = [VIEWS_TOTAL_FIELD, ...viewsCountRangeFields].reduce((agg, field) => {
   return {
     ...agg,
     [field]: 0,

@@ -8,12 +8,15 @@
 
 import { ISavedObjectsRepository } from '@kbn/core/server';
 
-import { viewsCountRangeFields } from '../../common';
+import { viewsCountRangeFields, VIEWS_TOTAL_FIELD } from '../../common';
 
 export const incrementViewsCounters = (
   contentType: string,
   savedObjectId: string,
   repository: ISavedObjectsRepository
 ) => {
-  repository.incrementCounter(contentType, savedObjectId, [...viewsCountRangeFields]);
+  repository.incrementCounter(contentType, savedObjectId, [
+    VIEWS_TOTAL_FIELD,
+    ...viewsCountRangeFields,
+  ]);
 };

@@ -23,7 +23,7 @@ import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/pu
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
 import type { UserContentPluginStart, ViewsCountRangeField } from '@kbn/user-content-plugin/public';
-import { viewsCountRangeFields } from '@kbn/user-content-plugin/public';
+import { viewsCountRangeFields, VIEWS_TOTAL_FIELD } from '@kbn/user-content-plugin/public';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -83,9 +83,7 @@ export const DashboardListing = ({
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
-  const [viewsCountRange, setViewsCountRange] = useState<ViewsCountRangeField>(
-    viewsCountRangeFields[0]
-  );
+  const [viewsCountRange, setViewsCountRange] = useState<ViewsCountRangeField>(VIEWS_TOTAL_FIELD);
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -310,7 +308,7 @@ export const DashboardListing = ({
   }, [savedObjectsTagging]);
 
   const toolsRight = useMemo<EuiSearchBarProps['toolsRight']>(() => {
-    const viewsCountOptions = viewsCountRangeFields.map((range) => {
+    const daysRangeOptions = viewsCountRangeFields.map((range) => {
       const days = /_(\d+)_/.exec(range)?.[1];
       const text = `Last ${days} days`;
 
@@ -319,6 +317,14 @@ export const DashboardListing = ({
         text,
       };
     });
+
+    const viewsCountOptions = [
+      {
+        value: VIEWS_TOTAL_FIELD,
+        text: 'Total views',
+      },
+      ...daysRangeOptions,
+    ];
 
     return [
       <EuiSelect
