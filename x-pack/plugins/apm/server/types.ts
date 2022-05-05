@@ -26,6 +26,7 @@ import {
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ActionsPlugin } from '@kbn/actions-plugin/server';
 import { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
@@ -83,6 +84,7 @@ export interface APMPluginSetupDependencies {
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  infra?: InfraPluginSetup;
 }
 
 export interface APMPluginStartDependencies {
@@ -104,4 +106,5 @@ export interface APMPluginStartDependencies {
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
+  infra?: InfraPluginStart;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
@@ -69,6 +69,9 @@ export async function setupRequest({
         request,
         debug: query._inspect,
       }),
+      metricIndices: plugins.infra
+        ? getMetricIndices(plugins.infra, coreContext.savedObjects.client)
+        : undefined,
       ml:
         plugins.ml && isActivePlatinumLicense(licensingContext.license)
           ? getMlSetup(
@@ -94,4 +97,15 @@ function getMlSetup(
     anomalyDetectors: ml.anomalyDetectorsProvider(request, savedObjectsClient),
     modules: ml.modulesProvider(request, savedObjectsClient),
   };
+}
+
+async function getMetricIndices(
+  infraPlugin: Required<APMRouteHandlerResources['plugins']>['infra'],
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<string> {
+  const infra = await infraPlugin.start();
+  const metricIndices = await infra.getMetricIndices(savedObjectsClient);
+  console.log('metricIndices: ', metricIndices);
+
+  return metricIndices;
 }
