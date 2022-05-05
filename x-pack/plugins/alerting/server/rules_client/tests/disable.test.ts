@@ -392,6 +392,8 @@ describe('disable()', () => {
         alertTypeId: 'myType',
         enabled: false,
         scheduledTaskId: null,
+        apiKey: null,
+        apiKeyOwner: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [

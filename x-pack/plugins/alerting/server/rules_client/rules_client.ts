@@ -1604,6 +1604,8 @@ export class RulesClient {
         id,
         {
           ...attributes,
+          ...(!attributes.apiKeyOwner && { apiKeyOwner: null }),
+          ...(!attributes.apiKey && { apiKey: null }),
           enabled: false,
           scheduledTaskId: null,
           updatedBy: await this.getUserName(),
@@ -1611,7 +1613,6 @@ export class RulesClient {
         },
         { version }
       );
-
       if (attributes.scheduledTaskId) {
         await this.taskManager.removeIfExists(attributes.scheduledTaskId);
       }
