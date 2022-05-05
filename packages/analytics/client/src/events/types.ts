@@ -13,6 +13,18 @@ import type { ShipperName } from '../analytics_client';
  */
 export interface EventContext {
   /**
+   * The UUID of the cluster
+   */
+  cluster_uuid?: string;
+  /**
+   * The name of the cluster.
+   */
+  cluster_name?: string;
+  /**
+   * The license ID.
+   */
+  license_id?: string;
+  /**
    * The unique user ID.
    */
   userId?: string;
