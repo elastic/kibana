@@ -7,4 +7,3 @@
  */
 
 export { registerApplicationUsageCollector } from './telemetry_application_usage_collector';
-export { rollDailyData as migrateTransactionalDocs } from './rollups';

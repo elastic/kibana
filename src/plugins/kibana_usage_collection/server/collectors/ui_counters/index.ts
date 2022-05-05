@@ -7,5 +7,3 @@
  */
 
 export { registerUiCountersUsageCollector } from './register_ui_counters_collector';
-export { registerUiCounterSavedObjectType } from './ui_counter_saved_object_type';
-export { registerUiCountersRollups } from './rollups';
