@@ -15,7 +15,7 @@ import type {
 
 import partition from 'lodash/partition';
 
-import type { Agent, FullAgentPolicy, PackageInfo } from '../../types';
+import type { Agent, FullAgentPolicy, PackageInfo, PackagePolicy } from '../../types';
 
 import { getAgentById } from '../agents';
 import { getFullAgentPolicy } from '../agent_policies';
@@ -107,7 +107,7 @@ const getNewHints = async (esClient: ElasticsearchClient): Promise<Hint[]> => {
         must_not: [
           {
             exists: {
-              field: 'fleet.received_at',
+              field: 'received_at',
             },
           },
         ],
@@ -157,18 +157,37 @@ const updateHintsById = async (
   }
 };
 const setHintsAsReceived = (esClient: ElasticsearchClient, hints: Hint[], logger?: Logger) => {
-  const update = { fleet: { received_at: Date.now() } };
+  const update = { received_at: Date.now(), last_updated: Date.now() };
   return updateHintsById(esClient, hints, update, logger);
 };
+
+type CreateResult = PackagePolicy | undefined;
 
 const setHintsAsComplete = (
   esClient: ElasticsearchClient,
   hintsIn: Hint[] | Hint,
-  logger?: Logger
+  policies: CreateResult[] = []
 ) => {
   const hints = Array.isArray(hintsIn) ? hintsIn : [hintsIn];
-  const update = { fleet: { status: 'complete' } };
-  return updateHintsById(esClient, hints, update, logger);
+  const update = { status: 'complete', last_updated: Date.now() };
+  if (!policies || policies.length !== hints.length) {
+    return updateHintsById(esClient, hints, update);
+  }
+
+  return Promise.all(
+    hints.map((hint, i) => {
+      const policy = policies[i];
+      const result = policy
+        ? {
+            package_policy_id: policy.id,
+            agent_policy_id: policy.policy_id,
+            package: { name: policy?.package?.name, version: policy?.package?.version },
+          }
+        : {};
+      const updateWithResult = { ...update, result };
+      return updateHintsById(esClient, [hint], updateWithResult);
+    })
+  );
 };
 
 const hintHasAutodiscoverAnnotations = (hint: Hint) => {
@@ -249,12 +268,12 @@ const processHints = async (params: HintTaskDeps & { logger?: Logger }) => {
   const [annotatedHints, emptyHints] = partition(hints, hintHasAutodiscoverAnnotations);
 
   if (emptyHints.length) {
-    await setHintsAsComplete(esClient, emptyHints, logger);
+    await setHintsAsComplete(esClient, emptyHints);
   }
 
   if (!annotatedHints.length) return;
 
-  await Promise.all(
+  const results = await Promise.all(
     annotatedHints.map(async (hint) => {
       const parsedAnnotations = parseAnnotations(hint);
 
@@ -304,9 +323,12 @@ const processHints = async (params: HintTaskDeps & { logger?: Logger }) => {
         return;
       }
 
-      const createResult = await packagePolicyService.create(soClient, esClient, packagePolicy);
+      const createdPolicy = await packagePolicyService.create(soClient, esClient, packagePolicy);
       logger?.info(`Finished processing ${hint._id}`);
+
+      return createdPolicy;
     })
   );
-  setHintsAsComplete(esClient, annotatedHints, logger);
+
+  setHintsAsComplete(esClient, annotatedHints, results);
 };

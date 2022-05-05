@@ -13,10 +13,16 @@ export type HintStatus = 'complete' | 'error';
 export interface Hint {
   _id: string;
   agent_id: string;
-  fleet?: {
-    received_at?: number;
-    status?: HintStatus;
-    installed_package?: string;
+  last_updated?: number;
+  received_at?: number;
+  status?: HintStatus;
+  result?: {
+    agent_policy_id?: string;
+    package_policy_id?: string;
+    package?: {
+      name: string;
+      version: string;
+    };
   };
   container: {
     id: string;
