@@ -12,13 +12,7 @@ export default async function ({ readConfigFile }) {
   return {
     ...baseConfig.getAll(),
 
-    testFiles: [
-      require.resolve('./apps/console'),
-      require.resolve('./apps/dashboard/group4/dashboard_save'),
-      require.resolve('./apps/dashboard_elements'),
-      require.resolve('./apps/discover'),
-      require.resolve('./apps/home'),
-    ],
+    testFiles: [require.resolve('./apps/visualize/group5')],
 
     browser: {
       type: 'firefox',
