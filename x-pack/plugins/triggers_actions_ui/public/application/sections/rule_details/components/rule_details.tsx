@@ -321,14 +321,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     <EuiText size="s">
                       <p>
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ownerTitle"
-                          defaultMessage="Owner"
+                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
+                          defaultMessage="API key owner"
                         />
                       </p>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge data-test-subj="ownerLabel">{rule.apiKeyOwner}</EuiBadge>
+                    <EuiBadge data-test-subj="apiKeyOwnerLabel">{rule.apiKeyOwner}</EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

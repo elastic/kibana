@@ -101,7 +101,7 @@ describe('rule_details', () => {
     ).toBeTruthy();
   });
 
-  it('renders the owner badge when user can manage API keys', () => {
+  it('renders the API key owner badge when user can manage API keys', () => {
     const rule = mockRule();
     expect(
       shallow(
@@ -110,7 +110,7 @@ describe('rule_details', () => {
     ).toBeTruthy();
   });
 
-  it(`doesn't render the owner badge when user can't manage API keys`, () => {
+  it(`doesn't render the API key owner badge when user can't manage API keys`, () => {
     const { hasManageApiKeysCapability } = jest.requireMock('../../../lib/capabilities');
     hasManageApiKeysCapability.mockReturnValueOnce(false);
     const rule = mockRule();
