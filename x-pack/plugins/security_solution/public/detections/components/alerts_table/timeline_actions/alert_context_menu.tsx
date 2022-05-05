@@ -173,7 +173,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
-    disabled: !isEvent || !canCreateEndpointEventFilters,
+    disabled:
+      !isEvent || !canCreateEndpointEventFilters || timelineId !== TimelineId.hostsPageEvents,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
