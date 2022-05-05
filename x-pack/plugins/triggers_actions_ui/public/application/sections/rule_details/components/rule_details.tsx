@@ -27,7 +27,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import {
+  hasAllPrivilege,
+  hasExecuteActionsCapability,
+  hasManageApiKeysCapability,
+} from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import {
@@ -310,6 +314,25 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+            {hasManageApiKeysCapability(capabilities) ? (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ownerTitle"
+                          defaultMessage="Owner"
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge data-test-subj="ownerLabel">{rule.apiKeyOwner}</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               {uniqueActions && uniqueActions.length ? (
                 <EuiFlexGroup responsive={false} gutterSize="xs">
