@@ -12,6 +12,7 @@ import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './create_rule';
+import { explainRuleRoute } from './explain_rule';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
 import { deleteRuleRoute } from './delete_rule';
@@ -67,4 +68,5 @@ export function defineRoutes(opts: RouteOptions) {
   updateRuleApiKeyRoute(router, licenseState);
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
+  explainRuleRoute(opts);
 }

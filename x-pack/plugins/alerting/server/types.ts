@@ -17,6 +17,7 @@ import type {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
+import { SavedObjectsClient } from '@kbn/core/public';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -40,6 +41,7 @@ import {
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
+  RuleConfigurationExplanation,
 } from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
@@ -169,6 +171,11 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  configurationExplanationFunction?: (
+    params: Params,
+    esClient: IScopedClusterClient,
+    savedObjectsClient: SavedObjectsClientContract
+  ) => RuleConfigurationExplanation;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

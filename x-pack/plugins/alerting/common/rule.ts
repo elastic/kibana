@@ -180,3 +180,12 @@ export interface RuleMonitoring extends SavedObjectAttributes {
     };
   };
 }
+
+export interface EsQueryExplanation {
+  type: 'ES_QUERY';
+  queries: Array<{
+    annotation: string;
+    query: string;
+  }>;
+}
+export type RuleConfigurationExplanation = EsQueryExplanation; // TODO: Could be expanded with other types, such as KQL etc.

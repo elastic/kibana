@@ -52,6 +52,7 @@ import {
   SanitizedRuleWithLegacyId,
   PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
+  RuleConfigurationExplanation,
 } from '../types';
 import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
@@ -499,6 +500,36 @@ export class RulesClient {
       false,
       true
     );
+  }
+
+  public async explain<Params extends RuleTypeParams = never>({
+    ruleTypeId,
+    params,
+    esClient,
+    savedObjectsClient,
+  }: {
+    // TODO: Add types
+    ruleTypeId: any;
+    params: any;
+    esClient: any;
+    savedObjectsClient: any;
+  }): Promise<RuleConfigurationExplanation> {
+    console.log('Inside of explain in client');
+    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
+    if (!ruleType.configurationExplanationFunction) {
+      throw new Error('Rule type does not have an explain function configured');
+    }
+
+    try {
+      const result = await ruleType.configurationExplanationFunction(
+        params,
+        esClient,
+        savedObjectsClient
+      );
+      return result;
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 
   public async get<Params extends RuleTypeParams = never>({

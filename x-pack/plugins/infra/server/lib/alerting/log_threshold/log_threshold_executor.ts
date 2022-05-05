@@ -260,7 +260,7 @@ export async function executeRatioAlert(
   }
 }
 
-const getESQuery = (
+export const getESQuery = (
   alertParams: Omit<RuleParams, 'criteria'> & { criteria: CountCriteria },
   timestampField: string,
   indexPattern: string,

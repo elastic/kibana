@@ -14,6 +14,7 @@ import {
 } from '../../../../common/alerting/logs/log_threshold';
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { createLogThresholdExplanationFunction } from './log_threshold_explainer';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
@@ -111,6 +112,7 @@ export async function registerLogThresholdRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: createLogThresholdExecutor(libs),
+    configurationExplanationFunction: createLogThresholdExplanationFunction(libs),
     actionVariables: {
       context: [
         { name: 'timestamp', description: timestampActionVariableDescription },
