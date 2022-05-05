@@ -23,11 +23,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   deleteRules,
   RuleTableItem,
+  RuleStatus,
   enableRule,
   disableRule,
   snoozeRule,
   useLoadRuleTypes,
-  RuleStatus,
   unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -83,7 +83,6 @@ function RulesPage() {
     application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
-  const { lastResponse, setLastResponse } = useRulesPageStateContainer();
   const documentationLink = docLinks.links.observability.createAlerts;
   const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -94,8 +93,9 @@ function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const { lastResponse, setLastResponse } = useRulesPageStateContainer();
+  const { status, setStatus } = useRulesPageStateContainer();
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
@@ -111,7 +111,7 @@ function RulesPage() {
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
     searchText,
     ruleLastResponseFilter: lastResponse,
-    ruleStatusesFilter,
+    ruleStatusesFilter: status,
     typesFilter,
     page,
     setPage,
@@ -289,6 +289,13 @@ function RulesPage() {
     []
   );
 
+  const setRuleStatusFilter = useCallback(
+    (ids: RuleStatus[]) => {
+      setStatus(ids);
+    },
+    [setStatus]
+  );
+
   const setExecutionStatusFilter = useCallback(
     (ids: string[]) => {
       setLastResponse(ids);
@@ -311,9 +318,6 @@ function RulesPage() {
       return <CenterJustifiedSpinner />;
     }
 
-    // const nextSearchParams = new URLSearchParams(history.location.search);
-    // const xx = [...nextSearchParams.getAll('executionStatus')] || [];
-    // console.log(xx, '!!');
     return (
       <>
         <EuiFlexGroup>
@@ -357,8 +361,8 @@ function RulesPage() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {triggersActionsUi.getRuleStatusFilter({
-              selectedStatuses: ruleStatusesFilter,
-              onChange: setRuleStatusesFilter,
+              selectedStatuses: status,
+              onChange: setRuleStatusFilter,
             })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
