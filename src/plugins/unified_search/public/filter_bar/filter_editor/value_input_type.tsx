@@ -34,6 +34,7 @@ class ValueInputTypeUI extends Component<Props> {
     }
     return value;
   };
+
   public render() {
     const value = this.props.value;
     const type = this.props.field.type;
@@ -70,8 +71,13 @@ class ValueInputTypeUI extends Component<Props> {
         const isInvalid = !isEmpty(value) && !validateParams(value, this.props.field);
         if (isInvalid) {
           this.props.showErrorMessage({
-            isInvalid,
-            errorMessage: ['Invalid date format provided'],
+            isInvalid: true,
+            errorMessage: [
+              this.props.intl.formatMessage({
+                id: 'unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage',
+                defaultMessage: 'Invalid date format provided',
+              }),
+            ],
           });
         } else {
           this.props.showErrorMessage({

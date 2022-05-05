@@ -102,8 +102,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   protected updateErrors = debounce(
     (error: { isInvalid: boolean; errorMessage: string[] }): void => {
       this.setState(error);
-    },
-    100
+    }
   );
 }
 

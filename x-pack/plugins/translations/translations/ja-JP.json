@@ -31260,6 +31260,7 @@
     "unifiedSearch.filter.filterBar.pinFilterButtonLabel": "すべてのアプリにピン付け",
     "unifiedSearch.filter.filterBar.pinnedFilterPrefix": "ピン付け済み",
     "unifiedSearch.filter.filterBar.unpinFilterButtonLabel": "ピンを外す",
+    "unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage": "無効な日付形式が提供されました",
     "unifiedSearch.filter.filterEditor.cancelButtonLabel": "キャンセル",
     "unifiedSearch.filter.filterEditor.createCustomLabelInputLabel": "カスタムラベル",
     "unifiedSearch.filter.filterEditor.createCustomLabelSwitchLabel": "カスタムラベルを作成しますか？",

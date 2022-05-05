@@ -31296,6 +31296,7 @@
     "unifiedSearch.filter.filterBar.pinFilterButtonLabel": "在所有应用上固定",
     "unifiedSearch.filter.filterBar.pinnedFilterPrefix": "已置顶",
     "unifiedSearch.filter.filterBar.unpinFilterButtonLabel": "取消固定",
+    "unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage": "提供的日期格式無效",
     "unifiedSearch.filter.filterEditor.cancelButtonLabel": "取消",
     "unifiedSearch.filter.filterEditor.createCustomLabelInputLabel": "定制标签",
     "unifiedSearch.filter.filterEditor.createCustomLabelSwitchLabel": "创建定制标签？",
