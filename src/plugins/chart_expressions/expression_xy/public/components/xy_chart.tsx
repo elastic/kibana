@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -25,6 +25,7 @@ import {
   RecursivePartial,
   AxisStyle,
   Placement,
+  RenderChangeListener,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -91,6 +92,7 @@ export type XYChartRenderProps = XYChartProps & {
   syncColors: boolean;
   syncTooltips: boolean;
   eventAnnotationService: EventAnnotationServiceType;
+  renderComplete: () => void;
 };
 
 function getValueLabelsStyling(isHorizontal: boolean): {
@@ -134,6 +136,7 @@ export function XYChart({
   syncColors,
   syncTooltips,
   useLegacyTimeAxis,
+  renderComplete,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -161,6 +164,15 @@ export function XYChart({
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
     datatables: filteredLayers.map(({ table }) => table),
   });
+
+  const onRenderChange = useCallback<RenderChangeListener>(
+    (isRendered) => {
+      if (isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
   const formattedDatatables = useMemo(
@@ -495,6 +507,7 @@ export function XYChart({
   return (
     <Chart ref={chartRef}>
       <Settings
+        onRenderChange={onRenderChange}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
           tooltip: { visible: syncTooltips, placement: Placement.Right },

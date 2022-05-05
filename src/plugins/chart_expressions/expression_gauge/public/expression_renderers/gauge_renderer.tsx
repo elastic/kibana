@@ -41,6 +41,7 @@ export const gaugeRenderer: (
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
+            renderComplete={handlers.done}
             uiState={handlers.uiState as PersistedState}
           />
         </div>

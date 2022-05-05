@@ -111,6 +111,7 @@ describe('HeatmapComponent', function () {
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
       interactive: true,
+      renderComplete: jest.fn(),
     };
   });
 

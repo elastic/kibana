@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { FC, memo, useCallback } from 'react';
-import { Chart, Goal, Settings } from '@elastic/charts';
+import { Chart, Goal, RenderChangeListener, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -203,7 +203,7 @@ const getPreviousSectionValue = (value: number, bands: number[]) => {
 };
 
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
-  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService }) => {
+  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService, renderComplete }) => {
     const {
       shape: gaugeType,
       palette,
@@ -276,6 +276,15 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         ];
       },
       [uiState]
+    );
+
+    const onRenderChange = useCallback<RenderChangeListener>(
+      (isRendered) => {
+        if (isRendered) {
+          renderComplete();
+        }
+      },
+      [renderComplete]
     );
 
     const table = data;
@@ -388,6 +397,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             theme={[{ background: { color: 'transparent' } }, chartTheme]}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
+            onRenderChange={onRenderChange}
           />
           <Goal
             id="goal"
