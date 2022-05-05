@@ -15,16 +15,18 @@ const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
   generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
-    const timeStamp = new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp']
+      ? new Date(overrides['@timestamp'])
+      : new Date(this.randomPastDate());
 
     return merge(
       {
-        action_id: this.randomUUID(),
+        action_id: this.seededUUIDv4(),
         '@timestamp': timeStamp.toISOString(),
         expiration: this.randomFutureDate(timeStamp),
         type: 'INPUT_ACTION',
         input_type: 'endpoint',
-        agents: [this.randomUUID()],
+        agents: [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
           command: this.randomIsolateCommand(),
