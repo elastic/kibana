@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source .buildkite/scripts/common/util.sh
+
+USER_FROM_VAULT="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/apm_parser_performance)"
+PASS_FROM_VAULT="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/apm_parser_performance)"
+ES_SERVER_URL="https://kibana-ops-e2e-perf.es.us-central1.gcp.cloud.es.io:9243"
+BUILD_ID=${BUILDKITE_BUILD_ID}
+GCS_BUCKET="gs://kibana-performance/scalability-tests"
+
+.buildkite/scripts/bootstrap.sh
+
+echo "--- Extract APM metrics"
+journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
+
+for i in "${journeys[@]}"; do
+    JOURNEY_NAME="${i}"
+    echo "Looking for JOURNEY=${JOURNEY_NAME} and BUILD_ID=${BUILD_ID} in APM traces"
+
+    ./node_modules/.bin/performance-testing-dataset-extractor -u "${USER_FROM_VAULT}" -p "${PASS_FROM_VAULT}" -c "${ES_SERVER_URL}" -b "${BUILD_ID}" -n "${JOURNEY_NAME}"
+done
+
+# archive json files with traces and upload as build artifacts
+echo "--- Upload Kibana build, plugins and scalability traces to the public bucket"
+mkdir "${BUILD_ID}"
+tar -czf "${BUILD_ID}/scalability_traces.tar.gz" output
+buildkite-agent artifact upload "${BUILD_ID}/scalability_traces.tar.gz"
+buildkite-agent artifact download kibana-default.tar.gz ./"${BUILD_ID}"
+buildkite-agent artifact download kibana-default-plugins.tar.gz ./"${BUILD_ID}"
+echo "${BUILDKITE_COMMIT}" > "${BUILD_ID}/KIBANA_COMMIT_HASH"
+gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
+echo "--- Update reference to the latest CI build"
+echo "${BUILD_ID}" > LATEST
+gsutil cp LATEST "${GCS_BUCKET}"
