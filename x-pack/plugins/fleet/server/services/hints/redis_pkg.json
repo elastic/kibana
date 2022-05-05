@@ -1,0 +1,502 @@
+{
+    "name": "redis",
+    "title": "Redis",
+    "version": "1.3.1",
+    "release": "ga",
+    "description": "Collect logs and metrics from Redis servers with Elastic Agent.",
+    "type": "integration",
+    "download": "/epr/redis/redis-1.3.1.zip",
+    "path": "/package/redis/1.3.1",
+    "icons": [
+        {
+            "src": "/img/logo_redis.svg",
+            "path": "/package/redis/1.3.1/img/logo_redis.svg",
+            "title": "logo redis",
+            "size": "32x32",
+            "type": "image/svg+xml"
+        }
+    ],
+    "conditions": {
+        "kibana": {
+            "version": "^7.14.0 || ^8.0.0"
+        }
+    },
+    "owner": {
+        "github": "elastic/integrations"
+    },
+    "categories": [
+        "datastore",
+        
+        "message_queue"
+    ],
+    "format_version": "1.0.0",
+    "readme": "/package/redis/1.3.1/docs/README.md",
+    "license": "basic",
+    "screenshots": [
+        {
+            "src": "/img/kibana-redis.png",
+            "path": "/package/redis/1.3.1/img/kibana-redis.png",
+            "title": "kibana redis",
+            "size": "1124x1079",
+            "type": "image/png"
+        },
+        {
+            "src": "/img/metricbeat_redis_key_dashboard.png",
+            "path": "/package/redis/1.3.1/img/metricbeat_redis_key_dashboard.png",
+            "title": "metricbeat redis key dashboard",
+            "size": "1855x949",
+            "type": "image/png"
+        }
+    ],
+    "assets": {
+        "kibana": {
+            "dashboard": [
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "dashboard",
+                    "file": "redis-28969190-0511-11e9-9c60-d582a238e2c5.json",
+                    "path": "redis-1.3.1/kibana/dashboard/redis-28969190-0511-11e9-9c60-d582a238e2c5.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "dashboard",
+                    "file": "redis-7fea2930-478e-11e7-b1f0-cb29bac6bf8b.json",
+                    "path": "redis-1.3.1/kibana/dashboard/redis-7fea2930-478e-11e7-b1f0-cb29bac6bf8b.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "dashboard",
+                    "file": "redis-AV4YjZ5pux-M-tCAunxK.json",
+                    "path": "redis-1.3.1/kibana/dashboard/redis-AV4YjZ5pux-M-tCAunxK.json"
+                }
+            ],
+            "search": [
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "search",
+                    "file": "redis-0ab87b80-478e-11e7-b1f0-cb29bac6bf8b.json",
+                    "path": "redis-1.3.1/kibana/search/redis-0ab87b80-478e-11e7-b1f0-cb29bac6bf8b.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "search",
+                    "file": "redis-73613570-4791-11e7-be88-2ddb32f3df97.json",
+                    "path": "redis-1.3.1/kibana/search/redis-73613570-4791-11e7-be88-2ddb32f3df97.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "search",
+                    "file": "redis-Metrics-Redis.json",
+                    "path": "redis-1.3.1/kibana/search/redis-Metrics-Redis.json"
+                }
+            ],
+            "visualization": [
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-00d39210-050d-11e9-9c60-d582a238e2c5.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-00d39210-050d-11e9-9c60-d582a238e2c5.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-4435ac40-050e-11e9-9c60-d582a238e2c5.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-4435ac40-050e-11e9-9c60-d582a238e2c5.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-517a5fd0-0514-11e9-9c60-d582a238e2c5.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-517a5fd0-0514-11e9-9c60-d582a238e2c5.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-78b9afe0-478f-11e7-b1f0-cb29bac6bf8b.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-78b9afe0-478f-11e7-b1f0-cb29bac6bf8b.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-7f4bc7d0-050c-11e9-9c60-d582a238e2c5.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-7f4bc7d0-050c-11e9-9c60-d582a238e2c5.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-8541a4a0-0513-11e9-9c60-d582a238e2c5.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-8541a4a0-0513-11e9-9c60-d582a238e2c5.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-Clients-Metrics.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-Clients-Metrics.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-Connected-clients.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-Connected-clients.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-Keyspaces.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-Keyspaces.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-Server-Versions.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-Server-Versions.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-d2864600-478f-11e7-be88-2ddb32f3df97.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-d2864600-478f-11e7-be88-2ddb32f3df97.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-dcccaa80-4791-11e7-be88-2ddb32f3df97.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-dcccaa80-4791-11e7-be88-2ddb32f3df97.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-hosts.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-hosts.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-multiplexing-API.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-multiplexing-API.json"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "kibana",
+                    "type": "visualization",
+                    "file": "redis-server-mode.json",
+                    "path": "redis-1.3.1/kibana/visualization/redis-server-mode.json"
+                }
+            ]
+        },
+        "elasticsearch": {
+            "ingest_pipeline": [
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "elasticsearch",
+                    "type": "ingest_pipeline",
+                    "file": "default.yml",
+                    "dataset": "log",
+                    "path": "redis-1.3.1/data_stream/log/elasticsearch/ingest_pipeline/default.yml"
+                },
+                {
+                    "pkgkey": "redis-1.3.1",
+                    "service": "elasticsearch",
+                    "type": "ingest_pipeline",
+                    "file": "default.json",
+                    "dataset": "slowlog",
+                    "path": "redis-1.3.1/data_stream/slowlog/elasticsearch/ingest_pipeline/default.json"
+                }
+            ]
+        }
+    },
+    "policy_templates": [
+        {
+            "name": "redis",
+            "title": "Redis logs and metrics",
+            "description": "Collect logs and metrics from Redis instances",
+            "inputs": [
+                {
+                    "type": "logfile",
+                    "title": "Collect Redis application logs",
+                    "description": "Collecting application logs from Redis instances"
+                },
+                {
+                    "type": "redis",
+                    "title": "Collect Redis slow logs",
+                    "description": "Collecting slow logs from Redis instances"
+                },
+                {
+                    "type": "redis/metrics",
+                    "vars": [
+                        {
+                            "name": "hosts",
+                            "type": "text",
+                            "title": "Hosts",
+                            "multi": true,
+                            "required": true,
+                            "show_user": true,
+                            "default": [
+                                "127.0.0.1:6379"
+                            ]
+                        },
+                        {
+                            "name": "idle_timeout",
+                            "type": "text",
+                            "title": "Idle Timeout",
+                            "multi": false,
+                            "required": false,
+                            "show_user": false,
+                            "default": "20s"
+                        },
+                        {
+                            "name": "maxconn",
+                            "type": "integer",
+                            "title": "Maxconn",
+                            "multi": false,
+                            "required": false,
+                            "show_user": false,
+                            "default": 10
+                        },
+                        {
+                            "name": "network",
+                            "type": "text",
+                            "title": "Network",
+                            "multi": false,
+                            "required": false,
+                            "show_user": false,
+                            "default": "tcp"
+                        },
+                        {
+                            "name": "password",
+                            "type": "password",
+                            "title": "Password",
+                            "multi": false,
+                            "required": false,
+                            "show_user": false,
+                            "default": ""
+                        }
+                    ],
+                    "title": "Collect Redis metrics",
+                    "description": "Collecting info, key and keyspace metrics from Redis instances"
+                }
+            ],
+            "multiple": true
+        }
+    ],
+    "data_streams": [
+        {
+            "type": "metrics",
+            "dataset": "redis.info",
+            "title": "Redis info metrics",
+            "release": "ga",
+            "streams": [
+                {
+                    "input": "redis/metrics",
+                    "vars": [
+                        {
+                            "name": "period",
+                            "type": "text",
+                            "title": "Period",
+                            "multi": false,
+                            "required": true,
+                            "show_user": true,
+                            "default": "10s"
+                        }
+                    ],
+                    "template_path": "stream.yml.hbs",
+                    "title": "Redis info metrics",
+                    "description": "Collect Redis info metrics",
+                    "enabled": true
+                }
+            ],
+            "package": "redis",
+            "path": "info"
+        },
+        {
+            "type": "metrics",
+            "dataset": "redis.key",
+            "title": "Redis key metrics",
+            "release": "ga",
+            "streams": [
+                {
+                    "input": "redis/metrics",
+                    "vars": [
+                        {
+                            "name": "key.patterns",
+                            "type": "yaml",
+                            "title": "Key Patterns",
+                            "multi": false,
+                            "required": true,
+                            "show_user": true,
+                            "default": "- limit: 20\n  pattern: '*'\n"
+                        },
+                        {
+                            "name": "period",
+                            "type": "text",
+                            "title": "Period",
+                            "multi": false,
+                            "required": true,
+                            "show_user": true,
+                            "default": "10s"
+                        }
+                    ],
+                    "template_path": "stream.yml.hbs",
+                    "title": "Redis key metrics",
+                    "description": "Collect Redis key metrics",
+                    "enabled": true
+                }
+            ],
+            "package": "redis",
+            "path": "key"
+        },
+        {
+            "type": "metrics",
+            "dataset": "redis.keyspace",
+            "title": "Redis keyspace metrics",
+            "release": "ga",
+            "streams": [
+                {
+                    "input": "redis/metrics",
+                    "vars": [
+                        {
+                            "name": "period",
+                            "type": "text",
+                            "title": "Period",
+                            "multi": false,
+                            "required": true,
+                            "show_user": true,
+                            "default": "10s"
+                        }
+                    ],
+                    "template_path": "stream.yml.hbs",
+                    "title": "Redis keyspace metrics",
+                    "description": "Collect Redis keyspace metrics",
+                    "enabled": true
+                }
+            ],
+            "package": "redis",
+            "path": "keyspace"
+        },
+        {
+            "type": "logs",
+            "dataset": "redis.log",
+            "title": "Redis application logs",
+            "release": "ga",
+            "ingest_pipeline": "default",
+            "streams": [
+                {
+                    "input": "logfile",
+                    "vars": [
+                        {
+                            "name": "paths",
+                            "type": "text",
+                            "title": "Paths",
+                            "multi": true,
+                            "required": true,
+                            "show_user": true,
+                            "default": [
+                                "/var/log/redis/redis-server.log*"
+                            ]
+                        },
+                        {
+                            "name": "tags",
+                            "type": "text",
+                            "title": "Tags",
+                            "multi": true,
+                            "required": true,
+                            "show_user": false,
+                            "default": [
+                                "redis-log"
+                            ]
+                        },
+                        {
+                            "name": "preserve_original_event",
+                            "type": "bool",
+                            "title": "Preserve original event",
+                            "description": "Preserves a raw copy of the original event, added to the field `event.original`",
+                            "multi": false,
+                            "required": true,
+                            "show_user": true,
+                            "default": false
+                        },
+                        {
+                            "name": "processors",
+                            "type": "yaml",
+                            "title": "Processors",
+                            "description": "Processors are used to reduce the number of fields in the exported event or to enhance the event with metadata. This executes in the agent before the logs are parsed. See [Processors](https://www.elastic.co/guide/en/beats/filebeat/current/filtering-and-enhancing-data.html) for details.\n",
+                            "multi": false,
+                            "required": false,
+                            "show_user": false
+                        }
+                    ],
+                    "template_path": "stream.yml.hbs",
+                    "title": "Redis application logs",
+                    "description": "Collect Redis application logs",
+                    "enabled": true
+                }
+            ],
+            "package": "redis",
+            "path": "log"
+        },
+        {
+            "type": "logs",
+            "dataset": "redis.slowlog",
+            "title": "Redis slow logs",
+            "release": "ga",
+            "ingest_pipeline": "default",
+            "streams": [
+                {
+                    "input": "redis",
+                    "vars": [
+                        {
+                            "name": "hosts",
+                            "type": "text",
+                            "title": "Hosts",
+                            "multi": true,
+                            "required": true,
+                            "show_user": true,
+                            "default": [
+                                "127.0.0.1:6379"
+                            ]
+                        },
+                        {
+                            "name": "password",
+                            "type": "password",
+                            "title": "Password",
+                            "multi": false,
+                            "required": false,
+                            "show_user": false,
+                            "default": ""
+                        }
+                    ],
+                    "template_path": "stream.yml.hbs",
+                    "title": "Redis slow logs",
+                    "description": "Collect Redis slow logs",
+                    "enabled": true
+                }
+            ],
+            "package": "redis",
+            "path": "slowlog"
+        }
+    ],
+    "latestVersion": "1.3.1",
+    "removable": true,
+    "keepPoliciesUpToDate": false,
+    "status": "not_installed"
+}

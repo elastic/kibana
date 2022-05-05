@@ -42,6 +42,7 @@ export type {
   ArchivePackage,
   RegistryVarsEntry,
   RegistryDataStream,
+  RegistryStream,
   RegistryElasticsearch,
   AssetReference,
   EsAssetReference,
