@@ -41,8 +41,9 @@ export abstract class BasicConnector<Config, Secrets> {
   }
 
   private normalizeURL(url: string) {
+    const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
     const replaceDoubleSlashesRegex = new RegExp('([^:]/)/+', 'g');
-    return url.replace(replaceDoubleSlashesRegex, '$1');
+    return urlWithoutTrailingSlash.replace(replaceDoubleSlashesRegex, '$1');
   }
 
   private removeNullOrUndefinedFields(data: unknown | undefined) {
@@ -77,7 +78,7 @@ export abstract class BasicConnector<Config, Secrets> {
     try {
       this.configurationUtilities.ensureUriAllowed(url);
     } catch (allowedListError) {
-      return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+      throw new Error(i18n.ALLOWED_HOSTS_ERROR(allowedListError.message));
     }
   }
 
@@ -93,7 +94,7 @@ export abstract class BasicConnector<Config, Secrets> {
     return this.subActions;
   }
 
-  protected abstract getResponseErrorMessage<T>(error: AxiosError<T>): string;
+  protected abstract getResponseErrorMessage(error: AxiosError): string;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected async request<R = any>({
@@ -123,7 +124,6 @@ export abstract class BasicConnector<Config, Secrets> {
       this.logger.debug(
         `Request to external service. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type} Method: ${method}. URL: ${normalizedURL}`
       );
-
       const res = await this.axiosInstance(normalizedURL, {
         ...config,
         method,
