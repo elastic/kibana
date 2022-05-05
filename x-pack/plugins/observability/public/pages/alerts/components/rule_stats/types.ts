@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export { renderRuleStats } from './rule_stats';
-export { RuleStatsState } from './types';
+export interface RuleStatsState {
+  total: number;
+  disabled: number;
+  muted: number;
+  error: number;
+  snoozed: number;
+}
+
+export type StatType = 'disabled' | 'snoozed' | 'error';

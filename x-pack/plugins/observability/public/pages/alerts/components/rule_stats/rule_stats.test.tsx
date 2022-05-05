@@ -1,0 +1,72 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { renderRuleStats } from './rule_stats';
+import { render } from '@testing-library/react';
+
+describe('Rule stats', () => {
+  test('renders all rule stats', () => {
+    const stats = renderRuleStats(
+      {
+        total: 11,
+        disabled: 0,
+        muted: 0,
+        error: 0,
+        snoozed: 0,
+      },
+      '/app/observability/alerts/rules',
+      false
+    );
+    expect(stats.length).toEqual(6);
+  });
+  test('no disabled rules', async () => {
+    const stats = renderRuleStats(
+      {
+        total: 11,
+        disabled: 0,
+        muted: 0,
+        error: 0,
+        snoozed: 0,
+      },
+      '/app/observability/alerts/rules',
+      false
+    );
+    const { findByText, container } = render(stats[4]);
+    const disabledElement = await findByText('Disabled');
+    expect(disabledElement).toBeInTheDocument();
+    expect(container.getElementsByClassName('euiStat').length).toBe(1);
+    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(0);
+  });
+
+  test('disabled rules are present', async () => {
+    const stats = renderRuleStats(
+      {
+        total: 11,
+        disabled: 1,
+        muted: 0,
+        error: 0,
+        snoozed: 0,
+      },
+      '/app/observability/alerts/rules',
+      false
+    );
+    const { findByText, container } = render(stats[4]);
+    const disabledElement = await findByText('Disabled');
+    expect(disabledElement).toBeInTheDocument();
+    expect(container.getElementsByClassName('euiStat').length).toBe(1);
+    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
+    expect(container.getElementsByClassName('euiStat__title--primary').length).toBe(1);
+  });
+
+  test('no snoozed rules', () => {});
+
+  test('snoozed rules are present', () => {});
+
+  test('no error rules', () => {});
+
+  test('error rules are present', () => {});
+});
