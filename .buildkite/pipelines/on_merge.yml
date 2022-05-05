@@ -213,9 +213,18 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
+      queue: n2-2-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/check_types.sh
+    label: 'Check Types'
+    agents:
       queue: c2-8
-    key: checks
-    timeout_in_minutes: 120
+    timeout_in_minutes: 60
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
