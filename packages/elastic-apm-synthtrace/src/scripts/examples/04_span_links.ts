@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { shuffle } from 'lodash';
+import { compact, shuffle } from 'lodash';
 import { apm, ApmFields, EntityArrayIterable, timerange } from '../..';
-import { generateShortId } from '../../lib/utils/generate_id';
+import { generateLongId, generateShortId } from '../../lib/utils/generate_id';
 import { Scenario } from '../scenario';
 
 function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10
   return Array(Math.floor(Math.random() * 11))
     .fill(0)
-    .map(() => ({ span: { id: generateShortId() }, trace: { id: generateShortId() } }));
+    .map(() => ({ span: { id: generateLongId() }, trace: { id: generateShortId() } }));
 }
 function generateIncomeEventsSpanLinks() {
   const range = timerange(
@@ -45,12 +45,12 @@ function generateIncomeEventsSpanLinks() {
 }
 
 function getSpanLinksFromEvents(events: ApmFields[]) {
-  return events
-    .map((event) => {
+  return compact(
+    events.map((event) => {
       const spanId = event['span.id'];
       return spanId ? { span: { id: spanId }, trace: { id: event['trace.id'] } } : undefined;
     })
-    .filter((_) => _) as Array<{ span: { id: string }; trace: { id: string } }>;
+  ) as Array<{ span: { id: string }; trace: { id: string } }>;
 }
 
 const scenario: Scenario<ApmFields> = async () => {
