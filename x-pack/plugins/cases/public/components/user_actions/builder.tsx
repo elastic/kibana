@@ -20,6 +20,10 @@ export const builderMap: UserActionBuilderMap = {
   tags: createTagsUserActionBuilder,
   title: createTitleUserActionBuilder,
   status: createStatusUserActionBuilder,
+  // TODO: Build severity user action
+  severity: () => ({
+    build: () => [],
+  }),
   pushed: createPushedUserActionBuilder,
   comment: createCommentUserActionBuilder,
   description: createDescriptionUserActionBuilder,

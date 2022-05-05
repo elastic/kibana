@@ -370,20 +370,20 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     describe('8.3.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
       describe('adding duration', () => {
-        before(async () => {
-          await kibanaServer.importExport.load(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
-          );
-        });
-
-        after(async () => {
-          await kibanaServer.importExport.unload(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
-          );
-          await deleteAllCaseItems(es);
-        });
-
         it('calculates the correct duration for closed cases', async () => {
           const caseInfo = await getCase({
             supertest,
@@ -416,19 +416,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       describe('add severity', () => {
-        before(async () => {
-          await kibanaServer.importExport.load(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
-          );
-        });
-
-        after(async () => {
-          await kibanaServer.importExport.unload(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
-          );
-          await deleteAllCaseItems(es);
-        });
-
         it('adds the severity field for existing documents', async () => {
           const caseInfo = await getCase({
             supertest,

@@ -104,33 +104,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should post a case without severity', async () => {
-        const postedCase = await createCase(
-          supertest,
-          getPostCaseRequest({
-            connector: {
-              id: '123',
-              name: 'Jira',
-              type: ConnectorTypes.jira,
-              fields: { issueType: 'Task', priority: 'High', parent: null },
-            },
-          })
-        );
+        const postedCase = await createCase(supertest, getPostCaseRequest());
         const data = removeServerGeneratedPropertiesFromCase(postedCase);
 
-        expect(data).to.eql(
-          postCaseResp(
-            null,
-            getPostCaseRequest({
-              severity: CaseSeverity.LOW,
-              connector: {
-                id: '123',
-                name: 'Jira',
-                type: ConnectorTypes.jira,
-                fields: { issueType: 'Task', priority: 'High', parent: null },
-              },
-            })
-          )
-        );
+        expect(data).to.eql(postCaseResp(null, getPostCaseRequest()));
       });
 
       it('should post a case with severity', async () => {
@@ -138,12 +115,6 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           getPostCaseRequest({
             severity: CaseSeverity.HIGH,
-            connector: {
-              id: '123',
-              name: 'Jira',
-              type: ConnectorTypes.jira,
-              fields: { issueType: 'Task', priority: 'High', parent: null },
-            },
           })
         );
         const data = removeServerGeneratedPropertiesFromCase(postedCase);
@@ -153,12 +124,6 @@ export default ({ getService }: FtrProviderContext): void => {
             null,
             getPostCaseRequest({
               severity: CaseSeverity.HIGH,
-              connector: {
-                id: '123',
-                name: 'Jira',
-                type: ConnectorTypes.jira,
-                fields: { issueType: 'Task', priority: 'High', parent: null },
-              },
             })
           )
         );
@@ -184,6 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: postedCase.settings,
             owner: postedCase.owner,
             status: CaseStatuses.open,
+            severity: CaseSeverity.LOW,
           },
         });
       });
@@ -270,16 +236,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s when passing a wrong severity value', async () => {
-        const req = getPostCaseRequest();
-
-        await supertest
-          .post(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ...req, severity: 'very-severe' })
-          .expect(400);
+        // @ts-expect-error
+        await createCase(supertest, { ...getPostCaseRequest(), severity: 'very-severe' }, 400);
       });
 
-      it.skip('400s if you passing status for a new case', async () => {
+      it('400s if you passing status for a new case', async () => {
         const req = getPostCaseRequest();
 
         await supertest

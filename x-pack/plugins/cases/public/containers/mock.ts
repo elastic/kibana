@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import type {
   ResolvedCase,
@@ -333,7 +333,7 @@ export const cases: Case[] = [
   caseWithAlertsSyncOff,
 ];
 
-export const allCases: AllCases = {
+export const allCases: Cases = {
   cases,
   page: 1,
   perPage: 5,
@@ -515,6 +515,7 @@ export const getUserAction = (
           description: 'a desc',
           connector: { ...getJiraConnector() },
           status: CaseStatuses.open,
+          severity: CaseSeverity.LOW,
           title: 'a title',
           tags: ['a tag'],
           settings: { syncAlerts: true },

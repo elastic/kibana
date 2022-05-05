@@ -2270,8 +2270,6 @@ exports.observeLines = observeLines;
 
 var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
 
-var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
-
 var _observe_readable = __webpack_require__("../../node_modules/@kbn/stdio-dev-helpers/target_node/observe_readable.js");
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -2297,8 +2295,8 @@ const SEP = /\r?\n/;
  *  @return {Rx.Observable}
  */
 function observeLines(readable) {
-  const done$ = (0, _observe_readable.observeReadable)(readable).pipe((0, _operators.share)());
-  const scan$ = Rx.fromEvent(readable, 'data').pipe((0, _operators.scan)(({
+  const done$ = (0, _observe_readable.observeReadable)(readable).pipe(Rx.share());
+  const scan$ = Rx.fromEvent(readable, 'data').pipe(Rx.scan(({
     buffer
   }, chunk) => {
     buffer += chunk;
@@ -2322,16 +2320,15 @@ function observeLines(readable) {
   }, {
     buffer: ''
   }), // stop if done completes or errors
-  (0, _operators.takeUntil)(done$.pipe((0, _operators.materialize)())), (0, _operators.share)());
+  Rx.takeUntil(done$.pipe(Rx.materialize())), Rx.share());
   return Rx.merge( // use done$ to provide completion/errors
   done$, // merge in the "lines" from each step
-  scan$.pipe((0, _operators.mergeMap)(({
+  scan$.pipe(Rx.mergeMap(({
     lines
   }) => lines || [])), // inject the "unsplit" data at the end
-  scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
+  scan$.pipe(Rx.takeLast(1), Rx.mergeMap(({
     buffer
-  }) => buffer ? [buffer] : []), // if there were no lines, last() will error, so catch and complete
-  (0, _operators.catchError)(() => Rx.empty())));
+  }) => buffer ? [buffer] : [])));
 }
 
 /***/ }),
@@ -2348,8 +2345,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.observeReadable = observeReadable;
 
 var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
-
-var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
@@ -2369,7 +2364,9 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  *   - fails on the first "error" event
  */
 function observeReadable(readable) {
-  return Rx.race(Rx.fromEvent(readable, 'end').pipe((0, _operators.first)(), (0, _operators.ignoreElements)()), Rx.fromEvent(readable, 'error').pipe((0, _operators.first)(), (0, _operators.mergeMap)(err => Rx.throwError(err))));
+  return Rx.race(Rx.fromEvent(readable, 'end').pipe(Rx.first(), Rx.ignoreElements()), Rx.fromEvent(readable, 'error').pipe(Rx.first(), Rx.map(err => {
+    throw err;
+  })));
 }
 
 /***/ }),

@@ -46,7 +46,7 @@ export enum CaseSeverity {
   CRITICAL = 'critical',
 }
 
-export const CaseSeverityRT = rt.union([
+export const CaseSeverityRt = rt.union([
   rt.literal(CaseSeverity.LOW),
   rt.literal(CaseSeverity.MEDIUM),
   rt.literal(CaseSeverity.HIGH),
@@ -82,7 +82,10 @@ const CaseBasicRt = rt.type({
    * The plugin owner of the case
    */
   owner: rt.string,
-  severity: CaseSeverityRT,
+  /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
 });
 
 /**
@@ -150,7 +153,11 @@ export const CasePostRequestRt = rt.intersection([
     owner: rt.string,
   }),
   rt.partial({
-    severity: CaseSeverityRT,
+    /**
+     * The severity of the case. The severity is
+     * default it to "low" if not provided.
+     */
+    severity: CaseSeverityRt,
   }),
 ]);
 
