@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/steps/test/test_group_env.sh
 
 echo '--- Default Saved Object Field Metrics'
 checks-reporter-with-killswitch "Capture Kibana Saved Objects field count metrics" \
