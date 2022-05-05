@@ -324,7 +324,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
         const mbLayerId = this._generateMbId(layer.id);
         const mbLayer = mbMap.getLayer(mbLayerId);
         if (mbLayer) {
-          mbMap.removeLayer(mbLayerId);
+          return;
         }
         const newLayerObject = {
           ...layer,

@@ -146,7 +146,6 @@ export class AbstractLayer implements ILayer {
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
       alpha: _.get(options, 'alpha', 0.75),
-      locale: _.get(options, 'locale'),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
       includeInFitToBounds:
@@ -261,7 +260,7 @@ export class AbstractLayer implements ILayer {
   }
 
   getLocale(): string | null {
-    return this._descriptor.locale ?? null;
+    return null;
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
