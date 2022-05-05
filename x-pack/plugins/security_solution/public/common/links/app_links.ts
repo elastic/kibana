@@ -15,18 +15,11 @@ import { links as usersLinks } from '../../users/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';
 import { links as managementLinks } from '../../management/links';
-import {
-  links as overviewLinks,
-  landingLinks,
-  detectionResponseLinks,
-  dashboardsLandingLinks,
-} from '../../overview/links';
+import { gettingStartedLinks, dashboardsLandingLinks } from '../../overview/links';
 
 export const appLinks: LinkItem[] = [
-  overviewLinks,
-  landingLinks,
+  gettingStartedLinks,
   dashboardsLandingLinks,
-  detectionResponseLinks,
   detectionLinks,
   {
     id: SecurityPageName.threatHuntingLanding,

@@ -16,7 +16,7 @@ import {
 import { DASHBOARDS, DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
 import { FEATURE, LinkItem } from '../common/links/types';
 
-export const links: LinkItem = {
+export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,
   title: OVERVIEW,
   path: OVERVIEW_PATH,
@@ -30,7 +30,7 @@ export const links: LinkItem = {
   globalNavOrder: 9000,
 };
 
-export const landingLinks: LinkItem = {
+export const gettingStartedLinks: LinkItem = {
   id: SecurityPageName.landing,
   title: GETTING_STARTED,
   path: LANDING_PATH,
@@ -69,4 +69,5 @@ export const dashboardsLandingLinks: LinkItem = {
       defaultMessage: 'Dashboards',
     }),
   ],
+  links: [overviewLinks, detectionResponseLinks],
 };
