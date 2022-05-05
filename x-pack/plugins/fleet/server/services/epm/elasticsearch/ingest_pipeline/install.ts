@@ -12,8 +12,7 @@ import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
 import type { ArchiveEntry } from '../../archive';
-import { saveInstalledEsRefs } from '../../packages/install';
-import { getInstallationObject } from '../../packages';
+import { updateEsAssetReferences } from '../../packages/install';
 import {
   FLEET_FINAL_PIPELINE_CONTENT,
   FLEET_FINAL_PIPELINE_ID,
@@ -23,8 +22,6 @@ import {
 import { appendMetadataToIngestPipeline } from '../meta';
 
 import { retryTransientEsErrors } from '../retry';
-
-import { deletePipelineRefs } from './remove';
 
 interface RewriteSubstitution {
   source: string;
@@ -44,7 +41,8 @@ export const installPipelines = async (
   paths: string[],
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
+  logger: Logger,
+  esReferences: EsAssetReference[]
 ) => {
   // unlike other ES assets, pipeline names are versioned so after a template is updated
   // it can be created pointing to the new template, without removing the old one and effecting data
@@ -67,7 +65,7 @@ export const installPipelines = async (
           const nameForInstallation = getPipelineNameForInstallation({
             pipelineName: name,
             dataStream,
-            packageVersion: installablePackage.version,
+            packageVersion: pkgVersion,
           });
           return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
         });
@@ -80,27 +78,17 @@ export const installPipelines = async (
     const { name } = getNameAndExtension(path);
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
-      packageVersion: installablePackage.version,
+      packageVersion: pkgVersion,
     });
     return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
   });
 
   pipelineRefs = [...pipelineRefs, ...topLevelPipelineRefs];
 
-  // check that we don't duplicate the pipeline refs if the user is reinstalling
-  const installedPkg = await getInstallationObject({
-    savedObjectsClient,
-    pkgName,
+  esReferences = await updateEsAssetReferences(savedObjectsClient, pkgName, esReferences, {
+    assetsToAdd: pipelineRefs,
   });
-  if (!installedPkg) throw new Error("integration wasn't found while installing pipelines");
-  // remove the current pipeline refs, if any exist, associated with this version before saving new ones so no duplicates occur
-  await deletePipelineRefs(
-    savedObjectsClient,
-    installedPkg.attributes.installed_es,
-    pkgName,
-    pkgVersion
-  );
-  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, pipelineRefs);
+
   const pipelines = dataStreams
     ? dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
         if (dataStream.ingest_pipeline) {
@@ -130,7 +118,8 @@ export const installPipelines = async (
     );
   }
 
-  return await Promise.all(pipelines).then((results) => results.flat());
+  await Promise.all(pipelines);
+  return esReferences;
 };
 
 export function rewriteIngestPipeline(

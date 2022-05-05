@@ -140,6 +140,11 @@ Object {
                       },
                     },
                     Object {
+                      "term": Object {
+                        "type": "ui-counter",
+                      },
+                    },
+                    Object {
                       "bool": Object {
                         "must": Array [
                           Object {
@@ -303,6 +308,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
@@ -473,6 +483,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
@@ -647,6 +662,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
@@ -861,6 +881,11 @@ Object {
                       },
                     },
                     Object {
+                      "term": Object {
+                        "type": "ui-counter",
+                      },
+                    },
+                    Object {
                       "bool": Object {
                         "must": Array [
                           Object {
@@ -1035,6 +1060,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
