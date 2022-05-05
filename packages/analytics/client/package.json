@@ -2,6 +2,7 @@
   "name": "@kbn/analytics-client",
   "private": true,
   "version": "1.0.0",
+  "browser": "./target_web/index.js",
   "main": "./target_node/index.js",
   "license": "SSPL-1.0 OR Elastic License 2.0"
 }

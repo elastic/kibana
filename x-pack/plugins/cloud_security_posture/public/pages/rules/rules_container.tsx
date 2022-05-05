@@ -16,7 +16,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
+import { cspRuleAssetSavedObjectType } from '../../../common/constants';
 import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
