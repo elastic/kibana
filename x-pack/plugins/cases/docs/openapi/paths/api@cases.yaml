@@ -78,7 +78,7 @@ delete:
       required: true
       schema:
         type: string
-      example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
+      example: 'd4e7abb0-b462-11ec-9a8d-698504725a43'
   responses:
     '204':
       description: Indicates a successful call.
