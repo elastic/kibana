@@ -23,7 +23,7 @@ const SeverityFieldFormComponent = ({ isLoading }: { isLoading: boolean }) => {
     setFieldValue('severity', newSeverity);
   };
   return (
-    <EuiFormRow data-test-subj="create-case-severity-field" fullWidth={true} label={SEVERITY_TITLE}>
+    <EuiFormRow data-test-subj="caseSeverity" fullWidth={true} label={SEVERITY_TITLE}>
       <SeveritySelector
         isLoading={isLoading}
         isDisabled={isLoading}
