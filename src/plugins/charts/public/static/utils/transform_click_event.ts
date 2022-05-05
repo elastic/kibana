@@ -17,6 +17,7 @@ import {
 
 import { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/public';
+import type { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 export interface ClickTriggerEvent {
   name: 'filterBucket';
@@ -24,8 +25,8 @@ export interface ClickTriggerEvent {
 }
 
 export interface BrushTriggerEvent {
-  name: 'brush';
-  data: RangeSelectContext['data'];
+  name: typeof SELECT_RANGE_TRIGGER;
+  data: RangeSelectContext;
 }
 
 type AllSeriesAccessors<D = any> = Array<
@@ -276,7 +277,7 @@ export function getBrushFromChartBrushEventFn<D = never>(
         column,
         range,
       },
-      name: 'brush',
+      name: 'SELECT_RANGE_TRIGGER',
     };
   };
 }

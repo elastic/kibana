@@ -14,6 +14,7 @@ import { Fit, Position } from '@elastic/charts';
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import {
   ChartMode,
@@ -36,7 +37,7 @@ export const areaVisTypeDefinition = {
     defaultMessage: 'Emphasize the data between an axis and a line.',
   }),
   toExpressionAst,
-  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, SELECT_RANGE_TRIGGER],
   updateVisTypeOnParamsChange: getVisTypeFromParams,
   visConfig: {
     defaults: {

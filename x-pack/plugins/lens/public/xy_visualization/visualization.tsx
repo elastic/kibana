@@ -22,6 +22,7 @@ import {
   YAxisMode,
   ExtendedYConfig,
 } from '@kbn/expression-xy-plugin/common';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -145,7 +146,7 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
-  triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  triggers: [VIS_EVENT_TO_TRIGGER.filter, SELECT_RANGE_TRIGGER],
 
   initialize(addNewLayer, state) {
     return (

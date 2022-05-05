@@ -34,7 +34,7 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   applyChanges,
   setState,
@@ -457,7 +457,7 @@ describe('workspace_panel', () => {
     const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
     onEvent({ name: 'brush', data: eventData, preventDefault: jest.fn() });
 
-    expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
+    expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(SELECT_RANGE_TRIGGER);
     expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });
   });
 

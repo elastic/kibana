@@ -31,6 +31,7 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
   AttributeService,
+  SELECT_RANGE_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import {
   IExpressionLoaderParams,
@@ -330,17 +331,14 @@ export class VisualizeEmbeddable
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
-      getExtraActionContext: ({ name, data }) => {
-        if (name === APPLY_FILTER_TRIGGER) {
-          return omitBy(
-            {
-              embeddable: this,
-              timeFieldName: this.vis.data.indexPattern?.timeFieldName,
-            },
-            isUndefined
-          );
-        }
-      },
+      getExtraActionContext: () =>
+        omitBy(
+          {
+            embeddable: this,
+            timeFieldName: this.vis.data.indexPattern?.timeFieldName,
+          },
+          isUndefined
+        ),
       renderMode: this.input.renderMode || 'view',
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
@@ -367,7 +365,10 @@ export class VisualizeEmbeddable
           return;
         }
 
-        if (!this.input.disableTriggers && event.name !== APPLY_FILTER_TRIGGER) {
+        if (
+          !this.input.disableTriggers &&
+          ![APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER].includes(event.name)
+        ) {
           event.preventDefault();
 
           const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);

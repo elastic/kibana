@@ -16,6 +16,7 @@ import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
@@ -84,7 +85,7 @@ function TimeseriesVisualization({
             range,
             timeFieldName: indexPattern?.timeFieldName,
           },
-          name: 'brush',
+          name: SELECT_RANGE_TRIGGER,
         };
       } else {
         event = {

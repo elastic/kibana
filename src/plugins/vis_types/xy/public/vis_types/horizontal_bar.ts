@@ -13,6 +13,7 @@ import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
 import {
@@ -38,7 +39,7 @@ export const horizontalBarVisTypeDefinition = {
     defaultMessage: 'Present data in horizontal bars on an axis.',
   }),
   toExpressionAst,
-  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, SELECT_RANGE_TRIGGER],
   updateVisTypeOnParamsChange: getVisTypeFromParams,
   visConfig: {
     defaults: {

@@ -17,6 +17,7 @@ import {
   VisTypeDefinition,
 } from '@kbn/visualizations-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import {
@@ -163,7 +164,7 @@ export const metricsVisDefinition: VisTypeDefinition<
   toExpressionAst,
   getSupportedTriggers: (params?: VisParams) => {
     if (params?.type === PANEL_TYPES.TIMESERIES) {
-      return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
+      return [VIS_EVENT_TO_TRIGGER.filter, SELECT_RANGE_TRIGGER];
     }
     return [];
   },

@@ -21,10 +21,9 @@ import { Query, TimeRange, FilterManager } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
 import { coreMock, httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { IBasePath } from '@kbn/core/public';
-import { AttributeService, ViewMode } from '@kbn/embeddable-plugin/public';
+import { AttributeService, ViewMode, SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
 import { act } from 'react-dom/test-utils';
@@ -832,57 +831,6 @@ describe('embeddable', () => {
     ]);
   });
 
-  it('should execute trigger on event from expression renderer', async () => {
-    const embeddable = new Embeddable(
-      {
-        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
-        attributeService,
-        expressionRenderer,
-        basePath,
-        inspector: inspectorPluginMock.createStartContract(),
-        indexPatternService: {} as DataViewsContract,
-        capabilities: {
-          canSaveDashboards: true,
-          canSaveVisualizations: true,
-          discover: {},
-          navLinks: {},
-        },
-        getTrigger,
-        visualizationMap: {},
-        datasourceMap: {},
-        injectFilterReferences: jest.fn(mockInjectFilterReferences),
-        theme: themeServiceMock.createStartContract(),
-        documentToExpression: () =>
-          Promise.resolve({
-            ast: {
-              type: 'expression',
-              chain: [
-                { type: 'function', function: 'my', arguments: {} },
-                { type: 'function', function: 'expression', arguments: {} },
-              ],
-            },
-            errors: undefined,
-          }),
-      },
-      { id: '123' } as LensEmbeddableInput
-    );
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
-    embeddable.render(mountpoint);
-
-    const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
-
-    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
-    onEvent({ name: 'brush', data: eventData, preventDefault: jest.fn() });
-
-    expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
-    expect(trigger.exec).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: { ...eventData, timeFieldName: undefined },
-        embeddable: expect.anything(),
-      })
-    );
-  });
-
   it('should execute trigger on row click event from expression renderer', async () => {
     const embeddable = new Embeddable(
       {
@@ -1127,7 +1075,7 @@ describe('embeddable', () => {
     expressionRenderer = jest.fn(({ onEvent }) => {
       setTimeout(() => {
         onEvent?.({
-          name: 'brush',
+          name: SELECT_RANGE_TRIGGER,
           data: { range: [0, 1], table: { rows: [], columns: [] }, column: 0 },
           preventDefault: jest.fn(),
         });

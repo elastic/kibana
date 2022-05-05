@@ -546,6 +546,7 @@ export class Embeddable
             this.logError('runtime');
           }}
           uiState={uiState}
+          getExtraActionContext={this.getExtraActionContext}
         />
       </KibanaThemeProvider>,
       domNode
@@ -610,26 +611,25 @@ export class Embeddable
     return this.deps.visualizationMap[visType].onEditAction;
   }
 
-  handleEvent = async (event: ExpressionRendererEvent) => {
-    event.preventDefault();
+  private getExtraActionContext = (event: ExpressionRendererEvent) => {
+    if (isLensBrushEvent(event)) {
+      return {
+        embeddable: this,
+        timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
+      };
+    }
+  };
 
+  handleEvent = async (event: ExpressionRendererEvent) => {
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }
-    if (isLensBrushEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
-        },
-        embeddable: this,
-      });
 
-      if (this.input.onBrushEnd) {
-        this.input.onBrushEnd(event.data);
-      }
+    if (isLensBrushEvent(event) && this.input.onBrushEnd) {
+      this.input.onBrushEnd(event.data);
     }
     if (isLensFilterEvent(event)) {
+      event.preventDefault();
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: {
           ...event.data,
@@ -643,6 +643,7 @@ export class Embeddable
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
+      event.preventDefault();
       this.deps.getTrigger(ROW_CLICK_TRIGGER).exec(
         {
           data: event.data,
@@ -658,6 +659,7 @@ export class Embeddable
     // We allow for edit actions in the Embeddable for display purposes only (e.g. changing the datatable sort order).
     // No state changes made here with an edit action are persisted.
     if (isLensEditEvent(event) && this.onEditAction) {
+      event.preventDefault();
       if (!this.savedVis) return;
 
       // have to dance since this.savedVis.state is readonly

@@ -31,12 +31,10 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
 
 export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
-  data: {
-    table: Datatable;
-    column: number;
-    range: number[];
-    timeFieldName?: string;
-  };
+  table: Datatable;
+  column: number;
+  range: number[];
+  timeFieldName?: string;
 }
 
 export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
@@ -98,13 +96,11 @@ export const valueClickTrigger: Trigger = {
   }),
 };
 
-export const isValueClickTriggerContext = (
-  context: ChartActionContext
-): context is ValueClickContext => context.data && 'data' in context.data;
+export const isValueClickTriggerContext = (context: any): context is ValueClickContext =>
+  context.data && 'data' in context.data;
 
-export const isRangeSelectTriggerContext = (
-  context: ChartActionContext
-): context is RangeSelectContext => context.data && 'range' in context.data;
+export const isRangeSelectTriggerContext = (context: unknown): context is RangeSelectContext =>
+  !!context && typeof context === 'object' && 'range' in context;
 
 export const isContextMenuTriggerContext = (context: unknown): context is EmbeddableContext =>
   !!context &&

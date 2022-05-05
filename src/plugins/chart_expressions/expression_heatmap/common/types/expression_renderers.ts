@@ -9,7 +9,11 @@
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type {
+  RangeSelectContext,
+  ValueClickContext,
+  SELECT_RANGE_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { HeatmapExpressionProps } from './expression_functions';
 
@@ -19,8 +23,8 @@ export interface FilterEvent {
 }
 
 export interface BrushEvent {
-  name: 'brush';
-  data: RangeSelectContext['data'];
+  name: typeof SELECT_RANGE_TRIGGER;
+  data: RangeSelectContext;
 }
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

@@ -12,6 +12,7 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   EXPRESSION_HEATMAP_NAME,
   HeatmapExpressionProps,
@@ -41,7 +42,7 @@ export const heatmapRenderer: (
       handlers.event({ name: 'filter', data });
     };
     const onSelectRange = (data: BrushEvent['data']) => {
-      handlers.event({ name: 'brush', data });
+      handlers.event({ name: SELECT_RANGE_TRIGGER, data });
     };
 
     const timeZone = getTimeZone(getUISettings());

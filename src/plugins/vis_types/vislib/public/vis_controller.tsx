@@ -12,7 +12,10 @@ import React, { RefObject } from 'react';
 import { mountReactNode } from '@kbn/core/public/utils';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import {
+  IInterpreterRenderEvent,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/public';
 
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
@@ -82,13 +85,15 @@ export const createVislibVisController = (
       // @ts-expect-error
       const { Vis: Vislib } = await import('./vislib/vis');
       const { uiState, event: fireEvent } = handlers;
+      const onBrush = (event: IInterpreterRenderEvent) =>
+        fireEvent({ name: 'SELECT_RANGE_TRIGGER', data: event.data });
 
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
-      this.vislibVis.on('brush', fireEvent);
+      this.vislibVis.on('brush', onBrush);
       this.vislibVis.on('click', fireEvent);
       this.vislibVis.on('renderComplete', handlers.done);
       this.removeListeners = () => {
-        this.vislibVis.off('brush', fireEvent);
+        this.vislibVis.off('brush', onBrush);
         this.vislibVis.off('click', fireEvent);
       };
 

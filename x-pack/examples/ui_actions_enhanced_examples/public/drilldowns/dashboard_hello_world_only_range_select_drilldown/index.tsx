@@ -68,11 +68,11 @@ export class DashboardHelloWorldOnlyRangeSelectDrilldown
    * Showcase isCompatible. Disabled drilldown action in case if range.length === 0
    */
   isCompatible(config: Config, context: RangeSelectContext): Promise<boolean> {
-    if (context.data.range.length === 0) return Promise.resolve(false);
+    if (context.range.length === 0) return Promise.resolve(false);
     return Promise.resolve(true);
   }
 
   public readonly execute = async (config: Config, context: RangeSelectContext) => {
-    alert(`Hello, ${config.name}, your selected range: ${JSON.stringify(context.data.range)}`);
+    alert(`Hello, ${config.name}, your selected range: ${JSON.stringify(context.range)}`);
   };
 }

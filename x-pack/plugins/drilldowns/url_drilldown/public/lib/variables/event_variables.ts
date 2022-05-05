@@ -65,7 +65,7 @@ export type ContextMenuTriggerEventScope = object;
 const getEventScopeFromRangeSelectTriggerContext = (
   eventScopeInput: RangeSelectContext
 ): RangeSelectTriggerEventScope => {
-  const { table, column: columnIndex, range } = eventScopeInput.data;
+  const { table, column: columnIndex, range } = eventScopeInput;
   const column = table.columns[columnIndex];
   return deleteUndefinedKeys({
     key: toPrimitiveOrUndefined(column?.meta.field) as string,

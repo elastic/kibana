@@ -51,7 +51,7 @@ export const getXyChartRenderer = ({
       handlers.event({ name: 'filter', data });
     };
     const onSelectRange = (data: BrushEvent['data']) => {
-      handlers.event({ name: 'brush', data });
+      handlers.event({ name: 'SELECT_RANGE_TRIGGER', data });
     };
     const deps = await getStartDeps();
 

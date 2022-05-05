@@ -45,6 +45,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   uiState: unknown;
+  getExtraActionContext?: React.ComponentProps<ReactExpressionRendererType>['getExtraActionContext'];
 }
 
 interface VisualizationErrorProps {
@@ -119,6 +120,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   uiState,
+  getExtraActionContext,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -160,6 +162,7 @@ export function ExpressionWrapper({
             }}
             onEvent={handleEvent}
             uiState={uiState}
+            getExtraActionContext={getExtraActionContext}
           />
         </div>
       )}

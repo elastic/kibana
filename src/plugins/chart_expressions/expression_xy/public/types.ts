@@ -11,7 +11,11 @@ import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type {
+  RangeSelectContext,
+  ValueClickContext,
+  SELECT_RANGE_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
 import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 
 export interface SetupDeps {
@@ -34,8 +38,8 @@ export interface FilterEvent {
 }
 
 export interface BrushEvent {
-  name: 'brush';
-  data: RangeSelectContext['data'];
+  name: typeof SELECT_RANGE_TRIGGER;
+  data: RangeSelectContext;
 }
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

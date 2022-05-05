@@ -23,6 +23,7 @@ import type {
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Query } from '@kbn/data-plugin/public';
 import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
@@ -941,8 +942,8 @@ export interface LensFilterEvent {
 }
 
 export interface LensBrushEvent {
-  name: 'brush';
-  data: RangeSelectContext['data'];
+  name: typeof SELECT_RANGE_TRIGGER;
+  data: RangeSelectContext;
 }
 
 // Use same technique as TriggerContext
@@ -976,7 +977,7 @@ export function isLensFilterEvent(event: unknown): event is LensFilterEvent {
 }
 
 export function isLensBrushEvent(event: unknown): event is LensBrushEvent {
-  return (event as Record<string, unknown>)?.name === 'brush';
+  return (event as Record<string, unknown>)?.name === SELECT_RANGE_TRIGGER;
 }
 
 export function isLensEditEvent<T extends LensEditSupportedActions>(

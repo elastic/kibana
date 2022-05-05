@@ -291,24 +291,19 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [expressionExists, localState.expressionToRender]);
 
+  const getExtraActionContext = useCallback((event) => {
+    if (isLensBrushEvent(event)) {
+      return {
+        timeFieldName: inferTimeField(event.data),
+      };
+    }
+  }, []);
+
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
-      event.preventDefault();
-
-      if (!plugins.uiActions) {
-        // ui actions not available, not handling event...
-        return;
-      }
-      if (isLensBrushEvent(event)) {
-        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-          data: {
-            ...event.data,
-            timeFieldName: inferTimeField(event.data),
-          },
-        });
-      }
       if (isLensFilterEvent(event)) {
-        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        event.preventDefault();
+        plugins.uiActions?.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
             timeFieldName: inferTimeField(event.data),
@@ -316,6 +311,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         });
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
+        event.preventDefault();
         dispatchLens(
           editVisualizationAction({
             visualizationId: activeVisualization.id,
@@ -452,6 +448,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         application={core.application}
         datasourceMap={datasourceMap}
         activeDatasourceId={activeDatasourceId}
+        getExtraActionContext={getExtraActionContext}
       />
     );
   };
@@ -545,6 +542,7 @@ export const VisualizationWrapper = ({
   application: ApplicationStart;
   activeDatasourceId: string | null;
   datasourceMap: DatasourceMap;
+  getExtraActionContext?: React.ComponentProps<ReactExpressionRendererType>['getExtraActionContext'];
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
