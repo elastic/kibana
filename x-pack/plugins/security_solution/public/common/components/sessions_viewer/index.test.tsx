@@ -109,7 +109,7 @@ describe('SessionsView', () => {
       expect(wrapper.getByTestId(`${TEST_PREFIX}:startDate`)).toHaveTextContent(startDate);
       expect(wrapper.getByTestId(`${TEST_PREFIX}:endDate`)).toHaveTextContent(endDate);
       expect(wrapper.getByTestId(`${TEST_PREFIX}:timelineId`)).toHaveTextContent(
-        'hosts-page-sessions'
+        'hosts-page-sessions-v2'
       );
     });
   });

@@ -70,7 +70,7 @@ exports[`SessionsView renders correctly against snapshot 1`] = `
           <div
             data-test-subj="security_solution:sessions_viewer:sessions_view:timelineId"
           >
-            hosts-page-sessions
+            hosts-page-sessions-v2
           </div>
           <div>
             Started
