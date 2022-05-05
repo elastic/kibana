@@ -12,7 +12,7 @@ import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-th
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 import { EsHitRecord } from '../../application/types';
-import { DocumentExplorerTourStepExpand } from '../../application/main/components/document_explorer_tour';
+import { DscTourStepAnchor } from '../dsc_tour/dsc_tour_step_anchor';
 /**
  * Button to expand a given row
  */
@@ -56,7 +56,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   );
 
   if (rowIndex === 0) {
-    return <DocumentExplorerTourStepExpand>{button}</DocumentExplorerTourStepExpand>;
+    return <DscTourStepAnchor stepName="expandDocument">{button}</DscTourStepAnchor>;
   }
 
   return button;

@@ -51,13 +51,7 @@ import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import {
-  DocumentExplorerTourStepColumns,
-  DocumentExplorerTourStepSorting,
-  DocumentExplorerTourStepRowHeight,
-} from '../../application/main/components/document_explorer_tour';
-
-const GRID_ID = 'documentExplorerGrid';
+import { DscTourStepAnchor } from '../dsc_tour/dsc_tour_step_anchor';
 
 interface SortObj {
   id: string;
@@ -357,7 +351,7 @@ export const DiscoverGrid = ({
     () => ({
       left: (
         <>
-          <DocumentExplorerTourStepSorting />
+          <DscTourStepAnchor stepName="sort" />
           {usedSelectedDocs.length ? (
             <DiscoverGridDocumentToolbarBtn
               isFilterActive={isFilterActive}
@@ -369,7 +363,7 @@ export const DiscoverGrid = ({
           ) : null}
         </>
       ),
-      right: <DocumentExplorerTourStepRowHeight />,
+      right: <DscTourStepAnchor stepName="changeRowHeight" />,
     }),
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
@@ -467,9 +461,8 @@ export const DiscoverGrid = ({
         data-document-number={displayedRows.length}
         className={className}
       >
-        <DocumentExplorerTourStepColumns anchorSelector={`#${GRID_ID}`} />
+        <DscTourStepAnchor stepName="reorderColumns" />
         <EuiDataGridMemoized
-          id={GRID_ID}
           aria-describedby={randomId}
           aria-labelledby={ariaLabelledBy}
           columns={euiGridColumns}

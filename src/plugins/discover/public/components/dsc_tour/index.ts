@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-export {
-  DocumentExplorerTourProvider,
-  DocumentExplorerTourStepColumns,
-  DocumentExplorerTourStepSorting,
-  DocumentExplorerTourStepRowHeight,
-  DocumentExplorerTourStepExpand,
-} from './document_explorer_tour';
+export { DscTourProvider } from './dsc_tour_provider';
+export { useDscTourContext } from './dsc_tour_context';
+export { DSC_TOUR_STEP_ANCHORS, DscTourStepAnchor } from './dsc_tour_step_anchor';

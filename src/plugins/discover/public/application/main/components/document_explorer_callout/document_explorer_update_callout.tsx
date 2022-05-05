@@ -23,7 +23,7 @@ import {
 import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { useDocumentExplorerTourContext } from '../document_explorer_tour/document_explorer_tour_context';
+import { useDscTourContext } from '../../../../components/dsc_tour/dsc_tour_context';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';
 
@@ -42,7 +42,7 @@ export const DocumentExplorerUpdateCallout = () => {
   const { euiTheme } = useEuiTheme();
   const { storage, capabilities, docLinks } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
-  const onStartTour = useDocumentExplorerTourContext().onStartTour;
+  const onStartTour = useDscTourContext().onStartTour;
 
   const semiBoldStyle = useMemo(
     () => css`

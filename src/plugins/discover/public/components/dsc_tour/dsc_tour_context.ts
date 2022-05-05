@@ -7,22 +7,19 @@
  */
 
 import { createContext, useContext } from 'react';
-import { EuiTourStepProps } from '@elastic/eui';
 
-export interface DocumentExplorerTourContextProps {
+export interface DscTourContextProps {
   onStartTour: () => void;
   onNextTourStep: () => void;
   onFinishTour: () => void;
-  getStepProps: (step: number) => Partial<EuiTourStepProps>;
 }
 
-export const DocumentExplorerTourContext = createContext<DocumentExplorerTourContextProps>({
+export const DscTourContext = createContext<DscTourContextProps>({
   onStartTour: () => {},
   onNextTourStep: () => {},
   onFinishTour: () => {},
-  getStepProps: () => ({}),
 });
 
-export const useDocumentExplorerTourContext = () => {
-  return useContext(DocumentExplorerTourContext);
+export const useDscTourContext = () => {
+  return useContext(DscTourContext);
 };
