@@ -7,6 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '../../..';
 import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
@@ -39,6 +41,10 @@ export const getFilteredMetricAgg = () => {
     params: [...params(['filter'])],
     hasNoDslParams: true,
     getSerializedFormat,
+    createFilter: (agg, inputState) => {
+      const esQueryConfigs = getEsQueryConfig({ get: () => undefined });
+      return buildEsQuery(agg.getIndexPattern(), [agg.params.customBucket.params.filter], [], esQueryConfigs);
+    },
     getValue(agg, bucket) {
       const customMetric = agg.getParam('customMetric');
       const customBucket = agg.getParam('customBucket');

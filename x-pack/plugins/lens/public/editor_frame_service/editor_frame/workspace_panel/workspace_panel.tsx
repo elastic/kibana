@@ -305,8 +305,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           },
         });
       }
-      if (isLensFilterEvent(event)) {
-        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+      if (isLensFilterEvent(event) || event.name == 'filterBucket') {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name] || 'VALUE_CLICK_TRIGGER').exec({
           data: {
             ...event.data,
             timeFieldName: inferTimeField(event.data),
