@@ -15,11 +15,14 @@ export const streamFetch = async <T = unknown>(
   abortCtrl: React.MutableRefObject<AbortController>,
   notifications: CoreStart['notifications']
 ) => {
-  const stream = await fetch('/api/aiops/example_stream', {
+  const stream = await fetch('/internal/aiops/example_stream', {
     signal: abortCtrl.current.signal,
+    method: 'POST',
     headers: {
+      'Content-Type': 'application/json',
       'kbn-xsrf': 'stream',
     },
+    body: JSON.stringify({ timeout: 250 }),
   });
 
   if (stream.body !== null) {

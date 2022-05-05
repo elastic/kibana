@@ -7,6 +7,7 @@
 
 import { Readable } from 'stream';
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
 import { AIOPS_ENABLED } from '../../common';
@@ -17,28 +18,22 @@ class ResponseStream extends Readable {
   _read(): void {}
 }
 
+export const aiopsExampleStreamSchema = schema.object({
+  /** Maximum timeout between streaming messages. */
+  timeout: schema.number(),
+});
+
 export function defineRoutes(router: IRouter) {
   if (AIOPS_ENABLED) {
-    router.get(
+    router.post(
       {
-        path: '/api/aiops/example',
-        validate: false,
+        path: '/internal/aiops/example_stream',
+        validate: {
+          body: aiopsExampleStreamSchema,
+        },
       },
       async (context, request, response) => {
-        return response.ok({
-          body: {
-            time: new Date().toISOString(),
-          },
-        });
-      }
-    );
-
-    router.get(
-      {
-        path: '/api/aiops/example_stream',
-        validate: false,
-      },
-      async (context, request, response) => {
+        const maxTimeoutMs = request.body.timeout ?? 250;
         let shouldStop = false;
 
         request.events.aborted$.subscribe(() => {
@@ -84,7 +79,8 @@ export function defineRoutes(router: IRouter) {
               const randomAction = actions[Math.floor(Math.random() * actions.length)];
 
               if (randomAction === 'add') {
-                streamPush(addToEntityAction(randomEntity, Math.floor(Math.random() * 100)));
+                const randomCommits = Math.floor(Math.random() * 100);
+                streamPush(addToEntityAction(randomEntity, randomCommits));
               } else if (randomAction === 'delete') {
                 streamPush(deleteEntityAction(randomEntity));
               }
@@ -95,7 +91,7 @@ export function defineRoutes(router: IRouter) {
               }
 
               pushStreamUpdate();
-            }, Math.floor(Math.random() * 250));
+            }, Math.floor(Math.random() * maxTimeoutMs));
           }
 
           pushStreamUpdate();
