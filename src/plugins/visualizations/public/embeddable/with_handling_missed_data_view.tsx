@@ -9,6 +9,7 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { ErrorEmbeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { VisualizeInput } from '..';
 import {
   getRelinkSavedObjectErrorMessage,
@@ -17,21 +18,40 @@ import {
   shouldShowRelinkSavedObjectError,
   RelinkCallback,
 } from '../components/relink_saved_object';
+import { SAVED_VIS_TYPE } from '../utils/saved_visualize_utils';
+
+/** @internal **/
+interface RootSavedObjectInputMeta {
+  visId?: string;
+  parent?: IContainer;
+  input: Partial<VisualizeInput> & { id: string };
+}
 
 const defaultOnRelink: RelinkCallback = (missedSavedObjectId, selectedSavedObjectId) => {
-  window.location.replace(
+  window.location.assign(
     window.location.href.replaceAll(missedSavedObjectId, selectedSavedObjectId)
   );
   window.location.reload();
 };
 
-export const withHandlingMissedSavedObject = async (
+const getRootSavedObjectMeta = ({ visId, parent }: RootSavedObjectInputMeta) => {
+  if (visId) {
+    return { id: visId, type: SAVED_VIS_TYPE };
+  }
+  if (parent) {
+    return { id: parent.id, type: parent.type };
+  }
+  return undefined;
+};
+
+export const withHandlingMissedDataView = async (
   core: CoreStart,
   fn: Function,
-  input: Partial<VisualizeInput> & { id: string },
-  parent: IContainer | undefined,
-  rootSavedObjectMeta: RelinkSavedObjectMeta,
-  partialMissedSavedObjectMeta: Pick<RelinkSavedObjectMeta, 'type' | 'name'>,
+  meta: {
+    visId?: string;
+    parent?: IContainer;
+    input: Partial<VisualizeInput> & { id: string };
+  },
   onRelink: RelinkCallback = defaultOnRelink
 ) => {
   try {
@@ -39,18 +59,18 @@ export const withHandlingMissedSavedObject = async (
   } catch (e) {
     if (shouldShowRelinkSavedObjectError(e, 'data view')) {
       const missedSavedObjectMeta: RelinkSavedObjectMeta = {
-        ...partialMissedSavedObjectMeta,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: e.savedObjectId!,
         name: e.savedObjectType,
       };
-
+      const rootSavedObjectMeta = getRootSavedObjectMeta(meta);
       const canSaveVisualization = Boolean(core.application.capabilities.visualize?.save);
 
       return new ErrorEmbeddable(
         getRelinkSavedObjectErrorMessage(missedSavedObjectMeta),
-        input,
-        parent,
-        canSaveVisualization ? (
+        meta.input,
+        meta.parent,
+        canSaveVisualization && rootSavedObjectMeta?.id ? (
           <RelinkSavedObject
             onRelink={onRelink}
             rootSavedObjectMeta={rootSavedObjectMeta}

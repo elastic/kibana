@@ -26,7 +26,6 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { checkForDuplicateTitle } from '@kbn/saved-objects-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
@@ -46,7 +45,6 @@ import {
   getSavedVisualization,
   saveVisualization,
   getFullPath,
-  SAVED_VIS_TYPE,
 } from '../utils/saved_visualize_utils';
 import {
   extractControlsReferences,
@@ -57,7 +55,7 @@ import {
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import type { VisualizationsStartDeps } from '../plugin';
-import { withHandlingMissedSavedObject } from './with_handling_missed_saved_object';
+import { withHandlingMissedDataView } from './with_handling_missed_data_view';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -167,7 +165,7 @@ export class VisualizeEmbeddableFactory
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const startDeps = await this.deps.start();
 
-    return await withHandlingMissedSavedObject(
+    return await withHandlingMissedDataView(
       startDeps.core,
       async () => {
         const savedObject = await getSavedVisualization(
@@ -206,10 +204,11 @@ export class VisualizeEmbeddableFactory
           parent
         );
       },
-      input,
-      parent,
-      { id: savedObjectId, type: SAVED_VIS_TYPE },
-      { type: DATA_VIEW_SAVED_OBJECT_TYPE }
+      {
+        visId: savedObjectId,
+        input,
+        parent,
+      }
     );
   }
 
@@ -220,7 +219,7 @@ export class VisualizeEmbeddableFactory
       const visState = input.savedVis;
       const startDeps = await this.deps.start();
 
-      return await withHandlingMissedSavedObject(
+      return await withHandlingMissedDataView(
         startDeps.core,
         async () => {
           const vis = await createVisAsync(visState.type, visState);
@@ -231,10 +230,10 @@ export class VisualizeEmbeddableFactory
             parent
           );
         },
-        input,
-        parent,
-        { id: parent!.id, type: 'dashboard' },
-        { type: DATA_VIEW_SAVED_OBJECT_TYPE }
+        {
+          input,
+          parent,
+        }
       );
     } else {
       showNewVisModal({

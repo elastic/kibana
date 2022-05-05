@@ -8,8 +8,7 @@
 
 import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
-import { withHandlingMissedSavedObject } from './with_handling_missed_saved_object';
+import { withHandlingMissedDataView } from './with_handling_missed_data_view';
 import { Vis } from '../types';
 import type {
   VisualizeInput,
@@ -20,7 +19,7 @@ import type {
 } from './visualize_embeddable';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getUISettings, getHttp, getTimeFilter, getCapabilities } from '../services';
-import { SAVED_VIS_TYPE, urlFor } from '../utils/saved_visualize_utils';
+import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
@@ -49,7 +48,7 @@ export const createVisEmbeddableFromObject =
 
       const startDeps = await deps.start();
 
-      return await withHandlingMissedSavedObject(
+      return await withHandlingMissedDataView(
         startDeps.core,
         async () => {
           let indexPatterns: DataView[] = [];
@@ -80,10 +79,11 @@ export const createVisEmbeddableFromObject =
             parent
           );
         },
-        input,
-        parent,
-        visId ? { id: visId, type: SAVED_VIS_TYPE } : { id: parent?.id ?? '', type: 'dashboard' },
-        { type: DATA_VIEW_SAVED_OBJECT_TYPE }
+        {
+          input,
+          parent,
+          visId,
+        }
       );
     } catch (e) {
       return e instanceof ErrorEmbeddable ? e : new ErrorEmbeddable(e, input, parent);
