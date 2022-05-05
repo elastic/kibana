@@ -97,8 +97,8 @@ export interface ProcessEventHost {
   architecture?: string;
   hostname?: string;
   id?: string;
-  ip?: string;
-  mac?: string;
+  ip?: string[];
+  mac?: string[];
   name?: string;
   os?: {
     family?: string;
@@ -198,7 +198,7 @@ export interface ProcessEventContainer {
     tag?: string;
     hash: {
       all?: string;
-    }
+    };
   };
 }
 
@@ -214,8 +214,9 @@ export interface ProcessEventOrchestrator {
   cluster: {
     version?: string;
     name?: string;
+    id?: string;
   };
   parent: {
     type?: string;
-  }
+  };
 }
