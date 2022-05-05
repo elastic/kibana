@@ -46,7 +46,10 @@ export const onPackagePolicyPostCreateCallback = async (
   }
   // Create csp-rules from the generic asset
   const existingRuleTemplates: SavedObjectsFindResponse<CloudSecurityPostureRuleTemplateSchema> =
-    await savedObjectsClient.find({ type: cloudSecurityPostureRuleTemplateSavedObjectType });
+    await savedObjectsClient.find({
+      type: cloudSecurityPostureRuleTemplateSavedObjectType,
+      perPage: 10000,
+    });
 
   if (existingRuleTemplates.total === 0) {
     return;
