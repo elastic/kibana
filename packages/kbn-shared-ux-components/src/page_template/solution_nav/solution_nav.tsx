@@ -26,6 +26,8 @@ import {
 import classNames from 'classnames';
 import { KibanaSolutionAvatar } from '../../solution_avatar';
 import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 export type KibanaPageTemplateSolutionNavProps = Omit<
   EuiSideNavProps<{}>,
@@ -132,11 +134,24 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
       <EuiTitle size="xs" id={headingID}>
         <HeadingElement>
           {solutionAvatar}
-          <strong>{name}</strong>
+          <strong>
+            <FormattedMessage
+              id="sharedUXComponents.solutionNav.mobileTitleText"
+              defaultMessage="{solutionName} {menuText}"
+              values={{
+                solutionName: name || 'Navigation',
+                menuText: isSmallerBreakpoint
+                  ? i18n.translate('sharedUXComponents.solutionNav.menuText', {
+                      defaultMessage: 'menu',
+                    })
+                  : '',
+              }}
+            />
+          </strong>
         </HeadingElement>
       </EuiTitle>
     ),
-    [name, solutionAvatar, headingID, HeadingElement]
+    [name, solutionAvatar, headingID, HeadingElement, isSmallerBreakpoint]
   );
 
   /**
@@ -171,7 +186,6 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
           titleElement="span"
           isCollapsible={true}
           initialIsOpen={false}
-          iconType="apps"
         >
           {sideNavContent}
         </EuiCollapsibleNavGroup>
