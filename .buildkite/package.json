@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "kibana-buildkite-library": "git+https://git@github.com/elastic/kibana-buildkite-library#c25c06e86ca15e7af51870108a4e0140c19a0c80"
+    "kibana-buildkite-library": "git+https://git@github.com/elastic/kibana-buildkite-library#682fc8c2514fe8b626837407048a11ca9794c6fd"
   }
 }
