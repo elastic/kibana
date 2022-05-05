@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
-  describe('ml', () => {
+  describe('ml Accessibility', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
@@ -79,16 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
         const dfaJobType = 'outlier_detection';
         const dfaJobId = `ihp_ally_${Date.now()}`;
 
-        const uploadFilePath = path.join(
-          __dirname,
-          '..',
-          '..',
-          'functional',
-          'apps',
-          'ml',
-          'data_visualizer',
-          'files_to_import',
-          'artificial_server_log'
+        const uploadFilePath = require.resolve(
+          '../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
         );
 
         before(async () => {
