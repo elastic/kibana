@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const PANEL_TITLE = 'Visualization PieChart';
 
-  describe('Dashboard Edit Panel', () => {
+  describe('Dashboard Edit Panel Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
