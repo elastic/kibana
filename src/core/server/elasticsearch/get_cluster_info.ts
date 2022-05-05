@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { defer, map, Observable, retry, shareReplay } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { defer, map, retry, shareReplay } from 'rxjs';
 import type { ElasticsearchClient } from './client';
 
 /** @private */

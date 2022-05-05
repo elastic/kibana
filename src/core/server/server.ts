@@ -220,7 +220,7 @@ export class Server {
 
     const analyticsSetup = this.analytics.setup();
 
-    this.registerKibanaStartedEvent(analyticsSetup);
+    this.registerKibanaStartedEventType(analyticsSetup);
 
     const environmentSetup = this.environment.setup();
 
@@ -440,7 +440,7 @@ export class Server {
     }
   }
 
-  private registerKibanaStartedEvent(analyticsSetup: AnalyticsServiceSetup) {
+  private registerKibanaStartedEventType(analyticsSetup: AnalyticsServiceSetup) {
     analyticsSetup.registerEventType<{ uptime_per_step: UptimeSteps }>({
       eventType: KIBANA_STARTED_EVENT,
       schema: {

@@ -29,6 +29,4 @@ export function registerAnalyticsContextProvider(
       cluster_version: { type: 'keyword', _meta: { description: 'The Cluster version' } },
     },
   });
-
-  return context$;
 }

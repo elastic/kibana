@@ -13,7 +13,7 @@ describe('fetchOptionalMemoryInfo', () => {
     expect(fetchOptionalMemoryInfo()).toBeUndefined();
   });
 
-  test('should return if no memory info is available', () => {
+  test('should return the memory info when available', () => {
     // @ts-expect-error 2339
     window.performance.memory = {
       get jsHeapSizeLimit() {
