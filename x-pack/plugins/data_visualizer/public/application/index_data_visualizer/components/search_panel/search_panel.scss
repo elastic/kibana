@@ -3,6 +3,10 @@
   padding: $euiSizeS;
 }
 
+.dvSearchPanel__container {
+  align-items: baseline;
+}
+
 @include euiBreakpoint('xs', 's', 'm', 'l') {
   .dvSearchPanel__container {
     flex-direction: column;

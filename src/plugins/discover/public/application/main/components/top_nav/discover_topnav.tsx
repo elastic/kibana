@@ -52,7 +52,10 @@ export const DiscoverTopNav = ({
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
-  const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
+  const editPermission = useMemo(
+    () => dataViewFieldEditor.userPermissions.editIndexPattern(),
+    [dataViewFieldEditor]
+  );
   const canEditDataViewField = !!editPermission && useNewFieldsApi;
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -87,7 +90,7 @@ export const DiscoverTopNav = ({
       canEditDataViewField
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (indexPattern?.id) {
-              const indexPatternInstance = await data.dataViews.get(indexPattern?.id);
+              const indexPatternInstance = await data.dataViews.get(indexPattern.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: indexPatternInstance,
@@ -197,6 +200,7 @@ export const DiscoverTopNav = ({
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerComponentProps={dataViewPickerProps}
+      displayStyle="detached"
     />
   );
 };

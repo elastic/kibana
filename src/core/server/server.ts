@@ -42,7 +42,6 @@ import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
 import { ContextService } from './context';
-import { RequestHandlerContext } from '.';
 import {
   InternalCorePreboot,
   InternalCoreSetup,
@@ -359,6 +358,7 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
+    this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();
@@ -372,13 +372,9 @@ export class Server {
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerRouteHandlerContext(
-      coreId,
-      'core',
-      (context, req, res): RequestHandlerContext['core'] => {
-        return new CoreRouteHandlerContext(this.coreStart!, req);
-      }
-    );
+    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req, res) => {
+      return new CoreRouteHandlerContext(this.coreStart!, req);
+    });
   }
 
   public setupCoreConfig() {

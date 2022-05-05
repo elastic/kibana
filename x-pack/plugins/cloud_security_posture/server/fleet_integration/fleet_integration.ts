@@ -17,7 +17,7 @@ import {
   cloudSecurityPostureRuleTemplateSavedObjectType,
   CloudSecurityPostureRuleTemplateSchema,
 } from '../../common/schemas/csp_rule_template';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
 import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../common/schemas/csp_rule';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
@@ -29,7 +29,7 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends Read
 const isCspPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
 ): boolean => {
-  return packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME;
+  return packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
 };
 
 /**
@@ -46,7 +46,10 @@ export const onPackagePolicyPostCreateCallback = async (
   }
   // Create csp-rules from the generic asset
   const existingRuleTemplates: SavedObjectsFindResponse<CloudSecurityPostureRuleTemplateSchema> =
-    await savedObjectsClient.find({ type: cloudSecurityPostureRuleTemplateSavedObjectType });
+    await savedObjectsClient.find({
+      type: cloudSecurityPostureRuleTemplateSavedObjectType,
+      perPage: 10000,
+    });
 
   if (existingRuleTemplates.total === 0) {
     return;
@@ -79,7 +82,7 @@ export const onPackagePolicyDeleteCallback = async (
     const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleSchema> =
       await soClient.find({
         type: cspRuleAssetSavedObjectType,
-        filter: `csp_rule.attributes.package_policy_id: ${deletedPackagePolicy.id} AND csp_rule.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
+        filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${deletedPackagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
       });
     await Promise.all(
       cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))

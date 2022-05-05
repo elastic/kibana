@@ -20,6 +20,7 @@ import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -116,6 +117,7 @@ export function getIndexPatternDatasource({
   core,
   storage,
   data,
+  unifiedSearch,
   dataViews,
   fieldFormats,
   charts,
@@ -125,6 +127,7 @@ export function getIndexPatternDatasource({
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -237,6 +240,7 @@ export function getIndexPatternDatasource({
       if (staticValue == null) {
         return state;
       }
+
       return mergeLayer({
         state,
         layerId,
@@ -375,6 +379,7 @@ export function getIndexPatternDatasource({
                 savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
+                unifiedSearch={unifiedSearch}
                 uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />

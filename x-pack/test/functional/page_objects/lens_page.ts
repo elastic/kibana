@@ -57,6 +57,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
       toTime = toTime || PageObjects.timePicker.defaultEndTime;
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      // give some time for the update button tooltip to close
+      await PageObjects.common.sleep(500);
     },
 
     /**
@@ -658,7 +660,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('indexPattern-label-edit', label, { clearWithKeyboard: true });
+      await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
     },
     async editDimensionFormat(format: string) {
       const formatInput = await testSubjects.find('indexPattern-dimension-format');
@@ -740,7 +742,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover() {
-      if (await testSubjects.exists('lnsChartSwitchList')) {
+      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
         return;
       }
       await retry.try(async () => {
@@ -909,7 +911,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async getCurrentChartDebugState() {
+    async getCurrentChartDebugState(visType: string) {
+      await this.waitForVisualization(visType);
       return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 

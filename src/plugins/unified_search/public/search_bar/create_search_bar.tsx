@@ -196,6 +196,7 @@ export function createSearchBar({ core, storage, data, usageCollection }: Statef
           placeholder={props.placeholder}
           {...overrideDefaultBehaviors(props)}
           dataViewPickerComponentProps={props.dataViewPickerComponentProps}
+          displayStyle={props.displayStyle}
         />
       </KibanaContextProvider>
     );

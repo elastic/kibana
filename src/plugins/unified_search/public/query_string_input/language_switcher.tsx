@@ -25,7 +25,7 @@ export interface QueryLanguageSwitcherProps {
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   nonKqlMode?: 'lucene' | 'text';
-  isOnMenu?: boolean;
+  isOnTopBarMenu?: boolean;
 }
 
 export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
@@ -33,7 +33,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   anchorPosition,
   onSelectLanguage,
   nonKqlMode = 'lucene',
-  isOnMenu,
+  isOnTopBarMenu,
 }: QueryLanguageSwitcherProps) {
   const kibana = useKibana();
   const kueryQuerySyntaxDocs = kibana.services.docLinks!.links.query.kueryQuerySyntax;
@@ -106,5 +106,5 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
     </EuiPopover>
   );
 
-  return Boolean(isOnMenu) ? languageMenuItem : languageQueryStringComponent;
+  return Boolean(isOnTopBarMenu) ? languageMenuItem : languageQueryStringComponent;
 });

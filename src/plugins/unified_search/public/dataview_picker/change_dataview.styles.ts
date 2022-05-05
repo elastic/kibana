@@ -8,7 +8,7 @@
 
 export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 280;
 
-export const ChangeDataViewStyles = ({ fullWidth }: { fullWidth?: boolean }) => {
+export const changeDataViewStyles = ({ fullWidth }: { fullWidth?: boolean }) => {
   return {
     trigger: {
       maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,

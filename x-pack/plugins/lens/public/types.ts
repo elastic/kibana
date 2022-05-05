@@ -534,7 +534,7 @@ export interface OperationDescriptor extends Operation {
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
   state: T;
 }
 
@@ -597,7 +597,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
-interface VisualizationDimensionChangeProps<T> {
+export interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
@@ -896,7 +896,8 @@ export interface Visualization<T = unknown> {
   toExpression: (
     state: T,
     datasourceLayers: DatasourceLayers,
-    attributes?: Partial<{ title: string; description: string }>
+    attributes?: Partial<{ title: string; description: string }>,
+    datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
@@ -904,7 +905,8 @@ export interface Visualization<T = unknown> {
    */
   toPreviewExpression?: (
     state: T,
-    datasourceLayers: DatasourceLayers
+    datasourceLayers: DatasourceLayers,
+    datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
@@ -929,6 +931,12 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  /**
+   * `datasourceExpressionsByLayers` will be passed to the params of `toExpression` and `toPreviewExpression`
+   * functions and datasource expressions will not be appended to the expression automatically.
+   */
+  shouldBuildDatasourceExpressionManually?: () => boolean;
 }
 
 export interface LensFilterEvent {
