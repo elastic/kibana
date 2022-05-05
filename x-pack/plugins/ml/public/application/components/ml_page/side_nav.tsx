@@ -222,13 +222,10 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
 
     if (AIOPS_ENABLED) {
       mlTabs.push({
-        id: 'aiops',
+        id: 'aiops_section',
         name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
           defaultMessage: 'AIOps',
         }),
-        disabled: disableLinks,
-        pathId: ML_PAGES.AIOPS,
-        testSubj: 'mlMainTab aiops',
         items: [
           {
             id: 'explainlogratespikes',

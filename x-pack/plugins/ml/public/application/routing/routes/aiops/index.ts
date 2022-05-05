@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './aiops';
 export * from './explain_log_rate_spikes';

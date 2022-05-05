@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { AiopsSelector } from './aiops_selector';
 export { ExplainLogRateSpikesPage } from './explain_log_rate_spikes';
