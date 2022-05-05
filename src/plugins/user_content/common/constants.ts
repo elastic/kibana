@@ -34,7 +34,7 @@ export const userContentCommonMappings = {
 const viewsCount = viewsCountRangeFields.reduce((agg, field) => {
   return {
     ...agg,
-    [field]: 1,
+    [field]: 0,
   };
 }, {} as ViewsCounters);
 
