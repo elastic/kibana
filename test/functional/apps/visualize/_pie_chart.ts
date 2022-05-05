@@ -13,8 +13,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const filterBar = getService('filterBar');
+  const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
   const inspector = getService('inspector');
+  const browser = getService('browser');
 
   const PageObjects = getPageObjects([
     'common',
@@ -31,7 +33,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const vizName1 = 'Visualization PieChart';
     before(async function () {
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
-      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await PageObjects.visualize.initTests();
+      if (isNewChartsLibraryEnabled) {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:legacyPieChartsLibrary': false,
+        });
+        await browser.refresh();
+      }
 
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();

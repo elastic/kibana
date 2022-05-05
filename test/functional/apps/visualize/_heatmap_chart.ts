@@ -13,6 +13,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
+  const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
@@ -23,7 +25,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled(
         'visualization:visualize:legacyHeatmapChartsLibrary'
       );
-      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      if (isNewChartsLibraryEnabled) {
+        await kibanaServer.uiSettings.update({
+          'visualization:visualize:legacyPieChartsLibrary': false,
+        });
+        await browser.refresh();
+      }
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickHeatmapChart');
