@@ -78,6 +78,11 @@ export class HomePageObject extends FtrService {
     });
   }
 
+  async launchSampleDiscover(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Discover');
+  }
+
   async launchSampleDashboard(id: string) {
     await this.launchSampleDataSet(id);
     await this.find.clickByLinkText('Dashboard');

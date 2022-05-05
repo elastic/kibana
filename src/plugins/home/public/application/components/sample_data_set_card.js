@@ -199,6 +199,7 @@ SampleDataSetCard.propTypes = {
       path: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
+      order: PropTypes.number,
     })
   ).isRequired,
   status: PropTypes.oneOf([INSTALLED_STATUS, UNINSTALLED_STATUS, 'unknown']).isRequired,
