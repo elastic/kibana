@@ -42,7 +42,7 @@ export const createSeverityUserActionBuilder: UserActionBuilder = ({
       userAction,
       handleOutlineComment,
       label,
-      icon: 'gear',
+      icon: 'dot',
     });
 
     return commonBuilder.build();

@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import { euiLightVars } from '@kbn/ui-theme';
 import { CaseSeverity } from '../../../common/api';
 import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
 
 export const severities = {
   [CaseSeverity.LOW]: {
-    color: 'success',
+    color: euiLightVars.euiColorVis0,
     label: LOW,
   },
   [CaseSeverity.MEDIUM]: {
-    color: 'warning',
+    color: euiLightVars.euiColorVis5,
     label: MEDIUM,
   },
   [CaseSeverity.HIGH]: {
-    color: 'ascent',
+    color: euiLightVars.euiColorVis7,
     label: HIGH,
   },
   [CaseSeverity.CRITICAL]: {
-    color: 'danger',
+    color: euiLightVars.euiColorVis9,
     label: CRITICAL,
   },
 };
