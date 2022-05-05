@@ -54,6 +54,8 @@ export const doSearch = async (
   cursor: string | undefined,
   forward = true
 ) => {
+  const cursorMillis = cursor && new Date(cursor).getTime() + (forward ? -1 : 1);
+
   const search = await client.search({
     index: [PROCESS_EVENTS_INDEX],
     body: {
@@ -64,7 +66,7 @@ export const doSearch = async (
       },
       size: PROCESS_EVENTS_PER_PAGE,
       sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
-      search_after: cursor ? [cursor] : undefined,
+      search_after: cursorMillis ? [cursorMillis] : undefined,
     },
   });
 

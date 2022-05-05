@@ -251,7 +251,7 @@ export class ProcessImpl implements Process {
     // because events is already ordered by @timestamp we take the last event
     // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
-    return filtered[filtered.length - 1] ?? {};
+    return filtered[filtered.length - 1];
   });
 
   isDescendantOf(process: Process) {
@@ -282,18 +282,26 @@ export const useProcessTree = ({
   // we add a fake session leader event, sourced from wide event data.
   // this is because we might not always have a session leader event
   // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = data[0].events?.find?.((event) => event.event?.kind === EventKind.event);
+  const fakeLeaderEvent = { ...data[0]?.events?.[0] }; // ?.find?.((event) => event.event?.kind === EventKind.event);
   const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
 
   if (fakeLeaderEvent) {
+    if (fakeLeaderEvent.event) {
+      fakeLeaderEvent.event.id = 'fakeSessionLeader';
+    }
     fakeLeaderEvent.user = fakeLeaderEvent?.process?.entry_leader?.user;
     fakeLeaderEvent.group = fakeLeaderEvent?.process?.entry_leader?.group;
+
+    // overwrite top level process data with with info from the widened entry_leader context
     fakeLeaderEvent.process = {
-      ...fakeLeaderEvent.process,
       ...fakeLeaderEvent.process?.entry_leader,
-      parent: fakeLeaderEvent.process?.parent,
     };
-    sessionLeaderProcess.events.push(fakeLeaderEvent);
+
+    // these details will be inaccurate since we've copied this from another event
+    delete fakeLeaderEvent.process?.group_leader;
+    delete fakeLeaderEvent.process?.parent;
+
+    sessionLeaderProcess.addEvent(fakeLeaderEvent);
   }
 
   const initializedProcessMap: ProcessMap = {
