@@ -9,7 +9,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { SecurityPageName } from '../../app/types';
 import { withSecuritySolutionLink } from '../../common/components/links';
-import * as i18n from './translations';
 
 interface LandingLinksImagesProps {
   items: NavItem[];
@@ -23,7 +22,7 @@ export interface NavItem {
   path?: string;
 }
 
-const PrimatyEuiTitle = styled(EuiTitle)`
+const PrimaryEuiTitle = styled(EuiTitle)`
   color: ${(props) => props.theme.eui.euiColorPrimary};
 `;
 
@@ -49,18 +48,24 @@ const Content = styled(EuiFlexItem)`
 export const LandingLinksImages: React.FC<LandingLinksImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
     {items.map(({ label, description, path, image, id }) => (
-      <EuiFlexItem key={id}>
-        <SecuritySolutionLink deepLinkId={id} path={path}>
+      <EuiFlexItem key={id} data-test-subj="LandingItem">
+        <SecuritySolutionLink deepLinkId={id} path={path} tabIndex={-1}>
           {/* Empty onClick is to force hover style on `EuiPanel` */}
           <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
             <EuiFlexGroup>
               <StyledFlexItem grow={false}>
-                <EuiImage size="l" alt={i18n.SCREENSHOT_IMAGE_ALT(label)} src={image} />
+                <EuiImage
+                  data-test-subj="LandingLinksImage"
+                  size="l"
+                  role="presentation"
+                  alt=""
+                  src={image}
+                />
               </StyledFlexItem>
               <Content>
-                <PrimatyEuiTitle size="s">
+                <PrimaryEuiTitle size="s">
                   <h2>{label}</h2>
-                </PrimatyEuiTitle>
+                </PrimaryEuiTitle>
                 <LandingLinksDescripton size="s" color="text">
                   {description}
                 </LandingLinksDescripton>

@@ -27,6 +27,7 @@ import {
   disableRule,
   snoozeRule,
   useLoadRuleTypes,
+  RuleStatus,
   unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -93,7 +94,7 @@ function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-  // const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -110,6 +111,7 @@ function RulesPage() {
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
     searchText,
     ruleLastResponseFilter: lastResponse,
+    ruleStatusesFilter,
     typesFilter,
     page,
     setPage,
@@ -205,7 +207,11 @@ function RulesPage() {
         width: '120px',
         'data-test-subj': 'rulesTableCell-status',
         render: (_executionStatus: RuleExecutionStatus, item: RuleTableItem) => (
-          <ExecutionStatus executionStatus={item.executionStatus} />
+          <ExecutionStatus
+            executionStatus={item.executionStatus}
+            item={item}
+            licenseType={ruleTypeIndex.get(item.ruleTypeId)?.minimumLicenseRequired!}
+          />
         ),
       },
       {
@@ -348,6 +354,12 @@ function RulesPage() {
               selectedStatuses={lastResponse}
               onChange={setExecutionStatusFilter}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {triggersActionsUi.getRuleStatusFilter({
+              selectedStatuses: ruleStatusesFilter,
+              onChange: setRuleStatusesFilter,
+            })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
