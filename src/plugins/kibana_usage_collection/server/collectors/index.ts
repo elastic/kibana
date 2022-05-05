@@ -19,7 +19,7 @@ export { registerCspCollector } from './csp';
 export { registerCoreUsageCollector } from './core';
 export { registerLocalizationUsageCollector } from './localization';
 export { registerConfigUsageCollector } from './config_usage';
-export { registerUiCountersUsageCollector, registerUiCounterSavedObjectType } from './ui_counters';
+export { registerUiCountersUsageCollector } from './ui_counters';
 export {
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
