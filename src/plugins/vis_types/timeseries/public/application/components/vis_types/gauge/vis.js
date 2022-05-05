@@ -83,7 +83,7 @@ function GaugeVisualization(props) {
 
   return (
     <div className="tvbVis" style={style}>
-      <Gauge {...params} />
+      <Gauge {...params} initialRender={props.initialRender} />
     </div>
   );
 }

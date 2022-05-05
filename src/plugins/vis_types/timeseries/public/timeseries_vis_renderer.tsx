@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { get } from 'lodash';
+import { get, once } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -72,14 +72,14 @@ export const getTimeseriesVisRenderer: (deps: {
               syncColors={syncColors}
               syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
+              initialRender={once(() => {
+                handlers.done();
+              })}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>
       </I18nProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

@@ -49,7 +49,10 @@ export class Gauge extends Component {
   handleResize() {
     // Bingo!
     const newState = calculateCoordinates(this.inner, this.resize, this.state);
-    this.setState(newState);
+    this.setState(newState, () => {
+      // TODO only call on `componentDidMount`
+      this.props.initialRender();
+    });
   }
 
   render() {

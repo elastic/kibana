@@ -75,6 +75,10 @@ class TableVis extends Component {
     }
   };
 
+  componentDidMount() {
+    this.props.initialRender();
+  }
+
   renderRow = (row, pivotIds, fieldValuesFormatter) => {
     const { model, fieldFormatMap, getConfig } = this.props;
 

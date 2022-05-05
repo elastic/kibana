@@ -7,7 +7,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 import classNames from 'classnames';
 import { get } from 'lodash';
 import { ClassNames } from '@emotion/react';
@@ -27,6 +27,9 @@ function MarkdownVisualization(props) {
   const style = { backgroundColor: panelBackgroundColor };
 
   let markdown;
+  useEffect(() => {
+    props.initialRender();
+  }, [props]);
 
   if (model.markdown) {
     const markdownSource = replaceVars(

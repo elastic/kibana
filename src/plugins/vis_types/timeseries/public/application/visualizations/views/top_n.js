@@ -35,9 +35,14 @@ export class TopN extends Component {
   }
 
   componentDidMount() {
-    this.setState({
-      labelMaxWidth: this.labelMaxWidth,
-    });
+    this.setState(
+      {
+        labelMaxWidth: this.labelMaxWidth,
+      },
+      () => {
+        this.props.initialRender();
+      }
+    );
   }
 
   componentDidUpdate(prevProps, prevState) {

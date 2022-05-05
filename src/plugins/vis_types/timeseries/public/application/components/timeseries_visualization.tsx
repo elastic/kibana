@@ -48,6 +48,7 @@ function TimeseriesVisualization({
   getConfig,
   syncColors,
   syncTooltips,
+  initialRender,
 }: TimeseriesVisualizationProps) {
   const [indexPattern, setIndexPattern] = useState<FetchedIndexPattern['indexPattern']>(null);
   const [palettesService, setPalettesService] = useState<PaletteRegistry | null>(null);
@@ -187,6 +188,7 @@ function TimeseriesVisualization({
             visData={visData}
             uiState={uiState}
             onBrush={onBrush}
+            initialRender={initialRender}
             onFilterClick={handleFilterClick}
             onUiState={handleUiState}
             syncColors={syncColors}

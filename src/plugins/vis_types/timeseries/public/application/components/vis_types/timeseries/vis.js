@@ -112,6 +112,10 @@ class TimeseriesVisualization extends Component {
   static getTickFormatter = (model, getConfig) =>
     createTickFormatter(get(model, 'formatter'), get(model, 'value_template'), getConfig);
 
+  componentDidMount() {
+    this.props.initialRender();
+  }
+
   componentDidUpdate() {
     const toastNotifications = getCoreStart().notifications.toasts;
     if (
