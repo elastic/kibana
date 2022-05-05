@@ -87,6 +87,7 @@ describe('utils', () => {
             "username": "elastic",
           },
           "description": "A description",
+          "duration": null,
           "external_service": null,
           "owner": "securitySolution",
           "settings": Object {
@@ -115,18 +116,6 @@ describe('utils', () => {
       // @ts-expect-error
       const node = buildRangeFilter({ from: null, to: null });
       expect(node).toBeFalsy();
-    });
-
-    it('returns undefined if the from is malformed', () => {
-      expect(() => buildRangeFilter({ from: '<' })).toThrowError(
-        'Invalid "from" and/or "to" query parameters'
-      );
-    });
-
-    it('returns undefined if the to is malformed', () => {
-      expect(() => buildRangeFilter({ to: '<' })).toThrowError(
-        'Invalid "from" and/or "to" query parameters'
-      );
     });
 
     it('creates a range filter with only the from correctly', () => {
@@ -216,6 +205,7 @@ describe('utils', () => {
         field: 'test',
         savedObjectType: 'test-type',
       });
+
       expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
@@ -242,6 +232,52 @@ describe('utils', () => {
                       "range": Object {
                         "test-type.attributes.test": Object {
                           "lte": "now",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    it('escapes the query correctly', () => {
+      const node = buildRangeFilter({
+        from: '2022-04-27T12:55:47.576Z',
+        to: '2022-04-27T12:56:47.576Z',
+        field: '<weird field)',
+        savedObjectType: '.weird SO)',
+      });
+
+      expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        ".weird SO).attributes.<weird field)": Object {
+                          "gte": "2022-04-27T12:55:47.576Z",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        ".weird SO).attributes.<weird field)": Object {
+                          "lte": "2022-04-27T12:56:47.576Z",
                         },
                       },
                     },

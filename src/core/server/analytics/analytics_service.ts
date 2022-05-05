@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClient } from '@elastic/analytics';
-import { createAnalytics } from '@elastic/analytics';
+import type { AnalyticsClient } from '@kbn/analytics-client';
+import { createAnalytics } from '@kbn/analytics-client';
 import type { CoreContext } from '../core_context';
 
 /**
@@ -15,13 +15,13 @@ import type { CoreContext } from '../core_context';
  * {@link AnalyticsClient}
  * @public
  */
-export type AnalyticsServicePreboot = AnalyticsClient;
+export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
 /**
  * Exposes the public APIs of the AnalyticsClient during the setup phase.
  * {@link AnalyticsClient}
  * @public
  */
-export type AnalyticsServiceSetup = AnalyticsClient;
+export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
 /**
  * Exposes the public APIs of the AnalyticsClient during the start phase
  * {@link AnalyticsClient}
@@ -73,5 +73,8 @@ export class AnalyticsService {
       reportEvent: this.analyticsClient.reportEvent,
       telemetryCounter$: this.analyticsClient.telemetryCounter$,
     };
+  }
+  public stop() {
+    this.analyticsClient.shutdown();
   }
 }

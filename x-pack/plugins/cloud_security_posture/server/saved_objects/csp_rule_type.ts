@@ -29,8 +29,22 @@ export const ruleAssetSavedObjectMappings: SavedObjectsType<CspRuleSchema>['mapp
         },
       },
     },
+    package_policy_id: {
+      type: 'keyword',
+    },
+    policy_id: {
+      type: 'keyword',
+    },
     description: {
       type: 'text',
+    },
+    enabled: {
+      type: 'boolean',
+      fields: {
+        keyword: {
+          type: 'keyword', // sort
+        },
+      },
     },
   },
 };

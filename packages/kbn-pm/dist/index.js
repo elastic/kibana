@@ -1580,7 +1580,20 @@ var _ciStatsCore = __webpack_require__("../../node_modules/@kbn/ci-stats-core/ta
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+
+function limitMetaStrings(meta) {
+  return Object.fromEntries(Object.entries(meta).map(([key, value]) => {
+    if (typeof value === 'string' && value.length > 2000) {
+      return [key, value.slice(0, 2000)];
+    }
+
+    return [key, value];
+  }));
+}
 /** A ci-stats metric record */
+
 
 /** Object that helps report data to the ci-stats service */
 class CiStatsReporter {
@@ -1631,7 +1644,9 @@ class CiStatsReporter {
     }
 
     const buildId = (_this$config3 = this.config) === null || _this$config3 === void 0 ? void 0 : _this$config3.buildId;
-    const timings = options.timings;
+    const timings = options.timings.map(timing => timing.meta ? { ...timing,
+      meta: limitMetaStrings(timing.meta)
+    } : timing);
     const upstreamBranch = (_options$upstreamBran = options.upstreamBranch) !== null && _options$upstreamBran !== void 0 ? _options$upstreamBran : this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
@@ -1740,19 +1755,56 @@ class CiStatsReporter {
       throw new Error('unable to report tests unless buildId is configured and auth config available');
     }
 
-    return await this.req({
+    const groupResp = await this.req({
       auth: true,
-      path: '/v1/test_group',
+      path: '/v2/test_group',
       query: {
         buildId: (_this$config7 = this.config) === null || _this$config7 === void 0 ? void 0 : _this$config7.buildId
       },
-      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
-      body: [JSON.stringify({
-        group
-      }), ...testRuns.map(testRun => JSON.stringify({
-        testRun
-      }))].join('\n')
+      bodyDesc: `[${group.name}/${group.type}] test group`,
+      body: group
     });
+
+    if (!groupResp) {
+      return;
+    }
+
+    let bufferBytes = 0;
+    const buffer = [];
+
+    const flushBuffer = async () => {
+      var _this$config8;
+
+      await this.req({
+        auth: true,
+        path: '/v2/test_runs',
+        query: {
+          buildId: (_this$config8 = this.config) === null || _this$config8 === void 0 ? void 0 : _this$config8.buildId,
+          groupId: groupResp.groupId,
+          groupType: group.type
+        },
+        bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
+        body: buffer.join('\n'),
+        timeout: 5 * MINUTE
+      });
+      buffer.length = 0;
+      bufferBytes = 0;
+    }; // send test runs in chunks of ~500kb
+
+
+    for (const testRun of testRuns) {
+      const json = JSON.stringify(testRun);
+      bufferBytes += json.length;
+      buffer.push(json);
+
+      if (bufferBytes >= 450000) {
+        await flushBuffer();
+      }
+    }
+
+    if (bufferBytes) {
+      await flushBuffer();
+    }
   }
   /**
    * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
@@ -1802,7 +1854,8 @@ class CiStatsReporter {
     body,
     bodyDesc,
     path,
-    query
+    query,
+    timeout = 60 * SECOND
   }) {
     let attempt = 0;
     const maxAttempts = 5;
@@ -1830,7 +1883,8 @@ class CiStatsReporter {
           adapter: _http.default,
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,
-          maxContentLength: Infinity
+          maxContentLength: Infinity,
+          timeout
         });
         return resp.data;
       } catch (error) {
@@ -2216,8 +2270,6 @@ exports.observeLines = observeLines;
 
 var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
 
-var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
-
 var _observe_readable = __webpack_require__("../../node_modules/@kbn/stdio-dev-helpers/target_node/observe_readable.js");
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -2243,8 +2295,8 @@ const SEP = /\r?\n/;
  *  @return {Rx.Observable}
  */
 function observeLines(readable) {
-  const done$ = (0, _observe_readable.observeReadable)(readable).pipe((0, _operators.share)());
-  const scan$ = Rx.fromEvent(readable, 'data').pipe((0, _operators.scan)(({
+  const done$ = (0, _observe_readable.observeReadable)(readable).pipe(Rx.share());
+  const scan$ = Rx.fromEvent(readable, 'data').pipe(Rx.scan(({
     buffer
   }, chunk) => {
     buffer += chunk;
@@ -2268,16 +2320,15 @@ function observeLines(readable) {
   }, {
     buffer: ''
   }), // stop if done completes or errors
-  (0, _operators.takeUntil)(done$.pipe((0, _operators.materialize)())), (0, _operators.share)());
+  Rx.takeUntil(done$.pipe(Rx.materialize())), Rx.share());
   return Rx.merge( // use done$ to provide completion/errors
   done$, // merge in the "lines" from each step
-  scan$.pipe((0, _operators.mergeMap)(({
+  scan$.pipe(Rx.mergeMap(({
     lines
   }) => lines || [])), // inject the "unsplit" data at the end
-  scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
+  scan$.pipe(Rx.takeLast(1), Rx.mergeMap(({
     buffer
-  }) => buffer ? [buffer] : []), // if there were no lines, last() will error, so catch and complete
-  (0, _operators.catchError)(() => Rx.empty())));
+  }) => buffer ? [buffer] : [])));
 }
 
 /***/ }),
@@ -2294,8 +2345,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.observeReadable = observeReadable;
 
 var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
-
-var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
@@ -2315,7 +2364,9 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  *   - fails on the first "error" event
  */
 function observeReadable(readable) {
-  return Rx.race(Rx.fromEvent(readable, 'end').pipe((0, _operators.first)(), (0, _operators.ignoreElements)()), Rx.fromEvent(readable, 'error').pipe((0, _operators.first)(), (0, _operators.mergeMap)(err => Rx.throwError(err))));
+  return Rx.race(Rx.fromEvent(readable, 'end').pipe(Rx.first(), Rx.ignoreElements()), Rx.fromEvent(readable, 'error').pipe(Rx.first(), Rx.map(err => {
+    throw err;
+  })));
 }
 
 /***/ }),
