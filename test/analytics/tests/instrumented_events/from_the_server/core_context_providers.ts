@@ -53,10 +53,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should have the properties provided by the "status info" context provider', () => {
-      expect(event.context).to.have.property('status_level');
-      expect(event.context.status_level).to.be.a('string');
-      expect(event.context).to.have.property('status_summary');
-      expect(event.context.status_summary).to.be.a('string');
+      expect(event.context).to.have.property('overall_status_level');
+      expect(event.context.overall_status_level).to.be.a('string');
+      expect(event.context).to.have.property('overall_status_summary');
+      expect(event.context.overall_status_summary).to.be.a('string');
     });
 
     it('should have the properties provided by the "license info" context provider', () => {

@@ -560,12 +560,12 @@ describe('StatusService', () => {
           .toMatchInlineSnapshot(`
             Array [
               Object {
-                "status_level": "initializing",
-                "status_summary": "Kibana is starting up",
+                "overall_status_level": "initializing",
+                "overall_status_summary": "Kibana is starting up",
               },
               Object {
-                "status_level": "available",
-                "status_summary": "All services are available",
+                "overall_status_level": "available",
+                "overall_status_summary": "All services are available",
               },
             ]
           `);
@@ -581,8 +581,8 @@ describe('StatusService', () => {
           Array [
             "core-overall_status_changed",
             Object {
-              "status_level": "available",
-              "status_summary": "All services are available",
+              "overall_status_level": "available",
+              "overall_status_summary": "All services are available",
             },
           ]
         `);
