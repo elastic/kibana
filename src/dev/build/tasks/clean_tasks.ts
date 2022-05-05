@@ -7,7 +7,7 @@
  */
 
 import minimatch from 'minimatch';
-
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
 
 export const Clean: GlobalTask = {
@@ -26,14 +26,11 @@ export const Clean: GlobalTask = {
   },
 };
 
-export const CleanPackages: Task = {
-  description: 'Cleaning source for packages that are now installed in node_modules',
+export const CleanPackageManagerRelatedFiles: Task = {
+  description: 'Cleaning package manager related files from the build folder',
 
   async run(config, log, build) {
-    await deleteAll(
-      [build.resolvePath('packages'), build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')],
-      log
-    );
+    await deleteAll([build.resolvePath('yarn.lock'), build.resolvePath('.npmrc')], log);
   },
 };
 
@@ -198,5 +195,18 @@ export const CleanEmptyFolders: Task = {
       build.resolvePath('data'),
       build.resolvePath('logs'),
     ]);
+  },
+};
+
+export const DeleteBazelPackagesFromBuildRoot: Task = {
+  description:
+    'Deleting bazel packages outputs from build folder root as they are now installed as node_modules',
+
+  async run(config, log, build) {
+    const bazelPackagesOnBuildRoot = (await discoverBazelPackages()).map((pkg) =>
+      build.resolvePath(pkg.normalizedRepoRelativeDir)
+    );
+
+    await deleteAll(bazelPackagesOnBuildRoot, log);
   },
 };

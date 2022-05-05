@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import globby from 'globby';
 import Path from 'path';
 
-import globby from 'globby';
 import { REPO_ROOT } from '@kbn/utils';
 
 /**

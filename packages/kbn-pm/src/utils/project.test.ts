@@ -50,65 +50,6 @@ test('fields', async () => {
   expect(kibana.hasScript('build')).toBe(false);
 });
 
-describe('#ensureValidProjectDependency', () => {
-  test('valid link: version', async () => {
-    const root = createProjectWith({
-      dependencies: {
-        foo: 'link:packages/foo',
-      },
-    });
-
-    const foo = createProjectWith(
-      {
-        name: 'foo',
-      },
-      'packages/foo'
-    );
-
-    expect(() => root.ensureValidProjectDependency(foo)).not.toThrow();
-  });
-
-  test('using link:, but with wrong path', () => {
-    const root = createProjectWith(
-      {
-        dependencies: {
-          foo: 'link:wrong/path',
-        },
-      },
-      rootPath
-    );
-
-    const foo = createProjectWith(
-      {
-        name: 'foo',
-      },
-      'packages/foo'
-    );
-
-    expect(() => root.ensureValidProjectDependency(foo)).toThrowErrorMatchingSnapshot();
-  });
-
-  test('using version instead of link:', () => {
-    const root = createProjectWith(
-      {
-        dependencies: {
-          foo: '1.0.0',
-        },
-      },
-      rootPath
-    );
-
-    const foo = createProjectWith(
-      {
-        name: 'foo',
-      },
-      'packages/foo'
-    );
-
-    expect(() => root.ensureValidProjectDependency(foo)).toThrowErrorMatchingSnapshot();
-  });
-});
-
 describe('#getExecutables()', () => {
   test('converts bin:string to an object with absolute paths', () => {
     const project = createProjectWith({
