@@ -163,7 +163,10 @@ class VectorTileInspector extends Component<Props, State> {
         <EuiTabs size="s">{this.renderTabs()}</EuiTabs>
         <EuiSpacer size="s" />
         {this.state.selectedTileRequest && (
-          <TileRequestTab tileRequest={this.state.selectedTileRequest} />
+          <TileRequestTab
+            key={`${this.state.selectedTileRequest.labelId}${this.state.selectedTileRequest.x}${this.state.selectedTileRequest.y}${this.state.selectedTileRequest.z}`}
+            tileRequest={this.state.selectedTileRequest}
+          />
         )}
       </>
     );
