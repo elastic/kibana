@@ -28,4 +28,5 @@ export const allNavigationItems: Record<CspPage, CspNavigationItem> = {
 export const findingsNavigation = {
   findings_default: { name: TEXT.FINDINGS, path: '/findings/default' },
   findings_by_resource: { name: TEXT.FINDINGS, path: '/findings/resource' },
+  resource_findings: { name: TEXT.FINDINGS, path: '/findings/resource/:resourceId' },
 };
