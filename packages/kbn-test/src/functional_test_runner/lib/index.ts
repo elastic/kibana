@@ -12,7 +12,6 @@ export { readConfigFile, Config } from './config';
 export * from './providers';
 // @internal
 export { runTests, setupMocha } from './mocha';
-export * from './test_metadata';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
 
