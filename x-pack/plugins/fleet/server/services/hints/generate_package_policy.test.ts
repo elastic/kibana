@@ -56,7 +56,7 @@ const expectedPolicy = {
         },
       ],
       vars: {
-        hosts: { value: ['127.0.0.1:6379'], type: 'text' },
+        hosts: { value: ['host1:8080'], type: 'text' },
         idle_timeout: { value: '20s', type: 'text' },
         maxconn: { value: 10, type: 'integer' },
         network: { value: 'tcp', type: 'text' },
