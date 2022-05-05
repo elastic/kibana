@@ -12,11 +12,11 @@ import { MlCustomSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKe
 import type { CombinedJob, CombinedJobWithStats } from './combined_job';
 import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { MlJobBlocked } from './job';
-import type { JobActionString } from '../../constants/job_actions';
+import type { JobActionState } from '../../constants/job_actions';
 export type { Datafeed } from './datafeed';
 export type { DatafeedStats } from './datafeed_stats';
 
-export type SummaryJobState = estypes.MlJobState | JobActionString;
+export type SummaryJobState = estypes.MlJobState | JobActionState;
 
 /**
  * A summary of an anomaly detection job.

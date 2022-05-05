@@ -13,9 +13,9 @@ export const JOB_ACTION = {
 
 export type JobAction = typeof JOB_ACTION[keyof typeof JOB_ACTION];
 
-export type JobActionString = 'deleting' | 'resetting' | 'reverting';
+export type JobActionState = 'deleting' | 'resetting' | 'reverting';
 
-export function getJobActionString(action: JobAction): JobActionString {
+export function getJobActionString(action: JobAction): JobActionState {
   switch (action) {
     case JOB_ACTION.DELETE:
       return 'deleting';
