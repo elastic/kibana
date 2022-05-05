@@ -329,7 +329,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('Applies options list control options to dashboard', async () => {
           await retry.try(async () => {
-            expect(await pieChart.getPieSliceCount()).to.be(2);
+            expect(await pieChart.getPieSliceCount(false)).to.be(2);
           });
         });
 
@@ -338,7 +338,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await header.waitUntilLoadingHasFinished();
           await dashboard.clickUnsavedChangesContinueEditing('New Dashboard');
           await header.waitUntilLoadingHasFinished();
-          expect(await pieChart.getPieSliceCount()).to.be(2);
+          expect(await pieChart.getPieSliceCount(false)).to.be(2);
 
           const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
           expect(selectionString).to.be('hiss, grr');
@@ -381,7 +381,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ]);
 
           // only valid selections are applied as filters.
-          expect(await pieChart.getPieSliceCount()).to.be(1);
+          expect(await pieChart.getPieSliceCount(false)).to.be(1);
         });
 
         it('can make invalid selections valid again if the parent filter changes', async () => {
@@ -390,7 +390,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await ensureAvailableOptionsEql(allAvailableOptions);
-          expect(await pieChart.getPieSliceCount()).to.be(2);
+          expect(await pieChart.getPieSliceCount(false)).to.be(2);
         });
 
         it('Can mark multiple selections invalid with Filter', async () => {
@@ -400,7 +400,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await ensureAvailableOptionsEql(['hiss', 'Ignored selections', 'meow', 'bark']);
 
           // only valid selections are applied as filters.
-          expect(await pieChart.getPieSliceCount()).to.be(1);
+          expect(await pieChart.getPieSliceCount(false)).to.be(1);
         });
       });
 

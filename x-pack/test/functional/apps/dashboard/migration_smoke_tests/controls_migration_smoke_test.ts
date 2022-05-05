@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('applies default selected options list options to dashboard', async () => {
       // because 4 selections are made on the control, the pie chart should only show 4 slices.
-      expect(await pieChart.getPieSliceCount()).to.be(4);
+      expect(await pieChart.getPieSliceCount(false)).to.be(4);
     });
   });
 }
