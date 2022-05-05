@@ -683,8 +683,10 @@ export const expectedDsl = {
     size: 0,
     _source: false,
     fields: [
-      'host.os.*',
+      'host.id',
       'host.name',
+      'host.os.name',
+      'host.os.version',
       {
         field: '@timestamp',
         format: 'strict_date_optional_time',

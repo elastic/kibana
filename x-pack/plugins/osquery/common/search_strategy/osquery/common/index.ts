@@ -54,7 +54,7 @@ export interface HostOsHitsItem {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      _source: { host: { os: Maybe<OsEcs> } };
+      fields: { host: { os: Maybe<OsEcs> } };
       sort?: [number];
       _index?: string;
       _type?: string;
@@ -101,7 +101,7 @@ export interface HostAggEsData extends SearchHit {
 }
 
 export interface HostHit extends Hit {
-  _source: {
+  fields: {
     '@timestamp'?: string;
     host: HostEcs;
   };

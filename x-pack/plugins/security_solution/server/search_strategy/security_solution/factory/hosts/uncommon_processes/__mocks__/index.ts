@@ -798,6 +798,13 @@ export const formattedSearchStrategyResponse = {
                           _id: 'M-GvaHQBA6bGZw2uBoYz',
                           _score: 0,
                           fields: {
+                            'process.args': [
+                              'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.673.0.exe',
+                              'WD',
+                              '/q',
+                            ],
+                            'process.name': ['AM_Delta_Patch_1.323.673.0.exe'],
+                            'user.name': ['SYSTEM'],
                             process: {
                               args: [
                                 'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.673.0.exe',
@@ -1791,7 +1798,18 @@ export const formattedSearchStrategyResponse = {
             },
           },
           size: 0,
-          fields: ['process.args', 'process.name', 'user.id', 'user.name'],
+          _source: false,
+          fields: [
+            'process.args',
+            'process.name',
+            'user.id',
+            'user.name',
+            'host.name',
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
           track_total_hits: false,
         },
         null,
@@ -1927,6 +1945,17 @@ export const expectedDsl = {
     },
   },
   size: 0,
-  fields: ['process.args', 'process.name', 'user.id', 'user.name'],
+  _source: false,
+  fields: [
+    'process.args',
+    'process.name',
+    'user.id',
+    'user.name',
+    'host.name',
+    {
+      field: '@timestamp',
+      format: 'strict_date_optional_time',
+    },
+  ],
   track_total_hits: false,
 };
