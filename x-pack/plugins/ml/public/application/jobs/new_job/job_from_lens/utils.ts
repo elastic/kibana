@@ -10,8 +10,7 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
   const { query, filters, timeRange } = embeddable.getInput();
 
-  // @ts-expect-error savedVis is private in Embeddable
-  const vis = embeddable.savedVis as LensSavedObjectAttributes;
+  const vis = embeddable.getSavedVis();
 
   if (timeRange === undefined) {
     throw Error('Time range not specified.');
