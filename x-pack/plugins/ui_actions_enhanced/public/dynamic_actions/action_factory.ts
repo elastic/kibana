@@ -55,7 +55,6 @@ export class ActionFactory<
   public readonly createConfig: (context: FactoryContext) => Config;
   public readonly isConfigValid: (config: Config, context: FactoryContext) => boolean;
   public readonly migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
-  public readonly isConfigurable: (context: FactoryContext) => boolean;
 
   constructor(
     protected readonly def: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>,
@@ -78,7 +77,6 @@ export class ActionFactory<
     this.ReactCollectConfig = uiToReactComponent(this.CollectConfig);
     this.createConfig = this.def.createConfig;
     this.isConfigValid = this.def.isConfigValid;
-    this.isConfigurable = this.def.isConfigurable || (() => true);
     this.migrations = this.def.migrations || {};
   }
 

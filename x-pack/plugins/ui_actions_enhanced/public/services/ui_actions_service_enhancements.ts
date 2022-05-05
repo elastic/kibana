@@ -136,8 +136,7 @@ export class UiActionsServiceEnhancements
       extract,
       inject,
       getIconType: () => euiIcon,
-      isCompatible: async () => true,
-      isConfigurable: (context) => !isConfigurable || isConfigurable(context),
+      isCompatible: async (context) => !isConfigurable || isConfigurable(context),
       create: (serializedAction) => ({
         id: '',
         type: factoryId,
