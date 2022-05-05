@@ -20,18 +20,21 @@ interface Props {
   selectedSeverity: CaseSeverity;
   onSeverityChange: (status: CaseSeverity) => void;
   isLoading: boolean;
+  isDisabled: boolean;
 }
 
 export const SeveritySelector: React.FC<Props> = ({
   selectedSeverity,
   onSeverityChange,
   isLoading,
+  isDisabled,
 }) => {
   const caseSeverities = Object.keys(severities) as CaseSeverity[];
   const options: Array<EuiSuperSelectOption<CaseSeverity>> = caseSeverities.map((severity) => {
     const severityData = severities[severity];
     return {
       value: severity,
+      disabled: isDisabled,
       inputDisplay: (
         <EuiFlexGroup
           gutterSize="xs"

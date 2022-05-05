@@ -15,12 +15,14 @@ interface Props {
   selectedSeverity: CaseSeverity;
   onSeverityChange: (status: CaseSeverity) => void;
   isLoading: boolean;
+  isDisabled: boolean;
 }
 
 export const SeveritySidebarSelector: React.FC<Props> = ({
   selectedSeverity,
   onSeverityChange,
   isLoading,
+  isDisabled,
 }) => {
   return (
     <EuiFlexItem grow={false}>
@@ -32,6 +34,7 @@ export const SeveritySidebarSelector: React.FC<Props> = ({
         isLoading={isLoading}
         selectedSeverity={selectedSeverity}
         onSeverityChange={onSeverityChange}
+        isDisabled={isDisabled}
       />
       <EuiSpacer size="m" />
     </EuiFlexItem>

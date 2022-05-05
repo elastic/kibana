@@ -189,6 +189,7 @@ export const CaseViewActivity = ({
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <SeveritySidebarSelector
+          isDisabled={!userCanCrud}
           isLoading={isLoading}
           selectedSeverity={caseData.severity}
           onSeverityChange={onUpdateSeverity}
