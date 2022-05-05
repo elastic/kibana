@@ -34,6 +34,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { IFieldSubTypeMulti } from '@kbn/es-query';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -109,11 +110,28 @@ export const ControlEditor = ({
   const getCompatibleControlTypes = (dataView?: DataView) => {
     if (!dataView) return {};
     const fieldRegistry: DataControlFieldRegistry = {};
+
+    // double link the parent-child relationship specifically for case-sensitivity support for options lists
+    for (const field of dataView.fields.getAll()) {
+      if (!fieldRegistry[field.name]) {
+        fieldRegistry[field.name] = { field, compatibleControlTypes: [] };
+      }
+      const parentFieldName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
+      if (parentFieldName) {
+        fieldRegistry[field.name].parentFieldName = parentFieldName;
+
+        const parentField = dataView.getFieldByName(parentFieldName);
+        if (!fieldRegistry[parentFieldName] && parentField) {
+          fieldRegistry[parentFieldName] = { field: parentField, compatibleControlTypes: [] };
+        }
+        fieldRegistry[parentFieldName].childFieldName = field.name;
+      }
+    }
+
     const controlFactories = getControlTypes().map(
       (controlType) => getControlFactory(controlType) as IEditableControlFactory
     );
     dataView.fields.map((dataViewField) => {
-      fieldRegistry[dataViewField.name] = { field: dataViewField, compatibleControlTypes: [] };
       for (const factory of controlFactories) {
         if (factory.isFieldCompatible) {
           factory.isFieldCompatible(fieldRegistry[dataViewField.name]);
@@ -206,7 +224,17 @@ export const ControlEditor = ({
               selectedFieldName={selectedField}
               dataView={dataView}
               onSelectField={(field) => {
-                onTypeEditorChange({ fieldName: field.name });
+                onTypeEditorChange({
+                  fieldName: field.name,
+                  parentFieldName: state.fieldRegistry?.[field.name].parentFieldName,
+                  childFieldName: state.fieldRegistry?.[field.name].childFieldName,
+                });
+                // console.log('on select field:');
+                // console.log('File registry: ', state.fieldRegistry);
+                // console.log('----> field:  ', field.name);
+                // console.log('----> parent: ', state.fieldRegistry?.[field.name].parentFieldName);
+                // console.log('----> child:  ', state.fieldRegistry?.[field.name].childFieldName);
+
                 const newDefaultTitle = field.displayName ?? field.name;
                 setDefaultTitle(newDefaultTitle);
                 setSelectedField(field.name);

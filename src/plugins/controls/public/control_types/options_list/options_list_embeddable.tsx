@@ -180,7 +180,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     dataView: DataView;
     field: OptionsListField;
   }> => {
-    const { dataViewId, fieldName } = this.getInput();
+    const { dataViewId, fieldName, parentFieldName, childFieldName } = this.getInput();
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
       this.dataView = await this.dataViewsService.get(dataViewId);
@@ -194,9 +194,16 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     if (!this.field || this.field.name !== fieldName) {
       const originalField = this.dataView.getFieldByName(fieldName);
-      const parentFieldName = (originalField?.subType as IFieldSubTypeMulti)?.multi?.parent;
-      const parentField = this.dataView.getFieldByName(parentFieldName);
-      const textFieldName = parentField?.esTypes?.includes('text') ? parentField.name : undefined;
+      const childField =
+        (childFieldName && this.dataView.getFieldByName(childFieldName)) || undefined;
+      const parentField =
+        (parentFieldName && this.dataView.getFieldByName(parentFieldName)) || undefined;
+
+      const textFieldName = childField?.esTypes?.includes('text')
+        ? childField.name
+        : parentField?.esTypes?.includes('text')
+        ? parentField.name
+        : undefined;
       (originalField as OptionsListField).textFieldName = textFieldName;
       this.field = originalField;
 
