@@ -3608,7 +3608,6 @@
     "expressionXY.xyVis.fittingFunction.help": "定义处理缺失值的方式",
     "expressionXY.xyVis.help": "X/Y 图表",
     "expressionXY.xyVis.hideEndzones.help": "隐藏部分数据的末日区域标记",
-    "expressionXY.xyVis.labelsOrientation.help": "定义轴标签的旋转",
     "expressionXY.layeredXyVis.layers.help": "可视序列的图层",
     "expressionXY.xyVis.legend.help": "配置图表图例。",
     "expressionXY.xyVis.logDatatable.breakDown": "细分方式",
