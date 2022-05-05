@@ -25,8 +25,6 @@ export interface PhraseSuggestorProps {
 export interface PhraseSuggestorState {
   suggestions: string[];
   isLoading: boolean;
-  errorMessage: string[];
-  isInvalid: boolean;
 }
 
 /**
@@ -43,8 +41,6 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   public state: PhraseSuggestorState = {
     suggestions: [],
     isLoading: false,
-    errorMessage: [''],
-    isInvalid: false,
   };
 
   public componentDidMount() {
@@ -94,16 +90,6 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
 
     this.setState({ suggestions, isLoading: false });
   }, 500);
-
-  protected showErrorMessage = (error: { isInvalid: boolean; errorMessage: string[] }): void => {
-    this.updateErrors(error);
-  };
-
-  protected updateErrors = debounce(
-    (error: { isInvalid: boolean; errorMessage: string[] }): void => {
-      this.setState(error);
-    }
-  );
 }
 
 export const PhraseSuggestor = withKibana(PhraseSuggestorUI as any);

@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React, { Component } from 'react';
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { isEmpty } from 'lodash';
-import React, { Component } from 'react';
 import { IFieldType } from '@kbn/data-views-plugin/common';
-import { validateParams } from './lib/filter_editor_utils';
 
 interface Props {
   value?: string | number;
@@ -23,7 +21,7 @@ interface Props {
   controlOnly?: boolean;
   className?: string;
   fullWidth?: boolean;
-  showErrorMessage: (error: { isInvalid: boolean; errorMessage: string[] }) => void;
+  isInvalid?: boolean;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -47,7 +45,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={!validateParams(value, this.props.field)}
+            isInvalid={this.props.isInvalid}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -68,23 +66,6 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'date':
       case 'date_range':
-        const isInvalid = !isEmpty(value) && !validateParams(value, this.props.field);
-        if (isInvalid) {
-          this.props.showErrorMessage({
-            isInvalid: true,
-            errorMessage: [
-              this.props.intl.formatMessage({
-                id: 'unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage',
-                defaultMessage: 'Invalid date format provided',
-              }),
-            ],
-          });
-        } else {
-          this.props.showErrorMessage({
-            isInvalid: false,
-            errorMessage: [''],
-          });
-        }
         inputElement = (
           <EuiFieldText
             fullWidth={this.props.fullWidth}
@@ -92,7 +73,7 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             onBlur={this.onBlur}
-            isInvalid={isInvalid}
+            isInvalid={this.props.isInvalid}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -106,7 +87,7 @@ class ValueInputTypeUI extends Component<Props> {
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
+            isInvalid={this.props.isInvalid}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
