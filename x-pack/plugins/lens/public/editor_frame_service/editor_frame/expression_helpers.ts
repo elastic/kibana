@@ -16,8 +16,12 @@ export function getDatasourceExpressionsByLayers(
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
   Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
-    const state = datasourceStates[datasourceId].state;
-    const layers = datasource.getLayers(datasourceStates[datasourceId].state);
+    const state = datasourceStates[datasourceId]?.state;
+    if (!state) {
+      return;
+    }
+
+    const layers = datasource.getLayers(state);
 
     layers.forEach((layerId) => {
       const result = datasource.toExpression(state, layerId);

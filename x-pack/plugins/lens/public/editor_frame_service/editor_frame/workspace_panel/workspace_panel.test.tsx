@@ -26,7 +26,6 @@ jest.mock('../../../debounced_component', () => {
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
-import { fromExpression } from '@kbn/interpreter';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -187,11 +186,9 @@ describe('workspace_panel', () => {
 
     instance.update();
 
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-      "kibana
-      | lens_merge_tables layerIds=\\"first\\" tables={datasource}
-      | testVis"
-    `);
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(
+      `"testVis"`
+    );
   });
 
   it('should give user control when auto-apply disabled', async () => {
@@ -227,11 +224,7 @@ describe('workspace_panel', () => {
     const getExpression = () => instance.find(expressionRendererMock).prop('expression');
 
     // allows initial render
-    expect(getExpression()).toMatchInlineSnapshot(`
-    "kibana
-    | lens_merge_tables layerIds=\\"first\\" tables={datasource}
-    | testVis"
-  `);
+    expect(getExpression()).toMatchInlineSnapshot(`"testVis"`);
 
     mockDatasource.toExpression.mockReturnValue('new-datasource');
     act(() => {
@@ -243,11 +236,7 @@ describe('workspace_panel', () => {
     });
     instance.update();
 
-    expect(getExpression()).toMatchInlineSnapshot(`
-    "kibana
-    | lens_merge_tables layerIds=\\"first\\" tables={datasource}
-    | testVis"
-  `);
+    expect(getExpression()).toMatchInlineSnapshot(`"testVis"`);
 
     act(() => {
       mounted.lensStore.dispatch(applyChanges());
@@ -255,11 +244,7 @@ describe('workspace_panel', () => {
     instance.update();
 
     // should update
-    expect(getExpression()).toMatchInlineSnapshot(`
-    "kibana
-    | lens_merge_tables layerIds=\\"first\\" tables={new-datasource}
-    | new-vis"
-  `);
+    expect(getExpression()).toMatchInlineSnapshot(`"new-vis"`);
 
     mockDatasource.toExpression.mockReturnValue('other-new-datasource');
     act(() => {
@@ -273,11 +258,7 @@ describe('workspace_panel', () => {
     instance.update();
 
     // reenabling auto-apply triggers an update as well
-    expect(getExpression()).toMatchInlineSnapshot(`
-    "kibana
-    | lens_merge_tables layerIds=\\"first\\" tables={other-new-datasource}
-    | other-new-vis"
-  `);
+    expect(getExpression()).toMatchInlineSnapshot(`"other-new-vis"`);
   });
 
   it('should base saveability on working changes when auto-apply disabled', async () => {
@@ -317,11 +298,9 @@ describe('workspace_panel', () => {
     instance.update();
 
     // allows initial render
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-    "kibana
-    | lens_merge_tables layerIds=\\"first\\" tables={datasource}
-    | testVis"
-  `);
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(
+      `"testVis"`
+    );
     expect(isSaveable()).toBe(true);
 
     act(() => {
@@ -497,90 +476,6 @@ describe('workspace_panel', () => {
       type: 'lens/onActiveDataChange',
       payload: tablesData,
     });
-  });
-
-  it('should include data fetching for each layer in the expression', async () => {
-    const mockDatasource2 = createMockDatasource('a');
-    const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.datasourceLayers = {
-      first: mockDatasource.publicAPIMock,
-      second: mockDatasource2.publicAPIMock,
-    };
-    mockDatasource.toExpression.mockReturnValue('datasource');
-    mockDatasource.getLayers.mockReturnValue(['first']);
-
-    mockDatasource2.toExpression.mockReturnValue('datasource2');
-    mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
-
-    const mounted = await mountWithProvider(
-      <WorkspacePanel
-        {...defaultProps}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-          mock2: mockDatasource2,
-        }}
-        framePublicAPI={framePublicAPI}
-        visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        }}
-        ExpressionRenderer={expressionRendererMock}
-      />,
-
-      {
-        preloadedState: {
-          datasourceStates: {
-            testDatasource: {
-              state: {},
-              isLoading: false,
-            },
-            mock2: {
-              state: {},
-              isLoading: false,
-            },
-          },
-        },
-      }
-    );
-    instance = mounted.instance;
-    instance.update();
-
-    const ast = fromExpression(instance.find(expressionRendererMock).prop('expression') as string);
-
-    expect(ast.chain[1].arguments.layerIds).toEqual(['first', 'second', 'third']);
-    expect(ast.chain[1].arguments.tables).toMatchInlineSnapshot(`
-                                    Array [
-                                      Object {
-                                        "chain": Array [
-                                          Object {
-                                            "arguments": Object {},
-                                            "function": "datasource",
-                                            "type": "function",
-                                          },
-                                        ],
-                                        "type": "expression",
-                                      },
-                                      Object {
-                                        "chain": Array [
-                                          Object {
-                                            "arguments": Object {},
-                                            "function": "datasource2",
-                                            "type": "function",
-                                          },
-                                        ],
-                                        "type": "expression",
-                                      },
-                                      Object {
-                                        "chain": Array [
-                                          Object {
-                                            "arguments": Object {},
-                                            "function": "datasource2",
-                                            "type": "function",
-                                          },
-                                        ],
-                                        "type": "expression",
-                                      },
-                                    ]
-                        `);
   });
 
   it('should run the expression again if the date range changes', async () => {
