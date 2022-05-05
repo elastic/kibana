@@ -88,6 +88,17 @@ const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   },
 ];
 
+const cleanupEntries = (
+  item: ArtifactFormComponentProps['item']
+): ArtifactFormComponentProps['item']['entries'] => {
+  return item.entries.map(
+    (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
+      delete e.id;
+      return e;
+    }
+  );
+};
+
 type EventFilterItemEntries = Array<{
   field: string;
   value: string;
@@ -145,22 +156,20 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
     const processChanged = useCallback(
       (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
+        const item = updatedItem
+          ? {
+              ...exception,
+              ...updatedItem,
+            }
+          : exception;
+        cleanupEntries(item);
         onChange({
-          item: updatedItem
-            ? {
-                ...exception,
-                ...updatedItem,
-              }
-            : exception,
+          item,
           isValid: isFormValid && areConditionsValid,
         });
       },
       [areConditionsValid, exception, isFormValid, onChange]
     );
-
-    useEffect(() => {
-      processChanged();
-    }, [processChanged]);
 
     // set initial state of `wasByPolicy` that checks
     // if the initial state of the exception was by policy or not
@@ -188,12 +197,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
       // TODO: `id` gets added to the exception.entries item
       // Is there a simpler way to this?
-      ef.entries.map(
-        (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
-          delete e.id;
-          return e;
-        }
-      );
+      cleanupEntries(ef);
 
       setAreConditionsValid(!!exception.entries.length);
       return ef;
@@ -223,7 +227,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             aria-label={NAME_LABEL}
             id="eventFiltersFormInputName"
             defaultValue={exception?.name ?? ''}
-            data-test-subj={'eventFilters-form-name-input'}
+            data-test-subj={getTestId('name-input')}
             fullWidth
             maxLength={256}
             required={hasBeenInputNameVisited}
@@ -232,7 +236,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           />
         </EuiFormRow>
       ),
-      [hasNameError, handleOnChangeName, hasBeenInputNameVisited, exception?.name]
+      [hasNameError, getTestId, handleOnChangeName, hasBeenInputNameVisited, exception?.name]
     );
 
     // description and handler
@@ -252,13 +256,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             defaultValue={exception?.description ?? ''}
             onChange={handleOnDescriptionChange}
             fullWidth
-            data-test-subj="eventFilters-form-description-input"
+            data-test-subj={getTestId('description-input')}
             aria-label={DESCRIPTION_LABEL}
             maxLength={256}
           />
         </EuiFormRow>
       ),
-      [exception?.description, handleOnDescriptionChange]
+      [exception?.description, getTestId, handleOnDescriptionChange]
     );
 
     // OS and handler
@@ -482,7 +486,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged({ tags });
         setHasFormChanged(true);
       },
-      [processChanged]
+      [processChanged, setSelectedPolicies]
     );
 
     const policiesSection = useMemo(
@@ -506,6 +510,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         policiesIsLoading,
       ]
     );
+
+    useEffect(() => {
+      processChanged();
+    }, [processChanged]);
 
     if (isIndexPatternLoading || !exception) {
       return <Loader size="xl" />;
