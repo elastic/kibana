@@ -109,7 +109,7 @@ export const DebugPage: React.FunctionComponent = () => {
             listItems={[
               {
                 label: 'Download Health Check Report',
-                disabled: true,
+                isDisabled: true,
                 iconType: 'download',
                 href: '/api/fleet/health_check',
                 target: '_blank',
