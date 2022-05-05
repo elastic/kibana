@@ -131,6 +131,7 @@ describe('send_email module', () => {
       page: 1,
     });
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    requestOAuthClientCredentialsTokenMock.mock.calls[0].pop();
     expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://login.microsoftonline.com/undefined/oauth2/v2.0/token",
@@ -150,32 +151,11 @@ describe('send_email module', () => {
           "clientSecret": "sdfhkdsjhfksdjfh",
           "scope": "https://graph.microsoft.com/.default",
         },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
       ]
     `);
 
+    delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -187,29 +167,6 @@ describe('send_email module', () => {
           "messageHTML": "<p>a message</p>
       ",
           "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
             "connectorId": "1",
             "content": Object {
               "message": "a message",
@@ -246,29 +203,6 @@ describe('send_email module', () => {
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
         },
       ]
     `);
@@ -331,6 +265,8 @@ describe('send_email module', () => {
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(0);
 
+    delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -342,29 +278,6 @@ describe('send_email module', () => {
           "messageHTML": "<p>a message</p>
       ",
           "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
             "connectorId": "1",
             "content": Object {
               "message": "a message",
@@ -401,29 +314,6 @@ describe('send_email module', () => {
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
         },
       ]
     `);
@@ -510,6 +400,8 @@ describe('send_email module', () => {
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
 
+    delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -521,29 +413,6 @@ describe('send_email module', () => {
           "messageHTML": "<p>a message</p>
       ",
           "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
             "connectorId": "1",
             "content": Object {
               "message": "a message",
@@ -580,29 +449,6 @@ describe('send_email module', () => {
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
         },
       ]
     `);
@@ -647,6 +493,8 @@ describe('send_email module', () => {
       `Not able to update connector token for connectorId: 1 due to error: Fail`,
     ]);
 
+    delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -658,29 +506,6 @@ describe('send_email module', () => {
           "messageHTML": "<p>a message</p>
       ",
           "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
             "connectorId": "1",
             "content": Object {
               "message": "a message",
@@ -742,29 +567,6 @@ describe('send_email module', () => {
             ],
           },
         },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
       ]
     `);
   });
@@ -799,8 +601,10 @@ describe('send_email module', () => {
 
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClientM);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
-    expect(connectorTokenClientM.deleteConnectorTokens.mock.calls.length).toBe(1);
+    expect(connectorTokenClientM.updateOrReplace.mock.calls.length).toBe(1);
 
+    delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -812,29 +616,6 @@ describe('send_email module', () => {
           "messageHTML": "<p>a message</p>
       ",
           "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
             "connectorId": "1",
             "content": Object {
               "message": "a message",
@@ -871,29 +652,6 @@ describe('send_email module', () => {
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
         },
       ]
     `);

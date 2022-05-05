@@ -76,6 +76,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
     this._style = new TileStyle();
   }
 
+  isInitialDataLoadComplete(): boolean {
+    return !!this._descriptor.__areTilesLoaded;
+  }
+
   getSource(): EMSTMSSource {
     return super.getSource() as EMSTMSSource;
   }

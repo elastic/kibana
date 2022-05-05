@@ -14,11 +14,15 @@ export const PLUGIN = {
     description: 'The description text that will appear in the feature catalogue.',
   }),
   ID: 'uptime',
+  SYNTHETICS_PLUGIN_ID: 'synthetics',
   LOCAL_STORAGE_KEY: 'xpack.synthetics.',
   NAME: i18n.translate('xpack.synthetics.featureRegistry.syntheticsFeatureName', {
     defaultMessage: 'Synthetics and Uptime',
   }),
   TITLE: i18n.translate('xpack.synthetics.uptimeFeatureCatalogueTitle', {
     defaultMessage: 'Uptime',
+  }),
+  SYNTHETICS: i18n.translate('xpack.synthetics.syntheticsFeatureCatalogueTitle', {
+    defaultMessage: 'Synthetics',
   }),
 };

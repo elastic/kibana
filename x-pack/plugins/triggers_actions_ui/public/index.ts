@@ -18,6 +18,7 @@ export type {
   RuleType,
   RuleTypeIndex,
   RuleTypeModel,
+  RuleStatus,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
@@ -30,6 +31,7 @@ export type {
   RuleTypeParams,
   AsApiContract,
   RuleTableItem,
+  AlertsTableConfigurationRegistryContract,
 } from './types';
 
 export {

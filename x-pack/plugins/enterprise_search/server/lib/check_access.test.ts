@@ -196,6 +196,17 @@ describe('checkAccess', () => {
             hasWorkplaceSearchAccess: false,
           });
         });
+
+        it('falls back to no access if response error', async () => {
+          (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({
+            responseStatus: 500,
+            responseStatusText: 'failed',
+          }));
+          expect(await checkAccess(mockDependencies)).toEqual({
+            hasAppSearchAccess: false,
+            hasWorkplaceSearchAccess: false,
+          });
+        });
       });
     });
   });

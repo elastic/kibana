@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function advancedSettingsApp({ loadTestFile }: FtrProviderContext) {
   describe('Data Views', function indexPatternsTestSuite() {
-    this.tags('ciGroup2');
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./spaces'));
   });
