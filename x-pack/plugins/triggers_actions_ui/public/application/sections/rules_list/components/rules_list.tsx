@@ -973,7 +973,7 @@ export const RulesList: React.FunctionComponent = () => {
     }
     return [];
   };
-  
+
   const getRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
       return [
