@@ -175,9 +175,12 @@ export function LayerSettings(props: Props) {
         value: DEFAULT_EMS_LOCALE,
       },
       {
-        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselectDropDown', {
-          defaultMessage: 'Autoselect based on Kibana locale',
-        }),
+        text: i18n.translate(
+          'xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselectDropDown',
+          {
+            defaultMessage: 'Autoselect based on Kibana locale',
+          }
+        ),
         value: AUTOSELECT_EMS_LOCALE,
       },
       {
