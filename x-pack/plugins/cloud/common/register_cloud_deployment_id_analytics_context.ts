@@ -12,13 +12,16 @@ export function registerCloudDeploymentIdAnalyticsContext(
   analytics: Pick<AnalyticsClient, 'registerContextProvider'>,
   cloudId?: string
 ) {
+  if (!cloudId) {
+    return;
+  }
   analytics.registerContextProvider({
     name: 'Cloud Deployment ID',
     context$: of({ cloudId }),
     schema: {
       cloudId: {
         type: 'keyword',
-        _meta: { description: 'The Cloud Deployment ID', optional: true },
+        _meta: { description: 'The Cloud Deployment ID' },
       },
     },
   });
