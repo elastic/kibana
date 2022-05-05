@@ -49,7 +49,11 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FleetConfigType, FleetAuthz, ExperimentalFeatures } from '../common';
 import { INTEGRATIONS_PLUGIN_ID, parseExperimentalConfigValue } from '../common';
 
-import { registerHintsTask, scheduleHintsTask } from './services/hints';
+import {
+  registerHintsTask,
+  scheduleHintsTask,
+  ensureMapping as ensureHintsMapping,
+} from './services/hints';
 
 import {
   PLUGIN_ID,
@@ -427,6 +431,7 @@ export class FleetPlugin
           level: ServiceStatusLevels.available,
           summary: 'Fleet is setting up',
         });
+        await ensureHintsMapping(core.elasticsearch.client.asInternalUser);
         scheduleHintsTask(plugins.taskManager, core.elasticsearch.client.asInternalUser, logger);
         await plugins.licensing.license$.pipe(take(1)).toPromise();
 

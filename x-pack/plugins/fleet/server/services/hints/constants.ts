@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './task';
-export * from './ensure_mapping';
+export const HINTS_INDEX_NAME = '.fleet-hints';

@@ -24,6 +24,8 @@ import { getPackageInfo } from '../epm/packages';
 import { packagePolicyService } from '../package_policy';
 import { incrementPackageName } from '../package_policies';
 
+import { HINTS_INDEX_NAME } from './constants';
+
 import { generatePackagePolicy } from './generate_package_policy';
 
 import type { Hint, ParsedAnnotations } from './types';
@@ -101,7 +103,7 @@ export const scheduleHintsTask = async (
 
 const getNewHints = async (esClient: ElasticsearchClient): Promise<Hint[]> => {
   const { hits } = await esClient.search({
-    index: '.fleet-hints',
+    index: HINTS_INDEX_NAME,
     query: {
       bool: {
         must_not: [
@@ -130,7 +132,7 @@ const getNewHints = async (esClient: ElasticsearchClient): Promise<Hint[]> => {
 
 const updateSingleDoc = async (esClient: ElasticsearchClient, id: string, update: any) => {
   esClient.update({
-    index: '.fleet-hints',
+    index: HINTS_INDEX_NAME,
     id,
     body: {
       doc: {
