@@ -153,6 +153,10 @@ export const CasePostRequestRt = rt.intersection([
     owner: rt.string,
   }),
   rt.partial({
+    /**
+     * The severity of the case. The severity is
+     * default it to "low" if not provided.
+     */
     severity: CaseSeverityRt,
   }),
 ]);
