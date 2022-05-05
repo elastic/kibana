@@ -10,7 +10,9 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 tags:
   - name: cases
+    description: Case APIs enable you to open and track issues.
   - name: kibana
+    description: Kibana APIs enable you to interact with Kibana features.
 servers:
   - url: http://localhost:5601
     description: local
@@ -22,6 +24,9 @@ paths:
         in the **Management**, **Observability**, or **Security** section of the
         Kibana feature privileges, depending on the owner of the case you're
         creating.
+      tags:
+        - cases
+        - kibana
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -400,6 +405,9 @@ paths:
         **Cases** feature in the **Management**, **Observability**, or
         **Security** section of the Kibana feature privileges, depending on the
         owner of the cases you're deleting.
+      tags:
+        - cases
+        - kibana
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - name: ids
@@ -422,6 +430,9 @@ paths:
         **Cases** feature in the **Management**, **Observability**, or
         **Security** section of the Kibana feature privileges, depending on the
         owner of the case you're updating.
+      tags:
+        - cases
+        - kibana
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -811,6 +822,9 @@ paths:
         in the **Management**, **Observability**, or **Security** section of the
         Kibana feature privileges, depending on the owner of the case you're
         creating.
+      tags:
+        - cases
+        - kibana
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -1190,6 +1204,9 @@ paths:
         **Cases** feature in the **Management**, **Observability**, or
         **Security** section of the Kibana feature privileges, depending on the
         owner of the cases you're deleting.
+      tags:
+        - cases
+        - kibana
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -1213,6 +1230,9 @@ paths:
         **Cases** feature in the **Management**, **Observability**, or
         **Security** section of the Kibana feature privileges, depending on the
         owner of the case you're updating.
+      tags:
+        - cases
+        - kibana
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -1709,9 +1729,7 @@ components:
             priority: High
         external_service: null
     update_case_request:
-      summary: >-
-        Update the description, tags, and connector of case ID
-        `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2``.
+      summary: Update the case description, tags, and connector.
       value:
         cases:
           - id: a18b38a0-71b0-11ea-a0b2-c51ea50a58e2
@@ -1736,8 +1754,8 @@ components:
               syncAlerts: true
     update_case_response:
       summary: >-
-        This is an example response when the description, tags, and connector
-        were updated for case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2`.
+        This is an example response when the case description, tags, and
+        connector were updated.
       value:
         - id: 66b9aa00-94fa-11ea-9f74-e7e108796192
           version: WzU0OCwxXQ==

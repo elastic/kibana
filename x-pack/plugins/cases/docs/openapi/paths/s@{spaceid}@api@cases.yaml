@@ -2,6 +2,9 @@ post:
   description: >
     Creates a case.
     You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
+  tags:
+    - cases
+    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -65,6 +68,9 @@ delete:
   description: >
     Deletes one or more cases.
     You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
+  tags:
+    - cases
+    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -85,6 +91,9 @@ patch:
   description: >
     Updates one or more cases.
     You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.
+  tags:
+    - cases
+    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'

@@ -14,10 +14,12 @@
   },
   "tags": [
     {
-      "name": "cases"
+      "name": "cases",
+      "description": "Case APIs enable you to open and track issues."
     },
     {
-      "name": "kibana"
+      "name": "kibana",
+      "description": "Kibana APIs enable you to interact with Kibana features."
     }
   ],
   "servers": [
@@ -30,6 +32,10 @@
     "/api/cases": {
       "post": {
         "description": "Creates a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -462,6 +468,10 @@
       },
       "delete": {
         "description": "Deletes one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -490,6 +500,10 @@
       },
       "patch": {
         "description": "Updates one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -941,6 +955,10 @@
     "/s/{spaceId}/api/cases": {
       "post": {
         "description": "Creates a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1376,6 +1394,10 @@
       },
       "delete": {
         "description": "Deletes one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1407,6 +1429,10 @@
       },
       "patch": {
         "description": "Updates one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
+        "tags": [
+          "cases",
+          "kibana"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1993,7 +2019,7 @@
         }
       },
       "update_case_request": {
-        "summary": "Update the description, tags, and connector of case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2``.",
+        "summary": "Update the case description, tags, and connector.",
         "value": {
           "cases": [
             {
@@ -2023,7 +2049,7 @@
         }
       },
       "update_case_response": {
-        "summary": "This is an example response when the description, tags, and connector were updated for case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2`.",
+        "summary": "This is an example response when the case description, tags, and connector were updated.",
         "value": [
           {
             "id": "66b9aa00-94fa-11ea-9f74-e7e108796192",
