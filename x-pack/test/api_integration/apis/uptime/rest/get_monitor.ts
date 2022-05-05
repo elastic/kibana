@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { formatSecrets } from '@kbn/synthetics-plugin/server/lib/synthetics_service/utils/secrets';
+import { formatSecrets } from '@kbn/synthetics-plugin/server/synthetics_service/utils/secrets';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
