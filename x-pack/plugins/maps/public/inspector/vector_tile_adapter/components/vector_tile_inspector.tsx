@@ -36,6 +36,17 @@ class VectorTileInspector extends Component<Props, State> {
     layerOptions: [],
   };
 
+  componentDidMount() {
+    this._isMounted = true;
+    this._onAdapterChange();
+    this.props.adapters.vectorTiles.on('change', this._debouncedOnAdapterChange);
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.props.adapters.vectorTiles.removeListener('change', this._debouncedOnAdapterChange);
+  }
+
   _onAdapterChange = () => {
     const layerOptions = this.props.adapters.vectorTiles.getLayerOptions() as Array<
       EuiComboBoxOptionOption<string>
@@ -86,17 +97,6 @@ class VectorTileInspector extends Component<Props, State> {
       this._onAdapterChange();
     }
   }, 256);
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._onAdapterChange();
-    this.props.adapters.map.on('change', this._debouncedOnAdapterChange);
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    this.props.adapters.map.removeListener('change', this._debouncedOnAdapterChange);
-  }
 
   _onLayerSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     if (selectedOptions.length === 0) {

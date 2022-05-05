@@ -23,7 +23,7 @@ export const VectorTileInspectorView = {
     defaultMessage: 'View Elasticsearch vector tile requests',
   }),
   shouldShow(adapters: Adapters) {
-    return true;
+    return Boolean(adapters.vectorTiles);
   },
   component: (props: { adapters: Adapters }) => {
     return <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />;
