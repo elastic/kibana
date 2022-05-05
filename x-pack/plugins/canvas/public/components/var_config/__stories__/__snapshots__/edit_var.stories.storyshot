@@ -67,7 +67,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -99,7 +99,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -139,7 +139,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -364,7 +364,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -396,7 +396,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -436,7 +436,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -602,7 +602,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -634,7 +634,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -674,7 +674,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -813,7 +813,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -845,7 +845,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -885,7 +885,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
