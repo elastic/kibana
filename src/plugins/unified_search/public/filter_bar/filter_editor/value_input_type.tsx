@@ -23,6 +23,7 @@ interface Props {
   controlOnly?: boolean;
   className?: string;
   fullWidth?: boolean;
+  showErrorMessage: (error: { isInvalid: boolean; errorMessage: string[] }) => void;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -66,6 +67,18 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'date':
       case 'date_range':
+        const isInvalid = !isEmpty(value) && !validateParams(value, this.props.field);
+        if (isInvalid) {
+          this.props.showErrorMessage({
+            isInvalid,
+            errorMessage: ['Invalid date format provided'],
+          });
+        } else {
+          this.props.showErrorMessage({
+            isInvalid: false,
+            errorMessage: [''],
+          });
+        }
         inputElement = (
           <EuiFieldText
             fullWidth={this.props.fullWidth}
@@ -73,7 +86,7 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onChange}
             onBlur={this.onBlur}
-            isInvalid={!isEmpty(value) && !validateParams(value, this.props.field)}
+            isInvalid={isInvalid}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />

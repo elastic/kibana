@@ -9,13 +9,11 @@
 import { EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
-import { isEmpty } from 'lodash';
 import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
-import { validateParams } from './lib/filter_editor_utils';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;
@@ -26,14 +24,6 @@ interface Props extends PhraseSuggestorProps {
 
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
   public render() {
-    const type = this.props.field.type;
-    const value = this.props.value;
-    let errorMessage: string = '';
-    let isInvalid: boolean = false;
-    if (type === 'date' || 'date_range') {
-      isInvalid = !isEmpty(value) && !validateParams(value, this.props.field);
-      errorMessage = 'Invalid date format provided';
-    }
     return (
       <EuiFormRow
         fullWidth={this.props.fullWidth}
@@ -41,8 +31,8 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
           id: 'unifiedSearch.filter.filterEditor.valueInputLabel',
           defaultMessage: 'Value',
         })}
-        isInvalid={isInvalid}
-        error={[errorMessage]}
+        isInvalid={this.state.isInvalid}
+        error={this.state.errorMessage}
       >
         {this.isSuggestingValues() ? (
           this.renderWithSuggestions()
@@ -56,6 +46,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
             value={this.props.value}
             onChange={this.props.onChange}
             field={this.props.field}
+            showErrorMessage={this.showErrorMessage}
           />
         )}
       </EuiFormRow>
