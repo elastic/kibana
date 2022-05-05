@@ -17,18 +17,13 @@
 
     text-align: center;
   }
-  div.logo {
+  img.logo {
     position: absolute;
 
     left: 2mm;
     bottom: 3mm;
 
-    height: 6.86mm;
-    width: 20mm;
-
-    background-size: 20mm 6.86mm;
-
-    content: url('data:image/png;base64,{{base64FooterLogo}}');
+    overflow: hidden;
   }
 
   div.poweredByElastic {
@@ -41,9 +36,10 @@
   }
 </style>
 <div class="container">
-  <div class="logo"></div>
+  <!-- DPI is 72/96 so scaling of all values here must * 0.75 to get values on page  -->
+  <img class="logo" height="30mm" width="80mm" src="{{base64FooterLogo}}" />
   {{#if hasCustomLogo}}
-    <div class="poweredByElastic">{{poweredByElasticCopy}}</div>
+  <div class="poweredByElastic">{{poweredByElasticCopy}}</div>
   {{/if}}
   <div class="pages">
     <span class="pageNumber"></span>&nbsp;of&nbsp;<span class="totalPages"></span>

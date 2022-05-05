@@ -32,7 +32,7 @@ export async function getHeaderTemplate({ title }: GetHeaderArgs): Promise<strin
 
 async function getDefaultFooterLogo(): Promise<string> {
   const logoBuffer = await fs.readFile(path.resolve(assetPath, 'img', 'logo-grey.png'));
-  return logoBuffer.toString('base64');
+  return `data:image/png;base64,${logoBuffer.toString('base64')}`;
 }
 
 interface FooterTemplateInput {
