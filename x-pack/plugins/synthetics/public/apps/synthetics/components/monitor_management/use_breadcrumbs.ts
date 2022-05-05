@@ -17,7 +17,7 @@ export const useMonitorManagementBreadcrumbs = () => {
   useBreadcrumbs([
     {
       text: MONITOR_MANAGEMENT_CRUMB,
-      href: `${appPath}/${MONITOR_MANAGEMENT_ROUTE}/all`,
+      href: `${appPath}/${MONITOR_MANAGEMENT_ROUTE}`,
     },
   ]);
 };
