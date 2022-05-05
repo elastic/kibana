@@ -167,16 +167,19 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {includeGlobalState ? (
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.includeGlobalStateTrueValue"
-                      defaultMessage="Yes"
-                    />
-                  ) : (
+                  {includeGlobalState === false ? (
                     <FormattedMessage
                       id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.includeGlobalStateFalseValue"
-                      defaultMessage="No"
+                      defaultMessage="No, without any feature states"
                     />
+                  ) : (
+                    <>
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.includeGlobalStateTrueValue"
+                        defaultMessage="Yes, including feature states from:"
+                      />{' '}
+                      <CollapsibleFeatureStatesList featureStates={featureStates} />
+                    </>
                   )}
                 </EuiDescriptionListDescription>
               </EuiDescriptionList>
@@ -184,27 +187,6 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
           ) : null}
         </EuiFlexGroup>
       ) : null}
-
-      {includeGlobalState && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionList textStyle="reverse">
-                <EuiDescriptionListTitle>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.featureStatesLabel"
-                    defaultMessage="Includes feature states from"
-                  />
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <CollapsibleFeatureStatesList featureStates={featureStates} />
-                </EuiDescriptionListDescription>
-              </EuiDescriptionList>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
 
       <EuiSpacer size="m" />
       <EuiTitle size="s">

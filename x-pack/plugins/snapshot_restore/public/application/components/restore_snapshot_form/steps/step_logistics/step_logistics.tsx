@@ -21,7 +21,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiIconTip,
   EuiTitle,
   EuiCallOut,
   EuiComboBox,
@@ -29,9 +28,9 @@ import {
 } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
 
+import { FEATURE_STATES_NONE_OPTION } from '../../../../../../common/constants';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
 import { RestoreSettings } from '../../../../../../common/types';
-import { FeatureStatesIconTip } from '../../..';
 
 import { useCore, useServices } from '../../../../app_context';
 
@@ -45,6 +44,8 @@ import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_
 import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
 
 import { SystemIndicesOverwrittenCallOut } from './system_indices_overwritten_callout';
+
+import { FeatureStatesFormField } from '../../../feature_states_form_field';
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
@@ -160,30 +161,17 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     restoreSettings?.featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[]
   );
 
-  const hasNoneOptionSelected = !!selectedFeatureStateOptions?.find((option) => option.label === 'none');
-  const onIncludeNoneSwitchChange = () => {
-    if (!hasNoneOptionSelected) {
-      setSelectedFeatureStateOptions([{ label: 'none' }]);
-      updateRestoreSettings({ featureStates: ['none'] });
-    } else {
-      setSelectedFeatureStateOptions([]);
-      updateRestoreSettings({ featureStates: [] });
-    }
-  };
-
-  const onFeatureStatesChange = (selected: FeaturesOption[]) => {
-    setSelectedFeatureStateOptions(selected);
-    updateRestoreSettings({
-      featureStates: selected.map((option) => option.label),
-    });
-  };
+  const hasNoneOptionSelected = !!selectedFeatureStateOptions?.find(
+    (option) => option.label === FEATURE_STATES_NONE_OPTION
+  );
 
   const onRestoreGlobalStateToggleChange = (event: EuiSwitchEvent) => {
     const { checked } = event.target;
 
     updateRestoreSettings({
       includeGlobalState: checked,
-      featureStates: checked && featureStates.length === 0 ? ['none'] : undefined,
+      featureStates:
+        checked && featureStates.length === 0 ? [FEATURE_STATES_NONE_OPTION] : undefined,
     });
   };
 
@@ -625,12 +613,15 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               }}
             />
 
-            {includeGlobalState && semverGt(version, '7.12.0') && featureStates.length > 0 && !hasNoneOptionSelected && (
-              <>
-                <EuiSpacer size="s" />
-                <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
-              </>
-            )}
+            {includeGlobalState &&
+              semverGt(version, '7.12.0') &&
+              featureStates.length > 0 &&
+              !hasNoneOptionSelected && (
+                <>
+                  <EuiSpacer size="s" />
+                  <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
+                </>
+              )}
           </>
         }
         fullWidth
@@ -664,57 +655,13 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         {includeGlobalState && featureStates.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiFormRow
-              label={
-                <>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.restoreForm.stepLogistics.featureStatesTitle"
-                    defaultMessage="Include feature states from"
-                  />{' '}
-                  <FeatureStatesIconTip />
-                </>
-              }
-              labelAppend={
-                <EuiSwitch
-                  compressed
-                  label={
-                    <>
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.restoreForm.stepLogistics.includeNoneLabel"
-                        defaultMessage="Include none"
-                      />{' '}
-                      <EuiIconTip
-                        type="questionInCircle"
-                        content={
-                          <span>
-                            <FormattedMessage
-                              id="xpack.snapshotRestore.restoreForm.stepLogistics.includeNoneDescription"
-                              defaultMessage="If enabled, all system indices will omitted."
-                            />
-                          </span>
-                        }
-                        iconProps={{
-                          className: 'eui-alignTop',
-                        }}
-                      />
-                    </>
-                  }
-                  checked={hasNoneOptionSelected}
-                  onChange={onIncludeNoneSwitchChange}
-                />
-              }
-            >
-              <>
-                <EuiComboBox
-                  placeholder="All features"
-                  options={featureStates.map((feature) => ({ label: feature }))}
-                  selectedOptions={hasNoneOptionSelected ? [] : selectedFeatureStateOptions}
-                  isDisabled={hasNoneOptionSelected}
-                  onChange={onFeatureStatesChange}
-                  isClearable={true}
-                />
-              </>
-            </EuiFormRow>
+            <FeatureStatesFormField
+              featuresOptions={featureStates.map((feature) => ({ label: feature }))}
+              selectedOptions={hasNoneOptionSelected ? [] : selectedFeatureStateOptions}
+              setSelectedOptions={setSelectedFeatureStateOptions}
+              onUpdateFormSettings={updateRestoreSettings}
+              hasNoneOptionSelected={hasNoneOptionSelected}
+            />
           </>
         )}
         {includeGlobalState && featureStates.length === 0 && (

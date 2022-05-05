@@ -15,15 +15,14 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiSpacer,
-  EuiIconTip,
-  EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
+import { FEATURE_STATES_NONE_OPTION } from '../../../../../../../../common/constants';
 import { SlmPolicyPayload } from '../../../../../../../../common/types';
 import { PolicyValidation } from '../../../../../../services/validation';
 import { useLoadFeatures } from '../../../../../../services/http/policy_requests';
-import { FeatureStatesIconTip } from '../../../../..';
+import { FeatureStatesFormField } from '../../../../../feature_states_form_field';
 
 interface Props {
   policy: SlmPolicyPayload;
@@ -53,23 +52,9 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
     config?.featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[]
   );
 
-  const onChange = (selected: FeaturesOption[]) => {
-    setSelected(selected);
-    onUpdate({
-      featureStates: selected.map((option) => option.label),
-    });
-  };
-
-  const hasNoneOptionSelected = !!selectedOptions?.find((option) => option.label === 'none');
-  const onIncludeNoneSwitchChange = () => {
-    if (!hasNoneOptionSelected) {
-      setSelected([{ label: 'none' }]);
-      onUpdate({ featureStates: ['none'] });
-    } else {
-      setSelected([]);
-      onUpdate({ featureStates: [] });
-    }
-  };
+  const hasNoneOptionSelected = !!selectedOptions?.find(
+    (option) => option.label === FEATURE_STATES_NONE_OPTION
+  );
 
   return (
     <EuiDescribedFormGroup
@@ -112,57 +97,14 @@ export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUp
       {config.includeGlobalState && (
         <>
           <EuiSpacer size="m" />
-          <EuiFormRow
-            label={
-              <>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepSettings.featureStatesTitle"
-                  defaultMessage="Include feature states from"
-                />{' '}
-                <FeatureStatesIconTip />
-              </>
-            }
-            labelAppend={
-              <EuiSwitch
-                compressed
-                label={
-                  <>
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepSettings.includeNoneLabel"
-                      defaultMessage="Include none"
-                    />{' '}
-                    <EuiIconTip
-                      type="questionInCircle"
-                      content={
-                        <span>
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.policyForm.stepSettings.includeNoneDescription"
-                            defaultMessage="All system indices can be omitted by providing including none of the feature states"
-                          />
-                        </span>
-                      }
-                      iconProps={{
-                        className: 'eui-alignTop',
-                      }}
-                    />
-                  </>
-                }
-                checked={hasNoneOptionSelected}
-                onChange={onIncludeNoneSwitchChange}
-              />
-            }
-          >
-            <EuiComboBox
-              data-test-subj="featureStatesDropdown"
-              placeholder="All features"
-              options={features}
-              selectedOptions={hasNoneOptionSelected ? [] : selectedOptions}
-              isDisabled={hasNoneOptionSelected}
-              onChange={onChange}
-              isLoading={isLoadingFeatures}
-              isClearable={true}
-            />
-          </EuiFormRow>
+          <FeatureStatesFormField
+            isLoadingFeatures={isLoadingFeatures}
+            featuresOptions={features}
+            selectedOptions={hasNoneOptionSelected ? [] : selectedOptions}
+            setSelectedOptions={setSelected}
+            onUpdateFormSettings={onUpdate}
+            hasNoneOptionSelected={hasNoneOptionSelected}
+          />
         </>
       )}
     </EuiDescribedFormGroup>

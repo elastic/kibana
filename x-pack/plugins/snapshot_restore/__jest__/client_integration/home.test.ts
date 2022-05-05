@@ -712,11 +712,13 @@ describe('<SnapshotRestoreHome />', () => {
           });
 
           test('should show feature states if include global state is enabled', async () => {
-            const { find, exists } = testBed;
+            const { find } = testBed;
 
             // Assert against first snapshot shown in the table, which should have includeGlobalState enabled
-            expect(exists('featureStates')).toBe(true);
-            expect(find('featureStates.value').text()).toBe('kibana');
+            expect(find('includeGlobalState.value').text()).toContain(
+              'Yes, including feature states from'
+            );
+            expect(find('snapshotDetail.featureStatesList').text()).toBe('kibana');
 
             // Close the flyout
             find('snapshotDetail.closeButton').simulate('click');
@@ -731,7 +733,9 @@ describe('<SnapshotRestoreHome />', () => {
             // Now we will assert against the second result of the table which shouldnt have includeGlobalState
             await testBed.actions.clickSnapshotAt(1);
 
-            expect(exists('featureStates')).toBe(false);
+            expect(find('includeGlobalState.value').text()).toContain(
+              'Yes, without any feature states'
+            );
           });
 
           describe('tabs', () => {
@@ -763,7 +767,9 @@ describe('<SnapshotRestoreHome />', () => {
                 );
                 expect(find('snapshotDetail.uuid.value').text()).toBe(uuid);
                 expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
-                expect(find('snapshotDetail.includeGlobalState.value').text()).toBe('Yes');
+                expect(find('snapshotDetail.includeGlobalState.value').text()).toBe(
+                  'Yes, including feature states from: kibana'
+                );
                 expect(find('snapshotDetail.indices.title').text()).toBe(
                   `Indices (${indices.length})`
                 );

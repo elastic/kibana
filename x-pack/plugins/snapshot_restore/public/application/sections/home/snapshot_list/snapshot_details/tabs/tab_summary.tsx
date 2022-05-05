@@ -108,16 +108,35 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            {includeGlobalState ? (
+            {includeGlobalState === false ? (
               <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
-                defaultMessage="Yes"
-              />
-            ) : (
-              <FormattedMessage
+                data-test-subj="withoutGlobalState"
                 id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateNoLabel"
                 defaultMessage="No"
               />
+            ) : (
+              <>
+                {/*
+                  When a policy that includes featureStates: ['none'] is executed, the resulting
+                  snapshot wont include the `none` in the featureStates array but instead will return
+                  an empty array.
+                */}
+                {featureStates.length === 0 ? (
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.featureStatesList.noFeatureStates"
+                    defaultMessage="Yes, without any feature states"
+                  />
+                ) : (
+                  <>
+                    <FormattedMessage
+                      data-test-subj="withGlobalStateAndFeatureStates"
+                      id="xpack.snapshotRestore.snapshotDetails.itemIncludeGlobalStateYesLabel"
+                      defaultMessage="Yes, including feature states from:"
+                    />{' '}
+                    <CollapsibleFeatureStatesList featureStates={featureStates} />
+                  </>
+                )}
+              </>
             )}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
@@ -233,35 +252,6 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-
-      {includeGlobalState && (
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="featureStates">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.featureStatesLabel"
-                defaultMessage="Includes feature states from"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {/*
-                When a policy that includes featureStates: ['none'] is executed, the resulting
-                snapshot wont include the `none` in the featureStates array but instead will return
-                an empty array.
-              */}
-              {featureStates.length === 0 ? (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.featureStatesList.noFeatures"
-                  defaultMessage="No features"
-                />
-              ) : (
-                <CollapsibleFeatureStatesList featureStates={featureStates} />
-              )}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
     </EuiDescriptionList>
   );
 };

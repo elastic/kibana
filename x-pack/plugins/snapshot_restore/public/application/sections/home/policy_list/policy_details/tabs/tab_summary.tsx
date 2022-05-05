@@ -252,7 +252,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListDescription>
           </EuiFlexItem>
 
-          <EuiFlexItem data-test-subj="includeGlobalState">
+          <EuiFlexItem data-test-subj="ignoreUnavailable">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.ignoreUnavailableLabel"
@@ -311,35 +311,23 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
               {includeGlobalState === false ? (
                 <FormattedMessage
+                  data-test-subj="withoutGlobalState"
                   id="xpack.snapshotRestore.policyDetails.includeGlobalStateFalseLabel"
                   defaultMessage="No"
                 />
               ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.includeGlobalStateTrueLabel"
-                  defaultMessage="Yes"
-                />
+                <>
+                  <FormattedMessage
+                    data-test-subj="withGlobalStateAndFeatureStates"
+                    id="xpack.snapshotRestore.policyDetails.includeGlobalStateTrueLabel"
+                    defaultMessage="Yes, including feature states from:"
+                  />{' '}
+                  <CollapsibleFeatureStatesList featureStates={featureStates} />
+                </>
               )}
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        {includeGlobalState && (
-          <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="featureStates">
-              <EuiDescriptionListTitle data-test-subj="title">
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.featureStatesLabel"
-                  defaultMessage="Includes feature states from"
-                />
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-                <CollapsibleFeatureStatesList featureStates={featureStates} />
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
       </EuiDescriptionList>
 
       {retention && (

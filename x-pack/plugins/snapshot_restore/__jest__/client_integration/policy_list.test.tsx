@@ -19,7 +19,7 @@ const POLICY_WITH_GLOBAL_STATE = getPolicy({
 const POLICY_WITHOUT_GLOBAL_STATE = getPolicy({
   name: 'without_state',
   retention: { minCount: 1 },
-  config: {},
+  config: { includeGlobalState: false },
 });
 
 describe('<PolicyList />', () => {
@@ -55,13 +55,13 @@ describe('<PolicyList />', () => {
     });
 
     test('should show feature states if include global state is enabled', async () => {
-      const { find, exists, actions } = testBed;
+      const { find, actions } = testBed;
 
       // Assert against first resutl shown in the table, which should have includeGlobalState enabled
       await actions.clickPolicyAt(0);
 
-      expect(exists('featureStates')).toBe(true);
-      expect(find('featureStates.value').text()).toBe('kibana');
+      expect(find('includeGlobalState').text()).toContain('Yes, including feature states from');
+      expect(find('policyDetail.featureStatesList').text()).toBe('kibana');
 
       // Close the flyout
       find('srPolicyDetailsFlyoutCloseButton').simulate('click');
@@ -74,7 +74,7 @@ describe('<PolicyList />', () => {
       // Now we will assert against the second result of the table which shouldnt have includeGlobalState
       await actions.clickPolicyAt(1);
 
-      expect(exists('featureStates')).toBe(false);
+      expect(find('includeGlobalState.value').text()).toContain('No');
     });
   });
 });

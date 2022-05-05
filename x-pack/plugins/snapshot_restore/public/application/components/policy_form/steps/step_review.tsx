@@ -221,39 +221,21 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
               {includeGlobalState === false ? (
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateFalseLabel"
-                  defaultMessage="No"
+                  defaultMessage="No, without any feature states"
                 />
               ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateTrueLabel"
-                  defaultMessage="Yes"
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateTrueLabel"
+                    defaultMessage="Yes, including feature states from:"
+                  />{' '}
+                  <CollapsibleFeatureStatesList featureStates={featureStates} />
+                </>
               )}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {includeGlobalState && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionList textStyle="reverse">
-                <EuiDescriptionListTitle>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.featureStatesLabel"
-                    defaultMessage="Includes feature states from"
-                  />
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <CollapsibleFeatureStatesList featureStates={featureStates} />
-                </EuiDescriptionListDescription>
-              </EuiDescriptionList>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
 
       {/* Retention summary */}
       {serializedRetention ? (

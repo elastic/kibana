@@ -40,7 +40,7 @@ export const CollapsibleFeatureStatesList: React.FunctionComponent<Props> = ({ f
 
   return (
     <>
-      <EuiText>
+      <EuiText data-test-subj="featureStatesList">
         <ul>
           {items.map((feature) => (
             <li key={feature}>

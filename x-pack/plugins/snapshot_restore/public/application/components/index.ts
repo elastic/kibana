@@ -26,4 +26,4 @@ export { RetentionSettingsUpdateModalProvider } from './retention_update_modal_p
 export type { ExecuteRetention } from './retention_execute_modal_provider';
 export { RetentionExecuteModalProvider } from './retention_execute_modal_provider';
 export { PolicyForm } from './policy_form';
-export { FeatureStatesIconTip } from './feature_states_icon_tip';
+export { FeatureStatesFormField } from './feature_states_form_field';
