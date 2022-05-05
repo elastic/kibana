@@ -81,6 +81,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
             filteredExecutionUUIDs: {
               terms: {
                 field: EXECUTION_UUID_FIELD,
+                order: { '@timestamp': 'desc' },
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
               },
             },
@@ -113,7 +114,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
           maxExecutions: MAX_EXECUTION_EVENTS_DISPLAYED,
           page,
           perPage,
-          sort: [{ [sortField]: { order: sortOrder } }] as estypes.Sort,
+          sort: [{ [sortField]: { order: sortOrder } }],
         }),
       });
 
