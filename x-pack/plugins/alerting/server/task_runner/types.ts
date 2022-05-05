@@ -8,7 +8,6 @@
 import { Dictionary } from 'lodash';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
   ActionGroup,
@@ -20,7 +19,6 @@ import {
   IntervalSchedule,
   RuleMonitoring,
   RuleTaskState,
-  SanitizedRule,
 } from '../../common';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -28,6 +26,7 @@ import { ExecutionHandler } from './create_execution_handler';
 import { RawRule } from '../types';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { AlertingEventLogger } from '../lib';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -61,29 +60,11 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
 > {
-  eventLogger: IEventLogger;
-  executionId: string;
+  alertingEventLogger: AlertingEventLogger;
   originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
   currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
   recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
-  ruleId: string;
   ruleLabel: string;
-  namespace: string | undefined;
-  ruleType: NormalizedRuleType<
-    RuleTypeParams,
-    RuleTypeParams,
-    RuleTypeState,
-    {
-      [x: string]: unknown;
-    },
-    {
-      [x: string]: unknown;
-    },
-    string,
-    string
-  >;
-  rule: SanitizedRule<RuleTypeParams>;
-  spaceId: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
@@ -145,7 +126,7 @@ export interface CreateExecutionHandlerOptions<
     RecoveryActionGroupId
   >;
   logger: Logger;
-  eventLogger: IEventLogger;
+  alertingEventLogger: AlertingEventLogger;
   request: KibanaRequest;
   ruleParams: RuleTypeParams;
   supportsEphemeralTasks: boolean;
