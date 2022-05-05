@@ -46,21 +46,20 @@ export const SearchSourceExpression = ({
   );
 
   useEffect(() => {
+    setRuleProperty('params', {
+      searchConfiguration,
+      searchType: SearchType.searchSource,
+      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
+      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      size: size ?? DEFAULT_VALUES.SIZE,
+    });
+
     const initSearchSource = () =>
       data.search.searchSource
         .create(searchConfiguration)
-        .then((fetchedSearchSource) => {
-          setSearchSource(fetchedSearchSource);
-          setRuleProperty('params', {
-            searchConfiguration,
-            searchType: SearchType.searchSource,
-            timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
-            timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-            threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
-            thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-            size: size ?? DEFAULT_VALUES.SIZE,
-          });
-        })
+        .then((fetchedSearchSource) => setSearchSource(fetchedSearchSource))
         .catch(setParamsError);
 
     initSearchSource();

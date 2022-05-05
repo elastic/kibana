@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import './search_source_expression.scss';
 import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';

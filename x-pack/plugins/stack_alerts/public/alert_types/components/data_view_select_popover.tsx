@@ -52,7 +52,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
         <EuiExpression
           display="columns"
           data-test-subj="selectDataViewExpression"
-          description={i18n.translate('xpack.stackAlerts.components.ui.alertParams.indexLabel', {
+          description={i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewLabel', {
             defaultMessage: 'data view',
           })}
           value={selectedDataViewTitle}
@@ -80,7 +80,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                data-test-subj="closePopover"
+                data-test-subj="closeDataViewPopover"
                 iconType="cross"
                 color="danger"
                 aria-label={i18n.translate(

@@ -13,7 +13,7 @@ import { Filter, isFilterPinned } from '@kbn/es-query';
 import { FilterLabel } from '..';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
 
-export interface Props {
+interface Props {
   filter: Filter;
   valueLabel: string;
   fieldLabel?: string;
