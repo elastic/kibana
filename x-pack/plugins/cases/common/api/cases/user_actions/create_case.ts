@@ -23,6 +23,7 @@ export const CommonFieldsRt = rt.type({
 const CommonPayloadAttributesRt = rt.type({
   description: DescriptionUserActionPayloadRt.props.description,
   status: rt.string,
+  severity: rt.string,
   tags: TagsUserActionPayloadRt.props.tags,
   title: TitleUserActionPayloadRt.props.title,
   settings: SettingsUserActionPayloadRt.props.settings,

@@ -13,6 +13,7 @@ import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import {
   Actions,
   ActionTypes,
+  CaseSeverity,
   CaseStatuses,
   CaseUserActionAttributes,
   ConnectorUserAction,
@@ -107,6 +108,7 @@ const createCaseUserAction = (): SavedObject<CaseUserActionAttributes> => {
         description: 'a desc',
         settings: { syncAlerts: false },
         status: CaseStatuses.open,
+        severity: CaseSeverity.LOW,
         tags: [],
         owner: SECURITY_SOLUTION_OWNER,
       },
@@ -447,6 +449,7 @@ describe('CaseUserActionService', () => {
             payload: casePayload,
             type: ActionTypes.create_case,
           });
+
           expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
             'cases-user-actions',
             {
@@ -477,6 +480,7 @@ describe('CaseUserActionService', () => {
                 owner: 'securitySolution',
                 settings: { syncAlerts: true },
                 status: 'open',
+                severity: 'low',
                 tags: ['sir'],
                 title: 'Case SIR',
               },
@@ -511,6 +515,33 @@ describe('CaseUserActionService', () => {
                 type: 'status',
                 owner: 'securitySolution',
                 payload: { status: 'closed' },
+              },
+              { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
+            );
+          });
+        });
+
+        describe('severity', () => {
+          it('creates an update severity user action', async () => {
+            await service.createUserAction({
+              ...commonArgs,
+              payload: { severity: CaseSeverity.MEDIUM },
+              type: ActionTypes.severity,
+            });
+
+            expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+              'cases-user-actions',
+              {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'severity',
+                owner: 'securitySolution',
+                payload: { severity: 'medium' },
               },
               { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
             );
@@ -799,6 +830,30 @@ describe('CaseUserActionService', () => {
               payload: { settings: { syncAlerts: false } },
             },
             references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'update',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              owner: 'securitySolution',
+              payload: {
+                severity: 'critical',
+              },
+              type: 'severity',
+            },
+            references: [
+              {
+                id: '2',
+                name: 'associated-cases',
+                type: 'cases',
+              },
+            ],
             type: 'cases-user-actions',
           },
         ]);

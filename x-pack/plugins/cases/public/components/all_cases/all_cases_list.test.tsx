@@ -17,7 +17,7 @@ import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -560,6 +560,7 @@ describe('AllCasesListGeneric', () => {
           username: 'lknope',
         },
         description: 'Security banana Issue',
+        severity: CaseSeverity.LOW,
         duration: null,
         externalService: {
           connectorId: '123',
