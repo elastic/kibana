@@ -16,6 +16,7 @@ import { useKibana } from '../utils/kibana_react';
 export function useFetchRules({
   searchText,
   ruleLastResponseFilter,
+  ruleStatusesFilter,
   typesFilter,
   setPage,
   page,
@@ -42,7 +43,8 @@ export function useFetchRules({
         page,
         searchText,
         typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
-        ruleStatusesFilter: ruleLastResponseFilter,
+        ruleExecutionStatusesFilter: ruleLastResponseFilter,
+        ruleStatusesFilter,
         sort,
       });
       setRulesState((oldState) => ({
@@ -58,6 +60,7 @@ export function useFetchRules({
       const isFilterApplied = !(
         isEmpty(searchText) &&
         isEmpty(ruleLastResponseFilter) &&
+        isEmpty(ruleStatusesFilter) &&
         isEmpty(typesFilter)
       );
 
@@ -66,7 +69,16 @@ export function useFetchRules({
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
     setInitialLoad(false);
-  }, [http, page, setPage, searchText, ruleLastResponseFilter, typesFilter, sort]);
+  }, [
+    http,
+    page,
+    setPage,
+    searchText,
+    ruleLastResponseFilter,
+    ruleStatusesFilter,
+    typesFilter,
+    sort,
+  ]);
   useEffect(() => {
     fetchRules();
   }, [fetchRules]);
