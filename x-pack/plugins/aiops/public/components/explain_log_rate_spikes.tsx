@@ -8,6 +8,7 @@
 import React, { FC } from 'react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { getCoreStart } from '../kibana_services';
 
@@ -24,7 +25,9 @@ export const ExplainLogRateSpikes: FC = () => {
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={coreStart}>
-        <AiopsApp notifications={coreStart.notifications} />,
+        <I18nProvider>
+          <AiopsApp notifications={coreStart.notifications} />
+        </I18nProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

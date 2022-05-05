@@ -6,14 +6,10 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-// import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExplainLogRateSpikesSpec } from '@kbn/aiops-plugin/public';
 import { useMlKibana, useTimefilter } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
-// import { isFullLicense } from '../license';
-import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
-// import { checkPermission } from '../capabilities/check_capabilities';
 
 import { MlPageHeader } from '../components/page_header';
 
@@ -22,7 +18,6 @@ export const ExplainLogRateSpikesPage: FC = () => {
   const {
     services: { docLinks, aiops },
   } = useMlKibana();
-  getMlNodeCount();
 
   const [ExplainLogRateSpikes, setExplainLogRateSpikes] = useState<ExplainLogRateSpikesSpec | null>(
     null

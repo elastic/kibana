@@ -9,6 +9,7 @@ import { Readable } from 'stream';
 
 import type { IRouter } from '@kbn/core/server';
 
+import { AIOPS_ENABLED } from '../../common';
 import type { ApiAction } from '../../common/api';
 import { updateProgressAction, addToEntityAction, deleteEntityAction } from '../../common/api';
 
@@ -17,94 +18,96 @@ class ResponseStream extends Readable {
 }
 
 export function defineRoutes(router: IRouter) {
-  router.get(
-    {
-      path: '/api/aiops/example',
-      validate: false,
-    },
-    async (context, request, response) => {
-      return response.ok({
-        body: {
-          time: new Date().toISOString(),
-        },
-      });
-    }
-  );
-
-  router.get(
-    {
-      path: '/api/aiops/example_stream',
-      validate: false,
-    },
-    async (context, request, response) => {
-      let shouldStop = false;
-
-      request.events.aborted$.subscribe(() => {
-        shouldStop = true;
-      });
-      request.events.completed$.subscribe(() => {
-        shouldStop = true;
-      });
-
-      const stream = new ResponseStream();
-
-      function streamPush(d: ApiAction) {
-        stream.push(JSON.stringify(d) + '\n');
+  if (AIOPS_ENABLED) {
+    router.get(
+      {
+        path: '/api/aiops/example',
+        validate: false,
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: {
+            time: new Date().toISOString(),
+          },
+        });
       }
+    );
 
-      const entities = [
-        'kimchy',
-        's1monw',
-        'martijnvg',
-        'jasontedor',
-        'nik9000',
-        'javanna',
-        'rjernst',
-        'jrodewig',
-      ];
-      const actions = [...Array(19).fill('add'), 'delete'];
+    router.get(
+      {
+        path: '/api/aiops/example_stream',
+        validate: false,
+      },
+      async (context, request, response) => {
+        let shouldStop = false;
 
-      async function runStream() {
-        let progress = 0;
+        request.events.aborted$.subscribe(() => {
+          shouldStop = true;
+        });
+        request.events.completed$.subscribe(() => {
+          shouldStop = true;
+        });
 
-        function pushStreamUpdate() {
-          if (shouldStop) {
-            stream.push(null);
-            return;
-          }
+        const stream = new ResponseStream();
 
-          setTimeout(() => {
-            progress++;
+        function streamPush(d: ApiAction) {
+          stream.push(JSON.stringify(d) + '\n');
+        }
 
-            streamPush(updateProgressAction(progress));
+        const entities = [
+          'kimchy',
+          's1monw',
+          'martijnvg',
+          'jasontedor',
+          'nik9000',
+          'javanna',
+          'rjernst',
+          'jrodewig',
+        ];
+        const actions = [...Array(19).fill('add'), 'delete'];
 
-            const randomEntity = entities[Math.floor(Math.random() * entities.length)];
-            const randomAction = actions[Math.floor(Math.random() * actions.length)];
+        async function runStream() {
+          let progress = 0;
 
-            if (randomAction === 'add') {
-              streamPush(addToEntityAction(randomEntity, Math.floor(Math.random() * 100)));
-            } else if (randomAction === 'delete') {
-              streamPush(deleteEntityAction(randomEntity));
-            }
-
-            if (progress === 100) {
+          function pushStreamUpdate() {
+            if (shouldStop) {
               stream.push(null);
               return;
             }
 
-            pushStreamUpdate();
-          }, Math.floor(Math.random() * 250));
+            setTimeout(() => {
+              progress++;
+
+              streamPush(updateProgressAction(progress));
+
+              const randomEntity = entities[Math.floor(Math.random() * entities.length)];
+              const randomAction = actions[Math.floor(Math.random() * actions.length)];
+
+              if (randomAction === 'add') {
+                streamPush(addToEntityAction(randomEntity, Math.floor(Math.random() * 100)));
+              } else if (randomAction === 'delete') {
+                streamPush(deleteEntityAction(randomEntity));
+              }
+
+              if (progress === 100) {
+                stream.push(null);
+                return;
+              }
+
+              pushStreamUpdate();
+            }, Math.floor(Math.random() * 250));
+          }
+
+          pushStreamUpdate();
         }
 
-        pushStreamUpdate();
+        // do call this using `await` so it will run asynchronously while we return the stream already.
+        runStream();
+
+        return response.ok({
+          body: stream,
+        });
       }
-
-      // do call this using `await` so it will run asynchronously while we return the stream already.
-      runStream();
-
-      return response.ok({
-        body: stream,
-      });
-    }
-  );
+    );
+  }
 }

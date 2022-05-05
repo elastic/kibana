@@ -7,6 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
+import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -26,6 +27,7 @@ export const aiopsRouteFactory = (navigateToPath: NavigateToPath, basePath: stri
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB'),
   ],
+  disabled: !AIOPS_ENABLED,
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {

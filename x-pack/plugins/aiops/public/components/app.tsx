@@ -10,7 +10,7 @@ import React, { useReducer, useRef } from 'react';
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -43,7 +43,6 @@ interface AiopsAppDeps {
 }
 
 export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
-  // Use React hooks to manage state.
   const [state, dispatch] = useReducer(streamReducer, initialState);
 
   const abortCtrl = useRef(new AbortController());
@@ -74,86 +73,82 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
     })
     .sort((a, b) => b.y - a.y);
 
-  // Render the application DOM.
-  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
-    <I18nProvider>
-      <EuiPage restrictWidth="1000px">
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiTitle>
-                <h2>
-                  <FormattedMessage
-                    id="xpack.aiops.congratulationsTitle"
-                    defaultMessage="Single endpoint streaming demo"
+    <EuiPage restrictWidth="1000px">
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  id="xpack.aiops.congratulationsTitle"
+                  defaultMessage="Single endpoint streaming demo"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiPageContentHeader>
+          <EuiPageContentBody>
+            <EuiText>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton type="primary" size="s" onClick={onClickHandler}>
+                    {!state.isRunning && (
+                      <FormattedMessage
+                        id="xpack.aiops.startbuttonText"
+                        defaultMessage="Start development"
+                      />
+                    )}
+                    {state.isRunning && (
+                      <FormattedMessage
+                        id="xpack.aiops.cancelbuttonText"
+                        defaultMessage="Stop development"
+                      />
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <p>{state.progress}</p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiProgress value={state.progress} max={100} size="xs" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer />
+              <div style={{ height: '300px' }}>
+                <Chart>
+                  <Settings rotation={90} />
+                  <Axis
+                    id="entities"
+                    position={Position.Bottom}
+                    title={i18n.translate('xpack.aiops.barChart.commitsTitle', {
+                      defaultMessage: 'Commits',
+                    })}
+                    showOverlappingTicks
                   />
-                </h2>
-              </EuiTitle>
-            </EuiPageContentHeader>
-            <EuiPageContentBody>
-              <EuiText>
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      {!state.isRunning && (
-                        <FormattedMessage
-                          id="xpack.aiops.startbuttonText"
-                          defaultMessage="Start development"
-                        />
-                      )}
-                      {state.isRunning && (
-                        <FormattedMessage
-                          id="xpack.aiops.cancelbuttonText"
-                          defaultMessage="Stop development"
-                        />
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <p>{state.progress}</p>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiProgress value={state.progress} max={100} size="xs" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer />
-                <div style={{ height: '300px' }}>
-                  <Chart>
-                    <Settings rotation={90} />
-                    <Axis
-                      id="entities"
-                      position={Position.Bottom}
-                      title={i18n.translate('xpack.aiops.barChart.commitsTitle', {
-                        defaultMessage: 'Commits',
-                      })}
-                      showOverlappingTicks
-                    />
-                    <Axis
-                      id="left2"
-                      title={i18n.translate('xpack.aiops.barChart.developersTitle', {
-                        defaultMessage: 'Developers',
-                      })}
-                      position={Position.Left}
-                    />
+                  <Axis
+                    id="left2"
+                    title={i18n.translate('xpack.aiops.barChart.developersTitle', {
+                      defaultMessage: 'Developers',
+                    })}
+                    position={Position.Left}
+                  />
 
-                    <BarSeries
-                      id="commits"
-                      xScaleType={ScaleType.Linear}
-                      yScaleType={ScaleType.Linear}
-                      xAccessor="x"
-                      yAccessors={['y']}
-                      data={chartData}
-                    />
-                  </Chart>
-                </div>
-              </EuiText>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    </I18nProvider>
+                  <BarSeries
+                    id="commits"
+                    xScaleType={ScaleType.Linear}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="x"
+                    yAccessors={['y']}
+                    data={chartData}
+                  />
+                </Chart>
+              </div>
+            </EuiText>
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 };
