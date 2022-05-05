@@ -9,6 +9,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   Actions,
   ActionTypes,
+  CaseSeverity,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
@@ -340,6 +341,40 @@ describe('UserActionBuilder', () => {
     `);
   });
 
+  it('builds a severity user action correctly', () => {
+    const builder = builderFactory.getBuilder(ActionTypes.severity)!;
+    const userAction = builder.build({
+      payload: { severity: CaseSeverity.LOW },
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "owner": "securitySolution",
+          "payload": Object {
+            "severity": "low",
+          },
+          "type": "severity",
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+        ],
+      }
+    `);
+  });
+
   it('builds a settings user action correctly', () => {
     const builder = builderFactory.getBuilder(ActionTypes.settings)!;
     const userAction = builder.build({
@@ -413,6 +448,7 @@ describe('UserActionBuilder', () => {
             "settings": Object {
               "syncAlerts": true,
             },
+            "severity": "low",
             "status": "open",
             "tags": Array [
               "sir",
