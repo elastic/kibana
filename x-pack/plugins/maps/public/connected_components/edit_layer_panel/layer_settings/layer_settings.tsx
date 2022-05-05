@@ -7,12 +7,11 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
+  EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
@@ -20,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TMSService } from '@elastic/ems-client';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { Attribution } from '../../../../common/descriptor_types';
 import { AUTOSELECT_EMS_LOCALE, DEFAULT_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
@@ -52,9 +50,9 @@ export function LayerSettings(props: Props) {
     props.updateLabel(layerId, label);
   };
 
-  const onLocaleChange = (options: EuiComboBoxOptionOption[]) => {
-    const { key } = options[0];
-    if (key) props.updateLocale(layerId, key);
+  const onLocaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    if (value) props.updateLocale(layerId, value);
   };
 
   const onZoomChange = (value: [string, string]) => {
@@ -171,26 +169,42 @@ export function LayerSettings(props: Props) {
 
     const options = [
       {
-        key: DEFAULT_EMS_LOCALE,
-        label: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageDefault', {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageDefaultDropDown', {
           defaultMessage: 'Default',
         }),
         value: DEFAULT_EMS_LOCALE,
       },
       {
-        key: AUTOSELECT_EMS_LOCALE,
-        label: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselect', {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselectDropDown', {
           defaultMessage: 'Autoselect based on Kibana locale',
         }),
         value: AUTOSELECT_EMS_LOCALE,
       },
+      {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageEnglishDropDown', {
+          defaultMessage: 'English',
+        }),
+        value: 'en',
+      },
+      {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageChineseDropDown', {
+          defaultMessage: 'Chinese',
+        }),
+        value: 'zh-cn',
+      },
+      {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageJapaneseDropDown', {
+          defaultMessage: 'Japanese',
+        }),
+        value: 'ja-jp',
+      },
+      {
+        text: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageFrenchDropDown', {
+          defaultMessage: 'French',
+        }),
+        value: 'fr-fr',
+      },
     ];
-
-    options.push(
-      ...TMSService.SupportedLanguages.map(({ key, label, omt }) => {
-        return { key, label, value: omt };
-      })
-    );
 
     return (
       <EuiFormRow
@@ -198,14 +212,10 @@ export function LayerSettings(props: Props) {
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageLabel', {
           defaultMessage: 'Label language',
         })}
-        helpText={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageHelpText', {
-          defaultMessage: 'Display labels in a different language',
-        })}
       >
-        <EuiComboBox
+        <EuiSelect
           options={options}
-          singleSelection={{ asPlainText: true }}
-          selectedOptions={options.filter(({ key }) => key === props.layer.getLocale())}
+          value={props.layer.getLocale() ?? DEFAULT_EMS_LOCALE}
           onChange={onLocaleChange}
           compressed
         />
