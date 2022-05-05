@@ -16,7 +16,7 @@ import { getTopBackends } from './get_top_backends';
 import { getUpstreamServicesForBackend } from './get_upstream_services_for_backend';
 import { getThroughputChartsForBackend } from './get_throughput_charts_for_backend';
 import { getErrorRateChartsForBackend } from './get_error_rate_charts_for_backend';
-import { ConnectionStatsItemWithImpact } from './../../../common/connections';
+import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { offsetRt } from '../../../common/offset_rt';
 
 const topBackendsRoute = createApmServerRoute({

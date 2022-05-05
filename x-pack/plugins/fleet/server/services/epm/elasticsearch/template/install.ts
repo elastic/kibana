@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import Boom from '@hapi/boom';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type {
@@ -16,17 +16,17 @@ import type {
   RegistryElasticsearch,
   InstallablePackage,
   IndexTemplate,
-  PackageInfo,
   IndexTemplateMappings,
   TemplateMapEntry,
   TemplateMap,
+  EsAssetReference,
 } from '../../../../types';
 
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
-import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/install';
 import {
   FLEET_COMPONENT_TEMPLATES,
   PACKAGE_TEMPLATE_SUFFIX,
@@ -35,8 +35,6 @@ import {
 
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
-
-import { getPackageInfo } from '../../packages';
 
 import {
   generateMappings,
@@ -54,8 +52,12 @@ export const installTemplates = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   paths: string[],
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<IndexTemplateEntry[]> => {
+  savedObjectsClient: SavedObjectsClientContract,
+  esReferences: EsAssetReference[]
+): Promise<{
+  installedTemplates: IndexTemplateEntry[];
+  installedEsReferences: EsAssetReference[];
+}> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
@@ -63,24 +65,27 @@ export const installTemplates = async (
   await installPreBuiltTemplates(paths, esClient, logger);
 
   // remove package installation's references to index templates
-  await removeAssetTypesFromInstalledEs(savedObjectsClient, installablePackage.name, [
-    ElasticsearchAssetType.indexTemplate,
-    ElasticsearchAssetType.componentTemplate,
-  ]);
+  esReferences = await updateEsAssetReferences(
+    savedObjectsClient,
+    installablePackage.name,
+    esReferences,
+    {
+      assetsToRemove: esReferences.filter(
+        ({ type }) =>
+          type === ElasticsearchAssetType.indexTemplate ||
+          type === ElasticsearchAssetType.componentTemplate
+      ),
+    }
+  );
+
   // build templates per data stream from yml files
   const dataStreams = installablePackage.data_streams;
-  if (!dataStreams) return [];
-
-  const packageInfo = await getPackageInfo({
-    savedObjectsClient,
-    pkgName: installablePackage.name,
-    pkgVersion: installablePackage.version,
-  });
+  if (!dataStreams) return { installedTemplates: [], installedEsReferences: esReferences };
 
   const installedTemplatesNested = await Promise.all(
     dataStreams.map((dataStream) =>
       installTemplateForDataStream({
-        pkg: packageInfo,
+        pkg: installablePackage,
         esClient,
         logger,
         dataStream,
@@ -93,13 +98,14 @@ export const installTemplates = async (
   const installedIndexTemplateRefs = getAllTemplateRefs(installedTemplates);
 
   // add package installation's references to index templates
-  await saveInstalledEsRefs(
+  esReferences = await updateEsAssetReferences(
     savedObjectsClient,
     installablePackage.name,
-    installedIndexTemplateRefs
+    esReferences,
+    { assetsToAdd: installedIndexTemplateRefs }
   );
 
-  return installedTemplates;
+  return { installedTemplates, installedEsReferences: esReferences };
 };
 
 const installPreBuiltTemplates = async (
@@ -192,7 +198,7 @@ export async function installTemplateForDataStream({
   logger,
   dataStream,
 }: {
-  pkg: PackageInfo;
+  pkg: InstallablePackage;
   esClient: ElasticsearchClient;
   logger: Logger;
   dataStream: RegistryDataStream;
@@ -315,19 +321,20 @@ async function installDataStreamComponentTemplates(params: {
   await Promise.all(
     templateEntries.map(async ([name, body]) => {
       if (isUserSettingsTemplate(name)) {
-        // look for existing user_settings template
-        const result = await retryTransientEsErrors(
-          () => esClient.cluster.getComponentTemplate({ name }, { ignore: [404] }),
-          { logger }
-        );
-        const hasUserSettingsTemplate = result.component_templates?.length === 1;
-        if (!hasUserSettingsTemplate) {
-          // only add if one isn't already present
+        try {
+          // Attempt to create custom component templates, ignore if they already exist
           const { clusterPromise } = putComponentTemplate(esClient, logger, {
             body,
             name,
+            create: true,
           });
-          return clusterPromise;
+          return await clusterPromise;
+        } catch (e) {
+          if (e?.statusCode === 400 && e.body?.error?.reason.includes('already exists')) {
+            // ignore
+          } else {
+            throw e;
+          }
         }
       } else {
         const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
@@ -408,44 +415,6 @@ export async function installTemplate({
       dataStream,
       packageVersion,
     });
-  }
-
-  // Datastream now throw an error if the aliases field is present so ensure that we remove that field.
-  const getTemplateRes = await retryTransientEsErrors(
-    () =>
-      esClient.indices.getIndexTemplate(
-        {
-          name: templateName,
-        },
-        {
-          ignore: [404],
-        }
-      ),
-    { logger }
-  );
-
-  const existingIndexTemplate = getTemplateRes?.index_templates?.[0];
-  if (
-    existingIndexTemplate &&
-    existingIndexTemplate.name === templateName &&
-    existingIndexTemplate?.index_template?.template?.aliases
-  ) {
-    const updateIndexTemplateParams = {
-      name: templateName,
-      body: {
-        ...existingIndexTemplate.index_template,
-        template: {
-          ...existingIndexTemplate.index_template.template,
-          // Remove the aliases field
-          aliases: undefined,
-        },
-      },
-    };
-
-    await retryTransientEsErrors(
-      () => esClient.indices.putIndexTemplate(updateIndexTemplateParams, { ignore: [404] }),
-      { logger }
-    );
   }
 
   const defaultSettings = buildDefaultSettings({

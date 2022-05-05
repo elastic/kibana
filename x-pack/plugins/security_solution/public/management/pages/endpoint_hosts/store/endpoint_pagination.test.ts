@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from 'kibana/public';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
 import { History, createBrowserHistory } from 'history';
 import { applyMiddleware, Store, createStore } from 'redux';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { AppLocation, MetadataListResponse } from '../../../../../common/endpoint/types';
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';

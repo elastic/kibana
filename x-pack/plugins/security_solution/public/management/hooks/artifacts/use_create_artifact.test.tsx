@@ -6,7 +6,7 @@
  */
 
 import { useCreateArtifact } from './use_create_artifact';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import {
   getFakeListId,
@@ -14,7 +14,7 @@ import {
   getFakeHttpService,
   renderMutation,
 } from '../test_utils';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { act } from '@testing-library/react-hooks';
 
 describe('Create artifact hook', () => {

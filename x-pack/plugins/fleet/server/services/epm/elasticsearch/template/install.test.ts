@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
-import { appContextService } from '../../../../services';
+import { appContextService } from '../../..';
 
 import type { RegistryDataStream } from '../../../../types';
 import type { Field } from '../../fields/field';
@@ -180,15 +180,11 @@ describe('EPM install', () => {
       packageName: pkg.name,
     });
 
-    const removeAliases = (
+    const sentTemplate = (
       esClient.indices.putIndexTemplate.mock.calls[0][0] as estypes.IndicesPutIndexTemplateRequest
     ).body;
-    expect(removeAliases?.template?.aliases).not.toBeDefined();
-
-    const sentTemplate = (
-      esClient.indices.putIndexTemplate.mock.calls[1][0] as estypes.IndicesPutIndexTemplateRequest
-    ).body;
     expect(sentTemplate).toBeDefined();
+    expect(sentTemplate?.template?.aliases).not.toBeDefined();
     expect(sentTemplate?.priority).toBe(templatePriorityDatasetIsPrefixUnset);
     expect(sentTemplate?.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
   });

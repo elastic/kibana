@@ -8,7 +8,7 @@ This example shows how to use *Discover* to list
 your documents from most relevant to least relevant. This example uses
 the <<gs-get-data-into-kibana, sample flights data set>>, or you can use your own data.
 
-.  In *Discover*, open the {data-source} dropdown, and select that data you want to work with.
+.  In *Discover*, open the {data-source} dropdown, and select the data that you want to work with.
 +
 For the sample flights data, set the {data-source} to *kibana_sample_data_flights*.
 
@@ -19,15 +19,16 @@ Warsaw OR Venice OR Clear
 ```
 . If you don't see any results, expand the <<set-time-filter,time range>>, for example to *Last 7 days*.
 . From the list of *Available fields*, add `_score` and any other fields you want to the document table.
-. To sort the `_score` column in descending order, hover over its header, and set
-the sort icon to
-image:images/downward-arrow.png[Downward pointing arrow to indicate descending sorting].
 +
-At this point, you're doing a multi-column sort: first by `Time`, and then by `_score`.
-. To turn off sorting for the `Time` field, hover over its header, and set the sort icon to
-image:images/double-arrow.png[Arrow on both ends of the icon indicates sorting is off].
+At this point, you're sorting by the`timestamp` field.
+. To turn off sorting by the `timestamp` field, click the *field sorted* option, and then click *Clear sorting.*
+. To turn on sorting by the `_score` field in descending order, open the dropdown menu and click *_score*, and then select *High-Low*.
++
+[role="screenshot"]
+image::images/sort-by-relevance.png["Field sorting popover", width=75%]
+
 +
 Your table now sorts documents from most to least relevant.
 +
 [role="screenshot"]
-image::images/discover-search-for-relevance.png["Documents are sorted from most relevant to least relevant."]
+image::images/discover-search-for-relevance.png["Documents are sorted from most relevant to least relevant.", width=75%]

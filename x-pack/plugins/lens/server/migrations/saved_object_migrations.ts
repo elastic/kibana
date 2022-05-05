@@ -12,12 +12,10 @@ import {
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
-} from 'src/core/server';
-import { Filter } from '@kbn/es-query';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from 'src/plugins/data/public';
-import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
-import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/core/server';
+import type { Query, Filter } from '@kbn/es-query';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -30,6 +28,11 @@ import {
   VisState716,
   CustomVisualizationMigrations,
   LensDocShape810,
+  LensDocShape830,
+  XYVisualizationStatePre830,
+  XYVisualizationState830,
+  VisState810,
+  VisState820,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -44,6 +47,8 @@ import {
   commonSetLastValueShowArrayValues,
   commonEnhanceTableRowHeight,
   commonSetIncludeEmptyRowsDateHistogram,
+  commonFixValueLabelsInXY,
+  commonLockOldMetricVisSettings,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -474,7 +479,10 @@ const setLastValueShowArrayValues: SavedObjectMigrationFn<LensDocShape810, LensD
   return { ...doc, attributes: commonSetLastValueShowArrayValues(doc.attributes) };
 };
 
-const enhanceTableRowHeight: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+const enhanceTableRowHeight: SavedObjectMigrationFn<
+  LensDocShape810<VisState810>,
+  LensDocShape810<VisState820>
+> = (doc) => {
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonEnhanceTableRowHeight(newDoc.attributes) };
 };
@@ -484,6 +492,18 @@ const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, 
 ) => {
   return { ...doc, attributes: commonSetIncludeEmptyRowsDateHistogram(doc.attributes) };
 };
+
+const fixValueLabelsInXY: SavedObjectMigrationFn<
+  LensDocShape830<XYVisualizationStatePre830>,
+  LensDocShape830<XYVisualizationState830 | unknown>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
+};
+
+const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => ({ ...doc, attributes: commonLockOldMetricVisSettings(doc.attributes) });
 
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
@@ -504,6 +524,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     setIncludeEmptyRowsDateHistogram,
     enhanceTableRowHeight
   ),
+  '8.3.0': flow(lockOldMetricVisSettings, fixValueLabelsInXY),
 };
 
 export const getAllMigrations = (

@@ -10,12 +10,13 @@ import { EuiBadge, EuiBadgeProps, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
-import { FilterLabel } from '../';
+import { FilterLabel } from '..';
 import type { FilterLabelStatus } from '../filter_item';
 
 interface Props {
   filter: Filter;
   valueLabel: string;
+  fieldLabel?: string;
   filterLabelStatus: FilterLabelStatus;
   errorMessage?: string;
   readonly?: boolean;
@@ -28,6 +29,7 @@ export const FilterView: FC<Props> = ({
   iconOnClick,
   onClick,
   valueLabel,
+  fieldLabel,
   errorMessage,
   filterLabelStatus,
   readonly,
@@ -100,6 +102,7 @@ export const FilterView: FC<Props> = ({
         <FilterLabel
           filter={filter}
           valueLabel={valueLabel}
+          fieldLabel={fieldLabel}
           filterLabelStatus={filterLabelStatus}
           hideAlias={hideAlias}
         />

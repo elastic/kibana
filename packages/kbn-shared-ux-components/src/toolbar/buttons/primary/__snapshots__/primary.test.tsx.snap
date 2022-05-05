@@ -4,10 +4,15 @@ exports[`<ToolbarButton /> is rendered 1`] = `
 <SharedUxServicesProvider
   application={
     Object {
-      "currentAppId$": Observable {
-        "_isScalar": false,
-      },
+      "currentAppId$": Observable {},
       "navigateToUrl": [Function],
+    }
+  }
+  data={
+    Object {
+      "hasDataView": [Function],
+      "hasESData": [Function],
+      "hasUserDataView": [Function],
     }
   }
   docLinks={

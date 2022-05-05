@@ -12,8 +12,8 @@ import {
   basicCaseNumericValueFeatures,
   basicCaseStatusFeatures,
 } from '../../../containers/mock';
-import { CaseViewMetrics } from './index';
-import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
+import { CaseViewMetrics } from '.';
+import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import { TestProviders } from '../../../common/mock';
 
 const renderCaseMetrics = ({
@@ -21,8 +21,8 @@ const renderCaseMetrics = ({
   features = [...basicCaseNumericValueFeatures, ...basicCaseStatusFeatures],
   isLoading = false,
 }: {
-  metrics?: CaseMetrics;
-  features?: CaseMetricsFeature[];
+  metrics?: SingleCaseMetrics;
+  features?: SingleCaseMetricsFeature[];
   isLoading?: boolean;
 } = {}) => {
   return render(
@@ -33,7 +33,7 @@ const renderCaseMetrics = ({
 };
 
 interface FeatureTest {
-  feature: CaseMetricsFeature;
+  feature: SingleCaseMetricsFeature;
   items: Array<{
     title: string;
     value: string | number;

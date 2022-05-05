@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { SPACES_USAGE_STATS_TYPE } from './constants';
 import { UsageStatsClient } from './usage_stats_client';

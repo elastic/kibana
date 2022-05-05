@@ -7,7 +7,7 @@
  */
 
 import { Subject } from 'rxjs';
-import type { Event, IShipper } from 'src/core/public';
+import type { Event, IShipper } from '@kbn/core/public';
 
 export class CustomShipper implements IShipper {
   public static shipperName = 'FTR-helpers-shipper';
@@ -20,4 +20,5 @@ export class CustomShipper implements IShipper {
     });
   }
   optIn(isOptedIn: boolean) {}
+  shutdown() {}
 }

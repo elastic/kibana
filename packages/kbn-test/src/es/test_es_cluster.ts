@@ -12,11 +12,11 @@ import del from 'del';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
-import { KIBANA_ROOT } from '../';
+import { KIBANA_ROOT } from '..';
 
 interface TestEsClusterNodesOptions {
   name: string;
@@ -41,6 +41,7 @@ interface Node {
   ) => Promise<{ insallPath: string }>;
   start: (installPath: string, opts: Record<string, unknown>) => Promise<void>;
   stop: () => Promise<void>;
+  kill: () => Promise<void>;
 }
 
 export interface ICluster {
@@ -268,20 +269,26 @@ export function createTestEsCluster<
     }
 
     async stop() {
-      const nodeStopPromises = [];
-      for (let i = 0; i < this.nodes.length; i++) {
-        nodeStopPromises.push(async () => {
+      await Promise.all(
+        this.nodes.map(async (node, i) => {
           log.info(`[es] stopping node ${nodes[i].name}`);
-          return await this.nodes[i].stop();
-        });
-      }
-      await Promise.all(nodeStopPromises.map(async (stop) => await stop()));
+          await node.stop();
+        })
+      );
 
       log.info('[es] stopped');
     }
 
     async cleanup() {
-      await this.stop();
+      log.info('[es] killing', this.nodes.length === 1 ? 'node' : `${this.nodes.length} nodes`);
+      await Promise.all(
+        this.nodes.map(async (node, i) => {
+          log.info(`[es] stopping node ${nodes[i].name}`);
+          // we are deleting this install, stop ES more aggressively
+          await node.kill();
+        })
+      );
+
       await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
     }

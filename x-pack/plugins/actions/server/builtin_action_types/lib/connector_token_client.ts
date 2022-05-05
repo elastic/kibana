@@ -6,13 +6,9 @@
  */
 
 import { omitBy, isUndefined } from 'lodash';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { Logger, SavedObjectsClientContract, SavedObjectsUtils } from '@kbn/core/server';
 import { ConnectorToken } from '../../types';
-import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
-import {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectsUtils,
-} from '../../../../../../src/core/server';
 import { CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
 
 export const MAX_TOKENS_RETURNED = 1;
@@ -37,6 +33,13 @@ export interface UpdateOptions {
   tokenType?: string;
 }
 
+interface UpdateOrReplaceOptions {
+  connectorId: string;
+  token: ConnectorToken | null;
+  newToken: string;
+  expiresInSec: number;
+  deleteExisting: boolean;
+}
 export class ConnectorTokenClient {
   private readonly logger: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -247,6 +250,38 @@ export class ConnectorTokenClient {
         `Failed to delete connector_token records for connectorId "${connectorId}". Error: ${err.message}`
       );
       throw err;
+    }
+  }
+
+  public async updateOrReplace({
+    connectorId,
+    token,
+    newToken,
+    expiresInSec,
+    deleteExisting,
+  }: UpdateOrReplaceOptions) {
+    expiresInSec = expiresInSec ?? 3600;
+    if (token === null) {
+      if (deleteExisting) {
+        await this.deleteConnectorTokens({
+          connectorId,
+          tokenType: 'access_token',
+        });
+      }
+
+      await this.create({
+        connectorId,
+        token: newToken,
+        expiresAtMillis: new Date(Date.now() + expiresInSec * 1000).toISOString(),
+        tokenType: 'access_token',
+      });
+    } else {
+      await this.update({
+        id: token.id!.toString(),
+        token: newToken,
+        expiresAtMillis: new Date(Date.now() + expiresInSec * 1000).toISOString(),
+        tokenType: 'access_token',
+      });
     }
   }
 }

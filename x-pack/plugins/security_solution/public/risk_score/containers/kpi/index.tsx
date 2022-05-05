@@ -9,6 +9,8 @@ import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { useEffect, useMemo } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createFilter } from '../../../common/containers/helpers';
 
 import {
@@ -20,9 +22,6 @@ import {
   RiskScoreAggByFields,
   RiskSeverity,
 } from '../../../../common/search_strategy';
-
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
