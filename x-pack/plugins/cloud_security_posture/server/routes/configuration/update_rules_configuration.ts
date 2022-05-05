@@ -37,25 +37,25 @@ export const getPackagePolicy = async (
     throw new Error(`package policy Id '${packagePolicyId}' is not exist`);
   }
   if (packagePolicies[0].package?.name !== CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
-    // TODO: improve this validator to support any future CSP package
-    throw new Error(`Package Policy Id '${packagePolicyId}' is not CSP package`);
+    throw new Error(
+      `Package Policy Id '${packagePolicyId}' is not of type cloud security posture package`
+    );
   }
 
   return packagePolicies![0];
 };
 
-export const getCspRules = async (
+export const getCspRules = (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-) => {
-  const cspRules = await soClient.find<CspRuleSchema>({
+): Promise<SavedObjectsFindResponse<CspRuleSchema, unknown>> => {
+  return soClient.find<CspRuleSchema>({
     type: cspRuleAssetSavedObjectType,
     filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
     searchFields: ['name'],
     // TODO: research how to get all rules
     perPage: 10000,
   });
-  return cspRules;
 };
 
 export const createRulesConfig = (
@@ -105,7 +105,7 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
   router.post(
     {
       path: UPDATE_RULES_CONFIG_ROUTE_PATH,
-      validate: { query: configurationUpdateInputSchema },
+      validate: { body: configurationUpdateInputSchema },
     },
     async (context, request, response) => {
       if (!(await context.fleet).authz.fleet.all) {
@@ -117,7 +117,7 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const soClient = coreContext.savedObjects.client;
         const packagePolicyService = cspContext.service.packagePolicyService;
-        const packagePolicyId = request.query.package_policy_id;
+        const packagePolicyId = request.body.package_policy_id;
 
         if (!packagePolicyService) {
           throw new Error(`Failed to get Fleet services`);

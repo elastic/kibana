@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { capitalize, sortBy } from 'lodash';
 import {
   EuiButton,
@@ -27,10 +27,13 @@ import {
   disableRule,
   snoozeRule,
   useLoadRuleTypes,
+  RuleStatus,
   unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
+
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
@@ -71,7 +74,7 @@ import {
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
-export function RulesPage() {
+function RulesPage() {
   const { ObservabilityPageTemplate, kibanaFeatures } = usePluginContext();
   const {
     http,
@@ -80,6 +83,7 @@ export function RulesPage() {
     application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
+  const { lastResponse, setLastResponse } = useRulesPageStateContainer();
   const documentationLink = docLinks.links.observability.createAlerts;
   const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -90,7 +94,7 @@ export function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-  const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -106,7 +110,8 @@ export function RulesPage() {
 
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
     searchText,
-    ruleLastResponseFilter,
+    ruleLastResponseFilter: lastResponse,
+    ruleStatusesFilter,
     typesFilter,
     page,
     setPage,
@@ -202,7 +207,11 @@ export function RulesPage() {
         width: '120px',
         'data-test-subj': 'rulesTableCell-status',
         render: (_executionStatus: RuleExecutionStatus, item: RuleTableItem) => (
-          <ExecutionStatus executionStatus={item.executionStatus} />
+          <ExecutionStatus
+            executionStatus={item.executionStatus}
+            item={item}
+            licenseType={ruleTypeIndex.get(item.ruleTypeId)?.minimumLicenseRequired!}
+          />
         ),
       },
       {
@@ -280,6 +289,13 @@ export function RulesPage() {
     []
   );
 
+  const setExecutionStatusFilter = useCallback(
+    (ids: string[]) => {
+      setLastResponse(ids);
+    },
+    [setLastResponse]
+  );
+
   const getRulesTable = () => {
     if (noData && !rulesState.isLoading) {
       return authorizedToCreateAnyRules ? (
@@ -294,6 +310,10 @@ export function RulesPage() {
     if (initialLoad) {
       return <CenterJustifiedSpinner />;
     }
+
+    // const nextSearchParams = new URLSearchParams(history.location.search);
+    // const xx = [...nextSearchParams.getAll('executionStatus')] || [];
+    // console.log(xx, '!!');
     return (
       <>
         <EuiFlexGroup>
@@ -331,9 +351,15 @@ export function RulesPage() {
           <EuiFlexItem grow={false}>
             <LastResponseFilter
               key="rule-lastResponse-filter"
-              selectedStatuses={ruleLastResponseFilter}
-              onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
+              selectedStatuses={lastResponse}
+              onChange={setExecutionStatusFilter}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {triggersActionsUi.getRuleStatusFilter({
+              selectedStatuses: ruleStatusesFilter,
+              onChange: setRuleStatusesFilter,
+            })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -457,3 +483,13 @@ export function RulesPage() {
     </ObservabilityPageTemplate>
   );
 }
+
+function WrappedRulesPage() {
+  return (
+    <Provider value={rulesPageStateContainer}>
+      <RulesPage />
+    </Provider>
+  );
+}
+
+export { WrappedRulesPage as RulesPage };
