@@ -63,8 +63,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ebtServerHelper.setOptIn(true);
 
       const actions = await getActions(3);
+
       // Validating the remote PID because that's the only field that it's added by the FTR plugin.
       const context = actions[1].meta;
+      expect(context).to.have.property('pid');
+      expect(context.pid).to.be.a('number');
+
+      // Some context providers emit very early. We are OK with that.
+      const initialContext = actions[2].meta[0].context;
+
+      const reportEventContext = actions[2].meta[1].context;
       expect(context).to.have.property('pid');
       expect(context.pid).to.be.a('number');
 
@@ -77,13 +85,13 @@ export default function ({ getService }: FtrProviderContext) {
             {
               timestamp: actions[2].meta[0].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context: {},
+              context: initialContext,
               properties: { plugin: 'analyticsPluginA', step: 'setup' },
             },
             {
               timestamp: actions[2].meta[1].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context,
+              context: reportEventContext,
               properties: { plugin: 'analyticsPluginA', step: 'start' },
             },
           ],
@@ -96,13 +104,13 @@ export default function ({ getService }: FtrProviderContext) {
         {
           timestamp: actions[2].meta[0].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context: {},
+          context: initialContext,
           properties: { plugin: 'analyticsPluginA', step: 'setup' },
         },
         {
           timestamp: actions[2].meta[1].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context,
+          context: reportEventContext,
           properties: { plugin: 'analyticsPluginA', step: 'start' },
         },
       ]);
