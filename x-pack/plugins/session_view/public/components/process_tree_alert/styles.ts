@@ -73,10 +73,15 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       color: colors.title,
     };
 
+    const actionBadge: CSSObject = {
+      textTransform: 'capitalize',
+    };
+
     return {
       alert,
       alertStatus,
       alertName,
+      actionBadge,
     };
   }, [euiTheme, isInvestigated, isSelected, euiVars]);
 

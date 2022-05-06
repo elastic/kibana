@@ -69,13 +69,21 @@ Object {
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <div
-              class="euiText euiText--extraSmall"
+            <span
+              class="euiBadge euiBadge--iconLeft css-1r0v2j9-EuiInnerText"
+              style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+              title="exec"
             >
-              (action: 
-              exec
-              )
-            </div>
+              <span
+                class="euiBadge__content"
+              >
+                <span
+                  class="euiBadge__text"
+                >
+                  exec
+                </span>
+              </span>
+            </span>
           </div>
         </div>
       </div>
@@ -146,13 +154,21 @@ Object {
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
-            class="euiText euiText--extraSmall"
+          <span
+            class="euiBadge euiBadge--iconLeft css-1r0v2j9-EuiInnerText"
+            style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+            title="exec"
           >
-            (action: 
-            exec
-            )
-          </div>
+            <span
+              class="euiBadge__content"
+            >
+              <span
+                class="euiBadge__text"
+              >
+                exec
+              </span>
+            </span>
+          </span>
         </div>
       </div>
     </div>

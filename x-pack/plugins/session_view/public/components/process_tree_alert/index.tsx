@@ -89,7 +89,7 @@ export const ProcessTreeAlert = ({
           </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">(action: {event?.action})</EuiText>
+          <EuiBadge css={styles.actionBadge}>{event?.action}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

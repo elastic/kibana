@@ -65,15 +65,6 @@ export const searchAlerts = async (
   const results = await client.find({
     query: {
       bool: {
-        // OR condition
-        should: [
-          // to ensure the investigated alert is always returned (due to maximum loaded alerts per session)
-          investigatedAlertId && {
-            term: {
-              [ALERT_UUID_PROPERTY]: investigatedAlertId,
-            },
-          },
-        ].filter((item) => !!item),
         must: [
           {
             term: {
@@ -97,6 +88,23 @@ export const searchAlerts = async (
     sort: { [ALERT_ORIGINAL_TIME_PROPERTY]: 'asc' },
     lastSortIds: cursor ? [cursor] : undefined,
   });
+
+  // if an alert is being investigated, fetch it on it's own, as it's not guaranteed to come back in the above request.
+  if (investigatedAlertId) {
+    const investigatedAlertSearch = await client.find({
+      query: {
+        match: {
+          [ALERT_UUID_PROPERTY]: investigatedAlertId,
+        },
+      },
+      size: 1,
+      index: indices.join(','),
+    });
+
+    if (investigatedAlertSearch.hits.hits.length > 0) {
+      results.hits.hits.push(investigatedAlertSearch.hits.hits[0]);
+    }
+  }
 
   const events = results.hits.hits.map((hit: any) => {
     // the alert indexes flattens many properties. this util unflattens them as session view expects structured json.
