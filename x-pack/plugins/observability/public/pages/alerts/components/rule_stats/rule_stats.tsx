@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -36,8 +36,8 @@ const ConditionalWrap = ({
   children,
 }: {
   condition: boolean;
-  wrap: FunctionComponent;
-  children: any;
+  wrap: (wrappedChildren: React.ReactNode) => JSX.Element;
+  children: JSX.Element;
 }): JSX.Element => (condition ? wrap(children) : children);
 
 export const renderRuleStats = (
