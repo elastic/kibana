@@ -11,16 +11,8 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { DistributiveOmit, EuiAvatar, EuiAvatarProps, IconType } from '@elastic/eui';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-type FilterStartingWith<Set, Needle extends string> = Set extends `${Needle}${infer _X}`
-  ? Set
-  : never;
-
-type ExtractSolutionName<SolutionString extends string> =
-  SolutionString extends `logo${infer Solution}` ? Solution : { error: 'Cannot parse logo' };
-
-type SolutionNameType = ExtractSolutionName<FilterStartingWith<EuiIconType, 'logo'>>;
+import { SolutionNameType } from './types';
 
 export type KnownSolutionProps = DistributiveOmit<EuiAvatarProps, 'size' | 'name' | 'iconType'> & {
   /**
@@ -59,7 +51,7 @@ export const KibanaSolutionAvatar = (props: KibanaSolutionAvatarProps) => {
   } = {};
 
   if (isKnown(props)) {
-    icon.iconType = `logo${rest.name}`;
+    icon.iconType = `logo${props.name.replace(/\s+/g, '')}`;
   }
 
   return (

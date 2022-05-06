@@ -31,7 +31,17 @@ export const SolutionAvatar = (params: KnownSolutionParams) => {
 SolutionAvatar.argTypes = {
   name: {
     control: 'select',
-    options: ['Elastic', 'Kibana', 'Observability', 'Cloud', 'Security'],
+    options: [
+      'Cloud',
+      'Elastic Stack',
+      'Elastic',
+      'Elasticsearch',
+      'Kibana',
+      'Observability',
+      'Security',
+      'Site Search',
+      'Workplace Search',
+    ],
     defaultValue: 'Elastic',
   },
   ...argTypes,
@@ -47,18 +57,21 @@ IconTypeAvatar.argTypes = {
   iconType: {
     control: 'select',
     options: [
+      'logoCloud',
+      'logoElasticStack',
       'logoElastic',
+      'logoElasticsearch',
       'logoKibana',
       'logoObservability',
-      'logoMaps',
-      'logoCloud',
       'logoSecurity',
+      'logoSiteSearch',
+      'logoWorkplaceSearch',
     ],
     defaultValue: 'logoElastic',
   },
   name: {
     control: 'text',
-    defaultValue: 'Elastic',
+    defaultValue: 'Solution Name',
   },
   ...argTypes,
 };
