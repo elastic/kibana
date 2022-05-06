@@ -31,7 +31,7 @@ export function SpanLinksBadge({
             {i18n.translate(
               'xpack.apm.waterfall.spanLinks.tooltip.linkedChildren',
               {
-                defaultMessage: '{linkedChildren} linkedChildren',
+                defaultMessage: '{linkedChildren} incoming',
                 values: { linkedChildren },
               }
             )}

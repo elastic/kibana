@@ -35,20 +35,39 @@ async function fetchSpanLinksDetails({
   spanLinks,
   start,
   end,
-  processorEvent,
 }: {
   setup: Setup;
   kuery: string;
   spanLinks: SpanLink[];
   start: number;
   end: number;
-  processorEvent: ProcessorEvent;
 }) {
   const { apmEventClient } = setup;
 
   const { startWithBuffer, endWithBuffer } = getBufferedTimerange({
     start,
     end,
+  });
+
+  const spanIdsMap: Record<string, boolean> = {};
+  const should = spanLinks.map((item) => {
+    spanIdsMap[item.span.id] = true;
+    return {
+      bool: {
+        filter: [
+          { term: { [TRACE_ID]: item.trace.id } },
+          {
+            bool: {
+              should: [
+                { term: { [SPAN_ID]: item.span.id } },
+                { term: { [TRANSACTION_ID]: item.span.id } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    };
   });
 
   const response = await apmEventClient.search('get_span_links_details', {
@@ -77,27 +96,23 @@ async function fetchSpanLinksDetails({
             ...rangeQuery(startWithBuffer, endWithBuffer),
             ...kqlQuery(kuery),
             {
-              bool: {
-                should: spanLinks.map((item) => ({
-                  bool: {
-                    filter: [
-                      { term: { [TRACE_ID]: item.trace.id } },
-                      { term: { [PROCESSOR_EVENT]: processorEvent } },
-                      ...(processorEvent === ProcessorEvent.transaction
-                        ? [{ term: { [TRANSACTION_ID]: item.span.id } }]
-                        : [{ term: { [SPAN_ID]: item.span.id } }]),
-                    ],
-                  },
-                })),
-                minimum_should_match: 1,
-              },
+              bool: { should, minimum_should_match: 1 },
             },
           ],
         },
       },
     },
   });
-  return response.hits.hits;
+  return response.hits.hits.filter(({ _source: source }) => {
+    // if span we need to guarantee that span.id is the same as the span links ids
+    // the query might return other spans children of the same transaction
+    if (source.processor.event === ProcessorEvent.span) {
+      const span = source as SpanRaw;
+      const hasSpanId = spanIdsMap[span.span.id] || false;
+      return hasSpanId;
+    }
+    return true;
+  });
 }
 
 export async function getSpanLinksDetails({
@@ -106,14 +121,12 @@ export async function getSpanLinksDetails({
   kuery,
   start,
   end,
-  processorEvent,
 }: {
   setup: Setup;
   spanLinks: SpanLink[];
   kuery: string;
   start: number;
   end: number;
-  processorEvent: ProcessorEvent;
 }): Promise<SpanLinkDetails[]> {
   if (!spanLinks.length) {
     return [];
@@ -129,7 +142,6 @@ export async function getSpanLinksDetails({
         spanLinks: spanLinksChunk,
         start,
         end,
-        processorEvent,
       })
     )
   );
