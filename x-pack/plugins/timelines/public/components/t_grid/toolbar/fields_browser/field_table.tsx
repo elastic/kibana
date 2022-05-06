@@ -7,17 +7,19 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { EuiInMemoryTable, Pagination, CriteriaWithPagination } from '@elastic/eui';
+import { EuiInMemoryTable, Pagination, Direction } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
 import { getColumnHeader, getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { tGridActions } from '../../../../store/t_grid';
-import type {
-  BrowserFieldItem,
-  GetFieldTableColumns,
-} from '../../../../../common/types/fields_browser';
+import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
 import { FieldTableHeader } from './field_table_header';
+
+const DEFAULT_SORTING: { field: string; direction: Direction } = {
+  field: '',
+  direction: 'asc',
+} as const;
 
 export interface FieldTableProps {
   timelineId: string;
@@ -74,6 +76,10 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
+  const [sortField, setSortField] = useState<string>(DEFAULT_SORTING.field);
+  const [sortDirection, setSortDirection] = useState<Direction>(DEFAULT_SORTING.direction);
+
   const dispatch = useDispatch();
 
   const fieldItems = useMemo(
@@ -121,16 +127,34 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
     [fieldItems.length, pageIndex, pageSize]
   );
 
-  const onTableChange = useCallback(({ page }: CriteriaWithPagination<BrowserFieldItem>) => {
-    const { index, size } = page;
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
-
   useEffect(() => {
     // Resets the pagination when some filter has changed, consequently, the number of fields is different
     setPageIndex(0);
   }, [fieldItems.length]);
+
+  /**
+   * Sorting controls
+   */
+  const sorting = useMemo(
+    () => ({
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
+    }),
+    [sortDirection, sortField]
+  );
+
+  const onTableChange = useCallback(({ page, sort = DEFAULT_SORTING }) => {
+    const { index, size } = page;
+    const { field, direction } = sort;
+
+    setPageIndex(index);
+    setPageSize(size);
+
+    setSortField(field);
+    setSortDirection(direction);
+  }, []);
 
   /**
    * Process columns
@@ -157,7 +181,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
           itemId="name"
           columns={columns}
           pagination={pagination}
-          sorting={true}
+          sorting={sorting}
           hasActions={hasActions}
           onChange={onTableChange}
           compressed
