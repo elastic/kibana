@@ -19,14 +19,20 @@ for i in "${journeys[@]}"; do
     JOURNEY_NAME="${i}"
     echo "Looking for JOURNEY=${JOURNEY_NAME} and BUILD_ID=${BUILD_ID} in APM traces"
 
-    ./node_modules/.bin/performance-testing-dataset-extractor -u "${USER_FROM_VAULT}" -p "${PASS_FROM_VAULT}" -c "${ES_SERVER_URL}" -b "${BUILD_ID}" -n "${JOURNEY_NAME}"
+    node scripts/extract_performance_testing_dataset \
+        --journeyName "${JOURNEY_NAME}" \
+        --buildId "${BUILD_ID}" \
+        --es-url "${ES_SERVER_URL}" \
+        --es-username "${USER_FROM_VAULT}" \
+        --es-password "${PASS_FROM_VAULT}"
 done
 
-# archive json files with traces and upload as build artifacts
 echo "--- Upload Kibana build, plugins and scalability traces to the public bucket"
 mkdir "${BUILD_ID}"
-tar -czf "${BUILD_ID}/scalability_traces.tar.gz" output
+# Archive json files with traces and upload as build artifacts
+tar -czf "${BUILD_ID}/scalability_traces.tar.gz" -C target scalability_traces
 buildkite-agent artifact upload "${BUILD_ID}/scalability_traces.tar.gz"
+# Upload Kibana build, plugins, commit sha and traces to the bucket
 buildkite-agent artifact download kibana-default.tar.gz ./"${BUILD_ID}"
 buildkite-agent artifact download kibana-default-plugins.tar.gz ./"${BUILD_ID}"
 echo "${BUILDKITE_COMMIT}" > "${BUILD_ID}/KIBANA_COMMIT_HASH"
