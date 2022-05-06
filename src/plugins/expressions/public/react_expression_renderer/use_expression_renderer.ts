@@ -131,6 +131,11 @@ export function useExpressionRenderer(
   }, [expressionLoaderRef.current, onData$]);
 
   useEffect(() => {
+    const subscription2 = expressionLoaderRef.current?.data$.subscribe(({ partial }) => {
+      setState({
+        isEmpty: false,
+      });
+    });
     const subscription = expressionLoaderRef.current?.render$
       .pipe(filter(() => !hasHandledErrorRef.current))
       .subscribe((item) => {
@@ -142,7 +147,10 @@ export function useExpressionRenderer(
         onRender$?.(item);
       });
 
-    return () => subscription?.unsubscribe();
+    return () => {
+      subscription?.unsubscribe();
+      subscription2?.unsubscribe();
+    };
   }, [expressionLoaderRef.current, onRender$]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

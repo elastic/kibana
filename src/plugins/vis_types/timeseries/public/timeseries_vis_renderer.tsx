@@ -72,9 +72,7 @@ export const getTimeseriesVisRenderer: (deps: {
               syncColors={syncColors}
               syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
-              initialRender={once(() => {
-                handlers.done();
-              })}
+              initialRender={handlers.done}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>

@@ -37,6 +37,7 @@ export class Gauge extends Component {
       }
     }, 200);
   }
+  handledResize = false;
 
   componentWillUnmount() {
     clearTimeout(this.timeout);
@@ -46,14 +47,19 @@ export class Gauge extends Component {
     this.handleResize(true);
   }
 
-  handleResize(notifyRender = false) {
+  componentDidUpdate() {
+    if (this.handledResize) {
+      setTimeout(() => {
+        this.props.initialRender();
+      }, 3000);
+    }
+  }
+
+  handleResize() {
     // Bingo!
     const newState = calculateCoordinates(this.inner, this.resize, this.state);
-    this.setState(newState, () => {
-      if (notifyRender) {
-        this.props.initialRender();
-      }
-    });
+    this.setState(newState);
+    this.handledResize = true;
   }
 
   render() {
