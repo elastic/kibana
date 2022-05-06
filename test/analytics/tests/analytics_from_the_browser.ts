@@ -72,6 +72,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(context).to.have.property('user_agent');
       expect(context.user_agent).to.be.a('string');
 
+      // Some context providers emit very early. We are OK with that.
+      const initialContext = actions[2].meta[0].context;
+
       const reportEventContext = actions[2].meta[1].context;
       expect(reportEventContext).to.have.property('user_agent');
       expect(reportEventContext.user_agent).to.be.a('string');
@@ -85,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               timestamp: actions[2].meta[0].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context: {},
+              context: initialContext,
               properties: { plugin: 'analyticsPluginA', step: 'setup' },
             },
             {
@@ -103,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           timestamp: actions[2].meta[0].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context: {},
+          context: initialContext,
           properties: { plugin: 'analyticsPluginA', step: 'setup' },
         },
         {
