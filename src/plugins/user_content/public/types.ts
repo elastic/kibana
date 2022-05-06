@@ -12,18 +12,18 @@ import { UserContentService } from './services';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserContentPluginSetup {}
 
-export interface GetUserContentTableColumnsDefinitionsOptions {
-  contentType: string;
-  selectedViewsRange: ViewsCountRangeField;
-}
-
 export interface UserContentPluginStart {
-  userContentService: Pick<UserContentService, 'register'>;
+  registerContent: UserContentService['register'];
   ui: {
     getUserContentTableColumnsDefinitions: (
       options: GetUserContentTableColumnsDefinitionsOptions
     ) => Array<EuiBasicTableColumn<Record<string, unknown>>>;
   };
+}
+
+export interface GetUserContentTableColumnsDefinitionsOptions {
+  contentType: string;
+  selectedViewsRange: ViewsCountRangeField;
 }
 
 /** The metadata event sent in the API payload from the client */

@@ -406,7 +406,7 @@ export class DashboardPlugin
       embeddableStart: plugins.embeddable,
     });
 
-    plugins.userContent.userContentService.register('dashboard');
+    plugins.userContent.registerContent('dashboard');
 
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,

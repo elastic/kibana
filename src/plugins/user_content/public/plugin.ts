@@ -21,10 +21,7 @@ export class UserContentPlugin implements Plugin<UserContentPluginSetup, UserCon
   private userContentService: UserContentService = new UserContentService();
   constructor() {}
 
-  public setup(
-    core: CoreSetup<StartDependencies, UserContentPluginStart>,
-    deps: SetupDependencies
-  ): UserContentPluginSetup {
+  public setup(core: CoreSetup, deps: SetupDependencies): UserContentPluginSetup {
     return {};
   }
 
@@ -39,9 +36,7 @@ export class UserContentPlugin implements Plugin<UserContentPluginSetup, UserCon
     const { register, getUserContentTableColumnsDefinitions } = this.userContentService;
 
     return {
-      userContentService: {
-        register: register.bind(this.userContentService),
-      },
+      registerContent: register.bind(this.userContentService),
       ui: {
         getUserContentTableColumnsDefinitions: getUserContentTableColumnsDefinitions.bind(
           this.userContentService
