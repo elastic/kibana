@@ -16,34 +16,12 @@ export interface CollapseArgs {
 }
 
 /**
- * Calculates the counter rate of a specified column in the data table.
+ * Collapses multiple rows into a single row using the specified function.
  *
- * Also supports multiple series in a single data table - use the `by` argument
- * to specify the columns to split the calculation by.
- * For each unique combination of all `by` columns a separate counter rate will be calculated.
- * The order of rows won't be changed - this function is not modifying any existing columns, it's only
- * adding the specified `outputColumnId` column to every row of the table without adding or removing rows.
+ * The `by` argument specifies the columns to group by - these columns are not collapsed.
+ * The `metric` arguments specifies the collumns to apply the aggregate function to.
  *
- * Behavior:
- * * Will write the counter rate of `inputColumnId` into `outputColumnId`
- * * If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`
- * * Counter rate always start with an undefined value for the first row of a series.
- * * If the value of the current cell is not smaller than the previous one, an output cell will contain
- * * its own value minus the value of the previous cell of the same series. If the value is smaller,
- * * an output cell will contain its own value
- *
- * Edge cases:
- * * Will return the input table if `inputColumnId` does not exist
- * * Will throw an error if `outputColumnId` exists already in provided data table
- * * If there is no previous row of the current series with a non `null` or `undefined` value, the output cell of the current row
- *   will be set to `undefined`.
- * * If the row value contains `null` or `undefined`, it will be ignored and the output cell will be set to `undefined`
- * * If the value of the previous row of the same series contains `null` or `undefined`, the output cell of the current row will be set to `undefined` as well
- * * For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the
- *   calculation of the current series even if this results in `NaN` (like in case of objects).
- * * To determine separate series defined by the `by` columns, the values of these columns will be cast to strings
- *   before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.
- *   Missing values (`null` and `undefined`) will be treated as empty strings.
+ * All other columns are removed.
  */
 export const collapse: CollapseExpressionFunction = {
   name: 'lens_collapse',
@@ -51,29 +29,32 @@ export const collapse: CollapseExpressionFunction = {
 
   inputTypes: ['datatable'],
 
-  help: i18n.translate('xpack.lens.functions.counterRate.help', {
-    defaultMessage: 'Calculates the counter rate of a column in a data table',
+  help: i18n.translate('xpack.lens.functions.collapse.help', {
+    defaultMessage:
+      'Collapses multiple rows into a single row using the specified aggregate function.',
   }),
 
   args: {
     by: {
-      help: i18n.translate('xpack.lens.functions.counterRate.args.byHelpText', {
-        defaultMessage: 'Column to split the counter rate calculation by',
+      help: i18n.translate('xpack.lens.functions.collapse.args.byHelpText', {
+        defaultMessage: 'Columns to group by - these columns are kept as-is',
       }),
       multi: true,
       types: ['string'],
       required: false,
     },
     metric: {
-      help: i18n.translate('xpack.lens.functions.counterRate.args.inputColumnIdHelpText', {
-        defaultMessage: 'Column to calculate the counter rate of',
+      help: i18n.translate('xpack.lens.functions.collapse.args.metricHelpText', {
+        defaultMessage: 'Column to calculate the specified aggregate function of',
       }),
       types: ['string'],
       multi: true,
       required: false,
     },
     fn: {
-      help: '',
+      help: i18n.translate('xpack.lens.functions.collapse.args.fnHelpText', {
+        defaultMessage: 'The aggregate function to apply',
+      }),
       types: ['string'],
       required: true,
     },
