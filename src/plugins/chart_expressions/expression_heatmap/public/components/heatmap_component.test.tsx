@@ -17,7 +17,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
-import { LegendSize, LegendSizeToPixels } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');

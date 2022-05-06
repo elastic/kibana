@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Settings, TooltipType, SeriesIdentifier, Partition } from '@elastic/charts';
+import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
