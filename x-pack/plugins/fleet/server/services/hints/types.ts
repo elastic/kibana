@@ -5,49 +5,10 @@
  * 2.0.
  */
 import type { PackagePolicy } from '../../types';
+export type { Hint } from '../../../common';
 export interface ParsedAnnotations {
   host?: string;
   package?: string;
 }
 
 export type CreatePackagePolicyResult = PackagePolicy | undefined;
-
-export type HintStatus = 'complete' | 'error';
-export interface Hint {
-  _id: string;
-  agent_id: string;
-  last_updated?: number;
-  received_at?: number;
-  status?: HintStatus;
-  result?: {
-    agent_policy_id?: string;
-    package_policy_id?: string;
-    package?: {
-      name: string;
-      version: string;
-    };
-  };
-  container: {
-    id: string;
-    image: {
-      name: string;
-    };
-    runtime: string;
-  };
-  orchestrator: {
-    cluster: {
-      name: string;
-      url: string;
-    };
-  };
-  kubernetes: {
-    namespace: string;
-    annotations?: Record<string, string>;
-    labels?: Record<string, string>;
-    pod: {
-      ip: string;
-      name: string;
-      uid: string;
-    };
-  };
-}

@@ -121,6 +121,7 @@ export type {
   PackageSpecCategory,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  Hint,
 } from '../../common';
 export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from '../../common';
 
