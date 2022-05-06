@@ -9,7 +9,8 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
 import { BasicConnector } from './basic';
-import { ServiceParams } from './types';
+import { CaseConnector } from './case';
+import { ExternalServiceIncidentResponse, ServiceParams } from './types';
 
 export const TestConfigSchema = schema.object({ url: schema.string() });
 export const TestSecretsSchema = schema.object({
@@ -107,12 +108,70 @@ export class TestExecutor extends BasicConnector<TestConfig, TestSecrets> {
   }
 
   public async noSchema({ id }: { id: string }) {
-    return Promise.resolve({ id });
+    return { id };
   }
 
-  public async noData() {
-    return Promise.resolve();
-  }
+  public async noData() {}
 
   public noAsync() {}
+}
+
+export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
+  constructor(params: ServiceParams<TestConfig, TestSecrets>) {
+    super(params);
+  }
+
+  protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
+    return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
+  }
+
+  public async createIncident(incident: {
+    category: string;
+  }): Promise<ExternalServiceIncidentResponse> {
+    return {
+      id: 'create-incident',
+      title: 'Test incident',
+      url: 'https://example.com',
+      pushedDate: '2022-05-06T09:41:00.401Z',
+    };
+  }
+
+  public async addComment({
+    incidentId,
+    comment,
+  }: {
+    incidentId: string;
+    comment: string;
+  }): Promise<ExternalServiceIncidentResponse> {
+    return {
+      id: 'add-comment',
+      title: 'Test incident',
+      url: 'https://example.com',
+      pushedDate: '2022-05-06T09:41:00.401Z',
+    };
+  }
+
+  public async updateIncident({
+    incidentId,
+    incident,
+  }: {
+    incidentId: string;
+    incident: { category: string };
+  }): Promise<ExternalServiceIncidentResponse> {
+    return {
+      id: 'update-incident',
+      title: 'Test incident',
+      url: 'https://example.com',
+      pushedDate: '2022-05-06T09:41:00.401Z',
+    };
+  }
+
+  public async getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse> {
+    return {
+      id: 'get-incident',
+      title: 'Test incident',
+      url: 'https://example.com',
+      pushedDate: '2022-05-06T09:41:00.401Z',
+    };
+  }
 }

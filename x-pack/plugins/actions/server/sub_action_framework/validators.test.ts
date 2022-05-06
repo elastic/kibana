@@ -70,15 +70,29 @@ describe('Validators', () => {
           val: null,
         },
       })
-    );
+    ).toEqual({
+      subAction: 'test',
+      subActionParams: {
+        foo: 'foo',
+        bar: 1,
+        baz: [{ test: 'hello' }, 1, 'test', false],
+        isValid: false,
+        val: null,
+      },
+    });
   });
 
-  it.each([[1], [false], [{ test: 'hello' }], [['test']], [{ test: 'hello' }]])(
-    'should throw if the subAction is %p',
-    async (subAction) => {
-      const validator = createValidator(TestBasicConnector);
-      const { params } = validator;
-      expect(() => params.validate({ subAction, subActionParams: {} })).toThrow();
-    }
-  );
+  it.each([
+    [undefined],
+    [null],
+    [1],
+    [false],
+    [{ test: 'hello' }],
+    [['test']],
+    [{ test: 'hello' }],
+  ])('should throw if the subAction is %p', async (subAction) => {
+    const validator = createValidator(TestBasicConnector);
+    const { params } = validator;
+    expect(() => params.validate({ subAction, subActionParams: {} })).toThrow();
+  });
 });

@@ -57,7 +57,7 @@ export interface SubAction {
 }
 
 export interface PushToServiceParams {
-  externalId: string;
+  externalId: string | null;
   comments: Array<{ commentId: string; comment: string }>;
   [x: string]: unknown;
 }

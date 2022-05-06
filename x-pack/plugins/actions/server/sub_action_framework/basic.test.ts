@@ -10,12 +10,12 @@ import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { TestBasicConnector } from './mocks';
 import { getCustomAgents } from '../builtin_action_types/lib/get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('axios');
 const axiosMock = axios as jest.Mocked<typeof axios>;
