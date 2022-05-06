@@ -24,6 +24,12 @@ const Divider = euiStyled.div`
   height: 100%;
 `;
 
+const StyledStat = euiStyled(EuiStat)`
+  .euiText {
+    line-height: 1;
+  }
+`;
+
 const ConditionalWrap = ({
   condition,
   wrap,
@@ -67,7 +73,7 @@ export const renderRuleStats = (
         </EuiButtonEmpty>
       )}
     >
-      <EuiStat
+      <StyledStat
         title={ruleStats.disabled}
         description={i18n.translate('xpack.observability.alerts.ruleStats.disabled', {
           defaultMessage: 'Disabled',
@@ -90,7 +96,7 @@ export const renderRuleStats = (
         </EuiButtonEmpty>
       )}
     >
-      <EuiStat
+      <StyledStat
         title={ruleStats.muted + ruleStats.snoozed}
         description={i18n.translate('xpack.observability.alerts.ruleStats.muted', {
           defaultMessage: 'Snoozed',
@@ -113,7 +119,7 @@ export const renderRuleStats = (
         </EuiButtonEmpty>
       )}
     >
-      <EuiStat
+      <StyledStat
         title={ruleStats.error}
         description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
           defaultMessage: 'Errors',
@@ -127,7 +133,7 @@ export const renderRuleStats = (
     </ConditionalWrap>
   );
   return [
-    <EuiStat
+    <StyledStat
       title={ruleStats.total}
       description={i18n.translate('xpack.observability.alerts.ruleStats.ruleCount', {
         defaultMessage: 'Rule count',
