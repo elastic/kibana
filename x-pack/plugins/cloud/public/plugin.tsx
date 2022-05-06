@@ -244,7 +244,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
     const fullStoryChunkPromise = import('./fullstory');
     const userIdPromise: Promise<string | undefined> = security
-      ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
+      ? loadFullStoryUserId({
+          cloudDeploymentId: this.config.id,
+          getCurrentUser: security.authc.getCurrentUser,
+        })
       : Promise.resolve(undefined);
 
     // We need to call FS.identify synchronously after FullStory is initialized, so we must load the user upfront
@@ -264,9 +267,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
       // across domains work
       if (userId) {
-        // Join the cloud org id and the user to create a truly unique user id.
         // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-        const hashedId = sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`);
+        const hashedId = sha256(`${userId}`);
 
         executionContextPromise
           ?.then(async (executionContext) => {
@@ -377,8 +379,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
 /** @internal exported for testing */
 export const loadFullStoryUserId = async ({
+  cloudDeploymentId,
   getCurrentUser,
 }: {
+  cloudDeploymentId?: string;
   getCurrentUser: () => Promise<AuthenticatedUser>;
 }) => {
   try {
@@ -395,9 +399,21 @@ export const loadFullStoryUserId = async ({
           currentUser.metadata
         )}`
       );
+
+      return undefined;
     }
 
-    return currentUser.username;
+    if (
+      getIsCloudEnabled(cloudDeploymentId) &&
+      currentUser.authentication_realm?.type === 'saml' &&
+      currentUser.authentication_realm?.name === 'cloud-saml-kibana'
+    ) {
+      return currentUser.username;
+    }
+
+    return cloudDeploymentId
+      ? `${cloudDeploymentId}:${currentUser.username}`
+      : currentUser.username;
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);
