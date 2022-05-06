@@ -9,6 +9,9 @@ import { renderRuleStats } from './rule_stats';
 import { render, screen } from '@testing-library/react';
 
 const RULES_PAGE_LINK = '/app/observability/alerts/rules';
+const STAT_CLASS = 'euiStat';
+const STAT_TITLE_PRIMARY_CLASS = 'euiStat__title--primary';
+const STAT_BUTTON_CLASS = 'euiButtonEmpty';
 
 describe('Rule stats', () => {
   test('renders all rule stats', async () => {
@@ -40,9 +43,9 @@ describe('Rule stats', () => {
     const { findByText, container } = render(stats[4]);
     const disabledElement = await findByText('Disabled');
     expect(disabledElement).toBeInTheDocument();
-    expect(container.getElementsByClassName('euiStat').length).toBe(1);
-    expect(container.getElementsByClassName('euiStat__title--primary').length).toBe(0);
-    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(0);
+    expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
+    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(0);
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(0);
   });
 
   test('disabled stat is clickable, when there are disabled rules', async () => {
@@ -63,7 +66,7 @@ describe('Rule stats', () => {
       `${RULES_PAGE_LINK}?_a=(lastResponse:!(),status:!(disabled))`
     );
 
-    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
   });
 
   test('disabled stat count is link-colored, when there are disabled rules', async () => {
@@ -79,7 +82,7 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[4]);
-    expect(container.getElementsByClassName('euiStat__title--primary').length).toBe(1);
+    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(1);
   });
 
   test('snoozed stat is not clickable, when there are no snoozed rules', async () => {
@@ -97,9 +100,9 @@ describe('Rule stats', () => {
     const { findByText, container } = render(stats[3]);
     const snoozedElement = await findByText('Snoozed');
     expect(snoozedElement).toBeInTheDocument();
-    expect(container.getElementsByClassName('euiStat').length).toBe(1);
-    expect(container.getElementsByClassName('euiStat__title--primary').length).toBe(0);
-    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(0);
+    expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
+    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(0);
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(0);
   });
 
   test('snoozed stat is clickable, when there are snoozed rules', () => {
@@ -115,7 +118,7 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[3]);
-    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
     expect(screen.getByText('Snoozed').closest('a')).toHaveAttribute(
       'href',
       `${RULES_PAGE_LINK}?_a=(lastResponse:!(),status:!(snoozed))`
@@ -135,7 +138,7 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[3]);
-    expect(container.getElementsByClassName('euiStat__title--primary').length).toBe(1);
+    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(1);
   });
 
   test('errors stat is not clickable, when there are no error rules', async () => {
@@ -153,9 +156,9 @@ describe('Rule stats', () => {
     const { findByText, container } = render(stats[2]);
     const errorsElement = await findByText('Errors');
     expect(errorsElement).toBeInTheDocument();
-    expect(container.getElementsByClassName('euiStat').length).toBe(1);
-    expect(container.getElementsByClassName('euiStat__title--primary').length).toBe(0);
-    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(0);
+    expect(container.getElementsByClassName(STAT_CLASS).length).toBe(1);
+    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(0);
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(0);
   });
 
   test('errors stat is clickable, when there are error rules', () => {
@@ -171,7 +174,7 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[2]);
-    expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
     expect(screen.getByText('Errors').closest('a')).toHaveAttribute(
       'href',
       `${RULES_PAGE_LINK}?_a=(lastResponse:!(error),status:!())`
@@ -191,6 +194,6 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[2]);
-    expect(container.getElementsByClassName('euiStat__title--primary').length).toBe(1);
+    expect(container.getElementsByClassName(STAT_TITLE_PRIMARY_CLASS).length).toBe(1);
   });
 });
