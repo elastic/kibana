@@ -223,6 +223,7 @@ describe('AllCasesListGeneric', () => {
             createdAt: null,
             createdBy: null,
             status: null,
+            severity: null,
             tags: null,
             title: null,
             totalComment: null,

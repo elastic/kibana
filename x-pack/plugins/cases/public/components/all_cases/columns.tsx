@@ -332,8 +332,11 @@ export const useCasesColumns = ({
     {
       name: i18n.SEVERITY,
       render: (theCase: Case) => {
-        const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
-        return <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>;
+        if (theCase.severity != null) {
+          const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+          return <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>;
+        }
+        return getEmptyTagValue();
       },
     },
 
