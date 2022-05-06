@@ -184,11 +184,8 @@ export const ModelsList: FC<Props> = ({
         }
       }
 
-      // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchModelsStats(
-        newItems
-        // newItems.filter((v) => v.model_type.includes(TRAINED_MODEL_TYPE.PYTORCH))
-      );
+      // Need to fetch state for all models to enable/disable actions
+      await fetchModelsStats(newItems);
 
       setItems(newItems);
 
