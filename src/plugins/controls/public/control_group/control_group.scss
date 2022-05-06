@@ -18,14 +18,17 @@ $controlMinWidth: $euiSize * 14;
 
   &--small {
     width: $smallControl;
+    min-width:$smallControl;
   }
 
   &--medium {
     width: $mediumControl;
+    min-width:$mediumControl;
   }
 
   &--large {
     width: $largeControl;
+    min-width:$largeControl;
   }
 
   &--twoLine {
@@ -111,14 +114,17 @@ $controlMinWidth: $euiSize * 14;
 
   &--small {
     width: $smallControl;
+    min-width: $smallControl;
   }
 
   &--medium {
     width: $mediumControl;
+    min-width: $mediumControl;
   }
 
   &--large {
     width: $largeControl;
+    min-width: $largeControl;
   }
 
   &--insertBefore,

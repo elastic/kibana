@@ -174,7 +174,7 @@ export const ControlGroupEditor = ({
               {controlCount > 0 && (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiSwitch
+                  <EuiCheckbox
                     id="editControls_setAllSizesCheckbox"
                     data-test-subj="set-all-control-sizes-checkbox"
                     label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
