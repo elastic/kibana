@@ -11,9 +11,9 @@ import 'jest-styled-components';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { SyntheticsPageTemplateComponent } from './synthetics_page_template';
 import { OVERVIEW_ROUTE } from '../../../../../../common/constants';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 
-jest.mock('../../../hooks/use_breakpoints', () => {
+jest.mock('../../../../../hooks/use_breakpoints', () => {
   const down = jest.fn().mockReturnValue(false);
   return {
     useBreakpoints: () => ({ down }),

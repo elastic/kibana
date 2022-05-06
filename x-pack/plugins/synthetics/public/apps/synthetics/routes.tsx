@@ -23,7 +23,7 @@ import {
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { MonitorManagementPage } from './components/monitor_management/monitor_management_page';
-import { apiService } from './utils/api_service';
+import { apiService } from '../../utils/api_service';
 import { SyntheticsPage, useSyntheticsTelemetry } from './hooks/use_telemetry';
 
 type RouteProps = {

@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useGetUrlParams } from './use_url_params';
-import { apiService } from '../utils/api_service';
+import { apiService } from '../../../utils/api_service';
 // import { API_URLS } from '../../../common/constants';
 
 export enum SyntheticsPage {
