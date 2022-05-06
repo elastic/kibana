@@ -6,7 +6,7 @@
  */
 
 import { renderRuleStats } from './rule_stats';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 describe('Rule stats', () => {
   test('renders all rule stats', async () => {
@@ -56,6 +56,11 @@ describe('Rule stats', () => {
       false
     );
     const { container } = render(stats[4]);
+    expect(screen.getByText('Disabled').closest('a')).toHaveAttribute(
+      'href',
+      '/app/observability/alerts/rules?_a=(lastResponse:!(),status:!(disabled))'
+    );
+
     expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
   });
 
@@ -95,7 +100,7 @@ describe('Rule stats', () => {
     expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(0);
   });
 
-  test('snoozed stat is clickable, when there are snoozed rules', async () => {
+  test('snoozed stat is clickable, when there are snoozed rules', () => {
     const stats = renderRuleStats(
       {
         total: 11,
@@ -109,6 +114,10 @@ describe('Rule stats', () => {
     );
     const { container } = render(stats[3]);
     expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
+    expect(screen.getByText('Snoozed').closest('a')).toHaveAttribute(
+      'href',
+      '/app/observability/alerts/rules?_a=(lastResponse:!(),status:!(snoozed))'
+    );
   });
 
   test('snoozed stat count is link-colored, when there are snoozed rules', async () => {
@@ -161,6 +170,10 @@ describe('Rule stats', () => {
     );
     const { container } = render(stats[2]);
     expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
+    expect(screen.getByText('Errors').closest('a')).toHaveAttribute(
+      'href',
+      '/app/observability/alerts/rules?_a=(lastResponse:!(error),status:!())'
+    );
   });
 
   test('errors stat count is link-colored, when there are error rules', () => {
