@@ -9855,7 +9855,6 @@
     "xpack.cases.recentCases.viewAllCasesLink": "Afficher tous les cas",
     "xpack.cases.settings.syncAlertsSwitchLabelOff": "Arrêt",
     "xpack.cases.settings.syncAlertsSwitchLabelOn": "Marche",
-    "xpack.cases.status.all": "Tout",
     "xpack.cases.status.closed": "Fermé",
     "xpack.cases.status.iconAria": "Modifier le statut",
     "xpack.cases.status.inProgress": "En cours",

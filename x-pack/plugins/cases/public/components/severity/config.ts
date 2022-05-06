@@ -7,7 +7,8 @@
 
 import { euiLightVars } from '@kbn/ui-theme';
 import { CaseSeverity } from '../../../common/api';
-import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
+import { SeverityAll } from '../../containers/types';
+import { ALL_SEVERITIES, CRITICAL, HIGH, LOW, MEDIUM } from './translations';
 
 export const severities = {
   [CaseSeverity.LOW]: {
@@ -25,5 +26,13 @@ export const severities = {
   [CaseSeverity.CRITICAL]: {
     color: euiLightVars.euiColorVis9,
     label: CRITICAL,
+  },
+};
+
+export const severitiesWithAll = {
+  ...severities,
+  [SeverityAll]: {
+    color: 'transparent',
+    label: ALL_SEVERITIES,
   },
 };

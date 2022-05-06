@@ -18,12 +18,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiHealth,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
 import { Case, DeleteCase } from '../../../common/ui/types';
-import { CaseStatuses, ActionConnector } from '../../../common/api';
+import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -40,6 +41,7 @@ import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { severities } from '../severity/config';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -300,30 +302,6 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(isSelectorView
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            render: (theCase: Case) => {
-              if (theCase.id != null) {
-                return (
-                  <EuiButton
-                    data-test-subj={`cases-table-row-select-${theCase.id}`}
-                    onClick={() => {
-                      assignCaseAction(theCase);
-                    }}
-                    size="s"
-                    fill={true}
-                  >
-                    {i18n.SELECT}
-                  </EuiButton>
-                );
-              }
-              return getEmptyTagValue();
-            },
-          },
-        ]
-      : []),
     ...(!isSelectorView
       ? [
           {
@@ -347,6 +325,38 @@ export const useCasesColumns = ({
                   }
                 />
               );
+            },
+          },
+        ]
+      : []),
+    {
+      name: i18n.SEVERITY,
+      render: (theCase: Case) => {
+        const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+        return <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>;
+      },
+    },
+
+    ...(isSelectorView
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            render: (theCase: Case) => {
+              if (theCase.id != null) {
+                return (
+                  <EuiButton
+                    data-test-subj={`cases-table-row-select-${theCase.id}`}
+                    onClick={() => {
+                      assignCaseAction(theCase);
+                    }}
+                    size="s"
+                    fill={true}
+                  >
+                    {i18n.SELECT}
+                  </EuiButton>
+                );
+              }
+              return getEmptyTagValue();
             },
           },
         ]

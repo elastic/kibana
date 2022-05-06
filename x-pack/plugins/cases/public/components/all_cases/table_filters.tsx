@@ -10,7 +10,12 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
-import { StatusAll, CaseStatusWithAllStatus } from '../../../common/ui/types';
+import {
+  StatusAll,
+  CaseStatusWithAllStatus,
+  SeverityAll,
+  CaseSeverityWithAll,
+} from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -18,6 +23,7 @@ import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
+import { SeverityFilter } from './severity_filter';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -48,6 +54,7 @@ const StatusFilterWrapper = styled(EuiFlexItem)`
 
 const defaultInitial = {
   search: '',
+  severity: SeverityAll,
   reporters: [],
   status: StatusAll,
   tags: [],
@@ -151,6 +158,13 @@ const CasesTableFiltersComponent = ({
     [onFilterChanged]
   );
 
+  const onSeverityChanged = useCallback(
+    (severity: CaseSeverityWithAll) => {
+      onFilterChanged({ severity });
+    },
+    [onFilterChanged]
+  );
+
   const stats = useMemo(
     () => ({
       [StatusAll]: null,
@@ -179,6 +193,14 @@ const CasesTableFiltersComponent = ({
               incremental={false}
               placeholder={i18n.SEARCH_PLACEHOLDER}
               onSearch={handleOnSearch}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SeverityFilter
+              selectedSeverity={initial.severity}
+              onSeverityChange={onSeverityChanged}
+              isLoading={false}
+              isDisabled={false}
             />
           </EuiFlexItem>
           <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">

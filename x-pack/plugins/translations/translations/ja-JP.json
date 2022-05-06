@@ -9820,7 +9820,6 @@
     "xpack.cases.recentCases.viewAllCasesLink": "すべてのケースを表示",
     "xpack.cases.settings.syncAlertsSwitchLabelOff": "オフ",
     "xpack.cases.settings.syncAlertsSwitchLabelOn": "オン",
-    "xpack.cases.status.all": "すべて",
     "xpack.cases.status.closed": "終了",
     "xpack.cases.status.iconAria": "ステータスの変更",
     "xpack.cases.status.inProgress": "進行中",

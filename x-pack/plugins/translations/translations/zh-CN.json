@@ -9842,7 +9842,6 @@
     "xpack.cases.recentCases.viewAllCasesLink": "查看所有案例",
     "xpack.cases.settings.syncAlertsSwitchLabelOff": "关闭",
     "xpack.cases.settings.syncAlertsSwitchLabelOn": "开启",
-    "xpack.cases.status.all": "全部",
     "xpack.cases.status.closed": "已关闭",
     "xpack.cases.status.iconAria": "更改状态",
     "xpack.cases.status.inProgress": "进行中",
