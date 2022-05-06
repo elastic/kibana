@@ -164,7 +164,7 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
       }
       titleSize="xs"
       fullWidth
-    >131749
+    >
       <>
         <UseField<string>
           path={waitForSnapshotFormField}
