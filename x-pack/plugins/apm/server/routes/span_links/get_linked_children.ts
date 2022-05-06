@@ -71,7 +71,7 @@ function getSpanId(source: TransactionRaw | SpanRaw) {
     : (source as TransactionRaw).transaction?.id;
 }
 
-export async function getLinkedChildrenOfSpanCountBySpanId({
+export async function getLinkedChildrenCountBySpanId({
   traceId,
   setup,
   start,
@@ -82,14 +82,14 @@ export async function getLinkedChildrenOfSpanCountBySpanId({
   start: number;
   end: number;
 }) {
-  const outgoingSpans = await fetchLinkedChildrenOfSpan({
+  const linkedChildren = await fetchLinkedChildrenOfSpan({
     traceId,
     setup,
     start,
     end,
   });
 
-  return outgoingSpans.reduce<Record<string, number>>(
+  return linkedChildren.reduce<Record<string, number>>(
     (acc, { _source: source }) => {
       source.span?.links?.forEach((link) => {
         // Ignores span links that don't belong to this trace
@@ -116,7 +116,7 @@ export async function getLinkedChildrenOfSpan({
   start: number;
   end: number;
 }) {
-  const outgoingSpan = await fetchLinkedChildrenOfSpan({
+  const linkedChildren = await fetchLinkedChildrenOfSpan({
     traceId,
     spanId,
     setup,
@@ -124,7 +124,7 @@ export async function getLinkedChildrenOfSpan({
     end,
   });
 
-  return outgoingSpan.map(({ _source: source }) => {
+  return linkedChildren.map(({ _source: source }) => {
     return {
       trace: { id: source.trace.id },
       span: { id: getSpanId(source) },

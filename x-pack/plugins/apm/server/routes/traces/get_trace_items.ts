@@ -19,7 +19,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
-import { getLinkedChildrenOfSpanCountBySpanId } from '../span_links/get_linked_children';
+import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
 
 export async function getTraceItems(
   traceId: string,
@@ -79,7 +79,7 @@ export async function getTraceItems(
     await Promise.all([
       errorResponsePromise,
       traceResponsePromise,
-      getLinkedChildrenOfSpanCountBySpanId({ traceId, setup, start, end }),
+      getLinkedChildrenCountBySpanId({ traceId, setup, start, end }),
     ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
