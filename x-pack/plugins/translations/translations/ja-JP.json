@@ -20395,7 +20395,6 @@
     "xpack.monitoring.cluster.overview.kibanaPanel.requestsLabel": "リクエスト",
     "xpack.monitoring.cluster.overview.logsPanel.logTypeTitle": "{type}",
     "xpack.monitoring.cluster.overview.logsPanel.noLogsFound": "ログが見つかりませんでした。",
-    "xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip": "ベータ機能",
     "xpack.monitoring.cluster.overview.logstashPanel.eventsEmittedLabel": "送信イベント",
     "xpack.monitoring.cluster.overview.logstashPanel.eventsReceivedLabel": "受信イベント",
     "xpack.monitoring.cluster.overview.logstashPanel.jvmHeapLabel": "{javaVirtualMachine}ヒープ",

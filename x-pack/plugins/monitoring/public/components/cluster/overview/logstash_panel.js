@@ -29,7 +29,6 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -235,19 +234,6 @@ export function LogstashPanel(props) {
                     </DisabledIfNoDataAndInSetupModeLink>
                   </h3>
                 </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip',
-                    {
-                      defaultMessage: 'Beta feature',
-                    }
-                  )}
-                  position="bottom"
-                  type="beaker"
-                  aria-label="Beta feature"
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />

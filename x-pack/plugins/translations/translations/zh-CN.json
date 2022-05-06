@@ -20427,7 +20427,6 @@
     "xpack.monitoring.cluster.overview.kibanaPanel.requestsLabel": "请求",
     "xpack.monitoring.cluster.overview.logsPanel.logTypeTitle": "{type}",
     "xpack.monitoring.cluster.overview.logsPanel.noLogsFound": "未找到任何日志。",
-    "xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip": "公测版功能",
     "xpack.monitoring.cluster.overview.logstashPanel.eventsEmittedLabel": "已发出事件",
     "xpack.monitoring.cluster.overview.logstashPanel.eventsReceivedLabel": "已接收事件",
     "xpack.monitoring.cluster.overview.logstashPanel.jvmHeapLabel": "{javaVirtualMachine} 堆",

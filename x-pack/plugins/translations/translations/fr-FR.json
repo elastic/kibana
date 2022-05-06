@@ -20372,7 +20372,6 @@
     "xpack.monitoring.cluster.overview.kibanaPanel.requestsLabel": "Requêtes",
     "xpack.monitoring.cluster.overview.logsPanel.logTypeTitle": "{type}",
     "xpack.monitoring.cluster.overview.logsPanel.noLogsFound": "Aucun log trouvé.",
-    "xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip": "Fonctionnalité bêta",
     "xpack.monitoring.cluster.overview.logstashPanel.eventsEmittedLabel": "Événements émis",
     "xpack.monitoring.cluster.overview.logstashPanel.eventsReceivedLabel": "Événements reçus",
     "xpack.monitoring.cluster.overview.logstashPanel.jvmHeapLabel": "Tas {javaVirtualMachine}",
