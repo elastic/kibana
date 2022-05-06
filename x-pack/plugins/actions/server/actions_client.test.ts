@@ -1369,12 +1369,12 @@ describe('getOAuthAccessToken()', () => {
     });
   });
 
-  test('throws when tokenUrl is not using https', async () => {
+  test('throws when tokenUrl is not using http or https', async () => {
     await expect(
       getOAuthAccessToken({
         type: 'jwt',
         options: {
-          tokenUrl: 'http://testurl.service-now.com/oauth_token.do',
+          tokenUrl: 'ftp://testurl.service-now.com/oauth_token.do',
           config: {
             clientId: 'abc',
             jwtKeyId: 'def',
@@ -1386,7 +1386,7 @@ describe('getOAuthAccessToken()', () => {
           },
         },
       })
-    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must use https]`);
+    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must use http or https]`);
 
     expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
   });

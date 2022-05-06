@@ -492,8 +492,8 @@ export class ActionsClient {
       throw Boom.badRequest(`Token URL must contain hostname`);
     }
 
-    if (parsedUrl.protocol !== 'https:') {
-      throw Boom.badRequest(`Token URL must use https`);
+    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+      throw Boom.badRequest(`Token URL must use http or https`);
     }
 
     let accessToken: string | null = null;
