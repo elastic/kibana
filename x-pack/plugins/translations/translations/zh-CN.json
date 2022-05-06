@@ -26036,7 +26036,6 @@
     "xpack.securitySolution.hosts.hostScoreOverTime.riskScore": "风险分数",
     "xpack.securitySolution.hosts.hostScoreOverTime.riskyLabel": "有风险",
     "xpack.securitySolution.hosts.hostScoreOverTime.riskyThresholdHeader": "有风险的阈值",
-    "xpack.securitySolution.hosts.hostScoreOverTime.title": "一段时间的主机风险分数",
     "xpack.securitySolution.hosts.kqlPlaceholder": "例如 host.name：“foo”",
     "xpack.securitySolution.hosts.navigation.alertsTitle": "外部告警",
     "xpack.securitySolution.hosts.navigation.allHostsTitle": "所有主机",

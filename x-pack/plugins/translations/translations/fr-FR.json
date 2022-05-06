@@ -25837,7 +25837,6 @@
     "xpack.securitySolution.hosts.hostScoreOverTime.riskScore": "Score de risque",
     "xpack.securitySolution.hosts.hostScoreOverTime.riskyLabel": "À risque",
     "xpack.securitySolution.hosts.hostScoreOverTime.riskyThresholdHeader": "Seuil du niveau À risque",
-    "xpack.securitySolution.hosts.hostScoreOverTime.title": "Score de risque de l'hôte sur la durée",
     "xpack.securitySolution.hosts.kqlPlaceholder": "par ex. hôte.nom : \"foo\"",
     "xpack.securitySolution.hosts.navigation.alertsTitle": "Alertes externes",
     "xpack.securitySolution.hosts.navigation.allHostsTitle": "Tous les hôtes",
