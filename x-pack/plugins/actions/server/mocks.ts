@@ -24,6 +24,7 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
+    registerSubActionConnectorType: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
   };
   return mock;
