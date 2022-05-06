@@ -6,7 +6,7 @@
  */
 import _ from 'lodash';
 import memoizeOne from 'memoize-one';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   AlertStatusEventEntityIdMap,
   EventAction,
@@ -17,6 +17,7 @@ import {
   ProcessEventsPage,
 } from '../../../common/types/process_tree';
 import {
+  inferProcessFromLeaderInfo,
   updateAlertEventStatus,
   processNewEvents,
   searchProcessTree,
@@ -283,31 +284,12 @@ export const useProcessTree = ({
   verboseMode,
   jumpToEntityId,
 }: UseProcessTreeDeps) => {
-  // initialize map, as well as a placeholder for session leader process
-  // we add a fake session leader event, sourced from wide event data.
-  // this is because we might not always have a session leader event
-  // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = { ...data[0]?.events?.[0] }; // ?.find?.((event) => event.event?.kind === EventKind.event);
-  const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
+  const firstEvent = data[0]?.events?.[0];
+  const sessionLeaderProcess = useMemo(() => {
+    const entryLeader = firstEvent?.process?.entry_leader;
 
-  if (fakeLeaderEvent) {
-    if (fakeLeaderEvent.event) {
-      fakeLeaderEvent.event.id = 'fakeSessionLeader';
-    }
-    fakeLeaderEvent.user = fakeLeaderEvent?.process?.entry_leader?.user;
-    fakeLeaderEvent.group = fakeLeaderEvent?.process?.entry_leader?.group;
-
-    // overwrite top level process data with with info from the widened entry_leader context
-    fakeLeaderEvent.process = {
-      ...fakeLeaderEvent.process?.entry_leader,
-    };
-
-    // these details will be inaccurate since we've copied this from another event
-    delete fakeLeaderEvent.process?.group_leader;
-    delete fakeLeaderEvent.process?.parent;
-
-    sessionLeaderProcess.addEvent(fakeLeaderEvent);
-  }
+    return inferProcessFromLeaderInfo(firstEvent, entryLeader);
+  }, [firstEvent]);
 
   const initializedProcessMap: ProcessMap = {
     [sessionEntityId]: sessionLeaderProcess,
@@ -329,13 +311,7 @@ export const useProcessTree = ({
       if (!processed) {
         const backwards = i < processedPages.length;
 
-        const result = processNewEvents(
-          updatedProcessMap,
-          page.events,
-          orphans,
-          sessionEntityId,
-          backwards
-        );
+        const result = processNewEvents(updatedProcessMap, page.events, orphans, backwards);
 
         updatedProcessMap = result[0];
         newOrphans = result[1];

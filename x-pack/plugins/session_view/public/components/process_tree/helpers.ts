@@ -11,8 +11,42 @@ import {
   Process,
   ProcessEvent,
   ProcessMap,
+  ProcessFields,
 } from '../../../common/types/process_tree';
 import { ProcessImpl } from './hooks';
+
+// Creates an instance of Process, from a nested leader process fieldset
+// This is used to ensure we always have a record for a session leader, as well as
+// a parent record for potentially orphaned processes
+export function inferProcessFromLeaderInfo(sourceEvent?: ProcessEvent, leader?: ProcessFields) {
+  const entityId = leader?.entity_id || '';
+  const process = new ProcessImpl(entityId);
+
+  if (sourceEvent && leader) {
+    const event = {
+      ...sourceEvent,
+      process: {
+        ...sourceEvent.process,
+        ...leader,
+      },
+      user: leader.user,
+      group: leader.group,
+      event: {
+        ...sourceEvent.event,
+        id: `fake-${entityId}`,
+      },
+    };
+
+    // won't be accurate, so removing
+    if (sourceEvent.process?.parent === leader) {
+      delete event.process?.parent;
+    }
+
+    process.addEvent(event);
+  }
+
+  return process;
+}
 
 // if given event is an alert, and it exist in updatedAlertsStatus, update the alert's status
 // with the updated status value in updatedAlertsStatus Map
@@ -76,7 +110,6 @@ export const buildProcessTree = (
   processMap: ProcessMap,
   events: ProcessEvent[],
   orphans: Process[],
-  sessionEntityId: string,
   backwardDirection: boolean = false
 ) => {
   // we process events in reverse order when paginating backwards.
@@ -87,21 +120,29 @@ export const buildProcessTree = (
   events.forEach((event) => {
     const { entity_id: id, parent } = event.process ?? {};
     const process = processMap[id ?? ''];
-    const parentProcess = processMap[parent?.entity_id ?? ''];
-    // if either entity_id or parent does not exist, return
-    // if session leader, or process already has a parent, return
-    if (!id || !parent || process.id === sessionEntityId || process.parent) {
-      return;
-    }
+    let parentProcess = processMap[parent?.entity_id ?? ''];
 
-    if (parentProcess) {
-      process.parent = parentProcess; // handy for recursive operations (like auto expand)
-      parentProcess.addChild(process);
-    } else {
-      if (!orphans.includes(process)) {
-        orphans.push(process);
+    if (!parentProcess) {
+      // infer a fake process for the parent, incase we don't end up loading any parent events (due to filtering or jumpToCursor pagination)
+      const parentFields = event?.process?.parent;
+
+      if (parentFields?.entity_id && !processMap[parentFields.entity_id]) {
+        parentProcess = inferProcessFromLeaderInfo(event, parentFields);
+        processMap[parentProcess.id] = parentProcess;
+
+        // this fake parent will most likely be orphaned, so lets track is as such
+        if (!orphans.includes(parentProcess)) {
+          orphans.push(parentProcess);
+        }
+      } else {
+        if (!orphans.includes(process)) {
+          orphans.push(process);
+        }
       }
     }
+
+    process.parent = parentProcess; // handy for recursive operations (like auto expand)
+    parentProcess.addChild(process);
   });
 
   const newOrphans: Process[] = [];
@@ -201,7 +242,6 @@ export const processNewEvents = (
   eventsProcessMap: ProcessMap,
   events: ProcessEvent[] | undefined,
   orphans: Process[],
-  sessionEntityId: string,
   backwardDirection: boolean = false
 ): [ProcessMap, Process[]] => {
   if (!events || events.length === 0) {
@@ -209,13 +249,7 @@ export const processNewEvents = (
   }
 
   const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
-  const newOrphans = buildProcessTree(
-    updatedProcessMap,
-    events,
-    orphans,
-    sessionEntityId,
-    backwardDirection
-  );
+  const newOrphans = buildProcessTree(updatedProcessMap, events, orphans, backwardDirection);
 
   return [autoExpandProcessTree(updatedProcessMap), newOrphans];
 };
