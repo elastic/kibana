@@ -204,6 +204,11 @@ describe('AllCasesListGeneric', () => {
           .childAt(0)
           .prop('value')
       ).toBe(useGetCasesMockState.data.cases[0].createdAt);
+
+      expect(
+        wrapper.find(`[data-test-subj="case-table-column-severity"]`).first().text().toLowerCase()
+      ).toBe(useGetCasesMockState.data.cases[0].severity);
+
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
       );
