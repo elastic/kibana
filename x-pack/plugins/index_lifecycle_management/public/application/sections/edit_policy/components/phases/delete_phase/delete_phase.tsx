@@ -14,7 +14,9 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiText,
-  EuiComment,
+  EuiTimelineItem,
+  EuiHorizontalRule,
+  EuiSplitPanel,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,8 +27,6 @@ import { usePhaseTimings, globalFields } from '../../../form';
 import { PhaseIcon } from '../../phase_icon';
 import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
 import { PhaseErrorIndicator } from '../phase/phase_error_indicator';
-
-import './delete_phase.scss';
 
 const formFieldPaths = {
   enabled: globalFields.deleteEnabled.path,
@@ -44,14 +44,14 @@ export const DeletePhase: FunctionComponent = () => {
     return null;
   }
   const phaseTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize={'s'} wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiTitle size={'s'}>
           <h2>{i18nTexts.editPolicy.titles.delete}</h2>
         </EuiTitle>
       </EuiFlexItem>
 
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           onClick={() => setDeletePhaseEnabled(false)}
           data-test-subj={'disableDeletePhaseButton'}
@@ -66,25 +66,31 @@ export const DeletePhase: FunctionComponent = () => {
       <EuiFlexItem grow={false}>
         <PhaseErrorIndicator phase={'delete'} />
       </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <MinAgeField phase={'delete'} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
   return (
-    <>
-      <EuiSpacer />
-      <EuiComment
-        data-test-subj="delete-phase"
-        username={phaseTitle}
-        actions={<MinAgeField phase={'delete'} />}
-        className="ilmDeletePhase ilmPhase"
-        timelineIcon={<PhaseIcon enabled={enabled} phase={'delete'} />}
-      >
-        <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
-          {i18nTexts.editPolicy.descriptions.delete}
-        </EuiText>
-        <EuiSpacer />
-        <SnapshotPoliciesField />
-      </EuiComment>
-    </>
+    <EuiTimelineItem
+      data-test-subj="delete-phase"
+      icon={<PhaseIcon enabled={enabled} phase="delete" />}
+      verticalAlign="top"
+    >
+      <EuiSplitPanel.Outer color="transparent" hasBorder grow>
+        <EuiSplitPanel.Inner color={enabled ? 'transparent' : 'subdued'}>
+          {phaseTitle}
+        </EuiSplitPanel.Inner>
+        <EuiHorizontalRule margin="none" />
+        <EuiSplitPanel.Inner>
+          <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
+            {i18nTexts.editPolicy.descriptions.delete}
+          </EuiText>
+          <EuiSpacer />
+          <SnapshotPoliciesField />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </EuiTimelineItem>
   );
 };

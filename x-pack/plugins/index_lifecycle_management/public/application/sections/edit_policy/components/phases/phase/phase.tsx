@@ -12,10 +12,12 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
-  EuiComment,
   EuiAccordion,
   EuiSpacer,
   EuiBadge,
+  EuiTimelineItem,
+  EuiSplitPanel,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -51,7 +53,7 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
   const enabled = get(formData, enabledPath) || isHotPhase;
 
   const phaseTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize={'s'} wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
       {!isHotPhase && (
         <EuiFlexItem grow={false}>
           <UseField
@@ -67,13 +69,13 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiTitle size={'s'}>
+        <EuiTitle size="s">
           <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
         </EuiTitle>
       </EuiFlexItem>
       {isHotPhase && (
         <EuiFlexItem grow={false}>
-          <EuiBadge>
+          <EuiBadge className="ilmPhaseRequiredBadge">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.phaseTitle.requiredBadge"
               defaultMessage="Required"
@@ -84,59 +86,64 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
       <EuiFlexItem grow={false}>
         <PhaseErrorIndicator phase={phase} />
       </EuiFlexItem>
+      {!isHotPhase && enabled && (
+        <EuiFlexItem grow={true}>
+          <MinAgeField phase={phase} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 
-  // @ts-ignore
-  const minAge = !isHotPhase && enabled ? <MinAgeField phase={phase} /> : null;
-
   return (
-    <EuiComment
-      username={phaseTitle}
-      actions={minAge}
-      timelineIcon={<PhaseIcon enabled={enabled} phase={phase} />}
-      className={`ilmPhase ${enabled ? 'ilmPhase--enabled' : ''}`}
-      data-test-subj={`${phase}-phase`}
-    >
-      <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
-        {i18nTexts.editPolicy.descriptions[phase]}
-      </EuiText>
+    <EuiTimelineItem icon={<PhaseIcon enabled={enabled} phase={phase} />} verticalAlign="top">
+      <EuiSplitPanel.Outer color="transparent" hasBorder grow>
+        <EuiSplitPanel.Inner color={enabled ? 'transparent' : 'subdued'}>
+          {phaseTitle}
+        </EuiSplitPanel.Inner>
+        <EuiHorizontalRule margin="none" />
+        <EuiSplitPanel.Inner>
+          <EuiText color="subdued" size="s" style={{ maxWidth: '50%' }}>
+            {i18nTexts.editPolicy.descriptions[phase]}
+          </EuiText>
 
-      {enabled && (
-        <>
-          {!!topLevelSettings ? (
+          {enabled && (
             <>
-              <EuiSpacer />
-              {topLevelSettings}
-            </>
-          ) : (
-            <EuiSpacer size="m" />
-          )}
+              {!!topLevelSettings ? (
+                <>
+                  <EuiSpacer />
+                  {topLevelSettings}
+                </>
+              ) : (
+                <EuiSpacer size="m" />
+              )}
 
-          {children ? (
-            <EuiAccordion
-              id={`${phase}-settingsSwitch`}
-              buttonContent={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
-                  defaultMessage="Advanced settings"
-                />
-              }
-              buttonClassName="ilmSettingsButton"
-              extraAction={<PhaseFooter phase={phase} />}
-            >
-              <EuiSpacer />
-              {children}
-            </EuiAccordion>
-          ) : (
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <PhaseFooter phase={phase} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              {children ? (
+                <EuiAccordion
+                  id={`${phase}-settingsSwitch`}
+                  className="ilmSettingsAccordion"
+                  buttonContent={
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
+                      defaultMessage="Advanced settings"
+                    />
+                  }
+                  buttonClassName="ilmSettingsButton"
+                  extraAction={<PhaseFooter phase={phase} />}
+                >
+                  <EuiSpacer />
+                  {children}
+                </EuiAccordion>
+              ) : (
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <PhaseFooter phase={phase} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </>
           )}
-        </>
-      )}
-    </EuiComment>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </EuiTimelineItem>
   );
 };

@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiPageHeader,
+  EuiTimeline,
 } from '@elastic/eui';
 
 import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
@@ -235,27 +236,21 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         <EuiSpacer size="l" />
 
-        <div>
+        <EuiTimeline>
           <HotPhase />
 
-          <EuiSpacer />
           <WarmPhase />
 
-          <EuiSpacer />
           <ColdPhase />
 
           {isAllowedByLicense && (
             <>
-              <EuiSpacer />
               <FrozenPhase />
             </>
           )}
 
-          {/* We can't add the <EuiSpacer /> here as it breaks the layout
-              and makes the connecting line go further that it needs to.
-              There is an issue in EUI to fix this (https://github.com/elastic/eui/issues/4492) */}
           <DeletePhase />
-        </div>
+        </EuiTimeline>
 
         <EuiHorizontalRule />
 
