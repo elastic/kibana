@@ -202,19 +202,6 @@
         }
       }
     },
-    "search": {
-      "properties": {
-        "successCount": {
-          "type": "long"
-        },
-        "errorCount": {
-          "type": "long"
-        },
-        "averageDuration": {
-          "type": "float"
-        }
-      }
-    },
     "search-session": {
       "properties": {
         "transientCount": {
@@ -225,6 +212,19 @@
         },
         "totalCount": {
           "type": "long"
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
         }
       }
     },
@@ -8128,6 +8128,12 @@
           }
         },
         "observability:enableInspectEsQueries": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableNewSyntheticsView": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
