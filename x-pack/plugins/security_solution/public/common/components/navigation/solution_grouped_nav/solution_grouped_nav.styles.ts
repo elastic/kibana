@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
-
-const primaryBackground = 'rgba(0, 119, 204, 0.1)';
+import { EuiThemeComputed, transparentize } from '@elastic/eui';
 
 export const solutionGroupedNavStyles = (euiTheme: EuiThemeComputed<{}>) => ({
   sideNavItem: `
-    font-weight: 400;
+    font-weight: ${euiTheme.font.weight.regular};
     &.solutionGroupedNavItem--isPrimary {
-      font-weight: 700;
+      font-weight: ${euiTheme.font.weight.bold};
     }
     &:focus,
     &:focus-within,
     &:hover,
     &.solutionGroupedNavItem--isActive {
-      background-color: ${primaryBackground};
+      background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
     }
     .solutionGroupedNavItemButton:focus,
     .solutionGroupedNavItemButton:focus-within,
     .solutionGroupedNavItemButton:hover {
-      background-color: ${primaryBackground};
+      background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
     }
   `,
 });

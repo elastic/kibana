@@ -109,49 +109,36 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   });
 
   /**
-   * Create the avatar
-   */
-  const solutionAvatar = useMemo(() => {
-    if (!icon) {
-      return;
-    }
-    return (
-      <KibanaSolutionAvatar
-        className="kbnPageTemplateSolutionNav__avatar"
-        iconType={icon}
-        name={name}
-      />
-    );
-  }, [name, icon]);
-
-  /**
-   * Create the titles
+   * Create the avatar and titles
    */
   const headingID = headingProps?.id || generateId('heading');
   const HeadingElement = headingProps?.element || 'h2';
-  const titleText = useMemo(
-    () => (
-      <EuiTitle size="xs" id={headingID}>
-        <HeadingElement>
-          {solutionAvatar}
-          <strong>
-            <FormattedMessage
-              id="sharedUXComponents.solutionNav.mobileTitleText"
-              defaultMessage="{solutionName} {menuText}"
-              values={{
-                solutionName: name || 'Navigation',
-                menuText: isSmallerBreakpoint
-                  ? i18n.translate('sharedUXComponents.solutionNav.menuText', {
-                      defaultMessage: 'menu',
-                    })
-                  : '',
-              }}
-            />
-          </strong>
-        </HeadingElement>
-      </EuiTitle>
-    ),
-    [name, solutionAvatar, headingID, HeadingElement, isSmallerBreakpoint]
+  const titleText = (
+    <EuiTitle size="xs" id={headingID}>
+      <HeadingElement>
+        {icon && (
+          <KibanaSolutionAvatar
+            className="kbnPageTemplateSolutionNav__avatar"
+            iconType={icon}
+            name={name}
+          />
+        )}
+        <strong>
+          <FormattedMessage
+            id="sharedUXComponents.solutionNav.mobileTitleText"
+            defaultMessage="{solutionName} {menuText}"
+            values={{
+              solutionName: name || 'Navigation',
+              menuText: isSmallerBreakpoint
+                ? i18n.translate('sharedUXComponents.solutionNav.menuText', {
+                    defaultMessage: 'menu',
+                  })
+                : '',
+            }}
+          />
+        </strong>
+      </HeadingElement>
+    </EuiTitle>
   );
 
   /**
