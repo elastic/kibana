@@ -29,7 +29,6 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiCheckbox,
   EuiForm,
   EuiAccordion,
   useGeneratedHtmlId,
@@ -67,7 +66,6 @@ export const ControlGroupEditor = ({
   onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
-  const [resetAllWidths, setResetAllWidths] = useState(false);
   const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
 
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
@@ -109,7 +107,7 @@ export const ControlGroupEditor = ({
 
   const applyChangesToInput = useCallback(() => {
     const inputToApply = { ...controlGroupEditorState };
-    if (resetAllWidths) {
+    if (inputToApply.defaultControlWidth !== initialInput.defaultControlWidth) {
       const newPanels = {} as ControlsPanels;
       Object.entries(initialInput.panels).forEach(
         ([id, panel]) =>
@@ -122,7 +120,7 @@ export const ControlGroupEditor = ({
       inputToApply.panels = newPanels;
     }
     if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
-  }, [controlGroupEditorState, resetAllWidths, initialInput, updateInput]);
+  }, [controlGroupEditorState, initialInput, updateInput]);
 
   return (
     <>
@@ -161,30 +159,6 @@ export const ControlGroupEditor = ({
                   });
                 }}
               />
-              <EuiSpacer size="s" />
-              <EuiSwitch
-                label={ControlGroupStrings.management.getDefaultGrowTitle()}
-                checked={controlGroupEditorState.defaultControlGrow}
-                onChange={() => {
-                  updateControlGroupEditorSetting({
-                    defaultControlGrow: !controlGroupEditorState.defaultControlGrow,
-                  });
-                }}
-              />
-              {controlCount > 0 && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCheckbox
-                    id="editControls_setAllSizesCheckbox"
-                    data-test-subj="set-all-control-sizes-checkbox"
-                    label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-                    checked={resetAllWidths}
-                    onChange={(e) => {
-                      setResetAllWidths(e.target.checked);
-                    }}
-                  />
-                </>
-              )}
             </>
           </EuiFormRow>
           <EuiHorizontalRule margin="m" />
