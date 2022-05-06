@@ -22,9 +22,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
-    });
 
-    before(async () => {
       await kibanaServer.uiSettings.update({
         'visualization:visualize:legacyPieChartsLibrary': true,
       });

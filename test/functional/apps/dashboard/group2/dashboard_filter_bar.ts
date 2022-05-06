@@ -145,6 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
+        await elasticChart.setNewChartUiDebugFlag(true);
         await pieChart.expectPieSliceCount(1);
       });
 
@@ -154,6 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goForward();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
+        await elasticChart.setNewChartUiDebugFlag(true);
         await pieChart.expectPieSliceCount(1);
       });
 

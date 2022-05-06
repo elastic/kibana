@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const browser = getService('browser');
   const log = getService('log');
   const queryBar = getService('queryBar');
@@ -75,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
@@ -93,6 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
@@ -113,6 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
