@@ -84,7 +84,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await visualBuilder.clickPanelOptions('metric');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
-        await visChart.waitForVisualizationRenderingStabilized();
 
         const value = await visualBuilder.getMetricValue();
         expect(value).to.eql('13,492');
@@ -120,7 +119,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('metric');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
         await visualBuilder.clickDataTab('metric');
-        await visChart.waitForVisualizationRenderingStabilized();
         await visualBuilder.checkInvalidAggComponentIsPresent();
         const error = await visualBuilder.getVisualizeError();
 
@@ -208,7 +206,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('gauge');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
         await visualBuilder.clickDataTab('gauge');
-        await visChart.waitForVisualizationRenderingStabilized();
         await visualBuilder.checkInvalidAggComponentIsPresent();
         const error = await visualBuilder.getVisualizeError();
 
@@ -331,7 +328,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.changeDataFormatter('number');
         await visualBuilder.clickPanelOptions('topN');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
-        await visChart.waitForVisualizationRenderingStabilized();
 
         const topNLabel = await visualBuilder.getTopNLabel();
         const topNCount = await visualBuilder.getTopNCount();
@@ -367,7 +363,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('topN');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
         await visualBuilder.clickDataTab('topN');
-        await visChart.waitForVisualizationRenderingStabilized();
         await visualBuilder.checkInvalidAggComponentIsPresent();
         const error = await visualBuilder.getVisualizeError();
 
