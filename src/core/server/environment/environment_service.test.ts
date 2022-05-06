@@ -13,10 +13,12 @@ import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
 import { CoreContext } from '../core_context';
+import type { AnalyticsServicePreboot } from '../analytics';
 
 import { configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { mockCoreContext } from '../core_context.mock';
+import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 jest.mock('./resolve_uuid', () => ({
   resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
@@ -63,11 +65,13 @@ describe('UuidService', () => {
   let configService: ReturnType<typeof configServiceMock.create>;
   let coreContext: CoreContext;
   let service: EnvironmentService;
+  let analytics: AnalyticsServicePreboot;
 
   beforeEach(async () => {
     logger = loggingSystemMock.create();
     configService = getConfigService();
     coreContext = mockCoreContext.create({ logger, configService });
+    analytics = analyticsServiceMock.createAnalyticsServicePreboot();
 
     service = new EnvironmentService(coreContext);
   });
@@ -78,7 +82,7 @@ describe('UuidService', () => {
 
   describe('#preboot()', () => {
     it('calls resolveInstanceUuid with correct parameters', async () => {
-      await service.preboot();
+      await service.preboot({ analytics });
 
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
       expect(resolveInstanceUuid).toHaveBeenCalledWith({
@@ -89,7 +93,7 @@ describe('UuidService', () => {
     });
 
     it('calls createDataFolder with correct parameters', async () => {
-      await service.preboot();
+      await service.preboot({ analytics });
 
       expect(createDataFolder).toHaveBeenCalledTimes(1);
       expect(createDataFolder).toHaveBeenCalledWith({
@@ -99,7 +103,7 @@ describe('UuidService', () => {
     });
 
     it('calls writePidFile with correct parameters', async () => {
-      await service.preboot();
+      await service.preboot({ analytics });
 
       expect(writePidFile).toHaveBeenCalledTimes(1);
       expect(writePidFile).toHaveBeenCalledWith({
@@ -109,14 +113,14 @@ describe('UuidService', () => {
     });
 
     it('returns the uuid resolved from resolveInstanceUuid', async () => {
-      const preboot = await service.preboot();
+      const preboot = await service.preboot({ analytics });
 
       expect(preboot.instanceUuid).toEqual('SOME_UUID');
     });
 
     describe('process warnings', () => {
       it('logs warnings coming from the process', async () => {
-        await service.preboot();
+        await service.preboot({ analytics });
 
         const warning = new Error('something went wrong');
         process.emit('warning', warning);
@@ -126,7 +130,7 @@ describe('UuidService', () => {
       });
 
       it('does not log deprecation warnings', async () => {
-        await service.preboot();
+        await service.preboot({ analytics });
 
         const warning = new Error('something went wrong');
         warning.name = 'DeprecationWarning';
@@ -139,7 +143,7 @@ describe('UuidService', () => {
     // TODO: From Nodejs v16 emitting an unhandledRejection will kill the process
     describe.skip('unhandledRejection warnings', () => {
       it('logs warn for an unhandeld promise rejected with an Error', async () => {
-        await service.preboot();
+        await service.preboot({ analytics });
 
         const err = new Error('something went wrong');
         process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
@@ -151,7 +155,7 @@ describe('UuidService', () => {
       });
 
       it('logs warn for an unhandeld promise rejected with a string', async () => {
-        await service.preboot();
+        await service.preboot({ analytics });
 
         const err = 'something went wrong';
         process.emit('unhandledRejection', err, new Promise((res, rej) => rej(err)));
@@ -166,7 +170,7 @@ describe('UuidService', () => {
 
   describe('#setup()', () => {
     it('returns the uuid resolved from resolveInstanceUuid', async () => {
-      await expect(service.preboot()).resolves.toEqual({ instanceUuid: 'SOME_UUID' });
+      await expect(service.preboot({ analytics })).resolves.toEqual({ instanceUuid: 'SOME_UUID' });
       expect(service.setup()).toEqual({ instanceUuid: 'SOME_UUID' });
     });
   });

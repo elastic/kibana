@@ -14,6 +14,7 @@ import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from 
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
 import type { UnauthorizedErrorHandler } from './client/retry_unauthorized';
+import { ClusterInfo } from './get_cluster_info';
 
 /**
  * @public
@@ -97,6 +98,7 @@ export type InternalElasticsearchServicePreboot = ElasticsearchServicePreboot;
 
 /** @internal */
 export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceSetup {
+  clusterInfo$: Observable<ClusterInfo>;
   esNodesCompatibility$: Observable<NodesVersionCompatibility>;
   status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
 }

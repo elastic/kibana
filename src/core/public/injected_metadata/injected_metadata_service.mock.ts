@@ -16,6 +16,7 @@ const createSetupContractMock = () => {
     getPublicBaseUrl: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBranch: jest.fn(),
+    getElasticsearchInfo: jest.fn(),
     getCspConfig: jest.fn(),
     getExternalUrlConfig: jest.fn(),
     getAnonymousStatusPage: jest.fn(),

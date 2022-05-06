@@ -34,6 +34,7 @@ import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
 import { isValidConnection as isValidConnectionMock } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
+import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/ensure_es_version'
@@ -53,6 +54,7 @@ let setupDeps: SetupDeps;
 
 beforeEach(() => {
   setupDeps = {
+    analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
   };

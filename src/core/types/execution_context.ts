@@ -14,7 +14,7 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type KibanaExecutionContext = {
   /**
-   * Kibana application initated an operation.
+   * Kibana application initiated an operation.
    * */
   readonly type?: string; // 'visualization' | 'actions' | 'server' | ..;
   /** public name of an application or a user-facing feature */

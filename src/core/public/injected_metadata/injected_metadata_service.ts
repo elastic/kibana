@@ -27,6 +27,12 @@ export interface InjectedPluginMetadata {
   };
 }
 
+export interface InjectedMetadataClusterInfo {
+  cluster_uuid?: string;
+  cluster_name?: string;
+  cluster_version?: string;
+}
+
 /** @internal */
 export interface InjectedMetadataParams {
   injectedMetadata: {
@@ -36,6 +42,7 @@ export interface InjectedMetadataParams {
     basePath: string;
     serverBasePath: string;
     publicBaseUrl: string;
+    clusterInfo: InjectedMetadataClusterInfo;
     category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
@@ -143,6 +150,10 @@ export class InjectedMetadataService {
       getTheme: () => {
         return this.state.theme;
       },
+
+      getElasticsearchInfo: () => {
+        return this.state.clusterInfo;
+      },
     };
   }
 }
@@ -169,6 +180,7 @@ export interface InjectedMetadataSetup {
     darkMode: boolean;
     version: ThemeVersion;
   };
+  getElasticsearchInfo: () => InjectedMetadataClusterInfo;
   /**
    * An array of frontend plugins in topological order.
    */

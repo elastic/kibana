@@ -15,6 +15,7 @@ import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
 import { FeatureUsageService } from './services';
 import type { PublicLicenseJSON } from '../common/types';
+import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 
 export const licensingSessionStorageKey = 'xpack.licensing';
 
@@ -81,6 +82,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       () => this.fetchLicense(core),
       this.getSaved()
     );
+
+    registerAnalyticsContextProvider(core.analytics, license$);
 
     this.internalSubscription = license$.subscribe((license) => {
       if (license.isAvailable) {
