@@ -9,6 +9,7 @@ import { Dictionary } from 'lodash';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ActionGroup,
   RuleAction,
@@ -26,7 +27,7 @@ import { ExecutionHandler } from './create_execution_handler';
 import { RawRule } from '../types';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { AlertingEventLogger } from '../lib';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -126,7 +127,7 @@ export interface CreateExecutionHandlerOptions<
     RecoveryActionGroupId
   >;
   logger: Logger;
-  alertingEventLogger: AlertingEventLogger;
+  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
   request: KibanaRequest;
   ruleParams: RuleTypeParams;
   supportsEphemeralTasks: boolean;

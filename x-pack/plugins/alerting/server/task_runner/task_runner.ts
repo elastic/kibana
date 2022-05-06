@@ -17,7 +17,6 @@ import { TaskRunnerContext } from './task_runner_factory';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
-  AlertingEventLogger,
   createWrappedScopedClusterClientFactory,
   ElasticsearchError,
   ErrorWithReason,
@@ -71,6 +70,7 @@ import {
 } from './types';
 import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -702,8 +702,6 @@ export class TaskRunner<
 
     this.alertingEventLogger.start();
 
-    console.log(this.alertingEventLogger.getEvent());
-
     const { stateWithMetrics, schedule, monitoring } = await errorAsRuleTaskRunResult(
       this.loadRuleAttributesAndRun()
     );
@@ -731,11 +729,11 @@ export class TaskRunner<
       }
     }
 
-    this.logger.info(
+    this.logger.debug(
       `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionStatus)}`
     );
     if (executionMetrics) {
-      this.logger.info(
+      this.logger.debug(
         `ruleRunMetrics for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionMetrics)}`
       );
     }
