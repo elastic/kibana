@@ -116,7 +116,7 @@ describe('migration actions', () => {
       await client.cluster.putSettings({
         body: {
           persistent: {
-            // Remove persistent test settings
+            // Reset persistent test settings
             cluster: { routing: { allocation: { enable: null } } },
           },
         },
@@ -126,11 +126,11 @@ describe('migration actions', () => {
       expect.assertions(1);
       const task = initAction({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Right",
-                  "right": Object {},
-                }
-              `);
+        Object {
+          "_tag": "Right",
+          "right": Object {},
+        }
+      `);
     });
     it('resolves right record with found indices', async () => {
       expect.assertions(1);
@@ -149,7 +149,7 @@ describe('migration actions', () => {
         })
       );
     });
-    it('resolves left with cluster routing allocation disabled', async () => {
+    it('resolves left when cluster.routing.allocation.enabled is incompatible', async () => {
       expect.assertions(3);
       await client.cluster.putSettings({
         body: {
@@ -164,14 +164,14 @@ describe('migration actions', () => {
         indices: ['existing_index_with_docs'],
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-              Object {
-                "_tag": "Left",
-                "left": Object {
-                  "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-                  "type": "unsupported_cluster_routing_allocation",
-                },
-              }
-            `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
+            "type": "unsupported_cluster_routing_allocation",
+          },
+        }
+      `);
       await client.cluster.putSettings({
         body: {
           persistent: {
@@ -185,14 +185,14 @@ describe('migration actions', () => {
         indices: ['existing_index_with_docs'],
       });
       await expect(task2()).resolves.toMatchInlineSnapshot(`
-              Object {
-                "_tag": "Left",
-                "left": Object {
-                  "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-                  "type": "unsupported_cluster_routing_allocation",
-                },
-              }
-            `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
+            "type": "unsupported_cluster_routing_allocation",
+          },
+        }
+      `);
       await client.cluster.putSettings({
         body: {
           persistent: {
@@ -206,14 +206,30 @@ describe('migration actions', () => {
         indices: ['existing_index_with_docs'],
       });
       await expect(task3()).resolves.toMatchInlineSnapshot(`
-              Object {
-                "_tag": "Left",
-                "left": Object {
-                  "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-                  "type": "unsupported_cluster_routing_allocation",
-                },
-              }
-            `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
+            "type": "unsupported_cluster_routing_allocation",
+          },
+        }
+      `);
+    });
+    it('resolves right when cluster.routing.allocation.enabled=all', async () => {
+      expect.assertions(1);
+      await client.cluster.putSettings({
+        body: {
+          persistent: {
+            cluster: { routing: { allocation: { enable: 'all' } } },
+          },
+        },
+      });
+      const task = initAction({
+        client,
+        indices: ['existing_index_with_docs'],
+      });
+      const result = await task();
+      expect(Either.isRight(result)).toBe(true);
     });
   });
 
@@ -271,14 +287,14 @@ describe('migration actions', () => {
       expect.assertions(1);
       const task = setWriteBlock({ client, index: 'no_such_index' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Left",
-                  "left": Object {
-                    "index": "no_such_index",
-                    "type": "index_not_found_exception",
-                  },
-                }
-              `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "index": "no_such_index",
+            "type": "index_not_found_exception",
+          },
+        }
+      `);
     });
   });
 
@@ -300,21 +316,21 @@ describe('migration actions', () => {
       expect.assertions(1);
       const task = removeWriteBlock({ client, index: 'existing_index_with_write_block_2' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Right",
-                  "right": "remove_write_block_succeeded",
-                }
-              `);
+        Object {
+          "_tag": "Right",
+          "right": "remove_write_block_succeeded",
+        }
+      `);
     });
     it('resolves right if successful when an index does not have a write block', async () => {
       expect.assertions(1);
       const task = removeWriteBlock({ client, index: 'existing_index_without_write_block_2' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Right",
-                  "right": "remove_write_block_succeeded",
-                }
-              `);
+        Object {
+          "_tag": "Right",
+          "right": "remove_write_block_succeeded",
+        }
+      `);
     });
     it('rejects if there is a non-retryable error', async () => {
       expect.assertions(1);
@@ -398,14 +414,14 @@ describe('migration actions', () => {
         timeout: '1s',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Left",
-                        "left": Object {
-                          "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [red_index] index to become 'yellow'",
-                          "type": "index_not_yellow_timeout",
-                        },
-                      }
-                  `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [red_index] index to become 'yellow'",
+              "type": "index_not_yellow_timeout",
+            },
+          }
+      `);
     });
   });
 
@@ -425,14 +441,14 @@ describe('migration actions', () => {
       });
       expect.assertions(1);
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                        Object {
-                          "_tag": "Right",
-                          "right": Object {
-                            "acknowledged": true,
-                            "shardsAcknowledged": true,
-                          },
-                        }
-                  `);
+        Object {
+          "_tag": "Right",
+          "right": Object {
+            "acknowledged": true,
+            "shardsAcknowledged": true,
+          },
+        }
+      `);
     });
     it('resolves right after waiting for index status to be yellow if clone target already existed', async () => {
       expect.assertions(2);
@@ -491,14 +507,14 @@ describe('migration actions', () => {
       expect.assertions(1);
       const task = cloneIndex({ client, source: 'no_such_index', target: 'clone_target_3' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                        Object {
-                          "_tag": "Left",
-                          "left": Object {
-                            "index": "no_such_index",
-                            "type": "index_not_found_exception",
-                          },
-                        }
-                  `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "index": "no_such_index",
+            "type": "index_not_found_exception",
+          },
+        }
+      `);
     });
     it('resolves left with a index_not_yellow_timeout if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
       // Create a red index
@@ -527,14 +543,14 @@ describe('migration actions', () => {
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Left",
-                        "left": Object {
-                          "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
-                          "type": "index_not_yellow_timeout",
-                        },
-                      }
-                  `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
+              "type": "index_not_yellow_timeout",
+            },
+          }
+      `);
 
       // Now that we know timeouts work, make the index yellow again and call cloneIndex a second time to verify that it completes
 
@@ -555,14 +571,14 @@ describe('migration actions', () => {
       })();
 
       await expect(cloneIndexPromise2).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": Object {
-                          "acknowledged": true,
-                          "shardsAcknowledged": true,
-                        },
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": Object {
+              "acknowledged": true,
+              "shardsAcknowledged": true,
+            },
+          }
+      `);
     });
   });
 
@@ -580,11 +596,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": "reindex_succeeded",
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": "reindex_succeeded",
+          }
+      `);
 
       const results = (
         (await searchForOutdatedDocuments(client, {
@@ -620,11 +636,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                        Object {
-                          "_tag": "Right",
-                          "right": "reindex_succeeded",
-                        }
-                  `);
+        Object {
+          "_tag": "Right",
+          "right": "reindex_succeeded",
+        }
+      `);
 
       const results = (
         (await searchForOutdatedDocuments(client, {
@@ -653,11 +669,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": "reindex_succeeded",
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": "reindex_succeeded",
+          }
+      `);
       const results = (
         (await searchForOutdatedDocuments(client, {
           batchSize: 1000,
