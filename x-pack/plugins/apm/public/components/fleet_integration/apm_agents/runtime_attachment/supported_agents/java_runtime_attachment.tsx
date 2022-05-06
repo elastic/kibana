@@ -13,6 +13,7 @@ import {
   RuntimeAttachment,
   RuntimeAttachmentSettings,
   IDiscoveryRule,
+  validateVersion,
 } from '..';
 import type {
   NewPackagePolicy,
@@ -97,7 +98,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         ({ type }) => type === 'apm'
       );
       onChange({
-        isValid: true,
+        isValid: validateVersion(runtimeAttachmentSettings.version),
         updatedPolicy: {
           ...newPolicy,
           inputs: [
@@ -130,6 +131,10 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
     },
     [newPolicy, onChange]
   );
+
+  function invalidatePackagePolicy() {
+    onChange({ isValid: false, updatedPolicy: newPolicy });
+  }
 
   const apmVars = useMemo(() => getApmVars(newPolicy), [newPolicy]);
 
@@ -191,6 +196,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         [initialDiscoveryRule]
       )}
       version={apmVars?.java_attacher_agent_version?.value || null}
+      invalidatePackagePolicy={invalidatePackagePolicy}
     />
   );
 }

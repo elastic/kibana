@@ -6,8 +6,7 @@
  */
 
 import { htmlIdGenerator, euiDragDropReorder, DropResult } from '@elastic/eui';
-import { isEmpty } from 'lodash';
-import React, { useState, useCallback, ReactNode } from 'react';
+import React, { useState, useCallback, ReactNode, useEffect } from 'react';
 import { RuntimeAttachment as RuntimeAttachmentStateless } from './runtime_attachment';
 
 export const STAGED_DISCOVERY_RULE_ID = 'STAGED_DISCOVERY_RULE_ID';
@@ -39,6 +38,7 @@ interface Props {
   initialDiscoveryRules?: IDiscoveryRule[];
   operationTypes: Operation[];
   version: RuntimeAttachmentSettings['version'];
+  invalidatePackagePolicy: () => void;
 }
 
 interface Option {
@@ -53,7 +53,7 @@ export interface Operation {
 }
 
 const versionRegex = new RegExp(/^\d+\.\d+\.\d+$/);
-function validateVersion(version: RuntimeAttachmentSettings['version']) {
+export function validateVersion(version: RuntimeAttachmentSettings['version']) {
   if (version) {
     return versionRegex.test(version);
   }
@@ -77,7 +77,20 @@ export function RuntimeAttachment(props: Props) {
     props.version
   );
   const [isValidVersion, setIsValidVersion] = useState(
-    isEmpty(version) ? true : validateVersion(version)
+    validateVersion(props.version)
+  );
+
+  useEffect(
+    () => {
+      // Invalidates the package policy, so save button is disabled
+      // until a valid version is provided
+      if (isEnabled && !isValidVersion) {
+        props.invalidatePackagePolicy();
+      }
+    },
+    // props shouldn't be listed as dependency here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isEnabled, isValidVersion]
   );
 
   const onToggleEnable = useCallback(() => {

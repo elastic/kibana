@@ -20,10 +20,12 @@ import {
   DropResult,
   EuiFormRow,
   EuiFieldText,
+  EuiLink,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoveryRule } from './discovery_rule';
 import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
@@ -128,10 +130,25 @@ export function RuntimeAttachment({
                 'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.invalid',
                 { defaultMessage: 'Invalid version' }
               )}
-              helpText={i18n.translate(
-                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.helpText',
-                { defaultMessage: 'Example: 1.30.0' }
-              )}
+              helpText={
+                <FormattedMessage
+                  id="xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.helpText"
+                  defaultMessage="Enter the {versionLink} of the Elastic APM Java agent that should be attached."
+                  values={{
+                    versionLink: (
+                      <EuiLink
+                        href="https://www.elastic.co/guide/en/apm/agent/java/current/release-notes.html"
+                        target="_blank"
+                      >
+                        {i18n.translate(
+                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.helpText.version',
+                          { defaultMessage: 'version' }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
             >
               <EuiFieldText
                 value={version || ''}
