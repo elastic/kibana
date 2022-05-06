@@ -97,6 +97,8 @@ const FAILURES_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
             operator: IS_OPERATOR,
           },
         }}
+        isAggregatable={true}
+        fieldType={'keyword'}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
@@ -185,6 +187,8 @@ const LAST_FAILED_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenticati
       attrName: 'host.name',
       idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
       render: (item) => <HostDetailsLink hostName={item} />,
+      isAggregatable: true,
+      fieldType: 'ip',
     }),
 };
 
@@ -244,6 +248,8 @@ const SUCCESS_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
             operator: IS_OPERATOR,
           },
         }}
+        isAggregatable={true}
+        fieldType={'keyword'}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
