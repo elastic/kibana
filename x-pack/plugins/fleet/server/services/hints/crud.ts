@@ -30,7 +30,7 @@ export const getHints = async (
 
   return hits.hits.map(({ _source }) => {
     const hint = { ...(_source as any) };
-    hint.annotations = flatten(hint.annotation);
+    hint.annotations = flatten(hint.annotations);
     return hint as Hint;
   });
 };
@@ -58,8 +58,6 @@ export const getNewHints = async (esClient: ElasticsearchClient): Promise<Hint[]
     hint.annotations = flatten(hint.annotations);
     return hint as Hint;
   });
-
-  return hints;
 };
 
 const updateSingleDoc = async (esClient: ElasticsearchClient, id: string, update: any) => {

@@ -32,7 +32,7 @@ const FLEET_POLL_HINTS_INDEX_TASK_ID = 'FLEET:sync-task';
 const FLEET_POLL_HINTS_INDEX_TASK_TYPE = 'FLEET:poll-hints-index';
 const POLL_INTERVAL = '5s';
 const POLICY_NAME_PREFIX = 'autodiscover-';
-const ANNOTATION_PREFIX = 'elastic.co.hints/';
+const ANNOTATION_PREFIX = 'elastic_co_hints/';
 const VALID_HINTS = Object.freeze(['host', 'package']);
 const SUPPORTED_PACKAGES = ['nginx', 'redis', 'apache'];
 interface HintTaskDeps {
