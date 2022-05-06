@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ProcessEventHost } from '../../../common/types/process_tree';
+import {
+  ProcessEventHost,
+  ProcessEventContainer,
+  ProcessEventOrchestrator,
+} from '../../../common/types/process_tree';
 import { DASH } from '../../constants';
-import { getHostData } from './helpers';
+import { getHostData, getContainerData, getOrchestratorData } from './helpers';
 
 const MOCK_HOST_DATA: ProcessEventHost = {
   architecture: 'x86_64',
@@ -22,6 +26,34 @@ const MOCK_HOST_DATA: ProcessEventHost = {
     name: 'Linux',
     platform: 'centos',
     version: '7.9.2009',
+  },
+};
+
+const MOCK_CONTAINER_DATA: ProcessEventContainer = {
+  id: 'containerd://5fe98d5566148268631302790833b7a14317a2fd212e3e4117bede77d0ca9ba6',
+  name: 'gce-pd-driver',
+  image: {
+    name: 'gke.gcr.io/gcp-compute-persistent-disk-csi-driver',
+    tag: 'v1.3.5-gke.0',
+    hash: {
+      all: 'PLACEHOLDER_FOR_IMAGE.HASH.ALL',
+    },
+  },
+};
+
+const MOCK_ORCHESTRATOR_DATA: ProcessEventOrchestrator = {
+  resource: {
+    name: 'pdcsi-node-6hvsp',
+    type: 'pod',
+    ip: 'PLACEHOLDER_FOR_RESOURCE.IP',
+  },
+  namespace: 'kube-system',
+  cluster: {
+    name: 'elastic-k8s-cluster',
+    id: 'PLACEHOLDER_FOR_CLUSTER.ID',
+  },
+  parent: {
+    type: 'PLACEHOLDER_FOR_PARENT.TYPE',
   },
 };
 
@@ -81,5 +113,69 @@ describe('detail panel host tab helpers tests', () => {
     expect(result.os.name).toEqual(MOCK_HOST_DATA.os?.name);
     expect(result.os.platform).toEqual(MOCK_HOST_DATA.os?.platform);
     expect(result.os.version).toEqual(MOCK_HOST_DATA.os?.version);
+  });
+
+  it('getContainerData returns dashes for missing fields', () => {
+    const result = getContainerData({
+      id: undefined,
+      name: 'gce-pd-driver',
+      image: {
+        name: undefined,
+        tag: 'v1.3.5-gke.0',
+        hash: {
+          all: undefined,
+        },
+      },
+    });
+    expect(result.id).toEqual(DASH);
+    expect(result.name).toEqual(MOCK_CONTAINER_DATA.name);
+    expect(result.image.name).toEqual(DASH);
+    expect(result.image.tag).toEqual(MOCK_CONTAINER_DATA?.image?.tag);
+    expect(result.image.hash.all).toEqual(DASH);
+  });
+
+  it('getContainerData returns all data provided', () => {
+    const result = getContainerData(MOCK_CONTAINER_DATA);
+    expect(result.id).toEqual(MOCK_CONTAINER_DATA.id);
+    expect(result.name).toEqual(MOCK_CONTAINER_DATA.name);
+    expect(result.image.name).toEqual(MOCK_CONTAINER_DATA?.image?.name);
+    expect(result.image.tag).toEqual(MOCK_CONTAINER_DATA?.image?.tag);
+    expect(result.image.hash.all).toEqual(MOCK_CONTAINER_DATA?.image?.hash?.all);
+  });
+
+  it('getOchestratorData returns dashes for missing fields', () => {
+    const result = getOrchestratorData({
+      resource: {
+        name: undefined,
+        type: 'pod',
+        ip: undefined,
+      },
+      namespace: 'kube-system',
+      cluster: {
+        name: 'elastic-k8s-cluster',
+        id: undefined,
+      },
+      parent: {
+        type: 'PLACEHOLDER_FOR_PARENT.TYPE',
+      },
+    });
+    expect(result.resource.name).toEqual(DASH);
+    expect(result.resource.type).toEqual(MOCK_ORCHESTRATOR_DATA?.resource?.type);
+    expect(result.resource.ip).toEqual(DASH);
+    expect(result.namespace).toEqual(MOCK_ORCHESTRATOR_DATA?.namespace);
+    expect(result.cluster.name).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.name);
+    expect(result.cluster.id).toEqual(DASH);
+    expect(result.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.parent?.type);
+  });
+
+  it('getOchestratorData returns all data provided', () => {
+    const result = getOrchestratorData(MOCK_ORCHESTRATOR_DATA);
+    expect(result.resource.name).toEqual(MOCK_ORCHESTRATOR_DATA?.resource?.name);
+    expect(result.resource.type).toEqual(MOCK_ORCHESTRATOR_DATA?.resource?.type);
+    expect(result.resource.ip).toEqual(MOCK_ORCHESTRATOR_DATA?.resource?.ip);
+    expect(result.namespace).toEqual(MOCK_ORCHESTRATOR_DATA?.namespace);
+    expect(result.cluster.name).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.name);
+    expect(result.cluster.id).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.id);
+    expect(result.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.parent?.type);
   });
 });

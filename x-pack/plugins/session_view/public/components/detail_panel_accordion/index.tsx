@@ -19,6 +19,8 @@ interface DetailPanelAccordionDeps {
   tooltipContent?: string;
   extraActionTitle?: string;
   onExtraActionClick?: () => void;
+  childComponent?: ReactNode;
+  isOpen?: boolean;
 }
 
 /**
@@ -31,6 +33,8 @@ export const DetailPanelAccordion = ({
   tooltipContent,
   extraActionTitle,
   onExtraActionClick,
+  childComponent,
+  isOpen = false,
 }: DetailPanelAccordionDeps) => {
   const styles = useStyles();
 
@@ -38,6 +42,7 @@ export const DetailPanelAccordion = ({
     <EuiAccordion
       id={id}
       arrowDisplay="right"
+      initialIsOpen={isOpen}
       buttonContent={
         <EuiFlexGroup
           alignItems="center"
@@ -71,6 +76,7 @@ export const DetailPanelAccordion = ({
       data-test-subj="sessionView:detail-panel-accordion"
     >
       <DetailPanelDescriptionList listItems={listItems} />
+      {childComponent}
     </EuiAccordion>
   );
 };

@@ -103,16 +103,13 @@ export interface DetailPanelContainer {
 }
 
 export interface DetailPanelOrchestrator {
-  id: string;
   resource: {
     name: string;
     type: string;
-    labels: string;
     ip: string;
   };
   namespace: string;
   cluster: {
-    version: string;
     name: string;
     id: string;
   };

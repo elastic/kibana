@@ -84,16 +84,13 @@ export const getOrchestratorData = (
   orchestrator: ProcessEventOrchestrator | undefined
 ): DetailPanelOrchestrator => {
   const detailPanelOrchestrator: DetailPanelOrchestrator = {
-    id: DASH,
     resource: {
       name: DASH,
       type: DASH,
-      labels: DASH,
       ip: DASH,
     },
     namespace: DASH,
     cluster: {
-      version: DASH,
       name: DASH,
       id: DASH,
     },
@@ -106,14 +103,12 @@ export const getOrchestratorData = (
     return detailPanelOrchestrator;
   }
 
-  detailPanelOrchestrator.id = dataOrDash(orchestrator.id).toString();
   detailPanelOrchestrator.resource.name = dataOrDash(orchestrator?.resource?.name).toString();
   detailPanelOrchestrator.resource.type = dataOrDash(orchestrator?.resource?.type).toString();
-  detailPanelOrchestrator.resource.labels = dataOrDash(orchestrator?.resource?.labels).toString();
   detailPanelOrchestrator.resource.ip = dataOrDash(orchestrator?.resource?.ip).toString();
   detailPanelOrchestrator.namespace = dataOrDash(orchestrator?.namespace).toString();
-  detailPanelOrchestrator.cluster.version = dataOrDash(orchestrator?.cluster?.version).toString();
   detailPanelOrchestrator.cluster.name = dataOrDash(orchestrator?.cluster?.name).toString();
+  detailPanelOrchestrator.cluster.id = dataOrDash(orchestrator?.cluster?.id).toString();
   detailPanelOrchestrator.parent.type = dataOrDash(orchestrator?.parent?.type).toString();
 
   return detailPanelOrchestrator;

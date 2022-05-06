@@ -193,30 +193,27 @@ export type ProcessMap = {
 export interface ProcessEventContainer {
   id?: string;
   name?: string;
-  image: {
+  image?: {
     name?: string;
     tag?: string;
-    hash: {
+    hash?: {
       all?: string;
     };
   };
 }
 
 export interface ProcessEventOrchestrator {
-  id?: string;
-  resource: {
+  resource?: {
     name?: string;
     type?: string;
-    labels?: string;
     ip?: string;
   };
   namespace?: string;
-  cluster: {
-    version?: string;
+  cluster?: {
     name?: string;
     id?: string;
   };
-  parent: {
+  parent?: {
     type?: string;
   };
 }
