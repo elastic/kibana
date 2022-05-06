@@ -6,6 +6,7 @@
  */
 
 import { Capabilities } from '@kbn/core/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 
@@ -13,9 +14,15 @@ export const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
   casesRead: `${CASES_FEATURE_ID}.read_cases`,
   casesCrud: `${CASES_FEATURE_ID}.crud_cases`,
-} as const;
+};
 
-export type Feature = typeof FEATURE[keyof typeof FEATURE];
+export type Feature = Readonly<typeof FEATURE[keyof typeof FEATURE]>;
+
+export interface UserPermissions {
+  enableExperimental: ExperimentalFeatures;
+  licenseType?: LicenseType;
+  capabilities?: Capabilities;
+}
 
 export interface LinkItem {
   description?: string;

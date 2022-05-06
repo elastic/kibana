@@ -10,9 +10,11 @@ import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
   EVENT_FILTERS_PATH,
+  EXCEPTIONS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_PATH,
   POLICIES_PATH,
+  RULES_PATH,
   SecurityPageName,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
@@ -20,9 +22,11 @@ import {
   BLOCKLIST,
   ENDPOINTS,
   EVENT_FILTERS,
+  EXCEPTIONS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
+  RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
 import { FEATURE, LinkItem } from '../common/links/types';
@@ -40,6 +44,30 @@ export const links: LinkItem = {
     }),
   ],
   links: [
+    {
+      id: SecurityPageName.rules,
+      title: RULES,
+      path: RULES_PATH,
+      globalNavEnabled: false,
+      globalSearchKeywords: [
+        i18n.translate('xpack.securitySolution.appLinks.rules', {
+          defaultMessage: 'Rules',
+        }),
+      ],
+      globalSearchEnabled: true,
+    },
+    {
+      id: SecurityPageName.exceptions,
+      title: EXCEPTIONS,
+      path: EXCEPTIONS_PATH,
+      globalNavEnabled: false,
+      globalSearchKeywords: [
+        i18n.translate('xpack.securitySolution.appLinks.exceptions', {
+          defaultMessage: 'Exception lists',
+        }),
+      ],
+      globalSearchEnabled: true,
+    },
     {
       id: SecurityPageName.endpoints,
       globalNavEnabled: true,

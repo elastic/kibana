@@ -57,7 +57,10 @@ const findNavLink = (id: SecurityPageName, navLinks: NavLinkItem[]): NavLinkItem
 
 // remove filter once new nav is live
 const allPages = Object.values(SecurityPageName).filter(
-  (pageName) => pageName !== SecurityPageName.explore && pageName !== SecurityPageName.investigate
+  (pageName) =>
+    pageName !== SecurityPageName.explore &&
+    SecurityPageName.detections &&
+    pageName !== SecurityPageName.investigate
 );
 const casesPages = [
   SecurityPageName.case,

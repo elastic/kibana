@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName, THREAT_HUNTING_PATH } from '../../../common/constants';
 import { THREAT_HUNTING } from '../../app/translations';
-import { FEATURE, LinkItem } from './types';
+import { FEATURE, LinkItem, UserPermissions } from './types';
 import { links as hostsLinks } from '../../hosts/links';
 import { links as detectionLinks } from '../../detections/links';
 import { links as networkLinks } from '../../network/links';
@@ -17,7 +17,7 @@ import { getCasesLinkItems } from '../../cases/links';
 import { links as managementLinks } from '../../management/links';
 import { gettingStartedLinks, dashboardsLandingLinks } from '../../overview/links';
 
-export const appLinks: LinkItem[] = [
+export const appLinks: Readonly<LinkItem[]> = Object.freeze([
   gettingStartedLinks,
   dashboardsLandingLinks,
   detectionLinks,
@@ -37,4 +37,13 @@ export const appLinks: LinkItem[] = [
   timelinesLinks,
   getCasesLinkItems(),
   managementLinks,
-];
+]);
+
+export const getAppLinks = async ({
+  enableExperimental,
+  licenseType,
+  capabilities,
+}: UserPermissions) => {
+  // OLM team, implement async behavior here
+  return appLinks;
+};

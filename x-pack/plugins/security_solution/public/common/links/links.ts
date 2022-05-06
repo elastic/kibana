@@ -10,7 +10,7 @@ import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { get } from 'lodash';
 import { SecurityPageName } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { appLinks } from './app_links';
+import { appLinks, getAppLinks } from './app_links';
 import {
   Feature,
   LinkInfo,
@@ -19,6 +19,7 @@ import {
   NavLinkItem,
   NormalizedLink,
   NormalizedLinks,
+  UserPermissions,
 } from './types';
 
 const createDeepLink = (link: LinkItem, linkProps?: LinkProps): AppDeepLink => ({
@@ -93,7 +94,7 @@ export function reduceLinks<T>({
   linkProps,
   formatFunction,
 }: {
-  links: LinkItem[];
+  links: Readonly<LinkItem[]>;
   linkProps?: LinkProps;
   formatFunction: (link: LinkItem, linkProps?: LinkProps) => T;
 }): T[] {
@@ -111,22 +112,24 @@ export const getInitialDeepLinks = (): AppDeepLink[] => {
 export const isLicenseBasic = (licenseType?: LicenseType) =>
   licenseType == null || licenseType === 'basic';
 
-export const getDeepLinks = (
-  enableExperimental: ExperimentalFeatures,
-  licenseType?: LicenseType,
-  capabilities?: Capabilities
-): AppDeepLink[] =>
-  reduceLinks<AppDeepLink>({
-    links: appLinks,
+export const getDeepLinks = async ({
+  enableExperimental,
+  licenseType,
+  capabilities,
+}: UserPermissions): Promise<AppDeepLink[]> => {
+  const links = await getAppLinks({ enableExperimental, licenseType, capabilities });
+  return reduceLinks<AppDeepLink>({
+    links,
     linkProps: { enableExperimental, isBasic: isLicenseBasic(licenseType), capabilities },
     formatFunction: createDeepLink,
   });
+};
 
-export const getNavLinkItems = (
-  enableExperimental: ExperimentalFeatures,
-  licenseType?: LicenseType,
-  capabilities?: Capabilities
-): NavLinkItem[] =>
+export const getNavLinkItems = ({
+  enableExperimental,
+  licenseType,
+  capabilities,
+}: UserPermissions): NavLinkItem[] =>
   reduceLinks<NavLinkItem>({
     links: appLinks,
     linkProps: { enableExperimental, isBasic: isLicenseBasic(licenseType), capabilities },
@@ -137,7 +140,7 @@ export const getNavLinkItems = (
  * Recursive function to create the `NormalizedLinks` structure from a `LinkItem` array parameter
  */
 const getNormalizedLinks = (
-  currentLinks: LinkItem[],
+  currentLinks: Readonly<LinkItem[]>,
   parentId?: SecurityPageName
 ): NormalizedLinks => {
   const result = currentLinks.reduce<Partial<NormalizedLinks>>(
