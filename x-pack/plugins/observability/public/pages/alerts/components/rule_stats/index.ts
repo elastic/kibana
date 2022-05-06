@@ -6,4 +6,4 @@
  */
 
 export { renderRuleStats } from './rule_stats';
-export { RuleStatsState } from './types';
+export type { RuleStatsState } from './types';
