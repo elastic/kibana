@@ -44,8 +44,14 @@ export const syntheticsMonitor: SavedObjectsType = {
           },
         },
       },
-      custom_id: {
+      journey_id: {
         type: 'keyword',
+      },
+      project_id: {
+        type: 'keyword',
+      },
+      is_push_monitor: {
+        type: 'boolean',
       },
     },
   },

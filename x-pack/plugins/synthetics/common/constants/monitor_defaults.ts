@@ -58,7 +58,8 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
 
 export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   ...DEFAULT_COMMON_FIELDS,
-  [ConfigKey.CUSTOM_ID]: '',
+  [ConfigKey.JOURNEY_ID]: '',
+  [ConfigKey.PROJECT_ID]: '',
   [ConfigKey.IS_PUSH_MONITOR]: false,
   [ConfigKey.METADATA]: {
     script_source: {

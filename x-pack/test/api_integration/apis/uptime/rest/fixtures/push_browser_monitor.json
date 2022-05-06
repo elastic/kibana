@@ -1,4 +1,6 @@
 {
+    "keep_stale": true,
+    "projectId": "test-suite",
     "monitors": [{
         "id": "test-id",
         "throttling": {

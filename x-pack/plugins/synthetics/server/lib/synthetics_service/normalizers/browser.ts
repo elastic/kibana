@@ -48,9 +48,11 @@ type NormalizedPublicFields = Omit<
 export const normalizePushedMonitor = ({
   locations = [],
   monitor,
+  projectId,
 }: {
   locations: Locations;
   monitor: PushBrowserMonitor;
+  projectId: string;
 }): BrowserFields => {
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
   const normalizedFields: NormalizedPublicFields = {
@@ -61,7 +63,8 @@ export const normalizePushedMonitor = ({
       number: `${new RegExp(/\d+/, 'g').exec(monitor.schedule)}` || '',
       unit: ScheduleUnit.MINUTES,
     },
-    [ConfigKey.CUSTOM_ID]: monitor.id || defaultFields[ConfigKey.CUSTOM_ID],
+    [ConfigKey.PROJECT_ID]: projectId || defaultFields[ConfigKey.PROJECT_ID],
+    [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.SOURCE_PUSH]: monitor.content || defaultFields[ConfigKey.SOURCE_PUSH],
     [ConfigKey.LOCATIONS]: monitor.locations
       ?.map((key) => {

@@ -397,7 +397,7 @@ export class SyntheticsService {
 
     return (monitors ?? []).map((monitor) => ({
       ...normalizeSecrets(monitor).attributes,
-      id: monitor.attributes.custom_id || monitor.id,
+      id: monitor.attributes.JOURNEY_ID || monitor.id,
       fields_under_root: true,
       fields: { config_id: monitor.id },
     }));

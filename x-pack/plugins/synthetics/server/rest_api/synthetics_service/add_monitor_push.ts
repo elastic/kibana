@@ -35,24 +35,45 @@ import { formatSecrets, normalizeSecrets } from '../../lib/synthetics_service/ut
 import { UptimeServerSetup } from '../../lib/adapters/framework';
 import { syncNewMonitor } from './add_monitor';
 import { syncEditedMonitor } from './edit_monitor';
+import { deleteMonitor } from './delete_monitor';
+
+interface StaleMonitor {
+  stale: boolean;
+  journeyId: string;
+  savedObjectId: string;
+}
+type StaleMonitorMap = Record<string, StaleMonitor>;
+
+const getSuiteFilter = (projectId: string) => {
+  return `${syntheticsMonitorType}.attributes.${ConfigKey.IS_PUSH_MONITOR}: true AND ${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: ${projectId}`;
+};
 
 export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'PUT',
   path: API_URLS.SYNTHETICS_MONITORS_PUSH,
   validate: {
-    body: schema.any(),
+    body: schema.object({
+      projectId: schema.string(),
+      keep_stale: schema.boolean(),
+      monitors: schema.arrayOf(schema.any()),
+    }),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
     const monitors = (request.body?.monitors as PushBrowserMonitor[]) || [];
+    const { keep_stale: keepStale, projectId } = request.body || {};
     const locations: Locations = (await getServiceLocations(server)).locations;
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+    const staleMonitorsMap = await getAllPushMonitorsForSuite(savedObjectsClient, projectId);
     const createdMonitors: string[] = [];
+    const deletedMonitors: string[] = [];
     const updatedMonitors: string[] = [];
+    const staleMonitors: string[] = [];
     const failedMonitors: string[] = [];
+    const failedStaleMonitors: string[] = [];
 
     await Promise.all(
       monitors.map((monitor) =>
-        configurePushMonitors({
+        configurePushMonitor({
           savedObjectsClient,
           encryptedSavedObjectsClient,
           locations,
@@ -61,15 +82,28 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
           updatedMonitors,
           failedMonitors,
           server,
+          staleMonitorsMap,
+          projectId,
         })
       )
     );
 
+    await handleStaleMonitors({
+      savedObjectsClient,
+      staleMonitorsMap,
+      staleMonitors,
+      deletedMonitors,
+      server,
+      keepStale,
+    });
+
     return response.ok({
       body: {
         createdMonitors,
-        failedMonitors,
         updatedMonitors,
+        staleMonitors,
+        deletedMonitors,
+        failedMonitors,
       },
     });
   },
@@ -77,16 +111,62 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
 
 const getExistingMonitor = async (
   savedObjectsClient: SavedObjectsClientContract,
-  id: string
+  journeyId: string,
+  projectId: string
 ): Promise<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> => {
   const { saved_objects: savedObjects } = await savedObjectsClient.find<EncryptedSyntheticsMonitor>(
     {
       type: syntheticsMonitorType,
       perPage: 1,
-      filter: `${syntheticsMonitorType}.attributes.${ConfigKey.CUSTOM_ID}: ${id}`,
+      filter: `${getSuiteFilter(projectId)} AND ${syntheticsMonitorType}.attributes.${
+        ConfigKey.JOURNEY_ID
+      }: ${journeyId}`,
     }
   );
   return savedObjects[0];
+};
+
+const getAllPushMonitorsForSuite = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  projectId: string
+): Promise<StaleMonitorMap> => {
+  const staleMonitors: StaleMonitorMap = {};
+  let page = 1;
+  let totalMonitors = 0;
+  do {
+    const { total, saved_objects: savedObjects } = await getPushMonitorsForSuite(
+      savedObjectsClient,
+      page,
+      projectId
+    );
+    savedObjects.forEach((savedObject) => {
+      const journeyId = (savedObject.attributes as BrowserFields)[ConfigKey.JOURNEY_ID];
+      if (journeyId) {
+        staleMonitors[journeyId] = {
+          stale: true,
+          savedObjectId: savedObject.id,
+          journeyId,
+        };
+      }
+    });
+
+    page++;
+    totalMonitors = total;
+  } while (Object.keys(staleMonitors).length < totalMonitors);
+  return staleMonitors;
+};
+
+const getPushMonitorsForSuite = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  page: number,
+  projectId: string
+) => {
+  return await savedObjectsClient.find<EncryptedSyntheticsMonitor>({
+    type: syntheticsMonitorType,
+    page,
+    perPage: 1,
+    filter: getSuiteFilter(projectId),
+  });
 };
 
 const updateMonitor = async (
@@ -135,7 +215,7 @@ const updateMonitor = async (
   return { editedMonitor, errors: [] };
 };
 
-const configurePushMonitors = async ({
+const configurePushMonitor = async ({
   savedObjectsClient,
   encryptedSavedObjectsClient,
   locations,
@@ -144,6 +224,8 @@ const configurePushMonitors = async ({
   updatedMonitors,
   failedMonitors,
   server,
+  staleMonitorsMap,
+  projectId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -153,11 +235,13 @@ const configurePushMonitors = async ({
   updatedMonitors: string[];
   failedMonitors: string[];
   server: UptimeServerSetup;
+  staleMonitorsMap: StaleMonitorMap;
+  projectId: string;
 }) => {
   try {
     // check to see if monitor already exists
-    const normalizedMonitor = normalizePushedMonitor({ locations, monitor });
-    const previousMonitor = await getExistingMonitor(savedObjectsClient, monitor.id);
+    const normalizedMonitor = normalizePushedMonitor({ locations, monitor, projectId });
+    const previousMonitor = await getExistingMonitor(savedObjectsClient, monitor.id, projectId);
 
     if (previousMonitor) {
       await updateMonitor(
@@ -168,6 +252,9 @@ const configurePushMonitors = async ({
         server
       );
       updatedMonitors.push(monitor.id);
+      if (staleMonitorsMap[monitor.id]) {
+        staleMonitorsMap[monitor.id].stale = false;
+      }
     } else {
       const newMonitor = await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
         syntheticsMonitorType,
@@ -183,6 +270,62 @@ const configurePushMonitors = async ({
     server.logger.error(e);
     // determine failed monitors reason
     failedMonitors.push(monitor.id);
-    // throw e;
   }
+};
+
+const handleStaleMonitors = async ({
+  savedObjectsClient,
+  server,
+  staleMonitorsMap,
+  staleMonitors,
+  deletedMonitors,
+  keepStale,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  server: UptimeServerSetup;
+  staleMonitorsMap: StaleMonitorMap;
+  staleMonitors: string[];
+  deletedMonitors: string[];
+  keepStale: boolean;
+}) => {
+  try {
+    const staleMonitorsData = Object.values(staleMonitorsMap).filter(
+      (monitor) => monitor.stale === true
+    );
+    await Promise.all(
+      staleMonitorsData.map((monitor) => {
+        if (!keepStale) {
+          return deleteStaleMonitor({
+            deletedMonitors,
+            savedObjectsClient,
+            server,
+            monitorId: monitor.savedObjectId,
+            journeyId: monitor.journeyId,
+          });
+        } else {
+          staleMonitors.push(monitor.journeyId);
+          return null;
+        }
+      })
+    );
+  } catch (e) {
+    server.logger.error(e);
+  }
+};
+
+const deleteStaleMonitor = async ({
+  deletedMonitors,
+  savedObjectsClient,
+  server,
+  monitorId,
+  journeyId,
+}: {
+  deletedMonitors: string[];
+  savedObjectsClient: SavedObjectsClientContract;
+  server: UptimeServerSetup;
+  monitorId: string;
+  journeyId: string;
+}) => {
+  await deleteMonitor({ savedObjectsClient, server, monitorId });
+  deletedMonitors.push(journeyId);
 };

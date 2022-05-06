@@ -1,7 +1,8 @@
 {
   "type": "browser",
   "enabled": true,
-  "custom_id": "",
+  "journey_id": "",
+  "project_id": "",
   "schedule": {
     "number": "3",
     "unit": "m"

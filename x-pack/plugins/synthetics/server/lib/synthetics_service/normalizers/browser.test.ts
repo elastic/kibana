@@ -72,7 +72,7 @@ describe('browser normalizers', () => {
       expect(actual).toEqual([
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
-          custom_id: 'test-id-1',
+          journey_id: 'test-id-1',
           ignore_https_errors: true,
           is_push_monitor: true,
           locations: [
@@ -105,7 +105,7 @@ describe('browser normalizers', () => {
         },
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
-          custom_id: 'test-id-2',
+          JOURNEY_ID: 'test-id-2',
           ignore_https_errors: false,
           is_push_monitor: true,
           locations: [

@@ -27,6 +27,8 @@ export const PushBrowserMonitorCodec = t.intersection([
 ]);
 
 export const PushMonitorsRequestCodec = t.interface({
+  projectId: t.string,
+  keep_stale: t.boolean,
   monitors: t.array(PushBrowserMonitorCodec),
 });
 
