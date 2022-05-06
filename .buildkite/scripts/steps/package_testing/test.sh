@@ -46,4 +46,4 @@ export TEST_KIBANA_URL="http://elastic:changeme@$KIBANA_IP_ADDRESS:5601"
 export TEST_ES_URL=http://elastic:changeme@192.168.56.1:9200
 
 cd x-pack
-node scripts/functional_test_runner.js --include-tag=smoke
+node scripts/functional_tests_server.js --config test/functional/apps/dashboard/group1/config.ts
