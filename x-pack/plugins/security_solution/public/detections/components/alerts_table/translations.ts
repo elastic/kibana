@@ -188,7 +188,8 @@ export const ACTION_ADD_EVENT_FILTER = i18n.translate(
 export const ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter.disabled.tooltip',
   {
-    defaultMessage: 'Add Endpoint event filter action cannot be performed in this context.',
+    defaultMessage:
+      'Endpoint event filters can be created from the Events section of the Hosts page.',
   }
 );
 
