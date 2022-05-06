@@ -16,6 +16,8 @@ import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(
   async ({ log, flags }) => {
+    process.env.IS_KIBANA_PRECOMIT_HOOK = 'true';
+
     const files = await getFilesForCommit(flags.ref);
     const errors = [];
 
