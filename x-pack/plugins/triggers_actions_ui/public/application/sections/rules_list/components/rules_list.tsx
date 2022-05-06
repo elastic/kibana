@@ -147,7 +147,7 @@ export const RulesList: React.FunctionComponent = () => {
 
   const [initialLoad, setInitialLoad] = useState<boolean>(true);
   const [noData, setNoData] = useState<boolean>(true);
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);

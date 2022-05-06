@@ -97,7 +97,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
 
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
 
   useEffect(() => {
     (async () => {

@@ -12,9 +12,10 @@ describe('createConfigRoute', () => {
   it('registers the route', async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
-    createConfigRoute(logger, router, `/api/triggers_actions_ui`, {
+    createConfigRoute(logger, router, `/api/triggers_actions_ui`, () => ({
+      isUsingSecurity: true,
       minimumScheduleInterval: { value: '1m', enforce: false },
-    });
+    }));
 
     const [config, handler] = router.get.mock.calls[0];
     expect(config.path).toMatchInlineSnapshot(`"/api/triggers_actions_ui/_config"`);
