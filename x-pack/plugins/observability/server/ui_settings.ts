@@ -42,7 +42,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       'xpack.observability.enableNewSyntheticsViewExperimentDescription',
       {
         defaultMessage:
-          'Enable new synthetic monitoring view in observability. A page refresh is required for the setting to be applied.',
+          'Enable new synthetic monitoring view in observability. Refresh the page to apply the setting.',
       }
     ),
     schema: schema.boolean(),
