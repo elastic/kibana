@@ -7,13 +7,13 @@
  */
 
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
 
+import { REPO_ROOT } from '@kbn/utils';
 import { createFlagError, RunWithCommands } from '@kbn/dev-utils';
 
 import { buildSchema } from './build_schema';
 import { loadYaml } from './load_yaml';
-import { printSchema } from './write_file';
+import { printSchema } from './printer';
 
 const PACKAGE_DIR = Path.resolve(REPO_ROOT, 'packages/kbn-ecs-schema/');
 
