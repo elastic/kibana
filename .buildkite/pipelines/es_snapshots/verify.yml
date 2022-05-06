@@ -32,6 +32,9 @@ steps:
     agents:
       queue: kibana-default
     env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       LIMIT_CONFIG_TYPE: integration,functional
     retry:
       automatic:
@@ -44,10 +47,8 @@ steps:
     agents:
       queue: kibana-default
     depends_on:
-      - default-cigroup
-      - oss-cigroup
+      - ftr-configs
       - jest-integration
-      - api-integration
 
   - wait: ~
     continue_on_failure: true

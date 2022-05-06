@@ -31,6 +31,7 @@ import {
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
+  CaseSeverity,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -154,6 +155,7 @@ export const basicCase: Case = {
     fields: null,
   },
   description: 'Security banana Issue',
+  severity: CaseSeverity.LOW,
   duration: null,
   externalService: null,
   status: CaseStatuses.open,
@@ -247,6 +249,7 @@ export const mockCase: Case = {
     fields: null,
   },
   duration: null,
+  severity: CaseSeverity.LOW,
   description: 'Security banana Issue',
   externalService: null,
   status: CaseStatuses.open,
@@ -512,6 +515,7 @@ export const getUserAction = (
           description: 'a desc',
           connector: { ...getJiraConnector() },
           status: CaseStatuses.open,
+          severity: CaseSeverity.LOW,
           title: 'a title',
           tags: ['a tag'],
           settings: { syncAlerts: true },
