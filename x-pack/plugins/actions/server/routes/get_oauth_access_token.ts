@@ -12,16 +12,6 @@ import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import {
-  getOAuthJwtAccessToken,
-  GetOAuthJwtConfig,
-  GetOAuthJwtSecrets,
-} from '../builtin_action_types/lib/get_oauth_jwt_access_token';
-import {
-  getOAuthClientCredentialsAccessToken,
-  GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets,
-} from '../builtin_action_types/lib/get_oauth_client_credentials_access_token';
 
 const oauthJwtBodySchema = schema.object({
   tokenUrl: schema.string(),
@@ -37,7 +27,7 @@ const oauthJwtBodySchema = schema.object({
   }),
 });
 
-type OAuthJwtParams = TypeOf<typeof oauthJwtBodySchema>;
+export type OAuthJwtParams = TypeOf<typeof oauthJwtBodySchema>;
 
 const oauthClientCredentialsBodySchema = schema.object({
   tokenUrl: schema.string(),
@@ -51,7 +41,7 @@ const oauthClientCredentialsBodySchema = schema.object({
   }),
 });
 
-type OAuthClientCredentialsParams = TypeOf<typeof oauthClientCredentialsBodySchema>;
+export type OAuthClientCredentialsParams = TypeOf<typeof oauthClientCredentialsBodySchema>;
 
 const bodySchema = schema.object({
   type: schema.oneOf([schema.literal('jwt'), schema.literal('client')]),
@@ -62,6 +52,8 @@ const bodySchema = schema.object({
     oauthClientCredentialsBodySchema
   ),
 });
+
+export type OAuthParams = TypeOf<typeof bodySchema>;
 
 export const getOAuthAccessToken = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -78,42 +70,10 @@ export const getOAuthAccessToken = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const { type, options } = req.body;
-
-        try {
-          configurationUtilities.ensureUriAllowed(options.tokenUrl);
-        } catch (err) {
-          return res.badRequest({ body: err.message });
-        }
-
-        let accessToken: string | null = null;
-        if (type === 'jwt') {
-          const tokenOpts = options as OAuthJwtParams;
-          accessToken = await getOAuthJwtAccessToken({
-            logger,
-            configurationUtilities,
-            credentials: {
-              config: tokenOpts.config as GetOAuthJwtConfig,
-              secrets: tokenOpts.secrets as GetOAuthJwtSecrets,
-            },
-            tokenUrl: tokenOpts.tokenUrl,
-          });
-        } else if (type === 'client') {
-          const tokenOpts = options as OAuthClientCredentialsParams;
-          accessToken = await getOAuthClientCredentialsAccessToken({
-            logger,
-            configurationUtilities,
-            credentials: {
-              config: tokenOpts.config as GetOAuthClientCredentialsConfig,
-              secrets: tokenOpts.secrets as GetOAuthClientCredentialsSecrets,
-            },
-            tokenUrl: tokenOpts.tokenUrl,
-            oAuthScope: tokenOpts.scope,
-          });
-        }
+        const actionsClient = (await context.actions).getActionsClient();
 
         return res.ok({
-          body: { accessToken },
+          body: await actionsClient.getOAuthAccessToken(req.body, logger, configurationUtilities),
         });
       })
     )
