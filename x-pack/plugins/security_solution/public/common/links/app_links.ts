@@ -28,7 +28,7 @@ export const appLinks: LinkItem[] = [
     globalNavEnabled: false,
     features: [FEATURE.general],
     globalSearchKeywords: [
-      i18n.translate('xpack.securitySolution.search.threatHunting', {
+      i18n.translate('xpack.securitySolution.appLinks.threatHunting', {
         defaultMessage: 'Threat hunting',
       }),
     ],
