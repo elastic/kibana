@@ -21,14 +21,12 @@ import {
   processNewEvents,
   searchProcessTree,
   autoExpandProcessTree,
-  updateProcessMap,
 } from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
-  alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
   verboseMode: boolean;
@@ -56,8 +54,6 @@ export class ProcessImpl implements Process {
   }
 
   addEvent(newEvent: ProcessEvent) {
-    // rather than push new events on the array, we return a new one
-    // this helps the below memoizeOne functions to behave correctly.
     const exists = this.events.find((event) => {
       return event.event?.id === newEvent.event?.id;
     });
@@ -68,11 +64,17 @@ export class ProcessImpl implements Process {
   }
 
   addAlert(alert: ProcessEvent) {
-    this.alerts = this.alerts.concat(alert);
+    const exists = this.alerts.find((event) => {
+      return event.event?.id === alert.event?.id;
+    });
+
+    if (!exists) {
+      this.alerts = this.alerts.concat(alert);
+    }
   }
 
-  addChild(child: Process) {
-    this.children = this.children.concat(child);
+  addChild(newChild: Process) {
+    this.children = this.children.concat(newChild);
   }
 
   clearSearch() {
@@ -84,6 +86,10 @@ export class ProcessImpl implements Process {
   }
 
   getChildrenMemo = memoizeOne((children: Process[], orphans: Process[], verboseMode: boolean) => {
+    if (children.length === 0 && orphans.length === 0) {
+      return [];
+    }
+
     // if there are orphans, we just render them inline with the other child processes (currently only session leader does this)
     if (orphans.length) {
       children = [...children, ...orphans];
@@ -109,7 +115,7 @@ export class ProcessImpl implements Process {
       });
     }
 
-    return children.sort(sortProcesses);
+    return _.sortedUniqBy(children.sort(sortProcesses), (child) => child.id);
   });
 
   isVerbose() {
@@ -272,7 +278,6 @@ export class ProcessImpl implements Process {
 export const useProcessTree = ({
   sessionEntityId,
   data,
-  alerts,
   searchQuery,
   updatedAlertsStatus,
   verboseMode,
@@ -310,7 +315,6 @@ export const useProcessTree = ({
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
   const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
-  const [alertsProcessed, setAlertsProcessed] = useState(false);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
@@ -347,16 +351,6 @@ export const useProcessTree = ({
       autoExpandProcessTree(updatedProcessMap, jumpToEntityId);
     }
   }, [data, processMap, orphans, processedPages, sessionEntityId, jumpToEntityId]);
-
-  useEffect(() => {
-    // currently we are loading a single page of alerts, with no pagination
-    // so we only need to add these alert events to processMap once.
-    if (!alertsProcessed) {
-      const updatedProcessMap = updateProcessMap(processMap, alerts);
-      setProcessMap({ ...updatedProcessMap });
-      setAlertsProcessed(true);
-    }
-  }, [processMap, alerts, alertsProcessed]);
 
   useEffect(() => {
     setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));

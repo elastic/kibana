@@ -58,7 +58,7 @@ export const useFetchSessionViewProcessEvents = (
     },
     {
       getNextPageParam: (lastPage) => {
-        if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
+        if (lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
           return {
             cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
             forward: true,
@@ -113,7 +113,7 @@ export const useFetchSessionViewAlerts = (
 
       const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
-      return [] || events;
+      return events;
     },
     {
       refetchOnWindowFocus: false,

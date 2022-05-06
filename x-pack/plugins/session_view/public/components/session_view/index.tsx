@@ -118,15 +118,12 @@ export const SessionView = ({
     hasPreviousPage,
   } = useFetchSessionViewProcessEvents(sessionEntityId, currentJumpToCursor);
 
-  // const alertsQuery = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
-  // const { data: alerts, error: alertsError, isFetching: alertsFetching } = alertsQuery;
-  const alerts: ProcessEvent[] = [];
-  const alertsError = null;
-  const alertsFetching = null;
-
-  const hasData = alerts && data && data.pages?.[0].events.length > 0;
+  const alertsQuery = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
+  const { data: alerts, error: alertsError } = alertsQuery;
   const hasError = error || alertsError;
-  const renderIsLoading = (isFetching || alertsFetching) && !(data && alerts);
+  const dataLoaded = data && data.pages?.length > (jumpToCursor ? 1 : 0);
+  const renderIsLoading = isFetching && !dataLoaded;
+  const hasData = dataLoaded && data.pages[0].events.length > 0;
   const { data: newUpdatedAlertsStatus } = useFetchAlertStatus(
     updatedAlertsStatus,
     fetchAlertStatus[0] ?? ''
@@ -279,7 +276,6 @@ export const SessionView = ({
                         key={sessionEntityId + currentJumpToCursor}
                         sessionEntityId={sessionEntityId}
                         data={data.pages}
-                        alerts={alerts}
                         searchQuery={searchQuery}
                         selectedProcess={selectedProcess}
                         onProcessSelected={onProcessSelected}

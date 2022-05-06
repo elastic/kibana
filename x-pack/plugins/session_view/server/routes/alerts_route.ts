@@ -88,7 +88,7 @@ export const searchAlerts = async (
               },
             },
           },
-        ],
+        ].filter((item) => !!item),
       },
     },
     track_total_hits: true,
