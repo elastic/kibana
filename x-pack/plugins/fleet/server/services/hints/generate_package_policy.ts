@@ -161,8 +161,8 @@ const generateConfigVar = (
   annotations: ParsedAnnotations,
   logger?: Logger
 ): PackagePolicyConfigRecordEntry | null => {
-  if (annotations.host && isHostVar(variable)) {
-    return getHostVar(variable, annotations.host);
+  if (annotations.hosts && isHostVar(variable)) {
+    return getHostVar(variable, annotations.hosts);
   }
 
   const defaultVar = getDefaultVar(variable);

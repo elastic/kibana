@@ -8,6 +8,7 @@ import type { PackagePolicy } from '../../types';
 export type { Hint } from '../../../common';
 export interface ParsedAnnotations {
   host?: string;
+  hosts?: string;
   package?: string;
 }
 
