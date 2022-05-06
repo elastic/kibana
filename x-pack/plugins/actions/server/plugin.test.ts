@@ -109,7 +109,7 @@ describe('Actions Plugin', () => {
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
         )) as unknown as ActionsApiRequestHandlerContext;
-        actionsContextHandler!.getActionsClient();
+        expect(actionsContextHandler!.getActionsClient()).toBeDefined();
       });
 
       it('should throw error when ESO plugin is missing encryption key', async () => {
