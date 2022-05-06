@@ -69,7 +69,7 @@ export const RuleEdit = ({
   const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
     props.ruleType
   );
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
 
   const {
     http,
@@ -230,20 +230,22 @@ export const RuleEdit = ({
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="alert"
-                        position="top"
-                        data-test-subj="changeInPrivilegesTip"
-                        content={i18n.translate(
-                          'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
-                          {
-                            defaultMessage:
-                              'Saving this rule will cause a change in privileges and may make the rule behave differently.',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
+                    {config.isUsingSecurity && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="alert"
+                          position="top"
+                          data-test-subj="changeInPrivilegesTip"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
+                            {
+                              defaultMessage:
+                                'Saving this rule will cause a change in privileges and may make the rule behave differently.',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         fill

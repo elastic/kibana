@@ -19,7 +19,7 @@ export function createConfigRoute(
   logger: Logger,
   router: IRouter,
   baseRoute: string,
-  config?: AlertingRulesConfig
+  config: () => AlertingRulesConfig
 ) {
   const path = `${baseRoute}/_config`;
   logger.debug(`registering triggers_actions_ui config route GET ${path}`);
@@ -35,6 +35,6 @@ export function createConfigRoute(
     req: KibanaRequest<unknown, unknown, unknown>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    return res.ok({ body: config ?? {} });
+    return res.ok({ body: config() });
   }
 }
