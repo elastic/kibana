@@ -8,9 +8,10 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, Fragment, useMemo, useState } from 'react';
+import React, { useEffect, useCallback, Fragment, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 
+import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { HostEcs } from '../../../../common/ecs/host';
 import {
   AutonomousSystem,
@@ -29,6 +30,12 @@ import {
 } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../network/components/details/translations';
+import { IS_OPERATOR, QueryOperator, TimelineId } from '../../../../common/types';
+import { OverflowItem } from '../../../common/components/tables/helpers';
+import { StatefulTopN } from '../../../common/components/top_n';
+import { ShowTopNButton } from '../../../common/components/hover_actions/actions/show_top_n';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -229,6 +236,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
         <EuiFlexItem grow={false}>{draggables} </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
+            attrName={attrName}
             rowItems={rowItems}
             idPrefix={idPrefix}
             render={render as OverflowRenderer}
@@ -251,6 +259,7 @@ DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
 type RowItemTypes = string | ReputationLinkSetting;
 interface DefaultFieldRendererOverflowProps {
+  attrName: string;
   rowItems: string[] | ReputationLinkSetting[];
   idPrefix: string;
   render?: (item: RowItemTypes) => React.ReactNode;
@@ -264,32 +273,126 @@ interface MoreContainerProps {
   rowItems: RowItemTypes[];
   moreMaxHeight: string;
   overflowIndexStart: number;
+  attrName: string;
+  dragDisplayValue?: string;
 }
 
 /** A container (with overflow) for showing "More" items in a popover */
 export const MoreContainer = React.memo<MoreContainerProps>(
-  ({ idPrefix, render, rowItems, moreMaxHeight, overflowIndexStart }) => (
-    <div
-      data-test-subj="more-container"
-      style={{
-        maxHeight: moreMaxHeight,
-        overflow: 'auto',
-        paddingRight: '2px',
-      }}
-    >
-      {rowItems.slice(overflowIndexStart).map((rowItem, i) => (
-        <EuiText key={`${idPrefix}-${rowItem}-${i}`} size="s">
-          {render ? render(rowItem) : rowItem}
-        </EuiText>
-      ))}
-    </div>
-  )
-);
+  ({
+    attrName,
+    dragDisplayValue,
+    idPrefix,
+    moreMaxHeight,
+    overflowIndexStart,
+    render,
+    rowItems,
+  }) => {
+    const [display, setDisplay] = useState(null);
+    const [selectedValue, setSelectedValue] = useState(null);
+    const [selectedField, setSelectedField] = useState(null);
+    const topNCallback = useCallback(({ displayType, selectedItemValue, selectedItemField }) => {
+      setDisplay((prev) => (prev == null ? displayType : null));
+      setSelectedValue((prev) => (prev == null ? selectedItemValue : null));
+      setSelectedField((prev) => (prev == null ? selectedItemField : null));
+    }, []);
+    const overflowItems = useMemo(
+      () =>
+        rowItems.slice(overflowIndexStart).map((rowItem, index) => {
+          const rowItemString = (rowItem as ReputationLinkSetting).name ?? rowItem;
+          const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItemString}-${index}`);
+          const dataProvider = {
+            and: [],
+            enabled: true,
+            id,
+            name: rowItemString,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: attrName,
+              value: rowItemString,
+              displayValue: dragDisplayValue ?? rowItemString,
+              operator: IS_OPERATOR as QueryOperator,
+            },
+          };
 
+          return (
+            <EuiFlexItem key={`${idPrefix}-${id}`}>
+              <OverflowItem
+                dataProvider={dataProvider}
+                dragDisplayValue={dragDisplayValue}
+                rowItem={rowItemString}
+                render={render}
+                field={attrName}
+                topNCallback={topNCallback}
+              />
+            </EuiFlexItem>
+          );
+        }),
+      [attrName, dragDisplayValue, idPrefix, overflowIndexStart, render, rowItems, topNCallback]
+    );
+    const { timelineId: timelineIdFind } = useContext(TimelineContext);
+    const timelineId = timelineIdFind ?? TimelineId.active;
+    const activeScope: SourcererScopeName =
+      timelineId === TimelineId.active
+        ? SourcererScopeName.timeline
+        : timelineId != null &&
+          [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
+            timelineId as TimelineId
+          )
+        ? SourcererScopeName.detections
+        : SourcererScopeName.default;
+    const { browserFields, indexPattern } = useSourcererDataView(activeScope);
+
+    return display === 'topN' ? (
+      <StatefulTopN
+        browserFields={browserFields}
+        field={selectedField}
+        indexPattern={indexPattern}
+        timelineId={timelineId ?? undefined}
+        toggleTopN={topNCallback}
+        value={selectedValue}
+        // onFilterAdded={onFilterAdded}
+
+        // globalFilters={globalFilters}
+      />
+    ) : (
+      <div
+        data-test-subj="more-container"
+        style={{
+          maxHeight: moreMaxHeight,
+          overflow: 'auto',
+          paddingRight: '2px',
+        }}
+        className="withHoverActions__popover"
+      >
+        <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="overflow-items">
+          {overflowItems}
+        </EuiFlexGroup>
+      </div>
+    );
+
+    // return (
+    //   <div
+    //     data-test-subj="more-container"
+    //     style={{
+    //       maxHeight: moreMaxHeight,
+    //       overflow: 'auto',
+    //       paddingRight: '2px',
+    //     }}
+    //     className="withHoverActions__popover"
+    //   >
+    //     <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="overflow-items">
+    //       {overflowItems}
+    //     </EuiFlexGroup>
+    //   </div>
+    // );
+  }
+);
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
+  ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
@@ -319,6 +422,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             repositionOnScroll
           >
             <MoreContainer
+              attrName={attrName}
               idPrefix={idPrefix}
               render={render}
               rowItems={rowItems}

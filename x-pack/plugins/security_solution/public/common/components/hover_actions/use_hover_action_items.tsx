@@ -133,7 +133,8 @@ export const useHoverActionItems = ({
       <ShowTopNButton
         Component={enableOverflowButton ? EuiContextMenuItem : undefined}
         data-test-subj="hover-actions-show-top-n"
-        enablePopOver={!enableOverflowButton && isCaseView}
+        // enablePopOver={!enableOverflowButton && isCaseView}
+        enablePopOver={true}
         field={field}
         key="hover-actions-show-top-n"
         onClick={toggleTopN}
@@ -145,17 +146,7 @@ export const useHoverActionItems = ({
         value={values}
       />
     ),
-    [
-      enableOverflowButton,
-      field,
-      isCaseView,
-      onFilterAdded,
-      ownFocus,
-      showTopN,
-      timelineId,
-      toggleTopN,
-      values,
-    ]
+    [enableOverflowButton, field, onFilterAdded, ownFocus, showTopN, timelineId, toggleTopN, values]
   );
 
   const allItems = useMemo(
@@ -320,6 +311,6 @@ export const useHoverActionItems = ({
 
   return {
     overflowActionItems,
-    allActionItems,
+    allActionItems: allItems,
   };
 };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiLink,
@@ -160,28 +160,40 @@ interface OverflowItemProps {
   dataProvider?: DataProvider | DataProvider[] | undefined;
   dragDisplayValue?: string;
   field: string;
+  render?: (item: RowItemTypes) => React.ReactNode;
   rowItem: string;
+  enableOverflowButton?: boolean;
 }
 
 export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
   dataProvider,
   dragDisplayValue,
   field,
+  render,
   rowItem,
+  enableOverflowButton,
+  topNCallback,
 }) => {
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const { timelineId: timelineIdFind } = useContext(TimelineContext);
   const [hoverActionsOwnFocus] = useState<boolean>(false);
   const toggleTopN = useCallback(() => {
+    if (topNCallback) {
+      topNCallback({ displayType: 'topN', selectedItemValue: rowItem, selectedItemField: field });
+    }
+
     setShowTopN((prevShowTopN) => {
       const newShowTopN = !prevShowTopN;
       return newShowTopN;
     });
-  }, []);
+  }, [field, rowItem, topNCallback]);
 
   const closeTopN = useCallback(() => {
     setShowTopN(false);
-  }, []);
+    if (topNCallback) {
+      topNCallback({});
+    }
+  }, [topNCallback]);
 
   return (
     <EuiFlexGroup
@@ -190,11 +202,12 @@ export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
       direction="row"
       data-test-subj={`${field}-${dragDisplayValue ?? rowItem}`}
     >
-      <EuiFlexItem grow={1}>{defaultToEmptyTag(rowItem)} </EuiFlexItem>
+      <EuiFlexItem grow={1}>{render ? render(rowItem) : defaultToEmptyTag(rowItem)} </EuiFlexItem>
       <EuiFlexItem grow={false} data-test-subj="hover-actions">
         <HoverActions
           closeTopN={closeTopN}
           dataProvider={dataProvider}
+          enableOverflowButton={enableOverflowButton}
           field={field}
           isObjectArray={false}
           ownFocus={hoverActionsOwnFocus}
