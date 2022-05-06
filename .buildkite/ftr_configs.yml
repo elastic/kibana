@@ -167,6 +167,7 @@ enabled:
   - x-pack/test/functional/apps/ml/data_visualizer/config.ts
   - x-pack/test/functional/apps/ml/group1/config.ts
   - x-pack/test/functional/apps/ml/group3/config.ts
+  - x-pack/test/functional/apps/ml/permissions/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
   - x-pack/test/functional/apps/reporting_management/config.ts

@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { USER } from '../../../../services/ml/security_common';
+import { USER } from '../../../services/ml/security_common';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const browser = getService('browser');
 
   const testUsers = [
-    { user: USER.ML_POWERUSER, discoverAvailable: true },
-    { user: USER.ML_POWERUSER_SPACES, discoverAvailable: false },
+    { user: USER.ML_VIEWER, discoverAvailable: true },
+    { user: USER.ML_VIEWER_SPACES, discoverAvailable: false },
   ];
 
-  describe('for user with full ML access', function () {
+  describe('for user with read ML access', function () {
     this.tags(['skipFirefox', 'ml']);
 
     describe('with no data loaded', function () {
@@ -43,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.assertKibanaNavMLEntryExists();
           });
 
-          it('should display side nav in the ML app correctly', async () => {
+          it('should display tabs in the ML app correctly', async () => {
             await ml.testExecution.logTestStep('should load the ML app');
             await ml.navigation.navigateToMl();
 
@@ -67,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
               'should display the enabled "Model Management" section'
             );
             await ml.navigation.assertTrainedModelsNavItemEnabled(true);
-            await ml.navigation.assertNodesNavItemEnabled(true);
+            await ml.navigation.assertNodesNavItemEnabled(false);
 
             await ml.testExecution.logTestStep(
               'should display the enabled "Data Visualizer" section'
@@ -79,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('should display elements on ML Overview page correctly', async () => {
             await ml.testExecution.logTestStep('should load the ML overview page');
+            await ml.navigation.navigateToMl();
             await ml.navigation.navigateToOverview();
 
             await ml.commonUI.waitForDatePickerIndicatorLoaded();
@@ -87,24 +87,18 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.overviewPage.assertGettingStartedCalloutVisible(true);
             await ml.overviewPage.dismissGettingStartedCallout();
 
-            await ml.testExecution.logTestStep('should display ML Nodes panel');
-            await ml.mlNodesPanel.assertNodeOverviewPanel();
+            await ml.testExecution.logTestStep('should not display ML Nodes panel');
+            await ml.mlNodesPanel.assertNodesOverviewPanelExists(false);
 
-            await ml.testExecution.logTestStep('should display Anomaly Detection empty state');
+            await ml.testExecution.logTestStep('should display disabled AD create job button');
             await ml.overviewPage.assertADEmptyStateExists();
             await ml.overviewPage.assertADCreateJobButtonExists();
-            await ml.overviewPage.assertADCreateJobButtonEnabled(true);
+            await ml.overviewPage.assertADCreateJobButtonEnabled(false);
 
-            await ml.testExecution.logTestStep('should display DFA empty state');
+            await ml.testExecution.logTestStep('should display disabled DFA create job button');
             await ml.overviewPage.assertDFAEmptyStateExists();
             await ml.overviewPage.assertDFACreateJobButtonExists();
-            await ml.overviewPage.assertDFACreateJobButtonEnabled(true);
-
-            await ml.testExecution.logTestStep(
-              'should persist the getting started callout state after refresh'
-            );
-            await browser.refresh();
-            await ml.overviewPage.assertGettingStartedCalloutVisible(false);
+            await ml.overviewPage.assertDFACreateJobButtonEnabled(false);
           });
         });
       }
@@ -122,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
       const ecExpectedTotalCount = '287';
 
       const uploadFilePath = require.resolve(
-        '../../data_visualizer/files_to_import/artificial_server_log'
+        '../data_visualizer/files_to_import/artificial_server_log'
       );
       const expectedUploadFileTitle = 'artificial_server_log';
 
@@ -186,23 +180,6 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.securityUI.logout();
           });
 
-          it('should display elements on ML Overview page correctly', async () => {
-            await ml.testExecution.logTestStep('should load the Overview page');
-            await ml.navigation.navigateToMl();
-            await ml.navigation.navigateToOverview();
-
-            await ml.commonUI.waitForDatePickerIndicatorLoaded();
-
-            await ml.testExecution.logTestStep('should display ML Nodes panel');
-            await ml.mlNodesPanel.assertNodeOverviewPanel();
-
-            await ml.testExecution.logTestStep('should display Anomaly Detection panel');
-            await ml.overviewPage.assertAdJobsOverviewPanelExist();
-
-            await ml.testExecution.logTestStep('should display DFA panel');
-            await ml.overviewPage.assertDFAJobsOverviewPanelExist();
-          });
-
           it('should display elements on Anomaly Detection page correctly', async () => {
             await ml.testExecution.logTestStep('should load the AD job management page');
             await ml.navigation.navigateToMl();
@@ -212,9 +189,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobManagement.assertJobStatsBarExists();
             await ml.jobManagement.assertJobTableExists();
 
-            await ml.testExecution.logTestStep('should display an enabled "Create job" button');
+            await ml.testExecution.logTestStep('should display a disabled "Create job" button');
             await ml.jobManagement.assertCreateNewJobButtonExists();
-            await ml.jobManagement.assertCreateNewJobButtonEnabled(true);
+            await ml.jobManagement.assertCreateNewJobButtonEnabled(false);
 
             await ml.testExecution.logTestStep('should display the AD job in the list');
             await ml.jobTable.filterWithSearchString(adJobId, 1);
@@ -223,12 +200,8 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionAnomalyExplorerButtonEnabled(adJobId, true);
 
-            await ml.testExecution.logTestStep('should display enabled AD job row action buttons');
-            await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, true);
-            await ml.jobTable.assertJobActionStartDatafeedButtonEnabled(adJobId, true);
-            await ml.jobTable.assertJobActionCloneJobButtonEnabled(adJobId, true);
-            await ml.jobTable.assertJobActionEditJobButtonEnabled(adJobId, true);
-            await ml.jobTable.assertJobActionDeleteJobButtonEnabled(adJobId, true);
+            await ml.testExecution.logTestStep('should display disabled AD job row action button');
+            await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, false);
 
             await ml.testExecution.logTestStep('should select the job');
             await ml.jobTable.selectJobRow(adJobId);
@@ -238,11 +211,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobTable.assertMultiSelectActionAnomalyExplorerButtonEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should display enabled multi select action buttons'
+              'should display disabled multi select action button'
             );
-            await ml.jobTable.assertMultiSelectManagementActionsButtonEnabled(true);
-            await ml.jobTable.assertMultiSelectStartDatafeedActionButtonEnabled(true);
-            await ml.jobTable.assertMultiSelectDeleteJobActionButtonEnabled(true);
+            await ml.jobTable.assertMultiSelectManagementActionsButtonEnabled(false);
             await ml.jobTable.deselectJobRow(adJobId);
           });
 
@@ -273,18 +244,16 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.anomaliesTable.assertTableExists();
             await ml.anomaliesTable.assertTableNotEmpty();
 
-            await ml.testExecution.logTestStep('should display enabled anomaly row action buttons');
-            await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
-            await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
-            await ml.anomaliesTable.assertAnomalyActionConfigureRulesButtonEnabled(0, true);
+            await ml.testExecution.logTestStep('should not display the anomaly row action button');
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonNotExists(0);
 
             await ml.testExecution.logTestStep(
-              'should display the forecast modal with enabled run button'
+              'should display the forecast modal with disabled run button'
             );
             await ml.forecast.assertForecastButtonExists();
             await ml.forecast.assertForecastButtonEnabled(true);
             await ml.forecast.openForecastModal();
-            await ml.forecast.assertForecastModalRunButtonEnabled(true);
+            await ml.forecast.assertForecastModalRunButtonEnabled(false);
             await ml.forecast.closeForecastModal();
           });
 
@@ -315,10 +284,8 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
             await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
 
-            await ml.testExecution.logTestStep(
-              'should display enabled configure rules action button'
-            );
-            await ml.anomaliesTable.assertAnomalyActionConfigureRulesButtonEnabled(0, true);
+            await ml.testExecution.logTestStep('should not display configure rules action button');
+            await ml.anomaliesTable.assertAnomalyActionConfigureRulesButtonNotExists(0);
 
             await ml.testExecution.logTestStep('should display enabled view series action button');
             await ml.anomaliesTable.assertAnomalyActionViewSeriesButtonEnabled(0, true);
@@ -334,9 +301,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataFrameAnalytics.assertAnalyticsStatsBarExists();
             await ml.dataFrameAnalytics.assertAnalyticsTableExists();
 
-            await ml.testExecution.logTestStep('should display an enabled "Create job" button');
+            await ml.testExecution.logTestStep('should display a disabled "Create job" button');
             await ml.dataFrameAnalytics.assertCreateNewAnalyticsButtonExists();
-            await ml.dataFrameAnalytics.assertCreateNewAnalyticsButtonEnabled(true);
+            await ml.dataFrameAnalytics.assertCreateNewAnalyticsButtonEnabled(false);
 
             await ml.testExecution.logTestStep('should display the DFA job in the list');
             await ml.dataFrameAnalyticsTable.filterWithSearchString(dfaJobId, 1);
@@ -348,11 +315,13 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataFrameAnalyticsTable.assertJobRowActionsMenuButtonEnabled(dfaJobId, true);
             await ml.dataFrameAnalyticsTable.assertJobActionViewButtonEnabled(dfaJobId, true);
 
-            await ml.testExecution.logTestStep('should display enabled DFA job row action buttons');
+            await ml.testExecution.logTestStep(
+              'should display disabled DFA job row action buttons'
+            );
             await ml.dataFrameAnalyticsTable.assertJobActionStartButtonEnabled(dfaJobId, false); // job already completed
-            await ml.dataFrameAnalyticsTable.assertJobActionEditButtonEnabled(dfaJobId, true);
-            await ml.dataFrameAnalyticsTable.assertJobActionCloneButtonEnabled(dfaJobId, true);
-            await ml.dataFrameAnalyticsTable.assertJobActionDeleteButtonEnabled(dfaJobId, true);
+            await ml.dataFrameAnalyticsTable.assertJobActionEditButtonEnabled(dfaJobId, false);
+            await ml.dataFrameAnalyticsTable.assertJobActionCloneButtonEnabled(dfaJobId, false);
+            await ml.dataFrameAnalyticsTable.assertJobActionDeleteButtonEnabled(dfaJobId, false);
             await ml.dataFrameAnalyticsTable.ensureJobActionsMenuClosed(dfaJobId);
           });
 
@@ -407,9 +376,9 @@ export default function ({ getService }: FtrProviderContext) {
             }
             await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
 
-            await ml.testExecution.logTestStep('should display job cards');
-            await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
-            await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
+            await ml.testExecution.logTestStep('should not display job cards');
+            await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
+            await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
           });
 
           it('should display elements on File Data Visualizer page correctly', async () => {
@@ -431,119 +400,69 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizerFileBased.assertFileContentPanelExists();
             await ml.dataVisualizerFileBased.assertSummaryPanelExists();
             await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
-            await ml.dataVisualizerFileBased.assertImportButtonEnabled(true);
+            await ml.dataVisualizerFileBased.assertImportButtonEnabled(false);
           });
 
           it('should display elements on Settings home page correctly', async () => {
             await ml.testExecution.logTestStep('should load the settings page');
             await ml.navigation.navigateToSettings();
 
-            await ml.testExecution.logTestStep('should display enabled calendar controls');
+            await ml.testExecution.logTestStep(
+              'should display enabled calendar management and disabled calendar create links'
+            );
             await ml.settings.assertManageCalendarsLinkExists();
             await ml.settings.assertManageCalendarsLinkEnabled(true);
             await ml.settings.assertCreateCalendarLinkExists();
-            await ml.settings.assertCreateCalendarLinkEnabled(true);
+            await ml.settings.assertCreateCalendarLinkEnabled(false);
 
-            await ml.testExecution.logTestStep('should display enabled filter list controls');
+            await ml.testExecution.logTestStep('should display disabled filter list controls');
             await ml.settings.assertManageFilterListsLinkExists();
-            await ml.settings.assertManageFilterListsLinkEnabled(true);
+            await ml.settings.assertManageFilterListsLinkEnabled(false);
             await ml.settings.assertCreateFilterListLinkExists();
-            await ml.settings.assertCreateFilterListLinkEnabled(true);
+            await ml.settings.assertCreateFilterListLinkEnabled(false);
           });
 
           it('should display elements on Calendar management page correctly', async () => {
             await ml.testExecution.logTestStep('should load the calendar management page');
             await ml.settings.navigateToCalendarManagement();
 
-            await ml.testExecution.logTestStep('should display enabled create calendar button');
-            await ml.settingsCalendar.assertCreateCalendarButtonEnabled(true);
+            await ml.testExecution.logTestStep('should display disabled create calendar button');
+            await ml.settingsCalendar.assertCreateCalendarButtonEnabled(false);
 
             await ml.testExecution.logTestStep('should display the calendar in the list');
             await ml.settingsCalendar.filterWithSearchString(calendarId, 1);
 
-            await ml.testExecution.logTestStep('should enable delete calendar button on selection');
+            await ml.testExecution.logTestStep(
+              'should not enable delete calendar button on selection'
+            );
             await ml.settingsCalendar.assertDeleteCalendarButtonEnabled(false);
             await ml.settingsCalendar.selectCalendarRow(calendarId);
-            await ml.settingsCalendar.assertDeleteCalendarButtonEnabled(true);
+            await ml.settingsCalendar.assertDeleteCalendarButtonEnabled(false);
 
             await ml.testExecution.logTestStep('should load the calendar edit page');
             await ml.settingsCalendar.openCalendarEditForm(calendarId);
 
             await ml.testExecution.logTestStep(
-              'should display enabled elements of the edit calendar page'
+              'should display disabled elements of the edit calendar page'
             );
-            await ml.settingsCalendar.assertApplyToAllJobsSwitchEnabled(true);
-            await ml.settingsCalendar.assertJobSelectionEnabled(true);
-            await ml.settingsCalendar.assertJobGroupSelectionEnabled(true);
-            await ml.settingsCalendar.assertNewEventButtonEnabled(true);
-            await ml.settingsCalendar.assertImportEventsButtonEnabled(true);
+            await ml.settingsCalendar.assertApplyToAllJobsSwitchEnabled(false);
+            await ml.settingsCalendar.assertJobSelectionEnabled(false);
+            await ml.settingsCalendar.assertJobGroupSelectionEnabled(false);
+            await ml.settingsCalendar.assertNewEventButtonEnabled(false);
+            await ml.settingsCalendar.assertImportEventsButtonEnabled(false);
 
             await ml.testExecution.logTestStep('should display the event in the list');
             await ml.settingsCalendar.assertEventRowExists(eventDescription);
 
             await ml.testExecution.logTestStep('should display enabled delete event button');
-            await ml.settingsCalendar.assertDeleteEventButtonEnabled(eventDescription, true);
-          });
-
-          it('should display elements on Filter Lists management page correctly', async () => {
-            await ml.testExecution.logTestStep('should load the filter list management page');
-            await ml.navigation.navigateToSettings();
-            await ml.settings.navigateToFilterListsManagement();
-
-            await ml.testExecution.logTestStep('should display enabled create filter list button');
-            await ml.settingsFilterList.assertCreateFilterListButtonEnabled(true);
-
-            await ml.testExecution.logTestStep('should display the filter list in the table');
-            await ml.settingsFilterList.filterWithSearchString(filterId, 1);
-
-            await ml.testExecution.logTestStep(
-              'should enable delete filter list button on selection'
-            );
-            await ml.settingsFilterList.assertDeleteFilterListButtonEnabled(false);
-            await ml.settingsFilterList.selectFilterListRow(filterId);
-            await ml.settingsFilterList.assertDeleteFilterListButtonEnabled(true);
-
-            await ml.testExecution.logTestStep('should load the filter list edit page');
-            await ml.settingsFilterList.openFilterListEditForm(filterId);
-
-            await ml.testExecution.logTestStep(
-              'should display enabled elements of the edit calendar page'
-            );
-            await ml.settingsFilterList.assertEditDescriptionButtonEnabled(true);
-            await ml.settingsFilterList.assertAddItemsButtonEnabled(true);
-
-            await ml.testExecution.logTestStep('should display the filter item in the list');
-            await ml.settingsFilterList.assertFilterItemExists(filterItems[0]);
-
-            await ml.testExecution.logTestStep(
-              'should enable delete filter item button on selection'
-            );
-            await ml.settingsFilterList.assertDeleteItemButtonEnabled(false);
-            await ml.settingsFilterList.selectFilterItem(filterItems[0]);
-            await ml.settingsFilterList.assertDeleteItemButtonEnabled(true);
+            await ml.settingsCalendar.assertDeleteEventButtonEnabled(eventDescription, false);
           });
 
           it('should display elements on Stack Management ML page correctly', async () => {
             await ml.testExecution.logTestStep(
-              'should load the stack management with the ML menu item being present'
+              'should load the stack management with the ML menu item being absent'
             );
-            await ml.navigation.navigateToStackManagement();
-
-            await ml.testExecution.logTestStep(
-              'should load the jobs list page in stack management'
-            );
-            await ml.navigation.navigateToStackManagementJobsListPage();
-
-            await ml.testExecution.logTestStep('should display the AD job in the list');
-            await ml.jobTable.filterWithSearchString(adJobId, 1, 'stackMgmtJobList');
-
-            await ml.testExecution.logTestStep(
-              'should load the analytics jobs list page in stack management'
-            );
-            await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-
-            await ml.testExecution.logTestStep('should display the DFA job in the list');
-            await ml.dataFrameAnalyticsTable.filterWithSearchString(dfaJobId, 1);
+            await ml.navigation.navigateToStackManagement({ expectMlLink: false });
           });
         });
       }
