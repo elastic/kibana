@@ -159,12 +159,12 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotDescription"
             defaultMessage="Specify a snapshot policy to be executed before the deletion of the index. This ensures that a snapshot of the deleted index is available."
           />{' '}
-          <LearnMoreLink docPath={docLinks.links.alerting.ilmWaitForSnapshot} />
+          <LearnMoreLink docPath={docLinks.links.elasticsearch.ilmWaitForSnapshot} />
         </>
       }
       titleSize="xs"
       fullWidth
-    >
+    >131749
       <>
         <UseField<string>
           path={waitForSnapshotFormField}
