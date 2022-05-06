@@ -155,3 +155,11 @@ export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
 export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
   defaultMessage: 'Back to Cases',
 });
+
+export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity', {
+  defaultMessage: 'Activity',
+});
+
+export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
+  defaultMessage: 'Alerts',
+});

@@ -73,7 +73,9 @@ export const ProcessTreeAlert = ({
         onClick={handleExpandClick}
       />
       <EuiIcon type="alert" color="danger" />
-      <EuiText size="s">{dataOrDash(name)}</EuiText>
+      <EuiText css={styles.alertName} size="s">
+        {dataOrDash(name)}
+      </EuiText>
       <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
         {dataOrDash(status)}
       </EuiBadge>

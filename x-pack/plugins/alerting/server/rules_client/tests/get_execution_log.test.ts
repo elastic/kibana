@@ -286,7 +286,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.105Z',
         end: '2022-03-23T17:37:07.105Z',
-        duration: 0,
+        duration: '0',
         outcome: 'failure',
       },
       kibana: {
@@ -335,7 +335,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.101Z',
         end: '2022-03-23T17:37:07.102Z',
-        duration: 1000000,
+        duration: '1000000',
         outcome: 'failure',
       },
       kibana: {
@@ -384,7 +384,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.098Z',
         end: '2022-03-23T17:37:07.098Z',
-        duration: 0,
+        duration: '0',
         outcome: 'failure',
       },
       kibana: {
@@ -433,7 +433,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.095Z',
         end: '2022-03-23T17:37:07.096Z',
-        duration: 1000000,
+        duration: '1000000',
         outcome: 'failure',
       },
       kibana: {
@@ -482,7 +482,7 @@ const findResults = {
         kind: 'action',
         start: '2022-03-23T17:37:07.084Z',
         end: '2022-03-23T17:37:07.086Z',
-        duration: 2000000,
+        duration: '2000000',
         outcome: 'failure',
       },
       kibana: {
@@ -533,7 +533,7 @@ const findResults = {
         start: '2022-03-23T17:23:05.131Z',
         outcome: 'failure',
         end: '2022-03-23T17:23:05.248Z',
-        duration: 117000000,
+        duration: '117000000',
         reason: 'execute',
       },
       kibana: {
