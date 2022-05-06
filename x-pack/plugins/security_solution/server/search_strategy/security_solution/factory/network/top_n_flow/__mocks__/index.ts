@@ -931,6 +931,15 @@ export const expectedDsl = {
         ],
       },
     },
+    _source: false,
+    fields: [
+      'source.geo.*',
+      'source.as.*',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
   size: 0,
   track_total_hits: false,

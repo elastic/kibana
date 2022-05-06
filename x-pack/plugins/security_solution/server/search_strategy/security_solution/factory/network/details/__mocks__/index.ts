@@ -216,7 +216,6 @@ export const formattedSearchStrategyResponse = {
           ignore_unavailable: true,
           track_total_hits: false,
           body: {
-            docvalue_fields: mockOptions.docValueFields,
             aggs: {
               source: {
                 filter: { term: { 'source.ip': '35.196.65.164' } },
@@ -284,13 +283,25 @@ export const formattedSearchStrategyResponse = {
                 filter: { term: { 'host.ip': '35.196.65.164' } },
                 aggs: {
                   results: {
-                    top_hits: { size: 1, _source: ['host'], sort: [{ '@timestamp': 'desc' }] },
+                    top_hits: { size: 1, _source: false, sort: [{ '@timestamp': 'desc' }] },
                   },
                 },
               },
             },
             query: { bool: { should: [] } },
             size: 0,
+            _source: false,
+            fields: [
+              'source.as',
+              'source.geo',
+              'destination.as',
+              'destination.geo',
+              'host*',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
         },
         null,
@@ -420,8 +431,19 @@ export const expectedDsl = {
         },
       },
     },
-    docvalue_fields: mockOptions.docValueFields,
     query: { bool: { should: [] } },
     size: 0,
+    _source: false,
+    fields: [
+      'source.as',
+      'source.geo',
+      'destination.as',
+      'destination.geo',
+      'host*',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
 };

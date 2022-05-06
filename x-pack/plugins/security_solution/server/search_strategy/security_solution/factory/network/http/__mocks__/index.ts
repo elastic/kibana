@@ -72,9 +72,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'L4wXh3QBc39KFIJbgXrN',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '67.173.227.94' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['67.173.227.94'],
                     },
                   },
                 ],
@@ -114,9 +114,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'tEIXh3QBB-gskclyiT2g',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '35.227.65.114' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['35.227.65.114'],
                     },
                   },
                 ],
@@ -156,9 +156,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'MYwXh3QBc39KFIJbgXrN',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '67.173.227.94' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['67.173.227.94'],
                     },
                   },
                 ],
@@ -192,9 +192,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'MIwXh3QBc39KFIJbgXrN',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '24.168.52.229' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['24.168.52.229'],
                     },
                   },
                 ],
@@ -228,9 +228,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'MowXh3QBc39KFIJbgXrN',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '67.173.227.94' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['67.173.227.94'],
                     },
                   },
                 ],
@@ -267,9 +267,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: '6Ywch3QBc39KFIJbVY_k',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '67.173.227.94' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['67.173.227.94'],
                     },
                   },
                 ],
@@ -306,9 +306,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'rkIXh3QBB-gskclyiT2g',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '35.226.77.71' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['35.226.77.71'],
                     },
                   },
                 ],
@@ -354,9 +354,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'JEIYh3QBB-gskclyYEfA',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '35.171.72.245' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['35.171.72.245'],
                     },
                   },
                 ],
@@ -398,9 +398,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 'sUIXh3QBB-gskclyiT2g',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '24.168.52.229' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['24.168.52.229'],
                     },
                   },
                 ],
@@ -434,9 +434,9 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _index: 'filebeat-8.0.0-2020.09.02-000001',
                     _id: 's0IXh3QBB-gskclyiT2g',
                     _score: 0,
-                    _source: {
-                      host: { name: 'bastion00.siem.estc.dev' },
-                      source: { ip: '75.134.244.183' },
+                    fields: {
+                      'host.name': ['bastion00.siem.estc.dev'],
+                      'source.ip': ['75.134.244.183'],
                     },
                   },
                 ],
@@ -635,7 +635,7 @@ export const formattedSearchStrategyResponse = {
                   domains: { terms: { field: 'url.domain', size: 4 } },
                   status: { terms: { field: 'http.response.status_code', size: 4 } },
                   source: {
-                    top_hits: { size: 1, _source: { includes: ['host.name', 'source.ip'] } },
+                    top_hits: { size: 1, _source: false },
                   },
                 },
               },
@@ -657,6 +657,19 @@ export const formattedSearchStrategyResponse = {
                 ],
               },
             },
+            _source: false,
+            fields: [
+              'host.name',
+              'source.ip',
+              'url.path',
+              'http.request.method',
+              'url.domain',
+              'http.response.status_code',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
           size: 0,
           track_total_hits: false,
@@ -692,7 +705,7 @@ export const expectedDsl = {
           methods: { terms: { field: 'http.request.method', size: 4 } },
           domains: { terms: { field: 'url.domain', size: 4 } },
           status: { terms: { field: 'http.response.status_code', size: 4 } },
-          source: { top_hits: { size: 1, _source: { includes: ['host.name', 'source.ip'] } } },
+          source: { top_hits: { size: 1, _source: false } },
         },
       },
     },
@@ -713,6 +726,19 @@ export const expectedDsl = {
         ],
       },
     },
+    _source: false,
+    fields: [
+      'host.name',
+      'source.ip',
+      'url.path',
+      'http.request.method',
+      'url.domain',
+      'http.response.status_code',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
   size: 0,
   track_total_hits: false,

@@ -68,7 +68,12 @@ export const buildHttpQuery = ({
       },
       _source: false,
       fields: [
-        'host.name', 'source.ip',
+        'host.name',
+        'source.ip',
+        'url.path',
+        'http.request.method',
+        'url.domain',
+        'http.response.status_code',
         {
           field: '@timestamp',
           format: 'strict_date_optional_time',
@@ -85,7 +90,7 @@ export const buildHttpQuery = ({
 const getHttpAggs = (sortField: SortField, querySize: number) => ({
   url: {
     terms: {
-      field: `url.path`,
+      field: 'url.path',
       size: querySize,
       order: {
         _count: sortField.direction,
