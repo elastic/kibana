@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable, Pagination, CriteriaWithPagination } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
 import { getColumnHeader, getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import { tGridActions } from '../../../../store/t_grid';
-import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
+import type {
+  BrowserFieldItem,
+  GetFieldTableColumns,
+} from '../../../../../common/types/fields_browser';
 import { FieldTableHeader } from './field_table_header';
 
 export interface FieldTableProps {
@@ -69,6 +72,8 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   timelineId,
   onHide,
 }) => {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const dispatch = useDispatch();
 
   const fieldItems = useMemo(
@@ -103,6 +108,33 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
     [columnHeaders, dispatch, timelineId]
   );
 
+  /**
+   * Pagination controls
+   */
+  const pagination: Pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      totalItemCount: fieldItems.length,
+      pageSizeOptions: [10, 25, 50],
+    }),
+    [fieldItems.length, pageIndex, pageSize]
+  );
+
+  const onTableChange = useCallback(({ page }: CriteriaWithPagination<BrowserFieldItem>) => {
+    const { index, size } = page;
+    setPageIndex(index);
+    setPageSize(size);
+  }, []);
+
+  useEffect(() => {
+    // Resets the pagination when some filter has changed, consequently, the number of fields is different
+    setPageIndex(0);
+  }, [fieldItems.length]);
+
+  /**
+   * Process columns
+   */
   const columns = useMemo(
     () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns, onHide }),
     [onToggleColumn, searchInput, getFieldTableColumns, onHide]
@@ -124,9 +156,10 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
           items={fieldItems}
           itemId="name"
           columns={columns}
-          pagination={true}
+          pagination={pagination}
           sorting={true}
           hasActions={hasActions}
+          onChange={onTableChange}
           compressed
         />
       </TableContainer>
