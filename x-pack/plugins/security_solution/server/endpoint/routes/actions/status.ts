@@ -24,7 +24,7 @@ export function registerActionStatusRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
-  // Summary of action status f for a given list of endpoints
+  // Summary of action status for a given list of endpoints
   router.get(
     {
       path: ACTION_STATUS_ROUTE,

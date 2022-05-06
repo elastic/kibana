@@ -150,7 +150,7 @@ export interface ActivityLogActionResponse {
 }
 
 /**
- * One of the possible Response Action Log entry - Eitehr a Fleet Action request, Fleet action response,
+ * One of the possible Response Action Log entry - Either a Fleet Action request, Fleet action response,
  * Endpoint action request and/or endpoint action response.
  */
 export type ActivityLogEntry =
