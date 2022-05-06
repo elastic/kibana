@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are added when a pie chart slice is clicked', async function () {
         await dashboardAddPanel.addVisualization('Rendering Test: pie');
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.filterOnPieSlice('4,886');
+        await pieChart.filterOnPieSlice('4886');
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
 

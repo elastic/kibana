@@ -179,6 +179,16 @@ export class PieChartService extends FtrService {
     return slices.length;
   }
 
+  async getSliceCountForAllPies() {
+    let pieSlices = 0;
+    const partitions =
+      (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition ?? [];
+    for (const partition of partitions) {
+      pieSlices += partition.partitions.length;
+    }
+    return pieSlices;
+  }
+
   async expectPieSliceCountEsCharts(expectedCount: number) {
     const slices =
       (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
@@ -192,6 +202,18 @@ export class PieChartService extends FtrService {
       const slicesCount = await this.getPieSliceCount(isNewLibrary);
       expect(slicesCount).to.be(expectedCount);
     });
+  }
+
+  async expectSliceCountForAllPies(expectedCount: number) {
+    await this.retry.try(async () => {
+      const slicesCount = await this.getSliceCountForAllPies();
+      expect(slicesCount).to.be(expectedCount);
+    });
+  }
+
+  async expectEmptyPieChart() {
+    const noResult = await this.testSubjects.exists('partitionVisEmptyValues');
+    expect(noResult).to.be(true);
   }
 
   async expectPieChartLabels(expectedLabels: string[], isNewLibrary: boolean = true) {
