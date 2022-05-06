@@ -241,6 +241,7 @@ export function WaterfallItem({
         <SpanLinksBadge
           linkedParents={item.spanLinksCount.linkedParents}
           linkedChildren={item.spanLinksCount.linkedChildren}
+          id={item.id}
         />
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>

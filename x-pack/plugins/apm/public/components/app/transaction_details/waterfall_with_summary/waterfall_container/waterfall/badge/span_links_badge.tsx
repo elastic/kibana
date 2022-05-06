@@ -9,10 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 
-export function SpanLinksBadge({
-  linkedParents,
-  linkedChildren,
-}: SpanLinksCount) {
+type Props = SpanLinksCount & { id: string };
+
+export function SpanLinksBadge({ linkedParents, linkedChildren, id }: Props) {
   if (!linkedParents && !linkedChildren) {
     return null;
   }
@@ -48,7 +47,7 @@ export function SpanLinksBadge({
         </EuiFlexGroup>
       }
     >
-      <EuiBadge data-test-subj="spanLinksBadge">
+      <EuiBadge data-test-subj={`spanLinksBadge_${id}`}>
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
           defaultMessage:
             '{total} {total, plural, one {Span link} other {Span links}}',

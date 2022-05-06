@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
+import { EntityArrayIterable } from '@elastic/apm-synthtrace';
 import { ProcessorEvent } from '@kbn/apm-plugin/common/processor_event';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { generateSpanLinksData } from './data_generator';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -46,185 +47,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        const serviceAInstanceGo = apm
-          .service('Service A', 'production', 'go')
-          .instance('instance a');
+        const { events, ids } = generateSpanLinksData();
 
-        const serviceAEvents = timerange(
-          new Date('2022-01-01T00:00:00.000Z'),
-          new Date('2022-01-01T00:01:00.000Z')
-        )
-          .interval('1m')
-          .rate(1)
-          .generator((timestamp) => {
-            return serviceAInstanceGo
-              .transaction(`Transaction A`)
-              .timestamp(timestamp)
-              .duration(1000)
-              .success()
-              .children(
-                serviceAInstanceGo
-                  .span(`Span A`, 'external', 'http')
-                  .timestamp(timestamp + 50)
-                  .duration(100)
-                  .success()
-              );
-          });
-
-        const serviceAAsArray = serviceAEvents.toArray();
-        const transactionA = serviceAAsArray.find(
-          (item) => item['processor.event'] === 'transaction'
-        );
-        const spanA = serviceAAsArray.find((item) => item['processor.event'] === 'span');
-        serviceAIds = {
-          transactionAId: transactionA?.['transaction.id']!,
-          traceId: spanA?.['trace.id']!,
-          spanAId: spanA?.['span.id']!,
-        };
-        const serviceASpanALink = {
-          trace: { id: spanA?.['trace.id']! },
-          span: { id: spanA?.['span.id']! },
-        };
-
-        const serviceBInstanceJava = apm
-          .service('Service B', 'production', 'java')
-          .instance('instance b');
-
-        const serviceBEvents = timerange(
-          new Date('2022-01-01T00:02:00.000Z'),
-          new Date('2022-01-01T00:03:00.000Z')
-        )
-          .interval('1m')
-          .rate(1)
-          .generator((timestamp) => {
-            return serviceBInstanceJava
-              .transaction(`Transaction B`)
-              .timestamp(timestamp)
-              .duration(1000)
-              .success()
-              .children(
-                serviceBInstanceJava
-                  .span(`Span B`, 'external', 'http')
-                  .defaults({ 'span.links': [{ trace: { id: '1' }, span: { id: '2' } }] })
-                  .timestamp(timestamp + 50)
-                  .duration(100)
-                  .success(),
-                serviceBInstanceJava
-                  .span(`Span B.1`, 'external', 'http')
-                  .timestamp(timestamp + 50)
-                  .duration(100)
-                  .success()
-              );
-          });
-
-        const serviceBAsArray = serviceBEvents.toArray();
-        const transactionB = serviceBAsArray.find(
-          (item) => item['processor.event'] === 'transaction'
-        );
-        const spanB = serviceBAsArray.find(
-          (item) => item['processor.event'] === 'span' && item['span.name'] === 'Span B'
-        );
-        serviceBIds = {
-          traceId: spanB?.['trace.id']!,
-          transactionBId: transactionB?.['transaction.id']!,
-          spanBId: spanB?.['span.id']!,
-        };
-
-        const serviceBSpanBLink = {
-          trace: { id: spanB?.['trace.id']! },
-          span: { id: spanB?.['span.id']! },
-        };
-
-        const serviceCInstanceRuby = apm
-          .service('Service C', 'production', 'ruby')
-          .instance('instance c');
-
-        const serviceCEvents = timerange(
-          new Date('2022-01-01T00:04:00.000Z'),
-          new Date('2022-01-01T00:05:00.000Z')
-        )
-          .interval('1m')
-          .rate(1)
-          .generator((timestamp) => {
-            return serviceCInstanceRuby
-              .transaction(`Transaction C`)
-              .defaults({ 'span.links': [serviceASpanALink] })
-              .timestamp(timestamp)
-              .duration(1000)
-              .success()
-              .children(
-                serviceCInstanceRuby
-                  .span(`Span C`, 'external', 'http')
-                  .timestamp(timestamp + 50)
-                  .duration(100)
-                  .success()
-              );
-          });
-
-        const serviceCAsArray = serviceCEvents.toArray();
-        const transactionC = serviceCAsArray.find(
-          (item) => item['processor.event'] === 'transaction'
-        );
-        const serviceCTransactionCLink = {
-          trace: { id: transactionC?.['trace.id']! },
-          span: { id: transactionC?.['transaction.id']! },
-        };
-        const spanC = serviceCAsArray.find(
-          (item) => item['processor.event'] === 'span' || item['span.name'] === 'Span C'
-        );
-        const serviceCSpanCLink = {
-          trace: { id: spanC?.['trace.id']! },
-          span: { id: spanC?.['span.id']! },
-        };
-        serviceCIds = {
-          traceId: transactionC?.['trace.id']!,
-          transactionCId: transactionC?.['transaction.id']!,
-          spanCId: spanC?.['span.id']!,
-        };
-
-        const serviceDInstanceNode = apm
-          .service('Service D', 'production', 'nodejs')
-          .instance('instance d');
-
-        const serviceDEvents = timerange(
-          new Date('2022-01-01T00:06:00.000Z'),
-          new Date('2022-01-01T00:07:00.000Z')
-        )
-          .interval('1m')
-          .rate(1)
-          .generator((timestamp) => {
-            return serviceDInstanceNode
-              .transaction(`Transaction D`)
-              .defaults({ 'span.links': [serviceASpanALink, serviceCSpanCLink] })
-              .timestamp(timestamp)
-              .duration(1000)
-              .success()
-              .children(
-                serviceDInstanceNode
-                  .span(`Span E`, 'external', 'http')
-                  .defaults({ 'span.links': [serviceBSpanBLink, serviceCTransactionCLink] })
-                  .timestamp(timestamp + 50)
-                  .duration(100)
-                  .success()
-              );
-          });
-        const serviceDAsArray = serviceDEvents.toArray();
-        const transactionD = serviceDAsArray.find(
-          (item) => item['processor.event'] === 'transaction'
-        );
-        const spanE = serviceDAsArray.find((item) => item['processor.event'] === 'span');
-
-        serviceDIds = {
-          traceId: transactionD?.['trace.id']!,
-          transactionDId: transactionD?.['transaction.id']!,
-          spanEId: spanE?.['span.id']!,
-        };
+        serviceAIds = ids.serviceAIds;
+        serviceBIds = ids.serviceBIds;
+        serviceCIds = ids.serviceCIds;
+        serviceDIds = ids.serviceDIds;
 
         await synthtraceEsClient.index(
-          new EntityArrayIterable(serviceAAsArray).merge(
-            new EntityArrayIterable(serviceBAsArray),
-            new EntityArrayIterable(serviceCAsArray),
-            new EntityArrayIterable(serviceDAsArray)
+          new EntityArrayIterable(events.serviceAAsArray).merge(
+            new EntityArrayIterable(events.serviceBAsArray),
+            new EntityArrayIterable(events.serviceCAsArray),
+            new EntityArrayIterable(events.serviceDAsArray)
           )
         );
       });
