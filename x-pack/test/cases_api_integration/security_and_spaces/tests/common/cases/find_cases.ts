@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CaseResponse, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  CaseResponse,
+  CaseSeverity,
+  CaseStatuses,
+  CommentType,
+} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -114,6 +119,45 @@ export default ({ getService }: FtrProviderContext): void => {
           count_open_cases: 1,
           count_closed_cases: 1,
           count_in_progress_cases: 0,
+        });
+      });
+
+      it('filters by severity', async () => {
+        await createCase(supertest, postCaseReq);
+        const theCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: theCase.id,
+                version: theCase.version,
+                severity: CaseSeverity.HIGH,
+              },
+            ],
+          },
+        });
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.HIGH } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [patchedCase[0]],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by severity (none found)', async () => {
+        await createCase(supertest, postCaseReq);
+        await createCase(supertest, postCaseReq);
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.CRITICAL } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 0,
+          cases: [],
         });
       });
 
