@@ -35,7 +35,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [enableNewSyntheticsView]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
-      defaultMessage: 'Enable new synthetic monitoring view',
+      defaultMessage: 'Enable new synthetic monitoring application',
     }),
     value: false,
     description: i18n.translate(
