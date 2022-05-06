@@ -8,4 +8,4 @@
 
 export { DscTourProvider } from './dsc_tour_provider';
 export { useDscTourContext } from './dsc_tour_context';
-export { DSC_TOUR_STEP_ANCHORS, DscTourStepAnchor } from './dsc_tour_step_anchor';
+export { DSC_TOUR_STEP_ANCHOR_IDS } from './dsc_tour_anchors';

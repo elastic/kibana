@@ -51,7 +51,6 @@ import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { DscTourStepAnchor } from '../dsc_tour/dsc_tour_step_anchor';
 
 interface SortObj {
   id: string;
@@ -348,26 +347,16 @@ export const DiscoverGrid = ({
   );
 
   const additionalControls = useMemo(
-    () => ({
-      left: {
-        prepend: <DscTourStepAnchor stepName="reorderColumns" />,
-        append: (
-          <>
-            <DscTourStepAnchor stepName="sort" />
-            {usedSelectedDocs.length ? (
-              <DiscoverGridDocumentToolbarBtn
-                isFilterActive={isFilterActive}
-                rows={rows!}
-                selectedDocs={usedSelectedDocs}
-                setSelectedDocs={setSelectedDocs}
-                setIsFilterActive={setIsFilterActive}
-              />
-            ) : null}
-          </>
-        ),
-      },
-      right: <DscTourStepAnchor stepName="changeRowHeight" />,
-    }),
+    () =>
+      usedSelectedDocs.length ? (
+        <DiscoverGridDocumentToolbarBtn
+          isFilterActive={isFilterActive}
+          rows={rows!}
+          selectedDocs={usedSelectedDocs}
+          setSelectedDocs={setSelectedDocs}
+          setIsFilterActive={setIsFilterActive}
+        />
+      ) : null,
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 

@@ -8,7 +8,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useEuiTour,
   EuiTourState,
@@ -21,11 +20,14 @@ import {
   EuiImage,
   EuiSpacer,
   EuiText,
+  EuiI18n,
 } from '@elastic/eui';
 import { PLUGIN_ID } from '../../../common';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { DscTourContext, DscTourContextProps } from './dsc_tour_context';
-import { DSC_TOUR_STEP_ANCHORS } from './dsc_tour_step_anchor';
+import { DSC_TOUR_STEP_ANCHORS } from './dsc_tour_anchors';
+
+const MAX_WIDTH = 350;
 
 interface TourStepDefinition {
   anchor: EuiTourStepProps['anchor'];
@@ -38,57 +40,57 @@ interface TourStepDefinition {
 
 const tourStepDefinitions: TourStepDefinition[] = [
   {
-    anchor: `#${DSC_TOUR_STEP_ANCHORS.addFields}`,
+    anchor: DSC_TOUR_STEP_ANCHORS.addFields,
     anchorPosition: 'upCenter',
-    title: i18n.translate('discover.docExplorerTour.stepAddFieldsTitle', {
+    title: i18n.translate('discover.dscTour.stepAddFields.title', {
       defaultMessage: 'Add fields to the table',
     }),
-    text: i18n.translate('discover.docExplorerTour.stepAddFieldsDescription', {
+    text: i18n.translate('discover.dscTour.stepAddFields.description', {
       defaultMessage: 'Click + <TODO> to add the fields that interest you.',
     }),
     imageName: 'add_fields.gif',
   },
   {
-    anchor: `#${DSC_TOUR_STEP_ANCHORS.reorderColumns}`,
+    anchor: DSC_TOUR_STEP_ANCHORS.reorderColumns,
     anchorPosition: 'upCenter',
-    title: i18n.translate('discover.docExplorerTour.stepReorderColumnsTitle', {
+    title: i18n.translate('discover.dscTour.stepReorderColumns.title', {
       defaultMessage: 'Reorder columns',
     }),
-    text: i18n.translate('discover.docExplorerTour.stepReorderColumnsDescription', {
+    text: i18n.translate('discover.dscTour.stepReorderColumns.description', {
       defaultMessage: 'Order your columns however you want.',
     }),
     imageName: 'reorder_columns.gif',
     isOptional: true,
   },
   {
-    anchor: `#${DSC_TOUR_STEP_ANCHORS.sort}`,
-    anchorPosition: 'rightUp',
-    title: i18n.translate('discover.docExplorerTour.stepSortFieldsTitle', {
+    anchor: DSC_TOUR_STEP_ANCHORS.sort,
+    anchorPosition: 'upCenter',
+    title: i18n.translate('discover.dscTour.stepSort.title', {
       defaultMessage: 'Sort on one or more fields',
     }),
-    text: i18n.translate('discover.docExplorerTour.stepSortFieldsDescription', {
+    text: i18n.translate('discover.dscTour.stepSort.description', {
       defaultMessage:
         'Sort a single field by clicking a column header. Sort by multiple fields using the pop-up.',
     }),
   },
   {
-    anchor: `#${DSC_TOUR_STEP_ANCHORS.changeRowHeight}`,
-    anchorPosition: 'leftUp',
-    title: i18n.translate('discover.docExplorerTour.stepChangeRowHeightTitle', {
+    anchor: DSC_TOUR_STEP_ANCHORS.changeRowHeight,
+    anchorPosition: 'upCenter',
+    title: i18n.translate('discover.dscTour.stepChangeRowHeight.title', {
       defaultMessage: 'Change the row height',
     }),
-    text: i18n.translate('discover.docExplorerTour.stepChangeRowHeightDescription', {
+    text: i18n.translate('discover.dscTour.stepChangeRowHeight.description', {
       defaultMessage: 'Adjust the number of lines to fit the contents.',
     }),
     imageName: 'rows_per_line.gif',
   },
   {
-    anchor: `#${DSC_TOUR_STEP_ANCHORS.expandDocument}`,
-    anchorPosition: 'rightUp',
-    title: i18n.translate('discover.docExplorerTour.stepExpandTitle', {
+    anchor: DSC_TOUR_STEP_ANCHORS.expandDocument,
+    anchorPosition: 'upCenter',
+    title: i18n.translate('discover.dscTour.stepExpand.title', {
       defaultMessage: 'Compare and expand',
     }),
-    text: i18n.translate('discover.docExplorerTour.stepExpandDescription', {
+    text: i18n.translate('discover.dscTour.stepExpand.description', {
       defaultMessage:
         'Narrow your view by selecting specific documents. View details by clicking <TODO>.',
     }),
@@ -110,6 +112,7 @@ const prepareTourSteps = (
       anchor: stepDefinition.anchor,
       anchorPosition: stepDefinition.anchorPosition,
       title: stepDefinition.title,
+      maxWidth: MAX_WIDTH,
       content: (
         <>
           <EuiText size="s">{stepDefinition.text}</EuiText>
@@ -126,7 +129,7 @@ const prepareTourSteps = (
 const tourConfig: EuiTourState = {
   currentTourStep: FIRST_STEP,
   isTourActive: false,
-  tourPopoverWidth: 350,
+  tourPopoverWidth: MAX_WIDTH,
   tourSubtitle: '',
 };
 
@@ -196,17 +199,15 @@ export const DscTourStepFooterAction: React.FC<{
       {!isLastStep && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty color="text" size="xs" onClick={onFinishTour}>
-            <FormattedMessage id="discover.docExplorerTour.skipButton" defaultMessage="Skip tour" />
+            {EuiI18n({ token: 'core.euiTourStep.skipTour', default: 'Skip tour' })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
         <EuiButton size="s" color="success" onClick={isLastStep ? onFinishTour : onNextTourStep}>
-          {isLastStep ? (
-            <FormattedMessage id="discover.docExplorerTour.finishButton" defaultMessage="Finish" />
-          ) : (
-            <FormattedMessage id="discover.docExplorerTour.nextButton" defaultMessage="Next" />
-          )}
+          {isLastStep
+            ? EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })
+            : EuiI18n({ token: 'core.euiTourStep.nextStep', default: 'Next' })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

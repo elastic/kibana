@@ -12,7 +12,8 @@ import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-th
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 import { EsHitRecord } from '../../application/types';
-import { DscTourStepAnchor } from '../dsc_tour/dsc_tour_step_anchor';
+import { DSC_TOUR_STEP_ANCHOR_IDS } from '../dsc_tour';
+
 /**
  * Button to expand a given row
  */
@@ -40,9 +41,10 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     defaultMessage: 'Toggle dialog with details',
   });
 
-  const button = (
+  return (
     <EuiToolTip content={buttonLabel} delay="long">
       <EuiButtonIcon
+        id={rowIndex === 0 ? DSC_TOUR_STEP_ANCHOR_IDS.expandDocument : undefined}
         size="xs"
         iconSize="s"
         aria-label={buttonLabel}
@@ -54,10 +56,4 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
       />
     </EuiToolTip>
   );
-
-  if (rowIndex === 0) {
-    return <DscTourStepAnchor stepName="expandDocument">{button}</DscTourStepAnchor>;
-  }
-
-  return button;
 };
