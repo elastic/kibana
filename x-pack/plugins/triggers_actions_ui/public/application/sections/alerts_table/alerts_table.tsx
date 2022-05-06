@@ -39,14 +39,14 @@ const emptyConfiguration = {
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
-  const { activePage, alertsCount, onPageChange, onSortChange } = props.useFetchAlertsData();
+  const { activePage, alertsCount, onPageChange, onSortChange, isLoading } =
+    props.useFetchAlertsData();
   const { sortingColumns, onSort } = useSorting(onSortChange);
   const {
     pagination,
     onChangePageSize,
     onChangePageIndex,
-    onPaginateFlyoutNext,
-    onPaginateFlyoutPrevious,
+    onPaginateFlyout,
     flyoutAlertIndex,
     setFlyoutAlertIndex,
   } = usePagination({
@@ -122,9 +122,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         <Suspense fallback={null}>
           <AlertsFlyout
             alert={props.alerts[flyoutAlertIndex]}
+            alertsCount={alertsCount}
             onClose={handleFlyoutClose}
-            onPaginateNext={onPaginateFlyoutNext}
-            onPaginatePrevious={onPaginateFlyoutPrevious}
+            flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+            onPaginate={onPaginateFlyout}
+            isLoading={isLoading}
           />
         </Suspense>
       )}
