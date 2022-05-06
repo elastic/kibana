@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'lens',
     'discover',
+    'unifiedSearch',
   ]);
 
   const find = getService('find');
@@ -163,6 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

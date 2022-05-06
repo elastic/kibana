@@ -1,3 +1,5 @@
+@import './variables';
+
 /**
  * 1.  Allow wrapping of long filter items
  */
@@ -6,25 +8,13 @@
   line-height: $euiSize;
   border: none;
   color: $euiTextColor;
-  padding-top: $euiSizeM / 2;
-  padding-bottom: $euiSizeM / 2;
+  padding-top: $euiSizeM / 2 + 1px;
+  padding-bottom: $euiSizeM / 2 + 1px;
   white-space: normal; /* 1 */
-
-  .euiBadge__childButton {
-    flex-shrink: 1; /* 1 */
-  }
-
-  .euiBadge__iconButton:focus {
-    background-color: transparentize($euiColorPrimary, .9);
-  }
 
   &:not(.globalFilterItem-isDisabled) {
     @include euiFormControlDefaultShadow;
     box-shadow: #{$euiFormControlBoxShadow}, inset 0 0 0 1px $kbnGlobalFilterItemBorderColor; // Make the actual border more visible
-  }
-
-  &:focus-within {
-    animation: none !important; // Remove focus ring animation otherwise it overrides simulated border via box-shadow
   }
 }
 
@@ -81,7 +71,7 @@
 }
 
 .globalFilterItem__editorForm {
-  padding: $euiSizeM;
+  padding: $euiSizeS;
 }
 
 .globalFilterItem__popover,

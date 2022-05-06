@@ -27,7 +27,7 @@ export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, show = 
 
   return (
     <InPortal node={globalKQLHeaderPortalNode}>
-      <EuiPanel borderRadius="none" color="subdued" paddingSize="s">
+      <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
         <FiltersGlobalContainer data-test-subj="filters-global-container" show={show}>
           {children}
         </FiltersGlobalContainer>

@@ -18,6 +18,7 @@ const defaultOptions: VisTypeOptions = {
   showQueryBar: true,
   showFilterBar: true,
   showIndexSelection: true,
+  showQueryInput: true,
   hierarchicalData: false, // we should get rid of this i guess ?
 };
 

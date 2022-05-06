@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
   const a11y = getService('a11y');
+  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
@@ -93,11 +94,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on saved queries list panel', async () => {
+      await savedQueryManagementComponent.loadSavedQuery('test');
       await PageObjects.discover.clickSavedQueriesPopOver();
-      await testSubjects.moveMouseTo(
-        'saved-query-list-item load-saved-query-test-button saved-query-list-item-selected saved-query-list-item-selected'
-      );
-      await testSubjects.find('delete-saved-query-test-button');
+      await testSubjects.click('saved-query-management-load-button');
+      await savedQueryManagementComponent.deleteSavedQuery('test');
       await a11y.testAppSnapshot();
     });
   });

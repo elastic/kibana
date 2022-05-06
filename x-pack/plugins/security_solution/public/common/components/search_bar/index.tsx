@@ -11,7 +11,6 @@ import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
-import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
@@ -52,12 +51,6 @@ interface SiemSearchBarProps {
   hideFilterBar?: boolean;
   hideQueryInput?: boolean;
 }
-
-const SearchBarContainer = styled.div`
-  .globalQueryBar {
-    padding: 0px;
-  }
-`;
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
@@ -322,7 +315,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     return (
-      <SearchBarContainer data-test-subj={`${id}DatePicker`}>
+      <div data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}
@@ -341,7 +334,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           showSaveQuery={true}
           dataTestSubj={dataTestSubj}
         />
-      </SearchBarContainer>
+      </div>
     );
   },
   (prevProps, nextProps) =>

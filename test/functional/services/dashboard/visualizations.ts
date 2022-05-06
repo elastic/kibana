@@ -17,6 +17,7 @@ export class DashboardVisualizationsService extends FtrService {
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
   private readonly discover = this.ctx.getPageObject('discover');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
 
@@ -43,6 +44,7 @@ export class DashboardVisualizationsService extends FtrService {
   }) {
     this.log.debug(`createSavedSearch(${name})`);
     await this.header.clickDiscover(true);
+    await this.unifiedSearch.closeTourPopoverByLocalStorage();
     await this.timePicker.setHistoricalDataRange();
 
     if (query) {

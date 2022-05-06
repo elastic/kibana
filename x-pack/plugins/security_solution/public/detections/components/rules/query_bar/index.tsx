@@ -46,23 +46,7 @@ interface QueryBarDefineRuleProps {
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
 
-const StyledEuiFormRow = styled(EuiFormRow)`
-  .kbnTypeahead__items {
-    max-height: 45vh !important;
-  }
-  .globalQueryBar {
-    padding: 4px 0px 0px 0px;
-    .kbnQueryBar {
-      & > div:first-child {
-        margin: 0px 0px 0px 4px;
-      }
-      &__wrap,
-      &__textarea {
-        z-index: 0;
-      }
-    }
-  }
-`;
+const StyledEuiFormRow = styled(EuiFormRow)``;
 
 // TODO need to add disabled in the SearchBar
 
@@ -283,6 +267,7 @@ export const QueryBarDefineRule = ({
                 savedQuery={savedQuery}
                 onSavedQuery={onSavedQuery}
                 hideSavedQuery={false}
+                displayStyle="inPage"
               />
             </div>
           )}

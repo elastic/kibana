@@ -40,6 +40,8 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     onOpenInspector: jest.fn(),
     searchSource: {} as ISearchSource,
     resetSavedSearch: () => {},
+    onEditRuntimeField: jest.fn(),
+    onChangeIndexPattern: jest.fn(),
   };
 }
 
