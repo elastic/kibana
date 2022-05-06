@@ -34,6 +34,7 @@ import {
   EuiErrorBoundary,
   EuiToolTip,
   EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '@kbn/features-plugin/public';
@@ -59,7 +60,6 @@ import {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
-  RuleConfigurationExplanation,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -77,7 +77,7 @@ import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
-import { explainRule } from '../../lib/rule_api';
+import { RuleExplanation } from './rule_explanation';
 
 const ENTER_KEY = 13;
 
@@ -167,9 +167,7 @@ export const RuleForm = ({
     error: loadRuleTypesError,
     ruleTypeIndex,
   } = useLoadRuleTypes({ filteredSolutions });
-  const [ruleConfigurationExplanation, setRuleConfigurationExplanation] = useState<
-    RuleConfigurationExplanation | undefined
-  >(undefined);
+  const [ruleExplanationIsOpen, setRuleExplanationIsOpen] = useState<boolean>(false);
 
   // load rule types
   useEffect(() => {
@@ -308,25 +306,10 @@ export const RuleForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableRuleTypes, searchText, JSON.stringify(solutionsFilter)]);
 
-  const handleExplainConfiguration = useCallback(async () => {
-    try {
-      const configurationExplanationResult = await explainRule({
-        http,
-        rule: rule as RuleUpdates,
-      });
-      setRuleConfigurationExplanation(configurationExplanationResult);
-    } catch (errorRes) {
-      toasts.addDanger(
-        errorRes.body?.message ??
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.ruleExplain.ruleConfigurationExplanationError',
-            {
-              defaultMessage: 'Could not explain the rule configuration.',
-            }
-          )
-      );
-    }
-  }, [http, toasts, rule]);
+  const handleExplainConfiguration = useCallback(() => {
+    // TODO: Handle the close case
+    setRuleExplanationIsOpen(true);
+  }, []);
 
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
@@ -475,16 +458,6 @@ export const RuleForm = ({
                 : ''}
             </h5>
           </EuiTitle>
-          <EuiButtonIcon
-            iconType="help"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.ruleForm.explainConfigurationButton',
-              {
-                defaultMessage: 'Explain configuration',
-              }
-            )}
-            onClick={handleExplainConfiguration}
-          />
         </EuiFlexItem>
         {canChangeTrigger ? (
           <EuiFlexItem grow={false}>
@@ -564,6 +537,15 @@ export const RuleForm = ({
               dataViews={dataViews}
               unifiedSearch={unifiedSearch}
             />
+            <EuiButton iconType="help" onClick={handleExplainConfiguration}>
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.ruleForm.explainConfigurationButton',
+                {
+                  defaultMessage: 'What does this do?',
+                }
+              )}
+            </EuiButton>
+            {ruleExplanationIsOpen ? <RuleExplanation rule={rule} errors={errors} /> : null}
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
