@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../../services/ml/data_frame_analytics_table';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('outlier detection saved search creation', function () {
+  describe('classification creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
-      await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
-      await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
+      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -26,56 +24,51 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote_small');
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
     });
 
-    const dateNow = Date.now();
+    const jobId = `bm_1_${Date.now()}`;
     const testDataList = [
       {
-        suiteTitle: 'with lucene query',
-        jobType: 'outlier_detection',
-        jobId: `fq_saved_search_2_${dateNow}`,
-        jobDescription: 'Outlier detection job based on a saved search with lucene query',
-        source: 'ft_farequote_lucene',
+        suiteTitle: 'bank marketing',
+        jobType: 'classification',
+        jobId,
+        jobDescription:
+          "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+        source: 'ft_bank_marketing',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
         runtimeFields: {
-          uppercase_airline: {
+          uppercase_y: {
             type: 'keyword',
-            script: 'emit(params._source.airline.toUpperCase())',
+            script: 'emit(params._source.y.toUpperCase())',
           },
         },
-        modelMemory: '65mb',
+        dependentVariable: 'y',
+        trainingPercent: 20,
+        modelMemory: '60mb',
         createIndexPattern: true,
         expected: {
-          source: 'ft_farequote_small',
-          histogramCharts: [
-            { chartAvailable: true, id: 'uppercase_airline', legend: '5 categories' },
-            { chartAvailable: true, id: 'responsetime', legend: '4.91 - 171.08' },
-            { chartAvailable: true, id: 'airline', legend: '5 categories' },
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 50 },
+            // line
+            { color: '#98A2B3', percentage: 10 },
           ],
-          scatterplotMatrixColorsWizard: [
-            // markers
-            { color: '#52B398', percentage: 15 },
-            // grey boilerplate
-            { color: '#6A717D', percentage: 13 },
-          ],
-          scatterplotMatrixColorStatsResults: [
-            // red markers
-            { color: '#D98071', percentage: 1 },
-            // tick/grid/axis, grey markers
-            { color: '#6A717D', percentage: 12 },
+          scatterplotMatrixColorStats: [
+            // marker colors
+            { color: '#7FC6B3', percentage: 1 },
+            { color: '#88ADD0', percentage: 0.03 },
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 8 },
             { color: '#D3DAE6', percentage: 8 },
-            { color: '#98A1B3', percentage: 12 },
-            // anti-aliasing
-            { color: '#F5F7FA', percentage: 30 },
+            { color: '#F5F7FA', percentage: 15 },
           ],
-          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
+          runtimeFieldsEditorContent: ['{', '  "uppercase_y": {', '    "type": "keyword",'],
           row: {
             memoryStatus: 'ok',
-            type: 'outlier_detection',
+            type: 'classification',
             status: 'stopped',
             progress: '100',
           },
@@ -84,84 +77,20 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 expectedEntries: {
-                  id: `fq_saved_search_2_${dateNow}`,
+                  id: jobId,
                   state: 'stopped',
                   data_counts:
-                    '{"training_docs_count":1604,"test_docs_count":0,"skipped_docs_count":0}',
-                  description: 'Outlier detection job based on a saved search with lucene query',
+                    '{"training_docs_count":1862,"test_docs_count":7452,"skipped_docs_count":0}',
+                  description:
+                    "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '4/4' } },
-            ],
-          } as AnalyticsTableRowDetails,
-        },
-      },
-      {
-        suiteTitle: 'with kuery query',
-        jobType: 'outlier_detection',
-        jobId: `fq_saved_search_3_${dateNow}`,
-        jobDescription: 'Outlier detection job based on a saved search with kuery query',
-        source: 'ft_farequote_kuery',
-        get destinationIndex(): string {
-          return `user-${this.jobId}`;
-        },
-        runtimeFields: {
-          uppercase_airline: {
-            type: 'keyword',
-            script: 'emit(params._source.airline.toUpperCase())',
-          },
-        },
-        modelMemory: '65mb',
-        createIndexPattern: true,
-        expected: {
-          source: 'ft_farequote_small',
-          histogramCharts: [
-            { chartAvailable: true, id: 'uppercase_airline', legend: '5 categories' },
-            { chartAvailable: true, id: 'responsetime', legend: '9.91 - 171.08' },
-            { chartAvailable: true, id: 'airline', legend: '5 categories' },
-          ],
-          scatterplotMatrixColorsWizard: [
-            // markers
-            { color: '#52B398', percentage: 15 },
-            // grey boilerplate
-            { color: '#6A717D', percentage: 13 },
-          ],
-          scatterplotMatrixColorStatsResults: [
-            // red markers
-            { color: '#D98071', percentage: 1 },
-            // tick/grid/axis, grey markers
-            { color: '#6A717D', percentage: 12 },
-            { color: '#D3DAE6', percentage: 8 },
-            { color: '#98A1B3', percentage: 12 },
-            // anti-aliasing
-            { color: '#F5F7FA', percentage: 30 },
-          ],
-          runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
-          row: {
-            memoryStatus: 'ok',
-            type: 'outlier_detection',
-            status: 'stopped',
-            progress: '100',
-          },
-          rowDetails: {
-            jobDetails: [
-              {
-                section: 'state',
-                expectedEntries: {
-                  id: `fq_saved_search_3_${dateNow}`,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":1603,"test_docs_count":0,"skipped_docs_count":0}',
-                  description: 'Outlier detection job based on a saved search with kuery query',
-                },
-              },
-              { section: 'progress', expectedEntries: { Phase: '4/4' } },
+              { section: 'progress', expectedEntries: { Phase: '8/8' } },
             ],
           } as AnalyticsTableRowDetails,
         },
       },
     ];
-
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
@@ -209,23 +138,34 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.runtimeFieldsEditorContent
           );
 
-          await ml.testExecution.logTestStep('does not display the dependent variable input');
-          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputMissing();
+          await ml.testExecution.logTestStep('inputs the dependent variable');
+          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
 
-          await ml.testExecution.logTestStep('does not display the training percent input');
-          await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputMissing();
+          await ml.testExecution.logTestStep('inputs the training percent');
+          await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputExists();
+          await ml.dataFrameAnalyticsCreation.setTrainingPercent(testData.trainingPercent);
 
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
-          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramChartEnabled(true);
-
-          await ml.testExecution.logTestStep('displays the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableAndAssertSourceDataPreviewHistogramCharts(
-            testData.expected.histogramCharts
-          );
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStats
+          );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -261,7 +201,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('checks validation callouts exist');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
-          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(1);
+          // Expect the follow callouts:
+          // - ✓ Dependent variable
+          // - ✓ Training percent
+          // - ✓ Top classes
+          // - ⚠ Analysis fields
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
@@ -300,7 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: testData.jobId,
             description: testData.jobDescription,
             memoryStatus: testData.expected.row.memoryStatus,
-            sourceIndex: testData.expected.source,
+            sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
             status: testData.expected.row.status,
@@ -339,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: testData.jobId,
             description: editedDescription,
             memoryStatus: testData.expected.row.memoryStatus,
-            sourceIndex: testData.expected.source,
+            sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
             status: testData.expected.row.status,
@@ -354,10 +299,38 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
-          await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
+          await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
+          await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
+          await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
+
+          await ml.testExecution.logTestStep('displays the ROC curve chart');
+          await ml.commonUI.assertColorsInCanvasElement(
+            'mlDFAnalyticsClassificationExplorationRocCurveChart',
+            testData.expected.rocCurveColorState,
+            ['#000000'],
+            undefined,
+            undefined,
+            // increased tolerance for ROC curve chart up from 10 to 20
+            // since the returned colors vary quite a bit on each run.
+            20
+          );
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStats
+          );
 
           await ml.commonUI.resetAntiAliasing();
         });

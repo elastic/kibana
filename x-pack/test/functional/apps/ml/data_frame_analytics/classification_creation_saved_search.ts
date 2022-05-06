@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../../services/ml/data_frame_analytics_table';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('regression saved search creation', function () {
+  describe('classification saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
@@ -34,9 +34,9 @@ export default function ({ getService }: FtrProviderContext) {
     const testDataList = [
       {
         suiteTitle: 'with lucene query',
-        jobType: 'regression',
+        jobType: 'classification',
         jobId: `fq_saved_search_2_${dateNow}`,
-        jobDescription: 'Regression job based on a saved search with lucene query',
+        jobDescription: 'Classification job based on a saved search with lucene query',
         source: 'ft_farequote_lucene',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
@@ -47,16 +47,22 @@ export default function ({ getService }: FtrProviderContext) {
             script: 'emit(params._source.airline.toUpperCase())',
           },
         },
-        dependentVariable: 'responsetime',
+        dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
           source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
           row: {
             memoryStatus: 'ok',
-            type: 'regression',
+            type: 'classification',
             status: 'stopped',
             progress: '100',
           },
@@ -69,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
                   state: 'stopped',
                   data_counts:
                     '{"training_docs_count":320,"test_docs_count":1284,"skipped_docs_count":0}',
-                  description: 'Regression job based on a saved search with lucene query',
+                  description: 'Classification job based on a saved search with lucene query',
                 },
               },
               { section: 'progress', expectedEntries: { Phase: '8/8' } },
@@ -79,9 +85,9 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         suiteTitle: 'with kuery query',
-        jobType: 'regression',
+        jobType: 'classification',
         jobId: `fq_saved_search_3_${dateNow}`,
-        jobDescription: 'Regression job based on a saved search with kuery query',
+        jobDescription: 'Classification job based on a saved search with kuery query',
         source: 'ft_farequote_kuery',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
@@ -92,16 +98,22 @@ export default function ({ getService }: FtrProviderContext) {
             script: 'emit(params._source.airline.toUpperCase())',
           },
         },
-        dependentVariable: 'responsetime',
+        dependentVariable: 'airline',
         trainingPercent: 20,
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
           source: 'ft_farequote_small',
+          rocCurveColorState: [
+            // tick/grid/axis
+            { color: '#DDDDDD', percentage: 38 },
+            // line
+            { color: '#98A2B3', percentage: 7 },
+          ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
           row: {
             memoryStatus: 'ok',
-            type: 'regression',
+            type: 'classification',
             status: 'stopped',
             progress: '100',
           },
@@ -114,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
                   state: 'stopped',
                   data_counts:
                     '{"training_docs_count":320,"test_docs_count":1283,"skipped_docs_count":0}',
-                  description: 'Regression job based on a saved search with kuery query',
+                  description: 'Classification job based on a saved search with kuery query',
                 },
               },
               { section: 'progress', expectedEntries: { Phase: '8/8' } },
@@ -219,7 +231,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('checks validation callouts exist');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
-          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
+          // Expect the follow callouts:
+          // - ✓ Dependent variable
+          // - ✓ Training percent
+          // - ✓ Top classes
+          // - ⚠ Analysis fields
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
@@ -264,6 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             progress: testData.expected.row.progress,
           });
+
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowDetails(
             testData.jobId,
             testData.expected.rowDetails
@@ -311,11 +329,23 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
-          await ml.dataFrameAnalyticsResults.assertRegressionEvaluatePanelElementsExists();
-          await ml.dataFrameAnalyticsResults.assertRegressionTablePanelExists();
+          await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
+          await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+
+          await ml.testExecution.logTestStep('displays the ROC curve chart');
+          await ml.commonUI.assertColorsInCanvasElement(
+            'mlDFAnalyticsClassificationExplorationRocCurveChart',
+            testData.expected.rocCurveColorState,
+            ['#000000'],
+            undefined,
+            undefined,
+            // increased tolerance for ROC curve chart up from 10 to 20
+            // since the returned colors vary quite a bit on each run.
+            20
+          );
 
           await ml.commonUI.resetAntiAliasing();
         });

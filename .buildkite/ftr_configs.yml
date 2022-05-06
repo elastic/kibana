@@ -163,6 +163,7 @@ enabled:
   - x-pack/test/functional/apps/maps/group3/config.ts
   - x-pack/test/functional/apps/maps/group4/config.ts
   - x-pack/test/functional/apps/ml/anomaly_detection/config.ts
+  - x-pack/test/functional/apps/ml/data_frame_analytics/config.ts
   - x-pack/test/functional/apps/ml/data_visualizer/config.ts
   - x-pack/test/functional/apps/ml/group1/config.ts
   - x-pack/test/functional/apps/ml/group3/config.ts

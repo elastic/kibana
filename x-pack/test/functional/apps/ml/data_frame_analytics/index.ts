@@ -11,7 +11,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning - group 2', () => {
+  describe('machine learning - data frame analytics', function () {
+    this.tags(['ml', 'skipFirefox']);
+
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
@@ -37,8 +39,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./permissions'));
-    loadTestFile(require.resolve('./pages'));
-    loadTestFile(require.resolve('./model_management'));
+    loadTestFile(require.resolve('./outlier_detection_creation'));
+    loadTestFile(require.resolve('./regression_creation'));
+    loadTestFile(require.resolve('./classification_creation'));
+    loadTestFile(require.resolve('./cloning'));
+    loadTestFile(require.resolve('./results_view_content'));
+    loadTestFile(require.resolve('./regression_creation_saved_search'));
+    loadTestFile(require.resolve('./classification_creation_saved_search'));
+    loadTestFile(require.resolve('./outlier_detection_creation_saved_search'));
   });
 }
