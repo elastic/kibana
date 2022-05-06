@@ -349,20 +349,23 @@ export const DiscoverGrid = ({
 
   const additionalControls = useMemo(
     () => ({
-      left: (
-        <>
-          <DscTourStepAnchor stepName="sort" />
-          {usedSelectedDocs.length ? (
-            <DiscoverGridDocumentToolbarBtn
-              isFilterActive={isFilterActive}
-              rows={rows!}
-              selectedDocs={usedSelectedDocs}
-              setSelectedDocs={setSelectedDocs}
-              setIsFilterActive={setIsFilterActive}
-            />
-          ) : null}
-        </>
-      ),
+      left: {
+        prepend: <DscTourStepAnchor stepName="reorderColumns" />,
+        append: (
+          <>
+            <DscTourStepAnchor stepName="sort" />
+            {usedSelectedDocs.length ? (
+              <DiscoverGridDocumentToolbarBtn
+                isFilterActive={isFilterActive}
+                rows={rows!}
+                selectedDocs={usedSelectedDocs}
+                setSelectedDocs={setSelectedDocs}
+                setIsFilterActive={setIsFilterActive}
+              />
+            ) : null}
+          </>
+        ),
+      },
       right: <DscTourStepAnchor stepName="changeRowHeight" />,
     }),
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
@@ -461,7 +464,6 @@ export const DiscoverGrid = ({
         data-document-number={displayedRows.length}
         className={className}
       >
-        <DscTourStepAnchor stepName="reorderColumns" />
         <EuiDataGridMemoized
           aria-describedby={randomId}
           aria-labelledby={ariaLabelledBy}

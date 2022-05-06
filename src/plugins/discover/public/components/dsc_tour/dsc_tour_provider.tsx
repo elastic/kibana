@@ -33,30 +33,42 @@ interface TourStepDefinition {
   title: EuiTourStepProps['title'];
   text: string;
   imageName?: string;
+  isOptional?: boolean;
 }
 
 const tourStepDefinitions: TourStepDefinition[] = [
   {
-    anchor: `#${DSC_TOUR_STEP_ANCHORS.reorderColumns}`,
+    anchor: `#${DSC_TOUR_STEP_ANCHORS.addFields}`,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.docExplorerTour.stepAddFieldsTitle', {
       defaultMessage: 'Add fields to the table',
     }),
     text: i18n.translate('discover.docExplorerTour.stepAddFieldsDescription', {
-      defaultMessage:
-        'Add the fields relevant to you, then drag the columns to your preferred order.',
+      defaultMessage: 'Click + <TODO> to add the fields that interest you.',
+    }),
+    imageName: 'add_fields.gif',
+  },
+  {
+    anchor: `#${DSC_TOUR_STEP_ANCHORS.reorderColumns}`,
+    anchorPosition: 'upCenter',
+    title: i18n.translate('discover.docExplorerTour.stepReorderColumnsTitle', {
+      defaultMessage: 'Reorder columns',
+    }),
+    text: i18n.translate('discover.docExplorerTour.stepReorderColumnsDescription', {
+      defaultMessage: 'Order your columns however you want.',
     }),
     imageName: 'reorder_columns.gif',
+    isOptional: true,
   },
   {
     anchor: `#${DSC_TOUR_STEP_ANCHORS.sort}`,
     anchorPosition: 'rightUp',
     title: i18n.translate('discover.docExplorerTour.stepSortFieldsTitle', {
-      defaultMessage: 'Sort on multiple fields',
+      defaultMessage: 'Sort on one or more fields',
     }),
     text: i18n.translate('discover.docExplorerTour.stepSortFieldsDescription', {
       defaultMessage:
-        'Find all your sorting needs in the fields sorted pop-up. Reorder the sort using drag and drop.',
+        'Sort a single field by clicking a column header. Sort by multiple fields using the pop-up.',
     }),
   },
   {
@@ -66,8 +78,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
       defaultMessage: 'Change the row height',
     }),
     text: i18n.translate('discover.docExplorerTour.stepChangeRowHeightDescription', {
-      defaultMessage:
-        'Specify the number of lines per row, or automatically adjust the height to fit the contents.',
+      defaultMessage: 'Adjust the number of lines to fit the contents.',
     }),
     imageName: 'rows_per_line.gif',
   },
@@ -75,11 +86,11 @@ const tourStepDefinitions: TourStepDefinition[] = [
     anchor: `#${DSC_TOUR_STEP_ANCHORS.expandDocument}`,
     anchorPosition: 'rightUp',
     title: i18n.translate('discover.docExplorerTour.stepExpandTitle', {
-      defaultMessage: 'Expand and compare',
+      defaultMessage: 'Compare and expand',
     }),
     text: i18n.translate('discover.docExplorerTour.stepExpandDescription', {
       defaultMessage:
-        'Expand a document to inspect its fields, set filters, and view the documents before and after. Interested in specific documents only? Select them, and then use the selected documents dropdown.',
+        'Narrow your view by selecting specific documents. View details by clicking <TODO>.',
     }),
     imageName: 'expand_document.gif',
   },
@@ -89,25 +100,28 @@ const FIRST_STEP = 1;
 
 const prepareTourSteps = (
   stepDefinitions: TourStepDefinition[],
-  getAssetPath: (imageName: string) => string
+  getAssetPath: (imageName: string) => string,
+  includeOptional: boolean
 ): EuiTourStepProps[] =>
-  stepDefinitions.map((stepDefinition, index) => ({
-    step: index + 1,
-    anchor: stepDefinition.anchor,
-    anchorPosition: stepDefinition.anchorPosition,
-    title: stepDefinition.title,
-    content: (
-      <>
-        <EuiText>{stepDefinition.text}</EuiText>
-        {stepDefinition.imageName && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiImage alt="TODO" src={getAssetPath(stepDefinition.imageName)} />
-          </>
-        )}
-      </>
-    ),
-  })) as EuiTourStepProps[];
+  stepDefinitions
+    .filter((stepDefinition) => includeOptional || !stepDefinition.isOptional)
+    .map((stepDefinition, index) => ({
+      step: index + 1,
+      anchor: stepDefinition.anchor,
+      anchorPosition: stepDefinition.anchorPosition,
+      title: stepDefinition.title,
+      content: (
+        <>
+          <EuiText size="s">{stepDefinition.text}</EuiText>
+          {stepDefinition.imageName && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiImage alt="TODO" src={getAssetPath(stepDefinition.imageName)} size={300} />
+            </>
+          )}
+        </>
+      ),
+    })) as EuiTourStepProps[];
 
 const tourConfig: EuiTourState = {
   currentTourStep: FIRST_STEP,
@@ -126,7 +140,7 @@ export const DscTourProvider: React.FC = ({ children }) => {
     [prependToBasePath]
   );
   const [steps, actions] = useEuiTour(
-    prepareTourSteps(tourStepDefinitions, getAssetPath),
+    prepareTourSteps(tourStepDefinitions, getAssetPath, true),
     tourConfig
   );
 
@@ -151,8 +165,6 @@ export const DscTourProvider: React.FC = ({ children }) => {
     }),
     [onStartTour, onNextTourStep, onFinishTour]
   );
-
-  console.log(steps);
 
   return (
     <DscTourContext.Provider value={contextValue}>

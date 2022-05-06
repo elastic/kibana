@@ -74,26 +74,15 @@ export const DocumentExplorerUpdateCallout = () => {
     >
       <p>
         <FormattedMessage
-          id="discover.docExplorerUpdateCallout.bodyMessage"
-          defaultMessage="Perform multi-column sorting, resize columns, set row height, and view data in fullscreen with the {documentExplorer}.
-          Learn more about the structure of your data with {fieldStatistics}."
+          id="discover.docExplorerUpdateCallout.description"
+          defaultMessage="Add relevant fields, reorder and sort columns, resize rows, and more in the {documentExplorer}."
           values={{
-            fieldStatistics: (
-              <EuiLink href={docLinks.links.discover.fieldStatistics} target="_blank">
-                <span css={semiBoldStyle}>
-                  <FormattedMessage
-                    id="discover.docExplorerUpdateCallout.fieldStatistics"
-                    defaultMessage="field statistics"
-                  />
-                </span>
-              </EuiLink>
-            ),
             documentExplorer: (
               <EuiLink href={docLinks.links.discover.documentExplorer} target="_blank">
                 <span css={semiBoldStyle}>
                   <FormattedMessage
-                    id="discover.docExplorerUpdateCallout.documentExplorer"
-                    defaultMessage="new document table"
+                    id="discover.docExplorerUpdateCallout.documentExplorerLabel"
+                    defaultMessage="document table"
                   />
                 </span>
               </EuiLink>
@@ -111,7 +100,7 @@ export const DocumentExplorerUpdateCallout = () => {
           <EuiButton size="s" onClick={onTakeTour}>
             <FormattedMessage
               id="discover.docExplorerUpdateCallout.takeTourButtonLabel"
-              defaultMessage="Take a tour"
+              defaultMessage="Take the tour"
             />
           </EuiButton>
         </EuiFlexItem>
@@ -137,8 +126,8 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
     <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         <FormattedMessage
-          id="discover.docExplorerUpdateCallout.headerMessage"
-          defaultMessage="Exploring your data just got better"
+          id="discover.docExplorerUpdateCallout.title"
+          defaultMessage="Get the best look at your search results"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

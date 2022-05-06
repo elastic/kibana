@@ -39,6 +39,7 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { DSC_TOUR_STEP_ANCHORS } from '../../../../components/dsc_tour/dsc_tour_step_anchor';
 import { ElasticSearchHit } from '../../../../types';
 
 /**
@@ -339,7 +340,7 @@ export function DiscoverSidebarComponent({
             />
           </form>
         </EuiFlexItem>
-        <EuiFlexItem className="eui-yScroll">
+        <EuiFlexItem className="eui-yScroll" id={DSC_TOUR_STEP_ANCHORS.addFields}>
           <div
             ref={(el) => {
               if (documents && el && !el.dataset.dynamicScroll) {
