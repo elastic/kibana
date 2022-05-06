@@ -1,26 +1,29 @@
 [[get-connector-api]]
-=== Get connector API
+== Get connector API
 ++++
 <titleabbrev>Get connector</titleabbrev>
 ++++
 
 Retrieves a connector by ID.
 
+[discrete]
 [[get-connector-api-request]]
-==== {api-request-title}
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/actions/connector/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
+[discrete]
 === {api-prereq-title}
 
 You must have `read` privileges for the *Actions and Connectors* feature in the
 *Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
+[discrete]
 [[get-connector-api-params]]
-==== {api-path-parms-title}
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the connector.
@@ -28,14 +31,16 @@ You must have `read` privileges for the *Actions and Connectors* feature in the
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[discrete]
 [[get-connector-api-codes]]
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
+[discrete]
 [[get-connector-api-example]]
-==== {api-examples-title}
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------

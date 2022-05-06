@@ -1,5 +1,5 @@
 [[delete-connector-api]]
-=== Delete connector API
+== Delete connector API
 ++++
 <titleabbrev>Delete connector</titleabbrev>
 ++++
@@ -8,21 +8,24 @@ Deletes an connector by ID.
 
 WARNING: When you delete a connector, _it cannot be recovered_.
 
+[discrete]
 [[delete-connector-api-request]]
-==== {api-request-title}
+=== {api-request-title}
 
 `DELETE <kibana host>:<port>/api/actions/connector/<id>`
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
+[discrete]
 === {api-prereq-title}
 
 You must have `all` privileges for the *Actions and Connectors* feature in the
 *Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
+[discrete]
 [[delete-connector-api-path-params]]
-==== {api-path-parms-title}
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the connector.
@@ -30,13 +33,15 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[discrete]
 [[delete-connector-api-response-codes]]
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `200`::
   Indicates a successful call.
 
-==== {api-examples-title}
+[discrete]
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
