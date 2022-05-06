@@ -6,71 +6,147 @@
  */
 
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const defaultPack = {
-  name: 'TestPack' + Date.now(),
+const getDefaultPack = ({ policyIds = [] }: { policyIds?: string[] }) => ({
+  name: 'TestPack',
   description: 'TestPack Description',
   enabled: true,
-  policy_ids: ['123', '456'],
+  policy_ids: policyIds,
   queries: {
     testQuery: {
-      query:
-        'select u.username,' +
-        '       p.pid,' +
-        '       p.name,' +
-        '       pos.local_address,' +
-        '       pos.local_port,' +
-        '       p.path,' +
-        '       p.cmdline,' +
-        '       pos.remote_address,' +
-        '       pos.remote_port' +
-        'from processes as p' +
-        'join users as u' +
-        '    on u.uid=p.uid' +
-        'join process_open_sockets as pos' +
-        '    on pos.pid=p.pid' +
-        "where pos.remote_port !='0'" +
-        'limit 1000;',
+      query: multiLineQuery,
       interval: 600,
       platform: 'windows',
       version: '1',
     },
   },
-};
+});
 
 const singleLineQuery =
-  "select u.username,       p.pid,       p.name,       pos.local_address,       pos.local_port,       p.path,       p.cmdline,       pos.remote_address,       pos.remote_portfrom processes as pjoin users as u    on u.uid=p.uidjoin process_open_sockets as pos    on pos.pid=p.pidwhere pos.remote_port !='0'limit 1000;";
+  "select u.username,    p.pid,    p.name,    pos.local_address,    pos.local_port,    p.path,    p.cmdline,    pos.remote_address,    pos.remote_port from processes as p join users as u   on u.uid=p.uid join process_open_sockets as pos   on pos.pid=p.pid where pos.remote_port !='0' limit 1000;";
+const multiLineQuery = `select u.username,
+       p.pid,
+       p.name,
+       pos.local_address,
+       pos.local_port,
+       p.path,
+       p.cmdline,
+       pos.remote_address,
+       pos.remote_port
+from processes as p
+join users as u
+    on u.uid=p.uid
+join process_open_sockets as pos
+    on pos.pid=p.pid
+where pos.remote_port !='0'
+limit 1000;`;
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Packs', () => {
-    let newlyCreatedPackId: string = '';
-    describe('create route', () => {
-      it('should return 200 and have a single line query', async () => {
-        const resp = await supertest
-          .post('/internal/osquery/packs')
-          .set('kbn-xsrf', 'true')
-          .send(defaultPack);
-
-        newlyCreatedPackId = resp.body.id;
-        expect(resp.body.attributes.queries.testQuery.query).to.be(singleLineQuery);
-        expect(resp.status).to.be(200);
-      });
+    let packId: string = '';
+    let hostedPolicy: Record<string, any>;
+    let packagePolicyId: string;
+    before(async () => {
+      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
     });
-    describe('update route', () => {
-      it('should return 200 and have a single line query', async () => {
-        const resp = await supertest
-          .put('/internal/osquery/packs/' + newlyCreatedPackId)
-          .set('kbn-xsrf', 'true')
-          .send(defaultPack);
+    after(async () => {
+      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
+    });
 
-        expect(resp.body.id).to.be(newlyCreatedPackId);
-        expect(resp.body.attributes.queries.testQuery.query).to.be(singleLineQuery);
-        expect(resp.status).to.be(200);
-      });
+    after(async function () {
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId: hostedPolicy.id });
+    });
+
+    it('create route should return 200 and multi line query, but single line query in packs config', async () => {
+      const {
+        body: { item: agentPolicy },
+      } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `Hosted policy from ${Date.now()}`,
+          namespace: 'default',
+        });
+      hostedPolicy = agentPolicy;
+
+      const {
+        body: { item: packagePolicy },
+      } = await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'true')
+        .send({
+          enabled: true,
+          package: {
+            name: 'osquery_manager',
+            version: '1.2.1',
+            title: 'test',
+          },
+          inputs: [],
+          namespace: 'default',
+          output_id: '',
+          policy_id: hostedPolicy.id,
+          name: 'TEST',
+          description: '123',
+          id: '123',
+        });
+      packagePolicyId = packagePolicy.id;
+
+      const createPackResponse = await supertest
+        .post('/internal/osquery/packs')
+        .set('kbn-xsrf', 'true')
+        .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
+
+      packId = createPackResponse.body.id;
+      expect(createPackResponse.status).to.be(200);
+
+      const pack = await supertest.get('/internal/osquery/packs/' + packId).set('kbn-xsrf', 'true');
+
+      expect(pack.status).to.be(200);
+      expect(pack.body.queries.testQuery.query).to.be(multiLineQuery);
+
+      const {
+        body: {
+          item: { inputs },
+        },
+      } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+
+      expect(inputs[0].config.osquery.value.packs.TestPack.queries.testQuery.query).to.be(
+        singleLineQuery
+      );
+    });
+
+    it('update route should return 200 and multi line query, but single line query in packs config', async () => {
+      const updatePackResponse = await supertest
+        .put('/internal/osquery/packs/' + packId)
+        .set('kbn-xsrf', 'true')
+        .send(getDefaultPack({ policyIds: [hostedPolicy.id] }));
+
+      expect(updatePackResponse.status).to.be(200);
+      expect(updatePackResponse.body.id).to.be(packId);
+      const pack = await supertest.get('/internal/osquery/packs/' + packId).set('kbn-xsrf', 'true');
+
+      expect(pack.body.queries.testQuery.query).to.be(multiLineQuery);
+      const {
+        body: {
+          item: { inputs },
+        },
+      } = await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`);
+
+      expect(inputs[0].config.osquery.value.packs.TestPack.queries.testQuery.query).to.be(
+        singleLineQuery
+      );
     });
   });
 }
