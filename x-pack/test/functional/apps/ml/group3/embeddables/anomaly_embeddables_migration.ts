@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
 
   describe('anomaly embeddables migration in Dashboard', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

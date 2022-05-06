@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('feature controls', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['skipFirefox', 'ml']);
     loadTestFile(require.resolve('./ml_security'));
     loadTestFile(require.resolve('./ml_spaces'));
   });

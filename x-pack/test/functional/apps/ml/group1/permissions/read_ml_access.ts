@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('for user with read ML access', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['skipFirefox', 'ml']);
 
     describe('with no data loaded', function () {
       for (const testUser of testUsers) {
