@@ -29,6 +29,7 @@ import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
+import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 import '../index.scss';
@@ -89,6 +90,8 @@ export interface SearchBarOwnProps {
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
   showSubmitButton?: boolean;
+  // defines size of suggestions query popover
+  suggestionsSize?: SuggestionsListSize;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -472,6 +475,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
+          suggestionsSize={this.props.suggestionsSize}
         />
       </div>
     );

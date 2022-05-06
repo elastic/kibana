@@ -31,7 +31,7 @@ const createStartContractMock = () => {
     addToQueryLog: jest.fn(),
     filterManager: createFilterManagerMock(),
     queryString: queryStringManagerMock.createStartContract(),
-    savedQueries: jest.fn() as any,
+    savedQueries: { getSavedQuery: jest.fn() } as any,
     state$: new Observable(),
     timefilter: timefilterServiceMock.createStartContract(),
     getEsQuery: jest.fn(),
