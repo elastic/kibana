@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import './document_explorer_callout.scss';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,13 +17,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { useDscTourContext } from '../../../../components/dsc_tour/dsc_tour_context';
+import { useDscTourContext } from '../../../../components/dsc_tour';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';
 
@@ -39,17 +36,9 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
  * The callout that's displayed when Document explorer is enabled
  */
 export const DocumentExplorerUpdateCallout = () => {
-  const { euiTheme } = useEuiTheme();
-  const { storage, capabilities, docLinks } = useDiscoverServices();
+  const { storage, capabilities } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
   const onStartTour = useDscTourContext().onStartTour;
-
-  const semiBoldStyle = useMemo(
-    () => css`
-      font-weight: ${euiTheme.font.weight.semiBold};
-    `,
-    [euiTheme.font.weight.semiBold]
-  );
 
   const onCloseCallout = useCallback(() => {
     updateStoredCalloutState(true, storage);
@@ -75,19 +64,7 @@ export const DocumentExplorerUpdateCallout = () => {
       <p>
         <FormattedMessage
           id="discover.docExplorerUpdateCallout.description"
-          defaultMessage="Add relevant fields, reorder and sort columns, resize rows, and more in the {documentExplorer}."
-          values={{
-            documentExplorer: (
-              <EuiLink href={docLinks.links.discover.documentExplorer} target="_blank">
-                <span css={semiBoldStyle}>
-                  <FormattedMessage
-                    id="discover.docExplorerUpdateCallout.documentExplorerLabel"
-                    defaultMessage="document table"
-                  />
-                </span>
-              </EuiLink>
-            ),
-          }}
+          defaultMessage="Add relevant fields, reorder and sort columns, resize rows, and more in the document table."
         />
       </p>
       <EuiFlexGroup

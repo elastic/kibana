@@ -144,7 +144,7 @@ const prepareTourSteps = (
       maxWidth: MAX_WIDTH,
       content: (
         <>
-          {stepDefinition.content}
+          <p>{stepDefinition.content}</p>
           {stepDefinition.imageName && (
             <>
               <EuiSpacer size="s" />
@@ -154,6 +154,20 @@ const prepareTourSteps = (
         </>
       ),
     })) as EuiTourStepProps[];
+
+const findNextAvailableStep = (
+  steps: EuiTourStepProps[],
+  currentTourStep: number
+): number | null => {
+  const nextStep = steps.find(
+    (step) =>
+      step.step > currentTourStep &&
+      typeof step.anchor === 'string' &&
+      document.querySelector(step.anchor)
+  );
+
+  return nextStep?.step ?? null;
+};
 
 const tourConfig: EuiTourState = {
   currentTourStep: FIRST_STEP,
@@ -171,10 +185,12 @@ export const DscTourProvider: React.FC = ({ children }) => {
     },
     [prependToBasePath]
   );
-  const [steps, actions] = useEuiTour(
-    prepareTourSteps(tourStepDefinitions, getAssetPath, true),
-    tourConfig
+  const tourSteps = useMemo(
+    () => prepareTourSteps(tourStepDefinitions, getAssetPath, true),
+    [getAssetPath]
   );
+  const [steps, actions, reducerState] = useEuiTour(tourSteps, tourConfig);
+  const currentTourStep = reducerState.currentTourStep;
 
   const onStartTour = useCallback(() => {
     actions.resetTour();
@@ -182,8 +198,13 @@ export const DscTourProvider: React.FC = ({ children }) => {
   }, [actions]);
 
   const onNextTourStep = useCallback(() => {
-    actions.incrementStep();
-  }, [actions]);
+    const nextAvailableStep = findNextAvailableStep(steps, currentTourStep);
+    if (nextAvailableStep) {
+      actions.goToStep(nextAvailableStep);
+    } else {
+      actions.finishTour();
+    }
+  }, [actions, steps, currentTourStep]);
 
   const onFinishTour = useCallback(() => {
     actions.finishTour();
@@ -202,7 +223,7 @@ export const DscTourProvider: React.FC = ({ children }) => {
     <DscTourContext.Provider value={contextValue}>
       {steps.map((step) => (
         <EuiTourStep
-          key={`step-${step.step}-of-${steps.length}`}
+          key={`step-${step.step}-is-${String(step.isStepOpen)}`}
           {...step}
           footerAction={
             <DscTourStepFooterAction
