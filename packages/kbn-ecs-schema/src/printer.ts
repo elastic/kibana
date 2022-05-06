@@ -42,7 +42,7 @@ function printIndex(topLevelFields: FieldDetails, groups: string[], outPath: str
   const baseFieldInfo = util.inspect(topLevelFields).slice(2, -2).concat(',\n');
   schema += baseFieldInfo;
   for (const group of groups) {
-    schema += `  ${group}Ecs,\n`;
+    schema += `  ${group}Ecs\: {...${group}Ecs},\n`;
   }
   schema += '};';
 
