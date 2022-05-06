@@ -10,12 +10,11 @@ import React, { FC } from 'react';
 
 import { NerInference } from './models/ner';
 
-import { LangIdentInference } from './models/lang_ident';
-
 import {
   TextClassificationInference,
   FillMaskInference,
   ZeroShotClassificationInference,
+  LangIdentInference,
 } from './models/text_classification';
 
 import { TextEmbeddingInference } from './models/text_embedding';

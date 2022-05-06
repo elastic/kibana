@@ -7,13 +7,12 @@
 
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
-import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
-import { getTextClassificationOutputComponent } from './text_classification_output';
+import { getLangIdentOutputComponent } from './lang_ident_output';
+import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
-export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
-  // @ts-expect-error model type is wrong
-  private numTopClasses = this.model.inference_config?.text_classification?.num_top_classes || 5;
+export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
+  private numTopClasses = this.model.inference_config?.classification?.num_top_classes || 5;
 
   public async infer() {
     try {
@@ -21,7 +20,7 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
       const inputText = this.inputText$.value;
       const payload = {
         docs: [{ [this.inputField]: inputText }],
-        inference_config: { text_classification: { num_top_classes: this.numTopClasses } },
+        inference_config: { classification: { num_top_classes: this.numTopClasses } },
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
@@ -49,6 +48,6 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   }
 
   public getOutputComponent(): JSX.Element {
-    return getTextClassificationOutputComponent(this);
+    return getLangIdentOutputComponent(this);
   }
 }

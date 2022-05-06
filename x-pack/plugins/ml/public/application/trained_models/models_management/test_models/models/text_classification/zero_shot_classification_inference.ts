@@ -23,7 +23,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
       const labelsText = this.labelsText$.value;
       const inputLabels = labelsText?.split(',').map((l) => l.trim());
       const payload = {
-        docs: { [this.inputField]: inputText },
+        docs: [{ [this.inputField]: inputText }],
         inference_config: {
           zero_shot_classification: {
             labels: inputLabels,

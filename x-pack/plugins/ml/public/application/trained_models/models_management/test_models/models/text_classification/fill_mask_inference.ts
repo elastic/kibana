@@ -23,7 +23,7 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
       this.setRunning();
       const inputText = this.inputText$.value;
       const payload = {
-        docs: { [this.inputField]: inputText },
+        docs: [{ [this.inputField]: inputText }],
         inference_config: { fill_mask: { num_top_classes: this.numTopClasses } },
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(

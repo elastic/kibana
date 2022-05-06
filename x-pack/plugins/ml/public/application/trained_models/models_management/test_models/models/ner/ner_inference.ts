@@ -11,6 +11,10 @@ import { InferenceBase, InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getNerOutputComponent } from './ner_output';
 
+interface MlInferTrainedModelDeploymentResponse {
+  inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
+}
+
 export type FormattedNerResponse = Array<{
   value: string;
   entity: estypes.MlTrainedModelEntities | null;
@@ -18,7 +22,7 @@ export type FormattedNerResponse = Array<{
 
 export type NerResponse = InferResponse<
   FormattedNerResponse,
-  estypes.MlInferTrainedModelDeploymentResponse
+  MlInferTrainedModelDeploymentResponse
 >;
 
 export class NerInference extends InferenceBase<NerResponse> {
@@ -26,7 +30,7 @@ export class NerInference extends InferenceBase<NerResponse> {
     try {
       this.setRunning();
       const inputText = this.inputText$.value;
-      const payload = { docs: { [this.inputField]: inputText } };
+      const payload = { docs: [{ [this.inputField]: inputText }] };
       const resp = await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
         payload,
@@ -56,8 +60,8 @@ export class NerInference extends InferenceBase<NerResponse> {
   }
 }
 
-function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): FormattedNerResponse {
-  const { predicted_value: predictedValue, entities } = resp;
+function parseResponse(resp: MlInferTrainedModelDeploymentResponse): FormattedNerResponse {
+  const [{ predicted_value: predictedValue, entities }] = resp.inference_results;
   const splitWordsAndEntitiesRegex = /(\[.*?\]\(.*?&.*?\))/;
   const matchEntityRegex = /(\[.*?\])\((.*?)&(.*?)\)/;
   if (predictedValue === undefined || entities === undefined) {

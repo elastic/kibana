@@ -12,7 +12,7 @@ import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
 
 export interface RawTextEmbeddingResponse {
-  predicted_value: number[];
+  inference_results: [{ predicted_value: number[] }];
 }
 
 export interface FormattedTextEmbeddingResponse {
@@ -30,7 +30,7 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
       this.setRunning();
       const inputText = this.inputText$.value;
       const payload = {
-        docs: { [this.inputField]: inputText },
+        docs: [{ [this.inputField]: inputText }],
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
@@ -63,6 +63,6 @@ function processResponse(
   model: estypes.MlTrainedModelConfig,
   inputText: string
 ) {
-  const predictedValue = resp.predicted_value;
+  const predictedValue = resp.inference_results[0].predicted_value;
   return { response: { predictedValue }, rawResponse: resp, inputText };
 }
