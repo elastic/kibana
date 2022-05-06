@@ -6,7 +6,7 @@
  */
 
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
