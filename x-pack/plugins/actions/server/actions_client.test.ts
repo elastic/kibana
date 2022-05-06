@@ -1369,6 +1369,50 @@ describe('getOAuthAccessToken()', () => {
     });
   });
 
+  test('throws when tokenUrl is not using https', async () => {
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'http://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must use https]`);
+
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+  });
+
+  test('throws when tokenUrl does not contain hostname', async () => {
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: '/path/to/myfile',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must contain hostname]`);
+
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+  });
+
   test('throws when tokenUrl is not in allowed hosts', async () => {
     configurationUtilities.ensureUriAllowed.mockImplementationOnce(() => {
       throw new Error('URI not allowed');

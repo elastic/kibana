@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -473,10 +474,26 @@ export class ActionsClient {
     // Verify that user has edit access
     await this.authorization.ensureAuthorized('update');
 
+    // Verify that token url is allowed by allowed hosts config
     try {
       configurationUtilities.ensureUriAllowed(options.tokenUrl);
     } catch (err) {
       throw Boom.badRequest(err.message);
+    }
+
+    // Verify that token url contains a hostname and uses https
+    const parsedUrl = url.parse(
+      options.tokenUrl,
+      false /* parseQueryString */,
+      true /* slashesDenoteHost */
+    );
+
+    if (!parsedUrl.hostname) {
+      throw Boom.badRequest(`Token URL must contain hostname`);
+    }
+
+    if (parsedUrl.protocol !== 'https:') {
+      throw Boom.badRequest(`Token URL must use https`);
     }
 
     let accessToken: string | null = null;
