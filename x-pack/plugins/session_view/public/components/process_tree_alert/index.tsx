@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-import { EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
@@ -59,27 +59,39 @@ export const ProcessTreeAlert = ({
   const { name } = rule;
 
   return (
-    <EuiText
-      key={uuid}
-      size="s"
-      css={styles.alert}
-      data-id={uuid}
-      data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
-      onClick={handleClick}
-    >
-      <EuiButtonIcon
-        iconType="expand"
-        aria-label="expand"
-        data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
-        onClick={handleExpandClick}
-      />
-      <EuiIcon type="alert" color="danger" />
-      <EuiText css={styles.alertName} size="s">
-        {dataOrDash(name)} (event.action: {event?.action})
-      </EuiText>
-      <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
-        {dataOrDash(status)}
-      </EuiBadge>
-    </EuiText>
+    <div key={uuid} css={styles.alert} data-id={uuid}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        wrap
+        onClick={handleClick}
+        data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="expand"
+            aria-label="expand"
+            data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
+            onClick={handleExpandClick}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="alert" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText css={styles.alertName} size="s">
+            {dataOrDash(name)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
+            {dataOrDash(status)}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">(action: {event?.action})</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };
