@@ -37,7 +37,7 @@ const fetchOrphanedPolicies = async () => {
   return response.data?.items ?? [];
 };
 
-export const OrphanedIntegrationPoliciesDebugger: React.FunctionComponent = () => {
+export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => {
   const { notifications } = useStartServices();
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<string>();
@@ -105,7 +105,10 @@ export const OrphanedIntegrationPoliciesDebugger: React.FunctionComponent = () =
   return (
     <>
       <EuiText grow={false}>
-        <p>This tool can be used to delete {'"orphaned"'} integration policies.</p>
+        <p>
+          This tool can be used to delete {'"orphaned"'} integration policies that have been
+          unlinked from their parent agent policy objects.
+        </p>
 
         <p>
           You may delete a single orphaned integration policy or use the {'"Delete all"'} button to

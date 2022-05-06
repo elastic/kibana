@@ -27,7 +27,7 @@ import {
   PreconfigurationDebugger,
   FleetIndexDebugger,
   SavedObjectDebugger,
-  OrphanedIntegrationPoliciesDebugger,
+  OrphanedIntegrationPolicyDebugger,
 } from './components';
 
 // TODO: Evaluate moving this react-query initialization up to the main Fleet app
@@ -61,9 +61,9 @@ const panels = [
     component: <PreconfigurationDebugger />,
   },
   {
-    title: 'Orphaned Integration Policies Debugger',
-    id: 'orphanedIntegrationPoliciesDebugger',
-    component: <OrphanedIntegrationPoliciesDebugger />,
+    title: 'Orphaned Integration Policy Debugger',
+    id: 'orphanedIntegrationPolicyDebugger',
+    component: <OrphanedIntegrationPolicyDebugger />,
   },
 ];
 
