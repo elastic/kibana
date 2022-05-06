@@ -26,7 +26,9 @@ import { CspAppContext } from '../../plugin';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 
-import { cspRuleAssetSavedObjectType, CspRuleSchema } from '../../../common/schemas/csp_rule';
+import { cspRuleAssetSavedObjectType } from '../../../common/constants';
+import { CspRuleSchema } from '../../../common/schemas/csp_rule';
+
 import {
   ElasticsearchClient,
   KibanaRequest,
