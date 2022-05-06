@@ -8,8 +8,6 @@
 import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { Optional } from '@kbn/utility-types';
-import type { Transaction } from 'elastic-apm-node';
-import apm from 'elastic-apm-node';
 import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
 import { from, Observable, of, throwError } from 'rxjs';
@@ -46,6 +44,7 @@ import {
 } from '../formats';
 import type { Layout } from '../layouts';
 import { createLayout } from '../layouts';
+import { EventLogger, Transactions } from './event_logger';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
 import { Semaphore } from './semaphore';
@@ -110,21 +109,18 @@ export class Screenshots {
     this.semaphore = new Semaphore(config.poolSize);
   }
 
-  private createLayout(transaction: Transaction | null, options: CaptureOptions): Layout {
-    const apmCreateLayout = transaction?.startSpan('create-layout', 'setup');
+  private createLayout(options: CaptureOptions): Layout {
     const layout = createLayout(options.layout ?? {});
     this.logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
-    apmCreateLayout?.end();
 
     return layout;
   }
 
   private captureScreenshots(
+    eventLogger: EventLogger,
     layout: Layout,
-    transaction: Transaction | null,
     options: ScreenshotObservableOptions
   ): Observable<CaptureResult> {
-    const apmCreatePage = transaction?.startSpan('create-page', 'wait');
     const { browserTimezone } = options;
 
     return this.browserDriverFactory
@@ -139,24 +135,22 @@ export class Screenshots {
       .pipe(
         this.semaphore.acquire(),
         mergeMap(({ driver, unexpectedExit$, close }) => {
-          apmCreatePage?.end();
-          unexpectedExit$.subscribe({ error: () => transaction?.end() });
-
           const screen = new ScreenshotObservableHandler(
             driver,
             this.config,
-            this.logger,
+            eventLogger,
             layout,
             options
           );
 
           return from(options.urls).pipe(
             concatMap((url, index) =>
-              screen.setupPage(index, url, transaction).pipe(
+              screen.setupPage(index, url).pipe(
                 catchError((error) => {
                   screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
                   this.logger.error(error);
+                  eventLogger.error(error, Transactions.SCREENSHOTTING);
                   return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
                 }),
                 takeUntil(unexpectedExit$),
@@ -166,16 +160,8 @@ export class Screenshots {
             take(options.urls.length),
             toArray(),
             mergeMap((results) =>
-              // At this point we no longer need the page, close it.
-              close().pipe(
-                tap(({ metrics }) => {
-                  if (metrics) {
-                    transaction?.setLabel('cpu', metrics.cpu, false);
-                    transaction?.setLabel('memory', metrics.memory, false);
-                  }
-                }),
-                map(({ metrics }) => ({ metrics, results }))
-              )
+              // At this point we no longer need the page, close it and send out the results
+              close().pipe(map(({ metrics }) => ({ metrics, results })))
             )
           );
         }),
@@ -243,15 +229,28 @@ export class Screenshots {
     if (this.systemHasInsufficientMemory()) {
       return throwError(() => new errors.InsufficientMemoryAvailableOnCloudError());
     }
-    const transaction = apm.startTransaction('screenshot-pipeline', 'screenshotting');
-    const layout = this.createLayout(transaction, options);
+
+    const eventLogger = new EventLogger(this.logger, this.config);
+    const transactionEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
+
+    const layout = this.createLayout(options);
     const captureOptions = this.getCaptureOptions(options);
 
-    return this.captureScreenshots(layout, transaction, captureOptions).pipe(
+    return this.captureScreenshots(eventLogger, layout, captureOptions).pipe(
+      tap(({ results, metrics }) => {
+        transactionEnd({
+          labels: {
+            cpu: metrics?.cpu,
+            memory: metrics?.memory,
+            memory_mb: metrics?.memoryInMegabytes,
+            ...eventLogger.getByteLengthFromCaptureResults(results),
+          },
+        });
+      }),
       mergeMap((result) => {
         switch (options.format) {
           case 'pdf':
-            return toPdf(this.logger, this.packageInfo, layout, options, result);
+            return toPdf(eventLogger, this.packageInfo, layout, options, result);
           default:
             return toPng(result);
         }
