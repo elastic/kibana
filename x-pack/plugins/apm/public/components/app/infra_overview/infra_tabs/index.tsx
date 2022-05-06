@@ -18,6 +18,8 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../../plugin';
+import { EmptyPrompt } from './empty_prompt';
+import { FailurePrompt } from './failure_prompt';
 
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
   id: 'containers' | 'pods' | 'hosts';
@@ -50,10 +52,14 @@ export function InfraTabs() {
     [environment, kuery, serviceName, start, end]
   );
 
+  const containerIds = data?.infrastructureData.containerIds;
+  const podNames = data?.infrastructureData.podNames;
+  const hostNames = data?.infrastructureData.hostNames;
+
   const tabs = useTabs({
-    containerIds: data?.infrastructureData.containerIds || [],
-    podNames: data?.infrastructureData.podNames || [],
-    hostNames: data?.infrastructureData.hostNames || [],
+    containerIds: containerIds || [],
+    podNames: podNames || [],
+    hostNames: hostNames || [],
     start,
     end,
   });
@@ -62,6 +68,30 @@ export function InfraTabs() {
     return (
       <div style={{ textAlign: 'center' }}>
         <EuiLoadingSpinner size="l" />
+      </div>
+    );
+  }
+
+  if (status === FETCH_STATUS.FAILURE) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <FailurePrompt />
+      </div>
+    );
+  }
+
+  if (
+    status === FETCH_STATUS.SUCCESS &&
+    containerIds &&
+    containerIds.length <= 0 &&
+    podNames &&
+    podNames.length <= 0 &&
+    hostNames &&
+    hostNames?.length <= 0
+  ) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <EmptyPrompt />
       </div>
     );
   }
@@ -122,16 +152,6 @@ function useTabs({
     }),
     [hostNames, containerIds, podNames]
   );
-  const testFilter = useMemo(
-    () => ({
-      bool: {
-        filter: [
-          { terms: { 'host.name': ['gke-edge-oblt-pool-1-9a60016d-lwwa'] } },
-        ],
-      },
-    }),
-    []
-  );
   const podsFilter = useMemo(
     () => ({
       bool: {
@@ -171,7 +191,7 @@ function useTabs({
       name: 'Hosts',
       content:
         HostMetricsTable &&
-        HostMetricsTable({ timerange, filterClauseDsl: testFilter }),
+        HostMetricsTable({ timerange, filterClauseDsl: hostsFilter }),
     },
   ];
 
