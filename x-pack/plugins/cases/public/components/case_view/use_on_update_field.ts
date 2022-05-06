@@ -72,6 +72,11 @@ export const useOnUpdateField = ({
             callUpdate('settings', settingsUpdate);
           }
           break;
+        case 'severity':
+          const severityUpdate = getTypedPayload<CaseAttributes['severity']>(value);
+          if (caseData.severity !== value) {
+            callUpdate('severity', severityUpdate);
+          }
         default:
           return null;
       }

@@ -198,6 +198,10 @@ export const MARKED_CASE_AS = i18n.translate('xpack.cases.caseView.markedCaseAs'
   defaultMessage: 'marked case as',
 });
 
+export const SET_SEVERITY_TO = i18n.translate('xpack.cases.caseView.setSeverityTo', {
+  defaultMessage: 'set severity to',
+});
+
 export const OPEN_CASES = i18n.translate('xpack.cases.caseTable.openCases', {
   defaultMessage: 'Open cases',
 });
