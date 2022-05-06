@@ -1518,7 +1518,7 @@ describe('TaskManagerRunner', () => {
       );
     });
 
-    test('Prints debug logs on task start and end', async () => {
+    test('Prints debug logs on task start/end', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {
           bar: {
@@ -1542,7 +1542,7 @@ describe('TaskManagerRunner', () => {
       });
     });
 
-    test('Prints debug logs on task start and end even if it throws error', async () => {
+    test('Prints debug logs on task start/end even if it throws error', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {
           bar: {
