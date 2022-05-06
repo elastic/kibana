@@ -40,6 +40,7 @@ import type { Exceptions } from './exceptions';
 import type { Hosts } from './hosts';
 import type { Users } from './users';
 import type { Network } from './network';
+import type { Kubernetes } from './kubernetes';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
@@ -104,6 +105,7 @@ export interface SubPlugins {
   hosts: Hosts;
   users: Users;
   network: Network;
+  kubernetes: Kubernetes;
   overview: Overview;
   timelines: Timelines;
   management: Management;
@@ -119,6 +121,7 @@ export interface StartedSubPlugins {
   hosts: ReturnType<Hosts['start']>;
   users: ReturnType<Users['start']>;
   network: ReturnType<Network['start']>;
+  kubernetes: ReturnType<Kubernetes['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;

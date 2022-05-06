@@ -59,7 +59,8 @@ export type SecurityNavKey =
   | SecurityPageName.rules
   | SecurityPageName.timelines
   | SecurityPageName.trustedApps
-  | SecurityPageName.users;
+  | SecurityPageName.users
+  | SecurityPageName.kubernetes;
 
 export type SecurityNav = Record<SecurityNavKey, NavTab>;
 

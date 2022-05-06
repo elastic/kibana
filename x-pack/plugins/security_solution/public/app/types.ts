@@ -53,6 +53,7 @@ export interface SecuritySubPlugin {
 export type SecuritySubPluginKeyStore =
   | 'hosts'
   | 'users'
+  | 'kubernetes'
   | 'network'
   | 'timeline'
   | 'hostList'

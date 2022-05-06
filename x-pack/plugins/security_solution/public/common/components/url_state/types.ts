@@ -36,6 +36,9 @@ export type LocationTypes =
   | CONSTANTS.networkPage
   | CONSTANTS.overviewPage
   | CONSTANTS.timelinePage
+  // TODO: zizhouW check if necessary
+  | CONSTANTS.kubernetesDetails
+  | CONSTANTS.kubernetesPage
   | CONSTANTS.unknown;
 
 export interface UrlState {

@@ -101,6 +101,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 ...(navTabs[SecurityPageName.users] != null
                   ? [navTabs[SecurityPageName.users]]
                   : []),
+                ...(navTabs[SecurityPageName.kubernetes] != null
+                  ? [navTabs[SecurityPageName.kubernetes]]
+                  : []),
               ],
             },
             {

@@ -73,6 +73,9 @@ const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =
 const isUsersRoutes = (spyState: RouteSpyState): spyState is UsersRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.users;
 
+const isKubernetesRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
+  spyState != null && spyState.pageName === SecurityPageName.kubernetes;
+
 const isTimelinesRoutes = (spyState: RouteSpyState): spyState is TimelineRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.timelines;
 
@@ -177,6 +180,10 @@ export const getBreadcrumbsForRoute = (
 
   if (isCaseRoutes(spyState) && object.navTabs) {
     return null; // controlled by Cases routes
+  }
+
+  if (isKubernetesRoutes(spyState) && object.navTabs) {
+    return null;
   }
 
   if (isTimelinesRoutes(spyState) && object.navTabs) {
