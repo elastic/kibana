@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { v4 as uuidv4 } from 'uuid';
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
+
 import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
@@ -87,24 +89,26 @@ export const findThresholdSignals = async ({
     },
   };
 
-  const thresholdFields = threshold.field;
+  const fakeFieldName = uuidv4();
+  const thresholdFields = [
+    ...threshold.field,
+    ...(threshold.field.length ? [] : fakeFieldName), // generate a field to group everything in one bucket
+  ];
 
-  // order buckets by cardinality (https://github.com/elastic/kibana/issues/95258)
-  // const thresholdFieldCount = thresholdFields.length;
-  /*
-  const orderByCardinality = (i: number = 0) =>
-    (thresholdFieldCount === 0 || i === thresholdFieldCount - 1) && threshold.cardinality?.length
-      ? { order: { cardinality_count: 'desc' } }
-      : {};
-  */
+  const runtimeMappings = threshold.field.length
+    ? undefined
+    : {
+        [fakeFieldName]: {
+          type: 'keyword',
+          script: 'emit("")',
+        },
+      };
 
-  // Generate a nested terms aggregation for each threshold grouping field provided, appending leaf
+  // Generate a composite aggregation considering each threshold grouping field provided, appending leaf
   // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
-  // 2) return the latest hit for each bucket so that we can persist the timestamp of the event in the
-  // `original_time` of the signal. This will be used for dupe mitigation purposes by the detection
-  // engine.
+  // 2) return the first and last hit for each bucket in order to eliminate dupes and reconstruct an accurate
+  // timeline.
 
-  // TODO: handle when no threshold fields are provided
   const aggregations = {
     thresholdTerms: {
       composite: {
@@ -115,50 +119,13 @@ export const findThresholdSignals = async ({
             },
           },
         })),
-        // ...(threshold.cardinality?.length ? { order: { cardinality_count: 'desc' } } : {}),
         size: 10000,
       },
       aggs: leafAggs,
     },
   };
 
-  /*
-  const aggregations = thresholdFields.length
-    ? thresholdFields.reduce((acc, field, i) => {
-        const aggPath = [...Array(i + 1).keys()]
-          .map((j) => {
-            return `['threshold_${j}:${thresholdFields[j]}']`;
-          })
-          .join(`['aggs']`);
-        set(acc, aggPath, {
-          terms: {
-            field,
-            ...orderByCardinality(i),
-            min_doc_count: threshold.value, // not needed on parent agg, but can help narrow down result set
-            size: 10000, // max 10k buckets
-          },
-        });
-        if (i === (thresholdFields.length ?? 0) - 1) {
-          set(acc, `${aggPath}['aggs']`, leafAggs);
-        }
-        return acc;
-      }, {})
-    : {
-        // No threshold grouping fields provided
-        threshold_0: {
-          terms: {
-            script: {
-              source: '""', // Group everything in the same bucket
-              lang: 'painless',
-            },
-            ...orderByCardinality(),
-            min_doc_count: threshold.value,
-          },
-          aggs: leafAggs,
-        },
-    };
-  */
-
+  // TODO: loop as long as we have sort ids
   return singleSearchAfter({
     aggregations,
     searchAfterSortId: undefined,
@@ -166,6 +133,7 @@ export const findThresholdSignals = async ({
     index: inputIndexPattern,
     from,
     to,
+    ...(runtimeMappings ? runtimeMappings : {}),
     services,
     logger,
     // @ts-expect-error refactor to pass type explicitly instead of unknown
