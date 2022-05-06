@@ -5,7 +5,10 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+// @ts-ignore
+import flat from 'flat';
 
+const flatten = flat.flatten as unknown as (o: any) => Record<string, string>;
 import type { ListWithKuery } from '../../types';
 
 import type { Hint, CreatePackagePolicyResult } from './types';
@@ -25,7 +28,11 @@ export const getHints = async (
 
   if (!hits.hits.length) return [];
 
-  return hits.hits.map(({ _source }) => _source as Hint);
+  return hits.hits.map(({ _source }) => {
+    const hint = { ...(_source as any) };
+    hint.annotations = flatten(hint.annotation);
+    return hint as Hint;
+  });
 };
 
 export const getNewHints = async (esClient: ElasticsearchClient): Promise<Hint[]> => {
@@ -46,13 +53,11 @@ export const getNewHints = async (esClient: ElasticsearchClient): Promise<Hint[]
 
   if (!hits?.hits.length) return [];
 
-  const hints = hits.hits.map(
-    ({ _id, _source }) =>
-      ({
-        _id,
-        ...(_source as Record<string, unknown>),
-      } as Hint)
-  );
+  return hits.hits.map(({ _source, _id }) => {
+    const hint = { ...(_source as any), _id };
+    hint.annotations = flatten(hint.annotations);
+    return hint as Hint;
+  });
 
   return hints;
 };

@@ -101,14 +101,12 @@ export const scheduleHintsTask = async (
 };
 
 const hintHasAutodiscoverAnnotations = (hint: Hint) => {
-  return Object.keys(hint.kubernetes?.annotations || {}).some((key) =>
-    key.startsWith(ANNOTATION_PREFIX)
-  );
+  return Object.keys(hint.annotations || {}).some((key) => key.startsWith(ANNOTATION_PREFIX));
 };
 
 const parseAnnotations = (hint: Hint): ParsedAnnotations => {
   const result = {} as ParsedAnnotations;
-  const annotations = hint.kubernetes.annotations || {};
+  const annotations = hint.annotations || {};
   Object.entries(annotations).map(([key, val]) => {
     if (!key.startsWith(ANNOTATION_PREFIX)) return;
 
