@@ -11,7 +11,7 @@ import { TopRiskScoreContributors } from '.';
 import { TestProviders } from '../../mock';
 import { RuleRisk } from '../../../../common/search_strategy';
 
-jest.mock('../../../common/containers/query_toggle');
+jest.mock('../../containers/query_toggle');
 jest.mock('../../../risk_score/containers');
 
 const testProps = {
