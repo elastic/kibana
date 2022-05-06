@@ -157,8 +157,10 @@ function DiscoverDocumentsComponent({
         </>
       )}
       {!isLegacy && (
-        <DscTourProvider>
-          <DocumentExplorerUpdateCallout />
+        <>
+          <DscTourProvider>
+            <DocumentExplorerUpdateCallout />
+          </DscTourProvider>
           <div className="dscDiscoverGrid">
             <DataGridMemoized
               ariaLabelledBy="documentsAriaLabel"
@@ -185,7 +187,7 @@ function DiscoverDocumentsComponent({
               onUpdateRowHeight={onUpdateRowHeight}
             />
           </div>
-        </DscTourProvider>
+        </>
       )}
     </EuiFlexItem>
   );
