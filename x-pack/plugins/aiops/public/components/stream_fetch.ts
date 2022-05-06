@@ -26,7 +26,11 @@ export const streamFetch = async <T = unknown>(
   });
 
   if (stream.body !== null) {
-    const reader = stream.body.pipeThrough(new TextDecoderStream()).getReader();
+    // Note that Firefox 99 doesn't support `TextDecoderStream` yet.
+    // That's why we skip it here and use `TextDecoder` later to decode each chunk.
+    // Once Firefox supports it, we can use the following alternative:
+    // const reader = stream.body.pipeThrough(new TextDecoderStream()).getReader();
+    const reader = stream.body.getReader();
     const bufferBounce = 100;
     let partial = '';
     let actionBuffer: T[] = [];
@@ -34,8 +38,10 @@ export const streamFetch = async <T = unknown>(
 
     while (true) {
       try {
-        const { value, done } = await reader.read();
+        const { value: uint8array, done } = await reader.read();
         if (done) break;
+
+        const value = new TextDecoder().decode(uint8array);
 
         const full = `${partial}${value}`;
         const parts = full.split('\n');
