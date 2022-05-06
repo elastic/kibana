@@ -7,3 +7,4 @@
 
 export * from './task';
 export * from './ensure_mapping';
+export * from './crud';

@@ -67,6 +67,7 @@ import {
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
+  registerHintAPIRoutes,
   registerPackagePolicyRoutes,
   registerDataStreamRoutes,
   registerAgentPolicyRoutes,
@@ -385,6 +386,7 @@ export class FleetPlugin
     registerSettingsRoutes(fleetAuthzRouter);
     registerDataStreamRoutes(fleetAuthzRouter);
     registerPreconfigurationRoutes(fleetAuthzRouter);
+    registerHintAPIRoutes(fleetAuthzRouter);
 
     // Conditional config routes
     if (config.agents.enabled) {

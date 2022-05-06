@@ -15,7 +15,7 @@ import type {
 
 import partition from 'lodash/partition';
 
-import type { Agent, FullAgentPolicy, PackageInfo, PackagePolicy } from '../../types';
+import type { Agent, FullAgentPolicy, PackageInfo } from '../../types';
 
 import { getAgentById } from '../agents';
 import { getFullAgentPolicy } from '../agent_policies';
@@ -24,11 +24,10 @@ import { getPackageInfo } from '../epm/packages';
 import { packagePolicyService } from '../package_policy';
 import { incrementPackageName } from '../package_policies';
 
-import { HINTS_INDEX_NAME } from './constants';
-
 import { generatePackagePolicy } from './generate_package_policy';
 
 import type { Hint, ParsedAnnotations } from './types';
+import { setHintsAsReceived, setHintsAsComplete, getNewHints } from './crud';
 const FLEET_POLL_HINTS_INDEX_TASK_ID = 'FLEET:sync-task';
 const FLEET_POLL_HINTS_INDEX_TASK_TYPE = 'FLEET:poll-hints-index';
 const POLL_INTERVAL = '5s';
@@ -99,97 +98,6 @@ export const scheduleHintsTask = async (
 
     return null;
   }
-};
-
-const getNewHints = async (esClient: ElasticsearchClient): Promise<Hint[]> => {
-  const { hits } = await esClient.search({
-    index: HINTS_INDEX_NAME,
-    query: {
-      bool: {
-        must_not: [
-          {
-            exists: {
-              field: 'received_at',
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  if (!hits?.hits.length) return [];
-
-  const hints = hits.hits.map(
-    ({ _id, _source }) =>
-      ({
-        _id,
-        ...(_source as Record<string, unknown>),
-      } as Hint)
-  );
-
-  return hints;
-};
-
-const updateSingleDoc = async (esClient: ElasticsearchClient, id: string, update: any) => {
-  esClient.update({
-    index: HINTS_INDEX_NAME,
-    id,
-    body: {
-      doc: {
-        ...update,
-      },
-    },
-    refresh: 'wait_for',
-    retry_on_conflict: 3,
-  });
-};
-
-const updateHintsById = async (
-  esClient: ElasticsearchClient,
-  hints: Hint[],
-  update: any,
-  logger?: Logger
-) => {
-  const ids = hints.map((h) => h._id);
-  try {
-    await Promise.all(ids.map((id) => updateSingleDoc(esClient, id, update)));
-  } catch (e) {
-    logger?.info(`Error updating hints ${ids} by id: ${e}`);
-    throw e;
-  }
-};
-const setHintsAsReceived = (esClient: ElasticsearchClient, hints: Hint[], logger?: Logger) => {
-  const update = { received_at: Date.now(), last_updated: Date.now() };
-  return updateHintsById(esClient, hints, update, logger);
-};
-
-type CreateResult = PackagePolicy | undefined;
-
-const setHintsAsComplete = (
-  esClient: ElasticsearchClient,
-  hintsIn: Hint[] | Hint,
-  policies: CreateResult[] = []
-) => {
-  const hints = Array.isArray(hintsIn) ? hintsIn : [hintsIn];
-  const update = { status: 'complete', last_updated: Date.now() };
-  if (!policies || policies.length !== hints.length) {
-    return updateHintsById(esClient, hints, update);
-  }
-
-  return Promise.all(
-    hints.map((hint, i) => {
-      const policy = policies[i];
-      const result = policy
-        ? {
-            package_policy_id: policy.id,
-            agent_policy_id: policy.policy_id,
-            package: { name: policy?.package?.name, version: policy?.package?.version },
-          }
-        : {};
-      const updateWithResult = { ...update, result };
-      return updateHintsById(esClient, [hint], updateWithResult);
-    })
-  );
 };
 
 const hintHasAutodiscoverAnnotations = (hint: Hint) => {

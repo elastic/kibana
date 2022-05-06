@@ -98,6 +98,10 @@ export const APP_API_ROUTES = {
   GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED: `${API_ROOT}/service-tokens`,
 };
 
+// Hint API routes
+export const HINT_API_ROUTES = {
+  LIST_PATTERN: `${API_ROOT}/hints`,
+};
 // Agent API routes
 export const AGENT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/agents`,
