@@ -75,7 +75,7 @@ const isLinkAllowed = (link: LinkItem, linkProps?: UserPermissions) =>
   !(
     linkProps != null &&
     // exclude link when license is basic and link is premium
-    ((linkProps.license && !linkProps.license.hasAtLeast(link.licenseType ?? 'basic')) ||
+    ((linkProps.license && !linkProps.license.isAtLeast(link.licenseType ?? 'basic')) ||
       // exclude link when enableExperimental[hideWhenExperimentalKey] is enabled and link has hideWhenExperimentalKey
       (link.hideWhenExperimentalKey != null &&
         linkProps.enableExperimental[link.hideWhenExperimentalKey]) ||

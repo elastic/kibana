@@ -18,9 +18,8 @@ import { Capabilities } from '@kbn/core/types';
 import { AppDeepLink } from '@kbn/core/public';
 import { mockGlobalState } from '../mock';
 import { NavLinkItem } from './types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LicenseService } from '../../../common/license';
 
 const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
 const mockCapabilities = {
@@ -88,12 +87,16 @@ const nonCasesPages = allPages.reduce(
     casesPages.includes(p) || featureFlagPages.includes(p) ? acc : [p, ...acc],
   []
 );
-describe('security app link helpers', () => {
-  let licenseMock: ReturnType<typeof licensingMock.createLicenseMock>;
-  const licenseBasicMock = jest.fn().mockImplementation((arg: LicenseType) => arg === 'basic');
 
+const licenseBasicMock = jest.fn().mockImplementation((arg: LicenseType) => arg === 'basic');
+const licensePremiumMock = jest.fn().mockReturnValue(true);
+const mockLicense = {
+  isAtLeast: licensePremiumMock,
+} as unknown as LicenseService;
+
+describe('security app link helpers', () => {
   beforeEach(() => {
-    licenseMock = licensingMock.createLicenseMock();
+    mockLicense.isAtLeast = licensePremiumMock;
   });
   describe('getInitialDeepLinks', () => {
     it('should return all pages in the app', () => {
@@ -103,10 +106,11 @@ describe('security app link helpers', () => {
   });
   describe('getDeepLinks', () => {
     it('basicLicense should return only basic links', async () => {
-      licenseMock.hasAtLeast = licenseBasicMock;
+      mockLicense.isAtLeast = licenseBasicMock;
+
       const links = await getDeepLinks({
         enableExperimental: mockExperimentalDefaults,
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findDeepLink(SecurityPageName.hostsAnomalies, links)).toBeFalsy();
@@ -124,7 +128,7 @@ describe('security app link helpers', () => {
     it('platinumLicense should return all links', async () => {
       const links = await getDeepLinks({
         enableExperimental: mockExperimentalDefaults,
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       allPages.forEach((page) => {
@@ -141,7 +145,7 @@ describe('security app link helpers', () => {
     it('hideWhenExperimentalKey hides entry when key = true', async () => {
       const links = await getDeepLinks({
         enableExperimental: { ...mockExperimentalDefaults, usersEnabled: true },
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findDeepLink(SecurityPageName.hostsAuthentications, links)).toBeFalsy();
@@ -149,7 +153,7 @@ describe('security app link helpers', () => {
     it('hideWhenExperimentalKey shows entry when key = false', async () => {
       const links = await getDeepLinks({
         enableExperimental: { ...mockExperimentalDefaults, usersEnabled: false },
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findDeepLink(SecurityPageName.hostsAuthentications, links)).toBeTruthy();
@@ -162,7 +166,7 @@ describe('security app link helpers', () => {
           riskyUsersEnabled: false,
           detectionResponseEnabled: false,
         },
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findDeepLink(SecurityPageName.hostsRisk, links)).toBeFalsy();
@@ -177,7 +181,7 @@ describe('security app link helpers', () => {
           riskyUsersEnabled: true,
           detectionResponseEnabled: true,
         },
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findDeepLink(SecurityPageName.hostsRisk, links)).toBeTruthy();
@@ -192,7 +196,7 @@ describe('security app link helpers', () => {
       } as unknown as Capabilities;
       const links = await getDeepLinks({
         enableExperimental: mockExperimentalDefaults,
-        license: licenseMock,
+        license: mockLicense,
         capabilities,
       });
       nonCasesPages.forEach((page) => {
@@ -211,7 +215,7 @@ describe('security app link helpers', () => {
       } as unknown as Capabilities;
       const links = await getDeepLinks({
         enableExperimental: mockExperimentalDefaults,
-        license: licenseMock,
+        license: mockLicense,
         capabilities,
       });
       nonCasesPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
@@ -221,10 +225,10 @@ describe('security app link helpers', () => {
 
   describe('getNavLinkItems', () => {
     it('basicLicense should return only basic links', () => {
-      licenseMock.hasAtLeast = licenseBasicMock;
+      mockLicense.isAtLeast = licenseBasicMock;
       const links = getNavLinkItems({
         enableExperimental: mockExperimentalDefaults,
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findNavLink(SecurityPageName.hostsAnomalies, links)).toBeFalsy();
@@ -242,7 +246,7 @@ describe('security app link helpers', () => {
     it('platinumLicense should return all links', () => {
       const links = getNavLinkItems({
         enableExperimental: mockExperimentalDefaults,
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       allPages.forEach((page) => {
@@ -259,7 +263,7 @@ describe('security app link helpers', () => {
     it('hideWhenExperimentalKey hides entry when key = true', () => {
       const links = getNavLinkItems({
         enableExperimental: { ...mockExperimentalDefaults, usersEnabled: true },
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findNavLink(SecurityPageName.hostsAuthentications, links)).toBeFalsy();
@@ -267,7 +271,7 @@ describe('security app link helpers', () => {
     it('hideWhenExperimentalKey shows entry when key = false', () => {
       const links = getNavLinkItems({
         enableExperimental: { ...mockExperimentalDefaults, usersEnabled: false },
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findNavLink(SecurityPageName.hostsAuthentications, links)).toBeTruthy();
@@ -280,7 +284,7 @@ describe('security app link helpers', () => {
           riskyUsersEnabled: false,
           detectionResponseEnabled: false,
         },
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findNavLink(SecurityPageName.hostsRisk, links)).toBeFalsy();
@@ -295,7 +299,7 @@ describe('security app link helpers', () => {
           riskyUsersEnabled: true,
           detectionResponseEnabled: true,
         },
-        license: licenseMock,
+        license: mockLicense,
         capabilities: mockCapabilities,
       });
       expect(findNavLink(SecurityPageName.hostsRisk, links)).toBeTruthy();
@@ -310,7 +314,7 @@ describe('security app link helpers', () => {
       } as unknown as Capabilities;
       const links = getNavLinkItems({
         enableExperimental: mockExperimentalDefaults,
-        license: licenseMock,
+        license: mockLicense,
         capabilities,
       });
       nonCasesPages.forEach((page) => {
@@ -329,7 +333,7 @@ describe('security app link helpers', () => {
       } as unknown as Capabilities;
       const links = getNavLinkItems({
         enableExperimental: mockExperimentalDefaults,
-        license: licenseMock,
+        license: mockLicense,
         capabilities,
       });
       nonCasesPages.forEach((page) => expect(findNavLink(page, links)).toBeTruthy());

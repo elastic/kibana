@@ -6,7 +6,8 @@
  */
 
 import { Capabilities } from '@kbn/core/types';
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LicenseService } from '../../../common/license';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 
@@ -20,7 +21,7 @@ export type Feature = Readonly<typeof FEATURE[keyof typeof FEATURE]>;
 
 export interface UserPermissions {
   enableExperimental: ExperimentalFeatures;
-  license?: ILicense;
+  license?: LicenseService;
   capabilities?: Capabilities;
 }
 
