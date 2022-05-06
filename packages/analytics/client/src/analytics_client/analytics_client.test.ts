@@ -33,6 +33,7 @@ describe('AnalyticsClient', () => {
   });
 
   afterEach(() => {
+    analyticsClient.shutdown();
     jest.useRealTimers();
   });
 
@@ -285,13 +286,16 @@ describe('AnalyticsClient', () => {
       constructor({
         optInMock,
         extendContextMock,
+        shutdownMock,
       }: {
         optInMock?: jest.Mock;
         extendContextMock?: jest.Mock;
+        shutdownMock?: jest.Mock;
       }) {
         super();
         if (optInMock) this.optIn = optInMock;
         if (extendContextMock) this.extendContext = extendContextMock;
+        if (shutdownMock) this.shutdown = shutdownMock;
       }
     }
 
@@ -316,7 +320,7 @@ describe('AnalyticsClient', () => {
 
     test(
       'Spreads the context updates to the shipper (only after opt-in)',
-      fakeSchedulers(async (advance) => {
+      fakeSchedulers((advance) => {
         const extendContextMock = jest.fn();
         analyticsClient.registerShipper(MockedShipper, { extendContextMock });
         expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
@@ -345,7 +349,7 @@ describe('AnalyticsClient', () => {
 
     test(
       'Does not spread the context if opt-in === false',
-      fakeSchedulers(async (advance) => {
+      fakeSchedulers((advance) => {
         const extendContextMock = jest.fn();
         analyticsClient.registerShipper(MockedShipper, { extendContextMock });
         expect(extendContextMock).toHaveBeenCalledTimes(0); // Not until we have opt-in
@@ -357,18 +361,31 @@ describe('AnalyticsClient', () => {
 
     test(
       'Handles errors in the shipper',
-      fakeSchedulers(async (advance) => {
+      fakeSchedulers((advance) => {
+        const optInMock = jest.fn().mockImplementation(() => {
+          throw new Error('Something went terribly wrong');
+        });
         const extendContextMock = jest.fn().mockImplementation(() => {
           throw new Error('Something went terribly wrong');
         });
-        analyticsClient.registerShipper(MockedShipper, { extendContextMock });
-        analyticsClient.optIn({ global: { enabled: true } });
+        const shutdownMock = jest.fn().mockImplementation(() => {
+          throw new Error('Something went terribly wrong');
+        });
+        analyticsClient.registerShipper(MockedShipper, {
+          optInMock,
+          extendContextMock,
+          shutdownMock,
+        });
+        expect(() => analyticsClient.optIn({ global: { enabled: true } })).not.toThrow();
         advance(10);
+        expect(optInMock).toHaveBeenCalledWith(true);
         expect(extendContextMock).toHaveBeenCalledWith({}); // The initial context
         expect(logger.warn).toHaveBeenCalledWith(
           `Shipper "${MockedShipper.shipperName}" failed to extend the context`,
           expect.any(Error)
         );
+        expect(() => analyticsClient.shutdown()).not.toThrow();
+        expect(shutdownMock).toHaveBeenCalled();
       })
     );
   });
@@ -731,6 +748,7 @@ describe('AnalyticsClient', () => {
       expect(optInMock1).toHaveBeenCalledWith(false); // Using global and shipper-specific
       expect(optInMock2).toHaveBeenCalledWith(false); // Using only global
     });
+
     test('Catches error in the shipper.optIn method', () => {
       optInMock1.mockImplementation(() => {
         throw new Error('Something went terribly wrong');

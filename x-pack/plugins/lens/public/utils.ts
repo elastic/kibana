@@ -19,6 +19,7 @@ import type {
   LensBrushEvent,
   LensFilterEvent,
   Visualization,
+  StateSetter,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 
@@ -63,6 +64,43 @@ export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Docum
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 };
 
+export function handleIndexPatternChange({
+  activeDatasources,
+  datasourceStates,
+  indexPatternId,
+  setDatasourceState,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  datasourceStates: DatasourceStates;
+  indexPatternId: string;
+  setDatasourceState: StateSetter<unknown>;
+}): void {
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    datasource?.updateCurrentIndexPatternId?.({
+      state: datasourceStates[id].state,
+      indexPatternId,
+      setState: setDatasourceState,
+    });
+  });
+}
+
+export function refreshIndexPatternsList({
+  activeDatasources,
+  indexPatternId,
+  setDatasourceState,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  indexPatternId: string;
+  setDatasourceState: StateSetter<unknown>;
+}): void {
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    datasource?.refreshIndexPatternsList?.({
+      indexPatternId,
+      setState: setDatasourceState,
+    });
+  });
+}
+
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,
@@ -70,17 +108,21 @@ export function getIndexPatternsIds({
   activeDatasources: Record<string, Datasource>;
   datasourceStates: DatasourceStates;
 }): string[] {
+  let currentIndexPatternId: string | undefined;
   const references: SavedObjectReference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
+    const indexPatternId = datasource.getCurrentIndexPatternId(datasourceStates[id].state);
+    currentIndexPatternId = indexPatternId;
     references.push(...savedObjectReferences);
   });
-
-  const uniqueFilterableIndexPatternIds = uniq(
-    references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-  );
-
-  return uniqueFilterableIndexPatternIds;
+  const referencesIds = references
+    .filter(({ type }) => type === 'index-pattern')
+    .map(({ id }) => id);
+  if (currentIndexPatternId) {
+    referencesIds.unshift(currentIndexPatternId);
+  }
+  return uniq(referencesIds);
 }
 
 export async function getIndexPatternsObjects(
