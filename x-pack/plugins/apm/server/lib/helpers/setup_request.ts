@@ -70,7 +70,7 @@ export async function setupRequest({
         debug: query._inspect,
       }),
       metricIndices: plugins.infra
-        ? getMetricIndices(plugins.infra, coreContext.savedObjects.client)
+        ? await getMetricIndices(plugins.infra, coreContext.savedObjects.client)
         : undefined,
       ml:
         plugins.ml && isActivePlatinumLicense(licensingContext.license)
@@ -105,7 +105,6 @@ async function getMetricIndices(
 ): Promise<string> {
   const infra = await infraPlugin.start();
   const metricIndices = await infra.getMetricIndices(savedObjectsClient);
-  console.log('metricIndices: ', metricIndices);
 
   return metricIndices;
 }
