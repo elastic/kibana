@@ -42,6 +42,8 @@ export type PolicyFormTestSubjects =
   | 'allIndicesToggle'
   | 'globalStateToggle'
   | 'featureStatesDropdown'
+  | 'toggleIncludeNone'
+  | 'noFeatureStatesCallout'
   | 'backButton'
   | 'deselectIndicesLink'
   | 'allDataStreamsToggle'

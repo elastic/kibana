@@ -86,6 +86,7 @@ export const FeatureStatesFormField: FunctionComponent<Props> = ({
       }
       labelAppend={
         <EuiSwitch
+          data-test-subj="toggleIncludeNone"
           compressed
           label={
             <>

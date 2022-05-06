@@ -7,7 +7,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../common';
-import { pageHelpers, setupEnvironment } from './helpers';
+import { nextTick, pageHelpers, setupEnvironment } from './helpers';
 import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
 import { REPOSITORY_NAME, SNAPSHOT_NAME } from './helpers/constant';
 import * as fixtures from '../../test/fixtures';
@@ -107,6 +107,55 @@ describe('<RestoreSnapshot />', () => {
       actions.toggleGlobalState();
 
       expect(exists('systemIndicesInfoCallOut')).toBe(true);
+    });
+  });
+
+  describe('feature states', () => {
+    test('when no feature states hide dropdown and show no features callout', async () => {
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot({ featureStates: [] })
+      );
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+
+      const { exists, actions } = testBed;
+
+      actions.toggleGlobalState();
+      expect(exists('systemIndicesInfoCallOut')).toBe(false);
+      expect(exists('featureStatesDropdown')).toBe(false);
+      expect(exists('noFeatureStatesCallout')).toBe(true);
+    });
+
+    test('enabling include none disables dropdown', async () => {
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot({ featureStates: ['kibana'] })
+      );
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+
+      const { component, form, actions, find } = testBed;
+
+      actions.toggleGlobalState();
+
+      expect(find('featureStatesDropdown').props().disabled).toBe(false);
+
+      await act(async () => {
+        form.toggleEuiSwitch('toggleIncludeNone');
+        await nextTick();
+      });
+      component.update();
+
+      expect(find('featureStatesDropdown').props().disabled).toBe(true);
     });
   });
 

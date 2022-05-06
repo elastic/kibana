@@ -11,8 +11,10 @@ import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './help
 import { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import * as fixtures from '../../test/fixtures';
 import { API_BASE_PATH } from '../../common';
+import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
@@ -164,25 +166,6 @@ describe('<PolicyAdd />', () => {
 
           expect(find('dataStreamBadge').length).toBe(2);
         });
-
-        describe('feature states', () => {
-          test('feature states dropdown is only shown when include global state is enabled', async () => {
-            const { exists, component, form } = testBed;
-
-            // By default the toggle is enabled
-            expect(exists('featureStatesDropdown')).toBe(true);
-
-            await act(async () => {
-              // Toggle "All indices" switch
-              form.toggleEuiSwitch('globalStateToggle');
-              await nextTick();
-            });
-            component.update();
-
-            // But after we toggle off the include global state it should be hidden
-            expect(exists('featureStatesDropdown')).toBe(false);
-          });
-        });
       });
 
       describe('retention (step 3)', () => {
@@ -232,7 +215,7 @@ describe('<PolicyAdd />', () => {
       });
     });
 
-    describe('form payload & api errors', () => {
+    describe('feature states', () => {
       beforeEach(async () => {
         const { actions, form, component } = testBed;
 
@@ -246,8 +229,126 @@ describe('<PolicyAdd />', () => {
           await nextTick();
         });
         component.update();
+      });
+
+      test('Enabling include none disables dropdown', async () => {
+        const { find, component, form } = testBed;
+
+        // By default the toggle is enabled
+        expect(find('featureStatesDropdown').props().disabled).toBe(false);
+
+        await act(async () => {
+          form.toggleEuiSwitch('toggleIncludeNone');
+          await nextTick();
+        });
+        component.update();
+
+        expect(find('featureStatesDropdown').props().disabled).toBe(true);
+      });
+
+      test('feature states dropdown is only shown when include global state is enabled', async () => {
+        const { exists, component, form } = testBed;
+
+        // By default the toggle is enabled
+        expect(exists('featureStatesDropdown')).toBe(true);
+
+        await act(async () => {
+          form.toggleEuiSwitch('globalStateToggle');
+          await nextTick();
+        });
+        component.update();
+
+        expect(exists('featureStatesDropdown')).toBe(false);
+      });
+
+      test('include all features', async () => {
+        const { actions, form, component } = testBed;
+
+        await act(async () => {
+          form.toggleEuiSwitch('toggleIncludeNone');
+          await nextTick();
+        });
+        component.update();
+
+        // Complete step 2
+        actions.clickNextButton();
+        // Complete step 3
+        actions.clickNextButton();
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await nextTick();
+        });
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
+        expect(parsedReqBody.config).toEqual({
+          includeGlobalState: true,
+          featureStates: [FEATURE_STATES_NONE_OPTION],
+        });
+      });
+
+      test('include some features', async () => {
+        const { actions, form } = testBed;
 
         form.setComboBoxValue('featureStatesDropdown', 'kibana');
+
+        // Complete step 2
+        actions.clickNextButton();
+        // Complete step 3
+        actions.clickNextButton();
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await nextTick();
+        });
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
+        expect(parsedReqBody.config).toEqual({
+          includeGlobalState: true,
+          featureStates: ['kibana'],
+        });
+      });
+
+      test('include no features', async () => {
+        const { actions } = testBed;
+
+        // Complete step 2
+        actions.clickNextButton();
+        // Complete step 3
+        actions.clickNextButton();
+
+        await act(async () => {
+          actions.clickSubmitButton();
+          await nextTick();
+        });
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
+        expect(parsedReqBody.config).toEqual({ includeGlobalState: true });
+      });
+    });
+
+    describe('form payload & api errors', () => {
+      beforeEach(async () => {
+        const { actions, form } = testBed;
+
+        // Complete step 1
+        form.setInputValue('nameInput', POLICY_NAME);
+        form.setInputValue('snapshotNameInput', SNAPSHOT_NAME);
+        actions.clickNextButton();
+
+        // Complete step 2
         actions.clickNextButton();
 
         // Complete step 3
@@ -275,7 +376,6 @@ describe('<PolicyAdd />', () => {
               repository: repository.name,
               config: {
                 includeGlobalState: true,
-                featureStates: ['kibana'],
               },
               retention: {
                 expireAfterValue: Number(EXPIRE_AFTER_VALUE),
