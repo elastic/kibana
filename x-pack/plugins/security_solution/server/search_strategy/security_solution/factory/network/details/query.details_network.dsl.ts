@@ -96,10 +96,7 @@ const getHostAggs = (ip: string) => {
   };
 };
 
-export const buildNetworkDetailsQuery = ({
-  defaultIndex,
-  ip,
-}: NetworkDetailsRequestOptions) => {
+export const buildNetworkDetailsQuery = ({ defaultIndex, ip }: NetworkDetailsRequestOptions) => {
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
