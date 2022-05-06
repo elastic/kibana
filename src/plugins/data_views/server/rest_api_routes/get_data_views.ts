@@ -33,7 +33,7 @@ export const getDataViews = async ({
   size,
 }: GetDataViewsArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.find('' ,size);
+  return dataViewsService.find('', size);
 };
 
 const getDataViewsRouteFactory =
@@ -50,14 +50,12 @@ const getDataViewsRouteFactory =
       {
         path,
         validate: {
-          query: schema.object(
-            {
-              size: schema.number({
-                defaultValue: 10,
-                max: 10000
-              }),
-            }
-          ),
+          query: schema.object({
+            size: schema.number({
+              defaultValue: 10,
+              max: 10000,
+            }),
+          }),
         },
       },
       router.handleLegacyErrors(
@@ -77,7 +75,7 @@ const getDataViewsRouteFactory =
             dataViewsService,
             usageCollection,
             counterName: `${req.route.method} ${path}`,
-            size
+            size,
           });
 
           return res.ok({
@@ -85,7 +83,7 @@ const getDataViewsRouteFactory =
               'content-type': 'application/json',
             },
             body: {
-              [serviceKey]: dataViews.map(dataView => dataView.toSpec()),
+              [serviceKey]: dataViews.map((dataView) => dataView.toSpec()),
             },
           });
         })

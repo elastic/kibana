@@ -17,7 +17,7 @@ describe('get all data views', () => {
       dataViewsService,
       counterName: 'GET /path',
       usageCollection,
-      size: 10
+      size: 10,
     });
     expect(usageCollection.incrementCounter).toBeCalledTimes(1);
   });
