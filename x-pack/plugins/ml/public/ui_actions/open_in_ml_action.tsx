@@ -37,16 +37,19 @@ export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServi
       }
     },
     async isCompatible(context: { embeddable: Embeddable }) {
+      if (
+        context.embeddable.type !== 'lens' ||
+        (await context.embeddable.canViewUnderlyingData()) === false
+      ) {
+        return false;
+      }
+
       const [coreStart, pluginsStart] = await getStartServices();
       const { canCreateADJob, getJobsItemsFromEmbeddable } = await import(
         '../application/jobs/new_job/job_from_lens'
       );
       const { query, filters, vis } = getJobsItemsFromEmbeddable(context.embeddable);
-      return (
-        context.embeddable.type === 'lens' &&
-        (await (context.embeddable as any).canViewUnderlyingData()) &&
-        canCreateADJob(vis, query, filters, pluginsStart.data.dataViews, coreStart.uiSettings)
-      );
+      return canCreateADJob(vis, query, filters, pluginsStart.data.dataViews, coreStart.uiSettings);
     },
   });
 }
