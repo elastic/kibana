@@ -233,4 +233,23 @@ describe('rule_edit', () => {
     expect(lastCall[2]).toBeDefined();
     expect(lastCall[2]).toEqual({ minimumScheduleInterval: { value: '1m', enforce: false } });
   });
+
+  it('should render an alert icon next to save button stating the potential change in permissions', async () => {
+    // Use fake timers so we don't have to wait for the EuiToolTip timeout
+    jest.useFakeTimers();
+    await setup();
+
+    expect(wrapper.find('[data-test-subj="changeInPrivilegesTip"]').exists()).toBeTruthy();
+    await act(async () => {
+      wrapper.find('[data-test-subj="changeInPrivilegesTip"]').first().simulate('mouseover');
+    });
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+      'Saving this rule will cause a change in privileges and may make the rule behave differently.'
+    );
+  });
 });
