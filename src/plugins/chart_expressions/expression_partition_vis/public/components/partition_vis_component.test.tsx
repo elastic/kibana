@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
+import { Settings, TooltipType, SeriesIdentifier, Partition } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -25,6 +25,7 @@ import {
   createMockWaffleParams,
 } from '../mocks';
 import { ChartTypes } from '../../common/types';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -175,6 +176,35 @@ describe('PartitionVisComponent', function () {
     const newProps = { ...wrapperProps, visParams: newParams };
     const component = shallow(<PartitionVisComponent {...newProps} />);
     expect(component.find(Settings).prop('legendMaxDepth')).toBeUndefined();
+  });
+
+  it('sets correct legend sizes', () => {
+    const component = shallow(
+      <PartitionVisComponent
+        {...wrapperProps}
+        visParams={{
+          ...visParams,
+          legendSize: LegendSize.SMALL,
+        }}
+      />
+    );
+    expect(component.find(Settings).prop('legendSize')).toEqual(80);
+
+    component.setProps({
+      visParams: {
+        ...visParams,
+        legendSize: LegendSize.AUTO,
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toBeUndefined();
+
+    component.setProps({
+      visParams: {
+        ...visParams,
+        legendSize: undefined,
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toEqual(130);
   });
 
   it('defaults on displaying the tooltip', () => {
