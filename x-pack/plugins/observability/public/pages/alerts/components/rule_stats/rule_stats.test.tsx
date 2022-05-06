@@ -8,6 +8,8 @@
 import { renderRuleStats } from './rule_stats';
 import { render, screen } from '@testing-library/react';
 
+const RULES_PAGE_LINK = '/app/observability/alerts/rules';
+
 describe('Rule stats', () => {
   test('renders all rule stats', async () => {
     const stats = renderRuleStats(
@@ -18,7 +20,7 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     expect(stats.length).toEqual(6);
@@ -32,7 +34,7 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { findByText, container } = render(stats[4]);
@@ -52,13 +54,13 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { container } = render(stats[4]);
     expect(screen.getByText('Disabled').closest('a')).toHaveAttribute(
       'href',
-      '/app/observability/alerts/rules?_a=(lastResponse:!(),status:!(disabled))'
+      `${RULES_PAGE_LINK}?_a=(lastResponse:!(),status:!(disabled))`
     );
 
     expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
@@ -73,7 +75,7 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { container } = render(stats[4]);
@@ -89,7 +91,7 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { findByText, container } = render(stats[3]);
@@ -109,14 +111,14 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 1,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { container } = render(stats[3]);
     expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
     expect(screen.getByText('Snoozed').closest('a')).toHaveAttribute(
       'href',
-      '/app/observability/alerts/rules?_a=(lastResponse:!(),status:!(snoozed))'
+      `${RULES_PAGE_LINK}?_a=(lastResponse:!(),status:!(snoozed))`
     );
   });
 
@@ -129,7 +131,7 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 1,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { container } = render(stats[3]);
@@ -145,7 +147,7 @@ describe('Rule stats', () => {
         error: 0,
         snoozed: 0,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { findByText, container } = render(stats[2]);
@@ -165,14 +167,14 @@ describe('Rule stats', () => {
         error: 2,
         snoozed: 0,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { container } = render(stats[2]);
     expect(container.getElementsByClassName('euiButtonEmpty').length).toBe(1);
     expect(screen.getByText('Errors').closest('a')).toHaveAttribute(
       'href',
-      '/app/observability/alerts/rules?_a=(lastResponse:!(error),status:!())'
+      `${RULES_PAGE_LINK}?_a=(lastResponse:!(error),status:!())`
     );
   });
 
@@ -185,7 +187,7 @@ describe('Rule stats', () => {
         error: 2,
         snoozed: 0,
       },
-      '/app/observability/alerts/rules',
+      RULES_PAGE_LINK,
       false
     );
     const { container } = render(stats[2]);
