@@ -6,23 +6,20 @@
  */
 
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { get } from 'lodash';
 import { SecurityPageName } from '../../../common/constants';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { appLinks, getAppLinks } from './app_links';
 import {
   Feature,
   LinkInfo,
   LinkItem,
-  LinkProps,
   NavLinkItem,
   NormalizedLink,
   NormalizedLinks,
   UserPermissions,
 } from './types';
 
-const createDeepLink = (link: LinkItem, linkProps?: LinkProps): AppDeepLink => ({
+const createDeepLink = (link: LinkItem, linkProps?: UserPermissions): AppDeepLink => ({
   id: link.id,
   path: link.path,
   title: link.title,
@@ -45,7 +42,7 @@ const createDeepLink = (link: LinkItem, linkProps?: LinkProps): AppDeepLink => (
   ...(link.globalSearchEnabled != null ? { searchable: link.globalSearchEnabled } : {}),
 });
 
-const createNavLinkItem = (link: LinkItem, linkProps?: LinkProps): NavLinkItem => ({
+const createNavLinkItem = (link: LinkItem, linkProps?: UserPermissions): NavLinkItem => ({
   id: link.id,
   path: link.path,
   title: link.title,
@@ -74,11 +71,11 @@ const hasFeaturesCapability = (
   return features.some((featureKey) => get(capabilities, featureKey, false));
 };
 
-const isLinkAllowed = (link: LinkItem, linkProps?: LinkProps) =>
+const isLinkAllowed = (link: LinkItem, linkProps?: UserPermissions) =>
   !(
     linkProps != null &&
     // exclude link when license is basic and link is premium
-    ((linkProps.isBasic && link.isPremium) ||
+    ((linkProps.license && !linkProps.license.hasAtLeast(link.licenseType ?? 'basic')) ||
       // exclude link when enableExperimental[hideWhenExperimentalKey] is enabled and link has hideWhenExperimentalKey
       (link.hideWhenExperimentalKey != null &&
         linkProps.enableExperimental[link.hideWhenExperimentalKey]) ||
@@ -95,8 +92,8 @@ export function reduceLinks<T>({
   formatFunction,
 }: {
   links: Readonly<LinkItem[]>;
-  linkProps?: LinkProps;
-  formatFunction: (link: LinkItem, linkProps?: LinkProps) => T;
+  linkProps?: UserPermissions;
+  formatFunction: (link: LinkItem, linkProps?: UserPermissions) => T;
 }): T[] {
   return links.reduce(
     (deepLinks: T[], link: LinkItem) =>
@@ -109,30 +106,27 @@ export const getInitialDeepLinks = (): AppDeepLink[] => {
   return appLinks.map((link) => createDeepLink(link));
 };
 
-export const isLicenseBasic = (licenseType?: LicenseType) =>
-  licenseType == null || licenseType === 'basic';
-
 export const getDeepLinks = async ({
   enableExperimental,
-  licenseType,
+  license,
   capabilities,
 }: UserPermissions): Promise<AppDeepLink[]> => {
-  const links = await getAppLinks({ enableExperimental, licenseType, capabilities });
+  const links = await getAppLinks({ enableExperimental, license, capabilities });
   return reduceLinks<AppDeepLink>({
     links,
-    linkProps: { enableExperimental, isBasic: isLicenseBasic(licenseType), capabilities },
+    linkProps: { enableExperimental, license, capabilities },
     formatFunction: createDeepLink,
   });
 };
 
 export const getNavLinkItems = ({
   enableExperimental,
-  licenseType,
+  license,
   capabilities,
 }: UserPermissions): NavLinkItem[] =>
   reduceLinks<NavLinkItem>({
     links: appLinks,
-    linkProps: { enableExperimental, isBasic: isLicenseBasic(licenseType), capabilities },
+    linkProps: { enableExperimental, license, capabilities },
     formatFunction: createNavLinkItem,
   });
 

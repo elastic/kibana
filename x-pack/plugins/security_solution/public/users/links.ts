@@ -36,7 +36,7 @@ export const links: LinkItem = {
         defaultMessage: 'Anomalies',
       }),
       path: `${USERS_PATH}/anomalies`,
-      isPremium: true,
+      licenseType: 'gold',
     },
     {
       id: SecurityPageName.usersRisk,

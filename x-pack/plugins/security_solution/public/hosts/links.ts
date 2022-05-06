@@ -43,7 +43,7 @@ export const links: LinkItem = {
         defaultMessage: 'Anomalies',
       }),
       path: `${HOSTS_PATH}/anomalies`,
-      isPremium: true,
+      licenseType: 'gold',
     },
     {
       id: SecurityPageName.hostsEvents,

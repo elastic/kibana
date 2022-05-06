@@ -20,7 +20,7 @@ export const getCasesLinkItems = (): LinkItem => {
       },
       [SecurityPageName.caseConfigure]: {
         features: [FEATURE.casesCrud],
-        isPremium: true,
+        licenseType: 'gold',
       },
       [SecurityPageName.caseCreate]: {
         features: [FEATURE.casesCrud],

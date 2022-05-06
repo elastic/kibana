@@ -6,7 +6,7 @@
  */
 
 import { Capabilities } from '@kbn/core/types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 
@@ -20,7 +20,7 @@ export type Feature = Readonly<typeof FEATURE[keyof typeof FEATURE]>;
 
 export interface UserPermissions {
   enableExperimental: ExperimentalFeatures;
-  licenseType?: LicenseType;
+  license?: ILicense;
   capabilities?: Capabilities;
 }
 
@@ -44,7 +44,7 @@ export interface LinkItem {
   id: SecurityPageName;
   image?: string;
   isBeta?: boolean;
-  isPremium?: boolean;
+  licenseType?: LicenseType;
   links?: LinkItem[];
   path: string;
   skipUrlState?: boolean; // defaults to false
@@ -60,12 +60,6 @@ export interface NavLinkItem {
   path: string;
   title: string;
   skipUrlState?: boolean; // default to false
-}
-
-export interface LinkProps {
-  enableExperimental: ExperimentalFeatures;
-  isBasic: boolean;
-  capabilities?: Capabilities;
 }
 
 export type LinkInfo = Omit<LinkItem, 'links'>;

@@ -56,7 +56,7 @@ export const links: LinkItem = {
         defaultMessage: 'Anomalies',
       }),
       path: `${NETWORK_PATH}/anomalies`,
-      isPremium: true,
+      licenseType: 'gold',
     },
   ],
 };
