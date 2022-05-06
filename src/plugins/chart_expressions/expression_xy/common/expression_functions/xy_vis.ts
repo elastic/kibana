@@ -7,9 +7,10 @@
  */
 
 import { XyVisFn } from '../types';
-import { XY_VIS, DATA_LAYER, REFERENCE_LINE_LAYER, ANNOTATION_LAYER } from '../constants';
+import { XY_VIS, REFERENCE_LINE_LAYER, ANNOTATION_LAYER } from '../constants';
 import { strings } from '../i18n';
 import { commonXYArgs } from './common_xy_args';
+import { commonDataLayerArgs } from './common_data_layer_args';
 
 export const xyVisFunction: XyVisFn = {
   name: XY_VIS,
@@ -18,11 +19,7 @@ export const xyVisFunction: XyVisFn = {
   help: strings.getXYHelp(),
   args: {
     ...commonXYArgs,
-    dataLayers: {
-      types: [DATA_LAYER],
-      help: strings.getDataLayerHelp(),
-      multi: true,
-    },
+    ...commonDataLayerArgs,
     referenceLineLayers: {
       types: [REFERENCE_LINE_LAYER],
       help: strings.getReferenceLineLayerHelp(),
