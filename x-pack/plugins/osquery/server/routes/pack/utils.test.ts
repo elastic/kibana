@@ -35,7 +35,7 @@ const oneLiner = {
   default: {
     ecs_mapping: {},
     interval: 3600,
-    query: `select u.username,    p.pid,    p.name,    pos.local_address,    pos.local_port,    p.path,    p.cmdline,    pos.remote_address,    pos.remote_port from processes as p join users as u   on u.uid=p.uid join process_open_sockets as pos   on pos.pid=p.pid where pos.remote_port !='0' limit 1000;`,
+    query: `select u.username, p.pid, p.name, pos.local_address, pos.local_port, p.path, p.cmdline, pos.remote_address, pos.remote_port from processes as p join users as u on u.uid=p.uid join process_open_sockets as pos on pos.pid=p.pid where pos.remote_port !='0' limit 1000;`,
   },
 };
 

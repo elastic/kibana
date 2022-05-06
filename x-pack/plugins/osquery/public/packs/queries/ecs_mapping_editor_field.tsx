@@ -59,6 +59,7 @@ import {
   FormArrayField,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
+import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -746,7 +747,7 @@ export const ECSMappingEditorField = React.memo(
         return;
       }
 
-      const oneLineQuery = query.replaceAll('\n', ' ').replaceAll('  ', ' ');
+      const oneLineQuery = removeMultilines(query);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let ast: Record<string, any> | undefined;

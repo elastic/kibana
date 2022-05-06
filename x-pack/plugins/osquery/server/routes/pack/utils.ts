@@ -6,6 +6,7 @@
  */
 
 import { pick, reduce } from 'lodash';
+import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 
 // @ts-expect-error update types
@@ -35,7 +36,7 @@ export const convertSOQueriesToPack = (queries, removeMultiLines?: boolean) =>
       const index = queryId ? queryId : key;
       acc[index] = {
         ...rest,
-        query: removeMultiLines ? query.replaceAll('\n', ' ').replaceAll('  ', ' ') : query,
+        query: removeMultiLines ? removeMultilines(query) : query,
         ecs_mapping: convertECSMappingToObject(ecs_mapping),
       };
 
