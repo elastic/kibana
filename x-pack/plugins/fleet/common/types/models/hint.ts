@@ -21,27 +21,29 @@ export interface Hint {
     };
   };
   type: string;
-  container: {
-    id: string;
-    image: string;
-    name: string;
-    port: string;
-    port_name: string;
-    runtime: string;
-  };
-  namespace: string;
   namespace_uid: string;
-  annotations?: Record<string, string>;
-  namespace_labels?: Record<string, string>;
   node: {
     hostname: string;
     name: string;
     ud: string;
     labels: string;
   };
-  pod: {
-    ip: string;
-    name: string;
-    uid: string;
+  kubernetes: {
+    labels?: Record<string, string>;
+    annotations?: Record<string, string>;
+    namespace: string;
+    pod: {
+      ip: string;
+      name: string;
+      uid: string;
+    };
+    container: {
+      id: string;
+      image: string;
+      name: string;
+      port: string;
+      port_name: string;
+      runtime: string;
+    };
   };
 }

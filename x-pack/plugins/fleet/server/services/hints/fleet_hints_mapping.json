@@ -3,7 +3,7 @@
     "dynamic_templates": [
       {
         "kubernetes_dynamic_annotations": {
-          "match": "annotations.*",
+          "match": "kubernetes.annotations.*",
           "runtime": {
             "type": "keyword"
           }
@@ -11,7 +11,7 @@
       },
       {
         "namespace_dynamic_labels": {
-          "match": "namespace_labels.*",
+          "match": "kubernetes.labels.*",
           "runtime": {
             "type": "keyword"
           }
@@ -62,40 +62,11 @@
       "type": {
         "type": "keyword"
       },
-      "container": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "image": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          },
-          "port": {
-            "type": "keyword"
-          },
-          "port_name": {
-            "type": "keyword"
-          },
-          "runtime": {
-            "type": "keyword"
-          }
-        }
-      },
-      "namespace": {
-        "type": "keyword"
-      },
+
       "namespace_uid": {
         "type": "keyword"
       },
-      "annotations": {
-        "properties": {}
-      },
-      "namespace_labels": {
-        "properties": {}
-      },
+
       "node": {
         "properties": {
           "hostname": {
@@ -111,18 +82,52 @@
             "properties": {}
           }
         }
-        
       },
-      "pod": {
-        "properties": {
-          "ip": {
+      "kubernetes" : {
+        "properties" : {
+          "labels": {
+            "properties": {}
+          },
+          "annotations": {
+            "properties": {}
+          },
+          "namespace": {
             "type": "keyword"
           },
-          "name": {
-            "type": "keyword"
+          "pod": {
+            "properties": {
+              "ip": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "uid": {
+                "type": "keyword"
+              }
+            }
           },
-          "uid": {
-            "type": "keyword"
+          "container": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "image": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "port": {
+                "type": "keyword"
+              },
+              "port_name": {
+                "type": "keyword"
+              },
+              "runtime": {
+                "type": "keyword"
+              }
+            }
           }
         }
       }

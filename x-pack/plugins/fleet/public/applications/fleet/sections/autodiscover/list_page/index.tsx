@@ -15,10 +15,14 @@ import {
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiLink,
+  EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+
+import type { HintStatus } from '../../../../../../common';
 
 import type { Hint } from '../../../types';
 import {
@@ -30,11 +34,11 @@ import {
   useBreadcrumbs,
 } from '../../../hooks';
 
-// import { HintDetailsFlyout } from './components';
+import { HintDetailsFlyout } from './components';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('autodiscover');
-
+  const [detailsFlyoutOpen, setIsDetailsFlyoutOpen] = useState<boolean>(false);
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -65,6 +69,24 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     kuery: search,
   });
 
+  const ViewRawHintButton: React.FunctionComponent<{ hint: Hint }> = ({ hint }) => {
+    return (
+      <EuiToolTip
+        content={i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenButtonLabel', {
+          defaultMessage: 'View raw hint',
+        })}
+      >
+        <EuiButtonIcon
+          aria-label={i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenButtonLabel', {
+            defaultMessage: 'View raw hint',
+          })}
+          onClick={() => setIsDetailsFlyoutOpen(true)}
+          iconType="inspect"
+        />
+      </EuiToolTip>
+    );
+  };
+
   // Some policies retrieved, set up table props
   const columns = useMemo(() => {
     const cols: Array<EuiTableFieldDataColumnType<Hint> | EuiTableActionsColumnType<Hint>> = [
@@ -77,34 +99,33 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         render: (agentId: string) => <>{agentId}</>,
       },
       {
-        field: 'container',
+        field: 'kubernetes',
         sortable: true,
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Container Name',
         }),
-        render: (container: Hint['container']) => <>{container.name || '-'}</>,
+        render: (kubernetes: Hint['kubernetes']) => <>{kubernetes.container.name || '-'}</>,
       },
       {
-        field: 'container',
+        field: 'kubernetes',
         sortable: true,
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Container Image',
         }),
-        render: (container: Hint['container']) => <>{container.image || '-'}</>,
+        render: (kubernetes: Hint['kubernetes']) => <>{kubernetes.container.image || '-'}</>,
       },
       {
-        field: 'pod',
-        sortable: true,
+        field: 'kubernetes',
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Pod Name',
         }),
-        render: (pod: Hint['pod']) => <>{pod.name || '-'}</>,
+        render: (kubernetes: Hint['kubernetes']) => <>{kubernetes.pod.name || '-'}</>,
       },
       {
         field: 'received_at',
         sortable: true,
         name: i18n.translate('xpack.fleet.agentPolicyList.updatedOnColumnTitle', {
-          defaultMessage: 'Received on',
+          defaultMessage: 'Received',
         }),
         render: (date: number) => <FormattedRelative value={date} />,
       },
@@ -130,6 +151,13 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           </>
         ),
       },
+      {
+        field: '',
+        name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        render: (hint: Hint) => <ViewRawHintButton hint={hint} />,
+      },
     ];
 
     // If Fleet is not enabled, then remove the `agents` column
@@ -146,7 +174,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         <h2>
           <FormattedMessage
             id="xpack.fleet.agentPolicyList.noAgentPoliciesPrompt"
-            defaultMessage="No autodiscover hints"
+            defaultMessage="No autodiscover hints received"
           />
         </h2>
       }

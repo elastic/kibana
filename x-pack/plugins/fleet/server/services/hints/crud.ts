@@ -30,7 +30,9 @@ export const getHints = async (
 
   return hits.hits.map(({ _source }) => {
     const hint = { ...(_source as any) };
-    hint.annotations = flatten(hint.annotations);
+    if (hint?.kubernetes?.annotatons) {
+      hint.kubernetes.annotations = flatten(hint.kubernetes.annotations);
+    }
     return hint as Hint;
   });
 };
@@ -55,7 +57,9 @@ export const getNewHints = async (esClient: ElasticsearchClient): Promise<Hint[]
 
   return hits.hits.map(({ _source, _id }) => {
     const hint = { ...(_source as any), _id };
-    hint.annotations = flatten(hint.annotations);
+    if (hint?.kubernetes?.annotatons) {
+      hint.kubernetes.annotations = flatten(hint.kubernetes.annotations);
+    }
     return hint as Hint;
   });
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,10 +19,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiButton,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
+
+import type { Hint } from '../../../../types';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
@@ -30,10 +31,12 @@ const FlyoutWithHigherZIndex = styled(EuiFlyout)`
 
 interface Props extends EuiFlyoutProps {
   onClose: () => void;
+  hint: Hint;
 }
 
 export const HintDetailsFlyout: React.FunctionComponent<Props> = ({
   onClose,
+  hint,
   as,
   ...restOfProps
 }) => {
@@ -43,7 +46,7 @@ export const HintDetailsFlyout: React.FunctionComponent<Props> = ({
         <h2 id="CreateAgentPolicyFlyoutTitle">
           <FormattedMessage
             id="xpack.fleet.createAgentPolicy.flyoutTitle"
-            defaultMessage="Create agent policy"
+            defaultMessage="Raw Hint"
           />
         </h2>
       </EuiTitle>
