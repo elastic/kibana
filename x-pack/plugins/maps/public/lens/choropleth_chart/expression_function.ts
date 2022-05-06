@@ -60,6 +60,9 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
   inputTypes: ['datatable'],
   fn(data, args, handlers) {
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
         data,
         [
