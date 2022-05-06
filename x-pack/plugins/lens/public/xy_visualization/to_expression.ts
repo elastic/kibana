@@ -343,11 +343,6 @@ export const buildExpression = (
   };
 };
 
-const buildTableExpression = (datasourceExpression: Ast): ExpressionAstExpression => ({
-  type: 'expression',
-  chain: [{ type: 'function', function: 'kibana', arguments: {} }, ...datasourceExpression.chain],
-});
-
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
   datasourceLayer: DatasourcePublicAPI,
@@ -368,7 +363,7 @@ const referenceLineLayerToExpression = (
             : [],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
         },
       },
     ],
@@ -437,7 +432,7 @@ const dataLayerToExpression = (
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
           palette: [
             {
               type: 'expression',
