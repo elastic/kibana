@@ -16,6 +16,7 @@ const DEFAULT_VALUES = {
   rawName: '',
   name: '',
   language: DEFAULT_LANGUAGE,
+  selectedSearchEngines: [],
 };
 
 describe('NewSearchIndexLogic', () => {

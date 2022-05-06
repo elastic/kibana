@@ -133,7 +133,6 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
                   {
                     defaultMessage: 'Language',
-                    values: { type: type.toLowerCase() },
                   }
                 )}
               >
