@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import {
   Cases,
   FetchCasesProps,
   ResolvedCase,
+  SeverityAll,
   SortFieldCase,
   StatusAll,
 } from '../../common/ui/types';
@@ -149,6 +149,7 @@ export const getCaseUserActions = async (
 export const getCases = async ({
   filterOptions = {
     search: '',
+    severity: SeverityAll,
     reporters: [],
     status: StatusAll,
     tags: [],
@@ -163,9 +164,11 @@ export const getCases = async ({
   signal,
 }: FetchCasesProps): Promise<Cases> => {
   const query = {
+    ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
+    ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
+    // severity: filterOptions.severity,
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags,
-    status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...queryParams,
@@ -173,7 +176,7 @@ export const getCases = async ({
 
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
-    query: query.status === StatusAll ? omit(query, ['status']) : query,
+    query,
     signal,
   });
 

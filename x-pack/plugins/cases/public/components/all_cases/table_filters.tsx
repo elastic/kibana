@@ -45,6 +45,12 @@ const StatusFilterWrapper = styled(EuiFlexItem)`
   }
 `;
 
+const SeverityFilterWrapper = styled(EuiFlexItem)`
+  && {
+    flex-basis: 180px;
+  }
+`;
+
 /**
  * Collection of filters for filtering data within the CasesTable. Contains search bar,
  * and tag selection
@@ -195,14 +201,14 @@ const CasesTableFiltersComponent = ({
               onSearch={handleOnSearch}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <SeverityFilterWrapper grow={false} data-test-subj="severity-filter-wrapper">
             <SeverityFilter
               selectedSeverity={initial.severity}
               onSeverityChange={onSeverityChanged}
               isLoading={false}
               isDisabled={false}
             />
-          </EuiFlexItem>
+          </SeverityFilterWrapper>
           <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">
             <StatusFilter
               selectedStatus={initial.status}

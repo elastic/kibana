@@ -11,9 +11,10 @@ import {
   EuiHealth,
   EuiSuperSelect,
   EuiSuperSelectOption,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
-import { CaseSeverityWithAll } from '../../containers/types';
+import { CaseSeverityWithAll, SeverityAll } from '../../containers/types';
 import { severitiesWithAll } from '../severity/config';
 
 interface Props {
@@ -43,7 +44,11 @@ export const SeverityFilter: React.FC<Props> = ({
             data-test-subj={`case-severity-selection-${severity}`}
           >
             <EuiFlexItem grow={false}>
-              <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
+              {severity === SeverityAll ? (
+                <EuiText size="s">{severityData.label}</EuiText>
+              ) : (
+                <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
