@@ -86,6 +86,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
         defaultMessage: 'Default width',
       }),
+    getAdvancedSettings: () =>
+      i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
+        defaultMessage: 'Advanced settings',
+      }),
     getDefaultGrowTitle: () =>
       i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
         defaultMessage: 'Expand width to fit available space',

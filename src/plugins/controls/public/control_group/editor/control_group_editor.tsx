@@ -62,6 +62,8 @@ export const ControlGroupEditor = ({
   onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
+  const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
+
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
     ...getDefaultControlGroupInput(),
@@ -98,31 +100,6 @@ export const ControlGroupEditor = ({
       ),
     [controlGroupEditorState]
   );
-
-  // const applyChangesToInput = async () => {
-  //   const inputToApply = { ...controlGroupEditorState };
-  //   if (controlCount > 0 && inputToApply.defaultControlWidth !== initialInput.defaultControlWidth) {
-  //     openConfirm(ControlGroupStrings.management.applyDefaultSize.getSubtitle(), {
-  //       confirmButtonText: ControlGroupStrings.management.applyDefaultSize.getConfirm(),
-  //       cancelButtonText: ControlGroupStrings.management.applyDefaultSize.getCancel(),
-  //       title: ControlGroupStrings.management.applyDefaultSize.getTitle(),
-  //     }).then((confirmed) => {
-  //       if (confirmed) {
-  //         const newPanels = {} as ControlsPanels;
-  //         Object.entries(initialInput.panels).forEach(
-  //           ([id, panel]) =>
-  //             (newPanels[id] = {
-  //               ...panel,
-  //               width: inputToApply.defaultControlWidth,
-  //             })
-  //         );
-  //         inputToApply.panels = newPanels;
-  //       }
-  //       updateInput(inputToApply);
-  //     });
-  //   } else if (!editorControlGroupInputIsEqual(inputToApply, initialInput))
-  //     updateInput(inputToApply);
-  // };
 
   return (
     <>
@@ -161,122 +138,142 @@ export const ControlGroupEditor = ({
                   });
                 }}
               />
-            </>
-          </EuiFormRow>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xs" />
+              <EuiSpacer size="s" />
               <EuiSwitch
-                label={ControlGroupStrings.management.querySync.getQuerySettingsTitle()}
-                data-test-subj="control-group-query-sync"
-                showLabel={false}
-                checked={fullQuerySyncActive}
-                onChange={(e) => {
-                  const newSetting = !e.target.checked;
-                  updateIgnoreSetting({
-                    ignoreFilters: newSetting,
-                    ignoreTimerange: newSetting,
-                    ignoreQuery: newSetting,
+                label={ControlGroupStrings.management.getDefaultGrowTitle()}
+                checked={controlGroupEditorState.defaultControlGrow}
+                onChange={() => {
+                  updateControlGroupEditorSetting({
+                    defaultControlGrow: !controlGroupEditorState.defaultControlGrow,
                   });
                 }}
               />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h3>{ControlGroupStrings.management.querySync.getQuerySettingsTitle()}</h3>
-              </EuiTitle>
-              <EuiText size="s">
-                <p>{ControlGroupStrings.management.querySync.getQuerySettingsSubtitle()}</p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiAccordion
-                data-test-subj="control-group-query-sync-advanced"
-                id={advancedSettingsAccordionId}
-                initialIsOpen={!fullQuerySyncActive}
-                buttonContent={ControlGroupStrings.management.querySync.getAdvancedSettingsTitle()}
-              >
-                <EuiSpacer size="s" />
-                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
+            </>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiFormRow label={ControlGroupStrings.management.getAdvancedSettings()}>
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="xs" />
                   <EuiSwitch
-                    data-test-subj="control-group-query-sync-time-range"
-                    label={ControlGroupStrings.management.querySync.getIgnoreTimerangeTitle()}
-                    compressed
-                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreTimerange)}
-                    onChange={(e) => updateIgnoreSetting({ ignoreTimerange: e.target.checked })}
+                    label={ControlGroupStrings.management.querySync.getQuerySettingsTitle()}
+                    data-test-subj="control-group-query-sync"
+                    showLabel={false}
+                    checked={fullQuerySyncActive}
+                    onChange={(e) => {
+                      const newSetting = !e.target.checked;
+                      updateIgnoreSetting({
+                        ignoreFilters: newSetting,
+                        ignoreTimerange: newSetting,
+                        ignoreQuery: newSetting,
+                      });
+                    }}
                   />
-                </EuiFormRow>
-                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="xxs">
+                    <h3>{ControlGroupStrings.management.querySync.getQuerySettingsTitle()}</h3>
+                  </EuiTitle>
+                  <EuiText size="s">
+                    <p>{ControlGroupStrings.management.querySync.getQuerySettingsSubtitle()}</p>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiAccordion
+                    data-test-subj="control-group-query-sync-advanced"
+                    id={advancedSettingsAccordionId}
+                    initialIsOpen={!fullQuerySyncActive}
+                    buttonContent={ControlGroupStrings.management.querySync.getAdvancedSettingsTitle()}
+                  >
+                    <EuiSpacer size="s" />
+                    <EuiFormRow hasChildLabel display="columnCompressedSwitch">
+                      <EuiSwitch
+                        data-test-subj="control-group-query-sync-time-range"
+                        label={ControlGroupStrings.management.querySync.getIgnoreTimerangeTitle()}
+                        compressed
+                        checked={Boolean(
+                          controlGroupEditorState.ignoreParentSettings?.ignoreTimerange
+                        )}
+                        onChange={(e) => updateIgnoreSetting({ ignoreTimerange: e.target.checked })}
+                      />
+                    </EuiFormRow>
+                    <EuiFormRow hasChildLabel display="columnCompressedSwitch">
+                      <EuiSwitch
+                        data-test-subj="control-group-query-sync-query"
+                        label={ControlGroupStrings.management.querySync.getIgnoreQueryTitle()}
+                        compressed
+                        checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreQuery)}
+                        onChange={(e) => updateIgnoreSetting({ ignoreQuery: e.target.checked })}
+                      />
+                    </EuiFormRow>
+                    <EuiFormRow hasChildLabel display="columnCompressedSwitch">
+                      <EuiSwitch
+                        data-test-subj="control-group-query-sync-filters"
+                        label={ControlGroupStrings.management.querySync.getIgnoreFilterPillsTitle()}
+                        compressed
+                        checked={Boolean(
+                          controlGroupEditorState.ignoreParentSettings?.ignoreFilters
+                        )}
+                        onChange={(e) => updateIgnoreSetting({ ignoreFilters: e.target.checked })}
+                      />
+                    </EuiFormRow>
+                  </EuiAccordion>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="xs" />
                   <EuiSwitch
-                    data-test-subj="control-group-query-sync-query"
-                    label={ControlGroupStrings.management.querySync.getIgnoreQueryTitle()}
-                    compressed
-                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreQuery)}
-                    onChange={(e) => updateIgnoreSetting({ ignoreQuery: e.target.checked })}
+                    data-test-subj="control-group-validate-selections"
+                    label={ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
+                    showLabel={false}
+                    checked={
+                      !Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)
+                    }
+                    onChange={(e) => updateIgnoreSetting({ ignoreValidations: !e.target.checked })}
                   />
-                </EuiFormRow>
-                <EuiFormRow hasChildLabel display="columnCompressedSwitch">
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="xxs">
+                    <h3>
+                      {ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
+                    </h3>
+                  </EuiTitle>
+                  <EuiText size="s">
+                    <p>
+                      {ControlGroupStrings.management.validateSelections.getValidateSelectionsSubTitle()}
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="xs" />
                   <EuiSwitch
-                    data-test-subj="control-group-query-sync-filters"
-                    label={ControlGroupStrings.management.querySync.getIgnoreFilterPillsTitle()}
-                    compressed
-                    checked={Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreFilters)}
-                    onChange={(e) => updateIgnoreSetting({ ignoreFilters: e.target.checked })}
+                    data-test-subj="control-group-chaining"
+                    label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
+                    showLabel={false}
+                    checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
+                    onChange={(e) =>
+                      updateControlGroupEditorSetting({
+                        chainingSystem: e.target.checked ? 'HIERARCHICAL' : 'NONE',
+                      })
+                    }
                   />
-                </EuiFormRow>
-              </EuiAccordion>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xs" />
-              <EuiSwitch
-                data-test-subj="control-group-validate-selections"
-                label={ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
-                showLabel={false}
-                checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
-                onChange={(e) => updateIgnoreSetting({ ignoreValidations: !e.target.checked })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h3>
-                  {ControlGroupStrings.management.validateSelections.getValidateSelectionsTitle()}
-                </h3>
-              </EuiTitle>
-              <EuiText size="s">
-                <p>
-                  {ControlGroupStrings.management.validateSelections.getValidateSelectionsSubTitle()}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xs" />
-              <EuiSwitch
-                data-test-subj="control-group-chaining"
-                label={ControlGroupStrings.management.controlChaining.getHierarchyTitle()}
-                showLabel={false}
-                checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
-                onChange={(e) =>
-                  updateControlGroupEditorSetting({
-                    chainingSystem: e.target.checked ? 'HIERARCHICAL' : 'NONE',
-                  })
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h3>{ControlGroupStrings.management.controlChaining.getHierarchyTitle()}</h3>
-              </EuiTitle>
-              <EuiText size="s">
-                <p>{ControlGroupStrings.management.controlChaining.getHierarchySubTitle()}</p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="xxs">
+                    <h3>{ControlGroupStrings.management.controlChaining.getHierarchyTitle()}</h3>
+                  </EuiTitle>
+                  <EuiText size="s">
+                    <p>{ControlGroupStrings.management.controlChaining.getHierarchySubTitle()}</p>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          </EuiFormRow>
           {controlCount > 0 && (
             <>
               <EuiHorizontalRule margin="m" />
