@@ -43,6 +43,12 @@ export const navTabsUsersDetails = (
       href: getTabsOnUsersDetailsUrl(userName, UsersTableType.alerts),
       disabled: false,
     },
+    [UsersTableType.risk]: {
+      id: UsersTableType.risk,
+      name: i18n.NAVIGATION_RISK_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.risk),
+      disabled: false,
+    },
   };
 
   return hasMlUserPermissions

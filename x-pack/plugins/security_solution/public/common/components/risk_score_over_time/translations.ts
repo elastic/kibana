@@ -7,14 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOST_RISK_SCORE_OVER_TIME = i18n.translate(
-  'xpack.securitySolution.hosts.hostScoreOverTime.title',
-  {
-    defaultMessage: 'Host risk score over time',
-  }
-);
-
-export const HOST_RISK_THRESHOLD = i18n.translate(
+export const RISK_THRESHOLD = i18n.translate(
   'xpack.securitySolution.hosts.hostScoreOverTime.riskyThresholdHeader',
   {
     defaultMessage: 'Risky threshold',

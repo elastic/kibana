@@ -26001,7 +26001,6 @@
     "xpack.securitySolution.hosts.hostScoreOverTime.riskScore": "リスクスコア",
     "xpack.securitySolution.hosts.hostScoreOverTime.riskyLabel": "高リスク",
     "xpack.securitySolution.hosts.hostScoreOverTime.riskyThresholdHeader": "高リスクしきい値",
-    "xpack.securitySolution.hosts.hostScoreOverTime.title": "経時的なホストリスクスコア",
     "xpack.securitySolution.hosts.kqlPlaceholder": "例：host.name:\"foo\"",
     "xpack.securitySolution.hosts.navigation.alertsTitle": "外部アラート",
     "xpack.securitySolution.hosts.navigation.allHostsTitle": "すべてのホスト",

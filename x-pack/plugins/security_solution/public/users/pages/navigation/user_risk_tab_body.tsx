@@ -5,34 +5,32 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
-import { useRiskyHostsDashboardButtonHref } from '../../../overview/containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
-import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
-import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
+
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { RiskScoreOverTime } from '../../../common/components/risk_score_over_time';
 import { TopRiskScoreContributors } from '../../../common/components/top_risk_score_contributors';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/containers';
+import { buildUserNamesFilter } from '../../../../common/search_strategy';
+import { UsersComponentsQueryProps } from './types';
+import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
+
+const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
 `;
 
-const QUERY_ID = HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE;
-
-const HostRiskTabBodyComponent: React.FC<
-  Pick<HostsComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
-    hostName: string;
+const UserRiskTabBodyComponent: React.FC<
+  Pick<UsersComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
+    userName: string;
   }
-> = ({ hostName, startDate, endDate, setQuery, deleteQuery }) => {
-  const { buttonHref } = useRiskyHostsDashboardButtonHref(startDate, endDate);
-
+> = ({ userName, startDate, endDate, setQuery, deleteQuery }) => {
   const timerange = useMemo(
     () => ({
       from: startDate,
@@ -46,8 +44,8 @@ const HostRiskTabBodyComponent: React.FC<
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
 
-  const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
+  const [loading, { data, refetch, inspect }] = useUserRiskScore({
+    filterQuery: userName ? buildUserNamesFilter([userName]) : undefined,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
     timerange,
@@ -88,7 +86,7 @@ const HostRiskTabBodyComponent: React.FC<
             loading={loading}
             riskScore={data}
             queryId={QUERY_ID}
-            title={i18n.HOST_RISK_SCORE_OVER_TIME}
+            title={i18n.USER_RISK_SCORE_OVER_TIME}
             toggleStatus={overTimeToggleStatus}
             toggleQuery={toggleOverTimeQuery}
           />
@@ -104,27 +102,29 @@ const HostRiskTabBodyComponent: React.FC<
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <StyledEuiFlexGroup gutterSize="s">
+        {/* // TODO PENDING ON USER RISK DOCUMENTATION
         <EuiFlexItem grow={false}>
           <EuiButton
             href={buttonHref}
             isDisabled={!buttonHref}
-            data-test-subj="risky-hosts-view-dashboard-button"
+            data-test-subj="risky-users-view-dashboard-button"
             target="_blank"
           >
             {i18n.VIEW_DASHBOARD_BUTTON}
           </EuiButton>
-        </EuiFlexItem>
+        </EuiFlexItem> */}
         <EuiFlexItem grow={false}>
-          <HostRiskInformationButtonEmpty />
+          <UserRiskInformationButtonEmpty />
         </EuiFlexItem>
       </StyledEuiFlexGroup>
     </>
   );
 };
 
-HostRiskTabBodyComponent.displayName = 'HostRiskTabBodyComponent';
+UserRiskTabBodyComponent.displayName = 'UserRiskTabBodyComponent';
 
-export const HostRiskTabBody = React.memo(HostRiskTabBodyComponent);
+export const UserRiskTabBody = React.memo(UserRiskTabBodyComponent);
 
-HostRiskTabBody.displayName = 'HostRiskTabBody';
+UserRiskTabBody.displayName = 'UserRiskTabBody';

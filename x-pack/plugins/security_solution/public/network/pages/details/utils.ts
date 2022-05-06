@@ -42,6 +42,7 @@ export const getBreadcrumbs = (
       }),
     },
   ];
+
   if (params.detailName != null) {
     breadcrumb = [
       ...breadcrumb,

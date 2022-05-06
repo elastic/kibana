@@ -8,31 +8,31 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
-import { useUserRiskScore, useUserRiskScoreKpi } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { UserRiskScoreQueryTabBody } from './user_risk_score_tab_body';
-import { UsersType } from '../../store/model';
+
+import { useHostRiskScore } from '../../../risk_score/containers';
+import { HostRiskTabBody } from './host_risk_tab_body';
+import { HostsType } from '../../store/model';
 
 jest.mock('../../../risk_score/containers');
 jest.mock('../../../common/containers/query_toggle');
 jest.mock('../../../common/lib/kibana');
 
-describe('All users query tab body', () => {
-  const mockUseUserRiskScore = useUserRiskScore as jest.Mock;
-  const mockUseUserRiskScoreKpi = useUserRiskScoreKpi as jest.Mock;
+describe('Host query tab body', () => {
+  const mockUseUserRiskScore = useHostRiskScore as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
+    hostName: 'testUser',
     indexNames: [],
     setQuery: jest.fn(),
     skip: false,
     startDate: '2019-06-25T04:31:59.345Z',
     endDate: '2019-06-25T06:31:59.345Z',
-    type: UsersType.page,
+    type: HostsType.page,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
 
     mockUseUserRiskScore.mockReturnValue([
       false,
@@ -47,36 +47,41 @@ describe('All users query tab body', () => {
         isModuleEnabled: true,
       },
     ]);
-    mockUseUserRiskScoreKpi.mockReturnValue({
-      loading: false,
-      severityCount: {
-        unknown: 12,
-        low: 12,
-        moderate: 12,
-        high: 12,
-        critical: 12,
-      },
-    });
   });
 
-  it('toggleStatus=true, do not skip', () => {
+  it("doesn't skip when both toggleStatus are true", () => {
+    mockUseQueryToggle.mockReturnValueOnce({ toggleStatus: true, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValueOnce({ toggleStatus: true, setToggleStatus: jest.fn() });
+
     render(
       <TestProviders>
-        <UserRiskScoreQueryTabBody {...defaultProps} />
+        <HostRiskTabBody {...defaultProps} />
       </TestProviders>
     );
     expect(mockUseUserRiskScore.mock.calls[0][0].skip).toEqual(false);
-    expect(mockUseUserRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
   });
 
-  it('toggleStatus=false, skip', () => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+  it("doesn't skip when at least one toggleStatus is true", () => {
+    mockUseQueryToggle.mockReturnValueOnce({ toggleStatus: true, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValueOnce({ toggleStatus: false, setToggleStatus: jest.fn() });
+
     render(
       <TestProviders>
-        <UserRiskScoreQueryTabBody {...defaultProps} />
+        <HostRiskTabBody {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockUseUserRiskScore.mock.calls[0][0].skip).toEqual(false);
+  });
+
+  it('does skip when both toggleStatus are false', () => {
+    mockUseQueryToggle.mockReturnValueOnce({ toggleStatus: false, setToggleStatus: jest.fn() });
+    mockUseQueryToggle.mockReturnValueOnce({ toggleStatus: false, setToggleStatus: jest.fn() });
+
+    render(
+      <TestProviders>
+        <HostRiskTabBody {...defaultProps} />
       </TestProviders>
     );
     expect(mockUseUserRiskScore.mock.calls[0][0].skip).toEqual(true);
-    expect(mockUseUserRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
   });
 });
