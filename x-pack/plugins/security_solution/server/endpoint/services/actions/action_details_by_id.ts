@@ -50,7 +50,11 @@ export const getActionDetailsById = async (
             body: {
               query: {
                 bool: {
-                  filter: [{ term: { action_id: actionId } }],
+                  filter: [
+                    { term: { action_id: actionId } },
+                    { term: { input_type: 'endpoint' } },
+                    { term: { type: 'INPUT_ACTION' } },
+                  ],
                 },
               },
             },
