@@ -60,6 +60,7 @@ describe('aggregateRulesRoute', () => {
       ruleSnoozedStatus: {
         snoozed: 4,
       },
+      ruleTags: ['a', 'b', 'c'],
     };
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
@@ -94,6 +95,11 @@ describe('aggregateRulesRoute', () => {
           "rule_snoozed_status": Object {
             "snoozed": 4,
           },
+          "rule_tags": Array [
+            "a",
+            "b",
+            "c",
+          ],
         },
       }
     `);
@@ -129,6 +135,7 @@ describe('aggregateRulesRoute', () => {
         rule_snoozed_status: {
           snoozed: 4,
         },
+        rule_tags: ['a', 'b', 'c'],
       },
     });
   });

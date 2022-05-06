@@ -336,4 +336,42 @@ describe('loadRules', () => {
       ]
     `);
   });
+
+  test('should call find API with tagsFilter', async () => {
+    const resolvedValue = {
+      page: 1,
+      per_page: 10,
+      total: 0,
+      data: [],
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+    const result = await loadRules({
+      http,
+      tagsFilter: ['a', 'b', 'c'],
+      page: { index: 0, size: 10 },
+    });
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_find",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.tags:(a or b or c)",
+            "page": 1,
+            "per_page": 10,
+            "search": undefined,
+            "search_fields": undefined,
+            "sort_field": "name",
+            "sort_order": "asc",
+          },
+        },
+      ]
+    `);
+  });
 });
