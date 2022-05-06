@@ -116,6 +116,7 @@ export const ControlGroupEditor = ({
           (newPanels[id] = {
             ...panel,
             width: inputToApply.defaultControlWidth,
+            grow: inputToApply.defaultControlGrow,
           })
       );
       inputToApply.panels = newPanels;
@@ -160,10 +161,20 @@ export const ControlGroupEditor = ({
                   });
                 }}
               />
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                label={ControlGroupStrings.management.getDefaultGrowTitle()}
+                checked={controlGroupEditorState.defaultControlGrow}
+                onChange={() => {
+                  updateControlGroupEditorSetting({
+                    defaultControlGrow: !controlGroupEditorState.defaultControlGrow,
+                  });
+                }}
+              />
               {controlCount > 0 && (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiCheckbox
+                  <EuiSwitch
                     id="editControls_setAllSizesCheckbox"
                     data-test-subj="set-all-control-sizes-checkbox"
                     label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}

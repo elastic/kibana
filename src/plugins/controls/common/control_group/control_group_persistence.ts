@@ -26,6 +26,7 @@ const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
 export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => ({
   panels: {},
   defaultControlWidth: DEFAULT_CONTROL_WIDTH,
+  defaultControlGrow: true,
   controlStyle: DEFAULT_CONTROL_STYLE,
   chainingSystem: 'HIERARCHICAL',
   ignoreParentSettings: {

@@ -22,6 +22,7 @@ export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
   defaultControlWidth?: ControlWidth;
   updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
+  updateDefaultGrow: (defaultControlGrow: boolean) => void;
   addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
   setLastUsedDataViewId?: (newDataViewId: string) => void;
   getRelevantDataViewId?: () => string | undefined;
@@ -35,13 +36,14 @@ interface CreateControlResult {
 }
 
 export const CreateControlButton = ({
-  defaultControlWidth,
-  updateDefaultWidth,
-  addNewEmbeddable,
   buttonType,
+  defaultControlWidth,
+  addNewEmbeddable,
   closePopover,
-  setLastUsedDataViewId,
   getRelevantDataViewId,
+  setLastUsedDataViewId,
+  updateDefaultWidth,
+  updateDefaultGrow,
 }: CreateControlButtonProps) => {
   // Controls Services Context
   const { overlays, controls } = pluginServices.getServices();
@@ -83,6 +85,7 @@ export const CreateControlButton = ({
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
+              updateGrow={updateDefaultGrow}
               onSave={(type: string) => {
                 const factory = getControlFactory(type) as IEditableControlFactory;
                 if (factory.presaveTransformFunction) {
