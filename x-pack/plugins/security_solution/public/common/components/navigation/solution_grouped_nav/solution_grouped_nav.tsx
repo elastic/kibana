@@ -40,8 +40,8 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
   footerItems = [],
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
   const styles = solutionGroupedNavStyles(euiTheme);
+  const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
   const [activePortalNavId, setActivePortalNavId] = useState<ActivePortalNav>(null);
   const activePortalNavIdRef = useRef<ActivePortalNav>(null);

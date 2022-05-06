@@ -19,6 +19,7 @@ import {
   EuiTitle,
   EuiWindowEvent,
   keys,
+  useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import classNames from 'classnames';
@@ -40,8 +41,9 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
   const [hasTimelineBar] = useShowTimeline();
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
   const isTimelineVisible = hasTimelineBar && isLargerBreakpoint;
+  const { euiTheme } = useEuiTheme();
 
-  const styles = groupedNavPanelStyles(isTimelineVisible);
+  const styles = groupedNavPanelStyles(euiTheme, isTimelineVisible);
   const panelClasses = classNames('eui-yScroll');
 
   /**
