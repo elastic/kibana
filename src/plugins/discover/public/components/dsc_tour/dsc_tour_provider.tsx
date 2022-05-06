@@ -8,6 +8,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useEuiTour,
   EuiTourState,
@@ -19,8 +20,8 @@ import {
   EuiButton,
   EuiImage,
   EuiSpacer,
-  EuiText,
   EuiI18n,
+  EuiIcon,
 } from '@elastic/eui';
 import { PLUGIN_ID } from '../../../common';
 import { useDiscoverServices } from '../../utils/use_discover_services';
@@ -33,7 +34,7 @@ interface TourStepDefinition {
   anchor: EuiTourStepProps['anchor'];
   anchorPosition: EuiTourStepProps['anchorPosition'];
   title: EuiTourStepProps['title'];
-  text: string;
+  content: EuiTourStepProps['content'];
   imageName?: string;
   isOptional?: boolean;
 }
@@ -45,9 +46,15 @@ const tourStepDefinitions: TourStepDefinition[] = [
     title: i18n.translate('discover.dscTour.stepAddFields.title', {
       defaultMessage: 'Add fields to the table',
     }),
-    text: i18n.translate('discover.dscTour.stepAddFields.description', {
-      defaultMessage: 'Click + <TODO> to add the fields that interest you.',
-    }),
+    content: (
+      <FormattedMessage
+        id="discover.dscTour.stepAddFields.description"
+        defaultMessage="Click {plusIcon} to add the fields that interest you."
+        values={{
+          plusIcon: <EuiIcon size="s" type="plusInCircleFilled" color="primary" aria-label="+" />,
+        }}
+      />
+    ),
     imageName: 'add_fields.gif',
   },
   {
@@ -56,9 +63,12 @@ const tourStepDefinitions: TourStepDefinition[] = [
     title: i18n.translate('discover.dscTour.stepReorderColumns.title', {
       defaultMessage: 'Reorder columns',
     }),
-    text: i18n.translate('discover.dscTour.stepReorderColumns.description', {
-      defaultMessage: 'Order your columns however you want.',
-    }),
+    content: (
+      <FormattedMessage
+        id="discover.dscTour.stepReorderColumns.description"
+        defaultMessage="Order your columns however you want."
+      />
+    ),
     imageName: 'reorder_columns.gif',
     isOptional: true,
   },
@@ -68,10 +78,12 @@ const tourStepDefinitions: TourStepDefinition[] = [
     title: i18n.translate('discover.dscTour.stepSort.title', {
       defaultMessage: 'Sort on one or more fields',
     }),
-    text: i18n.translate('discover.dscTour.stepSort.description', {
-      defaultMessage:
-        'Sort a single field by clicking a column header. Sort by multiple fields using the pop-up.',
-    }),
+    content: (
+      <FormattedMessage
+        id="discover.dscTour.stepSort.description"
+        defaultMessage="Sort a single field by clicking a column header. Sort by multiple fields using the pop-up."
+      />
+    ),
   },
   {
     anchor: DSC_TOUR_STEP_ANCHORS.changeRowHeight,
@@ -79,9 +91,12 @@ const tourStepDefinitions: TourStepDefinition[] = [
     title: i18n.translate('discover.dscTour.stepChangeRowHeight.title', {
       defaultMessage: 'Change the row height',
     }),
-    text: i18n.translate('discover.dscTour.stepChangeRowHeight.description', {
-      defaultMessage: 'Adjust the number of lines to fit the contents.',
-    }),
+    content: (
+      <FormattedMessage
+        id="discover.dscTour.stepChangeRowHeight.description"
+        defaultMessage="Adjust the number of lines to fit the contents."
+      />
+    ),
     imageName: 'rows_per_line.gif',
   },
   {
@@ -90,10 +105,24 @@ const tourStepDefinitions: TourStepDefinition[] = [
     title: i18n.translate('discover.dscTour.stepExpand.title', {
       defaultMessage: 'Compare and expand',
     }),
-    text: i18n.translate('discover.dscTour.stepExpand.description', {
-      defaultMessage:
-        'Narrow your view by selecting specific documents. View details by clicking <TODO>.',
-    }),
+    content: (
+      <FormattedMessage
+        id="discover.dscTour.stepExpand.description"
+        defaultMessage="Narrow your view by selecting specific documents. View details by clicking {expandIcon}."
+        values={{
+          expandIcon: (
+            <EuiIcon
+              size="s"
+              type="expand"
+              color="text"
+              aria-label={i18n.translate('discover.dscTour.stepExpand.expandIconLabel', {
+                defaultMessage: 'Expand icon',
+              })}
+            />
+          ),
+        }}
+      />
+    ),
     imageName: 'expand_document.gif',
   },
 ];
@@ -115,7 +144,7 @@ const prepareTourSteps = (
       maxWidth: MAX_WIDTH,
       content: (
         <>
-          <EuiText size="s">{stepDefinition.text}</EuiText>
+          {stepDefinition.content}
           {stepDefinition.imageName && (
             <>
               <EuiSpacer size="s" />
