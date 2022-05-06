@@ -8,46 +8,27 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-type Caps =
-  | 'A'
-  | 'B'
-  | 'C'
-  | 'D'
-  | 'E'
-  | 'F'
-  | 'G'
-  | 'H'
-  | 'I'
-  | 'J'
-  | 'K'
-  | 'L'
-  | 'M'
-  | 'N'
-  | 'O'
-  | 'P'
-  | 'Q'
-  | 'R'
-  | 'S'
-  | 'T'
-  | 'U'
-  | 'V'
-  | 'W'
-  | 'X'
-  | 'Y'
-  | 'Z';
-
 type StartsWith<T, S extends string> = T extends `${S}${infer _X}` ? _X : never;
 type ExtractName<S extends string> = S extends `${infer N}` ? N : { error: 'Cannot parse name' };
-type SpacedNames<T extends string> = T extends `${infer firstCapital}${infer rest}`
-  ? `${firstCapital}${ParseSpacedNames<rest>}`
-  : never;
+type RemoveSpaces<T extends string> = T extends `${infer F} ${infer L}` ? `${F}${L}` : never;
 
-// NOTE: This will NOT work with logo names with more than two words. Since we don't have any, we opted
-// to not melt our brains trying to figure out how to work out the recursion.
-type ParseSpacedNames<T extends string> = T extends `${infer head}${Caps}${infer tail}`
-  ? T extends `${head}${infer cap}${tail}`
-    ? `${head} ${cap}${tail}`
-    : never
-  : T;
+// Exhaustive list at present.  Reduces complexity of TS checking at the expense of not being dynamic
+// against a very, very static list.
+//
+// The only consequence is requiring a solution name without a space, (e.g. `ElasticStack`) until it's added
+// here.  That's easy to do in the very unlikely event that ever happens.
+type SpacedNames =
+  | 'AWS Mono'
+  | 'App Search'
+  | 'Azure Mono'
+  | 'Business Analytics'
+  | 'Cloud Enterprise'
+  | 'Elastic Stack'
+  | 'Enterprise Search'
+  | 'GCP Mono'
+  | 'IBM Mono'
+  | 'Site Search'
+  | 'Workplace Search';
 
-export type SolutionNameType = SpacedNames<ExtractName<StartsWith<EuiIconType, 'logo'>>>;
+type Names = Exclude<ExtractName<StartsWith<EuiIconType, 'logo'>>, RemoveSpaces<SpacedNames>>;
+export type SolutionNameType = Names | SpacedNames;
