@@ -124,41 +124,8 @@ export class UptimePlugin
       },
     });
 
-    plugins.observability.navigation.registerSections(
-      from(core.getStartServices()).pipe(
-        map(([coreStart]) => {
-          if (coreStart.application.capabilities.uptime.show) {
-            return [
-              {
-                label: 'Uptime',
-                sortKey: 500,
-                entries: [
-                  {
-                    label: i18n.translate('xpack.synthetics.overview.heading', {
-                      defaultMessage: 'Monitors',
-                    }),
-                    app: 'uptime',
-                    path: '/',
-                    matchFullPath: true,
-                    ignoreTrailingSlash: true,
-                  },
-                  {
-                    label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
-                      defaultMessage: 'TLS Certificates',
-                    }),
-                    app: 'uptime',
-                    path: '/certificates',
-                    matchFullPath: true,
-                  },
-                ],
-              },
-            ];
-          }
-
-          return [];
-        })
-      )
-    );
+    registerUptimeRoutesWithNavigation(core, plugins);
+    registerSyntheticsRoutesWithNavigation(core, plugins);
 
     const { observabilityRuleTypeRegistry } = plugins.observability;
 
@@ -274,4 +241,78 @@ export class UptimePlugin
   }
 
   public stop(): void {}
+}
+
+function registerSyntheticsRoutesWithNavigation(
+  core: CoreSetup<ClientPluginsStart, unknown>,
+  plugins: ClientPluginsSetup
+) {
+  plugins.observability.navigation.registerSections(
+    from(core.getStartServices()).pipe(
+      map(([coreStart]) => {
+        if (coreStart.application.capabilities.uptime.show) {
+          return [
+            {
+              label: 'Synthetics',
+              sortKey: 499,
+              entries: [
+                {
+                  label: i18n.translate('xpack.synthetics.overview.heading', {
+                    defaultMessage: 'Monitors',
+                  }),
+                  app: 'synthetics',
+                  path: '/manage-monitors',
+                  matchFullPath: true,
+                  ignoreTrailingSlash: true,
+                },
+              ],
+            },
+          ];
+        }
+
+        return [];
+      })
+    )
+  );
+}
+
+function registerUptimeRoutesWithNavigation(
+  core: CoreSetup<ClientPluginsStart, unknown>,
+  plugins: ClientPluginsSetup
+) {
+  plugins.observability.navigation.registerSections(
+    from(core.getStartServices()).pipe(
+      map(([coreStart]) => {
+        if (coreStart.application.capabilities.uptime.show) {
+          return [
+            {
+              label: 'Uptime',
+              sortKey: 500,
+              entries: [
+                {
+                  label: i18n.translate('xpack.synthetics.overview.heading', {
+                    defaultMessage: 'Monitors',
+                  }),
+                  app: 'uptime',
+                  path: '/',
+                  matchFullPath: true,
+                  ignoreTrailingSlash: true,
+                },
+                {
+                  label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
+                    defaultMessage: 'TLS Certificates',
+                  }),
+                  app: 'uptime',
+                  path: '/certificates',
+                  matchFullPath: true,
+                },
+              ],
+            },
+          ];
+        }
+
+        return [];
+      })
+    )
+  );
 }
