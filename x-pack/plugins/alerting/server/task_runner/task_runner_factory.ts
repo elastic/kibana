@@ -33,7 +33,7 @@ import {
 import { TaskRunner } from './task_runner';
 import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { InMemoryMetrics } from '../monitoring';
+import { NodeLevelMetrics } from '../monitoring';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 
 export interface TaskRunnerContext {
@@ -57,6 +57,7 @@ export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   cancelAlertsOnRuleTimeout: boolean;
   usageCounter?: UsageCounter;
+  nodeLevelMetrics?: NodeLevelMetrics;
 }
 
 export class TaskRunnerFactory {
@@ -89,8 +90,7 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext,
-    inMemoryMetrics: InMemoryMetrics
+    { taskInstance }: RunContext
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -104,6 +104,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
+    >(ruleType, taskInstance, this.taskRunnerContext!);
   }
 }

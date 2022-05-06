@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { IExecutionLogWithErrorsResult } from '@kbn/alerting-plugin/common';
+import { RuleMonitoringMetrics } from '@kbn/alerting-plugin/common/monitoring/types';
 import {
   Rule,
   RuleType,
@@ -38,6 +39,7 @@ import {
   LoadExecutionLogAggregationsProps,
   snoozeRule,
   unsnoozeRule,
+  loadMonitoring,
 } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -71,6 +73,7 @@ export interface ComponentOpts {
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
   snoozeRule: (rule: Rule, snoozeEndTime: string | -1) => Promise<void>;
   unsnoozeRule: (rule: Rule) => Promise<void>;
+  loadMonitoring: (id: Rule['id']) => Promise<RuleMonitoringMetrics>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -155,6 +158,7 @@ export function withBulkRuleOperations<T>(
         unsnoozeRule={async (rule: Rule) => {
           return await unsnoozeRule({ http, id: rule.id });
         }}
+        loadMonitoring={async (ruleId: Rule['id']) => loadMonitoring({ http, ruleId })}
       />
     );
   };

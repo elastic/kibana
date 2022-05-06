@@ -48,7 +48,10 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import {
+  MonitoringCollectionSetup,
+  MonitoringCollectionStart,
+} from '@kbn/monitoring-collection-plugin/server';
 import { RulesClient } from './rules_client';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -77,7 +80,7 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
-import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
+import { registerClusterLevelMetrics, NodeLevelMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
 
@@ -154,6 +157,7 @@ export interface AlertingPluginsStart {
   spaces: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
+  monitoringCollection?: MonitoringCollectionStart;
 }
 
 export class AlertingPlugin {
@@ -172,7 +176,7 @@ export class AlertingPlugin {
   private eventLogger?: IEventLogger;
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
-  private inMemoryMetrics: InMemoryMetrics;
+  private nodeLevelMetrics?: NodeLevelMetrics;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -182,7 +186,6 @@ export class AlertingPlugin {
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
   }
 
   public setup(
@@ -226,7 +229,6 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       licensing: plugins.licensing,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
-      inMemoryMetrics: this.inMemoryMetrics,
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -268,6 +270,13 @@ export class AlertingPlugin {
       this.config
     );
 
+    if (plugins.monitoringCollection) {
+      registerClusterLevelMetrics({
+        monitoringCollection: plugins.monitoringCollection,
+        core,
+      });
+    }
+
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
       summary: 'Alerting is (probably) ready',
@@ -281,17 +290,6 @@ export class AlertingPlugin {
       this.createRouteHandlerContext(core)
     );
 
-    if (plugins.monitoringCollection) {
-      registerNodeCollector({
-        monitoringCollection: plugins.monitoringCollection,
-        inMemoryMetrics: this.inMemoryMetrics,
-      });
-      registerClusterCollector({
-        monitoringCollection: plugins.monitoringCollection,
-        core,
-      });
-    }
-
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
@@ -300,6 +298,7 @@ export class AlertingPlugin {
       licenseState: this.licenseState,
       usageCounter: this.usageCounter,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
+      monitoringCollection: plugins.monitoringCollection,
     });
 
     return {
@@ -368,6 +367,10 @@ export class AlertingPlugin {
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: ['alert'],
     });
+
+    if (plugins.monitoringCollection) {
+      this.nodeLevelMetrics = new NodeLevelMetrics(plugins.monitoringCollection);
+    }
 
     const spaceIdToNamespace = (spaceId?: string) => {
       return plugins.spaces && spaceId
@@ -441,6 +444,7 @@ export class AlertingPlugin {
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
+      nodeLevelMetrics: this.nodeLevelMetrics,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

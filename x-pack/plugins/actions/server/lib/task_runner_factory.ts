@@ -34,7 +34,6 @@ import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects
 import { asSavedObjectExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -49,11 +48,9 @@ export class TaskRunnerFactory {
   private isInitialized = false;
   private taskRunnerContext?: TaskRunnerContext;
   private readonly actionExecutor: ActionExecutorContract;
-  private readonly inMemoryMetrics: InMemoryMetrics;
 
-  constructor(actionExecutor: ActionExecutorContract, inMemoryMetrics: InMemoryMetrics) {
+  constructor(actionExecutor: ActionExecutorContract) {
     this.actionExecutor = actionExecutor;
-    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   public initialize(taskRunnerContext: TaskRunnerContext) {
@@ -69,7 +66,7 @@ export class TaskRunnerFactory {
       throw new Error('TaskRunnerFactory not initialized');
     }
 
-    const { actionExecutor, inMemoryMetrics } = this;
+    const { actionExecutor } = this;
     const {
       logger,
       encryptedSavedObjectsClient,
@@ -134,14 +131,12 @@ export class TaskRunnerFactory {
           }
         }
 
-        inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
         if (
           executorResult &&
           executorResult?.status === 'error' &&
           executorResult?.retry !== undefined &&
           isRetryableBasedOnAttempts
         ) {
-          inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
           logger.error(
             `Action '${actionId}' failed ${
               !!executorResult.retry ? willRetryMessage : willNotRetryMessage
@@ -155,7 +150,6 @@ export class TaskRunnerFactory {
             executorResult.retry as boolean | Date
           );
         } else if (executorResult && executorResult?.status === 'error') {
-          inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
           logger.error(
             `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
           );
@@ -206,8 +200,6 @@ export class TaskRunnerFactory {
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           ...getSourceFromReferences(references),
         });
-
-        inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
 
         logger.debug(
           `Cancelling action task for action with id ${actionId} - execution error due to timeout.`

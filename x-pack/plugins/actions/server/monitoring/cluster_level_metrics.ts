@@ -11,33 +11,18 @@ import {
   RunningOrClaimingTaskWithExpiredRetryAt,
 } from '@kbn/task-manager-plugin/server';
 import { CoreSetup } from '@kbn/core/server';
-import { AlertingPluginsStart } from '../plugin';
-import { ClusterRulesMetric } from './types';
+import { ActionsPluginsStart } from '../plugin';
+import { ClusterLevelMetricsType } from '../../common/monitoring/types';
 
-export function registerClusterCollector({
+export function registerClusterLevelMetrics({
   monitoringCollection,
   core,
 }: {
   monitoringCollection: MonitoringCollectionSetup;
-  core: CoreSetup<AlertingPluginsStart, unknown>;
+  core: CoreSetup<ActionsPluginsStart, unknown>;
 }) {
-  monitoringCollection.registerMetric({
-    type: 'cluster_rules',
-    schema: {
-      overdue: {
-        count: {
-          type: 'long',
-        },
-        delay: {
-          p50: {
-            type: 'long',
-          },
-          p99: {
-            type: 'long',
-          },
-        },
-      },
-    },
+  monitoringCollection.registerMetricSet<ClusterLevelMetricsType>({
+    id: `kibana_alerting_cluster_actions`,
     fetch: async () => {
       const [_, pluginStart] = await core.getStartServices();
       const now = +new Date();
@@ -48,7 +33,7 @@ export function registerClusterCollector({
               {
                 term: {
                   'task.scope': {
-                    value: 'alerting',
+                    value: 'actions',
                   },
                 },
               },
@@ -65,26 +50,13 @@ export function registerClusterCollector({
       const overdueTasksDelay = overdueTasks.map(
         (overdueTask) => now - +new Date(overdueTask.runAt || overdueTask.retryAt)
       );
-
-      const metrics: ClusterRulesMetric = {
-        overdue: {
-          count: overdueTasks.length,
-          delay: {
-            p50: stats.percentile(overdueTasksDelay, 0.5),
-            p99: stats.percentile(overdueTasksDelay, 0.99),
-          },
-        },
+      const p50 = stats.percentile(overdueTasksDelay, 0.5);
+      const p99 = stats.percentile(overdueTasksDelay, 0.99);
+      return {
+        kibana_alerting_cluster_actions_overdue_count: overdueTasks.length,
+        kibana_alerting_cluster_actions_overdue_delay_p50: isNaN(p50) ? 0 : p50,
+        kibana_alerting_cluster_actions_overdue_delay_p99: isNaN(p99) ? 0 : p99,
       };
-
-      if (isNaN(metrics.overdue.delay.p50)) {
-        metrics.overdue.delay.p50 = 0;
-      }
-
-      if (isNaN(metrics.overdue.delay.p99)) {
-        metrics.overdue.delay.p99 = 0;
-      }
-
-      return metrics;
     },
   });
 }

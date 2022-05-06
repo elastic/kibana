@@ -9,6 +9,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  interval: schema.number({ defaultValue: 10000 }),
+  metricsIndex: schema.string({ defaultValue: 'metrics-apm*' }),
 });
 
 export type MonitoringCollectionConfig = ReturnType<typeof createConfig>;

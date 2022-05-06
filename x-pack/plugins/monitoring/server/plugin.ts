@@ -48,6 +48,7 @@ import {
   MonitoringCore,
   MonitoringLicenseService,
   MonitoringPluginSetup,
+  MonitoringPluginStart,
   PluginsSetup,
   PluginsStart,
   RequestHandlerContextMonitoringPlugin,
@@ -206,7 +207,10 @@ export class MonitoringPlugin
     }
   }
 
-  start(coreStart: CoreStart, { licensing }: PluginsStart) {
+  start(
+    coreStart: CoreStart,
+    { licensing, monitoringCollection }: PluginsStart
+  ): MonitoringPluginStart {
     const config = this.config!;
     this.cluster = instantiateClient(
       config.ui.elasticsearch,
@@ -215,6 +219,10 @@ export class MonitoringPlugin
     );
 
     this.init(this.cluster, coreStart);
+
+    if (monitoringCollection) {
+      monitoringCollection.registerCustomElasticsearchClient(this.cluster);
+    }
 
     // Start our license service which will ensure
     // the appropriate licenses are present
@@ -253,6 +261,12 @@ export class MonitoringPlugin
         'Internal collection for Kibana monitoring is disabled per configuration.'
       );
     }
+
+    return {
+      getMonitoringCluster: () => {
+        return this.cluster;
+      },
+    };
   }
 
   stop() {

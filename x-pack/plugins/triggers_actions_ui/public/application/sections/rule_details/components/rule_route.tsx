@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from '@kbn/core/public';
+import { RuleMonitoringMetrics } from '@kbn/alerting-plugin/common/monitoring/types';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 import {
@@ -23,13 +24,14 @@ type WithRuleSummaryProps = {
   readOnly: boolean;
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
-} & Pick<RuleApis, 'loadRuleSummary'>;
+} & Pick<RuleApis, 'loadRuleSummary' | 'loadMonitoring'>;
 
 export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
   rule,
   ruleType,
   readOnly,
   requestRefresh,
+  loadMonitoring,
   loadRuleSummary: loadRuleSummary,
   refreshToken,
 }) => {
@@ -38,6 +40,7 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
   } = useKibana().services;
 
   const [ruleSummary, setRuleSummary] = useState<RuleSummary | null>(null);
+  const [monitoring, setMonitoring] = useState<RuleMonitoringMetrics>();
   const [numberOfExecutions, setNumberOfExecutions] = useState(60);
   const [isLoadingChart, setIsLoadingChart] = useState(true);
   const ruleID = useRef<string | null>(null);
@@ -51,6 +54,14 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
     },
     [setIsLoadingChart, ruleID, loadRuleSummary, setRuleSummary, toasts, numberOfExecutions]
   );
+
+  useEffect(() => {
+    if (!rule.id) return;
+    (async () => {
+      const result = await loadMonitoring(rule.id);
+      setMonitoring(result);
+    })();
+  }, [loadMonitoring, rule.id]);
 
   useEffect(() => {
     if (ruleID.current !== rule.id) {
@@ -80,6 +91,7 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
       refreshToken={refreshToken}
       rule={rule}
       ruleType={ruleType}
+      monitoring={monitoring}
       readOnly={readOnly}
       ruleSummary={ruleSummary}
       numberOfExecutions={numberOfExecutions}
