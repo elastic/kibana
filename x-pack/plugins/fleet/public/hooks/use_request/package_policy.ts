@@ -109,3 +109,18 @@ export function sendUpgradePackagePolicy(packagePolicyIds: string[]) {
     }),
   });
 }
+
+export function sendGetOrphanedIntegrationPolicies() {
+  return sendRequest({
+    path: packagePolicyRouteService.getOrphanedIntegrationPoliciesPath(),
+    method: 'get',
+  });
+}
+
+export function sendDeleteOneOrphanedIntegrationPolicy(body: { ids: string[] }) {
+  return sendRequest({
+    path: packagePolicyRouteService.getDeleteOrphanedIntegrationPolicyPath(),
+    method: 'post',
+    body: JSON.stringify(body),
+  });
+}
