@@ -6,6 +6,7 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
@@ -35,9 +36,11 @@ export const UpdateApiKeyModalConfirmation = ({
 
   return updateModalFlyoutVisible ? (
     <EuiConfirmModal
-      buttonColor="danger"
+      buttonColor="primary"
       data-test-subj="updateApiKeyIdsConfirmation"
-      title="Confirm Update"
+      title={i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.title', {
+        defaultMessage: 'Update API Key',
+      })}
       onCancel={() => {
         setUpdateModalVisibility(false);
         onCancel();
@@ -47,17 +50,40 @@ export const UpdateApiKeyModalConfirmation = ({
         setIsLoadingState(true);
         try {
           await apiUpdateApiKeyCall({ id: idsToUpdate[0], http });
-          toasts.addSuccess('Updated');
+          toasts.addSuccess(
+            i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.successMessage', {
+              defaultMessage: 'API Key has been updated',
+            })
+          );
         } catch (e) {
-          toasts.addError(e, { title: 'Failed' });
+          toasts.addError(e, {
+            title: i18n.translate(
+              'xpack.triggersActionsUI.updateApiKeyConfirmModal.failureMessage',
+              {
+                defaultMessage: 'Failed to update the API Key',
+              }
+            ),
+          });
         }
         setIsLoadingState(false);
         onUpdated();
       }}
-      cancelButtonText="Cancel"
-      confirmButtonText="OK"
+      cancelButtonText={i18n.translate(
+        'xpack.triggersActionsUI.updateApiKeyConfirmModal.cancelButton',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.triggersActionsUI.updateApiKeyConfirmModal.confirmButton',
+        {
+          defaultMessage: 'Update',
+        }
+      )}
     >
-      Are you sure
+      {i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.description', {
+        defaultMessage: "You can't recover the old API Key",
+      })}
     </EuiConfirmModal>
   ) : null;
 };

@@ -136,6 +136,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable,
+          'data-test-subj': 'updateApiKey',
+          onClick: () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onUpdateAPIKey([item.id]);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
+            { defaultMessage: 'Update API Key' }
+          ),
+        },
+        {
+          disabled: !item.isEditable,
           'data-test-subj': 'deleteRule',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
@@ -145,15 +157,6 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.deleteRuleTitle',
             { defaultMessage: 'Delete rule' }
           ),
-        },
-        {
-          disabled: !item.isEditable,
-          'data-test-subj': 'updateApiKey',
-          onClick: () => {
-            setIsPopoverOpen(!isPopoverOpen);
-            onUpdateAPIKey([item.id]);
-          },
-          name: 'Update APIKey',
         },
       ],
     },

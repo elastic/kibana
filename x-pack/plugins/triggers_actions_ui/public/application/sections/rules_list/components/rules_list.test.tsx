@@ -334,7 +334,7 @@ describe('rules_list', () => {
       jest.clearAllMocks();
     });
 
-    it('Updates the apiKey successfully', async () => {
+    it('Updates the Api Key successfully', async () => {
       updateAPIKey.mockResolvedValueOnce(204);
       render(
         <IntlProvider locale="en">
@@ -346,28 +346,27 @@ describe('rules_list', () => {
       fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
       expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText('Update APIKey'));
-      expect(screen.getByText('Confirm Update')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('Update API Key'));
+      expect(screen.getByText("You can't recover the old API Key")).toBeInTheDocument();
 
       fireEvent.click(screen.getByText('Cancel'));
-      expect(screen.queryByText('Confirm Update')).not.toBeInTheDocument();
+      expect(screen.queryByText("You can't recover the old API Key")).not.toBeInTheDocument();
 
       fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
       expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText('Update APIKey'));
-      expect(screen.getByText('Confirm Update')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('Update API Key'));
 
       await act(async () => {
-        fireEvent.click(screen.getByText('OK'));
+        fireEvent.click(screen.getByText('Update'));
       });
       expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
       expect(loadRules).toHaveBeenCalledTimes(2);
-      expect(screen.queryByText('Confirm Update')).not.toBeInTheDocument();
-      expect(addSuccess).toHaveBeenCalledWith('Updated');
+      expect(screen.queryByText("You can't recover the old API Key")).not.toBeInTheDocument();
+      expect(addSuccess).toHaveBeenCalledWith('API Key has been updated');
     });
 
-    it('Update apiKey fails', async () => {
+    it('Update Api Key fails', async () => {
       updateAPIKey.mockRejectedValueOnce(500);
       render(
         <IntlProvider locale="en">
@@ -380,16 +379,16 @@ describe('rules_list', () => {
       fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
       expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText('Update APIKey'));
-      expect(screen.getByText('Confirm Update')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('Update API Key'));
+      expect(screen.getByText("You can't recover the old API Key")).toBeInTheDocument();
 
       await act(async () => {
-        fireEvent.click(screen.getByText('OK'));
+        fireEvent.click(screen.getByText('Update'));
       });
       expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
       expect(loadRules).toHaveBeenCalledTimes(2);
-      expect(screen.queryByText('Confirm Update')).not.toBeInTheDocument();
-      expect(addError).toHaveBeenCalledWith(500, { title: 'Failed' });
+      expect(screen.queryByText("You can't recover the old API Key")).not.toBeInTheDocument();
+      expect(addError).toHaveBeenCalledWith(500, { title: 'Failed to update the API Key' });
     });
   });
 
