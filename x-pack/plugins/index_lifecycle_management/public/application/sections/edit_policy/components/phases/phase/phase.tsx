@@ -95,7 +95,11 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
   );
 
   return (
-    <EuiTimelineItem icon={<PhaseIcon enabled={enabled} phase={phase} />} verticalAlign="top">
+    <EuiTimelineItem
+      icon={<PhaseIcon enabled={enabled} phase={phase} />}
+      verticalAlign="top"
+      data-test-subj={`${phase}-phase`}
+    >
       <EuiSplitPanel.Outer color="transparent" hasBorder grow>
         <EuiSplitPanel.Inner color={enabled ? 'transparent' : 'subdued'}>
           {phaseTitle}
