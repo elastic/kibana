@@ -54,7 +54,7 @@ interface NormalizedActionRequest {
 /**
  * Given an Action record - either a fleet action or an endpoint action - this utility
  * will return a normalized data structure based on those two types, which
- * will avoid us having to either cast or do type guards agains the two different
+ * will avoid us having to either cast or do type guards against the two different
  * types of action request.
  */
 export const mapToNormalizedActionRequest = (
@@ -75,7 +75,7 @@ export const mapToNormalizedActionRequest = (
     };
   }
 
-  // Else, its a Fleet Endpoint Action record
+  // Else, it's a Fleet Endpoint Action record
   return {
     agents: actionRequest.agents,
     command: actionRequest.data.command,
@@ -139,7 +139,7 @@ type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
 
 /**
  * Given a list of Action Responses, it will return a Map where keys are the Agent ID and
- * value is a object having information about the action responsess associated with that agent id
+ * value is a object having information about the action response's associated with that agent id
  * @param actionResponses
  */
 const mapActionResponsesByAgentId = (

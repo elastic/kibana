@@ -32,7 +32,7 @@ describe('When using Actions service utilities', () => {
       expect(isLogsEndpointAction(endpointActionGenerator.generate())).toBe(true);
     });
 
-    it('should return `false` for an `EndpiontAction` (fleet action request)', () => {
+    it('should return `false` for an `EndpointAction` (fleet action request)', () => {
       expect(isLogsEndpointAction(fleetActionGenerator.generate())).toBe(false);
     });
   });
