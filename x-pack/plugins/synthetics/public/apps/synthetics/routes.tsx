@@ -18,20 +18,19 @@ import { SyntheticsPageTemplateComponent } from './components/common/pages/synth
 import { NotFoundPage } from './components/common/pages/not_found';
 import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
 import {
+  GETTING_STARTED_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { MonitorManagementPage } from './components/monitor_management/monitor_management_page';
 import { apiService } from '../../utils/api_service';
-import { SyntheticsPage, useSyntheticsTelemetry } from './hooks/use_telemetry';
 
 type RouteProps = {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  telemetryId: SyntheticsPage;
   pageHeader: {
     pageTitle: string | JSX.Element;
     children?: JSX.Element;
@@ -54,13 +53,36 @@ const getRoutes = (): RouteProps[] => {
   return [
     {
       title: i18n.translate('xpack.synthetics.overviewRoute.title', {
+        defaultMessage: 'Synthetics Getting Started | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: GETTING_STARTED_ROUTE,
+      component: () => <OverviewPage />,
+      dataTestSubj: 'syntheticsGettingStartedPage',
+      pageHeader: {
+        pageTitle: (
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.synthetics.overview.pageHeader.title"
+                defaultMessage="Synthetics Getting started"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        rightSideItems: [
+          /* <AddMonitorBtn />*/
+        ],
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.overviewRoute.title', {
         defaultMessage: 'Synthetics Overview | {baseTitle}',
         values: { baseTitle },
       }),
       path: OVERVIEW_ROUTE,
       component: () => <OverviewPage />,
       dataTestSubj: 'syntheticsOverviewPage',
-      telemetryId: SyntheticsPage.Overview,
       pageHeader: {
         pageTitle: (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -89,7 +111,6 @@ const getRoutes = (): RouteProps[] => {
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorManagementPage',
-      telemetryId: SyntheticsPage.MonitorManagement,
       pageHeader: {
         pageTitle: (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -118,7 +139,6 @@ const getRoutes = (): RouteProps[] => {
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorAddPage',
-      telemetryId: SyntheticsPage.MonitorAdd,
       pageHeader: {
         pageTitle: (
           <FormattedMessage
@@ -133,12 +153,7 @@ const getRoutes = (): RouteProps[] => {
   ];
 };
 
-const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = ({
-  path,
-  title,
-  telemetryId,
-}) => {
-  useSyntheticsTelemetry(telemetryId);
+const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);
@@ -159,14 +174,12 @@ export const PageRouter: FC = () => {
           path,
           component: RouteComponent,
           dataTestSubj,
-          telemetryId,
           pageHeader,
           ...pageTemplateProps
         }) => (
-          <Route path={path} key={telemetryId} exact={true}>
+          <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
-              {/* <SyntheticsCallout /> TODO: See if the callout is needed for Synthetics App as well */}
-              <RouteInit title={title} path={path} telemetryId={telemetryId} />
+              <RouteInit title={title} path={path} />
               <SyntheticsPageTemplateComponent
                 path={path}
                 pageHeader={pageHeader}

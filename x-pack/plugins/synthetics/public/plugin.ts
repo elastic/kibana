@@ -257,6 +257,15 @@ function registerSyntheticsRoutesWithNavigation(
               sortKey: 499,
               entries: [
                 {
+                  label: i18n.translate('xpack.synthetics.gettingStarted', {
+                    defaultMessage: 'Getting started',
+                  }),
+                  app: 'synthetics',
+                  path: '/getting-started',
+                  matchFullPath: true,
+                  ignoreTrailingSlash: true,
+                },
+                {
                   label: i18n.translate('xpack.synthetics.overview.heading', {
                     defaultMessage: 'Monitors',
                   }),
