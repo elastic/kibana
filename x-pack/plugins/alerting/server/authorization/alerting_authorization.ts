@@ -32,6 +32,7 @@ export enum ReadOperations {
   GetAlertSummary = 'getAlertSummary',
   GetExecutionLog = 'getExecutionLog',
   Find = 'find',
+  GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
 }
 
 export enum WriteOperations {
