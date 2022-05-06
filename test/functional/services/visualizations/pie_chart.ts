@@ -35,7 +35,7 @@ export class PieChartService extends FtrService {
       if (name === 'Other') {
         sliceLabel = '__other__';
       }
-      const pieSlice = slices.find((slice) => slice.name === sliceLabel);
+      const pieSlice = slices.find((slice) => String(slice.name) === sliceLabel);
       const pie = await this.testSubjects.find(partitionVisChartSelector);
       if (pieSlice) {
         const pieSize = await pie.getSize();

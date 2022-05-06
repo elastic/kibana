@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const security = getService('security');
@@ -109,6 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultDataRange();
+        await elasticChart.setNewChartUiDebugFlag(true);
       });
 
       it('are not selected by default', async function () {

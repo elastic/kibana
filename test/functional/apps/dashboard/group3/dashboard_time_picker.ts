@@ -126,6 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '2015-09-19 06:31:44.000',
         '2015-09-23 18:31:44.000'
       );
+      await elasticChart.setNewChartUiDebugFlag(true);
       await pieChart.expectPieSliceCount(10);
     });
   });

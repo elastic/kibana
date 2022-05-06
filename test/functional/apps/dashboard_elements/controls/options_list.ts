@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -32,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
+      await elasticChart.setNewChartUiDebugFlag();
     });
 
     describe('Options List Control Editor selects relevant data views', async () => {
