@@ -37,6 +37,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
+    loadTestFile(require.resolve('./pages'));
+    loadTestFile(require.resolve('./model_management'));
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./embeddables'));
