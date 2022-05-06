@@ -161,6 +161,7 @@ export async function executor(
   const { summary, description } = execOptions.params;
 
   const externalService = createExternalService(
+    actionId,
     {
       config: execOptions.config,
       secrets: execOptions.secrets,
@@ -175,57 +176,58 @@ export async function executor(
     description,
   });
   console.log('result', result);
+  return result;
 
-  if (isOk(result)) {
-    const {
-      value: { status, statusText },
-    } = result;
-    logger.debug(
-      `response from cases webhook action "${actionId}": [HTTP ${status}] ${statusText}`
-    );
-
-    return successResult(actionId, data);
-  } else {
-    const { error } = result;
-    if (error.response) {
-      const {
-        status,
-        statusText,
-        headers: responseHeaders,
-        data: { message: responseMessage },
-      } = error.response;
-      const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
-      const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
-      logger.error(`error on ${actionId} cases webhook event: ${message}`);
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      // special handling for 5xx
-      if (status >= 500) {
-        return retryResult(actionId, message);
-      }
-
-      // special handling for rate limiting
-      if (status === 429) {
-        return pipe(
-          getRetryAfterIntervalFromHeaders(responseHeaders),
-          map((retry) => retryResultSeconds(actionId, message, retry)),
-          getOrElse(() => retryResult(actionId, message))
-        );
-      }
-      return errorResultInvalid(actionId, message);
-    } else if (error.code) {
-      const message = `[${error.code}] ${error.message}`;
-      logger.error(`error on ${actionId} cases webhook event: ${message}`);
-      return errorResultRequestFailed(actionId, message);
-    } else if (error.isAxiosError) {
-      const message = `${error.message}`;
-      logger.error(`error on ${actionId} cases webhook event: ${message}`);
-      return errorResultRequestFailed(actionId, message);
-    }
-
-    logger.error(`error on ${actionId} cases webhook action: unexpected error`);
-    return errorResultUnexpectedError(actionId);
-  }
+  // if (isOk(result)) {
+  //   // const {
+  //   //   value: { status, statusText },
+  //   // } = result;
+  //   // logger.debug(
+  //   //   `response from cases webhook action "${actionId}": [HTTP ${status}] ${statusText}`
+  //   // );
+  //   //
+  //   // return successResult(actionId, data);
+  // } else {
+  //   const { error } = result;
+  //   if (error.response) {
+  //     const {
+  //       status,
+  //       statusText,
+  //       headers: responseHeaders,
+  //       data: { message: responseMessage },
+  //     } = error.response;
+  //     const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
+  //     const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
+  //     logger.error(`error on ${actionId} cases webhook event: ${message}`);
+  //     // The request was made and the server responded with a status code
+  //     // that falls out of the range of 2xx
+  //     // special handling for 5xx
+  //     if (status >= 500) {
+  //       return retryResult(actionId, message);
+  //     }
+  //
+  //     // special handling for rate limiting
+  //     if (status === 429) {
+  //       return pipe(
+  //         getRetryAfterIntervalFromHeaders(responseHeaders),
+  //         map((retry) => retryResultSeconds(actionId, message, retry)),
+  //         getOrElse(() => retryResult(actionId, message))
+  //       );
+  //     }
+  //     return errorResultInvalid(actionId, message);
+  //   } else if (error.code) {
+  //     const message = `[${error.code}] ${error.message}`;
+  //     logger.error(`error on ${actionId} cases webhook event: ${message}`);
+  //     return errorResultRequestFailed(actionId, message);
+  //   } else if (error.isAxiosError) {
+  //     const message = `${error.message}`;
+  //     logger.error(`error on ${actionId} cases webhook event: ${message}`);
+  //     return errorResultRequestFailed(actionId, message);
+  //   }
+  //
+  //   logger.error(`error on ${actionId} cases webhook action: unexpected error`);
+  //   return errorResultUnexpectedError(actionId);
+  // }
 }
 
 // Action Executor Result w/ internationalisation

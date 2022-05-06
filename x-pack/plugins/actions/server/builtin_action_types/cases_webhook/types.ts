@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { ActionTypeExecutorResult } from '../../../common';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   ExternalIncidentServiceConfigurationSchema,
@@ -35,7 +36,7 @@ export interface ExternalServiceIncidentResponse {
 }
 
 export interface ExternalService {
-  createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
+  createIncident: (params: CreateIncidentParams) => Promise<ActionTypeExecutorResult>;
 }
 export interface ResponseError {
   errorMessages: string[] | null | undefined;

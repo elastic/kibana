@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
+import { pipe } from 'fp-ts/pipeable';
+import { getOrElse, map } from 'fp-ts/Option';
+import { ActionTypeExecutorResult } from '../../../common';
+import { isOk, promiseResult, Result } from '../lib/result_type';
 import {
   CreateIncidentParams,
   ExternalServiceCredentials,
@@ -21,6 +25,7 @@ import {
 import * as i18n from './translations';
 import { request, getErrorMessage, throwIfResponseIsNotValid } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_rersponse_retry_header';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
@@ -28,6 +33,7 @@ const BASE_URL = `rest/api/${VERSION}`;
 const VIEW_INCIDENT_URL = `browse`;
 
 export const createExternalService = (
+  actionId: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
@@ -151,38 +157,62 @@ export const createExternalService = (
     str = str.replace('$DESC', desc);
     return JSON.parse(str);
   };
-
+  // Action Executor Result w/ internationalisation
+  function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
+    return { status: 'ok', data, actionId };
+  }
   const createIncident = async ({
     summary,
     description,
-  }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
+  }: CreateIncidentParams): Promise<unknown> => {
     const data = replaceSumDesc(summary, description);
-    console.log('its happening!!', data);
+    console.log('cases webhook args!!', {
+      axios: axiosInstance,
+      url: `${incidentUrl}`,
+      logger,
+      method: 'post',
+      data,
+      configurationUtilities,
+    });
     try {
-      const res = await request({
-        axios: axiosInstance,
-        url: `${incidentUrl}`,
-        logger,
-        method: 'post',
-        data,
-        configurationUtilities,
-      });
-      console.log('it happened!!!', res);
+      const result: Result<AxiosResponse, AxiosError> = await promiseResult(
+        request({
+          axios: axiosInstance,
+          url: `${incidentUrl}`,
+          logger,
+          method: 'post',
+          data,
+          configurationUtilities,
+        })
+      );
+      console.log('it happened!!!', result);
 
-      throwIfResponseIsNotValid({
-        res,
-        requiredAttributesToBeInTheResponse: ['id'],
-      });
+      if (isOk(result)) {
+        const {
+          value: { status, statusText, data: data2 },
+        } = result;
+        console.log('DATA', data2);
+        logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
-      const updatedIncident = await getIncident(res.data.id);
-
-      console.log('updatedIncident!!!', updatedIncident);
-      return {
-        title: updatedIncident.key,
-        id: updatedIncident.id,
-        pushedDate: new Date(updatedIncident.created).toISOString(),
-        url: getIncidentViewURL(updatedIncident.key),
-      };
+        return successResult(actionId, data);
+      } else {
+        const { error } = result;
+        if (error.response) {
+          const {
+            status,
+            statusText,
+            headers: responseHeaders,
+            data: { message: responseMessage },
+          } = error.response;
+          const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
+          const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
+          logger.error(`error on ${actionId} webhook event: ${message}`);
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          // special handling for 5xx
+          return { actionId, message };
+        }
+      }
     } catch (error) {
       console.log('ERROR', error.response);
       throw new Error(
