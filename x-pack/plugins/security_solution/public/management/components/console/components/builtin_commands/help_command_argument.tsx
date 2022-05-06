@@ -13,7 +13,7 @@ import { HelpOutput } from '../help_output';
 import { CommandExecutionComponentProps } from '../../types';
 
 /**
- * Builtin component that handles the ouptut of command's `--help` argument
+ * Builtin component that handles the output of command's `--help` argument
  */
 export const HelpCommandArgument = memo<CommandExecutionComponentProps>((props) => {
   const CustomCommandHelp = props.command.commandDefinition.HelpComponent;

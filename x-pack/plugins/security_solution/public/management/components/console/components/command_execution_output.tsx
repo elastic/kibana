@@ -60,11 +60,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
       <CommandOutputContainer>
         <div>
           <UserCommandInput input={command.input} />
-          {isRunning && (
-            <>
-              <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />
-            </>
-          )}
+          {isRunning && <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />}
         </div>
         <div>
           <RenderComponent

@@ -16,7 +16,7 @@ type HelpOutputProps = PropsWithChildren<{
   command: MaybeImmutable<Command>;
   title?: ReactNode;
 }>;
-export const HelpOutput = memo<HelpOutputProps>(({ command, title, children }) => {
+export const HelpOutput = memo<HelpOutputProps>(({ title, children }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
   return (
