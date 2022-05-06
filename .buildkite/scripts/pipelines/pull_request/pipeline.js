@@ -10,20 +10,7 @@ const execSync = require('child_process').execSync;
 const fs = require('fs');
 // eslint-disable-next-line import/no-unresolved
 const { areChangesSkippable, doAnyChangesMatch } = require('kibana-buildkite-library');
-
-const SKIPPABLE_PATHS = [
-  /^docs\//,
-  /^rfcs\//,
-  /^.ci\/.+\.yml$/,
-  /^.ci\/es-snapshots\//,
-  /^.ci\/pipeline-library\//,
-  /^.ci\/Jenkinsfile_[^\/]+$/,
-  /^\.github\//,
-  /\.md$/,
-  /^\.backportrc\.json$/,
-  /^nav-kibana-dev\.docnav\.json$/,
-  /^src\/dev\/prs\/kibana_qa_pr_list\.json$/,
-];
+const { SKIPPABLE_PR_MATCHERS } = require('./skippable_pr_matchers');
 
 const REQUIRED_PATHS = [
   // this file is auto-generated and changes to it need to be validated with CI
@@ -49,7 +36,7 @@ const uploadPipeline = (pipelineContent) => {
 
 (async () => {
   try {
-    const skippable = await areChangesSkippable(SKIPPABLE_PATHS, REQUIRED_PATHS);
+    const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
       console.log('All changes in PR are skippable. Skipping CI.');
