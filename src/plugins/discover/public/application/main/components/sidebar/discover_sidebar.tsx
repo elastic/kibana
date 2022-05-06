@@ -340,7 +340,7 @@ export function DiscoverSidebarComponent({
             />
           </form>
         </EuiFlexItem>
-        <EuiFlexItem className="eui-yScroll" id={DSC_TOUR_STEP_ANCHOR_IDS.addFields}>
+        <EuiFlexItem className="eui-yScroll">
           <div
             ref={(el) => {
               if (documents && el && !el.dataset.dynamicScroll) {
@@ -413,7 +413,7 @@ export function DiscoverSidebarComponent({
                   initialIsOpen={true}
                   buttonContent={
                     <EuiText size="xs" id="available_fields">
-                      <strong>
+                      <strong id={DSC_TOUR_STEP_ANCHOR_IDS.addFields}>
                         <FormattedMessage
                           id="discover.fieldChooser.filter.availableFieldsTitle"
                           defaultMessage="Available fields"
