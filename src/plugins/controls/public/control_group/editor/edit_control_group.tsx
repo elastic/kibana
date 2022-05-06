@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import fastIsEqual from 'fast-deep-equal';
 import { EuiContextMenuItem } from '@elastic/eui';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -14,13 +15,17 @@ import { OverlayRef } from '@kbn/core/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupEditor } from './control_group_editor';
 import { pluginServices } from '../../services';
-import { ControlGroupContainer } from '..';
+import { ControlGroupContainer, ControlGroupInput } from '..';
 import { setFlyoutRef } from '../embeddable/control_group_container';
+import { ControlPanelState, ControlsPanels } from '../types';
 
 export interface EditControlGroupButtonProps {
   controlGroupContainer: ControlGroupContainer;
   closePopover: () => void;
 }
+
+const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInput) =>
+  fastIsEqual(a, b);
 
 export const EditControlGroup = ({
   controlGroupContainer,
@@ -47,15 +52,48 @@ export const EditControlGroup = ({
       });
     };
 
+    const onClose = (ref: OverlayRef, newInput?: ControlGroupInput) => {
+      if (!newInput) {
+        ref.close();
+        return;
+      }
+
+      const controlCount = Object.keys(controlGroupContainer.getInput().panels ?? {}).length;
+      const initialInput = controlGroupContainer.getInput();
+      if (controlCount > 0 && newInput.defaultControlWidth !== initialInput.defaultControlWidth) {
+        openConfirm(ControlGroupStrings.management.applyDefaultSize.getSubtitle(), {
+          confirmButtonText: ControlGroupStrings.management.applyDefaultSize.getConfirm(),
+          cancelButtonText: ControlGroupStrings.management.applyDefaultSize.getCancel(),
+          title: ControlGroupStrings.management.applyDefaultSize.getTitle(),
+        }).then((confirmed) => {
+          if (confirmed) {
+            const newPanels = {} as ControlsPanels;
+            Object.entries(initialInput.panels).forEach(
+              ([id, panel]) =>
+                (newPanels[id] = {
+                  ...panel,
+                  width: newInput.defaultControlWidth,
+                } as ControlPanelState)
+            );
+            newInput.panels = newPanels;
+          }
+          ref.close();
+          controlGroupContainer.updateInput(newInput);
+        });
+      } else if (!editorControlGroupInputIsEqual(newInput, initialInput)) {
+        ref.close();
+        controlGroupContainer.updateInput(newInput);
+      }
+    };
+
     const flyoutInstance = openFlyout(
       toMountPoint(
         <PresentationUtilProvider>
           <ControlGroupEditor
             initialInput={controlGroupContainer.getInput()}
-            updateInput={(changes) => controlGroupContainer.updateInput(changes)}
             controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
             onDeleteAll={() => onDeleteAll(flyoutInstance)}
-            onClose={() => flyoutInstance.close()}
+            onClose={(newInput?: ControlGroupInput) => onClose(flyoutInstance, newInput)}
           />
         </PresentationUtilProvider>
       ),

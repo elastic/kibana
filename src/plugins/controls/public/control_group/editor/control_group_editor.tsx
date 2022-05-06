@@ -49,28 +49,19 @@ import { pluginServices } from '../../services';
 interface EditControlGroupProps {
   initialInput: ControlGroupInput;
   controlCount: number;
-  updateInput: (input: Partial<ControlGroupInput>) => void;
   onDeleteAll: () => void;
-  onClose: () => void;
+  onClose: (newInput?: ControlGroupInput) => void;
 }
 
 type EditorControlGroupInput = ControlGroupInput &
   Required<Pick<ControlGroupInput, 'defaultControlWidth'>>;
 
-const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInput) =>
-  fastIsEqual(a, b);
-
 export const ControlGroupEditor = ({
   controlCount,
   initialInput,
-  updateInput,
   onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
-  const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
-  const { overlays } = pluginServices.getServices();
-  const { openConfirm } = overlays;
-
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
     ...getDefaultControlGroupInput(),
@@ -108,30 +99,30 @@ export const ControlGroupEditor = ({
     [controlGroupEditorState]
   );
 
-  const applyChangesToInput = async () => {
-    const inputToApply = { ...controlGroupEditorState };
-    if (controlCount > 0 && inputToApply.defaultControlWidth !== initialInput.defaultControlWidth) {
-      openConfirm(ControlGroupStrings.management.applyDefaultSize.getSubtitle(), {
-        confirmButtonText: ControlGroupStrings.management.applyDefaultSize.getConfirm(),
-        cancelButtonText: ControlGroupStrings.management.applyDefaultSize.getCancel(),
-        title: ControlGroupStrings.management.applyDefaultSize.getTitle(),
-      }).then((confirmed) => {
-        if (confirmed) {
-          const newPanels = {} as ControlsPanels;
-          Object.entries(initialInput.panels).forEach(
-            ([id, panel]) =>
-              (newPanels[id] = {
-                ...panel,
-                width: inputToApply.defaultControlWidth,
-              })
-          );
-          inputToApply.panels = newPanels;
-        }
-        updateInput(inputToApply);
-      });
-    } else if (!editorControlGroupInputIsEqual(inputToApply, initialInput))
-      updateInput(inputToApply);
-  };
+  // const applyChangesToInput = async () => {
+  //   const inputToApply = { ...controlGroupEditorState };
+  //   if (controlCount > 0 && inputToApply.defaultControlWidth !== initialInput.defaultControlWidth) {
+  //     openConfirm(ControlGroupStrings.management.applyDefaultSize.getSubtitle(), {
+  //       confirmButtonText: ControlGroupStrings.management.applyDefaultSize.getConfirm(),
+  //       cancelButtonText: ControlGroupStrings.management.applyDefaultSize.getCancel(),
+  //       title: ControlGroupStrings.management.applyDefaultSize.getTitle(),
+  //     }).then((confirmed) => {
+  //       if (confirmed) {
+  //         const newPanels = {} as ControlsPanels;
+  //         Object.entries(initialInput.panels).forEach(
+  //           ([id, panel]) =>
+  //             (newPanels[id] = {
+  //               ...panel,
+  //               width: inputToApply.defaultControlWidth,
+  //             })
+  //         );
+  //         inputToApply.panels = newPanels;
+  //       }
+  //       updateInput(inputToApply);
+  //     });
+  //   } else if (!editorControlGroupInputIsEqual(inputToApply, initialInput))
+  //     updateInput(inputToApply);
+  // };
 
   return (
     <>
@@ -325,8 +316,7 @@ export const ControlGroupEditor = ({
               color="primary"
               data-test-subj="control-group-editor-save"
               onClick={() => {
-                applyChangesToInput();
-                onClose();
+                onClose({ ...controlGroupEditorState });
               }}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
