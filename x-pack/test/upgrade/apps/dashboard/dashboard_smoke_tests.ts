@@ -37,12 +37,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await kibanaServer.uiSettings.update(
-            {
-              'visualization:visualize:legacyPieChartsLibrary': true,
-            },
-            { space }
-          );
           await browser.refresh();
         });
         dashboardTests.forEach(({ name, numPanels }) => {

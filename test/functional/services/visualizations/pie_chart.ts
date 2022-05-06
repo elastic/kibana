@@ -142,8 +142,8 @@ export class PieChartService extends FtrService {
     await this.inspector.expectTableData(expectedTableData);
   }
 
-  async getPieChartLabels() {
-    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
+  async getPieChartLabels(isNewLibrary: boolean = true) {
+    if (isNewLibrary) {
       const slices =
         (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
           ?.partitions ?? [];
@@ -167,9 +167,9 @@ export class PieChartService extends FtrService {
     );
   }
 
-  async getPieSliceCount() {
+  async getPieSliceCount(isNewLibrary: boolean = true) {
     this.log.debug('PieChart.getPieSliceCount');
-    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
+    if (isNewLibrary) {
       const slices =
         (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
           ?.partitions ?? [];
@@ -186,18 +186,18 @@ export class PieChartService extends FtrService {
     expect(slices.length).to.be(expectedCount);
   }
 
-  async expectPieSliceCount(expectedCount: number) {
+  async expectPieSliceCount(expectedCount: number, isNewLibrary: boolean = true) {
     this.log.debug(`PieChart.expectPieSliceCount(${expectedCount})`);
     await this.retry.try(async () => {
-      const slicesCount = await this.getPieSliceCount();
+      const slicesCount = await this.getPieSliceCount(isNewLibrary);
       expect(slicesCount).to.be(expectedCount);
     });
   }
 
-  async expectPieChartLabels(expectedLabels: string[]) {
+  async expectPieChartLabels(expectedLabels: string[], isNewLibrary: boolean = true) {
     this.log.debug(`PieChart.expectPieChartLabels(${expectedLabels.join(',')})`);
     await this.retry.try(async () => {
-      const pieData = await this.getPieChartLabels();
+      const pieData = await this.getPieChartLabels(isNewLibrary);
       expect(pieData.sort()).to.eql(expectedLabels);
     });
   }
