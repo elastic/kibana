@@ -94,7 +94,7 @@ Object {
           "right",
         ],
         "legendSize": Array [
-          130,
+          "large",
         ],
         "metric": Array [
           Object {

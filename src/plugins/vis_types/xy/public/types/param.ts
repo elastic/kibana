@@ -166,7 +166,7 @@ export interface XYVisConfig {
   addTimeMarker: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   orderBucketsBySum?: boolean;
   labels: ExpressionValueLabel;
   thresholdLine: ExpressionValueThresholdLine;

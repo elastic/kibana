@@ -7,13 +7,7 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
-import {
-  getVisSchemas,
-  VisToExpressionAst,
-  SchemaConfig,
-  DEFAULT_LEGEND_SIZE,
-  LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/public';
+import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   PIE_VIS_EXPRESSION_NAME,
@@ -71,7 +65,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     nestedLegend: vis.params?.nestedLegend ?? false,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
-    legendSize: LegendSizeToPixels[vis.params?.legendSize ?? DEFAULT_LEGEND_SIZE],
+    legendSize: vis.params?.legendSize,
     distinctColors: vis.params?.distinctColors,
     isDonut: vis.params.isDonut ?? false,
     emptySizeRatio: vis.params.emptySizeRatio,
