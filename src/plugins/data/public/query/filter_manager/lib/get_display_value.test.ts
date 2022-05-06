@@ -62,7 +62,7 @@ describe('getFieldDisplayValueFromFilter', () => {
       title: 'wrong data view',
       id: 'wrong data view',
     } as DataView;
-    const fieldLabel = getFieldDisplayValueFromFilter(phraseFilter, [wrongIndexPattern]);
+    const fieldLabel = getFieldDisplayValueFromFilter(phraseFilter, [wrongDataView]);
     expect(fieldLabel).toBe('');
   });
 
