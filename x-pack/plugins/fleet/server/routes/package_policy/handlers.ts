@@ -11,7 +11,9 @@ import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { appContextService, packagePolicyService } from '../../services';
+import { groupBy, keyBy } from 'lodash';
+
+import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
 import type {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
@@ -21,6 +23,8 @@ import type {
   UpgradePackagePoliciesRequestSchema,
   DryRunPackagePoliciesRequestSchema,
   FleetRequestHandler,
+  DeleteOrphanedIntegrationPoliciesRequestSchema,
+  PackagePolicy,
 } from '../../types';
 import type {
   CreatePackagePolicyResponse,
@@ -29,7 +33,14 @@ import type {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '../../../common';
+import { installationStatuses } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
+import { getInstallations } from '../../services/epm/packages';
+import {
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../constants';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,
@@ -79,6 +90,70 @@ export const getOnePackagePolicyHandler: RequestHandler<
     } else {
       return defaultIngestErrorHandler({ error, response });
     }
+  }
+};
+
+export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = async (
+  context,
+  request,
+  response
+) => {
+  const soClient = (await context.core).savedObjects.client;
+  try {
+    const installedPackages = await getInstallations(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+      filter: `
+        ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:${installationStatuses.Installed}
+    `,
+    });
+    const orphanedPackagePolicies: PackagePolicy[] = [];
+    const packagePolicies = await packagePolicyService.list(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+    });
+    const packagePoliciesByPackage = groupBy(packagePolicies.items, 'package.name');
+    const agentPolicies = await agentPolicyService.list(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+    });
+    const agentPoliciesById = keyBy(agentPolicies.items, 'id');
+    const usedPackages = installedPackages.saved_objects.filter(
+      ({ attributes: { name } }) => !!packagePoliciesByPackage[name]
+    );
+    usedPackages.forEach(({ attributes: { name, version } }) => {
+      packagePoliciesByPackage[name].forEach((packagePolicy) => {
+        if (!agentPoliciesById[packagePolicy.policy_id]) {
+          orphanedPackagePolicies.push(packagePolicy);
+        }
+      });
+    });
+
+    return response.ok({
+      body: {
+        items: orphanedPackagePolicies,
+        total: orphanedPackagePolicies.length,
+      },
+    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const deleteOrphanedIntegrationPolicyHandler: RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof DeleteOrphanedIntegrationPoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  try {
+    for (const id of request.body.ids) {
+      soClient.delete(PACKAGE_POLICY_SAVED_OBJECT_TYPE, id);
+    }
+
+    return response.ok({
+      body: {},
+    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
