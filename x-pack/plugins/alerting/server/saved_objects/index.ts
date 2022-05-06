@@ -12,6 +12,7 @@ import type {
   SavedObjectsServiceSetup,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { alertMappings } from './mappings';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
@@ -51,14 +52,15 @@ export function setupSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   ruleTypeRegistry: RuleTypeRegistry,
   logger: Logger,
-  isPreconfigured: (connectorId: string) => boolean
+  isPreconfigured: (connectorId: string) => boolean,
+  getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
-    migrations: getMigrations(encryptedSavedObjects, isPreconfigured),
+    migrations: getMigrations(encryptedSavedObjects, getSearchSourceMigrations(), isPreconfigured),
     mappings: alertMappings,
     management: {
       displayName: 'rule',
