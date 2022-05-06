@@ -317,7 +317,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     }
 
-    const httpFramework = createSubActionConnectorFramework({
+    const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
       logger: this.logger,
       actionsConfigUtils,
@@ -361,7 +361,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       >(
         connector: SubActionConnectorType<Config, Secrets>
       ) => {
-        httpFramework.registerConnector(connector);
+        subActionFramework.registerConnector(connector);
       },
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.preconfiguredActions.find(
