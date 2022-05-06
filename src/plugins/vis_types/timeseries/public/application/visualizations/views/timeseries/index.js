@@ -20,6 +20,7 @@ import {
   LineAnnotation,
   TooltipType,
   StackMode,
+  Placement,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -73,6 +74,7 @@ export const TimeSeries = ({
   xAxisFormatter,
   annotations,
   syncColors,
+  syncTooltips,
   palettesService,
   interval,
   isLastBucketDropped,
@@ -213,7 +215,9 @@ export const TimeSeries = ({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
-        externalPointerEvents={{ tooltip: { visible: false } }}
+        externalPointerEvents={{
+          tooltip: { visible: syncTooltips, placement: Placement.Right },
+        }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
