@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, RenderResult, waitFor, within } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { CommentType, ConnectorTypes } from '../../../common/api';
+import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
@@ -206,6 +206,34 @@ describe('Create case', () => {
       userEvent.click(renderResult.getByTestId('create-case-submit'));
       await waitFor(() => {
         expect(postCase).toBeCalledWith(sampleData);
+      });
+    });
+
+    it('should post a case on submit click with the selected severity', async () => {
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const renderResult = mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await fillFormReactTestingLib(renderResult);
+
+      userEvent.click(renderResult.getByTestId('case-severity-selection'));
+      expect(renderResult.getByTestId('case-severity-selection-high')).toBeTruthy();
+      userEvent.click(renderResult.getByTestId('case-severity-selection-high'));
+
+      userEvent.click(renderResult.getByTestId('create-case-submit'));
+      await waitFor(() => {
+        expect(postCase).toBeCalledWith({
+          ...sampleData,
+          severity: CaseSeverity.HIGH,
+        });
       });
     });
 
