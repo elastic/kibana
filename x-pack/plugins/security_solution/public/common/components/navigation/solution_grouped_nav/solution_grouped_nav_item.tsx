@@ -198,16 +198,7 @@ export const useFooterNavItems: () => NavItem[] = () => {
       id: 'get_started',
       render: () => (
         <EuiLink href="/get_started">
-          <EuiListGroupItem
-            label=" GET STARTED"
-            size="xs"
-            color="text"
-            icon={
-              <span role="img" aria-label="get started">
-                {'🚀 '}
-              </span>
-            }
-          />
+          <EuiListGroupItem label=" GET STARTED" size="xs" color="text" />
         </EuiLink>
       ),
     },
