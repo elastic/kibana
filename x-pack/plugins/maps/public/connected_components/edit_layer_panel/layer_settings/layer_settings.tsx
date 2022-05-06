@@ -7,7 +7,6 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
-  EuiColorPicker,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -20,17 +19,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
-import { Attribution } from '../../../../common/descriptor_types';
+import { Attribution, ColorFilter } from '../../../../common/descriptor_types';
 import { MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
 import { AttributionFormRow } from './attribution_form_row';
+import { ColorFilterSelect } from './color_filter_select';
 
 export interface Props {
   layer: ILayer;
   clearLayerAttribution: (layerId: string) => void;
   setLayerAttribution: (id: string, attribution: Attribution) => void;
-  updateColorTheme: (layerId: string, color: string) => void;
+  updateColorFilter: (layerId: string, colorFilter: ColorFilter) => void;
   updateLabel: (layerId: string, label: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
@@ -50,8 +50,8 @@ export function LayerSettings(props: Props) {
     props.updateLabel(layerId, label);
   };
 
-  const onColorThemeChange = (color: string) => {
-    props.updateColorTheme(layerId, color);
+  const onColorFilterChange = (colorFilter: ColorFilter) => {
+    props.updateColorFilter(layerId, colorFilter);
   }
 
   const onZoomChange = (value: [string, string]) => {
@@ -162,23 +162,19 @@ export function LayerSettings(props: Props) {
   };
 
   const renderColorPicker = () => {
-    if (!props.layer.supportsColorTheme()) {
+    if (!props.layer.supportsColorFilter()) {
       return null;
     }
 
-    return (
-      <EuiFormRow
-        display="columnCompressed"
-        label="Color theme"
-        helpText="Apply a color theme to the basemap"
-      >
-      <EuiColorPicker
-        color={props.layer.getColorTheme()}
-        mode='default'
-        onChange={onColorThemeChange}
-      />
+    const { color, operation, percentage } = props.layer.getColorFilter();
 
-      </EuiFormRow>
+    return (
+        <ColorFilterSelect
+          color={color}
+          operation={operation}
+          percentage={percentage}
+          onColorFilterChange={onColorFilterChange}
+        />
     )
   }
 
@@ -199,6 +195,7 @@ export function LayerSettings(props: Props) {
         {renderZoomSliders()}
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
+        <EuiSpacer size="m" />
         {renderColorPicker()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}

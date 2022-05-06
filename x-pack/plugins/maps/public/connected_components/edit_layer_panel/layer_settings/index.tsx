@@ -11,7 +11,7 @@ import { LayerSettings } from './layer_settings';
 import {
   clearLayerAttribution,
   setLayerAttribution,
-  updateLayerColorTheme,
+  updateLayerColorFilter,
   updateLayerLabel,
   updateLayerMaxZoom,
   updateLayerMinZoom,
@@ -19,14 +19,14 @@ import {
   updateLabelsOnTop,
   updateFittableFlag,
 } from '../../../actions';
-import { Attribution } from '../../../../common/descriptor_types';
+import { Attribution, ColorFilter } from '../../../../common/descriptor_types';
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     clearLayerAttribution: (id: string) => dispatch(clearLayerAttribution(id)),
     setLayerAttribution: (id: string, attribution: Attribution) =>
       dispatch(setLayerAttribution(id, attribution)),
-    updateColorTheme: (id: string, color: string) => dispatch(updateLayerColorTheme(id, color)),
+    updateColorFilter: (id: string, colorFilter: ColorFilter) => dispatch(updateLayerColorFilter(id, colorFilter)),
     updateLabel: (id: string, label: string) => dispatch(updateLayerLabel(id, label)),
     updateMinZoom: (id: string, minZoom: number) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id: string, maxZoom: number) => dispatch(updateLayerMaxZoom(id, maxZoom)),

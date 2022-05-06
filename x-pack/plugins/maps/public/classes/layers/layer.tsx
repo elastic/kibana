@@ -26,6 +26,7 @@ import {
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   Attribution,
+  ColorFilter,
   CustomIcon,
   LayerDescriptor,
   MapExtent,
@@ -52,7 +53,7 @@ export interface ILayer {
   supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
-  getColorTheme(): string | null;
+  getColorFilter(): ColorFilter;
   getLabel(): string;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
@@ -103,7 +104,7 @@ export interface ILayer {
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
-  supportsColorTheme: () => boolean;
+  supportsColorFilter: () => boolean;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -146,7 +147,6 @@ export class AbstractLayer implements ILayer {
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
       alpha: _.get(options, 'alpha', 0.75),
-      colorTheme: _.get(options, 'colorTheme'),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
       includeInFitToBounds:
@@ -256,10 +256,6 @@ export class AbstractLayer implements ILayer {
     throw new Error('Should implement AbstractLayer#getCurrentStyle');
   }
 
-  getColorTheme(): string | null {
-    return this._descriptor.colorTheme ?? null;
-  }
-
   getLabel(): string {
     return this._descriptor.label ? this._descriptor.label : '';
   }
@@ -344,6 +340,10 @@ export class AbstractLayer implements ILayer {
 
   getQuery(): Query | null {
     return this._descriptor.query ? this._descriptor.query : null;
+  }
+
+  getColorFilter(): ColorFilter {
+    return this._descriptor.colorFilter ?? {};
   }
 
   async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
@@ -475,7 +475,7 @@ export class AbstractLayer implements ILayer {
     return false;
   }
 
-  supportsColorTheme(): boolean {
+  supportsColorFilter(): boolean {
     return false;
   }
 

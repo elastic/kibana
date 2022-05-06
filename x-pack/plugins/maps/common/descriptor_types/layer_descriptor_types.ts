@@ -18,10 +18,17 @@ import {
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
 import { LAYER_TYPE } from '../constants';
+import type { blendMode } from '@elastic/ems-client';
 
 export type Attribution = {
   label: string;
   url: string;
+};
+
+export type ColorFilter = {
+  color?: string;
+  operation?: blendMode;
+  percentage?: number;
 };
 
 export type JoinDescriptor = {
@@ -54,7 +61,7 @@ export type LayerDescriptor = {
   alpha?: number;
   attribution?: Attribution;
   id: string;
-  colorTheme?: string;
+  colorFilter?: ColorFilter;
   label?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;

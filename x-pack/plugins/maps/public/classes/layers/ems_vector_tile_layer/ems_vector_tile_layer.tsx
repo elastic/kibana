@@ -51,6 +51,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
+    tileLayerDescriptor.colorFilter = _.get(options, 'colorFilter', {});
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
   }
@@ -380,10 +381,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return [];
   }
 
-  _setColorTheme(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
-    const theme = this.getColorTheme();
-    if (theme !== null) {
-      const properties = TMSService.transformColorProperties(mbLayer, theme);
+  _setColorFilter(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
+    const { color, operation, percentage } = this.getColorFilter();
+    if (color !== undefined && operation !== undefined) {
+      const properties = TMSService.transformColorProperties(mbLayer, color, operation, percentage);
       for (const { property, color } of properties) {
         mbMap.setPaintProperty(mbLayerId, property, color);
       }
@@ -425,7 +426,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
-      this._setColorTheme(mbMap, mbLayer, mbLayerId);
+      this._setColorFilter(mbMap, mbLayer, mbLayerId);
     });
   }
 
@@ -437,7 +438,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return true;
   }
 
-  supportsColorTheme(): boolean {
+  supportsColorFilter(): boolean {
     return true;
   }
 
