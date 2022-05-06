@@ -7,7 +7,9 @@
 /// <reference types="node" />
 
 import { AddConfigDeprecation } from '@kbn/config';
+import { AnalyticsClient } from '@kbn/analytics-client';
 import apm from 'elastic-apm-node';
+import { AwaitedProperties } from '@kbn/utility-types';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
@@ -20,6 +22,7 @@ import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
+import { ContextProviderOpts } from '@kbn/analytics-client';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
@@ -32,7 +35,12 @@ import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Event as Event_2 } from '@kbn/analytics-client';
+import { EventContext } from '@kbn/analytics-client';
+import { EventType } from '@kbn/analytics-client';
+import { EventTypeOpts } from '@kbn/analytics-client';
 import { IncomingHttpHeaders } from 'http';
+import { IShipper } from '@kbn/analytics-client';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
@@ -41,6 +49,7 @@ import { LogRecord } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
@@ -48,18 +57,37 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Readable } from 'stream';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
-import type { RequestHandlerContext as RequestHandlerContext_2 } from 'src/core/server';
 import { ResponseObject } from '@hapi/hapi';
 import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
+import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { Stream } from 'stream';
+import { TelemetryCounter } from '@kbn/analytics-client';
+import { TelemetryCounterType } from '@kbn/analytics-client';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { URL as URL_2 } from 'url';
 
 export { AddConfigDeprecation }
+
+export { AnalyticsClient }
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
 
 // @public
 export const APP_WRAPPER_CLASS = "kbnAppWrapper";
@@ -294,6 +322,8 @@ export { ConfigService }
 // @internal
 export type ConfigUsageData = Record<string, any | any[]>;
 
+export { ContextProviderOpts }
+
 // @public
 export interface ContextSetup {
     createContextContainer(): IContextContainer;
@@ -408,11 +438,37 @@ export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => 
 // @public
 export interface CorePreboot {
     // (undocumented)
+    analytics: AnalyticsServicePreboot;
+    // (undocumented)
     elasticsearch: ElasticsearchServicePreboot;
     // (undocumented)
     http: HttpServicePreboot;
     // (undocumented)
     preboot: PrebootServicePreboot;
+}
+
+// @public
+export interface CoreRequestHandlerContext {
+    // (undocumented)
+    deprecations: {
+        client: DeprecationsClient;
+    };
+    // (undocumented)
+    elasticsearch: {
+        client: IScopedClusterClient;
+    };
+    // (undocumented)
+    savedObjects: {
+        client: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
+        getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+        getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+        getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+    };
+    // (undocumented)
+    uiSettings: {
+        client: IUiSettingsClient;
+    };
 }
 
 // @internal
@@ -438,6 +494,8 @@ export interface CoreServicesUsageData {
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // (undocumented)
+    analytics: AnalyticsServiceSetup;
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
@@ -474,6 +532,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    analytics: AnalyticsServiceStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
@@ -805,6 +865,11 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
+// @public (undocumented)
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+    [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
@@ -859,6 +924,7 @@ export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 // @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
+    readonly enabledOnAnonymousPages?: boolean;
     readonly id: PluginName;
     readonly optionalPlugins: readonly PluginName[];
     readonly requiredBundles: readonly PluginName[];
@@ -981,6 +1047,10 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+export { Event_2 as Event }
+
+export { EventContext }
+
 // Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -990,6 +1060,10 @@ export class EventLoopDelaysMonitor {
     reset(): void;
     stop(): void;
 }
+
+export { EventType }
+
+export { EventTypeOpts }
 
 // @public (undocumented)
 export interface ExecutionContextSetup {
@@ -1084,16 +1158,18 @@ export interface HttpAuth {
 
 // @public
 export interface HttpResources {
-    register: <P, Q, B, Context extends RequestHandlerContext_2 = RequestHandlerContext_2>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B, Context>) => void;
+    register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B, Context>) => void;
 }
 
 // @public
 export interface HttpResourcesRenderOptions {
     headers?: ResponseHeaders;
+    // @internal
+    includeExposedConfigKeys?: boolean;
 }
 
 // @public
-export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext_2 = RequestHandlerContext_2> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
+export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 
 // @public
 export type HttpResourcesResponseOptions = HttpResponseOptions;
@@ -1143,7 +1219,7 @@ export interface HttpServiceSetup {
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
     registerOnPreResponse: (handler: OnPreResponseHandler) => void;
     registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
-    registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Context>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
+    registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Omit<Context, 'resolve'>>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
 }
 
 // @public (undocumented)
@@ -1175,7 +1251,7 @@ export interface IContextContainer {
 }
 
 // @public
-export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => Promise<Context[ContextName]> | Context[ContextName];
+export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => MaybePromise<Awaited<Context[ContextName]>>;
 
 // @public
 export interface ICspConfig {
@@ -1263,7 +1339,9 @@ export interface IntervalHistogram {
 
 // @public (undocumented)
 export interface IRenderOptions {
-    includeUserSettings?: boolean;
+    // @internal
+    includeExposedConfigKeys?: boolean;
+    isAnonymousPage?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
 }
@@ -1309,6 +1387,8 @@ export interface IScopedClusterClient {
     readonly asCurrentUser: ElasticsearchClient;
     readonly asInternalUser: ElasticsearchClient;
 }
+
+export { IShipper }
 
 // @public
 export interface IUiSettingsClient {
@@ -1414,7 +1494,7 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | Stream | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
@@ -1636,6 +1716,8 @@ export interface OpsServerMetrics {
     };
 }
 
+export { OptInConfig }
+
 export { PackageInfo }
 
 // @public
@@ -1692,6 +1774,7 @@ export interface PluginManifest {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     readonly configPath: ConfigPath;
     readonly description?: string;
+    readonly enabledOnAnonymousPages?: boolean;
     // @deprecated
     readonly extraPublicDirs?: string[];
     readonly id: PluginName;
@@ -1787,26 +1870,14 @@ export interface RegisterDeprecationsConfig {
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
-export interface RequestHandlerContext {
+export interface RequestHandlerContext extends RequestHandlerContextBase {
     // (undocumented)
-    core: {
-        savedObjects: {
-            client: SavedObjectsClientContract;
-            typeRegistry: ISavedObjectTypeRegistry;
-            getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-            getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-            getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-        };
-        elasticsearch: {
-            client: IScopedClusterClient;
-        };
-        uiSettings: {
-            client: IUiSettingsClient;
-        };
-        deprecations: {
-            client: DeprecationsClient;
-        };
-    };
+    core: Promise<CoreRequestHandlerContext>;
+}
+
+// @public (undocumented)
+export interface RequestHandlerContextBase {
+    resolve: <T extends keyof Omit<this, 'resolve'>>(parts: T[]) => Promise<AwaitedProperties<Pick<this, T>>>;
 }
 
 // @public
@@ -1999,8 +2070,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 
@@ -2468,7 +2541,7 @@ export class SavedObjectsImporter {
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
     });
-    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    import({ readStream, createNewCopies, namespace, overwrite, refresh, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 }
 
@@ -2531,6 +2604,7 @@ export interface SavedObjectsImportOptions {
     namespace?: string;
     overwrite: boolean;
     readStream: Readable;
+    refresh?: boolean | 'wait_for';
 }
 
 // @public
@@ -3055,6 +3129,8 @@ export type SharedGlobalConfig = RecursiveReadonly<{
     savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 
+export { ShipperClassConstructor }
+
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
@@ -3071,6 +3147,10 @@ export interface StatusServiceSetup {
     overall$: Observable<ServiceStatus>;
     set(status$: Observable<ServiceStatus>): void;
 }
+
+export { TelemetryCounter }
+
+export { TelemetryCounterType }
 
 // @public
 export interface UiSettingsParams<T = unknown> {
@@ -3166,8 +3246,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:393:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:395:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:502:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:405:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:407:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:514:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

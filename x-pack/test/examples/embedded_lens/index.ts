@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../../../test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
@@ -13,6 +13,8 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
   const kibanaServer = getService('kibanaServer');
 
   describe('embedded Lens examples', function () {
+    this.tags('skipFirefox');
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -30,10 +32,6 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
       );
     });
 
-    describe('', function () {
-      this.tags(['ciGroup4', 'skipFirefox']);
-
-      loadTestFile(require.resolve('./embedded_example'));
-    });
+    loadTestFile(require.resolve('./embedded_example'));
   });
 }

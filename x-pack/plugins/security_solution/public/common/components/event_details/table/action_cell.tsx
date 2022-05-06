@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useState, useContext } from 'react';
+import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EnrichedFieldInfo } from '../types';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
-import { TimelineContext } from '../../../../../../timelines/public';
 
 interface Props extends EnrichedFieldInfo {
   contextId: string;
@@ -18,6 +18,7 @@ interface Props extends EnrichedFieldInfo {
   disabled?: boolean;
   getLinkValue?: (field: string) => string | null;
   onFilterAdded?: () => void;
+  setIsPopoverVisible?: (isVisible: boolean) => void;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   hideAddToTimeline?: boolean;
 }
@@ -32,6 +33,7 @@ export const ActionCell: React.FC<Props> = React.memo(
     getLinkValue,
     linkValue,
     onFilterAdded,
+    setIsPopoverVisible,
     timelineId,
     toggleColumn,
     values,
@@ -55,9 +57,10 @@ export const ActionCell: React.FC<Props> = React.memo(
     const toggleTopN = useCallback(() => {
       setShowTopN((prevShowTopN) => {
         const newShowTopN = !prevShowTopN;
+        if (setIsPopoverVisible) setIsPopoverVisible(newShowTopN);
         return newShowTopN;
       });
-    }, []);
+    }, [setIsPopoverVisible]);
 
     const closeTopN = useCallback(() => {
       setShowTopN(false);

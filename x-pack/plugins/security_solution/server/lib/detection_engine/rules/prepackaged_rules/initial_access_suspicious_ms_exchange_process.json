@@ -16,6 +16,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Exchange Server UM Spawning Suspicious Processes",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n  process.parent.name : (\"UMService.exe\", \"UMWorkerProcess.exe\") and\n    not process.name : (\"werfault.exe\", \"wermgr.exe\")\n",
   "references": [
     "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers",
@@ -50,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

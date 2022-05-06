@@ -18,6 +18,7 @@ import { preparePack } from '../../tasks/packs';
 import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
 import { getSavedQueriesDropdown } from '../../screens/live_query';
+import { ROLES } from '../../test';
 
 describe('ALL - Packs', () => {
   const integration = 'Osquery Manager';
@@ -32,8 +33,9 @@ describe('ALL - Packs', () => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_2');
       runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_3');
     });
+
     beforeEach(() => {
-      login();
+      login(ROLES.soc_manager);
       navigateTo('/app/osquery');
     });
 
@@ -53,7 +55,7 @@ describe('ALL - Packs', () => {
       cy.react('List').first().click();
       findAndClickButton('Add query');
       cy.contains('Attach next query');
-      getSavedQueriesDropdown().click().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
+      getSavedQueriesDropdown().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
         .clear()
@@ -90,7 +92,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Add query');
       cy.contains('Attach next query');
       cy.contains('ID must be unique').should('not.exist');
-      getSavedQueriesDropdown().click().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
+      getSavedQueriesDropdown().type(`${SAVED_QUERY_ID}{downArrow}{enter}`);
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
@@ -168,7 +170,7 @@ describe('ALL - Packs', () => {
 
       findAndClickButton('Add query');
 
-      getSavedQueriesDropdown().click().type('Multiple {downArrow} {enter}');
+      getSavedQueriesDropdown().type('Multiple {downArrow} {enter}');
       cy.contains('Custom key/value pairs');
       cy.contains('Days of uptime');
       cy.contains('List of keywords used to tag each');
@@ -176,7 +178,7 @@ describe('ALL - Packs', () => {
       cy.contains('Client network address.');
       cy.contains('Total uptime seconds');
 
-      getSavedQueriesDropdown().click().type('NOMAPPING {downArrow} {enter}');
+      getSavedQueriesDropdown().type('NOMAPPING {downArrow} {enter}');
       cy.contains('Custom key/value pairs').should('not.exist');
       cy.contains('Days of uptime').should('not.exist');
       cy.contains('List of keywords used to tag each').should('not.exist');
@@ -184,7 +186,7 @@ describe('ALL - Packs', () => {
       cy.contains('Client network address.').should('not.exist');
       cy.contains('Total uptime seconds').should('not.exist');
 
-      getSavedQueriesDropdown().click().type('ONE_MAPPING {downArrow} {enter}');
+      getSavedQueriesDropdown().type('ONE_MAPPING {downArrow} {enter}');
       cy.contains('Name of the continent');
       cy.contains('Seconds of uptime');
 
@@ -202,6 +204,7 @@ describe('ALL - Packs', () => {
       deleteAndConfirm('pack');
     });
   });
+
   describe('Validate that agent is getting removed from pack if we remove agent', () => {
     beforeEach(() => {
       login();
@@ -247,6 +250,20 @@ describe('ALL - Packs', () => {
       cy.wait(1000);
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');
+    });
+  });
+
+  describe('Load prebuilt packs', () => {
+    beforeEach(() => {
+      login(ROLES.soc_manager);
+      navigateTo('/app/osquery/packs');
+    });
+
+    it('should load prebuilt packs', () => {
+      cy.contains('Load Elastic prebuilt packs').click();
+      cy.contains('Load Elastic prebuilt packs').should('not.exist');
+      cy.wait(1000);
+      cy.react('EuiTableRow').should('have.length.above', 5);
     });
   });
 });

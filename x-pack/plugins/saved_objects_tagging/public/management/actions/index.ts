@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { TagsCapabilities } from '../../../common';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
 import { TagAction } from './types';

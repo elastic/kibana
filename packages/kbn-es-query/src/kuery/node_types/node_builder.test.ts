@@ -7,7 +7,7 @@
  */
 
 import { nodeBuilder } from './node_builder';
-import { toElasticsearchQuery } from '../index';
+import { toElasticsearchQuery } from '..';
 
 jest.mock('../grammar');
 

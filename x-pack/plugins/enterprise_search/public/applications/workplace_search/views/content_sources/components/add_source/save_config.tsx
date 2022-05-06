@@ -121,10 +121,10 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
       <EuiSpacer />
       <EuiFlexGroup direction="column" justifyContent="flexStart" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ApiKey label={PUBLIC_KEY_LABEL} apiKey={publicKey} />
+          <ApiKey label={PUBLIC_KEY_LABEL} apiKey={publicKey || ''} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ApiKey label={CONSUMER_KEY_LABEL} apiKey={consumerKey} />
+          <ApiKey label={CONSUMER_KEY_LABEL} apiKey={consumerKey || ''} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

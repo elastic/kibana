@@ -18,7 +18,6 @@ export enum UsersQueries {
   kpiTotalUsers = 'usersKpiTotalUsers',
   users = 'allUsers',
   authentications = 'authentications',
-  authenticationsEntities = 'authenticationsEntities',
 }
 
 export type UserskKpiStrategyResponse = Omit<TotalUsersKpiStrategyResponse, 'rawResponse'>;

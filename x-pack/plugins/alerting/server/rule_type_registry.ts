@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
-import { Logger } from 'kibana/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
+import { Logger } from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,

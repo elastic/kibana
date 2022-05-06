@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
-import type { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
@@ -16,16 +16,14 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
-import type { TopNavMenuData } from 'src/plugins/navigation/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
@@ -279,7 +277,7 @@ const FleetTopNav = memo(
     const topNavConfig: TopNavMenuData[] = [
       {
         label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-          defaultMessage: 'Send Feedback',
+          defaultMessage: 'Send feedback',
         }),
         iconType: 'popout',
         run: () => window.open(FEEDBACK_URL),

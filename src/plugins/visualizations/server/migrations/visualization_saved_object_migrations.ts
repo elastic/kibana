@@ -7,12 +7,16 @@
  */
 
 import { cloneDeep, get, omit, has, flow, forOwn, mapValues } from 'lodash';
-import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
-import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
-import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
+import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
-import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '../../../data/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../data_views/common';
+import {
+  DEFAULT_QUERY_LANGUAGE,
+  isSerializedSearchSource,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -1215,27 +1219,31 @@ const visualizationSavedObjectTypeMigrations = {
 /**
  * This creates a migration map that applies search source migrations to legacy visualization SOs
  */
-const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+const getVisualizationSearchSourceMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
   mapValues<MigrateFunctionsObject, MigrateFunction>(
     searchSourceMigrations,
     (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
       (state) => {
-        const _state = state as unknown as { attributes: VisualizationSavedObjectAttributes };
+        const _state = state as { attributes: VisualizationSavedObjectAttributes };
 
-        const parsedSearchSourceJSON = _state.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-
-        if (!parsedSearchSourceJSON) return _state;
-
-        return {
-          ..._state,
-          attributes: {
-            ..._state.attributes,
-            kibanaSavedObjectMeta: {
-              ..._state.attributes.kibanaSavedObjectMeta,
-              searchSourceJSON: JSON.stringify(migrate(JSON.parse(parsedSearchSourceJSON))),
+        const parsedSearchSourceJSON = JSON.parse(
+          _state.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        if (isSerializedSearchSource(parsedSearchSourceJSON)) {
+          return {
+            ..._state,
+            attributes: {
+              ..._state.attributes,
+              kibanaSavedObjectMeta: {
+                ..._state.attributes.kibanaSavedObjectMeta,
+                searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
+              },
             },
-          },
-        };
+          };
+        }
+        return _state;
       }
   );
 
@@ -1244,7 +1252,5 @@ export const getAllMigrations = (
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     visualizationSavedObjectTypeMigrations,
-    getVisualizationSearchSourceMigrations(
-      searchSourceMigrations
-    ) as unknown as SavedObjectMigrationMap
+    getVisualizationSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
   );

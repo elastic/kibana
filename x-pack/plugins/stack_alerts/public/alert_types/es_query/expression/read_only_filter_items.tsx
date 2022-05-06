@@ -8,17 +8,19 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { getDisplayValueFromFilter } from '../../../../../../../src/plugins/data/public';
-import { Filter, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { FilterItem } from '../../../../../../../src/plugins/unified_search/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import { Filter } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { FilterItem } from '@kbn/unified-search-plugin/public';
 
 const FilterItemComponent = injectI18n(FilterItem);
 
 interface ReadOnlyFilterItemsProps {
   filters: Filter[];
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
 }
 
 const noOp = () => {};
@@ -29,7 +31,12 @@ export const ReadOnlyFilterItems = ({ filters, indexPatterns }: ReadOnlyFilterIt
   const filterList = filters.map((filter, index) => {
     const filterValue = getDisplayValueFromFilter(filter, indexPatterns);
     return (
-      <EuiFlexItem grow={false} className="globalFilterBar__flexItem">
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          max-width: 100%;
+        `}
+      >
         <FilterItemComponent
           key={`${filter.meta.key}${filterValue}`}
           id={`${index}`}

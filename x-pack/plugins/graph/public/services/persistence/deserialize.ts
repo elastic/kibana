@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   SerializedNode,
   UrlTemplate,
@@ -25,8 +27,6 @@ import {
   colorChoices,
   iconChoicesByClass,
 } from '../../helpers/style_choices';
-import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
-import type { DataView } from '../../../../../../src/plugins/data_views/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,

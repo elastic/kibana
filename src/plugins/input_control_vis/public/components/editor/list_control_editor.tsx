@@ -11,11 +11,11 @@ import React, { PureComponent, ComponentType } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
+import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IndexPatternSelectProps } from '../../../../unified_search/public';
-import { DataView, DataViewField } from '../../../../data_views/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface ListControlEditorState {

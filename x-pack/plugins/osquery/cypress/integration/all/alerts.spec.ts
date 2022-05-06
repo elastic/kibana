@@ -18,6 +18,7 @@ import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { ROLES } from '../../test';
 
 describe('Alert Event Details', () => {
   before(() => {
@@ -25,7 +26,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
   });
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
   });
 
   after(() => {
@@ -36,6 +37,7 @@ describe('Alert Event Details', () => {
   it('should be able to run live query', () => {
     const PACK_NAME = 'testpack';
     const RULE_NAME = 'Test-rule';
+    const TIMELINE_NAME = 'Untitled timeline';
     navigateTo('/app/osquery/packs');
     preparePack(PACK_NAME);
     findAndClickButton('Edit');
@@ -56,6 +58,7 @@ describe('Alert Event Details', () => {
     cy.getBySel('ruleSwitch').click();
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
     cy.visit('/app/security/alerts');
+    cy.wait(500);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
@@ -63,12 +66,16 @@ describe('Alert Event Details', () => {
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
-
+    cy.contains('Save for later').click();
+    cy.contains('Save query');
+    cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();
+    cy.getBySel('add-to-timeline').first().click();
+    cy.getBySel('globalToastList').contains('Added');
     cy.getBySel(RESULTS_TABLE).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
     });
-    cy.contains('Save for later').click();
-    cy.contains('Save query');
-    cy.contains(/^Save$/);
+    cy.contains('Cancel').click();
+    cy.contains(TIMELINE_NAME).click();
+    cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
   });
 });

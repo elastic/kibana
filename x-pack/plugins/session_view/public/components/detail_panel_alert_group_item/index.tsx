@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { EuiIcon, EuiText, EuiAccordion, EuiNotificationBadge } from '@elastic/eui';
-import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent } from '../../../common/types/process_tree';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from '../detail_panel_alert_list_item/styles';
@@ -18,7 +18,7 @@ export const ALERT_GROUP_ITEM_TITLE_TEST_ID = 'sessionView:detailPanelAlertGroup
 
 interface DetailPanelAlertsGroupItemDeps {
   alerts: ProcessEvent[];
-  onProcessSelected: (process: Process) => void;
+  onJumpToEvent: (event: ProcessEvent) => void;
   onShowAlertDetails: (alertId: string) => void;
 }
 
@@ -27,7 +27,7 @@ interface DetailPanelAlertsGroupItemDeps {
  */
 export const DetailPanelAlertGroupItem = ({
   alerts,
-  onProcessSelected,
+  onJumpToEvent,
   onShowAlertDetails,
 }: DetailPanelAlertsGroupItemDeps) => {
   const styles = useStyles();
@@ -49,19 +49,24 @@ export const DetailPanelAlertGroupItem = ({
       arrowDisplay="right"
       initialIsOpen={false}
       buttonContent={
-        <EuiText data-test-subj={ALERT_GROUP_ITEM_TITLE_TEST_ID} css={styles.alertTitle} size="s">
-          <p>
+        <EuiText
+          data-test-subj={ALERT_GROUP_ITEM_TITLE_TEST_ID}
+          css={styles.alertTitleContainer}
+          size="s"
+        >
+          <p css={styles.alertTitle}>
             <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
             {dataOrDash(rule?.name)}
           </p>
         </EuiText>
       }
-      css={styles.alertItem}
+      css={styles.alertGroupItem}
       extraAction={
         <EuiNotificationBadge
           data-test-subj={ALERT_GROUP_ITEM_COUNT_TEST_ID}
           className="eui-alignCenter"
           size="m"
+          css={styles.alertCountArrowPad}
         >
           {alertsCount}
         </EuiNotificationBadge>
@@ -75,7 +80,7 @@ export const DetailPanelAlertGroupItem = ({
             key={key}
             minimal
             event={event}
-            onProcessSelected={onProcessSelected}
+            onJumpToEvent={onJumpToEvent}
             onShowAlertDetails={onShowAlertDetails}
           />
         );
