@@ -81,8 +81,15 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
             filteredExecutionUUIDs: {
               terms: {
                 field: EXECUTION_UUID_FIELD,
-                order: { '@timestamp': 'desc' },
+                order: { executeStartTime: 'desc' },
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
+              },
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: '@timestamp',
+                  },
+                },
               },
             },
           },
