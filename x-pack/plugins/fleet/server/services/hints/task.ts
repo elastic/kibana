@@ -12,6 +12,7 @@ import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
+import get from 'lodash/get';
 
 import partition from 'lodash/partition';
 
@@ -116,11 +117,32 @@ const parseAnnotations = (hint: Hint): ParsedAnnotations => {
 
     if (VALID_HINTS.includes(parsedKey)) {
       // @ts-ignore
-      result[parsedKey] = val;
+      result[parsedKey] = templateVal(val, hint);
     }
   });
 
   return result;
+};
+
+const VALID_TEMPLATE_VARS = ['kubernetes.pod.ip'];
+const toTemplateStr = (s: string) => '${' + s + '}';
+const getTemplateVarsRegex = /(?<=\$\{).*?(?=\})/gm;
+export const templateVal = (val: string, hint: Hint): string => {
+  const templateVars = val.match(getTemplateVarsRegex);
+
+  if (!templateVars) return val;
+
+  const validTemplateVars = new Set(templateVars.filter((v) => VALID_TEMPLATE_VARS.includes(v)));
+
+  if (!validTemplateVars.size) return val;
+
+  let templatedVar = val;
+
+  validTemplateVars.forEach((templateVar) => {
+    templatedVar = templatedVar.replaceAll(toTemplateStr(templateVar), get(hint, templateVar));
+  });
+
+  return templatedVar;
 };
 
 const getAgentForHint = async (
