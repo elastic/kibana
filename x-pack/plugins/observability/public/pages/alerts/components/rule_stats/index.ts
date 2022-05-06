@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { EndpointConsole } from './endpoint_console';
+export { renderRuleStats } from './rule_stats';
+export type { RuleStatsState } from './types';

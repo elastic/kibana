@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { useConsoleStore } from '../../components/console_state/console_state';
-import { CommandServiceInterface } from '../../types';
+export interface RuleStatsState {
+  total: number;
+  disabled: number;
+  muted: number;
+  error: number;
+  snoozed: number;
+}
 
-export const useCommandService = (): CommandServiceInterface => {
-  return useConsoleStore().state.commandService;
-};
+export type StatType = 'disabled' | 'snoozed' | 'error';
