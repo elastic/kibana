@@ -13,7 +13,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   return {
