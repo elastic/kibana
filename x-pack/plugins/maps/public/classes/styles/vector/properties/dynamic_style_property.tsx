@@ -43,7 +43,6 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
   getField(): IField | null;
   getFieldName(): string;
-  getMbFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
   getCategoryFieldMeta(): Category[];
@@ -233,10 +232,6 @@ export class DynamicStyleProperty<T>
 
   getFieldName() {
     return this._field ? this._field.getName() : '';
-  }
-
-  getMbFieldName() {
-    return this._field ? this._field.getMbFieldName() : '';
   }
 
   isDynamic() {

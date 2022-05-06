@@ -135,7 +135,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getMbColor() {
-    if (!this.getMbFieldName()) {
+    if (!this.getMbPropertyName()) {
       return null;
     }
 
@@ -145,7 +145,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalColorMbExpression() {
-    const targetName = this.getMbFieldName();
+    const targetName = this.getMbPropertyName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
@@ -321,7 +321,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     }
 
     mbStops.push(defaultColor); // last color is default color
-    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbPropertyName()]], ...mbStops];
   }
 
   _getOrdinalBreaks(symbolId?: string, svg?: string): Break[] {
