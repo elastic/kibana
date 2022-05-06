@@ -328,7 +328,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge data-test-subj="apiKeyOwnerLabel">{rule.apiKeyOwner}</EuiBadge>
+                    <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
+                      <b>{rule.apiKeyOwner}</b>
+                    </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
