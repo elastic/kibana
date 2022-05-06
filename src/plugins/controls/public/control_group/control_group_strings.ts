@@ -182,6 +182,24 @@ export const ControlGroupStrings = {
           defaultMessage: 'Cancel',
         }),
     },
+    applyDefaultSize: {
+      getTitle: () =>
+        i18n.translate('controls.controlGroup.management.applyDefaultSize.title', {
+          defaultMessage: 'Apply default size',
+        }),
+      getSubtitle: () =>
+        i18n.translate('controls.controlGroup.management.applyDefaultSize.sub', {
+          defaultMessage: 'Do you want to apply the new default to all existing controls?',
+        }),
+      getConfirm: () =>
+        i18n.translate('controls.controlGroup.management.applyDefaultSize.confirm', {
+          defaultMessage: 'Apply',
+        }),
+      getCancel: () =>
+        i18n.translate('controls.controlGroup.management.applyDefaultSize.cancel', {
+          defaultMessage: 'Skip',
+        }),
+    },
     discardNewControl: {
       getTitle: () =>
         i18n.translate('controls.controlGroup.management.deleteNew.title', {

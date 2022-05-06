@@ -44,6 +44,7 @@ import { ParentIgnoreSettings } from '../..';
 import { ControlsPanels } from '../types';
 import { ControlGroupInput } from '..';
 import { DEFAULT_CONTROL_WIDTH, getDefaultControlGroupInput } from '../../../common';
+import { pluginServices } from '../../services';
 
 interface EditControlGroupProps {
   initialInput: ControlGroupInput;
@@ -67,6 +68,8 @@ export const ControlGroupEditor = ({
   onClose,
 }: EditControlGroupProps) => {
   const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
+  const { overlays } = pluginServices.getServices();
+  const { openConfirm } = overlays;
 
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
@@ -105,22 +108,30 @@ export const ControlGroupEditor = ({
     [controlGroupEditorState]
   );
 
-  const applyChangesToInput = useCallback(() => {
+  const applyChangesToInput = async () => {
     const inputToApply = { ...controlGroupEditorState };
-    if (inputToApply.defaultControlWidth !== initialInput.defaultControlWidth) {
-      const newPanels = {} as ControlsPanels;
-      Object.entries(initialInput.panels).forEach(
-        ([id, panel]) =>
-          (newPanels[id] = {
-            ...panel,
-            width: inputToApply.defaultControlWidth,
-            grow: inputToApply.defaultControlGrow,
-          })
-      );
-      inputToApply.panels = newPanels;
-    }
-    if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
-  }, [controlGroupEditorState, initialInput, updateInput]);
+    if (controlCount > 0 && inputToApply.defaultControlWidth !== initialInput.defaultControlWidth) {
+      openConfirm(ControlGroupStrings.management.applyDefaultSize.getSubtitle(), {
+        confirmButtonText: ControlGroupStrings.management.applyDefaultSize.getConfirm(),
+        cancelButtonText: ControlGroupStrings.management.applyDefaultSize.getCancel(),
+        title: ControlGroupStrings.management.applyDefaultSize.getTitle(),
+      }).then((confirmed) => {
+        if (confirmed) {
+          const newPanels = {} as ControlsPanels;
+          Object.entries(initialInput.panels).forEach(
+            ([id, panel]) =>
+              (newPanels[id] = {
+                ...panel,
+                width: inputToApply.defaultControlWidth,
+              })
+          );
+          inputToApply.panels = newPanels;
+        }
+        updateInput(inputToApply);
+      });
+    } else if (!editorControlGroupInputIsEqual(inputToApply, initialInput))
+      updateInput(inputToApply);
+  };
 
   return (
     <>
