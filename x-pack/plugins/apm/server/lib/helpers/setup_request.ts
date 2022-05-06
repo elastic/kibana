@@ -69,9 +69,6 @@ export async function setupRequest({
         request,
         debug: query._inspect,
       }),
-      metricIndices: plugins.infra
-        ? await getMetricIndices(plugins.infra, coreContext.savedObjects.client)
-        : undefined,
       ml:
         plugins.ml && isActivePlatinumLicense(licensingContext.license)
           ? getMlSetup(
@@ -97,14 +94,4 @@ function getMlSetup(
     anomalyDetectors: ml.anomalyDetectorsProvider(request, savedObjectsClient),
     modules: ml.modulesProvider(request, savedObjectsClient),
   };
-}
-
-async function getMetricIndices(
-  infraPlugin: Required<APMRouteHandlerResources['plugins']>['infra'],
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<string> {
-  const infra = await infraPlugin.start();
-  const metricIndices = await infra.getMetricIndices(savedObjectsClient);
-
-  return metricIndices;
 }

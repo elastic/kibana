@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { CONTAINER_ID } from '../../../../common/elasticsearch_fieldnames';
 import { SearchResponse } from '@kbn/core/server';
 
