@@ -12,7 +12,8 @@
 export type EcsNestedSchema = Record<string, GroupDetails>;
 export type GroupSchema = Record<string, FieldDetails>;
 
-export const TOP_LEVEL_GROUPS = ['base', 'trace'];
+export const TOP_LEVEL_NAME = 'topLevel';
+export const TOP_LEVEL_GROUPS = ['base', 'tracing'];
 
 /**
  * Metadata for each of the top-level items in the EcsSpec.

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
+import path from 'path';
+import fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/utils';
 import { createFlagError, RunWithCommands } from '@kbn/dev-utils';
@@ -15,10 +16,10 @@ import { buildSchema } from './build_schema';
 import { loadYaml } from './load_yaml';
 import { printSchema } from './printer';
 
-const PACKAGE_DIR = Path.resolve(REPO_ROOT, 'packages/kbn-ecs-schema/');
+const PACKAGE_DIR = path.resolve(REPO_ROOT, 'packages/kbn-ecs-schema/');
 
 function execute(spec: string,  outDir: string) {
-  const specPath = Path.resolve(PACKAGE_DIR, '.', spec)
+  const specPath = path.resolve(PACKAGE_DIR, '.', spec)
   console.log(`Loading ecs_nested.yml from ${specPath}`);
 
   const specYaml = loadYaml(specPath);
@@ -27,10 +28,23 @@ function execute(spec: string,  outDir: string) {
     process.exit(1);
   }
 
-  const outPath = Path.resolve(PACKAGE_DIR, '.', outDir);
-  const schema = buildSchema(specYaml);
+  const outPath = path.resolve(PACKAGE_DIR, '.', outDir);
+  emptyGeneratedFolder(outPath);
 
+  const schema = buildSchema(specYaml);
   printSchema(schema, outPath);
+}
+
+function emptyGeneratedFolder(outPath: string) {
+  fs.readdir(outPath, (err, files) => {
+    if (err) throw err;
+  
+    for (const file of files) {
+      fs.unlink(path.join(outPath, file), err => {
+        if (err) throw err;
+      });
+    }
+  });
 }
 
 export function runCli() {

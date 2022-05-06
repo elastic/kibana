@@ -7,7 +7,7 @@
  */
 
 import { set } from 'lodash';
-import { EcsNestedSchema, GroupSchema, TOP_LEVEL_GROUPS } from './common/types';
+import { EcsNestedSchema, GroupSchema, TOP_LEVEL_NAME, TOP_LEVEL_GROUPS } from './common/types';
 
 export function buildSchema(spec: EcsNestedSchema) : GroupSchema {
   const json: GroupSchema = {};
@@ -15,10 +15,10 @@ export function buildSchema(spec: EcsNestedSchema) : GroupSchema {
   for (const [group, details] of Object.entries(spec)) {
     for (const [, field] of Object.entries(details.fields)) {
       var full_field_name = field.flat_name.split(".").slice(1);
-      const name = group in TOP_LEVEL_GROUPS 
-        ? `${field.flat_name}` 
-        : `${full_field_name.join(".")}`;
-      set(json, `${group}.${name}`, field);
+      const name = TOP_LEVEL_GROUPS.includes(group)
+        ? `${TOP_LEVEL_NAME}.${field.flat_name}` 
+        : `${group}.${full_field_name.join(".")}`;
+      set(json, name, field);
     }
   }
   return json;

@@ -38,7 +38,6 @@ import { serviceEcs } from './service';
 import { sourceEcs } from './source';
 import { threatEcs } from './threat';
 import { tlsEcs } from './tls';
-import { tracingEcs } from './tracing';
 import { urlEcs } from './url';
 import { userEcs } from './user';
 import { user_agentEcs } from './user_agent';
@@ -101,6 +100,51 @@ export const ecsSchema = {
     short: 'List of keywords used to tag each event.',
     type: 'keyword'
   },
+  span: {
+    id: {
+      dashed_name: 'span-id',
+      description: 'Unique identifier of the span within the scope of its trace.\n' +
+        'A span represents an operation within a transaction, such as a request to another service, or a database query.',
+      example: '3ff9a8981b7ccd5a',
+      flat_name: 'span.id',
+      ignore_above: 1024,
+      level: 'extended',
+      name: 'span.id',
+      normalize: [],
+      short: 'Unique identifier of the span within the scope of its trace.',
+      type: 'keyword'
+    }
+  },
+  trace: {
+    id: {
+      dashed_name: 'trace-id',
+      description: 'Unique identifier of the trace.\n' +
+        'A trace groups multiple events like transactions that belong together. For example, a user request handled by multiple inter-connected services.',
+      example: '4bf92f3577b34da6a3ce929d0e0e4736',
+      flat_name: 'trace.id',
+      ignore_above: 1024,
+      level: 'extended',
+      name: 'trace.id',
+      normalize: [],
+      short: 'Unique identifier of the trace.',
+      type: 'keyword'
+    }
+  },
+  transaction: {
+    id: {
+      dashed_name: 'transaction-id',
+      description: 'Unique identifier of the transaction within the scope of its trace.\n' +
+        'A transaction is the highest level of work measured within a service, such as a request to a server.',
+      example: '00f067aa0ba902b7',
+      flat_name: 'transaction.id',
+      ignore_above: 1024,
+      level: 'extended',
+      name: 'transaction.id',
+      normalize: [],
+      short: 'Unique identifier of the transaction within the scope of its trace.',
+      type: 'keyword'
+    }
+  },
   agentEcs,
   asEcs,
   clientEcs,
@@ -141,7 +185,6 @@ export const ecsSchema = {
   sourceEcs,
   threatEcs,
   tlsEcs,
-  tracingEcs,
   urlEcs,
   userEcs,
   user_agentEcs,
