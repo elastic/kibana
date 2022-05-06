@@ -12,6 +12,7 @@ export { AgentsApp } from './agents';
 export type Section =
   | 'agents'
   | 'agent_policies'
+  | 'autodiscover'
   | 'enrollment_tokens'
   | 'data_streams'
   | 'settings';

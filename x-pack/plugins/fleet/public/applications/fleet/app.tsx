@@ -52,6 +52,7 @@ import type { UIExtensionsStorage } from './types';
 import { FLEET_ROUTING_PATHS } from './constants';
 import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout } from './layouts';
 import { AgentPolicyApp } from './sections/agent_policy';
+import { AutodiscoverApp } from './sections/autodiscover';
 import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
 import { MissingESRequirementsPage } from './sections/agents/agent_requirements_page';
@@ -314,6 +315,9 @@ export const AppRoutes = memo(
           </Route>
           <Route path={FLEET_ROUTING_PATHS.policies}>
             <AgentPolicyApp />
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.autodiscover}>
+            <AutodiscoverApp />
           </Route>
           <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
             <EnrollmentTokenListPage />

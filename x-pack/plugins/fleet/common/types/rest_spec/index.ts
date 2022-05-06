@@ -9,6 +9,7 @@ export * from './common';
 export * from './package_policy';
 export * from './data_stream';
 export * from './agent';
+export * from './hint';
 export * from './agent_policy';
 export * from './fleet_setup';
 export * from './epm';

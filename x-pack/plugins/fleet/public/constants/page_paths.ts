@@ -13,6 +13,7 @@ export type StaticPage =
   | 'integrations'
   | 'policies'
   | 'policies_list'
+  | 'autodiscover'
   | 'enrollment_tokens'
   | 'data_streams'
   | 'settings'
@@ -57,6 +58,7 @@ export const FLEET_ROUTING_PATHS = {
   agent_details_logs: '/agents/:agentId/logs',
   policies: '/policies',
   policies_list: '/policies',
+  autodiscover: '/autodiscover',
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
@@ -149,6 +151,7 @@ export const pagePathGetters: {
   ],
   policies: () => [FLEET_BASE_PATH, '/policies'],
   policies_list: () => [FLEET_BASE_PATH, '/policies'],
+  autodiscover: () => [FLEET_BASE_PATH, '/autodiscover'],
   policy_details: ({ policyId, tabId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,

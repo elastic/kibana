@@ -15,25 +15,22 @@ import {
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiLink,
-  EuiTextColor,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Hint } from '../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  useGetAgentPolicies,
+  useGetHints,
   usePagination,
   useSorting,
   useConfig,
   useUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
-import { AgentPolicySummaryLine, SearchBar } from '../../../components';
 
-import { HintDetailsFlyout } from './components';
+// import { HintDetailsFlyout } from './components';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('autodiscover');
@@ -51,16 +48,16 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   );
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const { sorting, setSorting } = useSorting<Hint>({
-    field: 'last_update',
+    field: 'last_updated',
     direction: 'desc',
   });
 
   // Fetch agent policies
   const {
     isLoading,
-    data: agentPolicyData,
+    data: hintsData,
     resendRequest,
-  } = useGetAgentPolicies({
+  } = useGetHints({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     sortField: sorting?.field,
@@ -80,14 +77,36 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         render: (agentId: string) => <>{agentId}</>,
       },
       {
+        field: 'container',
+        sortable: true,
+        name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
+          defaultMessage: 'Container Name',
+        }),
+        render: (container: Hint['container']) => <>{container.name || '-'}</>,
+      },
+      {
+        field: 'container',
+        sortable: true,
+        name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
+          defaultMessage: 'Container Image',
+        }),
+        render: (container: Hint['container']) => <>{container.image || '-'}</>,
+      },
+      {
+        field: 'pod',
+        sortable: true,
+        name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
+          defaultMessage: 'Pod Name',
+        }),
+        render: (pod: Hint['pod']) => <>{pod.name || '-'}</>,
+      },
+      {
         field: 'received_at',
         sortable: true,
         name: i18n.translate('xpack.fleet.agentPolicyList.updatedOnColumnTitle', {
           defaultMessage: 'Received on',
         }),
-        render: (date: number) => (
-          <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
-        ),
+        render: (date: number) => <FormattedRelative value={date} />,
       },
       {
         field: 'status',
@@ -95,7 +114,21 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Status',
         }),
-        render: (status: string) => <>{status || 'procssing'}</>,
+        render: (status: string) => <>{status || 'processing'}</>,
+      },
+      {
+        field: 'result',
+        sortable: true,
+        name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
+          defaultMessage: 'Status',
+        }),
+        render: (result: Hint['result']) => (
+          <>
+            {result?.package
+              ? `Added package ${result.package.name} v${result.package.version}`
+              : '-'}
+          </>
+        ),
       },
     ];
 
@@ -132,19 +165,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   return (
     <>
       <EuiFlexGroup alignItems={'center'} gutterSize="m">
-        <EuiFlexItem grow={4}>
-          <SearchBar
-            value={search}
-            onChange={(newSearch) => {
-              setPagination({
-                ...pagination,
-                currentPage: 1,
-              });
-              setSearch(newSearch);
-            }}
-            fieldPrefix={AGENT_POLICY_SAVED_OBJECT_TYPE}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={4} />
         <EuiFlexItem grow={false}>
           <EuiButton color="primary" iconType="refresh" onClick={() => resendRequest()}>
             <FormattedMessage
@@ -165,7 +186,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
               id="xpack.fleet.agentPolicyList.loadingAgentPoliciesMessage"
               defaultMessage="Loading agent policies…"
             />
-          ) : !search.trim() && (agentPolicyData?.total ?? 0) === 0 ? (
+          ) : !search.trim() && (hintsData?.total ?? 0) === 0 ? (
             emptyPrompt
           ) : (
             <FormattedMessage
@@ -184,14 +205,14 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
             />
           )
         }
-        items={agentPolicyData ? agentPolicyData.items : []}
+        items={hintsData && hintsData.hints ? hintsData.hints : []}
         itemId="id"
         columns={columns}
         isSelectable={false}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: agentPolicyData ? agentPolicyData.total : 0,
+          totalItemCount: hintsData ? hintsData.total : 0,
           pageSizeOptions,
         }}
         sorting={{ sort: sorting }}

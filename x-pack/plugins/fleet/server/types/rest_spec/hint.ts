@@ -11,5 +11,7 @@ export const GetHintsRequestSchema = {
     page: schema.number({ defaultValue: 1 }),
     perPage: schema.number({ defaultValue: 20 }),
     kuery: schema.maybe(schema.string()),
+    sortField: schema.maybe(schema.string()),
+    sortOrder: schema.maybe(schema.string()),
   }),
 };

@@ -19,6 +19,7 @@ import {
   SETTINGS_API_ROUTES,
   APP_API_ROUTES,
   K8S_API_ROUTES,
+  HINT_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -161,6 +162,10 @@ export const dataStreamRouteService = {
 export const fleetSetupRouteService = {
   getFleetSetupPath: () => AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
   postFleetSetupPath: () => AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
+};
+
+export const hintsRouteService = {
+  getListPath: () => HINT_API_ROUTES.LIST_PATTERN,
 };
 
 export const agentRouteService = {

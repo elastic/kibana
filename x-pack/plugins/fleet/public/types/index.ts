@@ -51,6 +51,8 @@ export type {
   GetDataStreamsResponse,
   GetAgentsResponse,
   GetAgentsRequest,
+  GetHintsResponse,
+  GetHintsRequest,
   GetOneAgentResponse,
   PostAgentUnenrollRequest,
   PostAgentUnenrollResponse,

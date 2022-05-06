@@ -81,6 +81,16 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
         {
           name: (
             <FormattedMessage
+              id="xpack.fleet.appNavigation.policiesLinkText"
+              defaultMessage="Autodiscover"
+            />
+          ),
+          isSelected: section === 'autodiscover',
+          href: getHref('autodiscover'),
+        },
+        {
+          name: (
+            <FormattedMessage
               id="xpack.fleet.appNavigation.settingsLinkText"
               defaultMessage="Settings"
             />

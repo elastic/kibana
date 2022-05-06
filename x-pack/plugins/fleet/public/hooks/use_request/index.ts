@@ -10,6 +10,7 @@ export * from './agent_policy';
 export * from './package_policy';
 export * from './data_stream';
 export * from './agents';
+export * from './hints';
 export * from './enrollment_api_keys';
 export * from './epm';
 export * from './outputs';
