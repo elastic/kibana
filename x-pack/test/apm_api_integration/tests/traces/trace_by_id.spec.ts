@@ -7,7 +7,6 @@
 import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { generateExternalSpanLinks, getSpanLinksFromEvents } from '../span_links/helper';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
