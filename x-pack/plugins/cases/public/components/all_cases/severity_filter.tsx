@@ -41,7 +41,7 @@ export const SeverityFilter: React.FC<Props> = ({
             gutterSize="xs"
             alignItems={'center'}
             responsive={false}
-            data-test-subj={`case-severity-selection-${severity}`}
+            data-test-subj={`case-severity-filter-${severity}`}
           >
             <EuiFlexItem grow={false}>
               {severity === SeverityAll ? (
@@ -64,7 +64,7 @@ export const SeverityFilter: React.FC<Props> = ({
       options={options}
       valueOfSelected={selectedSeverity}
       onChange={onSeverityChange}
-      data-test-subj="case-severity-selection"
+      data-test-subj="case-severity-filter"
     />
   );
 };

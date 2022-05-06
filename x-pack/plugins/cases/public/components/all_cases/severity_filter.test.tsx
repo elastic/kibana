@@ -26,20 +26,20 @@ describe('Severity form field', () => {
   });
   it('renders', () => {
     const result = appMockRender.render(<SeverityFilter {...props} />);
-    expect(result.getByTestId('case-severity-selection')).not.toHaveAttribute('disabled');
+    expect(result.getByTestId('case-severity-filter')).not.toHaveAttribute('disabled');
   });
 
   // default to LOW in this test configuration
   it('defaults to the correct value', () => {
     const result = appMockRender.render(<SeverityFilter {...props} />);
     // two items. one for the popover one for the selected field
-    expect(result.getAllByTestId('case-severity-selection-low').length).toBe(2);
+    expect(result.getAllByTestId('case-severity-filter-low').length).toBe(2);
   });
 
   it('selects the correct value when changed', async () => {
     const result = appMockRender.render(<SeverityFilter {...props} />);
-    userEvent.click(result.getByTestId('case-severity-selection'));
-    userEvent.click(result.getByTestId('case-severity-selection-high'));
+    userEvent.click(result.getByTestId('case-severity-filter'));
+    userEvent.click(result.getByTestId('case-severity-filter-high'));
     await waitFor(() => {
       expect(onSeverityChange).toHaveBeenCalledWith('high');
     });
@@ -47,8 +47,8 @@ describe('Severity form field', () => {
 
   it('selects the correct value when changed (all)', async () => {
     const result = appMockRender.render(<SeverityFilter {...props} />);
-    userEvent.click(result.getByTestId('case-severity-selection'));
-    userEvent.click(result.getByTestId('case-severity-selection-all'));
+    userEvent.click(result.getByTestId('case-severity-filter'));
+    userEvent.click(result.getByTestId('case-severity-filter-all'));
     await waitFor(() => {
       expect(onSeverityChange).toHaveBeenCalledWith('all');
     });
