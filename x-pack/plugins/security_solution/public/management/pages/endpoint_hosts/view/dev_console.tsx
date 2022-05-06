@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, {
+  memo,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   EuiButton,
   EuiCode,
@@ -15,12 +23,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { useIsMounted } from '../../../components/hooks/use_is_mounted';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUrlParams } from '../../../components/hooks/use_url_params';
 import {
-  Command,
   CommandDefinition,
-  CommandServiceInterface,
   Console,
   RegisteredConsoleClient,
   useConsoleManager,
@@ -28,69 +35,138 @@ import {
 
 const delay = async (ms: number = 4000) => new Promise((r) => setTimeout(r, ms));
 
-class DevCommandService implements CommandServiceInterface {
-  getCommandList(): CommandDefinition[] {
-    return [
-      {
-        name: 'cmd1',
-        about: 'Runs cmd1',
+const getCommandList = (): CommandDefinition[] => {
+  return [
+    {
+      name: 'cmd1',
+      about: 'Runs cmd1',
+      RenderComponent: ({ command, setStatus, store, setStore }) => {
+        const isMounted = useIsMounted();
+
+        const [apiResponse, setApiResponse] = useState<null | string>(null);
+        const [uiResponse, setUiResponse] = useState<null | ReactElement>(null);
+
+        // Emulate a real action where:
+        // 1. an api request is done to create the action
+        // 2. wait for a response
+        // 3. account for component mount/unmount and prevent duplicate api calls
+
+        useEffect(() => {
+          (async () => {
+            // Emulate an api call
+            if (!store.apiInflight) {
+              setStore({
+                ...store,
+                apiInflight: true,
+              });
+
+              window.console.warn(`${Math.random()} ------> cmd1: doing async work`);
+
+              await delay(6000);
+              setApiResponse(`API was called at: ${new Date().toLocaleString()}`);
+            }
+          })();
+        }, [setStore, store]);
+
+        useEffect(() => {
+          (async () => {
+            const doUiResponse = () => {
+              setUiResponse(
+                <EuiText>
+                  <EuiText>{`${command.commandDefinition.name}`}</EuiText>
+                  <EuiText>{`command input: ${command.input}`}</EuiText>
+                  <EuiText>{'Arguments provided:'}</EuiText>
+                  <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
+                </EuiText>
+              );
+            };
+
+            if (store.apiResponse) {
+              doUiResponse();
+            } else {
+              await delay();
+              doUiResponse();
+            }
+          })();
+        }, [
+          command.args,
+          command.commandDefinition.name,
+          command.input,
+          isMounted,
+          store.apiResponse,
+        ]);
+
+        useEffect(() => {
+          if (apiResponse && uiResponse) {
+            setStatus('success');
+          }
+        }, [apiResponse, setStatus, uiResponse]);
+
+        useEffect(() => {
+          if (apiResponse && store.apiResponse !== apiResponse) {
+            setStore({
+              ...store,
+              apiResponse,
+            });
+          }
+        }, [apiResponse, setStore, store]);
+
+        if (store.apiResponse) {
+          return (
+            <div>
+              {uiResponse}
+              <EuiText>{store.apiResponse as ReactNode}</EuiText>
+            </div>
+          );
+        }
+
+        return null;
       },
-      {
-        name: 'get-file',
-        about: 'retrieve a file from the endpoint',
-        args: {
-          file: {
-            required: true,
-            allowMultiples: false,
-            about: 'the file path for the file to be retrieved',
-          },
+      args: {
+        one: {
+          required: false,
+          allowMultiples: false,
+          about: 'just one',
         },
       },
-      {
-        name: 'cmd2',
-        about: 'runs cmd 2',
-        args: {
-          file: {
-            required: true,
-            allowMultiples: false,
-            about: 'Includes file in the run',
-            validate: () => {
-              return true;
-            },
-          },
-          bad: {
-            required: false,
-            allowMultiples: false,
-            about: 'will fail validation',
-            validate: () => 'This is a bad value',
-          },
-        },
-      },
-      {
-        name: 'cmd-long-delay',
-        about: 'runs cmd 2',
-      },
-    ];
-  }
-
-  async executeCommand(command: Command): Promise<{ result: React.ReactNode }> {
-    await delay();
-
-    if (command.commandDefinition.name === 'cmd-long-delay') {
-      await delay(20000);
-    }
-
-    return {
-      result: (
-        <div>
-          <div>{`${command.commandDefinition.name}`}</div>
-          <div>{`command input: ${command.input}`}</div>
-          <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
-        </div>
-      ),
-    };
-  }
-}
+    },
+    // {
+    //   name: 'get-file',
+    //   about: 'retrieve a file from the endpoint',
+    //   args: {
+    //     file: {
+    //       required: true,
+    //       allowMultiples: false,
+    //       about: 'the file path for the file to be retrieved',
+    //     },
+    //   },
+    // },
+    // {
+    //   name: 'cmd2',
+    //   about: 'runs cmd 2',
+    //   args: {
+    //     file: {
+    //       required: true,
+    //       allowMultiples: false,
+    //       about: 'Includes file in the run',
+    //       validate: () => {
+    //         return true;
+    //       },
+    //     },
+    //     bad: {
+    //       required: false,
+    //       allowMultiples: false,
+    //       about: 'will fail validation',
+    //       validate: () => 'This is a bad value',
+    //     },
+    //   },
+    // },
+    // {
+    //   name: 'cmd-long-delay',
+    //   about: 'runs cmd 2',
+    // },
+  ];
+};
 
 const RunningConsole = memo<{ registeredConsole: RegisteredConsoleClient }>(
   ({ registeredConsole }) => {
@@ -132,8 +208,8 @@ RunningConsole.displayName = 'RunningConsole';
 // ------------------------------------------------------------
 export const ShowDevConsole = memo(() => {
   const consoleManager = useConsoleManager();
-  const commandService = useMemo(() => {
-    return new DevCommandService();
+  const commands = useMemo(() => {
+    return getCommandList();
   }, []);
 
   const handleRegisterOnClick = useCallback(() => {
@@ -146,12 +222,12 @@ export const ShowDevConsole = memo(() => {
         },
         consoleProps: {
           prompt: '>>',
-          commandService,
+          commands,
           'data-test-subj': 'dev',
         },
       })
       .show();
-  }, [commandService, consoleManager]);
+  }, [commands, consoleManager]);
 
   return (
     <EuiPanel>
@@ -173,8 +249,8 @@ export const ShowDevConsole = memo(() => {
       <EuiText>
         <h3>{'Un-managed console'}</h3>
       </EuiText>
-      <EuiPanel>
-        <Console prompt="$$>" commandService={commandService} data-test-subj="dev" />
+      <EuiPanel style={{ height: '600px' }}>
+        <Console prompt="$$>" commands={getCommandList()} data-test-subj="dev" />
       </EuiPanel>
     </EuiPanel>
   );
