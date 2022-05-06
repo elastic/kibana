@@ -240,7 +240,7 @@ export const RuleEdit = ({
                             'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
                             {
                               defaultMessage:
-                                'Saving this rule will cause a change in privileges and may make the rule behave differently.',
+                                'Saving this rule will change its privileges and might change its behavior.',
                             }
                           )}
                         />

@@ -249,7 +249,7 @@ describe('rule_edit', () => {
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(
-      'Saving this rule will cause a change in privileges and may make the rule behave differently.'
+      'Saving this rule will change its privileges and might change its behavior.'
     );
   });
 });
