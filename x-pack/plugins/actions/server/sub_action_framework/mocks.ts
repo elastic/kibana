@@ -8,7 +8,6 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
-import { Resolver } from 'dns';
 import { BasicConnector } from './basic';
 import { ServiceParams } from './types';
 

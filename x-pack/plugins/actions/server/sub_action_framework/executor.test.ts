@@ -21,7 +21,7 @@ import {
 } from './mocks';
 import { IService } from './types';
 
-describe('BasicConnector', () => {
+describe('Executor', () => {
   const actionId = 'test-action-id';
   const config = { url: 'https://example.com' };
   const secrets = { username: 'elastic', password: 'changeme' };
