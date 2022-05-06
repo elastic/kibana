@@ -22,6 +22,10 @@ import { LegendProps } from './style_property';
 import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 
 export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions> {
+  supportsFeatureState() {
+    return false;
+  }
+
   isOrdinal() {
     return false;
   }
@@ -87,7 +91,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (fallbackSymbolId) {
       mbStops.push(fallbackSymbolId); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbPropertyName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
@@ -107,7 +111,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (fallbackSymbolId) {
       mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbPropertyName()]], ...mbStops];
   }
 
   _isIconDynamicConfigComplete() {
