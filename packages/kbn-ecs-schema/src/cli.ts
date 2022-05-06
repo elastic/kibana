@@ -40,9 +40,7 @@ function emptyGeneratedFolder(outPath: string) {
     if (err) throw err;
   
     for (const file of files) {
-      fs.unlink(path.join(outPath, file), err => {
-        if (err) throw err;
-      });
+      fs.unlinkSync(path.join(outPath, file));
     }
   });
 }

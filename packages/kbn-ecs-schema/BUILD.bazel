@@ -17,8 +17,12 @@ SOURCE_FILES = glob(
 SRCS = SOURCE_FILES
 
 filegroup(
-  name = "srcs",
-  srcs = SRCS,
+  name = "generated",
+  srcs = glob(
+    [
+      "generated/**/*",
+    ],
+  ),
 )
 
 NPM_MODULE_EXTRA_FILES = [
