@@ -25,6 +25,9 @@ export const datatableFn =
   ): DatatableExpressionFunction['fn'] =>
   async (table, args, context) => {
     if (context?.inspectorAdapters?.tables) {
+      context.inspectorAdapters.tables.reset();
+      context.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
         table,
         [

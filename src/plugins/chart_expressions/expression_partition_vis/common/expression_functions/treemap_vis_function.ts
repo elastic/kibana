@@ -134,6 +134,9 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     };
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
         context,
         [
