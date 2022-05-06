@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './filter_item.scss';
+
 import { EuiContextMenu, EuiPopover, EuiPopoverProps } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
@@ -24,9 +26,9 @@ import {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
-import { FilterEditor } from './filter_editor';
-import { FilterView } from './filter_view';
-import { getIndexPatterns } from '../services';
+import { FilterEditor } from '../filter_editor';
+import { FilterView } from '../filter_view';
+import { getIndexPatterns } from '../../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
 
@@ -99,6 +101,11 @@ export function FilterItem(props: FilterItemProps) {
     } else {
       setIsPopoverOpen(!isPopoverOpen);
     }
+  }
+
+  function handleIconClick(e: MouseEvent<HTMLInputElement>) {
+    props.onRemove();
+    setIsPopoverOpen(false);
   }
 
   function onSubmit(f: Filter) {
@@ -363,7 +370,7 @@ export function FilterItem(props: FilterItemProps) {
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,
     className: getClasses(!!filter.meta.negate, valueLabelConfig),
-    iconOnClick: props.onRemove,
+    iconOnClick: handleIconClick,
     onClick: handleBadgeClick,
     'data-test-subj': getDataTestSubj(valueLabelConfig),
     readonly: props.readonly,
