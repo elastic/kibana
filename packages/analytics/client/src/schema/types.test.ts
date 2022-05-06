@@ -421,6 +421,48 @@ describe('schema types', () => {
         };
         expect(valueType).not.toBeUndefined(); // <-- Only to stop the var-not-used complain
       });
+
+      test('it should expect support readonly arrays', () => {
+        let valueType: SchemaValue<ReadonlyArray<{ a_value: string }>> = {
+          type: 'array',
+          items: {
+            properties: {
+              a_value: {
+                type: 'keyword',
+                _meta: {
+                  description: 'Some description',
+                },
+              },
+            },
+          },
+        };
+
+        valueType = {
+          type: 'array',
+          items: {
+            properties: {
+              a_value: {
+                type: 'keyword',
+                _meta: {
+                  description: 'Some description',
+                  optional: false,
+                },
+              },
+            },
+            _meta: {
+              description: 'Description at the object level',
+            },
+          },
+        };
+
+        // @ts-expect-error because it's missing the items definition
+        valueType = { type: 'array' };
+        // @ts-expect-error because it's missing the items definition
+        valueType = { type: 'array', items: {} };
+        // @ts-expect-error because it's missing the items' properties definition
+        valueType = { type: 'array', items: { properties: {} } };
+        expect(valueType).not.toBeUndefined(); // <-- Only to stop the var-not-used complain
+      });
     });
   });
 
