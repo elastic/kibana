@@ -23,7 +23,7 @@ export const overviewLinks: LinkItem = {
   globalNavEnabled: true,
   features: [FEATURE.general],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.overview', {
+    i18n.translate('xpack.securitySolution.appLinks.overview', {
       defaultMessage: 'Overview',
     }),
   ],
@@ -37,7 +37,7 @@ export const gettingStartedLinks: LinkItem = {
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.getStarted', {
+    i18n.translate('xpack.securitySolution.appLinks.getStarted', {
       defaultMessage: 'Getting started',
     }),
   ],
@@ -52,7 +52,7 @@ export const detectionResponseLinks: LinkItem = {
   experimentalKey: 'detectionResponseEnabled',
   features: [FEATURE.general],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.detectionAndResponse', {
+    i18n.translate('xpack.securitySolution.appLinks.detectionAndResponse', {
       defaultMessage: 'Detection & Response',
     }),
   ],
@@ -65,7 +65,7 @@ export const dashboardsLandingLinks: LinkItem = {
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.dashboards', {
+    i18n.translate('xpack.securitySolution.appLinks.dashboards', {
       defaultMessage: 'Dashboards',
     }),
   ],

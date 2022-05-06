@@ -28,14 +28,14 @@ import {
 import { FEATURE, LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
-  id: SecurityPageName.manageLanding,
+  id: SecurityPageName.administration,
   title: MANAGE,
   path: MANAGEMENT_PATH,
   skipUrlState: true,
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.manage', {
+    i18n.translate('xpack.securitySolution.appLinks.manage', {
       defaultMessage: 'Manage',
     }),
   ],

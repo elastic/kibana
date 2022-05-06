@@ -16,7 +16,7 @@ export const links: LinkItem = {
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.detect', {
+    i18n.translate('xpack.securitySolution.appLinks.detect', {
       defaultMessage: 'Detect',
     }),
   ],
@@ -27,7 +27,7 @@ export const links: LinkItem = {
       path: ALERTS_PATH,
       globalNavEnabled: true,
       globalSearchKeywords: [
-        i18n.translate('xpack.securitySolution.search.alerts', {
+        i18n.translate('xpack.securitySolution.appLinks.alerts', {
           defaultMessage: 'Alerts',
         }),
       ],
@@ -40,7 +40,7 @@ export const links: LinkItem = {
       path: RULES_PATH,
       globalNavEnabled: false,
       globalSearchKeywords: [
-        i18n.translate('xpack.securitySolution.search.rules', {
+        i18n.translate('xpack.securitySolution.appLinks.rules', {
           defaultMessage: 'Rules',
         }),
       ],
@@ -52,7 +52,7 @@ export const links: LinkItem = {
       path: EXCEPTIONS_PATH,
       globalNavEnabled: false,
       globalSearchKeywords: [
-        i18n.translate('xpack.securitySolution.search.exceptions', {
+        i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',
         }),
       ],

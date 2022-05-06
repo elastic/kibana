@@ -16,7 +16,7 @@ export const links: LinkItem = {
   path: NETWORK_PATH,
   globalNavEnabled: true,
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.network', {
+    i18n.translate('xpack.securitySolution.appLinks.network', {
       defaultMessage: 'Network',
     }),
   ],
@@ -24,35 +24,35 @@ export const links: LinkItem = {
   links: [
     {
       id: SecurityPageName.networkDns,
-      title: i18n.translate('xpack.securitySolution.search.network.dns', {
+      title: i18n.translate('xpack.securitySolution.appLinks.network.dns', {
         defaultMessage: 'DNS',
       }),
       path: `${NETWORK_PATH}/dns`,
     },
     {
       id: SecurityPageName.networkHttp,
-      title: i18n.translate('xpack.securitySolution.search.network.http', {
+      title: i18n.translate('xpack.securitySolution.appLinks.network.http', {
         defaultMessage: 'HTTP',
       }),
       path: `${NETWORK_PATH}/http`,
     },
     {
       id: SecurityPageName.networkTls,
-      title: i18n.translate('xpack.securitySolution.search.network.tls', {
+      title: i18n.translate('xpack.securitySolution.appLinks.network.tls', {
         defaultMessage: 'TLS',
       }),
       path: `${NETWORK_PATH}/tls`,
     },
     {
       id: SecurityPageName.networkExternalAlerts,
-      title: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
+      title: i18n.translate('xpack.securitySolution.appLinks.network.externalAlerts', {
         defaultMessage: 'External Alerts',
       }),
       path: `${NETWORK_PATH}/external-alerts`,
     },
     {
       id: SecurityPageName.networkAnomalies,
-      title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+      title: i18n.translate('xpack.securitySolution.appLinks.hosts.anomalies', {
         defaultMessage: 'Anomalies',
       }),
       path: `${NETWORK_PATH}/anomalies`,

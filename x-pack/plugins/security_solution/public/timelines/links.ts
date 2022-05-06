@@ -17,7 +17,7 @@ export const links: LinkItem = {
   globalNavEnabled: true,
   features: [FEATURE.general],
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.timelines', {
+    i18n.translate('xpack.securitySolution.appLinks.timelines', {
       defaultMessage: 'Timelines',
     }),
   ],
@@ -25,7 +25,7 @@ export const links: LinkItem = {
   links: [
     {
       id: SecurityPageName.timelinesTemplates,
-      title: i18n.translate('xpack.securitySolution.search.timeline.templates', {
+      title: i18n.translate('xpack.securitySolution.appLinks.timeline.templates', {
         defaultMessage: 'Templates',
       }),
       path: `${TIMELINES_PATH}/template`,

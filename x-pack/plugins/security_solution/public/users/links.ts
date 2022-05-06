@@ -17,7 +17,7 @@ export const links: LinkItem = {
   globalNavEnabled: true,
   experimentalKey: 'usersEnabled',
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.search.users', {
+    i18n.translate('xpack.securitySolution.appLinks.users', {
       defaultMessage: 'Users',
     }),
   ],
@@ -25,14 +25,14 @@ export const links: LinkItem = {
   links: [
     {
       id: SecurityPageName.usersAuthentications,
-      title: i18n.translate('xpack.securitySolution.search.users.authentications', {
+      title: i18n.translate('xpack.securitySolution.appLinks.users.authentications', {
         defaultMessage: 'Authentications',
       }),
       path: `${USERS_PATH}/authentications`,
     },
     {
       id: SecurityPageName.usersAnomalies,
-      title: i18n.translate('xpack.securitySolution.search.users.anomalies', {
+      title: i18n.translate('xpack.securitySolution.appLinks.users.anomalies', {
         defaultMessage: 'Anomalies',
       }),
       path: `${USERS_PATH}/anomalies`,
@@ -40,7 +40,7 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.usersRisk,
-      title: i18n.translate('xpack.securitySolution.search.users.risk', {
+      title: i18n.translate('xpack.securitySolution.appLinks.users.risk', {
         defaultMessage: 'Users by risk',
       }),
       path: `${USERS_PATH}/userRisk`,
@@ -48,14 +48,14 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.usersEvents,
-      title: i18n.translate('xpack.securitySolution.search.users.events', {
+      title: i18n.translate('xpack.securitySolution.appLinks.users.events', {
         defaultMessage: 'Events',
       }),
       path: `${USERS_PATH}/events`,
     },
     {
       id: SecurityPageName.usersExternalAlerts,
-      title: i18n.translate('xpack.securitySolution.search.users.externalAlerts', {
+      title: i18n.translate('xpack.securitySolution.appLinks.users.externalAlerts', {
         defaultMessage: 'External Alerts',
       }),
       path: `${USERS_PATH}/externalAlerts`,
