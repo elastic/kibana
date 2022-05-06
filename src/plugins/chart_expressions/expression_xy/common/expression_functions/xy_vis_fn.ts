@@ -21,21 +21,36 @@ import {
 } from './validate';
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
-  const { referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
+  const {
+    referenceLineLayers = [],
+    annotationLayers = [],
+    seriesType,
+    accessors = [],
+    xAccessor,
+    hide,
+    splitAccessor,
+    columnToLabel,
+    yScaleType,
+    xScaleType,
+    isHistogram,
+    yConfig,
+    palette,
+    ...restArgs
+  } = args;
   const dataLayers: DataLayerConfigResult[] = [
     {
       type: DATA_LAYER,
-      seriesType: args.seriesType,
-      accessors: args.accessors ?? [],
-      xAccessor: args.xAccessor,
-      hide: args.hide,
-      splitAccessor: args.splitAccessor,
-      columnToLabel: args.columnToLabel,
-      yScaleType: args.yScaleType,
-      xScaleType: args.xScaleType,
-      isHistogram: args.isHistogram,
-      palette: args.palette,
-      yConfig: args.yConfig,
+      seriesType,
+      accessors,
+      xAccessor,
+      hide,
+      splitAccessor,
+      columnToLabel,
+      yScaleType,
+      xScaleType,
+      isHistogram,
+      palette,
+      yConfig,
       layerType: LayerTypes.DATA,
       table: data,
     },
