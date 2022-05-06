@@ -13,11 +13,10 @@ import {
   isLogsEndpointActionResponse,
   mapToNormalizedActionRequest,
 } from './utils';
-import {
+import type {
   ActivityLogActionResponse,
   EndpointActivityLogActionResponse,
 } from '../../../../common/endpoint/types';
-import { merge } from 'lodash';
 
 describe('When using Actions service utilities', () => {
   let fleetActionGenerator: FleetActionGenerator;
@@ -145,7 +144,7 @@ describe('When using Actions service utilities', () => {
         agentIds = ['123', '456', '789'];
         action123Responses = [
           fleetActionGenerator.generateActivityLogActionResponse({
-            item: { data: { action_id: '123', error: '' } },
+            item: { data: { agent_id: '123', error: '' } },
           }),
           endpointActionGenerator.generateActivityLogActionResponse({
             item: {
@@ -160,7 +159,7 @@ describe('When using Actions service utilities', () => {
 
         action456Responses = [
           fleetActionGenerator.generateActivityLogActionResponse({
-            item: { data: { action_id: '456', error: '' } },
+            item: { data: { agent_id: '456', error: '' } },
           }),
           endpointActionGenerator.generateActivityLogActionResponse({
             item: {
@@ -175,7 +174,7 @@ describe('When using Actions service utilities', () => {
 
         action789Responses = [
           fleetActionGenerator.generateActivityLogActionResponse({
-            item: { data: { action_id: '789', error: '' } },
+            item: { data: { agent_id: '789', error: '' } },
           }),
           endpointActionGenerator.generateActivityLogActionResponse({
             item: {
@@ -217,16 +216,19 @@ describe('When using Actions service utilities', () => {
       });
 
       it('should complete as `true` if one agent only received a fleet response with error on it', () => {
+        action456Responses[0].item.data.error = 'something is no good';
+        action456Responses[0].item.data['@timestamp'] = '2022-05-06T12:50:19.747Z';
+
         expect(
           getActionCompletionInfo(agentIds, [
             ...action123Responses,
 
             // Action id: 456 === is complete with only a fleet response that has `error`
-            merge(action456Responses[0], { item: { data: { error: 'something is no good' } } }),
+            action456Responses[0],
 
             ...action789Responses,
           ])
-        ).toEqual({ isCompleted: true, completedAt: COMPLETED_AT });
+        ).toEqual({ isCompleted: true, completedAt: '2022-05-06T12:50:19.747Z' });
       });
     });
   });

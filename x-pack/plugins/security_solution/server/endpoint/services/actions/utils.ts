@@ -150,45 +150,49 @@ const mapActionResponsesByAgentId = (
   for (const actionResponse of actionResponses) {
     if (actionResponse.type === 'fleetResponse' || actionResponse.type === 'response') {
       const agentId = getAgentIdFromActionResponse(actionResponse);
+      let thisAgentActionResponses = response[agentId];
 
-      if (!response[agentId]) {
+      if (!thisAgentActionResponses) {
         response[agentId] = {
           isCompleted: false,
           completedAt: undefined,
           fleetResponse: undefined,
           endpointResponse: undefined,
         };
+
+        thisAgentActionResponses = response[agentId];
       }
 
       if (actionResponse.type === 'fleetResponse') {
-        response[agentId].fleetResponse = actionResponse;
+        thisAgentActionResponses.fleetResponse = actionResponse;
       } else {
-        response[agentId].endpointResponse = actionResponse;
+        thisAgentActionResponses.endpointResponse = actionResponse;
       }
 
-      response[agentId].isCompleted =
+      thisAgentActionResponses.isCompleted =
         // Action is complete if an Endpoint Action Response was received
-        Boolean(response[agentId].endpointResponse) ||
+        Boolean(thisAgentActionResponses.endpointResponse) ||
         // OR:
         // If we did not have an endpoint response and the Fleet response has `error`, then
         // action is complete. Elastic Agent was unable to deliver the action request to the
         // endpoint, so we are unlikely to ever receive an Endpoint Response.
-        Boolean(response[agentId].fleetResponse?.item.data.error);
+        Boolean(thisAgentActionResponses.fleetResponse?.item.data.error);
 
-      if (response[agentId].isCompleted) {
-        if (response[agentId].endpointResponse) {
-          response[agentId].completedAt =
-            response[agentId].endpointResponse?.item.data['@timestamp'];
+      if (thisAgentActionResponses.isCompleted) {
+        if (thisAgentActionResponses.endpointResponse) {
+          thisAgentActionResponses.completedAt =
+            thisAgentActionResponses.endpointResponse?.item.data['@timestamp'];
         } else if (
-          response[agentId].fleetResponse &&
-          response[agentId].fleetResponse?.item.data.error
+          thisAgentActionResponses.fleetResponse &&
+          thisAgentActionResponses.fleetResponse?.item.data.error
         ) {
           // Check if perhaps the Fleet action response returned an error, in which case, the Fleet Agent
           // failed to deliver the Action to the Endpoint. If that's the case, we are not going to get
           // a Response from endpoint, thus mark the Action as completed and use the Fleet Message's
           // timestamp for the complete data/time.
-          response[agentId].isCompleted = true;
-          response[agentId].completedAt = response[agentId].fleetResponse?.item.data['@timestamp'];
+          thisAgentActionResponses.isCompleted = true;
+          thisAgentActionResponses.completedAt =
+            thisAgentActionResponses.fleetResponse?.item.data['@timestamp'];
         }
       }
     }
