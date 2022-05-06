@@ -110,6 +110,7 @@ export const buildProcessTree = (
   processMap: ProcessMap,
   events: ProcessEvent[],
   orphans: Process[],
+  sessionEntityId: string,
   backwardDirection: boolean = false
 ) => {
   // we process events in reverse order when paginating backwards.
@@ -122,6 +123,12 @@ export const buildProcessTree = (
     const process = processMap[id ?? ''];
     let parentProcess = processMap[parent?.entity_id ?? ''];
 
+    // if either entity_id or parent does not exist, return
+    // if process already has a parent, return
+    if (!id || !parent || process.parent || id === sessionEntityId) {
+      return;
+    }
+
     if (!parentProcess) {
       // infer a fake process for the parent, incase we don't end up loading any parent events (due to filtering or jumpToCursor pagination)
       const parentFields = event?.process?.parent;
@@ -130,7 +137,6 @@ export const buildProcessTree = (
         parentProcess = inferProcessFromLeaderInfo(event, parentFields);
         processMap[parentProcess.id] = parentProcess;
 
-        // this fake parent will most likely be orphaned, so lets track is as such
         if (!orphans.includes(parentProcess)) {
           orphans.push(parentProcess);
         }
@@ -141,8 +147,10 @@ export const buildProcessTree = (
       }
     }
 
-    process.parent = parentProcess; // handy for recursive operations (like auto expand)
-    parentProcess.addChild(process);
+    if (parentProcess) {
+      process.parent = parentProcess; // handy for recursive operations (like auto expand)
+      parentProcess.addChild(process);
+    }
   });
 
   const newOrphans: Process[] = [];
@@ -242,6 +250,7 @@ export const processNewEvents = (
   eventsProcessMap: ProcessMap,
   events: ProcessEvent[] | undefined,
   orphans: Process[],
+  sessionEntityId: string,
   backwardDirection: boolean = false
 ): [ProcessMap, Process[]] => {
   if (!events || events.length === 0) {
@@ -249,7 +258,13 @@ export const processNewEvents = (
   }
 
   const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
-  const newOrphans = buildProcessTree(updatedProcessMap, events, orphans, backwardDirection);
+  const newOrphans = buildProcessTree(
+    updatedProcessMap,
+    events,
+    orphans,
+    sessionEntityId,
+    backwardDirection
+  );
 
   return [autoExpandProcessTree(updatedProcessMap), newOrphans];
 };

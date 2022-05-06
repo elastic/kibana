@@ -311,7 +311,13 @@ export const useProcessTree = ({
       if (!processed) {
         const backwards = i < processedPages.length;
 
-        const result = processNewEvents(updatedProcessMap, page.events, orphans, backwards);
+        const result = processNewEvents(
+          updatedProcessMap,
+          page.events,
+          orphans,
+          sessionEntityId,
+          backwards
+        );
 
         updatedProcessMap = result[0];
         newOrphans = result[1];
