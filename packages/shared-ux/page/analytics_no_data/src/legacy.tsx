@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+export {
+  SharedUxServicesProvider as LegacyServicesProvider,
+  SharedUxServices as LegacyServices,
+} from '@kbn/shared-ux-services';
+
+import { SharedUxServices as LegacyServices } from '@kbn/shared-ux-services';
+import { Services } from './services';
+
+export const getLegacyServices = (services: Services): LegacyServices => ({
+  application: {
+    currentAppId$: services.currentAppId$,
+    navigateToUrl: services.navigateToUrl,
+  },
+  data: {
+    hasESData: services.hasESData,
+    hasDataView: services.hasDataView,
+    hasUserDataView: services.hasUserDataView,
+  },
+  docLinks: {
+    dataViewsDocLink: services.dataViewsDocLink,
+  },
+  editors: {
+    openDataViewEditor: services.openDataViewEditor,
+  },
+  http: {
+    addBasePath: services.addBasePath,
+  },
+  permissions: {
+    canAccessFleet: services.canAccessFleet,
+    canCreateNewDataView: services.canCreateNewDataView,
+  },
+  platform: {
+    setIsFullscreen: services.setIsFullscreen,
+  },
+});

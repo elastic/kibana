@@ -3212,6 +3212,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-services@link:bazel-bin/packages/kbn-shared-ux-services":
   version "0.0.0"
   uid ""
@@ -6297,6 +6301,10 @@
   uid ""
 
 "@types/kbn__shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/npm_module_types":
   version "0.0.0"
   uid ""
 
