@@ -56,7 +56,7 @@ describe('DraggableLegendItem', () => {
     ).toEqual(legendItem.value);
   });
 
-  it('renders a custom legend item via `render`', () => {
+  it('renders a custom legend item via the `render` prop when provided', () => {
     const render = (fieldValuePair?: { field: string; value: string | number }) => (
       <div data-test-subj="custom">{`${fieldValuePair?.field} - ${fieldValuePair?.value}`}</div>
     );
@@ -72,6 +72,18 @@ describe('DraggableLegendItem', () => {
     expect(wrapper.find(`[data-test-subj="custom"]`).first().text()).toEqual(
       `${legendItem.field} - ${legendItem.value}`
     );
+  });
+
+  it('renders an item count via the `count` prop when provided', () => {
+    const customLegendItem = { ...legendItem, count: 1234 };
+
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={customLegendItem} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="legendItemCount"]`).first().exists()).toBe(true);
   });
 
   it('always hides the Top N action for legend items', () => {

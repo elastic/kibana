@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
@@ -14,9 +14,9 @@ import type { LegendItem } from './draggable_legend_item';
 import { DraggableLegendItem } from './draggable_legend_item';
 
 export const MIN_LEGEND_HEIGHT = 175;
-const DEFAULT_WIDTH = 165; // px
+export const DEFAULT_WIDTH = 165; // px
 
-const DraggableLegendContainer = styled.div<{ height: number; width: number }>`
+const DraggableLegendContainer = styled.div<{ height: number; $minWidth: number }>`
   height: ${({ height }) => `${height}px`};
   overflow: auto;
   scrollbar-width: thin;
@@ -24,12 +24,11 @@ const DraggableLegendContainer = styled.div<{ height: number; width: number }>`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
     width: 165px;
   }
-  min-width: ${({ width }) => `${width}px`};
-  padding-right: ${({ theme }) => theme.eui.paddingSizes.s};
+  min-width: ${({ $minWidth }) => `${$minWidth}px`};
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
-    width: ${({ theme }) => theme.eui.euiSizeM};
+    width: ${({ theme }) => theme.eui.euiScrollBar};
   }
 
   &::-webkit-scrollbar-thumb {
@@ -47,9 +46,8 @@ const DraggableLegendContainer = styled.div<{ height: number; width: number }>`
 const DraggableLegendComponent: React.FC<{
   height: number;
   legendItems: LegendItem[];
-  showCountsInLegend?: boolean;
-  width?: number;
-}> = ({ height, legendItems, showCountsInLegend = false, width = DEFAULT_WIDTH }) => {
+  minWidth?: number;
+}> = ({ height, legendItems, minWidth = DEFAULT_WIDTH }) => {
   if (legendItems.length === 0) {
     return null;
   }
@@ -58,22 +56,14 @@ const DraggableLegendComponent: React.FC<{
     <DraggableLegendContainer
       data-test-subj="draggable-legend"
       height={height === 0 ? MIN_LEGEND_HEIGHT : height}
-      width={width}
+      $minWidth={minWidth}
     >
       <EuiText size="xs">
         <EuiFlexGroup direction="column" gutterSize="none">
           {legendItems.map((item) => (
             <EuiFlexItem key={item.dataProviderId} grow={false}>
               <DraggableLegendItem legendItem={item} />
-              {showCountsInLegend ? (
-                <EuiHorizontalRule
-                  data-test-subj="draggable-legend-spacer"
-                  margin="s"
-                  size="full"
-                />
-              ) : (
-                <EuiSpacer data-test-subj="draggable-legend-spacer" size="s" />
-              )}
+              <EuiSpacer data-test-subj="draggable-legend-spacer" size="s" />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

@@ -7,7 +7,6 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -22,18 +21,18 @@ import { getAlertsCountQuery } from './helpers';
 import * as i18n from './translations';
 import { AlertsCount } from './alerts_count';
 import type { AlertsCountAggregation } from './types';
-import { KpiPanel, StackByComboBox } from '../common/components';
+import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ChartOptionsFlexItem } from '../../../pages/detection_engine/chart_context_menu';
-import { GROUP_BY_TOP_LABEL, THEN_GROUP_BY_TOP_LABEL } from './translations';
+import { FieldSelection } from '../../../../common/components/field_selection';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
 interface AlertsCountPanelProps {
-  chartOptionsContextMenu?: React.ReactNode;
+  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
+  chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
   filters?: Filter[];
+  panelHeight?: number;
   query?: Query;
   setStackByField0: (stackBy: string) => void;
   setStackByField1: (stackBy: string | undefined) => void;
@@ -41,13 +40,16 @@ interface AlertsCountPanelProps {
   stackByField0: string;
   stackByField1: string | undefined;
   stackByWidth?: number;
+  title?: React.ReactNode;
   runtimeMappings?: MappingRuntimeFields;
 }
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
+    alignHeader,
     chartOptionsContextMenu,
     filters,
+    panelHeight,
     query,
     runtimeMappings,
     setStackByField0,
@@ -56,8 +58,8 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     stackByField0,
     stackByField1,
     stackByWidth,
+    title = i18n.COUNT_TABLE_TITLE,
   }) => {
-    const alertsTreemapEnabled = useIsExperimentalFeatureEnabled('alertsTreemapEnabled'); // feature flag
     const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
     // create a unique, but stable (across re-renders) query id
@@ -147,43 +149,32 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
 
     return (
       <InspectButtonContainer show={toggleStatus}>
-        <KpiPanel $toggleStatus={toggleStatus} hasBorder data-test-subj="alertsCountPanel">
+        <KpiPanel
+          $toggleStatus={toggleStatus}
+          data-test-subj="alertsCountPanel"
+          hasBorder
+          height={panelHeight}
+        >
           <HeaderSection
+            alignHeader={alignHeader}
             id={uniqueQueryId}
-            title={i18n.COUNT_TABLE_TITLE}
+            outerDirection="row"
+            title={title}
             titleSize="s"
             hideSubtitle
+            showInspectButton={chartOptionsContextMenu == null}
             toggleStatus={toggleStatus}
             toggleQuery={toggleQuery}
           >
-            <EuiFlexGroup alignItems="flexStart" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <StackByComboBox
-                  prepend={GROUP_BY_TOP_LABEL}
-                  selected={stackByField0}
-                  onSelect={setStackByField0}
-                  width={stackByWidth}
-                />
-                {alertsTreemapEnabled && (
-                  <>
-                    <EuiSpacer size="xs" />
-                    <StackByComboBox
-                      prepend={THEN_GROUP_BY_TOP_LABEL}
-                      onSelect={setStackByField1}
-                      selected={stackByField1 ?? ''}
-                      width={stackByWidth}
-                    />
-                  </>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {chartOptionsContextMenu != null && (
-                  <ChartOptionsFlexItem grow={false}>
-                    {chartOptionsContextMenu}
-                  </ChartOptionsFlexItem>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <FieldSelection
+              chartOptionsContextMenu={chartOptionsContextMenu}
+              setStackByField0={setStackByField0}
+              setStackByField1={setStackByField1}
+              stackByField0={stackByField0}
+              stackByField1={stackByField1}
+              stackByWidth={stackByWidth}
+              uniqueQueryId={uniqueQueryId}
+            />
           </HeaderSection>
           {toggleStatus && alertsData != null && (
             <AlertsCount

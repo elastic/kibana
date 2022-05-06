@@ -10,12 +10,12 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { APP_ID } from '../../../../common/constants';
 import { DEFAULT_STACK_BY_FIELD } from '../../../detections/components/alerts_kpis/common/config';
 import {
-  RISK_CHART_CATEGORY,
   ALERTS_PAGE,
+  EXPAND_SETTING_NAME,
   STACK_BY_SETTING_NAME,
-  SHOW_SETTING_NAME,
-} from '../../../detections/pages/detection_engine/alerts_local_storage/constants';
-import { getSettingKey, useDefaultWhenEmptyString } from './helpers';
+  TREEMAP_CATEGORY,
+} from '../../../detections/pages/detection_engine/chart_panels/alerts_local_storage/constants';
+import { getSettingKey, isDefaultWhenEmptyString } from './helpers';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { useLocalStorage } from '.';
 
@@ -50,7 +50,7 @@ describe('useLocalStorage', () => {
       useLocalStorage<string>({
         defaultValue: DEFAULT_STACK_BY_FIELD,
         key: getSettingKey({
-          category: RISK_CHART_CATEGORY,
+          category: TREEMAP_CATEGORY,
           page: ALERTS_PAGE,
           setting: STACK_BY_SETTING_NAME,
         }),
@@ -68,9 +68,9 @@ describe('useLocalStorage', () => {
       useLocalStorage<boolean>({
         defaultValue: true,
         key: getSettingKey({
-          category: RISK_CHART_CATEGORY,
+          category: TREEMAP_CATEGORY,
           page: ALERTS_PAGE,
-          setting: SHOW_SETTING_NAME,
+          setting: EXPAND_SETTING_NAME,
         }),
         plugin: APP_ID,
       })
@@ -89,9 +89,9 @@ describe('useLocalStorage', () => {
       useLocalStorage<number>({
         defaultValue: 1234,
         key: getSettingKey({
-          category: RISK_CHART_CATEGORY,
+          category: TREEMAP_CATEGORY,
           page: ALERTS_PAGE,
-          setting: SHOW_SETTING_NAME,
+          setting: EXPAND_SETTING_NAME,
         }),
         plugin: APP_ID,
       })
@@ -110,12 +110,12 @@ describe('useLocalStorage', () => {
         useLocalStorage<string>({
           defaultValue: DEFAULT_STACK_BY_FIELD,
           key: getSettingKey({
-            category: RISK_CHART_CATEGORY,
+            category: TREEMAP_CATEGORY,
             page: ALERTS_PAGE,
             setting: STACK_BY_SETTING_NAME,
           }),
           plugin: APP_ID,
-          isInvalidDefault: useDefaultWhenEmptyString,
+          isInvalidDefault: isDefaultWhenEmptyString,
         })
       );
 
@@ -125,7 +125,7 @@ describe('useLocalStorage', () => {
 
       expect(mockedUseKibana.services.storage.set).toBeCalledWith(
         `${APP_ID}.${getSettingKey({
-          category: RISK_CHART_CATEGORY,
+          category: TREEMAP_CATEGORY,
           page: ALERTS_PAGE,
           setting: STACK_BY_SETTING_NAME,
         })}`,
@@ -143,12 +143,12 @@ describe('useLocalStorage', () => {
         useLocalStorage<string>({
           defaultValue: DEFAULT_STACK_BY_FIELD,
           key: getSettingKey({
-            category: RISK_CHART_CATEGORY,
+            category: TREEMAP_CATEGORY,
             page: ALERTS_PAGE,
             setting: STACK_BY_SETTING_NAME,
           }),
           plugin: APP_ID,
-          isInvalidDefault: useDefaultWhenEmptyString,
+          isInvalidDefault: isDefaultWhenEmptyString,
         })
       );
 
@@ -165,12 +165,12 @@ describe('useLocalStorage', () => {
         useLocalStorage<string>({
           defaultValue: DEFAULT_STACK_BY_FIELD,
           key: getSettingKey({
-            category: RISK_CHART_CATEGORY,
+            category: TREEMAP_CATEGORY,
             page: ALERTS_PAGE,
             setting: STACK_BY_SETTING_NAME,
           }),
           plugin: APP_ID,
-          isInvalidDefault: useDefaultWhenEmptyString,
+          isInvalidDefault: isDefaultWhenEmptyString,
         })
       );
 

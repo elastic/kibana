@@ -18,5 +18,5 @@ export const getSettingKey = ({
   setting: string;
 }): string => `${page}.${category}.${setting}`;
 
-export const useDefaultWhenEmptyString = <T>(value: T): boolean =>
+export const isDefaultWhenEmptyString = <T>(value: T): boolean =>
   typeof value !== 'string' || isEmpty(value.trim());

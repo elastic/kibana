@@ -30,13 +30,6 @@ export const SUBTITLE = (maxItems: number) =>
     defaultMessage: 'Showing the top {maxItems} most frequently occurring alerts',
   });
 
-export const ALERTS_BY_RISK_SCORE_TITLE = i18n.translate(
-  'xpack.securitySolution.components.alertsTreemap.aletsByRiskScoreTitle',
-  {
-    defaultMessage: 'Alerts by risk score',
-  }
-);
-
 export const SHOW_ALL = i18n.translate(
   'xpack.securitySolution.components.alertsTreemap.showAllButton',
   {

@@ -8,11 +8,11 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Position } from '@elastic/charts';
 import type { EuiTitleSize } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import uuid from 'uuid';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -48,7 +48,7 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { ChartOptionsFlexItem } from '../../../pages/detection_engine/chart_context_menu';
+import { GROUP_BY_TOP_LABEL } from '../common/translations';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -61,9 +61,16 @@ const ViewAlertsFlexItem = styled(EuiFlexItem)`
   margin-left: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
+const OptionsFlexItem = styled(EuiFlexItem)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+export const LEGEND_WITH_COUNTS_WIDTH = 300; // px
+
 interface AlertsHistogramPanelProps {
+  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartHeight?: number;
-  chartOptionsContextMenu?: React.ReactNode;
+  chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
   combinedQueries?: string;
   defaultStackByOption?: string;
   filters?: Filter[];
@@ -78,13 +85,15 @@ interface AlertsHistogramPanelProps {
   legendPosition?: Position;
   signalIndexName: string | null;
   showCountsInLegend?: boolean;
+  showGroupByPlaceholder?: boolean;
   showLegend?: boolean;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   showStackBy?: boolean;
+  stackByLabel?: string;
   stackByWidth?: number;
   timelineId?: string;
-  title?: string;
+  title?: React.ReactNode;
   updateDateRange: UpdateDateRange;
   runtimeMappings?: MappingRuntimeFields;
 }
@@ -93,6 +102,7 @@ const NO_LEGEND_DATA: LegendItem[] = [];
 
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
+    alignHeader,
     chartHeight,
     chartOptionsContextMenu,
     combinedQueries,
@@ -107,10 +117,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     legendPosition = 'right',
     signalIndexName,
     showCountsInLegend = false,
+    showGroupByPlaceholder = false,
     showLegend = true,
     showLinkToAlerts = false,
     showTotalAlertsCount = false,
     showStackBy = true,
+    stackByLabel,
     stackByWidth,
     timelineId,
     title = i18n.HISTOGRAM_HEADER,
@@ -322,30 +334,55 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           $toggleStatus={toggleStatus}
         >
           <HeaderSection
+            alignHeader={alignHeader}
             id={uniqueQueryId}
+            outerDirection="row"
             title={titleText}
             titleSize={titleSize}
             toggleStatus={toggleStatus}
             toggleQuery={toggleQuery}
+            showInspectButton={chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
             hideSubtitle
           >
-            <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">
               <EuiFlexItem grow={false}>
                 {showStackBy && (
                   <>
                     <StackByComboBox
+                      data-test-subj="stackByComboBox"
                       selected={selectedStackByOption}
                       onSelect={onSelect}
+                      prepend={stackByLabel}
                       width={stackByWidth}
                     />
+                    {showGroupByPlaceholder && (
+                      <>
+                        <EuiSpacer data-test-subj="placeholderSpacer" size="s" />
+                        <EuiToolTip
+                          data-test-subj="placeholderTooltip"
+                          content={i18n.NOT_AVAILABLE_TOOLTIP}
+                        >
+                          <StackByComboBox
+                            isDisabled={true}
+                            data-test-subj="stackByPlaceholder"
+                            onSelect={noop}
+                            prepend={GROUP_BY_TOP_LABEL}
+                            selected=""
+                            width={stackByWidth}
+                          />
+                        </EuiToolTip>
+                      </>
+                    )}
                   </>
                 )}
                 {headerChildren != null && headerChildren}
               </EuiFlexItem>
               {chartOptionsContextMenu != null && (
-                <ChartOptionsFlexItem grow={false}>{chartOptionsContextMenu}</ChartOptionsFlexItem>
+                <OptionsFlexItem grow={false}>
+                  {chartOptionsContextMenu(uniqueQueryId)}
+                </OptionsFlexItem>
               )}
 
               {linkButton}
@@ -362,9 +399,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 from={from}
                 legendItems={legendItems}
                 legendPosition={legendPosition}
+                legendMinWidth={showCountsInLegend ? LEGEND_WITH_COUNTS_WIDTH : undefined}
                 loading={isLoadingAlerts}
                 to={to}
-                showCountsInLegend={showCountsInLegend}
                 showLegend={showLegend}
                 updateDateRange={updateDateRange}
               />

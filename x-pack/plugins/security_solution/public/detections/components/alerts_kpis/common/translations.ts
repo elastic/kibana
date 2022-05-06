@@ -14,10 +14,10 @@ export const STACK_BY_LABEL = i18n.translate(
   }
 );
 
-export const GROUP_BY_TOP_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.groupByTopLabel',
+export const GROUP_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.groupByLabel',
   {
-    defaultMessage: 'Group by top',
+    defaultMessage: 'Group by',
   }
 );
 
@@ -35,9 +35,9 @@ export const STACK_BY_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const THEN_GROUP_BY_TOP_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.thenGroupByTopLabel',
+export const GROUP_BY_TOP_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.stackByOptions.groupByTopLabel',
   {
-    defaultMessage: 'Then group by top',
+    defaultMessage: 'Group by top',
   }
 );

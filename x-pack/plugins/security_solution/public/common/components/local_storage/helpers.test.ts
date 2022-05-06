@@ -6,32 +6,32 @@
  */
 
 import {
-  RISK_CHART_CATEGORY,
+  TREEMAP_CATEGORY,
   ALERTS_PAGE,
   STACK_BY_SETTING_NAME,
-} from '../../../detections/pages/detection_engine/alerts_local_storage/constants';
-import { getSettingKey, useDefaultWhenEmptyString } from './helpers';
+} from '../../../detections/pages/detection_engine/chart_panels/alerts_local_storage/constants';
+import { getSettingKey, isDefaultWhenEmptyString } from './helpers';
 
 describe('helpers', () => {
   describe('getSettingKey', () => {
     it('returns the expected key', () => {
       expect(
         getSettingKey({
-          category: RISK_CHART_CATEGORY,
+          category: TREEMAP_CATEGORY,
           page: ALERTS_PAGE,
           setting: STACK_BY_SETTING_NAME,
         })
-      ).toEqual(`${ALERTS_PAGE}.${RISK_CHART_CATEGORY}.${STACK_BY_SETTING_NAME}`);
+      ).toEqual(`${ALERTS_PAGE}.${TREEMAP_CATEGORY}.${STACK_BY_SETTING_NAME}`);
     });
   });
 
-  describe('useDefaultWhenEmptyString', () => {
+  describe('isDefaultWhenEmptyString', () => {
     it('returns true when value is empty', () => {
-      expect(useDefaultWhenEmptyString('')).toBe(true);
+      expect(isDefaultWhenEmptyString('')).toBe(true);
     });
 
     it('returns false when value is non-empty', () => {
-      expect(useDefaultWhenEmptyString('foozle')).toBe(false);
+      expect(isDefaultWhenEmptyString('foozle')).toBe(false);
     });
   });
 });

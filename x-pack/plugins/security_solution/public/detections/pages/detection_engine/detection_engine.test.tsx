@@ -143,4 +143,18 @@ describe('DetectionEnginePageComponent', () => {
       expect(wrapper.find('FiltersGlobal').exists()).toBe(true);
     });
   });
+
+  it('renders the chart panels', async () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="chartPanels"]').exists()).toBe(true);
+    });
+  });
 });

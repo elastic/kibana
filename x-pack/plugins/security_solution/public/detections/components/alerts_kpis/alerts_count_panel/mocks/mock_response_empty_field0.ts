@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
-import { AlertsCountAggregation } from '../types';
+import type { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
+import type { AlertsCountAggregation } from '../types';
 
 export const emptyStackByField0Response: AlertSearchResponse<unknown, AlertsCountAggregation> = {
   took: 0,

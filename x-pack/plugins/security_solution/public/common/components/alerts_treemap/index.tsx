@@ -5,215 +5,203 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
-import type { Filter, Query } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
-import React, { useEffect, useMemo } from 'react';
-import uuid from 'uuid';
+import type { Datum, ElementClickListener, PartialTheme } from '@elastic/charts';
+import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
+import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
-import { useGlobalTime } from '../../containers/use_global_time';
-import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from './component';
+import { useTheme } from '../charts/common';
+import { DraggableLegend } from '../charts/draggable_legend';
+import type { LegendItem } from '../charts/draggable_legend_item';
+import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
+import { getRiskScorePalette, RISK_SCORE_STEPS } from './lib/chart_palette';
+import { getFlattenedBuckets } from './lib/flatten/get_flattened_buckets';
+import { getFlattenedLegendItems } from './lib/legend/get_flattened_legend_items';
 import {
-  KpiPanel,
-  StackByComboBox,
-} from '../../../detections/components/alerts_kpis/common/components';
-import { useInspectButton } from '../../../detections/components/alerts_kpis/common/hooks';
-import {
-  GROUP_BY_TOP_LABEL,
-  THEN_GROUP_BY_TOP_LABEL,
-} from '../../../detections/components/alerts_kpis/common/translations';
-import { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { ChartOptionsFlexItem } from '../../../detections/pages/detection_engine/chart_context_menu';
-import { HeaderSection } from '../header_section';
-import { InspectButtonContainer } from '../inspect';
-import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from './query';
-import * as i18n from './translations';
-import type { AlertsTreeMapAggregation } from './types';
+  getGroupByFieldsOnClick,
+  getMaxRiskSubAggregations,
+  getUpToMaxBuckets,
+  hasOptionalStackByField,
+} from './lib/helpers';
+import { getLayersMultiDimensional, getLayersOneDimension } from './lib/layers';
+import { getFirstGroupLegendItems } from './lib/legend';
+import { NoData } from './no_data';
+import type { AlertsTreeMapAggregation, FlattenedBucket, RawBucket } from './types';
 
-const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 122; // px
+export const DEFAULT_MIN_CHART_HEIGHT = 370; // px
+const DEFAULT_LEGEND_WIDTH = 300; // px
 
-const COLLAPSED_HEIGHT = 64; // px
-
-const ALERTS_TREEMAP_ID = 'alerts-treemap';
-
-interface AlertsTreemapPanelProps {
+export interface Props {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
-  chartOptionsContextMenu?: React.ReactNode;
-  expandRiskChart: boolean;
-  filters?: Filter[];
-  height?: number;
-  query?: Query;
-  riskSubAggregationField: string;
-  runtimeMappings?: MappingRuntimeFields;
-  setExpandRiskChart: (value: boolean) => void;
-  setStackByField0: (stackBy: string) => void;
-  setStackByField1: (stackBy: string | undefined) => void;
-  signalIndexName: string | null;
+  data: AlertSearchResponse<unknown, AlertsTreeMapAggregation>;
+  maxBuckets: number;
+  minChartHeight?: number;
   stackByField0: string;
   stackByField1: string | undefined;
-  stackByWidth?: number;
 }
 
-export const getBucketsCount = (
-  data: AlertSearchResponse<unknown, AlertsTreeMapAggregation> | null
-): number => data?.aggregations?.stackByField0?.buckets?.length ?? 0;
+const Wrapper = styled.div`
+  margin-top: -${({ theme }) => theme.eui.euiSizeS};
+`;
 
-const AlertsTreemapPanelComponent = ({
+const LegendContainer = styled.div`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+const ChartFlexItem = styled(EuiFlexItem)<{ $minChartHeight: number }>`
+  min-height: ${({ $minChartHeight }) => `${$minChartHeight}px`};
+`;
+
+const AlertsTreemapComponent: React.FC<Props> = ({
   addFilter,
-  chartOptionsContextMenu,
-  expandRiskChart,
-  filters,
-  height = DEFAULT_HEIGHT,
-  query,
-  riskSubAggregationField,
-  runtimeMappings,
-  setExpandRiskChart,
-  setStackByField0,
-  setStackByField1,
-  signalIndexName,
+  data,
+  maxBuckets,
+  minChartHeight = DEFAULT_MIN_CHART_HEIGHT,
   stackByField0,
   stackByField1,
-  stackByWidth,
-}: AlertsTreemapPanelProps) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime();
+}: Props) => {
+  const theme = useTheme();
+  const fillColor = useMemo(() => theme.background.color, [theme.background.color]);
 
-  // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
+  const treemapTheme: PartialTheme[] = useMemo(
+    () => [
+      {
+        partition: {
+          fillLabel: { valueFont: { fontWeight: 700 } },
+          idealFontSizeJump: 1.15,
+          maxFontSize: 16,
+          minFontSize: 8,
+          sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
+          sectorLineWidth: 1.5,
+        },
+      },
+    ],
+    [fillColor]
+  );
 
-  const additionalFilters = useMemo(() => {
-    try {
-      return [
-        buildEsQuery(
-          undefined,
-          query != null ? [query] : [],
-          filters?.filter((f) => f.meta.disabled === false) ?? []
-        ),
-      ];
-    } catch (e) {
-      return [];
-    }
-  }, [query, filters]);
+  const buckets: RawBucket[] = useMemo(
+    () =>
+      getUpToMaxBuckets({
+        buckets: data.aggregations?.stackByField0?.buckets,
+        maxItems: maxBuckets,
+      }),
+    [data.aggregations?.stackByField0?.buckets, maxBuckets]
+  );
 
-  const {
-    data: alertsData,
-    loading: isLoadingAlerts,
-    refetch,
-    request,
-    response,
-    setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, AlertsTreeMapAggregation>({
-    query: getAlertsRiskQuery({
-      additionalFilters,
-      from,
-      riskSubAggregationField,
-      runtimeMappings,
-      stackByField0,
-      stackByField1,
-      to,
-    }),
-    skip: !expandRiskChart,
-    indexName: signalIndexName,
-  });
+  const maxRiskSubAggregations = useMemo(() => getMaxRiskSubAggregations(buckets), [buckets]);
 
-  useEffect(() => {
-    setAlertsQuery(
-      getAlertsRiskQuery({
-        additionalFilters,
-        from,
-        riskSubAggregationField,
-        runtimeMappings,
+  const flattenedBuckets: FlattenedBucket[] = useMemo(
+    () =>
+      getFlattenedBuckets({
+        buckets,
+        maxRiskSubAggregations,
         stackByField0,
-        stackByField1,
-        to,
-      })
-    );
-  }, [
-    additionalFilters,
-    from,
-    riskSubAggregationField,
-    runtimeMappings,
-    setAlertsQuery,
-    stackByField0,
-    stackByField1,
-    to,
-  ]);
+      }),
+    [buckets, maxRiskSubAggregations, stackByField0]
+  );
 
-  useInspectButton({
-    deleteQuery,
-    loading: isLoadingAlerts,
-    response,
-    setQuery,
-    refetch,
-    request,
-    uniqueQueryId,
-  });
+  const colorPalette = useMemo(() => getRiskScorePalette(RISK_SCORE_STEPS), []);
+
+  const legendItems: LegendItem[] = useMemo(
+    () =>
+      flattenedBuckets.length === 0
+        ? getFirstGroupLegendItems({
+            buckets,
+            colorPalette,
+            maxRiskSubAggregations,
+            stackByField0,
+          })
+        : getFlattenedLegendItems({
+            buckets,
+            colorPalette,
+            flattenedBuckets,
+            maxRiskSubAggregations,
+            stackByField0,
+            stackByField1,
+          }),
+    [buckets, colorPalette, flattenedBuckets, maxRiskSubAggregations, stackByField0, stackByField1]
+  );
+
+  const onElementClick: ElementClickListener = useCallback(
+    (event) => {
+      const { groupByField0, groupByField1 } = getGroupByFieldsOnClick(event);
+
+      if (addFilter != null && !isEmpty(groupByField0.trim())) {
+        addFilter({ field: stackByField0, value: groupByField0 });
+      }
+
+      if (addFilter != null && !isEmpty(stackByField1?.trim()) && !isEmpty(groupByField1.trim())) {
+        addFilter({ field: `${stackByField1}`, value: groupByField1 });
+      }
+    },
+    [addFilter, stackByField0, stackByField1]
+  );
+
+  const layers = useMemo(
+    () =>
+      hasOptionalStackByField(stackByField1)
+        ? getLayersMultiDimensional({
+            colorPalette,
+            layer0FillColor: fillColor,
+            maxRiskSubAggregations,
+          })
+        : getLayersOneDimension({ colorPalette, maxRiskSubAggregations }),
+    [colorPalette, fillColor, maxRiskSubAggregations, stackByField1]
+  );
+
+  const valueAccessor = useMemo(
+    () =>
+      hasOptionalStackByField(stackByField1)
+        ? (d: Datum) => d.stackByField1DocCount
+        : (d: Datum) => d.doc_count,
+    [stackByField1]
+  );
+
+  const normalizedData: FlattenedBucket[] = hasOptionalStackByField(stackByField1)
+    ? flattenedBuckets
+    : buckets;
+
+  if (buckets.length === 0) {
+    return <NoData />;
+  }
 
   return (
-    <InspectButtonContainer>
-      <KpiPanel
-        hasBorder
-        height={expandRiskChart ? height : COLLAPSED_HEIGHT}
-        data-test-subj="treemapPanel"
-        $toggleStatus={true}
-      >
-        <HeaderSection
-          hideSubtitle={true}
-          id={uniqueQueryId}
-          title={i18n.ALERTS_BY_RISK_SCORE_TITLE}
-          titleSize="s"
-          toggleStatus={expandRiskChart}
-          toggleQuery={setExpandRiskChart}
-        >
-          {expandRiskChart && (
-            <EuiFlexGroup alignItems="flexStart" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <StackByComboBox
-                  onSelect={setStackByField0}
-                  prepend={GROUP_BY_TOP_LABEL}
-                  selected={stackByField0}
-                  width={stackByWidth}
-                />
-                <EuiSpacer size="xs" />
-                <StackByComboBox
-                  onSelect={setStackByField1}
-                  prepend={THEN_GROUP_BY_TOP_LABEL}
-                  selected={stackByField1 ?? ''}
-                  width={stackByWidth}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {chartOptionsContextMenu != null && (
-                  <ChartOptionsFlexItem grow={false}>
-                    {chartOptionsContextMenu}
-                  </ChartOptionsFlexItem>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </HeaderSection>
+    <Wrapper data-test-subj="treemap">
+      <EuiFlexGroup gutterSize="none">
+        <ChartFlexItem grow={true} $minChartHeight={minChartHeight}>
+          <Chart>
+            <Settings
+              baseTheme={theme}
+              showLegend={false}
+              theme={treemapTheme}
+              onElementClick={onElementClick}
+            />
+            <Partition
+              data={normalizedData}
+              id="spec_1"
+              layers={layers}
+              layout={PartitionLayout.treemap}
+              valueAccessor={valueAccessor}
+            />
+          </Chart>
+        </ChartFlexItem>
 
-        {isLoadingAlerts ? (
-          <EuiProgress size="xs" position="absolute" color="accent" />
-        ) : (
-          <>
-            {alertsData != null && expandRiskChart && (
-              <AlertsTreemap
-                addFilter={addFilter}
-                data={alertsData}
-                maxBuckets={DEFAULT_STACK_BY_FIELD0_SIZE}
-                stackByField0={stackByField0}
-                stackByField1={stackByField1}
+        <EuiFlexItem grow={false}>
+          <LegendContainer>
+            {legendItems.length > 0 && (
+              <DraggableLegend
+                height={minChartHeight}
+                legendItems={legendItems}
+                minWidth={DEFAULT_LEGEND_WIDTH}
               />
             )}
-          </>
-        )}
-      </KpiPanel>
-    </InspectButtonContainer>
+          </LegendContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Wrapper>
   );
 };
 
-AlertsTreemapPanelComponent.displayName = 'AlertsTreemapPanelComponent';
-
-export const AlertsTreemapPanel = React.memo(AlertsTreemapPanelComponent);
+export const AlertsTreemap = React.memo(AlertsTreemapComponent);

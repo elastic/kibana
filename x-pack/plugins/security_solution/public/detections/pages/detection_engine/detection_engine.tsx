@@ -26,8 +26,6 @@ import type { Dispatch } from 'redux';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { useAlertsLocalStorage } from './alerts_local_storage';
-import type { AlertsSettings } from './alerts_local_storage/types';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -41,7 +39,6 @@ import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
-import { AlertsHistogramPanel } from '../../components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../components/user_info';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
@@ -64,7 +61,6 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
-import { ChartOptions } from './chart_options';
 import { ChartPanels } from './chart_panels';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useSignalHelpers } from '../../../common/containers/sourcerer/use_signal_helpers';
@@ -73,8 +69,6 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
-import { AlertsCountPanel } from '../../components/alerts_kpis/alerts_count_panel';
-import { CHART_HEIGHT } from '../../components/alerts_kpis/common/config';
 import {
   AlertsTableFilterGroup,
   FILTER_OPEN,
@@ -82,7 +76,6 @@ import {
 import { EmptyPage } from '../../../common/components/empty_page';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -280,38 +273,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [docLinks]
   );
 
-  const alertsTreemapEnabled = useIsExperimentalFeatureEnabled('alertsTreemapEnabled'); // feature flag
-  const showAlertsPageTitle = useIsExperimentalFeatureEnabled('showAlertsPageTitle'); // feature flag
-
-  const {
-    alertViewSelection,
-    countTableStackBy0,
-    countTableStackBy1,
-    expandRiskChart,
-    riskChartStackBy0,
-    riskChartStackBy1,
-    setAlertViewSelection,
-    setCountTableStackBy0,
-    setCountTableStackBy1,
-    setExpandRiskChart,
-    setRiskChartStackBy0,
-    setRiskChartStackBy1,
-    setShowCountsInTrendChartLegend,
-    setShowCountTable,
-    setShowRiskChart,
-    setShowTrendChart,
-    setTourStep1Completed,
-    setTourStep2Completed,
-    setTrendChartStackBy,
-    showCountsInTrendChartLegend,
-    showCountTable,
-    showRiskChart,
-    showTrendChart,
-    tourStep1Completed,
-    tourStep2Completed,
-    trendChartStackBy,
-  }: AlertsSettings = useAlertsLocalStorage();
-
   if (loading) {
     return (
       <SecuritySolutionPageWrapper>
@@ -370,20 +331,16 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             data-test-subj="detectionsAlertsPage"
           >
             <Display show={!globalFullScreen}>
-              {showAlertsPageTitle && (
-                <>
-                  <HeaderPage title={i18n.PAGE_TITLE}>
-                    <LinkAnchor
-                      onClick={goToRules}
-                      href={formatUrl(getRulesUrl())}
-                      data-test-subj="manage-alert-detection-rules"
-                    >
-                      {i18n.BUTTON_MANAGE_RULES}
-                    </LinkAnchor>
-                  </HeaderPage>
-                  <EuiHorizontalRule margin="m" />
-                </>
-              )}
+              <HeaderPage title={i18n.PAGE_TITLE}>
+                <LinkAnchor
+                  onClick={goToRules}
+                  href={formatUrl(getRulesUrl())}
+                  data-test-subj="manage-alert-detection-rules"
+                >
+                  {i18n.BUTTON_MANAGE_RULES}
+                </LinkAnchor>
+              </HeaderPage>
+              <EuiHorizontalRule margin="m" />
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <AlertsTableFilterGroup
@@ -401,102 +358,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                           showUpdating,
                         })}
                     </EuiFlexItem>
-
-                    {alertsTreemapEnabled && (
-                      <EuiFlexItem grow={false}>
-                        <ChartOptions
-                          alertViewSelection={alertViewSelection}
-                          setAlertViewSelection={setAlertViewSelection}
-                          setShowCountTable={setShowCountTable}
-                          setShowRiskChart={setShowRiskChart}
-                          setShowTrendChart={setShowTrendChart}
-                          setTourStep1Completed={setTourStep1Completed}
-                          setTourStep2Completed={setTourStep2Completed}
-                          showCountTable={showCountTable}
-                          showRiskChart={showRiskChart}
-                          showTrendChart={showTrendChart}
-                          tourStep1Completed={tourStep1Completed}
-                          tourStep2Completed={tourStep2Completed}
-                        />
-                      </EuiFlexItem>
-                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
 
-              <EuiFlexGroup
-                direction={alertsTreemapEnabled && showRiskChart ? 'column' : 'row'}
-                gutterSize="l"
-                wrap
-              >
-                {alertsTreemapEnabled ? (
-                  <ChartPanels
-                    addFilter={addFilter}
-                    alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
-                    countTableStackBy0={countTableStackBy0}
-                    countTableStackBy1={countTableStackBy1}
-                    expandRiskChart={expandRiskChart}
-                    isLoadingIndexPattern={isLoadingIndexPattern}
-                    query={query}
-                    riskChartStackBy0={riskChartStackBy0}
-                    riskChartStackBy1={riskChartStackBy1}
-                    runtimeMappings={runtimeMappings}
-                    setCountTableStackBy0={setCountTableStackBy0}
-                    setCountTableStackBy1={setCountTableStackBy1}
-                    setExpandRiskChart={setExpandRiskChart}
-                    setRiskChartStackBy0={setRiskChartStackBy0}
-                    setRiskChartStackBy1={setRiskChartStackBy1}
-                    setShowCountsInTrendChartLegend={setShowCountsInTrendChartLegend}
-                    setTrendChartStackBy={setTrendChartStackBy}
-                    signalIndexName={signalIndexName}
-                    showCountsInTrendChartLegend={showCountsInTrendChartLegend}
-                    showCountTable={showCountTable}
-                    showRiskChart={showRiskChart}
-                    showTrendChart={showTrendChart}
-                    trendChartStackBy={trendChartStackBy}
-                    updateDateRangeCallback={updateDateRangeCallback}
-                  />
-                ) : (
-                  <>
-                    <EuiFlexItem grow={1}>
-                      {isLoadingIndexPattern ? (
-                        <EuiLoadingSpinner size="xl" />
-                      ) : (
-                        <AlertsCountPanel
-                          filters={alertsHistogramDefaultFilters}
-                          query={query}
-                          setStackByField0={setCountTableStackBy0}
-                          setStackByField1={setCountTableStackBy1}
-                          signalIndexName={signalIndexName}
-                          stackByField0={countTableStackBy0}
-                          stackByField1={undefined}
-                          runtimeMappings={runtimeMappings}
-                        />
-                      )}
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={2}>
-                      {isLoadingIndexPattern ? (
-                        <EuiLoadingSpinner size="xl" />
-                      ) : (
-                        <AlertsHistogramPanel
-                          chartHeight={CHART_HEIGHT}
-                          defaultStackByOption={trendChartStackBy}
-                          filters={alertsHistogramDefaultFilters}
-                          onFieldSelected={setTrendChartStackBy}
-                          query={query}
-                          showTotalAlertsCount={false}
-                          titleSize={'s'}
-                          signalIndexName={signalIndexName}
-                          updateDateRange={updateDateRangeCallback}
-                          runtimeMappings={runtimeMappings}
-                        />
-                      )}
-                    </EuiFlexItem>
-                  </>
-                )}
-              </EuiFlexGroup>
+              <ChartPanels
+                addFilter={addFilter}
+                alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
+                isLoadingIndexPattern={isLoadingIndexPattern}
+                query={query}
+                runtimeMappings={runtimeMappings}
+                signalIndexName={signalIndexName}
+                updateDateRangeCallback={updateDateRangeCallback}
+              />
 
               <EuiSpacer size="l" />
             </Display>

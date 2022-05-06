@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 
 import type { FlattenedBucket } from '../../../../common/components/alerts_treemap/types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
-import { GenericBuckets } from '../../../../../common/search_strategy/common';
+import type { GenericBuckets } from '../../../../../common/search_strategy/common';
 import * as i18n from './translations';
+import { DEFAULT_STACK_BY_FIELD0_SIZE, DEFAULT_STACK_BY_FIELD1_SIZE } from './helpers';
 
 export const getSingleGroupByAlertsCountTableColumns = ({
   defaultNumberFormat,
@@ -62,7 +63,7 @@ export const getMultiGroupAlertsCountTableColumns = ({
   {
     'data-test-subj': 'stackByField0Key',
     field: 'key',
-    name: stackByField0,
+    name: i18n.COLUMN_LABEL({ fieldName: stackByField0, topN: DEFAULT_STACK_BY_FIELD0_SIZE }),
     render: function DraggableStackOptionField(value: string) {
       return (
         <DefaultDraggable
@@ -80,7 +81,7 @@ export const getMultiGroupAlertsCountTableColumns = ({
   {
     'data-test-subj': 'stackByField1Key',
     field: 'stackByField1Key',
-    name: stackByField1,
+    name: i18n.COLUMN_LABEL({ fieldName: stackByField1 ?? '', topN: DEFAULT_STACK_BY_FIELD1_SIZE }),
     render: function DraggableStackOptionField(value: string) {
       return (
         <DefaultDraggable

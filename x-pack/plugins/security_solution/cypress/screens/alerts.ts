@@ -8,7 +8,7 @@
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
 export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
-  '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(3) .euiTableCellContent__text';
+  '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
 
 export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__input';
 
@@ -33,6 +33,8 @@ export const ALERTS_COUNT =
 export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
   '[data-test-subj="render-content-kibana.alert.rule.name"]';
 
+export const CHART_SELECT = '[data-test-subj="chartSelect"]';
+
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
 export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]';
@@ -45,13 +47,15 @@ export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
+export const GROUP_BY_TOP_INPUT = '[data-test-subj="groupByTop"] [data-test-subj="comboBoxInput"]';
+
 export const HOST_NAME = '[data-test-subj^=formatted-field][data-test-subj$=host\\.name]';
 
 export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
 
 export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
 
-export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="navigation-rules"]';
+export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
@@ -73,6 +77,8 @@ export const RISK_SCORE = '[data-test-subj^=formatted-field][data-test-subj$=ris
 export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule\\.name]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
+
+export const SELECT_TABLE = '[data-test-subj="selectTable"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 

@@ -5,22 +5,29 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter, Query } from '@kbn/es-query';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { ChartContextMenu } from '../chart_context_menu';
-import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap';
-import { UpdateDateRange } from '../../../../common/components/charts/common';
+import { useAlertsLocalStorage } from './alerts_local_storage';
+import type { AlertsSettings } from './alerts_local_storage/types';
+import { ChartContextMenu } from './chart_context_menu';
+import { ChartSelect } from './chart_select';
+import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
+import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
 import {
-  CHART_HEIGHT,
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
 } from '../../../components/alerts_kpis/common/config';
 import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
+import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
+
+const TABLE_PANEL_HEIGHT = 330; // px
+const TRENT_CHART_HEIGHT = 127; // px
+const TREND_CHART_PANEL_HEIGHT = 256; // px
 
 const AlertsCountPanelFlexItem = styled(EuiFlexItem)`
   margin-left: ${({ theme }) => theme.eui.euiSizeM};
@@ -30,65 +37,53 @@ const FullHeightFlexItem = styled(EuiFlexItem)`
   height: 100%;
 `;
 
+const ChartSelectContainer = styled.div`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
 export interface Props {
   addFilter: ({ field, value }: { field: string; value: string | number }) => void;
   alertsHistogramDefaultFilters: Filter[];
-  countTableStackBy0: string;
-  countTableStackBy1: string | undefined;
-  expandRiskChart: boolean;
   isLoadingIndexPattern: boolean;
   query: Query;
-  riskChartStackBy0: string;
-  riskChartStackBy1: string | undefined;
   runtimeMappings: MappingRuntimeFields;
-  setCountTableStackBy0: (value: string) => void;
-  setCountTableStackBy1: (value: string | undefined) => void;
-  setExpandRiskChart: (value: boolean) => void;
-  setRiskChartStackBy0: (value: string) => void;
-  setRiskChartStackBy1: (value: string | undefined) => void;
-  setShowCountsInTrendChartLegend: (value: boolean) => void;
-  setTrendChartStackBy: (value: string) => void;
   signalIndexName: string | null;
-  showCountsInTrendChartLegend: boolean;
-  showCountTable: boolean;
-  showRiskChart: boolean;
-  showTrendChart: boolean;
-  trendChartStackBy: string;
   updateDateRangeCallback: UpdateDateRange;
 }
 
-const ChartPanelsComponent = ({
+const ChartPanelsComponent: React.FC<Props> = ({
   addFilter,
   alertsHistogramDefaultFilters,
-  countTableStackBy0,
-  countTableStackBy1,
-  expandRiskChart,
   isLoadingIndexPattern,
   query,
-  riskChartStackBy0,
-  riskChartStackBy1,
   runtimeMappings,
-  setCountTableStackBy0,
-  setCountTableStackBy1,
-  setExpandRiskChart,
-  setRiskChartStackBy0,
-  setRiskChartStackBy1,
-  setShowCountsInTrendChartLegend,
-  setTrendChartStackBy,
   signalIndexName,
-  showCountsInTrendChartLegend,
-  showCountTable,
-  showRiskChart,
-  showTrendChart,
-  trendChartStackBy,
   updateDateRangeCallback,
 }: Props) => {
+  const {
+    alertViewSelection,
+    countTableStackBy0,
+    countTableStackBy1,
+    isTreemapPanelExpanded,
+    riskChartStackBy0,
+    riskChartStackBy1,
+    setAlertViewSelection,
+    setCountTableStackBy0,
+    setCountTableStackBy1,
+    setIsTreemapPanelExpanded,
+    setRiskChartStackBy0,
+    setRiskChartStackBy1,
+    setTrendChartStackBy,
+    trendChartStackBy,
+  }: AlertsSettings = useAlertsLocalStorage();
+
   const updateCommonStackBy0 = useCallback(
     (value: string) => {
+      setTrendChartStackBy(value);
       setCountTableStackBy0(value);
       setRiskChartStackBy0(value);
     },
-    [setCountTableStackBy0, setRiskChartStackBy0]
+    [setCountTableStackBy0, setRiskChartStackBy0, setTrendChartStackBy]
   );
 
   const updateCommonStackBy1 = useCallback(
@@ -99,58 +94,54 @@ const ChartPanelsComponent = ({
     [setCountTableStackBy1, setRiskChartStackBy1]
   );
 
-  const CountTableContextMenu = useMemo(
-    () => (
-      <ChartContextMenu
-        defaultStackByField={DEFAULT_STACK_BY_FIELD}
-        defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
-        setStackBy={updateCommonStackBy0}
-        setStackByField1={updateCommonStackBy1}
-      />
-    ),
+  const chartOptionsContextMenu = useMemo(
+    // eslint-disable-next-line react/display-name
+    () => (queryId: string) =>
+      (
+        <ChartContextMenu
+          defaultStackByField={DEFAULT_STACK_BY_FIELD}
+          defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
+          queryId={queryId}
+          setStackBy={updateCommonStackBy0}
+          setStackByField1={updateCommonStackBy1}
+        />
+      ),
     [updateCommonStackBy0, updateCommonStackBy1]
   );
 
-  const RiskChartContextMenu = useMemo(
+  const title = useMemo(
     () => (
-      <ChartContextMenu
-        defaultStackByField={DEFAULT_STACK_BY_FIELD}
-        defaultStackByField1={DEFAULT_STACK_BY_FIELD1}
-        setStackBy={updateCommonStackBy0}
-        setStackByField1={updateCommonStackBy1}
-      />
+      <ChartSelectContainer>
+        <ChartSelect
+          alertViewSelection={alertViewSelection}
+          setAlertViewSelection={setAlertViewSelection}
+        />
+      </ChartSelectContainer>
     ),
-    [updateCommonStackBy0, updateCommonStackBy1]
-  );
-
-  const TrendChartContextMenu = useMemo(
-    () => (
-      <ChartContextMenu
-        defaultStackByField={DEFAULT_STACK_BY_FIELD}
-        setShowCountsInChartLegend={setShowCountsInTrendChartLegend}
-        setStackBy={setTrendChartStackBy}
-        showCountsInChartLegend={showCountsInTrendChartLegend}
-      />
-    ),
-    [setShowCountsInTrendChartLegend, setTrendChartStackBy, showCountsInTrendChartLegend]
+    [alertViewSelection, setAlertViewSelection]
   );
 
   return (
-    <>
-      {showTrendChart && (
+    <div data-test-subj="chartPanels">
+      {alertViewSelection === 'trend' && (
         <FullHeightFlexItem grow={2}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner size="xl" />
+            <EuiLoadingSpinner data-test-subj="trendLoadingSpinner" size="xl" />
           ) : (
             <AlertsHistogramPanel
-              chartHeight={CHART_HEIGHT}
-              chartOptionsContextMenu={TrendChartContextMenu}
+              alignHeader="flexStart"
+              chartHeight={TRENT_CHART_HEIGHT}
+              chartOptionsContextMenu={chartOptionsContextMenu}
               defaultStackByOption={trendChartStackBy}
               filters={alertsHistogramDefaultFilters}
-              onFieldSelected={setTrendChartStackBy}
+              onFieldSelected={updateCommonStackBy0}
+              panelHeight={TREND_CHART_PANEL_HEIGHT}
               query={query}
-              showCountsInLegend={showCountsInTrendChartLegend}
+              showCountsInLegend={true}
+              showGroupByPlaceholder={true}
               showTotalAlertsCount={false}
+              stackByLabel={GROUP_BY_LABEL}
+              title={title}
               titleSize={'s'}
               signalIndexName={signalIndexName}
               updateDateRange={updateDateRangeCallback}
@@ -160,46 +151,55 @@ const ChartPanelsComponent = ({
         </FullHeightFlexItem>
       )}
 
-      {showCountTable && (
+      {alertViewSelection === 'table' && (
         <AlertsCountPanelFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner size="xl" />
+            <EuiLoadingSpinner data-test-subj="tableLoadingSpinner" size="xl" />
           ) : (
             <AlertsCountPanel
-              chartOptionsContextMenu={CountTableContextMenu}
+              alignHeader="flexStart"
+              chartOptionsContextMenu={chartOptionsContextMenu}
               filters={alertsHistogramDefaultFilters}
+              panelHeight={TABLE_PANEL_HEIGHT}
               query={query}
+              runtimeMappings={runtimeMappings}
               setStackByField0={updateCommonStackBy0}
               setStackByField1={updateCommonStackBy1}
               signalIndexName={signalIndexName}
               stackByField0={countTableStackBy0}
               stackByField1={countTableStackBy1}
-              runtimeMappings={runtimeMappings}
+              title={title}
             />
           )}
         </AlertsCountPanelFlexItem>
       )}
 
-      {showRiskChart && (
+      {alertViewSelection === 'treemap' && (
         <FullHeightFlexItem grow={1}>
-          <AlertsTreemapPanel
-            addFilter={addFilter}
-            chartOptionsContextMenu={RiskChartContextMenu}
-            expandRiskChart={expandRiskChart}
-            filters={alertsHistogramDefaultFilters}
-            query={query}
-            setExpandRiskChart={setExpandRiskChart}
-            setStackByField0={updateCommonStackBy0}
-            setStackByField1={updateCommonStackBy1}
-            signalIndexName={signalIndexName}
-            stackByField0={riskChartStackBy0}
-            stackByField1={riskChartStackBy1}
-            riskSubAggregationField="signal.rule.risk_score" // TODO: 'kibana.alert.rule.risk_score' returns no values
-            runtimeMappings={runtimeMappings}
-          />
+          {isLoadingIndexPattern ? (
+            <EuiLoadingSpinner data-test-subj="treemapLoadingSpinner" size="xl" />
+          ) : (
+            <AlertsTreemapPanel
+              addFilter={addFilter}
+              alignHeader="flexStart"
+              chartOptionsContextMenu={chartOptionsContextMenu}
+              isPanelExpanded={isTreemapPanelExpanded}
+              filters={alertsHistogramDefaultFilters}
+              query={query}
+              setIsPanelExpanded={setIsTreemapPanelExpanded}
+              setStackByField0={updateCommonStackBy0}
+              setStackByField1={updateCommonStackBy1}
+              signalIndexName={signalIndexName}
+              stackByField0={riskChartStackBy0}
+              stackByField1={riskChartStackBy1}
+              title={title}
+              riskSubAggregationField="signal.rule.risk_score" // TODO: 'kibana.alert.rule.risk_score' returns no values
+              runtimeMappings={runtimeMappings}
+            />
+          )}
         </FullHeightFlexItem>
       )}
-    </>
+    </div>
   );
 };
 

@@ -5,50 +5,34 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { Dispatch, SetStateAction } from 'react';
 import { useMemo, useState } from 'react';
+
+import { useInspect } from '../../../inspect/use_inspect';
 
 import * as i18n from './translations';
 
 const defaultInitialPanelId = 'default-initial-panel';
 
 interface Props {
-  defaultStackByField1?: string;
   onResetStackByFields: () => void;
-  setShowCountsInChartLegend?: (value: boolean) => void;
-  setStackBy: (value: string) => void;
-  setStackByField1?: (stackBy: string | undefined) => void;
-  showCountsInChartLegend?: boolean;
+  queryId: string;
 }
 
 export const useChartSettingsPopoverConfiguration = ({
   onResetStackByFields,
-  setShowCountsInChartLegend,
-  setStackBy,
-  setStackByField1 = noop,
-  showCountsInChartLegend,
-}: Props) => {
+  queryId,
+}: Props): {
+  defaultInitialPanelId: string;
+  defaultMenuItems: EuiContextMenuPanelDescriptor[];
+  isPopoverOpen: boolean;
+  setIsPopoverOpen: Dispatch<SetStateAction<boolean>>;
+} => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const showCountsInChartLegendMenuItem: EuiContextMenuPanelItemDescriptor[] = useMemo(
-    () =>
-      setShowCountsInChartLegend != null
-        ? [
-            {
-              name: showCountsInChartLegend
-                ? i18n.HIDE_COUNTS_IN_LEGEND
-                : i18n.SHOW_COUNTS_IN_LEGEND,
-              icon: 'number',
-              onClick: () => {
-                setIsPopoverOpen(false);
-                setShowCountsInChartLegend(!showCountsInChartLegend);
-              },
-            },
-          ]
-        : [],
-    [setShowCountsInChartLegend, showCountsInChartLegend]
-  );
+  const { handleClick } = useInspect({
+    queryId,
+  });
 
   const defaultMenuItems: EuiContextMenuPanelDescriptor[] = useMemo(
     () => [
@@ -56,82 +40,32 @@ export const useChartSettingsPopoverConfiguration = ({
         id: defaultInitialPanelId,
         items: [
           {
-            name: i18n.RESET_STACK_BY_FIELD,
-            icon: 'kqlField',
+            'data-test-subj': 'inspectMenuItem',
+            icon: 'inspect',
+            name: i18n.INSPECT,
             onClick: () => {
               setIsPopoverOpen(false);
-              onResetStackByFields();
+              handleClick();
             },
           },
-          ...showCountsInChartLegendMenuItem,
-        ],
-        title: i18n.OPTIONS,
-      },
-    ],
-    [onResetStackByFields, showCountsInChartLegendMenuItem]
-  );
-
-  const riskMenuItems: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [
-      {
-        id: defaultInitialPanelId,
-        items: [
           {
+            'data-test-subj': 'resetGroupByFieldsMenuItem',
             name: i18n.RESET_GROUP_BY_FIELDS,
-            icon: 'kqlField',
             onClick: () => {
               setIsPopoverOpen(false);
               onResetStackByFields();
             },
           },
-          {
-            name: i18n.GROUP_BY_RULE_AND_USER_NAME,
-            icon: 'kqlField',
-            onClick: () => {
-              setIsPopoverOpen(false);
-              setStackBy('kibana.alert.rule.name');
-              setStackByField1('user.name');
-            },
-          },
-          {
-            name: i18n.GROUP_BY_PARENT_AND_CHILD_PROCESS,
-            icon: 'kqlField',
-            onClick: () => {
-              setIsPopoverOpen(false);
-              setStackBy('process.parent.name');
-              setStackByField1('process.name');
-            },
-          },
-          {
-            name: i18n.GROUP_BY_PROCESS_AND_FILE_NAME,
-            icon: 'kqlField',
-            onClick: () => {
-              setIsPopoverOpen(false);
-              setStackBy('process.name');
-              setStackByField1('file.name');
-            },
-          },
-          {
-            name: i18n.GROUP_BY_HOST_AND_USER_NAME,
-            icon: 'kqlField',
-            onClick: () => {
-              setIsPopoverOpen(false);
-              setStackBy('host.name');
-              setStackByField1('user.name');
-            },
-          },
         ],
-        title: i18n.OPTIONS,
       },
     ],
-    [onResetStackByFields, setStackBy, setStackByField1]
+    [handleClick, onResetStackByFields]
   );
 
   return {
     defaultInitialPanelId,
     defaultMenuItems,
     isPopoverOpen,
-    riskMenuItems,
     setIsPopoverOpen,
   };
 };

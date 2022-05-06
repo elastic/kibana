@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiProgress, EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useUiSetting$ } from '../../../../common/lib/kibana';
@@ -18,8 +17,8 @@ import type { AlertsCountAggregation } from './types';
 import {
   getMaxRiskSubAggregations,
   getUpToMaxBuckets,
-} from '../../../../common/components/alerts_treemap/component/helpers';
-import { getFlattenedBuckets } from '../../../../common/components/alerts_treemap/flatten/get_flattened_buckets';
+} from '../../../../common/components/alerts_treemap/lib/helpers';
+import { getFlattenedBuckets } from '../../../../common/components/alerts_treemap/lib/flatten/get_flattened_buckets';
 import type {
   FlattenedBucket,
   RawBucket,
@@ -41,60 +40,65 @@ const Wrapper = styled.div`
   margin-top: -${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const AlertsCount = memo<AlertsCountProps>(
-  ({ data, loading, stackByField0, stackByField1 }) => {
-    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+export const AlertsCountComponent: React.FC<AlertsCountProps> = ({
+  data,
+  loading,
+  stackByField0,
+  stackByField1,
+}) => {
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-    const tableColumns = useMemo(
-      () =>
-        isEmpty(stackByField1?.trim())
-          ? getSingleGroupByAlertsCountTableColumns({
-              defaultNumberFormat,
-              stackByField0,
-            })
-          : getMultiGroupAlertsCountTableColumns({
-              defaultNumberFormat,
-              stackByField0,
-              stackByField1,
-            }),
-      [defaultNumberFormat, stackByField0, stackByField1]
-    );
+  const tableColumns = useMemo(
+    () =>
+      isEmpty(stackByField1?.trim())
+        ? getSingleGroupByAlertsCountTableColumns({
+            defaultNumberFormat,
+            stackByField0,
+          })
+        : getMultiGroupAlertsCountTableColumns({
+            defaultNumberFormat,
+            stackByField0,
+            stackByField1,
+          }),
+    [defaultNumberFormat, stackByField0, stackByField1]
+  );
 
-    const buckets: RawBucket[] = useMemo(
-      () =>
-        getUpToMaxBuckets({
-          buckets: data.aggregations?.stackByField0?.buckets,
-          maxItems: DEFAULT_STACK_BY_FIELD0_SIZE,
-        }),
-      [data.aggregations?.stackByField0?.buckets]
-    );
+  const buckets: RawBucket[] = useMemo(
+    () =>
+      getUpToMaxBuckets({
+        buckets: data.aggregations?.stackByField0?.buckets,
+        maxItems: DEFAULT_STACK_BY_FIELD0_SIZE,
+      }),
+    [data.aggregations?.stackByField0?.buckets]
+  );
 
-    const maxRiskSubAggregations = useMemo(() => getMaxRiskSubAggregations(buckets), [buckets]);
+  const maxRiskSubAggregations = useMemo(() => getMaxRiskSubAggregations(buckets), [buckets]);
 
-    const items: FlattenedBucket[] = useMemo(
-      () =>
-        isEmpty(stackByField1?.trim())
-          ? buckets
-          : getFlattenedBuckets({
-              buckets,
-              maxRiskSubAggregations,
-              stackByField0,
-            }),
-      [buckets, maxRiskSubAggregations, stackByField0, stackByField1]
-    );
+  const items: FlattenedBucket[] = useMemo(
+    () =>
+      isEmpty(stackByField1?.trim())
+        ? buckets
+        : getFlattenedBuckets({
+            buckets,
+            maxRiskSubAggregations,
+            stackByField0,
+          }),
+    [buckets, maxRiskSubAggregations, stackByField0, stackByField1]
+  );
 
-    return (
-      <Wrapper data-test-subj="alertsCountTable" className="eui-yScroll">
-        <EuiInMemoryTable
-          isSelectable={false}
-          columns={tableColumns}
-          items={items}
-          loading={loading}
-          sorting={true}
-        />
-      </Wrapper>
-    );
-  }
-);
+  return (
+    <Wrapper data-test-subj="alertsCountTable" className="eui-yScroll">
+      <EuiInMemoryTable
+        isSelectable={false}
+        columns={tableColumns}
+        items={items}
+        loading={loading}
+        sorting={true}
+      />
+    </Wrapper>
+  );
+};
 
-AlertsCount.displayName = 'AlertsCount';
+AlertsCountComponent.displayName = 'AlertsCountComponent';
+
+export const AlertsCount = React.memo(AlertsCountComponent);

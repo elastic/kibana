@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+
+import { BUTTON_CLASS } from '../inspect';
+import * as i18n from './translations';
 
 interface Props {
   initialPanelId: string;
@@ -20,7 +19,7 @@ interface Props {
   setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ChartSettingsPopoverComponent = ({
+const ChartSettingsPopoverComponent: React.FC<Props> = ({
   initialPanelId,
   isPopoverOpen,
   panels,
@@ -35,7 +34,14 @@ const ChartSettingsPopoverComponent = ({
 
   const button = useMemo(
     () => (
-      <EuiButtonIcon color="text" iconType="boxesHorizontal" onClick={onButtonClick} size="xs" />
+      <EuiButtonIcon
+        aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
+        data-test-subj="chartSettingsPopoverButton"
+        color="text"
+        iconType="boxesHorizontal"
+        onClick={onButtonClick}
+        size="xs"
+      />
     ),
     [onButtonClick]
   );
@@ -44,6 +50,7 @@ const ChartSettingsPopoverComponent = ({
     <EuiPopover
       anchorPosition="downCenter"
       button={button}
+      className={BUTTON_CLASS}
       closePopover={closePopover}
       isOpen={isPopoverOpen}
       panelPaddingSize="none"

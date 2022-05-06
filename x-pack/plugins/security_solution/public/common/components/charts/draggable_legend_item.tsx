@@ -8,12 +8,17 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React from 'react';
+import styled from 'styled-components';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { DefaultDraggable } from '../draggables';
 import { useUiSetting$ } from '../../lib/kibana';
 import { EMPTY_VALUE_LABEL } from './translation';
 import { hasValueToDisplay } from '../../utils/validators';
+
+const CountFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin-right: ${theme.eui.euiSizeS};`}
+`;
 
 export interface LegendItem {
   color?: string;
@@ -79,7 +84,9 @@ const DraggableLegendItemComponent: React.FC<{
             </EuiFlexItem>
 
             {count != null && (
-              <EuiFlexItem grow={false}>{numeral(count).format(defaultNumberFormat)}</EuiFlexItem>
+              <CountFlexItem data-test-subj={`legendItemCount`} grow={false}>
+                {numeral(count).format(defaultNumberFormat)}
+              </CountFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>

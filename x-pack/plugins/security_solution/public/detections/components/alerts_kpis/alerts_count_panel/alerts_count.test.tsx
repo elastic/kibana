@@ -17,7 +17,7 @@ import type { AlertsCountAggregation } from './types';
 import { emptyStackByField0Response } from './mocks/mock_response_empty_field0';
 import {
   buckets as oneGroupByResponseBuckets,
-  multiGroupResponse,
+  mockMultiGroupResponse,
 } from './mocks/mock_response_multi_group';
 import {
   buckets as twoGroupByResponseBuckets,
@@ -78,7 +78,7 @@ describe('AlertsCount', () => {
           <TestProviders>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <AlertsCount
-                data={multiGroupResponse}
+                data={mockMultiGroupResponse}
                 loading={false}
                 stackByField0={'kibana.alert.rule.name'}
                 stackByField1={undefined}
@@ -103,7 +103,7 @@ describe('AlertsCount', () => {
           <TestProviders>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <AlertsCount
-                data={multiGroupResponse}
+                data={mockMultiGroupResponse}
                 loading={false}
                 stackByField0={'test_selected_field'}
                 stackByField1={undefined}

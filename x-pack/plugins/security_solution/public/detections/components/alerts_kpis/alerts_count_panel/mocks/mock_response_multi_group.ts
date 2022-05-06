@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
-import { AlertsCountAggregation } from '../types';
+import type { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
+import type { AlertsCountAggregation } from '../types';
 
 export const buckets = [
   {
@@ -34,7 +34,7 @@ export const buckets = [
 /**
  * A mock response to a request containing multiple group by fields
  */
-export const multiGroupResponse: AlertSearchResponse<unknown, AlertsCountAggregation> = {
+export const mockMultiGroupResponse: AlertSearchResponse<unknown, AlertsCountAggregation> = {
   took: 0,
   timeout: false,
   _shards: {

@@ -14,11 +14,27 @@ import * as i18n from './translations';
 
 const DEFAULT_WIDTH = 400;
 
-export const KpiPanel = styled(EuiPanel)<{ height?: number; $toggleStatus: boolean }>`
+export const KpiPanel = styled(EuiPanel)<{
+  height?: number;
+  $overflowY?:
+    | 'auto'
+    | 'clip'
+    | 'hidden'
+    | 'hidden visible'
+    | 'inherit'
+    | 'initial'
+    | 'revert'
+    | 'revert-layer'
+    | 'scroll'
+    | 'unset'
+    | 'visible';
+  $toggleStatus: boolean;
+}>`
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: ${({ $overflowY }) => $overflowY ?? 'hidden'};
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
     ${({ height, $toggleStatus }) =>
       $toggleStatus &&
@@ -33,6 +49,8 @@ export const KpiPanel = styled(EuiPanel)<{ height?: number; $toggleStatus: boole
   `}
 `;
 interface StackedBySelectProps {
+  'data-test-subj'?: string;
+  isDisabled?: boolean;
   prepend?: string;
   selected: string;
   onSelect: (selected: string) => void;
@@ -45,6 +63,8 @@ export const StackByComboBoxWrapper = styled.div<{ width: number }>`
 `;
 
 export const StackByComboBox: React.FC<StackedBySelectProps> = ({
+  'data-test-subj': dataTestSubj,
+  isDisabled = false,
   onSelect,
   prepend = i18n.STACK_BY_LABEL,
   selected,
@@ -70,7 +90,9 @@ export const StackByComboBox: React.FC<StackedBySelectProps> = ({
   return (
     <StackByComboBoxWrapper width={width}>
       <EuiComboBox
+        data-test-subj={dataTestSubj}
         aria-label={i18n.STACK_BY_ARIA_LABEL}
+        isDisabled={isDisabled}
         placeholder={i18n.STACK_BY_PLACEHOLDER}
         prepend={prepend}
         singleSelection={singleSelection}
