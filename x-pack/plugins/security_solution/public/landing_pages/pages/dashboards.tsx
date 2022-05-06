@@ -13,7 +13,9 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingLinksImages, NavItem } from '../components/landing_links_images';
 import { DASHBOARDS_PAGE_TITLE } from './translations';
 import overviewPageImg from '../../common/images/overview_page.png';
-import { OVERVIEW } from '../../app/translations';
+import detectionResponsePageImg from '../../common/images/detection_response_page.png';
+
+import { DETECTION_RESPONSE, OVERVIEW } from '../../app/translations';
 
 const items: NavItem[] = [
   {
@@ -23,6 +25,18 @@ const items: NavItem[] = [
       defaultMessage: 'What is going in your secuity environment',
     }),
     image: overviewPageImg,
+  },
+  {
+    id: SecurityPageName.detectionAndResponse,
+    label: DETECTION_RESPONSE,
+    description: i18n.translate(
+      'xpack.securitySolution.landing.dashboards.detectionAndResponseDescription',
+      {
+        defaultMessage:
+          "Monitor the impact of application and device performance from the end user's point of view.",
+      }
+    ),
+    image: detectionResponsePageImg,
   },
 ];
 
