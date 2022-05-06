@@ -28,8 +28,10 @@ export const RULE_FAILED = `failed`;
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
-  showBenchmarks: false,
+  showBenchmarks: true,
   showManageRulesMock: false,
   showRisksMock: false,
   showFindingsGroupBy: false,
 } as const;
+
+export const cspRuleAssetSavedObjectType = 'csp_rule';

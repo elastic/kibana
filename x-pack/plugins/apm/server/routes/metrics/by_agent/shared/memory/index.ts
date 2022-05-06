@@ -44,8 +44,16 @@ const chartBase: ChartBase = {
 };
 
 export const percentSystemMemoryUsedScript = {
-  lang: 'expression',
-  source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`,
+  lang: 'painless',
+  source: `
+    if(doc.containsKey('${METRIC_SYSTEM_FREE_MEMORY}') && doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}')){
+      double freeMemoryValue =  doc['${METRIC_SYSTEM_FREE_MEMORY}'].value;
+      double totalMemoryValue = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
+      return 1 - freeMemoryValue / totalMemoryValue
+    }
+    
+    return null;
+  `,
 } as const;
 
 export const percentCgroupMemoryUsedScript = {

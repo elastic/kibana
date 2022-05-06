@@ -48,6 +48,7 @@ import {
   setSavedQueryId,
   setStateFromSaveModal,
   setSyncColors,
+  setSyncTooltips,
   setUseMargins,
   setViewMode,
   useDashboardDispatch,
@@ -396,6 +397,10 @@ export function DashboardTopNav({
         onSyncColorsChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setSyncColors(isChecked));
         },
+        syncTooltips: Boolean(currentState.options.syncTooltips),
+        onSyncTooltipsChange: (isChecked: boolean) => {
+          dispatchDashboardStateChange(setSyncTooltips(isChecked));
+        },
         hidePanelTitles: currentState.options.hidePanelTitles,
         onHidePanelTitlesChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setHidePanelTitles(isChecked));
@@ -486,7 +491,7 @@ export function DashboardTopNav({
     const showQueryInput = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowQueryInput));
     const showDatePicker = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showQueryBar = showQueryInput || showDatePicker;
+    const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
     const showSearchBar = showQueryBar || showFilterBar;
     const screenTitle = dashboardState.title;
 

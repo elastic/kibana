@@ -12,7 +12,7 @@ import { logFilePath } from './test_utils';
 const alertTestPlugin = Path.resolve(__dirname, './fixtures/plugins/alerts');
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   const servers = {
     ...functionalConfig.get('servers'),
