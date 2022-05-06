@@ -215,6 +215,25 @@ exports.Cluster = class Cluster {
         }),
       ]);
     });
+
+    if (options.onEarlyExit) {
+      this._outcome
+        .then(
+          () => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly`);
+            }
+          },
+          (error) => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly: ${error.stack}`);
+            }
+          }
+        )
+        .catch((error) => {
+          throw new Error(`failure handling early exit: ${error.stack}`);
+        });
+    }
   }
 
   /**

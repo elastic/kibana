@@ -31,10 +31,12 @@ export async function runKibanaServer({
   procs,
   config,
   options,
+  onEarlyExit,
 }: {
   procs: ProcRunner;
   config: Config;
   options: { installDir?: string; extraKbnOpts?: string[] };
+  onEarlyExit?: (msg: string) => void;
 }) {
   const runOptions = config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
@@ -51,6 +53,7 @@ export async function runKibanaServer({
     },
     cwd: installDir || KIBANA_ROOT,
     wait: runOptions.wait,
+    onEarlyExit,
   });
 }
 

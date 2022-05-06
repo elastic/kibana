@@ -21,6 +21,7 @@ const noop = () => {};
 interface RunOptions extends ProcOptions {
   wait: true | RegExp;
   waitTimeout?: number | false;
+  onEarlyExit?: (msg: string) => void;
 }
 
 /**
@@ -47,16 +48,6 @@ export class ProcRunner {
 
   /**
    *  Start a process, tracking it by `name`
-   *  @param  {String}  name
-   *  @param  {Object}  options
-   *  @property {String} options.cmd executable to run
-   *  @property {Array<String>?} options.args arguments to provide the executable
-   *  @property {String?} options.cwd current working directory for the process
-   *  @property {RegExp|Boolean} options.wait Should start() wait for some time? Use
-   *                                          `true` will wait until the proc exits,
-   *                                          a `RegExp` will wait until that log line
-   *                                          is found
-   *  @return {Promise<undefined>}
    */
   async run(name: string, options: RunOptions) {
     const {
@@ -66,6 +57,7 @@ export class ProcRunner {
       wait = false,
       waitTimeout = 15 * MINUTE,
       env = process.env,
+      onEarlyExit,
     } = options;
     const cmd = options.cmd === 'node' ? process.execPath : options.cmd;
 
@@ -88,6 +80,25 @@ export class ProcRunner {
       env,
       stdin,
     });
+
+    if (onEarlyExit) {
+      proc.outcomePromise
+        .then(
+          (code) => {
+            if (!proc.stopWasCalled()) {
+              onEarlyExit(`[${name}] exitted early with ${code}`);
+            }
+          },
+          (error) => {
+            if (!proc.stopWasCalled()) {
+              onEarlyExit(`[${name}] exitted early: ${error.message}`);
+            }
+          }
+        )
+        .catch((error) => {
+          throw new Error(`Error handling early exit: ${error.stack}`);
+        });
+    }
 
     try {
       if (wait instanceof RegExp) {
