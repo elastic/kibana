@@ -7,30 +7,36 @@
 Retrieves all connectors.
 
 [[get-all-connectors-api-request]]
-==== Request
+==== {api-request-title}
 
 `GET <kibana host>:<port>/api/actions/connectors`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connectors`
 
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Actions and Connectors* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
 [[get-all-connectors-api-path-params]]
-==== Path parameters
+==== {api-path-parms-title}
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[get-all-connectors-api-codes]]
-==== Response code
+==== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[get-all-connectors-api-example]]
-==== Example
+==== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/actions/connectors
+GET api/actions/connectors
 --------------------------------------------------
 // KIBANA
 
@@ -64,4 +70,4 @@ The API returns the following:
 ]
 --------------------------------------------------
 
-<1> `referenced_by_count` - The number of saved-objects referencing this connector. This value is not calculated if `is_preconfigured: true`.
+<1> `referenced_by_count` indicates the number of saved objects that reference the connector. This value is not calculated if `is_preconfigured` is `true`.
