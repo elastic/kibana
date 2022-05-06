@@ -260,7 +260,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           {
             id: SecurityPageName.hostsRisk,
             title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
-              defaultMessage: 'Hosts by risk',
+              defaultMessage: 'Host risk',
             }),
             path: `${HOSTS_PATH}/hostRisk`,
             experimentalKey: 'riskyHostsEnabled',
@@ -355,7 +355,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           {
             id: SecurityPageName.usersRisk,
             title: i18n.translate('xpack.securitySolution.search.users.risk', {
-              defaultMessage: 'Users by risk',
+              defaultMessage: 'User risk',
             }),
             path: `${USERS_PATH}/userRisk`,
             experimentalKey: 'riskyUsersEnabled',
