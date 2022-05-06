@@ -31,7 +31,7 @@ export const SolutionAvatar = (params: KnownSolutionParams) => {
 SolutionAvatar.argTypes = {
   name: {
     control: 'select',
-    options: ['Elastic', 'Kibana', 'Observability', 'Maps', 'Cloud', 'Security'],
+    options: ['Elastic', 'Kibana', 'Observability', 'Cloud', 'Security'],
     defaultValue: 'Elastic',
   },
   ...argTypes,
