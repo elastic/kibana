@@ -25,7 +25,12 @@ describe('xyVis', () => {
     expect(result).toEqual({
       type: 'render',
       as: XY_VIS,
-      value: { args: { ...rest, layers: [{layerType, table: data, layerId: 'dataLayers-0', type, ...restLayerArgs}] } },
+      value: {
+        args: {
+          ...rest,
+          layers: [{ layerType, table: data, layerId: 'dataLayers-0', type, ...restLayerArgs }],
+        },
+      },
     });
   });
 });
