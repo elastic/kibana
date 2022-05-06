@@ -6,14 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { either } from 'fp-ts';
+import { either, function as fn } from 'fp-ts';
+import { Type, TypeFormatFlags } from 'ts-morph';
 import { BaseFeature, formatCommonFeatureProperties, formatEitherWithError } from './common';
 
 export interface HttpRouteFeature extends BaseFeature {
   type: 'http-route';
   path: either.Either<Error, string>;
+  requestParamsType: either.Either<Error, Type>;
+  requestQueryType: either.Either<Error, Type>;
+  requestBodyType: either.Either<Error, Type>;
 }
 
 export const formatHttpRouteFeature = (feature: HttpRouteFeature): string => `## HTTP route
 ${formatCommonFeatureProperties(feature)}
-Path: ${formatEitherWithError(feature.path, (path) => path)}`;
+Path: ${formatEitherWithError(feature.path, (path) => path)}
+RequestParams: ${formatValidationType(feature.requestParamsType)}
+RequestQuery: ${formatValidationType(feature.requestQueryType)}
+RequestBody: ${formatValidationType(feature.requestBodyType)}
+`;
+
+const formatValidationType = (validationType: either.Either<Error, Type>) =>
+  fn.pipe(
+    validationType,
+    either.fold(
+      (error: Error) => 'Missing',
+      (value) =>
+        value.getText(
+          undefined,
+          // eslint-disable-next-line no-bitwise
+          TypeFormatFlags.NoTruncation | TypeFormatFlags.UseAliasDefinedOutsideCurrentScope
+        )
+    )
+  );

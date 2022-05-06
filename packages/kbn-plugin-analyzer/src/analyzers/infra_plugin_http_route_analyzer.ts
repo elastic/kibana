@@ -10,10 +10,11 @@ import { array, either, function as fn, option } from 'fp-ts';
 import { CallExpression, Directory, Node, SyntaxKind, ts } from 'ts-morph';
 import { HttpRouteFeature } from '../features';
 import {
+  debug,
   getFeatureLocation,
+  getLiteralValue,
   getPropertyInitializer,
   getScopeDirectory,
-  resolveLiteralValue,
   wrapError,
 } from './common_utilities';
 import { AnalysisResult, Analyzer } from './types';
@@ -35,6 +36,9 @@ export const infraPluginHttpRouteAnalyzer: Analyzer = {
               type: 'http-route',
               location: getFeatureLocation(callExpression),
               path: getPathValue(callExpression),
+              requestParamsType: getRequestType('params')(callExpression),
+              requestQueryType: getRequestType('query')(callExpression),
+              requestBodyType: getRequestType('body')(callExpression),
             })
           )
         )
@@ -65,7 +69,7 @@ const getRouteRegistrationFunction = (serverDirectory: Directory) =>
     wrapError
   );
 
-const getPathValue = (callSite: CallExpression<ts.CallExpression>) =>
+const getRouteConfigObject = (callSite: CallExpression<ts.CallExpression>) =>
   fn.pipe(
     callSite.getArguments(),
     array.head,
@@ -75,8 +79,38 @@ const getPathValue = (callSite: CallExpression<ts.CallExpression>) =>
     either.filterOrElse(
       Node.isObjectLiteralExpression,
       () => new Error('Failed to find the route config literal: not a config object')
-    ),
+    )
+  );
+
+const getPathValue = (callSite: CallExpression<ts.CallExpression>) =>
+  fn.pipe(
+    getRouteConfigObject(callSite),
     either.chain(getPropertyInitializer('path')),
-    either.chain(resolveLiteralValue),
+    either.chain(getLiteralValue),
     either.map(String)
   );
+
+const getRequestType =
+  (key: 'params' | 'body' | 'query') => (callSite: CallExpression<ts.CallExpression>) =>
+    fn.pipe(
+      getRouteConfigObject(callSite),
+      either.chain(getPropertyInitializer('validate')),
+      either.filterOrElse(
+        Node.isObjectLiteralExpression,
+        () => new Error('Failed to find the validate config literal: not an object')
+      ),
+      either.chain(getPropertyInitializer(key)),
+      either.chain((paramsInitializer) => {
+        const paramsInitializerType = paramsInitializer.getType();
+        return either.fromNullable(
+          new Error(
+            `Failed to find the "${key}" validator type argument: no type arguments in ${paramsInitializer
+              .getType()
+              .getText()}`
+          )
+        )(
+          paramsInitializerType.getTypeArguments()[0] ??
+            paramsInitializerType.getAliasTypeArguments()[0]
+        );
+      })
+    );

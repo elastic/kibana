@@ -38,6 +38,7 @@ function createPluginProject(pluginTsconfigPath: string) {
 
   // project.enableLogging();
   project.addSourceFilesFromTsConfig(pluginTsconfigPath);
+  project.resolveSourceFileDependencies();
 
   return project;
 }
