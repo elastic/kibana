@@ -183,7 +183,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     tooltipMessage:
       timelineId !== TimelineId.hostsPageEvents
         ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
-        : '',
+        : undefined,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
