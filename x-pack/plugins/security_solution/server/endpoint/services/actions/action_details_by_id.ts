@@ -98,11 +98,9 @@ export const getActionDetailsById = async (
       normalizedActionRequest = mapToNormalizedActionRequest(actionDoc);
     }
 
-    actionResponses = getUniqueLogData(
-      categorizeResponseResults({
-        results: actionResponsesEsSearchResults?.hits?.hits ?? [],
-      })
-    ) as Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
+    actionResponses = categorizeResponseResults({
+      results: actionResponsesEsSearchResults?.hits?.hits ?? [],
+    }) as Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
   } catch (error) {
     throw new EndpointError(error.message, error);
   }
