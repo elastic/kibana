@@ -58,7 +58,7 @@ describe('AddToTimelineCellRenderer', () => {
           />
         </TestProviders>
       );
-      expect(screen.getByTestId('test-add-to-timeline')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Investigate in timeline')).toBeInTheDocument();
     });
   });
 
@@ -76,7 +76,7 @@ describe('AddToTimelineCellRenderer', () => {
           />
         </TestProviders>
       );
-      expect(screen.queryByTestId('test-add-to-timeline')).toBeNull();
+      expect(screen.queryByLabelText('Investigate in timeline')).not.toBeInTheDocument();
     });
   });
 });
