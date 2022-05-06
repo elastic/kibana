@@ -10,6 +10,7 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
+  CaseSeverity,
   CasesResponse,
   CaseStatuses,
   CommentType,
@@ -170,6 +171,34 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should patch the severity of a case correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // the default severity
+        expect(postedCase.severity).equal(CaseSeverity.LOW);
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                severity: CaseSeverity.MEDIUM,
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          severity: CaseSeverity.MEDIUM,
+          updated_by: defaultUser,
+        });
+      });
+
       it('should patch a case with new connector', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCases = await updateCase({
@@ -294,6 +323,22 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           },
           expectedHttpCode: 404,
+        });
+      });
+
+      it('400s when a wrong severity value is passed', async () => {
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                version: 'version',
+                // @ts-expect-error
+                severity: 'wont-do',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
         });
       });
 

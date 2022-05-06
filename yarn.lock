@@ -2932,15 +2932,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common":
   version "0.0.0"
   uid ""
 
 "@kbn/analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser":
   version "0.0.0"
   uid ""
 
@@ -3109,6 +3109,10 @@
   uid ""
 
 "@kbn/optimizer@link:bazel-bin/packages/kbn-optimizer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/performance-testing-dataset-extractor@link:bazel-bin/packages/kbn-performance-testing-dataset-extractor":
   version "0.0.0"
   uid ""
 
@@ -6044,15 +6048,15 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6197,6 +6201,10 @@
   uid ""
 
 "@types/kbn__optimizer@link:bazel-bin/packages/kbn-optimizer/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__performance-testing-dataset-extractor@link:bazel-bin/packages/kbn-performance-testing-dataset-extractor/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -13033,10 +13041,10 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.32.0:
-  version "3.32.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.32.0.tgz#fdad3c03aabc4e7994b4155b031f68d9774af49a"
-  integrity sha512-6vOe1FZv5toCouuyfiXZuWNE1+1fim9zvsv7H56BKRYa7xQ3X1fxq7QAP2gLd/Z9zvSDLGNXS4DPE1eqX1A1Jw==
+elastic-apm-node@^3.33.0:
+  version "3.33.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.33.0.tgz#ad2850b005355299c3a9fdc631875162480ceb15"
+  integrity sha512-ZJKcRbYdEU87MWyB9CczGTLEERA595OWd0nqpxrDBkogogpxwpzCOialKZA+bekpNA0Oa4Sv18zRCdyqpV25Pw==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -13068,7 +13076,6 @@ elastic-apm-node@^3.32.0:
     shallow-clone-shim "^2.0.0"
     source-map "^0.8.0-beta.0"
     sql-summary "^1.0.1"
-    traceparent "^1.0.0"
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
@@ -23601,11 +23608,6 @@ random-bytes@~1.0.0:
   resolved "https://registry.yarnpkg.com/random-bytes/-/random-bytes-1.0.0.tgz#4f68a1dc0ae58bd3fb95848c30324db75d64360b"
   integrity sha1-T2ih3Arli9P7lYSMMDJNt11kNgs=
 
-random-poly-fill@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/random-poly-fill/-/random-poly-fill-1.0.1.tgz#13634dc0255a31ecf85d4a182d92c40f9bbcf5ed"
-  integrity sha512-bMOL0hLfrNs52+EHtIPIXxn2PxYwXb0qjnKruTjXiM/sKfYqj506aB2plFwWW1HN+ri724bAVVGparh4AtlJKw==
-
 random-word-slugs@^0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/random-word-slugs/-/random-word-slugs-0.0.5.tgz#6ccd6c7ea320be9fbc19507f8c3a7d4a970ff61f"
@@ -28110,13 +28112,6 @@ tr46@~0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=
-
-traceparent@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/traceparent/-/traceparent-1.0.0.tgz#9b14445cdfe5c19f023f1c04d249c3d8e003a5ce"
-  integrity sha512-b/hAbgx57pANQ6cg2eBguY3oxD6FGVLI1CC2qoi01RmHR7AYpQHPXTig9FkzbWohEsVuHENZHP09aXuw3/LM+w==
-  dependencies:
-    random-poly-fill "^1.0.1"
 
 traverse@^0.6.6, traverse@~0.6.6:
   version "0.6.6"
