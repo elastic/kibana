@@ -20,59 +20,53 @@ import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
-import { LensMultiTable } from '../../../common';
 import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { RenderMode } from '@kbn/expressions-plugin';
+import { Datatable, RenderMode } from '@kbn/expressions-plugin';
 
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
-  const data: LensMultiTable = {
-    type: 'lens_multitable',
-    tables: {
-      l1: {
-        type: 'datatable',
-        columns: [
-          {
-            id: 'a',
-            name: 'a',
-            meta: {
-              type: 'string',
-              source: 'esaggs',
-              field: 'a',
-              sourceParams: { type: 'terms', indexPatternId },
-            },
-          },
-          {
-            id: 'b',
-            name: 'b',
-            meta: {
-              type: 'date',
-              field: 'b',
-              source: 'esaggs',
-              sourceParams: {
-                type: 'date_histogram',
-                indexPatternId,
-              },
-            },
-          },
-          {
-            id: 'c',
-            name: 'c',
-            meta: {
-              type: 'number',
-              source: 'esaggs',
-              field: 'c',
-              sourceParams: { indexPatternId, type: 'count' },
-            },
-          },
-        ],
-        rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
+  const data: Datatable = {
+    type: 'datatable',
+    columns: [
+      {
+        id: 'a',
+        name: 'a',
+        meta: {
+          type: 'string',
+          source: 'esaggs',
+          field: 'a',
+          sourceParams: { type: 'terms', indexPatternId },
+        },
       },
-    },
+      {
+        id: 'b',
+        name: 'b',
+        meta: {
+          type: 'date',
+          field: 'b',
+          source: 'esaggs',
+          sourceParams: {
+            type: 'date_histogram',
+            indexPatternId,
+          },
+        },
+      },
+      {
+        id: 'c',
+        name: 'c',
+        meta: {
+          type: 'number',
+          source: 'esaggs',
+          field: 'c',
+          sourceParams: { indexPatternId, type: 'count' },
+        },
+      },
+    ],
+    rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
   };
 
   const args: DatatableProps['args'] = {
@@ -175,13 +169,7 @@ describe('DatatableComponent', () => {
 
     const wrapper = mountWithIntl(
       <DatatableComponent
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2020-04-20T05:00:00.000Z'),
-            toDate: new Date('2020-05-03T05:00:00.000Z'),
-          },
-        }}
+        data={data}
         args={args}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -206,7 +194,7 @@ describe('DatatableComponent', () => {
           {
             column: 0,
             row: 0,
-            table: data.tables.l1,
+            table: data,
             value: 'shoes',
           },
         ],
@@ -220,13 +208,7 @@ describe('DatatableComponent', () => {
 
     const wrapper = mountWithIntl(
       <DatatableComponent
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2020-04-20T05:00:00.000Z'),
-            toDate: new Date('2020-05-03T05:00:00.000Z'),
-          },
-        }}
+        data={data}
         args={args}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -251,7 +233,7 @@ describe('DatatableComponent', () => {
           {
             column: 1,
             row: 0,
-            table: data.tables.l1,
+            table: data,
             value: 1588024800000,
           },
         ],
@@ -261,35 +243,30 @@ describe('DatatableComponent', () => {
   });
 
   test('it invokes executeTriggerActions with correct context on click on timefield from range', async () => {
-    const data: LensMultiTable = {
-      type: 'lens_multitable',
-      tables: {
-        l1: {
-          type: 'datatable',
-          columns: [
-            {
-              id: 'a',
-              name: 'a',
-              meta: {
-                type: 'date',
-                source: 'esaggs',
-                field: 'a',
-                sourceParams: { type: 'date_range', indexPatternId: 'a' },
-              },
-            },
-            {
-              id: 'b',
-              name: 'b',
-              meta: {
-                type: 'number',
-                source: 'esaggs',
-                sourceParams: { type: 'count', indexPatternId: 'a' },
-              },
-            },
-          ],
-          rows: [{ a: 1588024800000, b: 3 }],
+    const data: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: 'a',
+          name: 'a',
+          meta: {
+            type: 'date',
+            source: 'esaggs',
+            field: 'a',
+            sourceParams: { type: 'date_range', indexPatternId: 'a' },
+          },
         },
-      },
+        {
+          id: 'b',
+          name: 'b',
+          meta: {
+            type: 'number',
+            source: 'esaggs',
+            sourceParams: { type: 'count', indexPatternId: 'a' },
+          },
+        },
+      ],
+      rows: [{ a: 1588024800000, b: 3 }],
     };
 
     const args: DatatableProps['args'] = {
@@ -305,13 +282,7 @@ describe('DatatableComponent', () => {
 
     const wrapper = mountWithIntl(
       <DatatableComponent
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2020-04-20T05:00:00.000Z'),
-            toDate: new Date('2020-05-03T05:00:00.000Z'),
-          },
-        }}
+        data={data}
         args={args}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -336,7 +307,7 @@ describe('DatatableComponent', () => {
           {
             column: 0,
             row: 0,
-            table: data.tables.l1,
+            table: data,
             value: 1588024800000,
           },
         ],
@@ -350,13 +321,7 @@ describe('DatatableComponent', () => {
 
     const wrapper = mountWithIntl(
       <DatatableComponent
-        data={{
-          ...data,
-          dateRange: {
-            fromDate: new Date('2020-04-20T05:00:00.000Z'),
-            toDate: new Date('2020-05-03T05:00:00.000Z'),
-          },
-        }}
+        data={data}
         args={args}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -377,14 +342,9 @@ describe('DatatableComponent', () => {
 
   test('it shows emptyPlaceholder for undefined bucketed data', () => {
     const { args, data } = sampleArgs();
-    const emptyData: LensMultiTable = {
+    const emptyData: Datatable = {
       ...data,
-      tables: {
-        l1: {
-          ...data.tables.l1,
-          rows: [{ a: undefined, b: undefined, c: 0 }],
-        },
-      },
+      rows: [{ a: undefined, b: undefined, c: 0 }],
     };
 
     const component = shallow(
@@ -551,7 +511,7 @@ describe('DatatableComponent', () => {
   test('it detect last_value filtered metric type', () => {
     const { data, args } = sampleArgs();
 
-    const table = data.tables.l1;
+    const table = data;
     const column = table.columns[1];
 
     column.meta = {
@@ -613,7 +573,7 @@ describe('DatatableComponent', () => {
     );
     // mnake a copy of the data, changing only the name of the first column
     const newData = copyData(data);
-    newData.tables.l1.columns[0].name = 'new a';
+    newData.columns[0].name = 'new a';
     wrapper.setProps({ data: newData });
     wrapper.update();
 

@@ -40,6 +40,7 @@ import {
 } from '../../../common/expressions';
 
 import './dimension_editor.scss';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -128,6 +129,17 @@ export function TableDimensionEditor(
 
   return (
     <>
+      {props.groupId === 'rows' && (
+        <CollapseSetting
+          value={column.collapseFn || ''}
+          onChange={(collapseFn: string) => {
+            setState({
+              ...state,
+              columns: updateColumnWith(state, accessor, { collapseFn }),
+            });
+          }}
+        />
+      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth

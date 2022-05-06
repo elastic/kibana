@@ -58,7 +58,7 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
-  const [firstTable] = Object.values(props.data.tables);
+  const firstTable = props.data;
 
   const isInteractive = props.interactive;
 

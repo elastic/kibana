@@ -8,8 +8,8 @@
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import type { DatatableColumnMeta, ExecutionContext } from '@kbn/expressions-plugin';
-import { FormatFactory, LensMultiTable } from '../../types';
+import type { Datatable, DatatableColumnMeta, ExecutionContext } from '@kbn/expressions-plugin';
+import { FormatFactory } from '../../types';
 import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
 import { getSortingCriteria } from './sorting';
@@ -24,10 +24,10 @@ export const datatableFn =
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
   ): DatatableExpressionFunction['fn'] =>
   async (data, args, context) => {
-    const [firstTable] = Object.values(data.tables);
+    const firstTable = data;
     if (context?.inspectorAdapters?.tables) {
       const logTable = prepareLogTable(
-        Object.values(data.tables)[0],
+        firstTable,
         [
           [
             args.columns.map((column) => column.columnId),
@@ -42,9 +42,7 @@ export const datatableFn =
       context.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
-    let untransposedData: LensMultiTable | undefined;
-    // do the sorting at this level to propagate it also at CSV download
-    const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
+    let untransposedData: Datatable | undefined;
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);
 
@@ -92,11 +90,11 @@ export const datatableFn =
         sortDirection
       );
       // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = (firstTable.rows || [])
+      context.inspectorAdapters.tables.default.rows = (firstTable.rows || [])
         .slice()
         .sort(sortingCriteria);
       // replace also the local copy
-      firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
+      firstTable.rows = context.inspectorAdapters.tables.default.rows;
     } else {
       args.sortingColumnId = undefined;
       args.sortingDirection = 'none';

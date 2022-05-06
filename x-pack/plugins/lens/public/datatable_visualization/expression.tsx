@@ -46,7 +46,7 @@ export const getDatatableRenderer = (dependencies: {
     // ROW_CLICK_TRIGGER trigger.
     let rowHasRowClickTriggerActions: boolean[] = [];
     if (hasCompatibleActions) {
-      const table = Object.values(config.data.tables)[0];
+      const table = config.data;
       if (!!table) {
         rowHasRowClickTriggerActions = await Promise.all(
           table.rows.map(async (row, rowIndex) => {

@@ -6,56 +6,51 @@
  */
 
 import type { DatatableProps } from '../../common/expressions';
-import type { LensMultiTable } from '../../common';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import type { FormatFactory } from '../../common';
 import { getDatatable } from '../../common/expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
-  const data: LensMultiTable = {
-    type: 'lens_multitable',
-    tables: {
-      l1: {
-        type: 'datatable',
-        columns: [
-          {
-            id: 'a',
-            name: 'a',
-            meta: {
-              type: 'string',
-              source: 'esaggs',
-              field: 'a',
-              sourceParams: { type: 'terms', indexPatternId },
-            },
-          },
-          {
-            id: 'b',
-            name: 'b',
-            meta: {
-              type: 'date',
-              field: 'b',
-              source: 'esaggs',
-              sourceParams: {
-                type: 'date_histogram',
-                indexPatternId,
-              },
-            },
-          },
-          {
-            id: 'c',
-            name: 'c',
-            meta: {
-              type: 'number',
-              source: 'esaggs',
-              field: 'c',
-              sourceParams: { indexPatternId, type: 'count' },
-            },
-          },
-        ],
-        rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
+  const data: Datatable = {
+    type: 'datatable',
+    columns: [
+      {
+        id: 'a',
+        name: 'a',
+        meta: {
+          type: 'string',
+          source: 'esaggs',
+          field: 'a',
+          sourceParams: { type: 'terms', indexPatternId },
+        },
       },
-    },
+      {
+        id: 'b',
+        name: 'b',
+        meta: {
+          type: 'date',
+          field: 'b',
+          source: 'esaggs',
+          sourceParams: {
+            type: 'date_histogram',
+            indexPatternId,
+          },
+        },
+      },
+      {
+        id: 'c',
+        name: 'c',
+        meta: {
+          type: 'number',
+          source: 'esaggs',
+          field: 'c',
+          sourceParams: { indexPatternId, type: 'count' },
+        },
+      },
+    ],
+    rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
   };
 
   const args: DatatableProps['args'] = {
