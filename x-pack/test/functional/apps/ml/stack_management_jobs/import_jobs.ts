@@ -6,7 +6,7 @@
  */
 
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

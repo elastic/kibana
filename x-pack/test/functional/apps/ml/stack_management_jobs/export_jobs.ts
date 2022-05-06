@@ -7,7 +7,7 @@
 
 import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
   {

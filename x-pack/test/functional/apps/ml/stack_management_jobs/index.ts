@@ -11,7 +11,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning - group 3', function () {
+  describe('machine learning - stack management jobs', function () {
+    this.tags(['ml', 'skipFirefox']);
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
@@ -37,8 +38,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./settings'));
-    loadTestFile(require.resolve('./embeddables'));
+    loadTestFile(require.resolve('./synchronize'));
+    loadTestFile(require.resolve('./manage_spaces'));
+    loadTestFile(require.resolve('./import_jobs'));
+    loadTestFile(require.resolve('./export_jobs'));
   });
 }
