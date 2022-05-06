@@ -19,7 +19,7 @@ import { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/pu
 import { Datatable } from '@kbn/expressions-plugin/public';
 
 export interface ClickTriggerEvent {
-  name: 'filterBucket';
+  name: 'filter';
   data: ValueClickContext['data'];
 }
 
@@ -214,7 +214,7 @@ export const getFilterFromChartClickEventFn =
     });
 
     return {
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         negate,
         data,
@@ -250,7 +250,7 @@ export const getFilterFromSeriesFn =
     }));
 
     return {
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         negate,
         data,

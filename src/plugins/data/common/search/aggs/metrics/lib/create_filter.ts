@@ -7,13 +7,11 @@
  */
 
 import { buildExistsFilter } from '@kbn/es-query';
-import { IMetricAggConfig } from '../../metrics/metric_agg_type';
+import { IMetricAggConfig } from '../metric_agg_type';
 
 export const createMetricFilter = (aggConfig: IMetricAggConfig, key: string) => {
   const indexPattern = aggConfig.getIndexPattern();
   if (aggConfig.getField()) {
-    return buildExistsFilter(aggConfig.getField(), indexPattern.id!);
-  } else {
-    return { match_all: {} };
+    return buildExistsFilter(aggConfig.getField(), indexPattern);
   }
 };

@@ -621,8 +621,8 @@ export class Embeddable
         this.input.onBrushEnd(event.data);
       }
     }
-    if (isLensFilterEvent(event) || event.name == 'filterBucket') {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name] || 'VALUE_CLICK_TRIGGER').exec({
+    if (isLensFilterEvent(event)) {
+      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: {
           ...event.data,
           timeFieldName: event.data.timeFieldName || inferTimeField(event.data),

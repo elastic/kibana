@@ -98,7 +98,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     );
   }
 
-  private filterBucket = (row: number) => {
+  private filterColumn = (row: number) => {
     const { dimensions } = this.props.visParams;
 
     const table = this.props.visData;
@@ -107,7 +107,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       column = table.columns.indexOf(column);
     }
     this.props.fireEvent({
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         data: [
           {
@@ -145,7 +145,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}
-        onFilter={() => this.filterBucket(index)}
+        onFilter={() => this.filterColumn(index)}
         autoScale={this.props.visParams.metric.autoScale}
         colorFullBackground={this.props.visParams.metric.colorFullBackground}
         labelConfig={this.props.visParams.metric.labels}
