@@ -83,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('navigates to the endpoint list page filtered by policy', async () => {
           const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
           await endpointCount.click();
-          await testSubjects.find('endpointListTable');
+          await pageObjects.endpoint.ensureIsOnEndpointListPage();
         });
         it('admin searchbar contains the selected policy id', async () => {
           const expectedPolicyId = indexedData.integrationPolicies[0].id;
