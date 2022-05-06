@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { registerUiCountersRollups } from './register_rollups';
+require('../src/setup_node_env');
+require('@kbn/performance-testing-dataset-extractor').runExtractor();
