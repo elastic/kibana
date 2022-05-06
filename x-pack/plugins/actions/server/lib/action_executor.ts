@@ -19,6 +19,7 @@ import {
   validateConnector,
 } from './validate_with_schema';
 import {
+  ActionType,
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
@@ -30,6 +31,7 @@ import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
+import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -157,24 +159,6 @@ export class ActionExecutor {
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
 
-        let validatedParams: Record<string, unknown>;
-        let validatedConfig: Record<string, unknown>;
-        let validatedSecrets: Record<string, unknown>;
-        try {
-          validatedParams = validateParams(actionType, params);
-          validatedConfig = validateConfig(actionType, config);
-          validatedSecrets = validateSecrets(actionType, secrets);
-          if (actionType.validate?.connector) {
-            validateConnector(actionType, {
-              config,
-              secrets,
-            });
-          }
-        } catch (err) {
-          span?.setOutcome('failure');
-          return { status: 'error', actionId, message: err.message, retry: false };
-        }
-
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
 
@@ -221,6 +205,14 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorResult<unknown>;
         try {
+          const { validatedParams, validatedConfig, validatedSecrets } = validateAction({
+            actionId,
+            actionType,
+            params,
+            config,
+            secrets,
+          });
+
           rawResult = await actionType.executor({
             actionId,
             services,
@@ -231,14 +223,19 @@ export class ActionExecutor {
             taskInfo,
           });
         } catch (err) {
-          rawResult = {
-            actionId,
-            status: 'error',
-            message: 'an error occurred while running the action executor',
-            serviceMessage: err.message,
-            retry: false,
-          };
+          if (err.reason === ActionExecutionErrorReason.Validation) {
+            rawResult = err.result;
+          } else {
+            rawResult = {
+              actionId,
+              status: 'error',
+              message: 'an error occurred while running the action',
+              serviceMessage: err.message,
+              retry: false,
+            };
+          }
         }
+
         eventLogger.stopTiming(event);
 
         // allow null-ish return to indicate success
@@ -410,4 +407,39 @@ function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string
   }
 
   return message;
+}
+
+interface ValidateActionOpts {
+  actionId: string;
+  actionType: ActionType;
+  params: Record<string, unknown>;
+  config: unknown;
+  secrets: unknown;
+}
+
+function validateAction({ actionId, actionType, params, config, secrets }: ValidateActionOpts) {
+  let validatedParams: Record<string, unknown>;
+  let validatedConfig: Record<string, unknown>;
+  let validatedSecrets: Record<string, unknown>;
+
+  try {
+    validatedParams = validateParams(actionType, params);
+    validatedConfig = validateConfig(actionType, config);
+    validatedSecrets = validateSecrets(actionType, secrets);
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, {
+        config,
+        secrets,
+      });
+    }
+
+    return { validatedParams, validatedConfig, validatedSecrets };
+  } catch (err) {
+    throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
+      actionId,
+      status: 'error',
+      message: err.message,
+      retry: false,
+    });
+  }
 }
