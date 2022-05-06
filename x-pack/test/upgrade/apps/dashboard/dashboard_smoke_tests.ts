@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
 
   describe('upgrade dashboard smoke tests', function describeIndexTests() {
