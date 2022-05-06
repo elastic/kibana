@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -30,9 +30,9 @@ const ConditionalWrap = ({
   children,
 }: {
   condition: boolean;
-  wrap: any;
+  wrap: FunctionComponent;
   children: any;
-}) => (condition ? wrap(children) : children);
+}): JSX.Element => (condition ? wrap(children) : children);
 
 export const renderRuleStats = (
   ruleStats: RuleStatsState,
@@ -61,7 +61,7 @@ export const renderRuleStats = (
   const disabledStatsComponent = (
     <ConditionalWrap
       condition={ruleStats.disabled > 0}
-      wrap={(wrappedChildren: any) => (
+      wrap={(wrappedChildren) => (
         <EuiButtonEmpty href={createRuleStatsLink(ruleStats, 'disabled')}>
           {wrappedChildren}
         </EuiButtonEmpty>
@@ -84,7 +84,7 @@ export const renderRuleStats = (
   const snoozedStatsComponent = (
     <ConditionalWrap
       condition={ruleStats.muted + ruleStats.snoozed > 0}
-      wrap={(wrappedChildren: any) => (
+      wrap={(wrappedChildren) => (
         <EuiButtonEmpty href={createRuleStatsLink(ruleStats, 'snoozed')}>
           {wrappedChildren}
         </EuiButtonEmpty>
@@ -107,7 +107,7 @@ export const renderRuleStats = (
   const errorStatsComponent = (
     <ConditionalWrap
       condition={ruleStats.error > 0}
-      wrap={(wrappedChildren: any) => (
+      wrap={(wrappedChildren) => (
         <EuiButtonEmpty href={createRuleStatsLink(ruleStats, 'error')}>
           {wrappedChildren}
         </EuiButtonEmpty>
