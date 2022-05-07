@@ -112,115 +112,114 @@ export const DetailPanelHostTab = ({
             ),
           },
         ]}
-        childComponent={
-          <EuiPanel
-            hasShadow={false}
-            color="subdued"
-            hasBorder={true}
-            borderRadius="m"
-            paddingSize="none"
-            css={styles.metadataHostOS}
-          >
-            <DetailPanelAccordion
-              id="hostOS"
-              title="Host OS"
-              listItems={[
-                {
-                  title: <DetailPanelListItem>architecture</DetailPanelListItem>,
-                  description: (
-                    <DetailPanelCopy
-                      textToCopy={`host.architecture: "${hostData.architecture}"`}
-                      tooltipContent={hostData.architecture}
-                    >
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {hostData.architecture}
-                      </EuiTextColor>
-                    </DetailPanelCopy>
-                  ),
-                },
-                {
-                  title: <DetailPanelListItem>os.family</DetailPanelListItem>,
-                  description: (
-                    <DetailPanelCopy
-                      textToCopy={`host.os.family: "${hostData.os.family}"`}
-                      tooltipContent={hostData.os.family}
-                    >
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {hostData.os.family}
-                      </EuiTextColor>
-                    </DetailPanelCopy>
-                  ),
-                },
-                {
-                  title: <DetailPanelListItem>os.full</DetailPanelListItem>,
-                  description: (
-                    <DetailPanelCopy
-                      textToCopy={`host.os.full: "${hostData.os.full}"`}
-                      tooltipContent={hostData.os.full}
-                    >
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {hostData.os.full}
-                      </EuiTextColor>
-                    </DetailPanelCopy>
-                  ),
-                },
-                {
-                  title: <DetailPanelListItem>os.kernel</DetailPanelListItem>,
-                  description: (
-                    <DetailPanelCopy
-                      textToCopy={`host.os.kernel: "${hostData.os.kernel}"`}
-                      tooltipContent={hostData.os.kernel}
-                    >
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {hostData.os.kernel}
-                      </EuiTextColor>
-                    </DetailPanelCopy>
-                  ),
-                },
-                {
-                  title: <DetailPanelListItem>os.name</DetailPanelListItem>,
-                  description: (
-                    <DetailPanelCopy
-                      textToCopy={`host.os.name: "${hostData.os.name}"`}
-                      tooltipContent={hostData.os.name}
-                    >
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {hostData.os.name}
-                      </EuiTextColor>
-                    </DetailPanelCopy>
-                  ),
-                },
-                {
-                  title: <DetailPanelListItem>os.platform</DetailPanelListItem>,
-                  description: (
-                    <DetailPanelCopy
-                      textToCopy={`host.os.platform: "${hostData.os.platform}"`}
-                      tooltipContent={hostData.os.platform}
-                    >
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {hostData.os.platform}
-                      </EuiTextColor>
-                    </DetailPanelCopy>
-                  ),
-                },
-                {
-                  title: <DetailPanelListItem>os.version</DetailPanelListItem>,
-                  description: (
-                    <DetailPanelCopy
-                      textToCopy={`host.os.version: "${hostData.os.version}"`}
-                      tooltipContent={hostData.os.version}
-                    >
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {hostData.os.version}
-                      </EuiTextColor>
-                    </DetailPanelCopy>
-                  ),
-                },
-              ]}
-            />
-          </EuiPanel>
-        }
-      />
+      >
+        <EuiPanel
+          hasShadow={false}
+          color="subdued"
+          hasBorder={true}
+          borderRadius="m"
+          paddingSize="none"
+          css={styles.metadataHostOS}
+        >
+          <DetailPanelAccordion
+            id="hostOS"
+            title="Host OS"
+            listItems={[
+              {
+                title: <DetailPanelListItem>architecture</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`host.architecture: "${hostData.architecture}"`}
+                    tooltipContent={hostData.architecture}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {hostData.architecture}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>os.family</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`host.os.family: "${hostData.os.family}"`}
+                    tooltipContent={hostData.os.family}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {hostData.os.family}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>os.full</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`host.os.full: "${hostData.os.full}"`}
+                    tooltipContent={hostData.os.full}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {hostData.os.full}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>os.kernel</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`host.os.kernel: "${hostData.os.kernel}"`}
+                    tooltipContent={hostData.os.kernel}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {hostData.os.kernel}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>os.name</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`host.os.name: "${hostData.os.name}"`}
+                    tooltipContent={hostData.os.name}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {hostData.os.name}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>os.platform</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`host.os.platform: "${hostData.os.platform}"`}
+                    tooltipContent={hostData.os.platform}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {hostData.os.platform}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>os.version</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`host.os.version: "${hostData.os.version}"`}
+                    tooltipContent={hostData.os.version}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {hostData.os.version}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+            ]}
+          />
+        </EuiPanel>
+      </DetailPanelAccordion>
 
       {processOrchestrator && processContainer && (
         <>

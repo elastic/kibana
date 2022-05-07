@@ -27006,7 +27006,6 @@
     "xpack.sessionView.detailPanelAlertsEmptyTitle": "Aucune alerte",
     "xpack.sessionView.detailPanelCopy.copyButton": "Copier",
     "xpack.sessionView.detailsPanel.alerts": "Alertes",
-    "xpack.sessionView.detailsPanel.host": "Hôte",
     "xpack.sessionView.detailsPanel.process": "Processus",
     "xpack.sessionView.emptyDataMessage": "Aucun événement de processus n'a été trouvé pour cette requête.",
     "xpack.sessionView.emptyDataTitle": "Aucune donnée à rendre",

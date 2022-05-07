@@ -27080,7 +27080,6 @@
     "xpack.sessionView.detailPanelAlertsEmptyTitle": "无告警",
     "xpack.sessionView.detailPanelCopy.copyButton": "复制",
     "xpack.sessionView.detailsPanel.alerts": "告警",
-    "xpack.sessionView.detailsPanel.host": "主机",
     "xpack.sessionView.detailsPanel.process": "进程",
     "xpack.sessionView.emptyDataMessage": "找不到此查询的进程事件。",
     "xpack.sessionView.emptyDataTitle": "没有可呈现的数据",

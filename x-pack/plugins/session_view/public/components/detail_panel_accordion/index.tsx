@@ -19,7 +19,7 @@ interface DetailPanelAccordionDeps {
   tooltipContent?: string;
   extraActionTitle?: string;
   onExtraActionClick?: () => void;
-  childComponent?: ReactNode;
+  children?: ReactNode;
   isOpen?: boolean;
 }
 
@@ -33,7 +33,7 @@ export const DetailPanelAccordion = ({
   tooltipContent,
   extraActionTitle,
   onExtraActionClick,
-  childComponent,
+  children,
   isOpen = false,
 }: DetailPanelAccordionDeps) => {
   const styles = useStyles();
@@ -76,7 +76,7 @@ export const DetailPanelAccordion = ({
       data-test-subj="sessionView:detail-panel-accordion"
     >
       <DetailPanelDescriptionList listItems={listItems} />
-      {childComponent}
+      {children}
     </EuiAccordion>
   );
 };

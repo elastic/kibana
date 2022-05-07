@@ -27045,7 +27045,6 @@
     "xpack.sessionView.detailPanelAlertsEmptyTitle": "アラートなし",
     "xpack.sessionView.detailPanelCopy.copyButton": "コピー",
     "xpack.sessionView.detailsPanel.alerts": "アラート",
-    "xpack.sessionView.detailsPanel.host": "ホスト",
     "xpack.sessionView.detailsPanel.process": "プロセス",
     "xpack.sessionView.emptyDataMessage": "このクエリのプロセスイベントが見つかりません。",
     "xpack.sessionView.emptyDataTitle": "表示するデータがありません",

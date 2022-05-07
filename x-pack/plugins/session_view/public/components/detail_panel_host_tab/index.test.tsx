@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessEventHost } from '../../../common/types/process_tree';
+import { ProcessEventHost, ProcessEventContainer, ProcessEventOrchestrator } from '../../../common/types/process_tree';
 import { DetailPanelHostTab } from '.';
 
 const TEST_ARCHITECTURE = 'x86_64';
@@ -22,6 +22,24 @@ const TEST_OS_KERNEL = '3.10.0-1160.31.1.el7.x86_64 #1 SMP Thu Jun 10 13:32:12 U
 const TEST_OS_NAME = 'os-Linux';
 const TEST_OS_PLATFORM = 'platform-centos';
 const TEST_OS_VERSION = 'version-7.9.2009';
+
+//Container data
+const TEST_CONTAINER_ID = 'containerd://5fe98d5566148268631302790833b7a14317a2fd212e3e4117bede77d0ca9ba6';
+const TEST_CONTAINER_NAME = 'gce-pd-driver';
+const TEST_CONTAINER_IMAGE_NAME = 'gke.gcr.io/gcp-compute-persistent-disk-csi-driver';
+const TEST_CONTAINER_IMAGE_TAG = 'v1.3.5-gke.0';
+const TEST_CONTAINER_IMAGE_HASH_ALL = 'PLACEHOLDER_FOR_IMAGE.HASH.ALL';
+
+//Orchestrator data
+const TEST_ORCHESTRATOR_RESOURCE_NAME = 'pdcsi-node-6hvsp';
+const TEST_ORCHESTRATOR_RESOURCE_TYPE = 'pod';
+const TEST_ORCHESTRATOR_RESOURCE_IP = 'PLACEHOLDER_FOR_RESOURCE.IP';
+const TEST_ORCHESTRATOR_NAMESPACE = 'kube-system';
+const TEST_ORCHESTRATOR_PARENT_TYPE = 'elastic-k8s-cluster';
+const TEST_ORCHESTRATOR_CLUSTER_ID = 'PLACEHOLDER_FOR_CLUSTER.ID';
+const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_PARENT.TYPE';
+
+
 
 const TEST_HOST: ProcessEventHost = {
   architecture: TEST_ARCHITECTURE,
@@ -40,6 +58,34 @@ const TEST_HOST: ProcessEventHost = {
   },
 };
 
+const TEST_CONTAINER: ProcessEventContainer = {
+  id: TEST_CONTAINER_ID,
+  name: TEST_CONTAINER_NAME,
+  image: {
+    name: TEST_CONTAINER_IMAGE_NAME,
+    tag: TEST_CONTAINER_IMAGE_TAG,
+    hash: {
+      all: TEST_CONTAINER_IMAGE_HASH_ALL,
+    },
+  },
+};
+
+const TEST_ORCHESTRATOR: ProcessEventOrchestrator = {
+  resource: {
+    name: TEST_ORCHESTRATOR_RESOURCE_NAME,
+    type: TEST_ORCHESTRATOR_RESOURCE_TYPE,
+    ip: TEST_ORCHESTRATOR_RESOURCE_IP,
+  },
+  namespace: TEST_ORCHESTRATOR_NAMESPACE,
+  cluster: {
+    name: TEST_ORCHESTRATOR_CLUSTER_NAME,
+    id: TEST_ORCHESTRATOR_CLUSTER_ID,
+  },
+  parent: {
+    type: TEST_ORCHESTRATOR_PARENT_TYPE,
+  },
+};
+
 describe('DetailPanelHostTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
@@ -50,7 +96,7 @@ describe('DetailPanelHostTab component', () => {
   });
 
   describe('When DetailPanelHostTab is mounted', () => {
-    it('renders DetailPanelHostTab correctly', async () => {
+    it('renders DetailPanelHostTab correctly (non cloud environment)', async () => {
       renderResult = mockedContext.render(<DetailPanelHostTab processHost={TEST_HOST} />);
 
       expect(renderResult.queryByText('architecture')).toBeVisible();
@@ -80,6 +126,72 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText(TEST_OS_NAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_PLATFORM)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_VERSION)).toBeVisible();
+
+      //Orchestrator and Container should be missing if session came from a Non-cloud env
+      expect(renderResult.queryByText('Container')).toBeNull();
+      expect(renderResult.queryByText('Orchestrator')).toBeNull();
+    });
+
+    it('renders DetailPanelHostTab correctly (cloud environment)', async () => {
+      renderResult = mockedContext.render(<DetailPanelHostTab processHost={TEST_HOST} processContainer={TEST_CONTAINER} processOrchestrator={TEST_ORCHESTRATOR} />);
+
+      expect(renderResult.queryByText('architecture')).toBeVisible();
+      expect(renderResult.queryByText('hostname')).toBeVisible();   
+      expect(renderResult.queryByText('ip')).toBeVisible();
+      expect(renderResult.queryByText('mac')).toBeVisible();
+      expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
+      expect(renderResult.queryByText(TEST_HOSTNAME)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ID)).toBeVisible();
+      expect(renderResult.queryByText(TEST_IP.join(', '))).toBeVisible();
+      expect(renderResult.queryByText(TEST_MAC.join(', '))).toBeVisible();
+      expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
+
+      //Checks for existence of id and name fields in Host and Container accordion
+      expect(renderResult.queryAllByText('id').length).toBe(2);
+      expect(renderResult.queryAllByText('name').length).toBe(2);
+
+      // expand host os accordion
+      renderResult.queryByText('Host OS')?.querySelector('button')?.click();
+      expect(renderResult.queryByText('os.family')).toBeVisible();
+      expect(renderResult.queryByText('os.full')).toBeVisible();
+      expect(renderResult.queryByText('os.kernel')).toBeVisible();
+      expect(renderResult.queryByText('os.name')).toBeVisible();
+      expect(renderResult.queryByText('os.platform')).toBeVisible();
+      expect(renderResult.queryByText('os.version')).toBeVisible();
+      expect(renderResult.queryByText(TEST_OS_FAMILY)).toBeVisible();
+      expect(renderResult.queryByText(TEST_OS_FULL)).toBeVisible();
+      expect(renderResult.queryByText(TEST_OS_KERNEL)).toBeVisible();
+      expect(renderResult.queryByText(TEST_OS_NAME)).toBeVisible();
+      expect(renderResult.queryByText(TEST_OS_PLATFORM)).toBeVisible();
+      expect(renderResult.queryByText(TEST_OS_VERSION)).toBeVisible();
+
+      //expand Container Accordion
+      renderResult.queryByText('Container')?.querySelector('button')?.click();
+      expect(renderResult.queryByText('image.name')).toBeVisible();
+      expect(renderResult.queryByText('image.tag')).toBeVisible();
+      expect(renderResult.queryByText('image.hash.all')).toBeVisible();
+      expect(renderResult.queryByText(TEST_CONTAINER_ID)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CONTAINER_NAME)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CONTAINER_IMAGE_NAME)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CONTAINER_IMAGE_TAG)).toBeVisible();
+      expect(renderResult.queryByText(TEST_CONTAINER_IMAGE_HASH_ALL)).toBeVisible();
+
+      //expand Orchestrator Accordion
+      renderResult.queryByText('Orchestrator')?.querySelector('button')?.click();
+      expect(renderResult.queryByText('resource.name')).toBeVisible();
+      expect(renderResult.queryByText('resource.type')).toBeVisible();
+      expect(renderResult.queryByText('resource.ip')).toBeVisible();
+      expect(renderResult.queryByText('namespace')).toBeVisible();
+      expect(renderResult.queryByText('parent.type')).toBeVisible();
+      expect(renderResult.queryByText('cluster.id')).toBeVisible();
+      expect(renderResult.queryByText('cluster.name')).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_NAME)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_TYPE)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_IP)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_NAMESPACE)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_PARENT_TYPE)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_ID)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_NAME)).toBeVisible();
     });
   });
 });
