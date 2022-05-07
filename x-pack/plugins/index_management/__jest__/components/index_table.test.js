@@ -16,7 +16,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import { mountWithIntl, stubWebWorker } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
+import { mountWithIntl } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
 import { init as initHttpRequests } from '../client_integration/helpers/http_requests';
 
 import { BASE_PATH } from '../../common/constants';

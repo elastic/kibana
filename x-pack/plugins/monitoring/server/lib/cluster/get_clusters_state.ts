@@ -6,8 +6,6 @@
  */
 
 import { find } from 'lodash';
-// @ts-ignore
-import { checkParam } from '../error_missing_required';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 import { getNewIndexPatterns } from './get_index_patterns';

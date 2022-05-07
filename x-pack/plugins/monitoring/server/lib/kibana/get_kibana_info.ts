@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 // @ts-ignore
-import { checkParam, MissingRequiredError } from '../error_missing_required';
+import { MissingRequiredError } from '../error_missing_required';
 // @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';

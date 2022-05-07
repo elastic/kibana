@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
@@ -27,7 +26,7 @@ import {
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
 // @ts-expect-error
-import { getMakiSymbol, PREFERRED_ICONS } from './symbol_utils';
+import { getMakiSymbol } from './symbol_utils';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { getHasLabel } from './style_util';

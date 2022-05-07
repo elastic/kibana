@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React from 'react';
 
 import { IndexPatternsContract } from '@kbn/data-plugin/public';

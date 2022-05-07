@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
-import { checkParam } from '../error_missing_required';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest, Cluster } from '../../types';
