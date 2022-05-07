@@ -7,7 +7,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { AssetReference } from '../../../../plugins/fleet/common';
+import { AssetReference } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -568,6 +568,10 @@ const expectAssetsInstalled = ({
         {
           id: 'metrics-all_assets.test_metrics-all_assets',
           type: 'data_stream_ilm_policy',
+        },
+        {
+          id: 'all_assets',
+          type: 'ilm_policy',
         },
         {
           id: 'logs-all_assets.test_logs',

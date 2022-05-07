@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
+import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
 import { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,

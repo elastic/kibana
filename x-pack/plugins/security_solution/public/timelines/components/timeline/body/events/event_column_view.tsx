@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 
+import type { SetEventsLoading, SetEventsDeleted } from '@kbn/timelines-plugin/common';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import type { SetEventsLoading, SetEventsDeleted } from '../../../../../../../timelines/common';
 import { OnRowSelected } from '../../events';
 import { EventsTrData, EventsTdGroupActions } from '../../styles';
 import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';

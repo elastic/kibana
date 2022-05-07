@@ -14,7 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo, ReactNode, useCallback } from 'react';
 import {
   EuiBasicTable,
-  EuiBadge,
   EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -30,8 +29,6 @@ import {
   EuiTableSortingType,
   EuiButtonIcon,
   EuiHorizontalRule,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiSelectableOption,
   EuiIcon,
   EuiScreenReaderOnly,
@@ -47,11 +44,21 @@ import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
 import {
+  RuleExecutionStatus,
+  RuleExecutionStatusValues,
+  ALERTS_FEATURE_ID,
+  RuleExecutionStatusErrorReasons,
+  formatDuration,
+  parseDuration,
+  MONITORING_HISTORY_LIMIT,
+} from '@kbn/alerting-plugin/common';
+import {
   ActionType,
   Rule,
   RuleTableItem,
   RuleType,
   RuleTypeIndex,
+  RuleStatus,
   Pagination,
   Percentiles,
   TriggersActionsUiConfig,
@@ -62,7 +69,7 @@ import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../commo
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
-import { RuleStatusFilter, getHealthColor } from './rule_status_filter';
+import { RuleExecutionStatusFilter, getHealthColor } from './rule_execution_status_filter';
 import {
   loadRules,
   loadRuleAggregations,
@@ -78,15 +85,6 @@ import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capab
 import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import {
-  RuleExecutionStatus,
-  RuleExecutionStatusValues,
-  ALERTS_FEATURE_ID,
-  RuleExecutionStatusErrorReasons,
-  formatDuration,
-  parseDuration,
-  MONITORING_HISTORY_LIMIT,
-} from '../../../../../../alerting/common';
 import { rulesStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
@@ -95,11 +93,14 @@ import { CenterJustifiedSpinner } from '../../../components/center_justified_spi
 import { ManageLicenseModal } from './manage_license_modal';
 import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
 import { RuleStatusDropdown } from './rule_status_dropdown';
+import { RuleTagBadge } from './rule_tag_badge';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
 import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { RuleStatusFilter } from './rule_status_filter';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 const ENTER_KEY = 13;
 
@@ -155,16 +156,18 @@ export const RulesList: React.FunctionComponent = () => {
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<string[]>([]);
+  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
-  const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(null);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
+
+  const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
   useEffect(() => {
     (async () => {
@@ -228,6 +231,7 @@ export const RulesList: React.FunctionComponent = () => {
     percentileOptions,
     JSON.stringify(typesFilter),
     JSON.stringify(actionTypesFilter),
+    JSON.stringify(ruleExecutionStatusesFilter),
     JSON.stringify(ruleStatusesFilter),
   ]);
 
@@ -287,6 +291,7 @@ export const RulesList: React.FunctionComponent = () => {
           searchText,
           typesFilter,
           actionTypesFilter,
+          ruleExecutionStatusesFilter,
           ruleStatusesFilter,
           sort,
         });
@@ -305,6 +310,7 @@ export const RulesList: React.FunctionComponent = () => {
           isEmpty(searchText) &&
           isEmpty(typesFilter) &&
           isEmpty(actionTypesFilter) &&
+          isEmpty(ruleExecutionStatusesFilter) &&
           isEmpty(ruleStatusesFilter)
         );
 
@@ -331,6 +337,7 @@ export const RulesList: React.FunctionComponent = () => {
         searchText,
         typesFilter,
         actionTypesFilter,
+        ruleExecutionStatusesFilter,
         ruleStatusesFilter,
       });
       if (rulesAggs?.ruleExecutionStatus) {
@@ -355,13 +362,11 @@ export const RulesList: React.FunctionComponent = () => {
         enableRule={async () => await enableRule({ http, id: item.id })}
         snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
           await snoozeRule({ http, id: item.id, snoozeEndTime });
-          setPreviousSnoozeInterval(interval);
         }}
         unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
-        item={item}
+        rule={item}
         onRuleChanged={() => loadRulesData()}
         isEditable={item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)}
-        previousSnoozeInterval={previousSnoozeInterval}
       />
     );
   };
@@ -423,7 +428,7 @@ export const RulesList: React.FunctionComponent = () => {
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip',
             {
-              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} execution durations (mm:ss).`,
+              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} run durations (mm:ss).`,
               values: {
                 percentileOrdinal: percentileOrdinals[selectedPercentile!],
                 sampleLimit: MONITORING_HISTORY_LIMIT,
@@ -593,40 +598,12 @@ export const RulesList: React.FunctionComponent = () => {
         'data-test-subj': 'rulesTableCell-tagsPopover',
         render: (tags: string[], item: RuleTableItem) => {
           return tags.length > 0 ? (
-            <EuiPopover
-              button={
-                <EuiBadge
-                  data-test-subj="ruleTagsBadge"
-                  color="hollow"
-                  iconType="tag"
-                  iconSide="left"
-                  tabIndex={-1}
-                  onClick={() => setTagPopoverOpenIndex(item.index)}
-                  onClickAriaLabel="Tags"
-                  iconOnClick={() => setTagPopoverOpenIndex(item.index)}
-                  iconOnClickAriaLabel="Tags"
-                >
-                  {tags.length}
-                </EuiBadge>
-              }
-              anchorPosition="upCenter"
+            <RuleTagBadge
               isOpen={tagPopoverOpenIndex === item.index}
-              closePopover={() => setTagPopoverOpenIndex(-1)}
-            >
-              <EuiPopoverTitle data-test-subj="ruleTagsPopoverTitle">Tags</EuiPopoverTitle>
-              <div style={{ width: '300px' }} />
-              {tags.map((tag: string, index: number) => (
-                <EuiBadge
-                  data-test-subj="ruleTagsPopoverTag"
-                  key={index}
-                  color="hollow"
-                  iconType="tag"
-                  iconSide="left"
-                >
-                  {tag}
-                </EuiBadge>
-              ))}
-            </EuiPopover>
+              tags={tags}
+              onClick={() => setTagPopoverOpenIndex(item.index)}
+              onClose={() => setTagPopoverOpenIndex(-1)}
+            />
           ) : null;
         },
       },
@@ -638,7 +615,7 @@ export const RulesList: React.FunctionComponent = () => {
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle',
               {
-                defaultMessage: 'Start time of the last execution.',
+                defaultMessage: 'Start time of the last run.',
               }
             )}
           >
@@ -794,7 +771,7 @@ export const RulesList: React.FunctionComponent = () => {
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
               {
-                defaultMessage: 'How often this rule executes successfully.',
+                defaultMessage: 'How often this rule runs successfully.',
               }
             )}
           >
@@ -832,8 +809,8 @@ export const RulesList: React.FunctionComponent = () => {
       {
         field: 'enabled',
         name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.triggerActionsTitle',
-          { defaultMessage: 'Trigger actions' }
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.stateTitle',
+          { defaultMessage: 'State' }
         ),
         sortable: true,
         truncateText: false,
@@ -963,6 +940,15 @@ export const RulesList: React.FunctionComponent = () => {
     );
   };
 
+  const getRuleStatusFilter = () => {
+    if (isRuleStatusFilterEnabled) {
+      return [
+        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusesFilter} />,
+      ];
+    }
+    return [];
+  };
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
@@ -974,15 +960,16 @@ export const RulesList: React.FunctionComponent = () => {
         })
       )}
     />,
+    ...getRuleStatusFilter(),
     <ActionTypeFilter
       key="action-type-filter"
       actionTypes={actionTypes}
       onChange={(ids: string[]) => setActionTypesFilter(ids)}
     />,
-    <RuleStatusFilter
+    <RuleExecutionStatusFilter
       key="rule-status-filter"
-      selectedStatuses={ruleStatusesFilter}
-      onChange={(ids: string[]) => setRuleStatusesFilter(ids)}
+      selectedStatuses={ruleExecutionStatusesFilter}
+      onChange={(ids: string[]) => setRuleExecutionStatusesFilter(ids)}
     />,
     <EuiButtonEmpty
       data-test-subj="refreshRulesButton"
@@ -1020,7 +1007,7 @@ export const RulesList: React.FunctionComponent = () => {
                 }}
               />
               &nbsp;
-              <EuiLink color="primary" onClick={() => setRuleStatusesFilter(['error'])}>
+              <EuiLink color="primary" onClick={() => setRuleExecutionStatusesFilter(['error'])}>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
                   defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"

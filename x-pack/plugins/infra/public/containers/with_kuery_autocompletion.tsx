@@ -7,16 +7,18 @@
 
 import React from 'react';
 import { DataViewBase } from '@kbn/es-query';
-import { QuerySuggestion, DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   withKibana,
   KibanaReactContextValue,
   KibanaServices,
-} from '../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import { QuerySuggestion, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { RendererFunction } from '../utils/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {
-  kibana: KibanaReactContextValue<{ data: DataPublicPluginStart } & KibanaServices>;
+  kibana: KibanaReactContextValue<
+    { unifiedSearch: UnifiedSearchPublicPluginStart } & KibanaServices
+  >;
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
@@ -63,7 +65,7 @@ class WithKueryAutocompletionComponent extends React.Component<
     const { indexPattern } = this.props;
     const language = 'kuery';
     const hasQuerySuggestions =
-      this.props.kibana.services.data?.autocomplete.hasQuerySuggestions(language);
+      this.props.kibana.services.unifiedSearch?.autocomplete.hasQuerySuggestions(language);
 
     if (!hasQuerySuggestions) {
       return;
@@ -78,7 +80,7 @@ class WithKueryAutocompletionComponent extends React.Component<
     });
 
     const suggestions =
-      (await this.props.kibana.services.data.autocomplete.getQuerySuggestions({
+      (await this.props.kibana.services.unifiedSearch.autocomplete.getQuerySuggestions({
         language,
         query: expression,
         selectionStart: cursorPosition,

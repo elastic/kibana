@@ -9,7 +9,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { AddTimelineButton } from './';
+import { AddTimelineButton } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import {

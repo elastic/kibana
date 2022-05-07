@@ -8,7 +8,7 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';

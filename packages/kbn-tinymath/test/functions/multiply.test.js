@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { multiply } = require('../../src/functions/multiply.js');
+const { multiply } = require('../../src/functions/multiply');
 
 describe('Multiply', () => {
   it('number, number', () => {

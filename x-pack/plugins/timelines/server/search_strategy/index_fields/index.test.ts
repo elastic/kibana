@@ -13,13 +13,10 @@ import {
   formatSecondFields,
   createFieldItem,
   requestIndexFieldSearch,
-} from './index';
+} from '.';
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
 import { fieldsBeat as beatFields } from '../../utils/beat_schema/fields';
-import {
-  IndexPatternsFetcher,
-  SearchStrategyDependencies,
-} from '../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 
 describe('Index Fields', () => {
   describe('formatIndexFields', () => {

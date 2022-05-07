@@ -9,7 +9,7 @@
 // TODO: https://github.com/elastic/kibana/issues/109904
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { ConfigSchema } from '../config';
 
 export * from './deprecated';
@@ -19,9 +19,9 @@ export * from './deprecated';
  */
 
 export { getEsQueryConfig, FilterStateStore } from '../common';
-export { FilterLabel, FilterItem } from './ui';
 export {
   getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
   generateFilters,
   extractTimeRange,
   getIndexPatternFromFilter,
@@ -96,20 +96,6 @@ export {
   DuplicateDataViewError,
 } from '../common';
 
-/*
- * Autocomplete query suggestions:
- */
-
-export type {
-  QuerySuggestion,
-  QuerySuggestionGetFn,
-  QuerySuggestionGetFnArgs,
-  QuerySuggestionBasic,
-  QuerySuggestionField,
-  AutocompleteStart,
-} from './autocomplete';
-
-export { QuerySuggestionTypes } from './autocomplete';
 /*
  * Search:
  */
@@ -259,15 +245,6 @@ export const search = {
  * UI components
  */
 
-export type {
-  SearchBarProps,
-  StatefulSearchBarProps,
-  IndexPatternSelectProps,
-  QueryStringInputProps,
-} from './ui';
-
-export { QueryStringInput, SearchBar } from './ui';
-
 /**
  * Types to be shared externally
  * @public
@@ -281,7 +258,13 @@ export {
   getDefaultQuery,
   FilterManager,
   TimeHistory,
+  getQueryLog,
+  mapAndFlattenFilters,
+  QueryService,
 } from './query';
+
+export { NowProvider } from './now_provider';
+export type { NowProviderInternalContract } from './now_provider';
 
 export type {
   QueryState,
@@ -293,6 +276,10 @@ export type {
   QueryStateChange,
   QueryStart,
   AutoRefreshDoneFn,
+  PersistedLog,
+  QueryStringContract,
+  QuerySetup,
+  TimefilterSetup,
 } from './query';
 
 export type { AggsStart } from './search/aggs';
@@ -303,8 +290,6 @@ export type { SavedObject } from '../common';
 
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
 
-export type { ApplyGlobalFilterActionContext } from './actions';
-export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
@@ -321,7 +306,6 @@ export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 

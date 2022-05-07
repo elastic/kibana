@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../../../../features/common';
+import { KibanaFeature } from '@kbn/features-plugin/common';
+
 import { ALL_SPACES_ID } from '../../../../../common/constants';
 import { getPutPayloadSchema, validateKibanaPrivileges } from './put_payload';
 

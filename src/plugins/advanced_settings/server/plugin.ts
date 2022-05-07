@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { capabilitiesProvider } from './capabilities_provider';
 
 export class AdvancedSettingsServerPlugin implements Plugin<object, object> {

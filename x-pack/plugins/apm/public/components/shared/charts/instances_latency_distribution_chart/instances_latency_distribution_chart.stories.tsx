@@ -10,7 +10,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import {
   InstancesLatencyDistributionChart,
   InstancesLatencyDistributionChartProps,
-} from './';
+} from '.';
 
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart',

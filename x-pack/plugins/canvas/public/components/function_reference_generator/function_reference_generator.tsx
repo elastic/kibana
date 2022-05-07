@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { ExpressionFunction } from 'src/plugins/expressions';
+import { ExpressionFunction } from '@kbn/expressions-plugin';
 import { EuiButtonEmpty } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import { CanvasPluginServices } from '../../services';

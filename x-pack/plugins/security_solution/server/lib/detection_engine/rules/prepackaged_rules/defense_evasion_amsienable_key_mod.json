@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "JScript tries to query the AmsiEnable registry key from the HKEY_USERS registry hive before initializing Antimalware Scan Interface (AMSI). If this key is set to 0, AMSI is not enabled for the JScript process. An adversary can modify this key to disable AMSI protections.",
+  "description": "Identifies modifications of the AmsiEnable registry key to 0, which disables the Antimalware Scan Interface (AMSI). An adversary can modify this key to disable AMSI protections.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Modification of AmsiEnable Registry Key",
+  "note": "## Triage and analysis\n\n### Investigating Modification of AmsiEnable Registry Key\n\nThe Windows Antimalware Scan Interface (AMSI) is a versatile interface standard that allows your applications and\nservices to integrate with any antimalware product that's present on a machine. AMSI provides integration with multiple\nWindows components, ranging from User Account Control (UAC) to VBA Macros.\n\nSince AMSI is widely used across security products for increased visibility, attackers can disable it to evade\ndetections that rely on it.\n\nThis rule monitors the modifications to the Software\\Microsoft\\Windows Script\\Settings\\AmsiEnable registry key.\n\n#### Possible investigation steps\n\n- Identify the user that performed the action.\n- Check whether this user should be doing this kind of activity.\n- Investigate program execution chain (parent process tree).\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Investigate the execution of scripts and macros after the registry modification.\n- Retrieve script/office files:\n  - Use a sandboxed malware analysis system to perform analysis.\n    - Observe attempts to contact external domains and addresses.\n  - Use the PowerShell Get-FileHash cmdlet to get the SHA-256 hash value of the file.\n    - Search for the existence of this file in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n- Use process name, command line, and file hash to search for occurrences on other hosts.\n\n### False positive analysis\n\n- This modification should not happen legitimately. Any potential benign true positive (B-TP) should be mapped and\nmonitored by the security team, as these modifications expose the host to malware infections.\n\n### Related rules\n\n- Microsoft Windows Defender Tampering - fe794edd-487f-4a90-b285-3ee54f2af2d3\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- If malware was found, implement temporary network rules, procedures, and segmentation required to contain it.\n- Delete or set the key to its default value.\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path : (\n    \"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows Script\\\\Settings\\\\AmsiEnable\",\n    \"HKU\\\\*\\\\Software\\\\Microsoft\\\\Windows Script\\\\Settings\\\\AmsiEnable\"\n  ) and\n  registry.data.strings: (\"0\", \"0x00000000\")\n",
   "references": [
     "https://hackinparis.com/data/slides/2019/talks/HIP2019-Dominic_Chell-Cracking_The_Perimeter_With_Sharpshooter.pdf",
@@ -53,5 +54,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

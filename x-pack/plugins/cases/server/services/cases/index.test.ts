@@ -15,16 +15,17 @@
 
 import { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   SavedObject,
   SavedObjectReference,
   SavedObjectsCreateOptions,
+  SavedObjectsFindResponse,
   SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
@@ -160,10 +161,12 @@ describe('CasesService', () => {
               "username": "elastic",
             },
             "description": "This is a brand new case of a bad meanie defacing data",
+            "duration": null,
             "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
             },
+            "severity": "low",
             "status": "open",
             "tags": Array [
               "defacement",
@@ -500,6 +503,7 @@ describe('CasesService', () => {
               "username": "elastic",
             },
             "description": "This is a brand new case of a bad meanie defacing data",
+            "duration": null,
             "external_service": Object {
               "connector_name": ".jira",
               "external_id": "100",
@@ -516,6 +520,7 @@ describe('CasesService', () => {
             "settings": Object {
               "syncAlerts": true,
             },
+            "severity": "low",
             "status": "open",
             "tags": Array [
               "defacement",
@@ -1130,6 +1135,73 @@ describe('CasesService', () => {
 
         expect(res.attributes.external_service).toMatchInlineSnapshot(`null`);
       });
+    });
+  });
+
+  describe('executeAggregations', () => {
+    const aggregationBuilders = [
+      {
+        build: () => ({
+          myAggregation: { avg: { field: 'avg-field' } },
+        }),
+        getName: () => 'avg-test-builder',
+        formatResponse: () => {},
+      },
+      {
+        build: () => ({
+          myAggregation: { min: { field: 'min-field' } },
+        }),
+        getName: () => 'min-test-builder',
+        formatResponse: () => {},
+      },
+    ];
+
+    it('returns an aggregation correctly', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+        aggregations: { myAggregation: { value: 0 } },
+      } as SavedObjectsFindResponse<ESCaseAttributes>);
+
+      const res = await service.executeAggregations({ aggregationBuilders });
+      expect(res).toEqual({ myAggregation: { value: 0 } });
+    });
+
+    it('calls find correctly', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+        aggregations: { myAggregation: { value: 0 } },
+      } as SavedObjectsFindResponse<ESCaseAttributes>);
+
+      await service.executeAggregations({ aggregationBuilders, options: { perPage: 20 } });
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "aggs": Object {
+            "myAggregation": Object {
+              "min": Object {
+                "field": "min-field",
+              },
+            },
+          },
+          "perPage": 20,
+          "sortField": "created_at",
+          "type": "cases",
+        }
+      `);
+    });
+
+    it('throws an error correctly', async () => {
+      expect.assertions(1);
+      unsecuredSavedObjectsClient.find.mockRejectedValue(new Error('Aggregation error'));
+
+      await expect(service.executeAggregations({ aggregationBuilders })).rejects.toThrow(
+        'Failed to execute aggregations [avg-test-builder,min-test-builder]: Error: Aggregation error'
+      );
     });
   });
 });

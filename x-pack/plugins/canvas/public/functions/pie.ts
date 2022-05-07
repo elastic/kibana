@@ -6,7 +6,7 @@
  */
 
 import { get, keyBy, map, groupBy } from 'lodash';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
 import {

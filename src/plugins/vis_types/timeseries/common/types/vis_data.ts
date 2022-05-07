@@ -52,6 +52,7 @@ export interface PanelData {
   seriesId: string;
   splitByLabel: string;
   isSplitByTerms: boolean;
+  termsSplitKey?: string | string[];
   error?: string;
 }
 
