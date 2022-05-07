@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessEventHost, ProcessEventContainer, ProcessEventOrchestrator } from '../../../common/types/process_tree';
+import {
+  ProcessEventHost,
+  ProcessEventContainer,
+  ProcessEventOrchestrator,
+} from '../../../common/types/process_tree';
 import { DetailPanelHostTab } from '.';
 
 const TEST_ARCHITECTURE = 'x86_64';
@@ -23,14 +27,15 @@ const TEST_OS_NAME = 'os-Linux';
 const TEST_OS_PLATFORM = 'platform-centos';
 const TEST_OS_VERSION = 'version-7.9.2009';
 
-//Container data
-const TEST_CONTAINER_ID = 'containerd://5fe98d5566148268631302790833b7a14317a2fd212e3e4117bede77d0ca9ba6';
+// Container data
+const TEST_CONTAINER_ID =
+  'containerd://5fe98d5566148268631302790833b7a14317a2fd212e3e4117bede77d0ca9ba6';
 const TEST_CONTAINER_NAME = 'gce-pd-driver';
 const TEST_CONTAINER_IMAGE_NAME = 'gke.gcr.io/gcp-compute-persistent-disk-csi-driver';
 const TEST_CONTAINER_IMAGE_TAG = 'v1.3.5-gke.0';
 const TEST_CONTAINER_IMAGE_HASH_ALL = 'PLACEHOLDER_FOR_IMAGE.HASH.ALL';
 
-//Orchestrator data
+// Orchestrator data
 const TEST_ORCHESTRATOR_RESOURCE_NAME = 'pdcsi-node-6hvsp';
 const TEST_ORCHESTRATOR_RESOURCE_TYPE = 'pod';
 const TEST_ORCHESTRATOR_RESOURCE_IP = 'PLACEHOLDER_FOR_RESOURCE.IP';
@@ -38,8 +43,6 @@ const TEST_ORCHESTRATOR_NAMESPACE = 'kube-system';
 const TEST_ORCHESTRATOR_PARENT_TYPE = 'elastic-k8s-cluster';
 const TEST_ORCHESTRATOR_CLUSTER_ID = 'PLACEHOLDER_FOR_CLUSTER.ID';
 const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_PARENT.TYPE';
-
-
 
 const TEST_HOST: ProcessEventHost = {
   architecture: TEST_ARCHITECTURE,
@@ -127,16 +130,22 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText(TEST_OS_PLATFORM)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_VERSION)).toBeVisible();
 
-      //Orchestrator and Container should be missing if session came from a Non-cloud env
+      // Orchestrator and Container should be missing if session came from a Non-cloud env
       expect(renderResult.queryByText('Container')).toBeNull();
       expect(renderResult.queryByText('Orchestrator')).toBeNull();
     });
 
     it('renders DetailPanelHostTab correctly (cloud environment)', async () => {
-      renderResult = mockedContext.render(<DetailPanelHostTab processHost={TEST_HOST} processContainer={TEST_CONTAINER} processOrchestrator={TEST_ORCHESTRATOR} />);
+      renderResult = mockedContext.render(
+        <DetailPanelHostTab
+          processHost={TEST_HOST}
+          processContainer={TEST_CONTAINER}
+          processOrchestrator={TEST_ORCHESTRATOR}
+        />
+      );
 
       expect(renderResult.queryByText('architecture')).toBeVisible();
-      expect(renderResult.queryByText('hostname')).toBeVisible();   
+      expect(renderResult.queryByText('hostname')).toBeVisible();
       expect(renderResult.queryByText('ip')).toBeVisible();
       expect(renderResult.queryByText('mac')).toBeVisible();
       expect(renderResult.queryByText(TEST_ARCHITECTURE)).toBeVisible();
@@ -146,7 +155,7 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText(TEST_MAC.join(', '))).toBeVisible();
       expect(renderResult.queryByText(TEST_NAME)).toBeVisible();
 
-      //Checks for existence of id and name fields in Host and Container accordion
+      // Checks for existence of id and name fields in Host and Container accordion
       expect(renderResult.queryAllByText('id').length).toBe(2);
       expect(renderResult.queryAllByText('name').length).toBe(2);
 
@@ -165,7 +174,7 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText(TEST_OS_PLATFORM)).toBeVisible();
       expect(renderResult.queryByText(TEST_OS_VERSION)).toBeVisible();
 
-      //expand Container Accordion
+      // expand Container Accordion
       renderResult.queryByText('Container')?.querySelector('button')?.click();
       expect(renderResult.queryByText('image.name')).toBeVisible();
       expect(renderResult.queryByText('image.tag')).toBeVisible();
@@ -176,7 +185,7 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText(TEST_CONTAINER_IMAGE_TAG)).toBeVisible();
       expect(renderResult.queryByText(TEST_CONTAINER_IMAGE_HASH_ALL)).toBeVisible();
 
-      //expand Orchestrator Accordion
+      // expand Orchestrator Accordion
       renderResult.queryByText('Orchestrator')?.querySelector('button')?.click();
       expect(renderResult.queryByText('resource.name')).toBeVisible();
       expect(renderResult.queryByText('resource.type')).toBeVisible();
