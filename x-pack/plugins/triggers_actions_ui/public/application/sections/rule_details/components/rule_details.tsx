@@ -25,9 +25,13 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { RuleExecutionStatusErrorReasons, parseDuration } from '../../../../../../alerting/common';
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import {
+  hasAllPrivilege,
+  hasExecuteActionsCapability,
+  hasManageApiKeysCapability,
+} from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import {
@@ -271,8 +275,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <EuiText size="s">
                     <p>
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.triggerActionsTitle"
-                        defaultMessage="Trigger actions"
+                        id="xpack.triggersActionsUI.sections.ruleDetails.stateTitle"
+                        defaultMessage="State"
                       />
                     </p>
                   </EuiText>
@@ -285,11 +289,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                       await snoozeRule(rule, snoozeEndTime)
                     }
                     unsnoozeRule={async () => await unsnoozeRule(rule)}
-                    item={rule as RuleTableItem}
+                    rule={rule as RuleTableItem}
                     onRuleChanged={requestRefresh}
                     direction="row"
                     isEditable={hasEditButton}
-                    previousSnoozeInterval={null}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -311,6 +314,27 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+            {hasManageApiKeysCapability(capabilities) ? (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
+                          defaultMessage="API key owner"
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
+                      <b>{rule.apiKeyOwner}</b>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               {uniqueActions && uniqueActions.length ? (
                 <EuiFlexGroup responsive={false} gutterSize="xs">

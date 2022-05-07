@@ -13,7 +13,7 @@ import { EuiSteps, EuiSelect } from '@elastic/eui';
 
 import { ElasticsearchClientInstructions } from '../elasticsearch_client_instructions';
 
-import { ElasticsearchGuide } from './';
+import { ElasticsearchGuide } from '.';
 
 describe('Elasticsearch Guide Component', () => {
   let wrapper: ShallowWrapper;

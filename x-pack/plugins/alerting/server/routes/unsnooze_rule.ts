@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, RuleMutedError } from '../lib';
 import { verifyAccessAndContext } from './lib';
@@ -28,7 +28,7 @@ export const unsnoozeRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const params = req.params;
         try {
           await rulesClient.unsnooze({ ...params });

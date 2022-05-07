@@ -5,11 +5,23 @@
  * 2.0.
  */
 
-import { Logger } from '../../../../../../src/core/server';
-import { Incident, PartialIncident, ResponseError, ServiceNowError } from './types';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { Logger } from '@kbn/core/server';
+import {
+  ExternalServiceCredentials,
+  Incident,
+  PartialIncident,
+  ResponseError,
+  ServiceNowError,
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+} from './types';
 import { FIELD_PREFIX } from './config';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
 import * as i18n from './translations';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ConnectorTokenClientContract } from '../../types';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 
 export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
   useOldApi
@@ -68,4 +80,68 @@ export const throwIfSubActionIsNotSupported = ({
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }
+};
+
+export interface GetAxiosInstanceOpts {
+  connectorId?: string;
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+  credentials: ExternalServiceCredentials;
+  snServiceUrl: string;
+  connectorTokenClient?: ConnectorTokenClientContract;
+}
+
+export const getAxiosInstance = ({
+  connectorId,
+  logger,
+  configurationUtilities,
+  credentials,
+  snServiceUrl,
+  connectorTokenClient,
+}: GetAxiosInstanceOpts): AxiosInstance => {
+  const { config, secrets } = credentials;
+  const { isOAuth } = config as ServiceNowPublicConfigurationType;
+  const { username, password } = secrets as ServiceNowSecretConfigurationType;
+
+  let axiosInstance;
+
+  if (!isOAuth && username && password) {
+    axiosInstance = axios.create({
+      auth: { username, password },
+    });
+  } else {
+    axiosInstance = axios.create();
+    axiosInstance.interceptors.request.use(
+      async (axiosConfig: AxiosRequestConfig) => {
+        const accessToken = await getOAuthJwtAccessToken({
+          connectorId,
+          logger,
+          configurationUtilities,
+          credentials: {
+            config: {
+              clientId: config.clientId as string,
+              jwtKeyId: config.jwtKeyId as string,
+              userIdentifierValue: config.userIdentifierValue as string,
+            },
+            secrets: {
+              clientSecret: secrets.clientSecret as string,
+              privateKey: secrets.privateKey as string,
+              privateKeyPassword: secrets.privateKeyPassword
+                ? (secrets.privateKeyPassword as string)
+                : null,
+            },
+          },
+          tokenUrl: `${snServiceUrl}/oauth_token.do`,
+          connectorTokenClient,
+        });
+        axiosConfig.headers.Authorization = accessToken;
+        return axiosConfig;
+      },
+      (error) => {
+        Promise.reject(error);
+      }
+    );
+  }
+
+  return axiosInstance;
 };

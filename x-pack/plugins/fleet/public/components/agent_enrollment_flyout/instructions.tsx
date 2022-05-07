@@ -13,17 +13,19 @@ import { useFleetStatus, useGetAgents } from '../../hooks';
 
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
-
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
 import { Loading } from '..';
 
+import { policyHasFleetServer } from '../../services';
+
+import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
+
 import type { InstructionProps } from './types';
 
-import { ManagedSteps, StandaloneSteps, FleetServerSteps } from './steps';
+import { ManagedSteps, StandaloneSteps } from './steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
@@ -32,8 +34,10 @@ export const Instructions = (props: InstructionProps) => {
     isFleetServerPolicySelected,
     settings,
     isLoadingAgentPolicies,
+    selectionType,
     setSelectionType,
     mode,
+    setMode,
     isIntegrationFlow,
   } = props;
   const fleetStatus = useFleetStatus();
@@ -85,22 +89,22 @@ export const Instructions = (props: InstructionProps) => {
 
   if (mode === 'managed') {
     if (showFleetServerEnrollment) {
-      return <FleetServerRequirementPage />;
+      return <FleetServerRequirementPage showStandaloneTab={() => setMode('standalone')} />;
     } else if (showAgentEnrollment) {
       return (
         <>
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.managedDescription"
-              defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
-            />
-          </EuiText>
-          <EuiSpacer size="l" />
-          {isFleetServerPolicySelected ? (
-            <FleetServerSteps {...props} />
-          ) : (
-            <ManagedSteps {...props} />
+          {selectionType === 'tabs' && (
+            <>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollment.managedDescription"
+                  defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
+                />
+              </EuiText>
+              <EuiSpacer size="l" />
+            </>
           )}
+          {isFleetServerPolicySelected ? <AdvancedTab /> : <ManagedSteps {...props} />}
         </>
       );
     }

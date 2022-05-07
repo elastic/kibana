@@ -24,10 +24,12 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { DISCOVER_APP_LOCATOR } from '../../../../../../../../../src/plugins/discover/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/public';
 
+import { DuplicateDataViewError } from '@kbn/data-plugin/public';
+import type { RuntimeField } from '@kbn/data-plugin/common';
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
@@ -43,12 +45,10 @@ import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
-import { DuplicateDataViewError } from '../../../../../../../../../src/plugins/data/public';
 import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
-import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common';
 import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';

@@ -16,7 +16,7 @@ import { HostDetailsLink, NetworkDetailsLink } from '../../../../common/componen
 import {
   TooltipProperty,
   ITooltipProperty,
-} from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+} from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { FlowTarget } from '../../../../../common/search_strategy';
 
 describe('PointToolTipContent', () => {

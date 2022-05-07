@@ -18,13 +18,15 @@ import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
-import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
-import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import {
+  MatrixHistogramProps,
+  MatrixHistogramOption,
+  MatrixHistogramQueryProps,
   MatrixHistogramMappingTypes,
   GetTitle,
   GetSubTitle,
-} from '../../components/matrix_histogram/types';
+} from './types';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';

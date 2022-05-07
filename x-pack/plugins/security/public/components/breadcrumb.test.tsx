@@ -7,7 +7,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { Breadcrumb, BreadcrumbsProvider, createBreadcrumbsChangeHandler } from './breadcrumb';
 

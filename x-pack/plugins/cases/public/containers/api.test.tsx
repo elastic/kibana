@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
@@ -16,10 +17,10 @@ import {
 
 import {
   deleteCases,
+  deleteComment,
   getActionLicense,
   getCase,
   getCases,
-  getCasesStatus,
   getCaseUserActions,
   getReporters,
   getTags,
@@ -49,9 +50,11 @@ import {
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
+  basicCaseId,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import { getCasesStatus } from '../api';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -244,21 +247,33 @@ describe('Case Configuration API', () => {
   });
 
   describe('getCasesStatus', () => {
+    const http = httpServiceMock.createStartContract({ basePath: '' });
+    http.get.mockResolvedValue(casesStatusSnake);
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesStatusSnake);
     });
+
     test('should be called with correct check url, method, signal', async () => {
-      await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/status`, {
-        method: 'GET',
+      await getCasesStatus({
+        http,
+        signal: abortCtrl.signal,
+        query: { owner: [SECURITY_SOLUTION_OWNER] },
+      });
+
+      expect(http.get).toHaveBeenCalledWith(`${CASES_URL}/status`, {
         signal: abortCtrl.signal,
         query: { owner: [SECURITY_SOLUTION_OWNER] },
       });
     });
 
     test('should return correct response', async () => {
-      const resp = await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      const resp = await getCasesStatus({
+        http,
+        signal: abortCtrl.signal,
+        query: { owner: SECURITY_SOLUTION_OWNER },
+      });
+
       expect(resp).toEqual(casesStatus);
     });
   });
@@ -526,6 +541,27 @@ describe('Case Configuration API', () => {
     test('should return correct response', async () => {
       const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(resp).toEqual(pushedCase);
+    });
+  });
+
+  describe('deleteComment', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(null);
+    });
+    const commentId = 'ab1234';
+
+    test('should be called with correct check url, method, signal', async () => {
+      const resp = await deleteComment({
+        caseId: basicCaseId,
+        commentId,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments/${commentId}`, {
+        method: 'DELETE',
+        signal: abortCtrl.signal,
+      });
+      expect(resp).toBe(undefined);
     });
   });
 });

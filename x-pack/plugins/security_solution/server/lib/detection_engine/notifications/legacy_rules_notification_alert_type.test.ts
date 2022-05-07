@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { getAlertMock } from '../routes/__mocks__/request_responses';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+
+import { getRuleMock } from '../routes/__mocks__/request_responses';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './legacy_rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyNotificationExecutorOptions } from './legacy_types';
 import {
@@ -75,10 +76,7 @@ describe('legacyRules_notification_alert_type', () => {
     });
   });
 
-  describe.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('executor - %s', (_, isRuleRegistryEnabled) => {
+  describe('executor', () => {
     it('throws an error if rule alert was not found', async () => {
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
@@ -93,7 +91,7 @@ describe('legacyRules_notification_alert_type', () => {
     });
 
     it('should call buildSignalsSearchQuery with proper params', async () => {
-      const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
@@ -118,7 +116,7 @@ describe('legacyRules_notification_alert_type', () => {
     });
 
     it('should resolve results_link when meta is undefined to use "/app/security"', async () => {
-      const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       delete ruleAlert.params.meta;
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'rule-id',
@@ -144,7 +142,7 @@ describe('legacyRules_notification_alert_type', () => {
     });
 
     it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
-      const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       ruleAlert.params.meta = {};
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'rule-id',
@@ -169,7 +167,7 @@ describe('legacyRules_notification_alert_type', () => {
     });
 
     it('should resolve results_link to custom kibana link when given one', async () => {
-      const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       ruleAlert.params.meta = {
         kibana_siem_app_url: 'http://localhost',
       };
@@ -196,7 +194,7 @@ describe('legacyRules_notification_alert_type', () => {
     });
 
     it('should not call alertFactory.create if signalsCount was 0', async () => {
-      const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
@@ -213,7 +211,7 @@ describe('legacyRules_notification_alert_type', () => {
     });
 
     it('should call scheduleActions if signalsCount was greater than 0', async () => {
-      const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       alertServices.savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',

@@ -11,7 +11,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
@@ -2465,6 +2465,31 @@ describe('migration visualization', () => {
             some: 'prop',
             migrated: true,
           }),
+        },
+      },
+    });
+  });
+
+  it('should not apply search source migrations within visualization when searchSourceJSON is not an object', () => {
+    const visualizationDoc = {
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
+        },
+      },
+    } as SavedObjectUnsanitizedDoc;
+
+    const versionToTest = '1.2.4';
+    const visMigrations = getAllMigrations({
+      [versionToTest]: (state) => ({ ...state, migrated: true }),
+    });
+
+    expect(
+      visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)
+    ).toEqual({
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
         },
       },
     });

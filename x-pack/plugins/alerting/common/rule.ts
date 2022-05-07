@@ -10,8 +10,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'kibana/server';
-import { RuleExecutionMetrics } from '.';
+} from '@kbn/core/server';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 
 export type RuleTypeState = Record<string, unknown>;
@@ -49,9 +48,6 @@ export enum RuleExecutionStatusWarningReasons {
 
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
-  numberOfTriggeredActions?: number;
-  numberOfScheduledActions?: number;
-  metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
@@ -79,6 +75,7 @@ export interface RuleAggregations {
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
   ruleSnoozedStatus: { snoozed: number };
+  ruleTags: string[];
 }
 
 export interface MappedParamsProperties {

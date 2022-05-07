@@ -7,7 +7,7 @@
 import { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
-import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { TestProviders } from '../../../mock';
 import { ShowTopNButton } from './show_top_n';
 

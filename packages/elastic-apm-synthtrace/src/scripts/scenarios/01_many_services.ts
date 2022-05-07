@@ -7,7 +7,7 @@
  */
 
 import { random } from 'lodash';
-import { apm, timerange } from '../../index';
+import { apm, timerange } from '../..';
 import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';
 import { getLogger } from '../utils/get_common_services';

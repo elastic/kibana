@@ -5,19 +5,39 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   prepareIncident,
   createServiceError,
   getPushedDate,
   throwIfSubActionIsNotSupported,
+  getAxiosInstance,
 } from './utils';
+import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
+import { actionsConfigMock } from '../../actions_config.mock';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 
+jest.mock('../lib/get_oauth_jwt_access_token', () => ({
+  getOAuthJwtAccessToken: jest.fn(),
+}));
+
+jest.mock('axios', () => ({
+  create: jest.fn(),
+}));
+const createAxiosInstanceMock = axios.create as jest.Mock;
+const axiosInstanceMock = {
+  interceptors: {
+    request: { eject: jest.fn(), use: jest.fn() },
+    response: { eject: jest.fn(), use: jest.fn() },
+  },
+};
+
+const connectorTokenClient = connectorTokenClientMock.create();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-
+const configurationUtilities = actionsConfigMock.create();
 /**
  * The purpose of this test is to
  * prevent developers from accidentally
@@ -129,6 +149,115 @@ describe('utils', () => {
           logger,
         })
       ).not.toThrow();
+    });
+  });
+
+  describe('getAxiosInstance', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
+    });
+
+    test('creates axios instance with basic auth when isOAuth is false and username and password are defined', () => {
+      getAxiosInstance({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
+          },
+          secrets: {
+            clientSecret: null,
+            privateKey: null,
+            privateKeyPassword: null,
+            username: 'username',
+            password: 'password',
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+
+      expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+      expect(createAxiosInstanceMock).toHaveBeenCalledWith({
+        auth: { password: 'password', username: 'username' },
+      });
+    });
+
+    test('creates axios instance with interceptor when isOAuth is true and OAuth fields are defined', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: {
+          id: '1',
+          connectorId: '123',
+          tokenType: 'access_token',
+          token: 'testtokenvalue',
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 10000000000).toISOString(),
+        },
+      });
+      getAxiosInstance({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+            username: null,
+            password: null,
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+
+      expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+      expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+      expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
+
+      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce('Bearer tokentokentoken');
+
+      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+        .calls[0][0];
+      expect(await mockRequestCallback({ headers: {} })).toEqual({
+        headers: { Authorization: 'Bearer tokentokentoken' },
+      });
+
+      expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+          },
+        },
+        tokenUrl: 'https://dev23432523.service-now.com/oauth_token.do',
+        connectorTokenClient,
+      });
     });
   });
 });
