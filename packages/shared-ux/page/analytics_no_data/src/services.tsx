@@ -9,14 +9,35 @@
 import React, { FC, useContext } from 'react';
 import { Observable } from 'rxjs';
 
+/**
+ * TODO: `DataView` is a class exported by `src/plugins/data_views/public`.  Since this service
+ * is contained in this package-- and packages can only depend on other packages and never on
+ * plugins-- we have to set this to `unknown`.  If and when `DataView` is exported from a
+ * stateless package, we can remove this.
+ *
+ * @see: https://github.com/elastic/kibana/issues/127695
+ */
 type DataView = unknown;
 
+/**
+ * A subset of the `DataViewEditorOptions` interface relevant to this component.
+ *
+ * @see: src/plugins/data_view_editor/public/types.ts
+ */
 interface DataViewEditorOptions {
+  /** Handler to be invoked when the Data View Editor completes a save operation. */
   onSave: (dataView: DataView) => void;
 }
 
 /**
+ * A list of Services that are consumed by this component.
  *
+ * This list is temporary, a stopgap as we migrate to a package-based architecture, where
+ * services are not collected in a single package.  In order to make the transition, this
+ * interface is intentionally "flat".
+ *
+ * Expect this list to dwindle to zero as `@kbn/shared-ux-components` are migrated to their
+ * own packages, (and `@kbn/shared-ux-services` is removed).
  */
 export interface Services {
   addBasePath: (url: string) => string;
@@ -36,7 +57,7 @@ export interface Services {
 const PageAnalyticsNoDataContext = React.createContext<Services | null>(null);
 
 /**
- *
+ * A Context Provider that provides services to the component.
  */
 export const PageAnalyticsNoDataProvider: FC<Services> = ({ children, ...services }) => {
   return (
@@ -47,9 +68,10 @@ export const PageAnalyticsNoDataProvider: FC<Services> = ({ children, ...service
 };
 
 /**
- *
+ * An interface containing a collection of Kibana plugins and services required to
+ * render this component and its dependencies.
  */
-export interface KibanaServices {
+export interface KibanaDependencies {
   coreStart: {
     application: {
       capabilities: {
@@ -95,13 +117,13 @@ export interface KibanaServices {
 }
 
 /**
- *
+ * Kibana-specific Provider that maps dependencies to services.
  */
-export const PageAnalyticsNoDataKibanaProvider: FC<KibanaServices> = ({
+export const PageAnalyticsNoDataKibanaProvider: FC<KibanaDependencies> = ({
   children,
-  ...services
+  ...dependencies
 }) => {
-  const { coreStart, dataViewEditor, dataViews } = services;
+  const { coreStart, dataViewEditor, dataViews } = dependencies;
   const value: Services = {
     addBasePath: coreStart.http.basePath.prepend,
     canAccessFleet: coreStart.application.capabilities.navLinks.integrations,
@@ -125,7 +147,7 @@ export const PageAnalyticsNoDataKibanaProvider: FC<KibanaServices> = ({
 };
 
 /**
- *
+ * React hook for accessing pre-wired services.
  */
 export function useServices() {
   const context = useContext(PageAnalyticsNoDataContext);

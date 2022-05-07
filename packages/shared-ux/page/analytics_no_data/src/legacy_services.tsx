@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  SharedUxServicesProvider as LegacyServicesProvider,
-  SharedUxServices as LegacyServices,
-} from '@kbn/shared-ux-services';
+export { SharedUxServicesProvider as LegacyServicesProvider } from '@kbn/shared-ux-services';
+export type { SharedUxServices as LegacyServices } from '@kbn/shared-ux-services';
 
 import { SharedUxServices as LegacyServices } from '@kbn/shared-ux-services';
 import { Services } from './services';

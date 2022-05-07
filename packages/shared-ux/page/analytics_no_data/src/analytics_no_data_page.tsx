@@ -7,9 +7,9 @@
  */
 import React from 'react';
 
-import { LegacyServicesProvider, getLegacyServices } from './legacy';
+import { LegacyServicesProvider, getLegacyServices } from './legacy_services';
 import { useServices } from './services';
-import { AnalyticsNoDataPage as Component } from './page.component';
+import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 
 export interface AnalyticsNoDataPageProps {
   onDataViewCreated: (dataView: unknown) => void;

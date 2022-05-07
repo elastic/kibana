@@ -9,7 +9,8 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { servicesFactory, DataServiceFactoryConfig } from '@kbn/shared-ux-storybook';
-import { AnalyticsNoDataPage } from './page';
+
+import { AnalyticsNoDataPage } from './analytics_no_data_page';
 import { PageAnalyticsNoDataProvider, Services } from './services';
 import mdx from '../README.mdx';
 

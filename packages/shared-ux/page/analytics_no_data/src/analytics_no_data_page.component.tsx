@@ -14,20 +14,20 @@ export interface Props {
   onDataViewCreated: (dataView: unknown) => void;
 }
 
-const solution = i18n.translate('sharedUX.noDataConfig.analytics', {
+const solution = i18n.translate('sharedUXPackages.noDataConfig.analytics', {
   defaultMessage: 'Analytics',
 });
 
-const pageTitle = i18n.translate('sharedUX.noDataConfig.analyticsPageTitle', {
+const pageTitle = i18n.translate('sharedUXPackages.noDataConfig.analyticsPageTitle', {
   defaultMessage: 'Welcome to Analytics!',
 });
 
-const addIntegrationsTitle = i18n.translate('sharedUX.noDataConfig.addIntegrationsTitle', {
+const addIntegrationsTitle = i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsTitle', {
   defaultMessage: 'Add integrations',
 });
 
 const addIntegrationsDescription = i18n.translate(
-  'sharedUX.noDataConfig.addIntegrationsDescription',
+  'sharedUXPackages.noDataConfig.addIntegrationsDescription',
   {
     defaultMessage: 'Use Elastic Agent to collect data and build out Analytics solutions.',
   }
