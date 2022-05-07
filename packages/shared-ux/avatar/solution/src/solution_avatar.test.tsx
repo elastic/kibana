@@ -12,7 +12,9 @@ import { KibanaSolutionAvatar } from './solution_avatar';
 
 describe('KibanaSolutionAvatar', () => {
   test('renders', () => {
-    const component = shallow(<KibanaSolutionAvatar name="Solution" iconType="logoElastic" />);
-    expect(component).toMatchSnapshot();
+    const nameAndIcon = shallow(<KibanaSolutionAvatar name="Solution" iconType="logoElastic" />);
+    expect(nameAndIcon).toMatchSnapshot();
+    const nameOnly = shallow(<KibanaSolutionAvatar name="Elastic Stack" />);
+    expect(nameOnly).toMatchSnapshot();
   });
 });

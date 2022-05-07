@@ -6,29 +6,73 @@
  * Side Public License, v 1.
  */
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-
-type StartsWith<T, S extends string> = T extends `${S}${infer _X}` ? _X : never;
-type ExtractName<S extends string> = S extends `${infer N}` ? N : { error: 'Cannot parse name' };
-type RemoveSpaces<T extends string> = T extends `${infer F} ${infer L}` ? `${F}${L}` : never;
-
-// Exhaustive list at present.  Reduces complexity of TS checking at the expense of not being dynamic
-// against a very, very static list.
+// Manual, exhaustive list at present.  This was attempted dynamically using Typescript Template Literals and
+// the computation cost exceeded the benefit.  By enumerating them manually, we reduce the complexity of TS
+// checking at the expense of not being dynamic against a very, very static list.
+//
+// It's likely not all of these are relevant, and that's ok.  The original logic tested against all `EuiIconType`
+// values that begin with `logo`, and this list matches.
 //
 // The only consequence is requiring a solution name without a space, (e.g. `ElasticStack`) until it's added
 // here.  That's easy to do in the very unlikely event that ever happens.
-type SpacedNames =
+//
+// We may consider reducing this list to those that we consider "solutions".  That would be ok, too.  For now,
+// we're just keeping it as a manual, exhaustive list.
+export type SolutionNameType =
+  | 'AWS'
   | 'AWS Mono'
+  | 'Aerospike'
+  | 'Apache'
   | 'App Search'
+  | 'Azure'
   | 'Azure Mono'
+  | 'Beats'
   | 'Business Analytics'
+  | 'Ceph'
+  | 'Cloud'
   | 'Cloud Enterprise'
+  | 'Code'
+  | 'Codesandbox'
+  | 'Couchbase'
+  | 'Docker'
+  | 'Dropwizard'
+  | 'Elastic'
   | 'Elastic Stack'
+  | 'Elasticsearch'
   | 'Enterprise Search'
-  | 'GCP Mono'
+  | 'Etcd'
+  | 'GCP'
+  | 'GCPMono'
+  | 'Github'
+  | 'Gmail'
+  | 'Golang'
+  | 'GoogleG'
+  | 'HAproxy'
+  | 'IBM'
   | 'IBM Mono'
+  | 'Kafka'
+  | 'Kibana'
+  | 'Kubernetes'
+  | 'Logging'
+  | 'Logstash'
+  | 'Maps'
+  | 'Memcached'
+  | 'Metrics'
+  | 'Mongodb'
+  | 'MySQL'
+  | 'Nginx'
+  | 'Observability'
+  | 'Osquery'
+  | 'Php'
+  | 'Postgres'
+  | 'Prometheus'
+  | 'Rabbitmq'
+  | 'Redis'
+  | 'Security'
   | 'Site Search'
+  | 'Sketch'
+  | 'Slack'
+  | 'Uptime'
+  | 'Webhook'
+  | 'Windows'
   | 'Workplace Search';
-
-type Names = Exclude<ExtractName<StartsWith<EuiIconType, 'logo'>>, RemoveSpaces<SpacedNames>>;
-export type SolutionNameType = Names | SpacedNames;
