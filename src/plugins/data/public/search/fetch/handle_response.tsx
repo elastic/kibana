@@ -10,13 +10,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { debounce } from 'lodash';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { ThemeServiceStart, CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IKibanaSearchResponse } from '../../../common';
 import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
 import { getNotifications, getUiSettings } from '../../services';
 import type { SearchRequest } from '..';
 import { UI_SETTINGS } from '../..';
+
+let debouncedShardsToast: CoreStart['notifications']['toasts']['addWarning'];
 
 export function handleResponse(
   request: SearchRequest,
@@ -25,13 +27,11 @@ export function handleResponse(
 ) {
   const searchTimeout = getUiSettings().get<number>(UI_SETTINGS.SEARCH_TIMEOUT);
 
-  const debouncedShardsToast = debounce(
-    getNotifications().toasts.addWarning,
-    searchTimeout + 5000,
-    {
+  if (!debouncedShardsToast) {
+    debouncedShardsToast = debounce(getNotifications().toasts.addWarning, searchTimeout + 5000, {
       leading: true,
-    }
-  );
+    });
+  }
 
   const { rawResponse } = response;
 

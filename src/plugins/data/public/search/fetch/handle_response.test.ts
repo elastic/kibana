@@ -8,11 +8,11 @@
 
 import { handleResponse } from './handle_response';
 
-import { notificationServiceMock } from '@kbn/core/public/notifications/notifications_service.mock';
+import { notificationServiceMock, themeServiceMock } from '@kbn/core/public';
 import { setNotifications, setUiSettings } from '../../services';
 import { IKibanaSearchResponse } from '../../../common';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { CoreStart } from 'src/core/public';
+// import { themeServiceMock } from '@kbn/core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -68,6 +68,10 @@ describe('handleResponse', () => {
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'shards failed'
     );
+
+    // call a second time to verify debounce
+    handleResponse(request, response, theme);
+    expect(notifications.toasts.addWarning.mock.calls.length === 1);
   });
 
   test('returns the response', () => {
