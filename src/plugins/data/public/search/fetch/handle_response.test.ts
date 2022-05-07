@@ -8,7 +8,7 @@
 
 import { handleResponse } from './handle_response';
 
-import { notificationServiceMock, themeServiceMock } from '@kbn/core/public';
+import { notificationServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { setNotifications, setUiSettings } from '../../services';
 import { IKibanaSearchResponse } from '../../../common';
 // import { themeServiceMock } from '@kbn/core/public/mocks';
