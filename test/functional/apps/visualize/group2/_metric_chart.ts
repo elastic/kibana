@@ -171,14 +171,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('with filters', function () {
-      it('should prevent filtering without buckets', async function () {
+      it('should allow filtering without buckets', async function () {
         let filterCount = 0;
         await retry.try(async function tryingForTime() {
           // click first metric bucket
           await PageObjects.visEditor.clickMetricByIndex(0);
           filterCount = await filterBar.getFilterCount();
         });
-        expect(filterCount).to.equal(0);
+        await filterBar.removeAllFilters();
+        expect(filterCount).to.equal(1);
       });
 
       it('should allow filtering with buckets', async function () {

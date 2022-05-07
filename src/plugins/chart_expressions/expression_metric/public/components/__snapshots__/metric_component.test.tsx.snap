@@ -26,6 +26,7 @@ Array [
         "value": 182,
       }
     }
+    onFilter={[Function]}
     style={
       Object {
         "bgColor": false,
@@ -60,6 +61,7 @@ Array [
         "value": 445842.4634666484,
       }
     }
+    onFilter={[Function]}
     style={
       Object {
         "bgColor": false,
@@ -98,6 +100,7 @@ exports[`MetricVisComponent should render correct structure for single metric 1`
       "value": 4301021,
     }
   }
+  onFilter={[Function]}
   style={
     Object {
       "bgColor": false,

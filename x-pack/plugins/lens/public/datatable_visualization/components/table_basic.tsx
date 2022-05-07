@@ -20,7 +20,8 @@ import {
   EuiDataGridStyle,
 } from '@elastic/eui';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
+import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
@@ -120,7 +121,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onClickValue = useCallback(
-    (data: LensFilterEvent['data']) => {
+    (data: ClickTriggerEvent['data']) => {
       dispatchEvent({ name: 'filter', data });
     },
     [dispatchEvent]
