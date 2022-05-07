@@ -11,7 +11,6 @@ import { handleResponse } from './handle_response';
 import { notificationServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { setNotifications, setUiSettings } from '../../services';
 import { IKibanaSearchResponse } from '../../../common';
-// import { themeServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 
 jest.mock('@kbn/i18n', () => {
