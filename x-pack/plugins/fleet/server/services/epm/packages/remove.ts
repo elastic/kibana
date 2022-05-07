@@ -130,6 +130,8 @@ function deleteESAssets(
       return deleteTransforms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
       return deleteIlms(esClient, [id]);
+    } else if (assetType === ElasticsearchAssetType.ilmPolicy) {
+      return deleteIlms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.mlModel) {
       return deleteMlModel(esClient, [id]);
     }
