@@ -12,7 +12,7 @@ import { notificationServiceMock } from '@kbn/core/public/notifications/notifica
 import { setNotifications, setUiSettings } from '../../services';
 import { IKibanaSearchResponse } from '../../../common';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 
 jest.mock('@kbn/i18n', () => {
   return {
