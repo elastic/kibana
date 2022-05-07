@@ -54,7 +54,7 @@ export interface HostOsHitsItem {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      fields: { 
+      fields: {
         'host.os.name': string[];
         'host.os.family': string[];
         'host.os.version': string[];
