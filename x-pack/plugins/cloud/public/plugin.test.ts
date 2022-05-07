@@ -11,6 +11,7 @@ import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { CloudPlugin, CloudConfigType } from './plugin';
 import { firstValueFrom } from 'rxjs';
+import { Sha256 } from '@kbn/core/public/utils';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -74,6 +75,9 @@ describe('Cloud Plugin', () => {
     });
 
     describe('setupTelemetryContext', () => {
+      const username = '1234';
+      const expectedHashedPlainUsername = new Sha256().update(username, 'utf8').digest('hex');
+
       beforeEach(() => {
         jest.clearAllMocks();
       });
@@ -121,9 +125,7 @@ describe('Cloud Plugin', () => {
       test('register the context provider for the cloud user with hashed user ID when security is available', async () => {
         const { coreSetup } = await setupPlugin({
           config: { id: 'cloudId' },
-          currentUserProps: {
-            username: '1234',
-          },
+          currentUserProps: { username },
         });
 
         expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
@@ -140,9 +142,7 @@ describe('Cloud Plugin', () => {
       it('user hash includes cloud id', async () => {
         const { coreSetup: coreSetup1 } = await setupPlugin({
           config: { id: 'esOrg1' },
-          currentUserProps: {
-            username: '1234',
-          },
+          currentUserProps: { username },
         });
 
         const [{ context$: context1$ }] =
@@ -151,12 +151,11 @@ describe('Cloud Plugin', () => {
           )!;
 
         const hashId1 = await firstValueFrom(context1$);
+        expect(hashId1).not.toEqual(expectedHashedPlainUsername);
 
         const { coreSetup: coreSetup2 } = await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
-          currentUserProps: {
-            username: '1234',
-          },
+          currentUserProps: { username },
         });
 
         const [{ context$: context2$ }] =
@@ -165,15 +164,17 @@ describe('Cloud Plugin', () => {
           )!;
 
         const hashId2 = await firstValueFrom(context2$);
+        expect(hashId2).not.toEqual(expectedHashedPlainUsername);
 
         expect(hashId1).not.toEqual(hashId2);
       });
 
-      test('user hash does not include cloudId when not provided', async () => {
+      test('user hash does not include cloudId when authenticated via Cloud SAML', async () => {
         const { coreSetup } = await setupPlugin({
-          config: {},
+          config: { id: 'cloudDeploymentId' },
           currentUserProps: {
-            username: '1234',
+            username,
+            authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
           },
         });
 
@@ -184,7 +185,24 @@ describe('Cloud Plugin', () => {
         )!;
 
         await expect(firstValueFrom(context$)).resolves.toEqual({
-          userId: '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
+          userId: expectedHashedPlainUsername,
+        });
+      });
+
+      test('user hash does not include cloudId when not provided', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: {},
+          currentUserProps: { username },
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: expectedHashedPlainUsername,
         });
       });
 
