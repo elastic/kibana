@@ -261,10 +261,21 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       analytics.registerContextProvider({
         name: 'cloud_user_id',
         context$: from(security.authc.getCurrentUser()).pipe(
-          map((user) => user.username),
+          map((user) => {
+            if (
+              getIsCloudEnabled(cloudId) &&
+              user.authentication_realm?.type === 'saml' &&
+              user.authentication_realm?.name === 'cloud-saml-kibana'
+            ) {
+              // If authenticated via Cloud SAML, use the SAML username as the user ID
+              return user.username;
+            }
+
+            return cloudId ? `${cloudId}:${user.username}` : user.username;
+          }),
           // Join the cloud org id and the user to create a truly unique user id.
           // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-          map((userId) => ({ userId: sha256(cloudId ? `${cloudId}:${userId}` : `${userId}`) })),
+          map((userId) => ({ userId: sha256(userId) })),
           catchError(() => of({ userId: undefined }))
         ),
         schema: {
