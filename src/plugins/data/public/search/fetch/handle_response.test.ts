@@ -11,9 +11,10 @@ import { handleResponse } from './handle_response';
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
-import { setNotifications } from '../../services';
+import { setNotifications, setUiSettings } from '../../services';
 import { IKibanaSearchResponse } from 'src/plugins/data/common';
 import { themeServiceMock } from 'src/core/public/mocks';
+import { CoreStart } from 'src/core/public';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -30,6 +31,9 @@ describe('handleResponse', () => {
 
   beforeEach(() => {
     setNotifications(notifications);
+    setUiSettings({
+      get: <T = number>() => 10000 as unknown as T,
+    } as unknown as CoreStart['uiSettings']);
     (notifications.toasts.addWarning as jest.Mock).mockReset();
   });
 
