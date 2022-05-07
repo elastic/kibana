@@ -27,7 +27,6 @@ export const HOST_DETAILS_FIELDS = [
   'host.architecture',
   'host.id',
   'host.ip',
-  'host.id',
   'host.mac',
   'host.name',
   'host.os.family',

@@ -521,6 +521,17 @@ export const formattedSearchStrategyResponse = {
               },
             },
             size: 0,
+            _source: false,
+            fields: [
+              'host.id',
+              'host.name',
+              'host.os.name',
+              'host.os.version',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
         },
         null,
@@ -627,15 +638,10 @@ export const mockBuckets: HostAggEsItem = {
           _id: 'dl0T_m0BHe9nqdOiF2A8',
           _score: null,
           fields: {
-            host: {
-              os: {
-                kernel: ['5.0.0-1013-gcp'],
-                name: ['Ubuntu'],
-                family: ['debian'],
-                version: ['18.04.2 LTS (Bionic Beaver)'],
-                platform: ['ubuntu'],
-              },
-            },
+            'host.os.name': ['Ubuntu'],
+            'host.os.family': ['debian'],
+            'host.os.version': ['18.04.2 LTS (Bionic Beaver)'],
+            'host.os.platform': ['ubuntu'],
           },
           sort: [1571925726017],
         },

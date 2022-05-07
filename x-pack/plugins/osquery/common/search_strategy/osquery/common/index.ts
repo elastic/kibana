@@ -54,7 +54,12 @@ export interface HostOsHitsItem {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      fields: { host: { os: Maybe<OsEcs> } };
+      fields: { 
+        'host.os.name': string[];
+        'host.os.family': string[];
+        'host.os.version': string[];
+        'host.os.platform': string[];
+      };
       sort?: [number];
       _index?: string;
       _type?: string;

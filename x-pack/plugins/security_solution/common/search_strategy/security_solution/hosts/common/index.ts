@@ -6,7 +6,7 @@
  */
 
 import { CloudEcs } from '../../../../ecs/cloud';
-import { HostEcs, OsEcs } from '../../../../ecs/host';
+import { HostEcs } from '../../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
 import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
 
@@ -68,7 +68,12 @@ export interface HostOsHitsItem {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      fields: { host: { os: Maybe<OsEcs> } };
+      fields: {
+        'host.os.name': string[];
+        'host.os.family': string[];
+        'host.os.version': string[];
+        'host.os.platform': string[];
+      };
       sort?: [number];
       _index?: string;
       _type?: string;

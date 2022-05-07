@@ -824,6 +824,7 @@ export const expectedDsl = {
         ],
       },
     },
+    size: 0,
     _source: false,
     fields: [
       'agent.id',
@@ -845,6 +846,5 @@ export const expectedDsl = {
         format: 'strict_date_optional_time',
       },
     ],
-    size: 0,
   },
 };

@@ -585,7 +585,7 @@ export const mockSearchStrategyResponse = {
                           fields: {
                             'process.args': ['/etc/cron.daily/apt-compat'],
                             'process.name': ['apt-compat'],
-                            'host.name': ['siem-windows'],
+                            'host.name': ['siem-kibana'],
                             'user.name': ['root'],
                             'user.id': [0],
                             '@timestamp': '2020-09-07T06:25:01.154464000Z',
@@ -643,7 +643,7 @@ export const mockSearchStrategyResponse = {
                           fields: {
                             'process.args': ['/etc/cron.daily/bsdmainutils'],
                             'process.name': ['bsdmainutils'],
-                            'host.name': ['siem-windows'],
+                            'host.name': ['siem-kibana'],
                             'user.name': ['root'],
                             'user.id': [0],
                             '@timestamp': '2020-09-07T06:25:01.155812000Z',
@@ -1104,7 +1104,7 @@ export const formattedSearchStrategyResponse = {
                             ],
                             'process.name': ['SpeechModelDownload.exe'],
                             'host.name': ['siem-windows'],
-                            'user.name': ['NT AUTHORITY'],
+                            'user.name': ['NETWORK SERVICE'],
                             '@timestamp': '2020-09-07T03:09:51.225Z',
                           },
                         },
@@ -1247,7 +1247,6 @@ export const formattedSearchStrategyResponse = {
                     fields: {
                       'process.args': ['/etc/cron.daily/bsdmainutils'],
                       'process.name': ['bsdmainutils'],
-                      'host.name': ['siem-windows'],
                       'user.name': ['root'],
                       'user.id': [0],
                     },
@@ -1559,7 +1558,6 @@ export const formattedSearchStrategyResponse = {
           ],
           ignore_unavailable: true,
           body: {
-            _source: false,
             aggregations: {
               process_count: { cardinality: { field: 'process.name' } },
               group_by_process: {
@@ -1664,6 +1662,7 @@ export const formattedSearchStrategyResponse = {
                 ],
               },
             },
+            _source: false,
             fields: [
               'process.args',
               'process.name',
