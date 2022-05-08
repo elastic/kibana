@@ -18,6 +18,13 @@ if [[ -d /opt/local-ssd/buildkite ]]; then
   mkdir -p "$TMPDIR"
 fi
 
+GCS_REGION="us-central1"
+if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+  # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
+  GCS_REGION=$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone | rev | cut -d'/' -f1 | cut -c3- | rev)
+fi
+export GCS_REGION
+
 KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH
 export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"

@@ -32,7 +32,6 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
 fi
 
 echo "--- tar-ing the workspace for workers to use"
-time tar --exclude ./.git -cf "../workspace.tar" .
-cd ..
-buildkite-agent artifact upload "workspace.tar"
+time tar --exclude ./.git -cf "../workspace_$BUILDKITE_BUILD_ID.tar" .
+gsutil cp "../workspace_$BUILDKITE_BUILD_ID.tar" "gs://kibana-ci-workspaces/"
 
