@@ -7,7 +7,7 @@
  */
 
 import { debounce } from 'lodash';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import type { OnNotification } from '../common/types';
 
 export const toastsAddDebounced = (
