@@ -520,7 +520,6 @@ export const formattedSearchStrategyResponse = {
                 ],
               },
             },
-            size: 0,
             _source: false,
             fields: [
               'host.id',
@@ -532,6 +531,7 @@ export const formattedSearchStrategyResponse = {
                 format: 'strict_date_optional_time',
               },
             ],
+            size: 0,
           },
         },
         null,
@@ -686,7 +686,6 @@ export const expectedDsl = {
         ],
       },
     },
-    size: 0,
     _source: false,
     fields: [
       'host.id',
@@ -698,6 +697,7 @@ export const expectedDsl = {
         format: 'strict_date_optional_time',
       },
     ],
+    size: 0,
   },
   ignore_unavailable: true,
   index: [

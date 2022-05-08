@@ -949,7 +949,6 @@ export const formattedSearchStrategyResponse = {
                         '{6BB79B50-2038-4A10-B513-2FAC72FF213E}',
                       ],
                       'process.name': ['DismHost.exe'],
-                      'host.name': ['siem-windows'],
                       'user.name': ['SYSTEM'],
                     },
                     sort: [1599487135371],

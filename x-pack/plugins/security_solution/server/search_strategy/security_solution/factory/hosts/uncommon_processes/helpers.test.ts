@@ -198,34 +198,13 @@ describe('helpers', () => {
         { id: ['host-id-1'], name: ['host-name-1'] },
       ],
       fields: {
-        '@timestamp': 'time',
-        process: {
-          name: ['process-1'],
-          title: ['title-1'],
-        },
+        '@timestamp': ['time'],
+        'process.name': ['process-1'],
+        'process.title': ['title-1'],
       },
       cursor: 'cursor-1',
       sort: [0],
     };
-
-    test('it formats a uncommon process data with a source of name correctly', () => {
-      const data = formatUncommonProcessesData(hit, processFieldsMap);
-      const expected: HostsUncommonProcessesEdges = {
-        cursor: { tiebreaker: null, value: 'cursor-1' },
-        node: {
-          _id: 'id-123',
-          hosts: [
-            { id: ['host-id-1'], name: ['host-name-1'] },
-            { id: ['host-id-1'], name: ['host-name-1'] },
-          ],
-          process: {
-            name: ['process-1'],
-          },
-          instances: 100,
-        },
-      };
-      expect(data).toEqual(expected);
-    });
 
     test('it formats a uncommon process data with a source of name and title correctly', () => {
       const data = formatUncommonProcessesData(hit, processFieldsMap);
@@ -247,8 +226,8 @@ describe('helpers', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats a uncommon process data without any data if fields is empty', () => {
-      const data = formatUncommonProcessesData(hit, processFieldsMap);
+    test('it formats a uncommon process data without any data if fields map is empty', () => {
+      const data = formatUncommonProcessesData(hit, {});
       const expected: HostsUncommonProcessesEdges = {
         cursor: {
           tiebreaker: null,
