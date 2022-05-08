@@ -9,7 +9,7 @@ workspace="$(pwd)"
 cd ..
 tarball="workspace-$BUILDKITE_JOB_ID.tar"
 echo "download"
-time buildkite-agent artifact download "$tarball" .
+time buildkite-agent artifact download "workspace.tar" "$tarball"
 echo "extract"
 time tar -xf "$tarball" -C "$workspace"
 echo "cleanup"
