@@ -33,5 +33,6 @@ fi
 
 echo "--- tar-ing the workspace for workers to use"
 tarball="workspace-$BUILDKITE_JOB_ID.tar"
-time tar --exclude ./.git -cf "$tarball" .
+time tar --exclude ./.git -cf "../$tarball" .
+buildkite-agent artifact upload "../$tarball"
 
