@@ -8,9 +8,12 @@ echo "--- downloading and extracting workspace state"
 workspace="$(pwd)"
 cd ..
 tarball="workspace-$BUILDKITE_JOB_ID.tar"
-buildkite-agent artifact download workspace.tar "$tarball"
-tar -xf "$tarball" -C "$workspace"
-rm "$tarball"
+echo "download"
+time buildkite-agent artifact download "$tarball" .
+echo "extract"
+time tar -xf "$tarball" -C "$workspace"
+echo "cleanup"
+time rm "$tarball"
 cd "$workspace"
 
 ###

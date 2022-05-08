@@ -32,5 +32,6 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
 fi
 
 echo "--- tar-ing the workspace for workers to use"
-time tar --exclude ./.git -cf workspace.tar .
+tarball="workspace-$BUILDKITE_JOB_ID.tar"
+time tar --exclude ./.git -cf "$tarball" .
 
