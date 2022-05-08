@@ -19,6 +19,7 @@ import {
   CaseAttributes,
   CasePostRequest,
   CaseResponse,
+  CaseSeverity,
   CasesFindResponse,
   CaseStatuses,
   CommentAttributes,
@@ -56,6 +57,7 @@ export const transformNewCase = ({
 }): CaseAttributes => ({
   ...newCase,
   duration: null,
+  severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
   closed_by: null,
   created_at: new Date().toISOString(),

@@ -33,6 +33,8 @@ import { AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
 import { KIBANA_DATE_FORMAT } from '../../../common/constants';
 import { useStyles } from './styles';
+import { SplitText } from './split_text';
+import { Nbsp } from './nbsp';
 
 export interface ProcessDeps {
   process: Process;
@@ -104,7 +106,7 @@ export function ProcessTreeNode({
     [hasAlerts, alerts, investigatedAlertId]
   );
   const isSelected = selectedProcess?.id === process.id;
-  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected });
+  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected, isSessionLeader });
   const buttonStyles = useButtonStyles();
 
   const nodeRef = useVisible({
@@ -255,14 +257,21 @@ export function ProcessTreeNode({
           onClick={onProcessClicked}
         >
           {isSessionLeader ? (
-            <>
-              <EuiIcon type={sessionIcon} css={styles.icon} />{' '}
-              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
-              <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
-              <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
-            </>
+            <span css={styles.sessionLeader}>
+              <EuiIcon type={sessionIcon} css={styles.icon} />
+              <Nbsp />
+              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>
+              <Nbsp />
+              <span>
+                <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />
+              </span>
+              <Nbsp />
+              <EuiIcon type="user" />
+              <Nbsp />
+              <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
+            </span>
           ) : (
-            <span>
+            <>
               {showTimestamp && (
                 <span data-test-subj="sessionView:processTreeNodeTimestamp" css={styles.timeStamp}>
                   {timeStampsNormal}
@@ -270,13 +279,15 @@ export function ProcessTreeNode({
               )}
               <EuiToolTip position="top" content={iconTooltip}>
                 <EuiIcon data-test-subj={iconTestSubj} type={processIcon} css={styles.icon} />
-              </EuiToolTip>{' '}
-              <span ref={textRef}>
-                <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>&nbsp;
-                <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>{' '}
-                {args?.slice(1).join(' ')}
+              </EuiToolTip>
+              <span ref={textRef} css={styles.textSection}>
+                <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>
+                <Nbsp />
+                <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>
+                <Nbsp />
+                <SplitText>{args?.slice(1).join(' ') || ''}</SplitText>
               </span>
-            </span>
+            </>
           )}
 
           {showUserEscalation && (

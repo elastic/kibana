@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { capitalize, sortBy } from 'lodash';
 import {
   EuiButton,
@@ -23,14 +23,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   deleteRules,
   RuleTableItem,
+  RuleStatus,
   enableRule,
   disableRule,
-  muteRule,
+  snoozeRule,
   useLoadRuleTypes,
-  unmuteRule,
+  unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
+
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
@@ -38,7 +41,6 @@ import { RulesTable } from './components/rules_table';
 import { Name } from './components/name';
 import { LastResponseFilter } from './components/last_response_filter';
 import { TypeFilter } from './components/type_filter';
-import { StatusContext } from './components/status_context';
 import { ExecutionStatus } from './components/execution_status';
 import { LastRun } from './components/last_run';
 import { EditRuleFlyout } from './components/edit_rule_flyout';
@@ -72,7 +74,7 @@ import {
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
-export function RulesPage() {
+function RulesPage() {
   const { ObservabilityPageTemplate, kibanaFeatures } = usePluginContext();
   const {
     http,
@@ -91,11 +93,13 @@ export function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-  const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const { lastResponse, setLastResponse } = useRulesPageStateContainer();
+  const { status, setStatus } = useRulesPageStateContainer();
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
+  const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
@@ -106,7 +110,8 @@ export function RulesPage() {
 
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
     searchText,
-    ruleLastResponseFilter,
+    ruleLastResponseFilter: lastResponse,
+    ruleStatusesFilter: status,
     typesFilter,
     page,
     setPage,
@@ -172,6 +177,23 @@ export function RulesPage() {
         render: (name: string, rule: RuleTableItem) => <Name name={name} rule={rule} />,
       },
       {
+        field: 'tags',
+        name: '',
+        sortable: false,
+        width: '50px',
+        'data-test-subj': 'rulesTableCell-tagsPopover',
+        render: (tags: string[], item: RuleTableItem) => {
+          return tags.length > 0
+            ? triggersActionsUi.getRuleTagBadge({
+                isOpen: tagPopoverOpenIndex === item.index,
+                tags,
+                onClick: () => setTagPopoverOpenIndex(item.index),
+                onClose: () => setTagPopoverOpenIndex(-1),
+              })
+            : null;
+        },
+      },
+      {
         field: 'executionStatus.lastExecutionDate',
         name: LAST_RUN_COLUMN_TITLE,
         sortable: true,
@@ -185,7 +207,11 @@ export function RulesPage() {
         width: '120px',
         'data-test-subj': 'rulesTableCell-status',
         render: (_executionStatus: RuleExecutionStatus, item: RuleTableItem) => (
-          <ExecutionStatus executionStatus={item.executionStatus} />
+          <ExecutionStatus
+            executionStatus={item.executionStatus}
+            item={item}
+            licenseType={ruleTypeIndex.get(item.ruleTypeId)?.minimumLicenseRequired!}
+          />
         ),
       },
       {
@@ -193,17 +219,17 @@ export function RulesPage() {
         name: STATUS_COLUMN_TITLE,
         sortable: true,
         render: (_enabled: boolean, item: RuleTableItem) => {
-          return (
-            <StatusContext
-              disabled={!item.isEditable || !item.enabledInLicense}
-              item={item}
-              onStatusChanged={() => reload()}
-              enableRule={async () => await enableRule({ http, id: item.id })}
-              disableRule={async () => await disableRule({ http, id: item.id })}
-              muteRule={async () => await muteRule({ http, id: item.id })}
-              unMuteRule={async () => await unmuteRule({ http, id: item.id })}
-            />
-          );
+          return triggersActionsUi.getRuleStatusDropdown({
+            rule: item,
+            enableRule: async () => await enableRule({ http, id: item.id }),
+            disableRule: async () => await disableRule({ http, id: item.id }),
+            onRuleChanged: () => reload(),
+            isEditable: item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId),
+            snoozeRule: async (snoozeEndTime: string | -1) => {
+              await snoozeRule({ http, id: item.id, snoozeEndTime });
+            },
+            unsnoozeRule: async () => await unsnoozeRule({ http, id: item.id }),
+          });
         },
       },
       {
@@ -263,6 +289,20 @@ export function RulesPage() {
     []
   );
 
+  const setRuleStatusFilter = useCallback(
+    (ids: RuleStatus[]) => {
+      setStatus(ids);
+    },
+    [setStatus]
+  );
+
+  const setExecutionStatusFilter = useCallback(
+    (ids: string[]) => {
+      setLastResponse(ids);
+    },
+    [setLastResponse]
+  );
+
   const getRulesTable = () => {
     if (noData && !rulesState.isLoading) {
       return authorizedToCreateAnyRules ? (
@@ -277,6 +317,7 @@ export function RulesPage() {
     if (initialLoad) {
       return <CenterJustifiedSpinner />;
     }
+
     return (
       <>
         <EuiFlexGroup>
@@ -314,9 +355,15 @@ export function RulesPage() {
           <EuiFlexItem grow={false}>
             <LastResponseFilter
               key="rule-lastResponse-filter"
-              selectedStatuses={ruleLastResponseFilter}
-              onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
+              selectedStatuses={lastResponse}
+              onChange={setExecutionStatusFilter}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {triggersActionsUi.getRuleStatusFilter({
+              selectedStatuses: status,
+              onChange: setRuleStatusFilter,
+            })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -440,3 +487,13 @@ export function RulesPage() {
     </ObservabilityPageTemplate>
   );
 }
+
+function WrappedRulesPage() {
+  return (
+    <Provider value={rulesPageStateContainer}>
+      <RulesPage />
+    </Provider>
+  );
+}
+
+export { WrappedRulesPage as RulesPage };
