@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationContext } from 'kibana/server';
+import { SavedObjectMigrationContext } from '@kbn/core/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;

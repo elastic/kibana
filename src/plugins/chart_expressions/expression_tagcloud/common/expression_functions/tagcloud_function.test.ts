@@ -8,9 +8,9 @@
 
 import { tagcloudFunction } from './tagcloud_function';
 
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ScaleOptions, Orientation } from '../constants';
 
 type Arguments = Parameters<ReturnType<typeof tagcloudFunction>['fn']>[1];

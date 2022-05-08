@@ -7,10 +7,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { TelemetryCounter } from 'src/core/server';
+import type { TelemetryCounter } from '@kbn/core/server';
+import { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
 import { FtrProviderContext } from '../services';
-import { Action } from '../__fixtures__/plugins/analytics_plugin_a/server/custom_shipper';
-import '../__fixtures__/plugins/analytics_plugin_a/public/types';
+import '@kbn/analytics-plugin-a-plugin/public/types';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ): Promise<TelemetryCounter[]> => {
       return await browser.execute(
         ({ takeNumberOfCounters }) =>
-          window.__analyticsPluginA__.stats.slice(-takeNumberOfCounters),
+          window.__analyticsPluginA__.stats
+            .filter((counter) => counter.event_type === 'test-plugin-lifecycle')
+            .slice(-takeNumberOfCounters),
         { takeNumberOfCounters: _takeNumberOfCounters }
       );
     };
@@ -70,6 +72,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(context).to.have.property('user_agent');
       expect(context.user_agent).to.be.a('string');
 
+      // Some context providers emit very early. We are OK with that.
+      const initialContext = actions[2].meta[0].context;
+
+      const reportEventContext = actions[2].meta[1].context;
+      expect(reportEventContext).to.have.property('user_agent');
+      expect(reportEventContext.user_agent).to.be.a('string');
+
       expect(actions).to.eql([
         { action: 'optIn', meta: true },
         { action: 'extendContext', meta: context },
@@ -79,13 +88,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               timestamp: actions[2].meta[0].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context: {},
+              context: initialContext,
               properties: { plugin: 'analyticsPluginA', step: 'setup' },
             },
             {
               timestamp: actions[2].meta[1].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context,
+              context: reportEventContext,
               properties: { plugin: 'analyticsPluginA', step: 'start' },
             },
           ],
@@ -97,13 +106,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           timestamp: actions[2].meta[0].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context: {},
+          context: initialContext,
           properties: { plugin: 'analyticsPluginA', step: 'setup' },
         },
         {
           timestamp: actions[2].meta[1].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context,
+          context: reportEventContext,
           properties: { plugin: 'analyticsPluginA', step: 'start' },
         },
       ]);

@@ -6,7 +6,7 @@
  */
 
 import rison from 'rison-node';
-import type { TimeRange } from '../../../../src/plugins/data/common/query';
+import type { TimeRange } from '@kbn/data-plugin/common/query';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';

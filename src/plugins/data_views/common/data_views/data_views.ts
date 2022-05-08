@@ -11,6 +11,8 @@
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   DEFAULT_ASSETS_TO_IGNORE,
@@ -34,9 +36,7 @@ import {
   DataViewFieldMap,
   TypeMeta,
 } from '../types';
-import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../field_formats/common/';
-import { META_FIELDS, SavedObject } from '../../common';
-import { SavedObjectNotFound } from '../../../kibana_utils/common';
+import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';

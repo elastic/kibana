@@ -9,7 +9,7 @@
 // TODO: https://github.com/elastic/kibana/issues/109904
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { ConfigSchema } from '../config';
 
 export * from './deprecated';
@@ -21,6 +21,7 @@ export * from './deprecated';
 export { getEsQueryConfig, FilterStateStore } from '../common';
 export {
   getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
   generateFilters,
   extractTimeRange,
   getIndexPatternFromFilter,
@@ -95,20 +96,6 @@ export {
   DuplicateDataViewError,
 } from '../common';
 
-/*
- * Autocomplete query suggestions:
- */
-
-export type {
-  QuerySuggestion,
-  QuerySuggestionGetFn,
-  QuerySuggestionGetFnArgs,
-  QuerySuggestionBasic,
-  QuerySuggestionField,
-  AutocompleteStart,
-} from './autocomplete';
-
-export { QuerySuggestionTypes } from './autocomplete';
 /*
  * Search:
  */
@@ -273,7 +260,11 @@ export {
   TimeHistory,
   getQueryLog,
   mapAndFlattenFilters,
+  QueryService,
 } from './query';
+
+export { NowProvider } from './now_provider';
+export type { NowProviderInternalContract } from './now_provider';
 
 export type {
   QueryState,
@@ -288,6 +279,7 @@ export type {
   PersistedLog,
   QueryStringContract,
   QuerySetup,
+  TimefilterSetup,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

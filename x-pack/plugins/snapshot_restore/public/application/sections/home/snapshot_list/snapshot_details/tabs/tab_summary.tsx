@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SnapshotDetails } from '../../../../../../../common/types';
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import {
@@ -28,8 +29,6 @@ import {
 import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
 import { useServices } from '../../../../../app_context';
-
-import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   snapshotDetails: SnapshotDetails;

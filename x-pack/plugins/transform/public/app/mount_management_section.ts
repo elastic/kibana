@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public/';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { PluginsDependencies } from '../plugin';
 import { getMlSharedImports } from '../shared_imports';

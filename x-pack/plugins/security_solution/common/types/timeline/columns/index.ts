@@ -10,4 +10,4 @@ export type {
   ColumnId,
   ColumnHeaderOptions,
   ColumnRenderer,
-} from '../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getLicenseFromLocalOrMaster } from './get_license';
 
 describe('getLicenseFromLocalOrMaster', () => {

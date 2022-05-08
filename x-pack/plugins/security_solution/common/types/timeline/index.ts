@@ -318,7 +318,7 @@ export enum TimelineId {
   usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
-  hostsPageSessions = 'hosts-page-sessions',
+  hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
@@ -326,6 +326,7 @@ export enum TimelineId {
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  rulePreview = 'rule-preview',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
@@ -339,6 +340,7 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
+  runtimeTypes.literal(TimelineId.rulePreview),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;

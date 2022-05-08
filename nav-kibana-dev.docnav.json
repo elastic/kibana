@@ -62,12 +62,14 @@
         { "id": "kibDevTutorialCI" },
         { "id": "kibDevTutorialServerEndpoint" },
         { "id": "kibDevTutorialAdvancedSettings" },
-        { "id": "kibDevSharePluginReadme" }
+        { "id": "kibDevSharePluginReadme" },
+        { "id": "kibDevTutorialScreenshotting" }
       ]
     },
     {
       "label": "Contributors Newsletters",
       "items": [
+        { "id": "kibApril2022ContributorNewsletter" },
         { "id": "kibMarch2022ContributorNewsletter" },
         { "id": "kibFebruary2022ContributorNewsletter" },
         { "id": "kibJanuary2022ContributorNewsletter" },
@@ -98,7 +100,6 @@
         { "id": "kibCoreSavedObjectsPluginApi" },
         { "id": "kibFieldFormatsPluginApi" },
         { "id": "kibDataPluginApi" },
-        { "id": "kibDataAutocompletePluginApi" },
         { "id": "kibDataEnhancedPluginApi" },
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
@@ -146,6 +147,7 @@
         { "id": "kibSavedObjectsTaggingOssPluginApi" },
         { "id": "kibSavedObjectsTaggingPluginApi" },
         { "id": "kibSavedObjectsPluginApi" },
+        { "id": "kibScreenshottingPluginApi" },
         { "id": "kibSecuritySolutionPluginApi" },
         { "id": "kibSecurityPluginApi" },
         { "id": "kibSharePluginApi" },

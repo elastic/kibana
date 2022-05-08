@@ -8,8 +8,8 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 
-import { applicationServiceMock } from 'src/core/public/mocks';
-import { setup } from 'src/core/test_helpers/http_test_setup';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { setup } from '@kbn/core/test_helpers/http_test_setup';
 
 import { SessionExpired } from './session_expired';
 import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';

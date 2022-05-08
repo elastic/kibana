@@ -28,9 +28,10 @@ import {
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
   CardinalityIndexPatternColumn,
-} from '../../../../../../lens/public';
+} from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
-import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import {
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
@@ -43,7 +44,6 @@ import {
   ReportTypes,
 } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
-import { PersistableFilter } from '../../../../../../lens/common';
 import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
@@ -785,7 +785,7 @@ export class LensAttributes {
     };
   }
 
-  getJSON(): TypedLensByValueInput['attributes'] {
+  getJSON(lastRefresh?: number): TypedLensByValueInput['attributes'] {
     const uniqueIndexPatternsIds = Array.from(
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );
@@ -794,7 +794,7 @@ export class LensAttributes {
 
     return {
       title: 'Prefilled from exploratory view app',
-      description: '',
+      description: lastRefresh ? `Last refreshed at ${new Date(lastRefresh).toISOString()}` : '',
       visualizationType: 'lnsXY',
       references: [
         ...uniqueIndexPatternsIds.map((patternId) => ({

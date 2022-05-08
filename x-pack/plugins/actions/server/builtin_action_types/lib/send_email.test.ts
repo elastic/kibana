@@ -12,22 +12,21 @@ jest.mock('nodemailer', () => ({
 jest.mock('./send_email_graph_api', () => ({
   sendEmailGraphApi: jest.fn(),
 }));
-jest.mock('./request_oauth_client_credentials_token', () => ({
-  requestOAuthClientCredentialsToken: jest.fn(),
+jest.mock('./get_oauth_client_credentials_access_token', () => ({
+  getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
-import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { CustomHostSettings } from '../../config';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { ConnectorTokenClient } from './connector_token_client';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { connectorTokenClientMock } from './connector_token_client.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
@@ -92,90 +91,40 @@ describe('send_email module', () => {
 
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
+    const getOAuthClientCredentialsAccessTokenMock =
+      getOAuthClientCredentialsAccessToken as jest.Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
         clientId: '123456',
+        tenantId: '98765',
         clientSecret: 'sdfhkdsjhfksdjfh',
       },
     });
-    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
-      tokenType: 'Bearer',
-      accessToken: 'dfjsdfgdjhfgsjdf',
-      expiresIn: 123,
-    });
+    getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(`Bearer dfjsdfgdjhfgsjdf`);
     const date = new Date();
     date.setDate(date.getDate() + 5);
-
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'connector_token',
-      references: [],
-      attributes: {
-        connectorId: '123',
-        expiresAt: date.toISOString(),
-        tokenType: 'access_token',
-        token: '11111111',
-      },
-    });
 
     sendEmailGraphApiMock.mockReturnValue({
       status: 202,
     });
 
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 0,
-      saved_objects: [],
-      per_page: 500,
-      page: 1,
-    });
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
-    expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "https://login.microsoftonline.com/undefined/oauth2/v2.0/token",
-        Object {
-          "context": Array [],
-          "debug": [MockFunction],
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        Object {
-          "clientId": "123456",
-          "clientSecret": "sdfhkdsjhfksdjfh",
-          "scope": "https://graph.microsoft.com/.default",
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
-      ]
-    `);
+    expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
+      configurationUtilities: sendEmailOptions.configurationUtilities,
+      connectorId: '1',
+      connectorTokenClient,
+      credentials: {
+        config: { clientId: '123456', tenantId: '98765' },
+        secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
+      },
+      logger: mockLogger,
+      oAuthScope: 'https://graph.microsoft.com/.default',
+      tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+    });
 
+    delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
+    sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -187,29 +136,6 @@ describe('send_email module', () => {
           "messageHTML": "<p>a message</p>
       ",
           "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
             "connectorId": "1",
             "content": Object {
               "message": "a message",
@@ -232,6 +158,7 @@ describe('send_email module', () => {
               "clientSecret": "sdfhkdsjhfksdjfh",
               "password": "changeme",
               "service": "exchange_server",
+              "tenantId": "98765",
               "user": "elastic",
             },
           },
@@ -247,656 +174,44 @@ describe('send_email module', () => {
           "trace": [MockFunction],
           "warn": [MockFunction],
         },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
-      ]
-    `);
-
-    expect(unsecuredSavedObjectsClient.create.mock.calls.length).toBe(1);
-  });
-
-  test('uses existing "access_token" from "connector_token" SO for authentication for email using "exchange_server" service', async () => {
-    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
-    const sendEmailOptions = getSendEmailOptions({
-      transport: {
-        service: 'exchange_server',
-        clientId: '123456',
-        clientSecret: 'sdfhkdsjhfksdjfh',
-      },
-    });
-    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
-      tokenType: 'Bearer',
-      accessToken: 'dfjsdfgdjhfgsjdf',
-      expiresIn: 123,
-    });
-
-    sendEmailGraphApiMock.mockReturnValue({
-      status: 202,
-    });
-    const date = new Date();
-    date.setDate(date.getDate() + 5);
-
-    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
-      errors: [],
-    });
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 2,
-      saved_objects: [
-        {
-          id: '1',
-          score: 1,
-          type: 'connector_token',
-          references: [],
-          attributes: {
-            connectorId: '123',
-            expiresAt: date.toISOString(),
-            tokenType: 'access_token',
-          },
-        },
-      ],
-      per_page: 500,
-      page: 1,
-    });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'connector_token',
-      references: [],
-      attributes: {
-        token: '11111111',
-      },
-    });
-
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
-    expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(0);
-
-    expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "graphApiUrl": undefined,
-          "headers": Object {
-            "Authorization": "11111111",
-            "Content-Type": "application/json",
-          },
-          "messageHTML": "<p>a message</p>
-      ",
-          "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
-            "connectorId": "1",
-            "content": Object {
-              "message": "a message",
-              "subject": "a subject",
-            },
-            "hasAuth": true,
-            "routing": Object {
-              "bcc": Array [],
-              "cc": Array [
-                "bob@example.com",
-                "robert@example.com",
-              ],
-              "from": "fred@example.com",
-              "to": Array [
-                "jim@example.com",
-              ],
-            },
-            "transport": Object {
-              "clientId": "123456",
-              "clientSecret": "sdfhkdsjhfksdjfh",
-              "password": "changeme",
-              "service": "exchange_server",
-              "user": "elastic",
-            },
-          },
-        },
-        Object {
-          "context": Array [],
-          "debug": [MockFunction],
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
-      ]
-    `);
-
-    expect(unsecuredSavedObjectsClient.create.mock.calls.length).toBe(0);
-  });
-
-  test('request the new token and update existing "access_token" when it is expired for "exchange_server" email service', async () => {
-    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
-    const sendEmailOptions = getSendEmailOptions({
-      transport: {
-        service: 'exchange_server',
-        clientId: '123456',
-        clientSecret: 'sdfhkdsjhfksdjfh',
-      },
-    });
-    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
-      tokenType: 'Bearer',
-      accessToken: 'dfjsdfgdjhfgsjdf',
-      expiresIn: 123,
-    });
-
-    sendEmailGraphApiMock.mockReturnValue({
-      status: 202,
-    });
-    const date = new Date();
-    date.setDate(date.getDate() - 5);
-
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 2,
-      saved_objects: [
-        {
-          id: '1',
-          score: 1,
-          type: 'connector_token',
-          references: [],
-          attributes: {
-            connectorId: '123',
-            expiresAt: date.toISOString(),
-            tokenType: 'access_token',
-          },
-        },
-      ],
-      per_page: 500,
-      page: 1,
-    });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'connector_token',
-      references: [],
-      attributes: {
-        token: '11111111',
-      },
-    });
-
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'connector_token',
-      references: [],
-      attributes: {
-        connectorId: '123',
-        expiresAt: date.toISOString(),
-        tokenType: 'access_token',
-        token: '11111111',
-      },
-    });
-    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
-      errors: [],
-    });
-
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'connector_token',
-      references: [],
-      attributes: {
-        connectorId: '123',
-        expiresAt: date.toISOString(),
-        tokenType: 'access_token',
-        token: '11111111',
-      },
-    });
-
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
-    expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
-
-    expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "graphApiUrl": undefined,
-          "headers": Object {
-            "Authorization": "Bearer dfjsdfgdjhfgsjdf",
-            "Content-Type": "application/json",
-          },
-          "messageHTML": "<p>a message</p>
-      ",
-          "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
-            "connectorId": "1",
-            "content": Object {
-              "message": "a message",
-              "subject": "a subject",
-            },
-            "hasAuth": true,
-            "routing": Object {
-              "bcc": Array [],
-              "cc": Array [
-                "bob@example.com",
-                "robert@example.com",
-              ],
-              "from": "fred@example.com",
-              "to": Array [
-                "jim@example.com",
-              ],
-            },
-            "transport": Object {
-              "clientId": "123456",
-              "clientSecret": "sdfhkdsjhfksdjfh",
-              "password": "changeme",
-              "service": "exchange_server",
-              "user": "elastic",
-            },
-          },
-        },
-        Object {
-          "context": Array [],
-          "debug": [MockFunction],
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
-      ]
-    `);
-
-    expect(unsecuredSavedObjectsClient.create.mock.calls.length).toBe(1);
-  });
-
-  test('sending email for "exchange_server" wont fail if connectorTokenClient throw the errors, just log warning message', async () => {
-    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
-    const sendEmailOptions = getSendEmailOptions({
-      transport: {
-        service: 'exchange_server',
-        clientId: '123456',
-        clientSecret: 'sdfhkdsjhfksdjfh',
-      },
-    });
-    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
-      tokenType: 'Bearer',
-      accessToken: 'dfjsdfgdjhfgsjdf',
-      expiresIn: 123,
-    });
-
-    sendEmailGraphApiMock.mockReturnValue({
-      status: 202,
-    });
-    const date = new Date();
-    date.setDate(date.getDate() + 5);
-
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 0,
-      saved_objects: [],
-      per_page: 500,
-      page: 1,
-    });
-    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
-
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
-    expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
-    expect(unsecuredSavedObjectsClient.create.mock.calls.length).toBe(1);
-    expect(mockLogger.warn.mock.calls[0]).toMatchObject([
-      `Not able to update connector token for connectorId: 1 due to error: Fail`,
-    ]);
-
-    expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "graphApiUrl": undefined,
-          "headers": Object {
-            "Authorization": "Bearer dfjsdfgdjhfgsjdf",
-            "Content-Type": "application/json",
-          },
-          "messageHTML": "<p>a message</p>
-      ",
-          "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
-            "connectorId": "1",
-            "content": Object {
-              "message": "a message",
-              "subject": "a subject",
-            },
-            "hasAuth": true,
-            "routing": Object {
-              "bcc": Array [],
-              "cc": Array [
-                "bob@example.com",
-                "robert@example.com",
-              ],
-              "from": "fred@example.com",
-              "to": Array [
-                "jim@example.com",
-              ],
-            },
-            "transport": Object {
-              "clientId": "123456",
-              "clientSecret": "sdfhkdsjhfksdjfh",
-              "password": "changeme",
-              "service": "exchange_server",
-              "user": "elastic",
-            },
-          },
-        },
-        Object {
-          "context": Array [],
-          "debug": [MockFunction],
-          "error": [MockFunction] {
-            "calls": Array [
-              Array [
-                "Failed to create connector_token for connectorId \\"1\\" and tokenType: \\"access_token\\". Error: Fail",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction] {
-            "calls": Array [
-              Array [
-                "Not able to update connector token for connectorId: 1 due to error: Fail",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
       ]
     `);
   });
 
-  test('delete duplication tokens if connectorTokenClient get method has the errors, like decription error', async () => {
+  test('throws error if null access token returned when using OAuth 2.0 Client Credentials authentication', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
+    const getOAuthClientCredentialsAccessTokenMock =
+      getOAuthClientCredentialsAccessToken as jest.Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
         clientId: '123456',
+        tenantId: '98765',
         clientSecret: 'sdfhkdsjhfksdjfh',
       },
     });
-    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
-      tokenType: 'Bearer',
-      accessToken: 'dfjsdfgdjhfgsjdf',
-      expiresIn: 123,
+    getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(null);
+
+    await expect(() =>
+      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to retrieve access token for connectorId: 1"`
+    );
+
+    expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
+      configurationUtilities: sendEmailOptions.configurationUtilities,
+      connectorId: '1',
+      connectorTokenClient,
+      credentials: {
+        config: { clientId: '123456', tenantId: '98765' },
+        secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
+      },
+      logger: mockLogger,
+      oAuthScope: 'https://graph.microsoft.com/.default',
+      tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
     });
 
-    sendEmailGraphApiMock.mockReturnValue({
-      status: 202,
-    });
-    const date = new Date();
-    date.setDate(date.getDate() + 5);
-
-    const connectorTokenClientM = connectorTokenClientMock.create();
-    connectorTokenClientM.get.mockResolvedValueOnce({
-      hasErrors: true,
-      connectorToken: null,
-    });
-
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClientM);
-    expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
-    expect(connectorTokenClientM.deleteConnectorTokens.mock.calls.length).toBe(1);
-
-    expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "graphApiUrl": undefined,
-          "headers": Object {
-            "Authorization": "Bearer dfjsdfgdjhfgsjdf",
-            "Content-Type": "application/json",
-          },
-          "messageHTML": "<p>a message</p>
-      ",
-          "options": Object {
-            "configurationUtilities": Object {
-              "ensureActionTypeEnabled": [MockFunction],
-              "ensureHostnameAllowed": [MockFunction],
-              "ensureUriAllowed": [MockFunction],
-              "getCustomHostSettings": [MockFunction],
-              "getMicrosoftGraphApiUrl": [MockFunction] {
-                "calls": Array [
-                  Array [],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
-              },
-              "getProxySettings": [MockFunction],
-              "getResponseSettings": [MockFunction],
-              "getSSLSettings": [MockFunction],
-              "isActionTypeEnabled": [MockFunction],
-              "isHostnameAllowed": [MockFunction],
-              "isUriAllowed": [MockFunction],
-            },
-            "connectorId": "1",
-            "content": Object {
-              "message": "a message",
-              "subject": "a subject",
-            },
-            "hasAuth": true,
-            "routing": Object {
-              "bcc": Array [],
-              "cc": Array [
-                "bob@example.com",
-                "robert@example.com",
-              ],
-              "from": "fred@example.com",
-              "to": Array [
-                "jim@example.com",
-              ],
-            },
-            "transport": Object {
-              "clientId": "123456",
-              "clientSecret": "sdfhkdsjhfksdjfh",
-              "password": "changeme",
-              "service": "exchange_server",
-              "user": "elastic",
-            },
-          },
-        },
-        Object {
-          "context": Array [],
-          "debug": [MockFunction],
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction] {
-            "calls": Array [
-              Array [],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
-      ]
-    `);
+    expect(sendEmailGraphApiMock).not.toHaveBeenCalled();
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {
