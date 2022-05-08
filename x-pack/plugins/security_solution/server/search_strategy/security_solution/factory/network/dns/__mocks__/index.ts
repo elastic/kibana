@@ -189,6 +189,14 @@ export const formattedSearchStrategyResponse = {
                 must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
               },
             },
+            _source: false,
+            fields: [
+              'dns.question.registered_domain',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
           size: 0,
           track_total_hits: false,
@@ -261,15 +269,15 @@ export const expectedDsl = {
         must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
       },
     },
+    _source: false,
+    fields: [
+      'dns.question.registered_domain',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
   size: 0,
-  _source: false,
-  fields: [
-    'dns.question.registered_domain',
-    {
-      field: '@timestamp',
-      format: 'strict_date_optional_time',
-    },
-  ],
   track_total_hits: false,
 };
