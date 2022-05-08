@@ -32,7 +32,7 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
 fi
 
 echo "--- finding updated and untracked files in the workspace for workers to use"
-tarball="workspace_$BUILDKITE_BUILD_ID.tar"
+archiveName="workspace_$BUILDKITE_BUILD_ID.zip"
 files="$(git ls-files -mo --directory | uniq)"
 echo "$files"
 if [[ "$files" == "" ]]; then
@@ -40,9 +40,9 @@ if [[ "$files" == "" ]]; then
   exit 1
 fi
 
-echo "--- tar-ing up files for workers to use"
-tar -cHf "../$tarball" "$files"
-ls -lah "../$tarball"
+echo "--- zipping up files for workers to use"
+zip "../$archiveName" -rqy -0 "$files"
+ls -lah "../$archiveName"
 
 echo "--- uploading workspace to gcs"
-gsutil cp "../$tarball" "gs://kibana-ci-workspaces/"
+gsutil cp "../$archiveName" "gs://kibana-ci-workspaces/"

@@ -5,17 +5,18 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 workspace="$(pwd)"
-tarball="workspace_$BUILDKITE_BUILD_ID.tar"
+archiveName="workspace_$BUILDKITE_BUILD_ID.zip"
 
 echo "--- downloading workspace"
 cd ..
-gsutil cp "gs://kibana-ci-workspaces/$tarball" "$tarball"
+gsutil cp "gs://kibana-ci-workspaces/$archiveName" "$archiveName"
 
 echo "--- extracting workspace"
-tar -xf "$tarball" -C "$workspace"
+cd "$workspace"
+unzip -q "../$archiveName"
 
 echo "cleanup"
-rm "$tarball"
+rm "$archiveName"
 cd "$workspace"
 
 ###
