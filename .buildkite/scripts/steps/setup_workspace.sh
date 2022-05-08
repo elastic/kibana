@@ -32,7 +32,7 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
 fi
 
 echo "--- getting files to tar up"
-files="$(git ls-files -mo --directory --deduplicate)"
+files="$(git ls-files -mo --directory | uniq)"
 echo "file list:"
 echo "$files"
 
