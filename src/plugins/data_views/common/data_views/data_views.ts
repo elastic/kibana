@@ -333,7 +333,10 @@ export class DataViewsService {
       indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: err.message, color: 'danger', iconType: 'alert' });
+        this.onNotification(
+          { title: err.message, color: 'danger', iconType: 'alert' },
+          `refreshFields:${indexPattern.title}`
+        );
       }
 
       this.onError(err, {
@@ -378,7 +381,10 @@ export class DataViewsService {
       return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: err.message, color: 'danger', iconType: 'alert' });
+        this.onNotification(
+          { title: err.message, color: 'danger', iconType: 'alert' },
+          `refreshFieldSpecMap:${title}`
+        );
         return {};
       }
 
@@ -530,11 +536,14 @@ export class DataViewsService {
       }
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({
-          title: err.message,
-          color: 'danger',
-          iconType: 'alert',
-        });
+        this.onNotification(
+          {
+            title: err.message,
+            color: 'danger',
+            iconType: 'alert',
+          },
+          `initFromSavedObject:${title}`
+        );
       } else {
         this.onError(err, {
           title: i18n.translate('dataViews.fetchFieldErrorTitle', {
@@ -718,7 +727,10 @@ export class DataViewsService {
                 'Unable to write data view! Refresh the page to get the most up to date changes for this data view.',
             });
 
-            this.onNotification({ title, color: 'danger' });
+            this.onNotification(
+              { title, color: 'danger' },
+              `updateSavedObject:${indexPattern.title}`
+            );
             throw err;
           }
 
