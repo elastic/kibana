@@ -33,9 +33,8 @@ fi
 
 echo "--- tar-ing up update and untracked files in the workspace for workers to use"
 tarball="workspace_$BUILDKITE_BUILD_ID.tar"
-time git ls-files -mo --directory | uniq | xargs tar -rf "../$tarball"
+git ls-files -mo --directory | uniq | xargs tar -rvhf "../$tarball"
 ls -lah "../$tarball"
 
 echo "--- uploading workspace to gcs"
 gsutil cp "../$tarball" "gs://kibana-ci-workspaces/"
-

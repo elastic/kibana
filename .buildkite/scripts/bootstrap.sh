@@ -9,13 +9,13 @@ tarball="workspace_$BUILDKITE_BUILD_ID.tar"
 
 echo "--- downloading workspace"
 cd ..
-time gsutil cp "gs://kibana-ci-workspaces/$tarball" "$tarball"
+gsutil cp "gs://kibana-ci-workspaces/$tarball" "$tarball"
 
 echo "--- extracting workspace"
-time tar -xf "$tarball" -C "$workspace"
+tar -xf "$tarball" -C "$workspace"
 
 echo "cleanup"
-time rm "$tarball"
+rm "$tarball"
 cd "$workspace"
 
 ###
