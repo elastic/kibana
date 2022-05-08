@@ -41,7 +41,7 @@ if [[ "$files" == "" ]]; then
 fi
 
 echo "--- zipping up files for workers to use"
-zip "../$archiveName" -rqy -0 "$files"
+zip "../$archiveName" -rqy -0 -@ <<< "$files"
 ls -lah "../$archiveName"
 
 echo "--- uploading workspace to gcs"
