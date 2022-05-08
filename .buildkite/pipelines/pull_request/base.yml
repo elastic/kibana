@@ -5,6 +5,13 @@ steps:
     agents:
       queue: kibana-default
 
+  - command: .buildkite/scripts/steps/setup_workspace.sh
+    label: Initialize Workspace
+    agents:
+      queue: c2-16
+    key: workspace
+    timeout_in_minutes: 30
+
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
