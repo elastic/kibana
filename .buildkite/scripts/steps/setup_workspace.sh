@@ -31,9 +31,17 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
 
-echo "--- tar-ing up update and untracked files in the workspace for workers to use"
+echo "--- finding updated and untracked files in the workspace for workers to use"
 tarball="workspace_$BUILDKITE_BUILD_ID.tar"
-git ls-files -mo --directory | uniq | xargs tar -rHf "../$tarball"
+files="$(git ls-files -mo --directory | uniq)"
+echo "$files"
+if [[ "$files" == "" ]]; then
+  echo "no modified or untracked files found"
+  exit 1
+fi
+
+echo "--- tar-ing up files for workers to use"
+tar -cHf "../$tarball" "$files"
 ls -lah "../$tarball"
 
 echo "--- uploading workspace to gcs"
