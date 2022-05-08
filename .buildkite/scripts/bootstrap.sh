@@ -4,16 +4,14 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo "--- downloading and extracting workspace state"
-
 workspace="$(pwd)"
-tarball="workspace_$BUILDKITE_JOB_ID.tar"
+tarball="workspace_$BUILDKITE_BUILD_ID.tar"
 
-echo "download"
+echo "--- downloading workspace"
 cd ..
 time gsutil cp "gs://kibana-ci-workspaces/$tarball" "$tarball"
 
-echo "extract"
+echo "--- extracting workspace"
 time tar -xf "$tarball" -C "$workspace"
 
 echo "cleanup"

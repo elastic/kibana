@@ -31,9 +31,16 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
 
+echo "--- getting files to tar up"
+files="$(git ls-files -mo --directory --deduplicate)"
+echo "file list:"
+echo "$files"
+
 echo "--- tar-ing the workspace for workers to use"
 tarball="workspace_$BUILDKITE_BUILD_ID.tar"
-time tar --exclude ./.git -cf "../$tarball" .
+time tar --exclude ./.git -cf "../$tarball" "$files"
 ls -lah "../$tarball"
+
+echo "--- uploading workspace to gcs"
 gsutil cp "../$tarball" "gs://kibana-ci-workspaces/"
 
