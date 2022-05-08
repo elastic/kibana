@@ -1,0 +1,5 @@
+type: string
+description: The type of comment.
+enum:
+  - alert
+  - user
