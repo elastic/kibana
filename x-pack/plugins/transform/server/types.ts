@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, CoreSetup } from '@kbn/core/server';
+import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
@@ -20,4 +21,9 @@ export interface Dependencies {
 export interface RouteDependencies {
   router: IRouter;
   license: License;
+  getStartServices: CoreSetup<PluginStartContract>['getStartServices'];
+}
+
+export interface PluginStartContract {
+  dataViews: DataViewsServerPluginStart;
 }

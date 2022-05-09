@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
-import { Dependencies } from './types';
+import { Dependencies, PluginStartContract } from './types';
 import { ApiRoutes } from './routes';
 import { License } from './services';
 import { registerTransformHealthRuleType } from './lib/alerting';
@@ -38,7 +38,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   }
 
   setup(
-    { http, getStartServices, elasticsearch }: CoreSetup,
+    { http, getStartServices, elasticsearch }: CoreSetup<PluginStartContract>,
     { licensing, features, alerting }: Dependencies
   ): {} {
     const router = http.createRouter();
@@ -74,6 +74,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     this.apiRoutes.setup({
       router,
       license: this.license,
+      getStartServices,
     });
 
     if (alerting) {
@@ -83,7 +84,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     return {};
   }
 
-  start() {}
+  start(core: CoreStart, plugins: PluginStartContract) {}
 
   stop() {}
 }
