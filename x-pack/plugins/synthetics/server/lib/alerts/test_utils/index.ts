@@ -13,8 +13,6 @@ import { UMServerLibs } from '../../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../types';
 import { getUptimeESMockClient } from '../../requests/helper';
-import { DynamicSettings } from '../../../../common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -41,15 +39,7 @@ export const bootstrapDependencies = (customRequests?: any, customPlugins: any =
   return { server, libs, plugins };
 };
 
-export const createRuleTypeMocks = (
-  dynamicCertSettings: {
-    certAgeThreshold: DynamicSettings['certAgeThreshold'];
-    certExpirationThreshold: DynamicSettings['certExpirationThreshold'];
-  } = {
-    certAgeThreshold: DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
-    certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
-  }
-) => {
+export const createRuleTypeMocks = (recoveredAlerts: Array<Record<string, any>> = []) => {
   const loggerMock = {
     debug: jest.fn(),
     warn: jest.fn(),
@@ -58,10 +48,17 @@ export const createRuleTypeMocks = (
 
   const scheduleActions = jest.fn();
   const replaceState = jest.fn();
+  const setContext = jest.fn();
 
   const services = {
     ...getUptimeESMockClient(),
     ...alertsMock.createRuleExecutorServices(),
+    alertFactory: {
+      ...alertsMock.createRuleExecutorServices().alertFactory,
+      done: () => ({
+        getRecoveredAlerts: () => createRecoveredAlerts(recoveredAlerts, setContext),
+      }),
+    },
     alertWithLifecycle: jest.fn().mockReturnValue({ scheduleActions, replaceState }),
     getAlertStartedDate: jest.fn().mockReturnValue('2022-03-17T13:13:33.755Z'),
     logger: loggerMock,
@@ -77,5 +74,14 @@ export const createRuleTypeMocks = (
     services,
     scheduleActions,
     replaceState,
+    setContext,
   };
+};
+
+const createRecoveredAlerts = (alerts: Array<Record<string, any>>, setContext: jest.Mock) => {
+  return alerts.map((alert) => ({
+    getState: () => alert,
+    setContext,
+    context: {},
+  }));
 };

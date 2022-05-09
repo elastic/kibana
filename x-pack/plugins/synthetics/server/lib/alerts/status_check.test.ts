@@ -56,6 +56,53 @@ const mockMonitors = [
   },
 ];
 
+const mockRecoveredAlerts = [
+  {
+    currentTriggerStarted: '2022-04-25T14:36:31.511Z',
+    firstCheckedAt: '2022-04-25T14:10:30.785Z',
+    firstTriggeredAt: '2022-04-25T14:10:30.785Z',
+    lastCheckedAt: '2022-04-25T14:36:31.511Z',
+    lastTriggeredAt: '2022-04-25T14:36:31.511Z',
+    lastResolvedAt: '2022-04-25T14:23:43.007Z',
+    isTriggered: true,
+    monitorUrl: 'https://expired.badssl.com/',
+    monitorId: 'expired-badssl',
+    monitorName: 'BadSSL Expired',
+    monitorType: 'http',
+    latestErrorMessage:
+      'Get "https://expired.badssl.com/": x509: certificate has expired or is not yet valid: current time 2022-04-25T10:36:27-04:00 is after 2015-04-12T23:59:59Z',
+    observerLocation: 'Unnamed-location',
+    observerHostname: 'Dominiques-MacBook-Pro-2.local',
+    reason:
+      'BadSSL Expired from Unnamed-location failed 2 times in the last 3 mins. Alert when > 1.',
+    statusMessage: 'failed 2 times in the last 3 mins. Alert when > 1.',
+    start: '2022-04-25T14:36:31.621Z',
+    duration: 315110000000,
+  },
+  {
+    currentTriggerStarted: '2022-04-25T14:36:31.511Z',
+    firstCheckedAt: '2022-04-25T14:10:30.785Z',
+    firstTriggeredAt: '2022-04-25T14:10:30.785Z',
+    lastCheckedAt: '2022-04-25T14:36:31.511Z',
+    lastTriggeredAt: '2022-04-25T14:36:31.511Z',
+    lastResolvedAt: '2022-04-25T14:23:43.007Z',
+    isTriggered: true,
+    monitorUrl: 'https://invalid.badssl.com/',
+    monitorId: 'expired-badssl',
+    monitorName: 'BadSSL Expired',
+    monitorType: 'http',
+    latestErrorMessage:
+      'Get "https://invalid.badssl.com/": x509: certificate has expired or is not yet valid: current time 2022-04-25T10:36:27-04:00 is after 2015-04-12T23:59:59Z',
+    observerLocation: 'Unnamed-location',
+    observerHostname: 'Dominiques-MacBook-Pro-2.local',
+    reason:
+      'BadSSL Expired from Unnamed-location failed 2 times in the last 3 mins. Alert when > 1.',
+    statusMessage: 'failed 2 times in the last 3 mins. Alert when > 1.',
+    start: '2022-04-25T14:36:31.621Z',
+    duration: 315110000000,
+  },
+];
+
 const mockCommonAlertDocumentFields = (monitorInfo: GetMonitorStatusResult['monitorInfo']) => ({
   'agent.name': monitorInfo.agent?.name,
   'error.message': monitorInfo.error?.message,
@@ -121,13 +168,14 @@ const mockOptions = (
     },
   }
 ): any => {
-  const { services } = createRuleTypeMocks();
+  const { services, setContext } = createRuleTypeMocks(mockRecoveredAlerts);
 
   return {
     params,
     state,
     services,
     rule,
+    setContext,
   };
 };
 
@@ -142,6 +190,7 @@ describe('status check alert', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   describe('executor', () => {
     it('does not trigger when there are no monitors down', async () => {
       expect.assertions(5);
@@ -242,7 +291,15 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
+            "latestErrorMessage": "error message 1",
+            "monitorId": "first",
+            "monitorName": "First",
+            "monitorType": "myType",
+            "monitorUrl": "localhost:8080",
+            "observerHostname": undefined,
+            "observerLocation": "harrisburg",
             "reason": "First from harrisburg failed 234 times in the last 15 mins. Alert when > 5.",
+            "statusMessage": "failed 234 times in the last 15 mins. Alert when > 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
           },
         ]
@@ -313,7 +370,15 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
+            "latestErrorMessage": "error message 1",
+            "monitorId": "first",
+            "monitorName": "First",
+            "monitorType": "myType",
+            "monitorUrl": "localhost:8080",
+            "observerHostname": undefined,
+            "observerLocation": "harrisburg",
             "reason": "First from harrisburg failed 234 times in the last 15m. Alert when > 5.",
+            "statusMessage": "failed 234 times in the last 15m. Alert when > 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
           },
         ]
@@ -785,28 +850,60 @@ describe('status check alert', () => {
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "latestErrorMessage": undefined,
+              "monitorId": "foo",
+              "monitorName": "Foo",
+              "monitorType": "myType",
+              "monitorUrl": "https://foo.com",
+              "observerHostname": undefined,
+              "observerLocation": "harrisburg",
               "reason": "Foo from harrisburg 35 days availability is 99.28%. Alert when < 99.34%.",
+              "statusMessage": "35 days availability is 99.28%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zm9v?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
             },
           ],
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "latestErrorMessage": undefined,
+              "monitorId": "foo",
+              "monitorName": "Foo",
+              "monitorType": "myType",
+              "monitorUrl": "https://foo.com",
+              "observerHostname": undefined,
+              "observerLocation": "fairbanks",
               "reason": "Foo from fairbanks 35 days availability is 98.03%. Alert when < 99.34%.",
+              "statusMessage": "35 days availability is 98.03%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zm9v?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
           ],
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "latestErrorMessage": undefined,
+              "monitorId": "unreliable",
+              "monitorName": "Unreliable",
+              "monitorType": "myType",
+              "monitorUrl": "https://unreliable.co",
+              "observerHostname": undefined,
+              "observerLocation": "fairbanks",
               "reason": "Unreliable from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
+              "statusMessage": "35 days availability is 90.92%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/dW5yZWxpYWJsZQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
           ],
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
+              "latestErrorMessage": undefined,
+              "monitorId": "no-name",
+              "monitorName": "no-name",
+              "monitorType": "myType",
+              "monitorUrl": "https://no-name.co",
+              "observerHostname": undefined,
+              "observerLocation": "fairbanks",
               "reason": "no-name from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
+              "statusMessage": "35 days availability is 90.92%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/bm8tbmFtZQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
           ],
@@ -909,6 +1006,26 @@ describe('status check alert', () => {
         })
       );
     });
+
+    it('sets alert recovery context for recovered alerts', async () => {
+      toISOStringSpy.mockImplementation(() => 'foo date string');
+      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+
+      mockGetter.mockReturnValue(mockMonitors);
+      const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
+      const alert = statusCheckAlertFactory(server, libs, plugins);
+      const options = mockOptions();
+      // @ts-ignore the executor can return `void`, but ours never does
+      const state: Record<string, any> = await alert.executor(options);
+      expect(options.setContext).toHaveBeenCalledTimes(2);
+      mockRecoveredAlerts.forEach((alertState) => {
+        expect(options.setContext).toHaveBeenCalledWith(alertState);
+      });
+    });
+  });
+
+  describe('alert recovery', () => {
+    it('sets context for alert recovery', () => {});
   });
 
   describe('alert factory', () => {

@@ -16,7 +16,7 @@ import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monit
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from '../../../../common/translations';
 
-const { defaultActionMessage, description } = DurationAnomalyTranslations;
+const { defaultActionMessage, defaultRecoveryMessage, description } = DurationAnomalyTranslations;
 const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_anomaly'));
 
 export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
@@ -34,6 +34,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
+  defaultRecoveryMessage,
   requiresAppContext: true,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',

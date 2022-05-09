@@ -15,7 +15,12 @@ import {
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
 import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
-import { updateState, generateAlertMessage, getViewInAppUrl } from './common';
+import {
+  updateState,
+  generateAlertMessage,
+  getViewInAppUrl,
+  setRecoveredAlertsContext,
+} from './common';
 import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
@@ -94,14 +99,26 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     },
   ],
   actionVariables: {
-    context: [ACTION_VARIABLES[ALERT_REASON_MSG], ACTION_VARIABLES[VIEW_IN_APP_URL]],
+    context: [
+      ACTION_VARIABLES[ALERT_REASON_MSG],
+      ACTION_VARIABLES[VIEW_IN_APP_URL],
+      ...durationAnomalyTranslations.actionVariables,
+      ...commonStateTranslations,
+    ],
     state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
   },
   isExportable: true,
   minimumLicenseRequired: 'platinum',
+  doesSetRecoveryContext: true,
   async executor({
     params,
-    services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient, getAlertStartedDate },
+    services: {
+      alertWithLifecycle,
+      scopedClusterClient,
+      savedObjectsClient,
+      getAlertStartedDate,
+      alertFactory,
+    },
     state,
     startedAt,
   }) {
@@ -160,9 +177,12 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         alertInstance.scheduleActions(DURATION_ANOMALY.id, {
           [ALERT_REASON_MSG]: alertReasonMessage,
           [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+          ...summary,
         });
       });
     }
+
+    setRecoveredAlertsContext(alertFactory);
 
     return updateState(state, foundAnomalies);
   },
