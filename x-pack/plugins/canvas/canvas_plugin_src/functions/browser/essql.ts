@@ -17,10 +17,10 @@ import {
   SqlSearchStrategyResponse,
   SQL_SEARCH_STRATEGY,
 } from '@kbn/data-plugin/common';
+import { sanitizeName } from '../../../common/lib/request/sanitize_name';
 import { searchService } from '../../../public/services';
 import { getFunctionHelp } from '../../../i18n';
-import { sanitizeName } from '@kbn/canvas-plugin/common/lib/request/sanitize_name';
-import { normalizeType } from '@kbn/canvas-plugin/common/lib/request/normalize_type';
+import { normalizeType } from '../../../common/lib/request/normalize_type';
 
 interface Arguments {
   query: string;
@@ -76,20 +76,23 @@ export function essql(): ExpressionFunctionDefinition<'essql', KibanaContext, Ar
           input.query || [],
           // we need to convert timeRange to filter and add it here
           input.filters || []
-          /*, getEsQueryConfig({ get: getConfig })*/
+          /* , getEsQueryConfig({ get: getConfig })*/
         ),
         field_multi_value_leniency: true,
       };
 
       return lastValueFrom(
-        search.search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>({ params: req }, {
-          strategy: SQL_SEARCH_STRATEGY,
-        })
+        search.search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(
+          { params: req },
+          {
+            strategy: SQL_SEARCH_STRATEGY,
+          }
+        )
       )
         .then((resp: SqlSearchStrategyResponse) => {
           debugger;
 
-          let body = resp.rawResponse;
+          const body = resp.rawResponse;
 
           const columns = body.columns!.map(({ name, type }) => {
             return {
