@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { IndicesAndDataStreamsField } from './indices_and_data_streams_field';
-export { IncludeGlobalStateField } from './include_global_state_field';
-export { IncludeFeatureStatesField } from './include_feature_states_field';
+export * from './policies';
+export * from './snapshots';

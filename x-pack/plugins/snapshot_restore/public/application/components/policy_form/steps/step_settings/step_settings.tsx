@@ -21,7 +21,11 @@ import {
 import { SlmPolicyPayload } from '../../../../../../common/types';
 import { StepProps } from '..';
 
-import { IndicesAndDataStreamsField, IncludeGlobalStateField } from './fields';
+import {
+  IndicesAndDataStreamsField,
+  IncludeGlobalStateField,
+  IncludeFeatureStatesField,
+} from './fields';
 import { useCore } from '../../../../app_context';
 
 export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
@@ -172,6 +176,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       {renderPartialField()}
 
       <IncludeGlobalStateField errors={errors} policy={policy} onUpdate={updatePolicyConfig} />
+      <IncludeFeatureStatesField errors={errors} policy={policy} onUpdate={updatePolicyConfig} />
     </div>
   );
 };

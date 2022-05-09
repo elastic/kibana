@@ -24,7 +24,8 @@ import {
 import { serializePolicy } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
 import { StepProps } from '.';
-import { CollapsibleIndicesList, CollapsibleFeatureStatesList } from '../../collapsible_lists';
+import { CollapsibleIndicesList } from '../../collapsible_lists';
+import { PolicyFeatureStatesSummary } from '../../summaries';
 
 export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   policy,
@@ -190,6 +191,34 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateLabel"
+                defaultMessage="Include global state"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {includeGlobalState === false ? (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateFalseLabel"
+                  defaultMessage="No"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateTrueLabel"
+                  defaultMessage="Yes"
+                />
+              )}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+        <PolicyFeatureStatesSummary featureStates={featureStates} />
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialIndicesLabel"
                 defaultMessage="Allow partial indices"
               />
@@ -205,32 +234,6 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
                   id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialFalseLabel"
                   defaultMessage="No"
                 />
-              )}
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiDescriptionList textStyle="reverse">
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateLabel"
-                defaultMessage="Include global state"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              {includeGlobalState === false ? (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateFalseLabel"
-                  defaultMessage="No, without any feature states"
-                />
-              ) : (
-                <>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.includeGlobalStateTrueLabel"
-                    defaultMessage="Yes, including feature states from:"
-                  />{' '}
-                  <CollapsibleFeatureStatesList featureStates={featureStates} />
-                </>
               )}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>

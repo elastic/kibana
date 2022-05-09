@@ -67,10 +67,10 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   const [policy, setPolicy] = useState<SlmPolicyPayload>({
     ...originalPolicy,
     config: {
-      // By default, the policy has includeGlobalState enabled but it doesnt get
-      // reflected in the form state. We need to have it here because the feature_states
-      // dropdown depends on it.
-      includeGlobalState: true,
+      // By default, the policy has includeGlobalState enabled but since when
+      // a policy is created with just that option it also includes all featureStates
+      // we also want to set all featureStates to be enabled by default.
+      featureStates: [],
       ...(originalPolicy.config || {}),
     },
     retention: {

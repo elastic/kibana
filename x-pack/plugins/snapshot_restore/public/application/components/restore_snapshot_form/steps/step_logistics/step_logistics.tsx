@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverGt from 'semver/functions/gt';
+import { sortBy } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -62,7 +63,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     dataStreams: snapshotDataStreams = [],
     includeGlobalState: snapshotIncludeGlobalState,
     version,
-    featureStates,
+    featureStates: snapshotIncludeFeatureStates,
   } = snapshotDetails;
 
   const snapshotIndices = unfilteredSnapshotIndices.filter(
@@ -90,6 +91,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement,
     partial,
     includeGlobalState,
+    featureStates,
     includeAliases,
   } = restoreSettings;
 
@@ -157,21 +159,23 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement: '',
   });
 
-  const [selectedFeatureStateOptions, setSelectedFeatureStateOptions] = useState(
-    restoreSettings?.featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[]
-  );
-
-  const hasNoneOptionSelected = !!selectedFeatureStateOptions?.find(
-    (option) => option.label === FEATURE_STATES_NONE_OPTION
-  );
-
   const onRestoreGlobalStateToggleChange = (event: EuiSwitchEvent) => {
+    updateRestoreSettings({
+      includeGlobalState: event.target.checked,
+    });
+  };
+
+  const selectedFeatureStateOptions = useMemo(() => {
+    return featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[];
+  }, [featureStates]);
+
+  const isFeatureStatesToggleEnabled =
+    featureStates !== undefined && !featureStates?.includes(FEATURE_STATES_NONE_OPTION);
+  const onFeatureStatesToggleChange = (event: EuiSwitchEvent) => {
     const { checked } = event.target;
 
     updateRestoreSettings({
-      includeGlobalState: checked,
-      featureStates:
-        checked && featureStates.length === 0 ? [FEATURE_STATES_NONE_OPTION] : undefined,
+      featureStates: checked ? [] : [FEATURE_STATES_NONE_OPTION],
     });
   };
 
@@ -590,39 +594,27 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateTitle"
-                defaultMessage="Restore global state and feature states"
+                defaultMessage="Restore global state"
               />
             </h3>
           </EuiTitle>
         }
         description={
-          <>
-            <FormattedMessage
-              id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
-              defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings and all system indices from all features. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
-                    {i18n.translate(
-                      'xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDocLink',
-                      { defaultMessage: 'Learn more.' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-
-            {includeGlobalState &&
-              semverGt(version, '7.12.0') &&
-              featureStates.length > 0 &&
-              !hasNoneOptionSelected && (
-                <>
-                  <EuiSpacer size="s" />
-                  <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
-                </>
-              )}
-          </>
+          <FormattedMessage
+            id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
+            defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
+            templates with the same name. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
+                  {i18n.translate(
+                    'xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDocLink',
+                    { defaultMessage: 'Learn more.' }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
         }
         fullWidth
       >
@@ -642,7 +634,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateLabel"
-                defaultMessage="Restore global state and feature states"
+                defaultMessage="Restore global state"
               />
             }
             checked={includeGlobalState === undefined ? false : includeGlobalState}
@@ -651,20 +643,87 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             data-test-subj="includeGlobalStateSwitch"
           />
         </EuiFormRow>
+      </EuiDescribedFormGroup>
 
-        {includeGlobalState && featureStates.length > 0 && (
+      {/* Include feature states */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesTitle"
+                defaultMessage="Restore feature states"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <>
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesDescription"
+              defaultMessage="Restores persistent settings and all system indices from features. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotFeatureStates}>
+                    {i18n.translate(
+                      'xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesDocLink',
+                      { defaultMessage: 'Learn more.' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+
+            {semverGt(version, '7.12.0') &&
+              featureStates &&
+              featureStates?.length >= 0 &&
+              isFeatureStatesToggleEnabled && (
+                <>
+                  <EuiSpacer size="s" />
+                  <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
+                </>
+              )}
+          </>
+        }
+        fullWidth
+      >
+        <EuiFormRow
+          hasEmptyLabelSpace={true}
+          fullWidth
+          helpText={
+            snapshotIncludeFeatureStates ? null : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDisabledDescription"
+                defaultMessage="Not available for this snapshot."
+              />
+            )
+          }
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.restoreFeatureStatesLabel"
+                defaultMessage="Restore feature states"
+              />
+            }
+            checked={isFeatureStatesToggleEnabled}
+            onChange={onFeatureStatesToggleChange}
+            disabled={snapshotIncludeFeatureStates?.length === 0}
+            data-test-subj="includeFeatureStatesSwitch"
+          />
+        </EuiFormRow>
+
+        {isFeatureStatesToggleEnabled && (
           <>
             <EuiSpacer size="m" />
             <FeatureStatesFormField
-              featuresOptions={featureStates.map((feature) => ({ label: feature }))}
-              selectedOptions={hasNoneOptionSelected ? [] : selectedFeatureStateOptions}
-              setSelectedOptions={setSelectedFeatureStateOptions}
+              featuresOptions={snapshotIncludeFeatureStates?.map((feature) => ({ label: feature }))}
+              selectedOptions={selectedFeatureStateOptions}
               onUpdateFormSettings={updateRestoreSettings}
-              hasNoneOptionSelected={hasNoneOptionSelected}
             />
           </>
         )}
-        {includeGlobalState && featureStates.length === 0 && (
+        {snapshotIncludeFeatureStates?.length === 0 && (
           <>
             <EuiSpacer size="m" />
             <EuiCallOut

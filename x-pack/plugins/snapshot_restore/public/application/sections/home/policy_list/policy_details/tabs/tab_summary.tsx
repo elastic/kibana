@@ -25,12 +25,9 @@ import {
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
-import {
-  FormattedDateTime,
-  CollapsibleIndicesList,
-  CollapsibleFeatureStatesList,
-} from '../../../../../components';
+import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
+import { PolicyFeatureStatesSummary } from '../../../../../components/summaries';
 
 interface Props {
   policy: SlmPolicy;
@@ -316,17 +313,18 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                   defaultMessage="No"
                 />
               ) : (
-                <>
-                  <FormattedMessage
-                    data-test-subj="withGlobalStateAndFeatureStates"
-                    id="xpack.snapshotRestore.policyDetails.includeGlobalStateTrueLabel"
-                    defaultMessage="Yes, including feature states from:"
-                  />{' '}
-                  <CollapsibleFeatureStatesList featureStates={featureStates} />
-                </>
+                <FormattedMessage
+                  data-test-subj="withGlobalStateAndFeatureStates"
+                  id="xpack.snapshotRestore.policyDetails.includeGlobalStateTrueLabel"
+                  defaultMessage="Yes"
+                />
               )}
             </EuiDescriptionListDescription>
           </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
+          <PolicyFeatureStatesSummary featureStates={featureStates} />
         </EuiFlexGroup>
       </EuiDescriptionList>
 
