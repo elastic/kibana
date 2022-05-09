@@ -26,6 +26,10 @@ import { IS_OPERATOR } from '../../../timelines/components/timeline/data_provide
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { HoverActions } from '../hover_actions';
 import { DataProvider, QueryOperator } from '../../../../common/types';
+import {
+  DEFAULT_MORE_MAX_HEIGHT,
+  MoreContainer,
+} from '../../../timelines/components/field_renderers/field_renderers';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
@@ -184,14 +188,14 @@ export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
   const [hoverActionsOwnFocus] = useState<boolean>(false);
   const toggleTopN = useCallback(() => {
     if (onToggleTopN) {
-      onToggleTopN({ displayType: 'topN', selectedItemValue: rowItem, selectedItemField: field });
+      onToggleTopN({ displayType: 'topN', selectedItemValue: rowItem });
     }
 
     setShowTopN((prevShowTopN) => {
       const newShowTopN = !prevShowTopN;
       return newShowTopN;
     });
-  }, [field, rowItem, onToggleTopN]);
+  }, [rowItem, onToggleTopN]);
 
   const closeTopN = useCallback(() => {
     setShowTopN(false);
@@ -247,48 +251,19 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   overflowIndexStart = 5,
   rowItems,
 }) => {
-  const overflowItems = useMemo(
-    () =>
-      rowItems
-        .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
-        .map((rowItem, index) => {
-          const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
-          const dataProvider = {
-            and: [],
-            enabled: true,
-            id,
-            name: rowItem,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: attrName,
-              value: rowItem,
-              displayValue: dragDisplayValue || rowItem,
-              operator: IS_OPERATOR as QueryOperator,
-            },
-          };
-
-          return (
-            <EuiFlexItem key={`${idPrefix}-${id}`}>
-              <OverflowItem
-                dataProvider={dataProvider}
-                dragDisplayValue={dragDisplayValue}
-                rowItem={rowItem}
-                field={attrName}
-              />
-            </EuiFlexItem>
-          );
-        }),
-    [attrName, dragDisplayValue, idPrefix, maxOverflowItems, overflowIndexStart, rowItems]
-  );
   return (
     <>
       {rowItems.length > overflowIndexStart && (
         <Popover count={rowItems.length - overflowIndexStart} idPrefix={idPrefix}>
           <EuiText size="xs">
-            <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="overflow-items">
-              {overflowItems}
-            </EuiFlexGroup>
+            <MoreContainer
+              attrName={attrName}
+              dragDisplayValue={dragDisplayValue}
+              idPrefix={idPrefix}
+              overflowIndexStart={overflowIndexStart}
+              rowItems={rowItems}
+              moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            />
 
             {rowItems.length > overflowIndexStart + maxOverflowItems && (
               <p data-test-subj="popover-additional-overflow">

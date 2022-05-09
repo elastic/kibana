@@ -303,7 +303,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
       setDisplay((prev) => (prev == null ? params?.displayType : null));
       setSelectedValue((prev) => (prev == null ? params?.selectedItemValue : null));
     }, []);
-    const itemsWithHoverActions = useMemo(
+    const moreItemsWithHoverActions = useMemo(
       () =>
         rowItems.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, rowItem, index) => {
           const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
@@ -345,7 +345,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
       [attrName, dragDisplayValue, idPrefix, overflowIndexStart, render, rowItems, onToggleTopN]
     );
 
-    const renderedItems = useMemo(
+    const moreItems = useMemo(
       () =>
         rowItems.slice(overflowIndexStart).map((rowItem, index) => {
           return (
@@ -394,7 +394,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
       >
         <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="overflow-items">
           {/* Do not render hover actions if row items are Reputation Links */}
-          {attrName != null ? itemsWithHoverActions : renderedItems}
+          {attrName != null ? moreItemsWithHoverActions : moreItems}
         </EuiFlexGroup>
       </div>
     );
