@@ -155,8 +155,12 @@ export class HeadlessChromiumDriver {
     return !this.page.isClosed();
   }
 
-  /*
-   * Call Page.screenshot and return a base64-encoded string of the image
+  /**
+   * Receive a PNG buffer of the page screenshot from Chromium
+   *
+   * @async
+   * @param {ElementPosition} elementPosition - coordinates to capture
+   * @returns {Promise<Buffer | undefined>} PNG Buffer, or `undefined` if a screenshot could not be generated
    */
   async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
@@ -167,6 +171,7 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
+      captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
 
     if (Buffer.isBuffer(screenshot)) {

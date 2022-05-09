@@ -29,6 +29,21 @@ export const openUrl = async (
 
   try {
     await browser.open(url, { context, headers, waitForSelector, timeout }, kbnLogger);
+
+    // debugging statement to trace expensive resizing
+    await browser.evaluate(
+      {
+        fn: () => {
+          window.addEventListener('resize', () => {
+            // eslint-disable-next-line no-console
+            console.log(`window resize, width is now: ${window.innerWidth}px`);
+          });
+        },
+        args: [],
+      },
+      { context: Actions.OPEN_URL },
+      kbnLogger
+    );
   } catch (err) {
     kbnLogger.error(err);
 
