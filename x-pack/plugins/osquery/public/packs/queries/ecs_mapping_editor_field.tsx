@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
 import {
   castArray,
   each,
@@ -19,16 +18,7 @@ import {
   trim,
   get,
 } from 'lodash';
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useImperativeHandle,
-  MutableRefObject,
-} from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFormLabel,
   EuiButtonIcon,
@@ -49,7 +39,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import deepmerge from 'deepmerge';
 
 import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
@@ -57,17 +46,17 @@ import osquerySchema from '../../common/schemas/osquery/v5.2.2.json';
 import { FieldIcon } from '../../common/lib/kibana';
 import {
   FIELD_TYPES,
-  Form,
-  FormData,
   FieldHook,
   getFieldValidityAndErrorMessage,
-  useForm,
   useFormData,
   Field,
   getUseField,
   fieldValidators,
   ValidationFuncArg,
   UseMultiFields,
+  UseArray,
+  ArrayItem,
+  FormArrayField,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
 
@@ -179,7 +168,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
       setSelected(newSelectedOptions);
       setValue(newSelectedOptions[0]?.label ?? '');
     },
-    [setSelected, setValue]
+    [setValue]
   );
 
   // TODO: Create own component for this.
@@ -339,7 +328,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>();
   const { setValue } = resultValue;
-  const { setValue: setType } = resultType;
+  const { value: typeValue, setValue: setType } = resultType;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(resultValue);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
   const [selectedOptions, setSelected] = useState<
@@ -383,12 +372,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   const onTypeChange = useCallback(
     (newType) => {
-      if (newType !== resultType.value) {
+      if (newType !== typeValue) {
         setType(newType);
         setValue(newType === 'value' && euiFieldProps.singleSelection === false ? [] : '');
       }
     },
-    [resultType.value, setType, setValue, euiFieldProps.singleSelection]
+    [typeValue, setType, setValue, euiFieldProps.singleSelection]
   );
 
   const handleCreateOption = useCallback(
@@ -416,8 +405,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const Prepend = useMemo(
     () => (
       <StyledEuiSuperSelect
+        disabled={euiFieldProps.isDisabled}
         options={OSQUERY_COLUMN_VALUE_TYPE_OPTIONS}
-        valueOfSelected={resultType.value}
+        valueOfSelected={typeValue || OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value}
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         popoverProps={{
           panelStyle: {
@@ -427,7 +417,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         onChange={onTypeChange}
       />
     ),
-    [onTypeChange, resultType.value]
+    [euiFieldProps.isDisabled, onTypeChange, typeValue]
   );
 
   useEffect(() => {
@@ -438,8 +428,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     if (!euiFieldProps?.singleSelection && !isArray(resultValue.value)) {
       setValue(resultValue.value.length ? [resultValue.value] : []);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [euiFieldProps?.singleSelection, setValue]);
+  }, [euiFieldProps?.singleSelection, resultValue.value, setValue]);
 
   useEffect(() => {
     setSelected(() => {
@@ -482,7 +471,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             rowHeight={32}
             isClearable
             {...euiFieldProps}
-            options={(resultType.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
+            options={(typeValue === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -490,105 +479,96 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   );
 };
 
-export const OsqueryColumnField = React.memo(
-  OsqueryColumnFieldComponent,
-  (prevProps, nextProps) =>
-    prevProps.resultType.value === nextProps.resultType.value &&
-    prevProps.resultType.isChangingValue === nextProps.resultType.isChangingValue &&
-    prevProps.resultType.errors === nextProps.resultType.errors &&
-    prevProps.resultValue.value === nextProps.resultValue.value &&
-    prevProps.resultValue.isChangingValue === nextProps.resultValue.isChangingValue &&
-    prevProps.resultValue.errors === nextProps.resultValue.errors &&
-    deepEqual(prevProps.euiFieldProps, nextProps.euiFieldProps)
-);
-
-export interface ECSMappingEditorFieldRef {
-  validate: () => Promise<
-    | Record<
-        string,
-        {
-          field: string;
-        }
-      >
-    | false
-    | {}
-  >;
-}
+export const OsqueryColumnField = React.memo(OsqueryColumnFieldComponent);
 
 export interface ECSMappingEditorFieldProps {
-  field: FieldHook<Record<string, unknown>>;
-  query: string;
-  fieldRef: MutableRefObject<ECSMappingEditorFieldRef>;
-  euiFieldProps: EuiComboBoxProps<{}>;
+  euiFieldProps?: EuiComboBoxProps<{}>;
 }
 
 interface ECSMappingEditorFormProps {
   isDisabled?: boolean;
   osquerySchemaOptions: OsquerySchemaOption[];
-  defaultValue?: FormData;
-  onAdd?: (payload: FormData) => void;
-  onChange?: (payload: FormData) => void;
-  onDelete?: (key: string) => void;
+  item: ArrayItem;
+  isLastItem?: boolean;
+  onDelete?: FormArrayField['removeItem'];
 }
 
-const getEcsFieldValidator =
-  (editForm: boolean) =>
-  (args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['key']>) => {
-    const fieldRequiredError = fieldValidators.emptyField(
-      i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldRequiredErrorMessage', {
-        defaultMessage: 'ECS field is required.',
-      })
-    )(args);
+const ecsFieldValidator = (
+  args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['key']> & {
+    customData: {
+      value: {
+        editForm: boolean;
+      };
+    };
+  }
+) => {
+  const editForm: boolean = args.customData.value?.editForm;
+  const rootPath = args.path.split('.')[0];
 
+  const fieldRequiredError = fieldValidators.emptyField(
+    i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldRequiredErrorMessage', {
+      defaultMessage: 'ECS field is required.',
+    })
+  )(args);
+
+  if (
+    fieldRequiredError &&
     // @ts-expect-error update types
-    if (fieldRequiredError && ((!editForm && args.formData['result.value'].length) || editForm)) {
-      return fieldRequiredError;
-    }
+    ((!editForm && args.formData[`${rootPath}.result.value`]?.length) || editForm)
+  ) {
+    return fieldRequiredError;
+  }
 
-    return undefined;
-  };
+  return undefined;
+};
 
-const getOsqueryResultFieldValidator =
-  (osquerySchemaOptions: OsquerySchemaOption[], editForm: boolean) =>
-  (
-    args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['value']['value']>
-  ) => {
-    const fieldRequiredError = fieldValidators.emptyField(
-      i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage', {
-        defaultMessage: 'Value is required.',
-      })
-    )(args);
+const osqueryResultFieldValidator = async (
+  args: ValidationFuncArg<ECSMappingEditorFormData, ECSMappingEditorFormData['value']['value']> & {
+    customData: {
+      value: {
+        editForm: boolean;
+        osquerySchemaOptions: OsquerySchemaOption[];
+      };
+    };
+  }
+) => {
+  const rootPath = args.path.split('.')[0];
+  const { editForm, osquerySchemaOptions } = args.customData.value;
+  const fieldRequiredError = fieldValidators.emptyField(
+    i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage', {
+      defaultMessage: 'Value is required.',
+    })
+  )(args);
 
-    if (fieldRequiredError && ((!editForm && args.formData.key.length) || editForm)) {
-      return fieldRequiredError;
-    }
+  // @ts-expect-error update types
+  if (fieldRequiredError && ((!editForm && args.formData[`${rootPath}.key`]?.length) || editForm)) {
+    return fieldRequiredError;
+  }
 
-    // @ts-expect-error update types
-    if (!args.value?.length || args.formData['result.type'] !== 'field') return;
+  // @ts-expect-error update types
+  if (!args.value?.length || args.formData[`${rootPath}.result.type`] !== 'field') return;
 
-    const osqueryColumnExists = find(osquerySchemaOptions, ['label', args.value]);
+  const osqueryColumnExists = find(osquerySchemaOptions, [
+    'label',
+    isArray(args.value) ? args.value[0] : args.value,
+  ]);
 
-    return !osqueryColumnExists
-      ? {
-          code: 'ERR_FIELD_FORMAT',
-          path: args.path,
-          message: i18n.translate(
-            'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
-            {
-              defaultMessage: 'The current query does not return a {columnName} field',
-              values: {
-                columnName: args.value,
-              },
-            }
-          ),
-          __isBlocking__: false,
-        }
-      : undefined;
-  };
-
-const FORM_DEFAULT_VALUE = {
-  key: '',
-  value: { field: '' },
+  return !osqueryColumnExists
+    ? {
+        code: 'ERR_FIELD_FORMAT',
+        path: args.path,
+        message: i18n.translate(
+          'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
+          {
+            defaultMessage: 'The current query does not return a {columnName} field',
+            values: {
+              columnName: args.value,
+            },
+          }
+        ),
+        __isBlocking__: false,
+      }
+    : undefined;
 };
 
 interface ECSMappingEditorFormData {
@@ -599,217 +579,141 @@ interface ECSMappingEditorFormData {
   };
 }
 
-interface ECSMappingEditorFormRef {
-  validate: () => Promise<{
-    data: ECSMappingEditorFormData | {};
-    isValid: boolean;
-  }>;
-}
+export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
+  isDisabled,
+  osquerySchemaOptions,
+  item,
+  isLastItem,
+  onDelete,
+}) => {
+  const multipleValuesField = useRef(false);
 
-export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappingEditorFormProps>(
-  ({ isDisabled, osquerySchemaOptions, defaultValue, onAdd, onChange, onDelete }, ref) => {
-    const editForm = !!defaultValue;
-    const multipleValuesField = useRef(false);
-    const currentFormData = useRef(defaultValue);
-    const formSchema = useMemo(
-      () => ({
-        key: {
-          type: FIELD_TYPES.COMBO_BOX,
-          fieldsToValidateOnChange: ['result.value', 'key'],
-          validations: [
-            {
-              validator: getEcsFieldValidator(editForm),
+  const MultiFields = useMemo(
+    () => (
+      <UseMultiFields
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        fields={{
+          resultType: {
+            path: `${item.path}.result.type`,
+            config: {
+              valueChangeDebounceTime: 300,
+              defaultValue: OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value,
+              type: FIELD_TYPES.COMBO_BOX,
+              fieldsToValidateOnChange: [`${item.path}.key`, `${item.path}.result.value`],
             },
-          ],
-        },
-        result: {
-          type: {
-            defaultValue: OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value,
-            type: FIELD_TYPES.COMBO_BOX,
-            fieldsToValidateOnChange: ['result.value'],
           },
-          value: {
-            type: FIELD_TYPES.COMBO_BOX,
-            fieldsToValidateOnChange: ['key'],
-            validations: [
-              {
-                validator: getOsqueryResultFieldValidator(osquerySchemaOptions, editForm),
-              },
-            ],
-          },
-        },
-      }),
-      [editForm, osquerySchemaOptions]
-    );
-
-    const { form } = useForm({
-      // @ts-expect-error update types
-      schema: formSchema,
-      defaultValue: defaultValue ?? FORM_DEFAULT_VALUE,
-      deserializer: (data) => ({
-        key: data.key ?? '',
-        result: {
-          type: data.value
-            ? Object.keys(data.value)[0]
-            : OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value,
-          value: data.value ? Object.values(data.value)[0] : '',
-        },
-      }),
-    });
-
-    const { submit, reset, validate, validateFields } = form;
-
-    const [formData] = useFormData({ form });
-
-    const handleSubmit = useCallback(async () => {
-      validate();
-      validateFields(['result.value', 'key']);
-      const { data, isValid } = await submit();
-
-      if (isValid) {
-        const serializedData = {
-          key: data.key,
-          value: {
-            [data.result.type]: data.result.value,
-          },
-        };
-        if (onAdd) {
-          onAdd(serializedData);
-        }
-
-        if (onChange) {
-          onChange(serializedData);
-        }
-
-        reset();
-      }
-    }, [validate, validateFields, submit, onAdd, onChange, reset]);
-
-    const handleDeleteClick = useCallback(() => {
-      if (defaultValue?.key && onDelete) {
-        onDelete(defaultValue.key);
-      }
-    }, [defaultValue, onDelete]);
-
-    const MultiFields = useMemo(
-      () => (
-        <UseMultiFields
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          fields={{
-            resultType: {
-              path: 'result.type',
+          resultValue: {
+            path: `${item.path}.result.value`,
+            validationData: {
+              osquerySchemaOptions,
+              editForm: !isLastItem,
             },
-            resultValue: {
-              path: 'result.value',
+            config: {
+              valueChangeDebounceTime: 300,
+              type: FIELD_TYPES.COMBO_BOX,
+              fieldsToValidateOnChange: [`${item.path}.key`, `${item.path}.result.value`],
+              validations: [
+                {
+                  // @ts-expect-error update types
+                  validator: osqueryResultFieldValidator,
+                },
+              ],
             },
-          }}
-        >
-          {(fields) => (
-            <OsqueryColumnField
-              {...fields}
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              euiFieldProps={{
+          },
+        }}
+      >
+        {(fields) => (
+          <OsqueryColumnField
+            {...fields}
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            euiFieldProps={{
+              // @ts-expect-error update types
+              options: osquerySchemaOptions,
+              isDisabled,
+              // @ts-expect-error update types
+              singleSelection: !multipleValuesField.current ? { asPlainText: true } : false,
+            }}
+          />
+        )}
+      </UseMultiFields>
+    ),
+    [item.path, osquerySchemaOptions, isLastItem, isDisabled]
+  );
+
+  const ecsComboBoxEuiFieldProps = useMemo(() => ({ isDisabled }), [isDisabled]);
+
+  const validationData = useMemo(() => ({ editForm: !isLastItem }), [isLastItem]);
+
+  const config = useMemo(
+    () => ({
+      valueChangeDebounceTime: 300,
+      fieldsToValidateOnChange: [`${item.path}.key`, `${item.path}.result.value`],
+      validations: [
+        {
+          validator: ecsFieldValidator,
+        },
+      ],
+    }),
+    [item.path]
+  );
+
+  const handleDeleteClick = useCallback(() => {
+    if (onDelete) {
+      onDelete(item.id);
+    }
+  }, [item.id, onDelete]);
+
+  return (
+    <>
+      <EuiFlexGroup data-test-subj="ECSMappingEditorForm" alignItems="flexStart" gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
+            <EuiFlexItem>
+              <CommonUseField
+                path={`${item.path}.key`}
+                component={ECSComboboxField}
+                euiFieldProps={ecsComboBoxEuiFieldProps}
+                validationData={validationData}
                 // @ts-expect-error update types
-                options: osquerySchemaOptions,
-                isDisabled,
-                // @ts-expect-error update types
-                singleSelection: !multipleValuesField.current ? { asPlainText: true } : false,
-              }}
-            />
-          )}
-        </UseMultiFields>
-      ),
-      [osquerySchemaOptions, isDisabled]
-    );
-
-    const ecsComboBoxEuiFieldProps = useMemo(() => ({ isDisabled }), [isDisabled]);
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        validate: async () => {
-          if (!editForm && deepEqual(formData, FORM_DEFAULT_VALUE)) {
-            return { data: {}, isValid: true };
-          }
-
-          validateFields(['result.value', 'key']);
-          const isValid = await validate();
-
-          return {
-            data: formData?.key?.length
-              ? {
-                  [formData.key]: {
-                    [formData.result.type]: formData.result.value,
-                  },
-                }
-              : {},
-            isValid,
-          };
-        },
-      }),
-      [validateFields, editForm, formData, validate]
-    );
-
-    useEffect(() => {
-      if (!deepEqual(formData, currentFormData.current)) {
-        currentFormData.current = formData;
-        const ecsOption = find(ECSSchemaOptions, ['label', formData.key]);
-        multipleValuesField.current =
-          ecsOption?.value?.normalization === 'array' && formData.result.type === 'value';
-        handleSubmit();
-      }
-    }, [handleSubmit, formData, onAdd]);
-
-    return (
-      <Form form={form}>
-        <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-              <EuiFlexItem>
-                <CommonUseField
-                  path="key"
-                  component={ECSComboboxField}
-                  euiFieldProps={ecsComboBoxEuiFieldProps}
-                />
-              </EuiFlexItem>
+                config={config}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <StyledSemicolonWrapper>
+                <EuiText>:</EuiText>
+              </StyledSemicolonWrapper>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
+            <ECSFieldWrapper>{MultiFields}</ECSFieldWrapper>
+            {!isDisabled && (
               <EuiFlexItem grow={false}>
-                <StyledSemicolonWrapper>
-                  <EuiText>:</EuiText>
-                </StyledSemicolonWrapper>
+                <StyledButtonWrapper>
+                  {!isLastItem && (
+                    <EuiButtonIcon
+                      aria-label={i18n.translate(
+                        'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
+                        {
+                          defaultMessage: 'Delete ECS mapping row',
+                        }
+                      )}
+                      iconType="trash"
+                      color="danger"
+                      onClick={handleDeleteClick}
+                    />
+                  )}
+                </StyledButtonWrapper>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-              <ECSFieldWrapper>{MultiFields}</ECSFieldWrapper>
-              {!isDisabled && (
-                <EuiFlexItem grow={false}>
-                  <StyledButtonWrapper>
-                    {defaultValue && (
-                      <EuiButtonIcon
-                        aria-label={i18n.translate(
-                          'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
-                          {
-                            defaultMessage: 'Delete ECS mapping row',
-                          }
-                        )}
-                        id={`${defaultValue?.key}-trash`}
-                        iconType="trash"
-                        color="danger"
-                        onClick={handleDeleteClick}
-                      />
-                    )}
-                  </StyledButtonWrapper>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-      </Form>
-    );
-  }
-);
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
 
 interface OsquerySchemaOption {
   label: string;
@@ -831,177 +735,155 @@ interface OsqueryColumn {
 }
 
 export const ECSMappingEditorField = React.memo(
-  ({ field, query, fieldRef, euiFieldProps }: ECSMappingEditorFieldProps) => {
-    const { setValue, value = {} } = field;
-    const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
-    const formRefs = useRef<Record<string, ECSMappingEditorFormRef>>({});
-
-    useImperativeHandle(
-      fieldRef,
-      () => ({
-        validate: async () => {
-          const validations = await Promise.all(
-            Object.values(formRefs.current).map(async (formRef) => {
-              const { data, isValid } = await formRef.validate();
-
-              return [data, isValid];
-            })
-          );
-
-          if (find(validations, (result) => result[1] === false)) {
-            return false;
-          }
-
-          return deepmerge.all(map(validations, '[0]'));
-        },
-      }),
-      []
-    );
+  ({ euiFieldProps }: ECSMappingEditorFieldProps) => {
+    const lastItemPath = useRef<string>();
+    const onAdd = useRef<FormArrayField['addItem']>();
+    const osquerySchemaOptions = useRef<OsquerySchemaOption[]>([]);
+    const [{ query, ...formData }, formDataSerializer, isMounted] = useFormData();
 
     useEffect(() => {
-      setOsquerySchemaOptions((currentValue) => {
-        if (!query?.length) {
-          return currentValue;
+      if (!query?.length) {
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let ast: Record<string, any> | undefined;
+
+      try {
+        ast = sqlParser.parse(query)?.value;
+      } catch (e) {
+        return;
+      }
+
+      const astOsqueryTables: Record<
+        string,
+        {
+          columns: OsqueryColumn[];
+          order: number;
         }
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let ast: Record<string, any> | undefined;
-
-        try {
-          ast = sqlParser.parse(query)?.value;
-        } catch (e) {
-          return currentValue;
-        }
-
-        const astOsqueryTables: Record<
-          string,
-          {
-            columns: OsqueryColumn[];
-            order: number;
-          }
-        > =
-          ast?.from?.value?.reduce(
-            (
-              acc: {
-                [x: string]: {
-                  columns: OsqueryColumn[];
-                  order: number;
-                };
-              },
-              table: {
-                value: {
-                  left?: { value: { value: string }; alias?: { value: string } };
-                  right?: { value: { value: string }; alias?: { value: string } };
-                  value?: { value: string };
-                  alias?: { value: string };
-                };
-              }
-            ) => {
-              each(['value.left', 'value.right', 'value'], (valueKey) => {
-                if (valueKey) {
-                  const osqueryTable = find(osquerySchema, [
-                    'name',
-                    get(table, `${valueKey}.value.value`),
-                  ]);
-
-                  if (osqueryTable) {
-                    acc[
-                      get(table, `${valueKey}.alias.value`) ?? get(table, `${valueKey}.value.value`)
-                    ] = {
-                      columns: osqueryTable.columns,
-                      order: Object.keys(acc).length,
-                    };
-                  }
-                }
-              });
-
-              return acc;
+      > =
+        ast?.from?.value?.reduce(
+          (
+            acc: {
+              [x: string]: {
+                columns: OsqueryColumn[];
+                order: number;
+              };
             },
-            {}
-          ) ?? {};
+            table: {
+              value: {
+                left?: { value: { value: string }; alias?: { value: string } };
+                right?: { value: { value: string }; alias?: { value: string } };
+                value?: { value: string };
+                alias?: { value: string };
+              };
+            }
+          ) => {
+            each(['value.left', 'value.right', 'value'], (valueKey) => {
+              if (valueKey) {
+                const osqueryTable = find(osquerySchema, [
+                  'name',
+                  get(table, `${valueKey}.value.value`),
+                ]);
 
-        // Table doesn't exist in osquery schema
-        if (isEmpty(astOsqueryTables)) {
-          return currentValue;
-        }
+                if (osqueryTable) {
+                  acc[
+                    get(table, `${valueKey}.alias.value`) ?? get(table, `${valueKey}.value.value`)
+                  ] = {
+                    columns: osqueryTable.columns,
+                    order: Object.keys(acc).length,
+                  };
+                }
+              }
+            });
 
-        const suggestions =
-          isArray(ast?.selectItems?.value) &&
-          ast?.selectItems?.value
-            ?.map((selectItem: { type: string; value: string; hasAs: boolean; alias?: string }) => {
-              if (selectItem.type === 'Identifier') {
-                /*
+            return acc;
+          },
+          {}
+        ) ?? {};
+
+      // Table doesn't exist in osquery schema
+      if (isEmpty(astOsqueryTables)) {
+        return;
+      }
+
+      const suggestions =
+        isArray(ast?.selectItems?.value) &&
+        ast?.selectItems?.value
+          ?.map((selectItem: { type: string; value: string; hasAs: boolean; alias?: string }) => {
+            if (selectItem.type === 'Identifier') {
+              /*
                 select * from routes, uptime;
               */
-                if (ast?.selectItems?.value.length === 1 && selectItem.value === '*') {
-                  return reduce(
-                    astOsqueryTables,
-                    (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
-                      acc.push(
-                        ...osqueryColumns.map((osqueryColumn) => ({
-                          label: osqueryColumn.name,
-                          value: {
-                            name: osqueryColumn.name,
-                            description: osqueryColumn.description,
-                            table,
-                            tableOrder,
-                            suggestion_label: osqueryColumn.name,
-                          },
-                        }))
-                      );
-
-                      return acc;
-                    },
-                    [] as OsquerySchemaOption[]
-                  );
-                }
-
-                /*
-                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-              */
-
-                const [table, column] = selectItem.value.includes('.')
-                  ? selectItem.value?.split('.')
-                  : [Object.keys(astOsqueryTables)[0], selectItem.value];
-
-                if (column === '*' && astOsqueryTables[table]) {
-                  const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
-
-                  return osqueryColumns.map((osqueryColumn) => ({
-                    label: osqueryColumn.name,
-                    value: {
-                      name: osqueryColumn.name,
-                      description: osqueryColumn.description,
-                      table,
-                      tableOrder,
-                      suggestion_label: `${osqueryColumn.name}`,
-                    },
-                  }));
-                }
-
-                if (astOsqueryTables[table]) {
-                  const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
-
-                  if (osqueryColumn) {
-                    const label = selectItem.hasAs ? selectItem.alias : column;
-
-                    return [
-                      {
-                        label,
+              if (ast?.selectItems?.value.length === 1 && selectItem.value === '*') {
+                return reduce(
+                  astOsqueryTables,
+                  (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
+                    acc.push(
+                      ...osqueryColumns.map((osqueryColumn) => ({
+                        label: osqueryColumn.name,
                         value: {
                           name: osqueryColumn.name,
                           description: osqueryColumn.description,
                           table,
-                          tableOrder: astOsqueryTables[table].order,
-                          suggestion_label: `${label}`,
+                          tableOrder,
+                          suggestion_label: osqueryColumn.name,
                         },
-                      },
-                    ];
-                  }
-                }
+                      }))
+                    );
+
+                    return acc;
+                  },
+                  [] as OsquerySchemaOption[]
+                );
               }
 
               /*
+                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+              */
+
+              const [table, column] = selectItem.value.includes('.')
+                ? selectItem.value?.split('.')
+                : [Object.keys(astOsqueryTables)[0], selectItem.value];
+
+              if (column === '*' && astOsqueryTables[table]) {
+                const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
+
+                return osqueryColumns.map((osqueryColumn) => ({
+                  label: osqueryColumn.name,
+                  value: {
+                    name: osqueryColumn.name,
+                    description: osqueryColumn.description,
+                    table,
+                    tableOrder,
+                    suggestion_label: `${osqueryColumn.name}`,
+                  },
+                }));
+              }
+
+              if (astOsqueryTables[table]) {
+                const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
+
+                if (osqueryColumn) {
+                  const label = selectItem.hasAs ? selectItem.alias : column;
+
+                  return [
+                    {
+                      label,
+                      value: {
+                        name: osqueryColumn.name,
+                        description: osqueryColumn.description,
+                        table,
+                        tableOrder: astOsqueryTables[table].order,
+                        suggestion_label: `${label}`,
+                      },
+                    },
+                  ];
+                }
+              }
+            }
+
+            /*
               SELECT pid, uid, name, ROUND((
                 (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
               ) * 100, 2) AS percentage
@@ -1015,95 +897,57 @@ export const ECSMappingEditorField = React.memo(
               LIMIT 5;
             */
 
-              if (selectItem.hasAs && selectItem.alias) {
-                return [
-                  {
-                    label: selectItem.alias,
-                    value: {
-                      name: selectItem.alias,
-                      description: '',
-                      table: '',
-                      tableOrder: -1,
-                      suggestion_label: selectItem.alias,
-                    },
+            if (selectItem.hasAs && selectItem.alias) {
+              return [
+                {
+                  label: selectItem.alias,
+                  value: {
+                    name: selectItem.alias,
+                    description: '',
+                    table: '',
+                    tableOrder: -1,
+                    suggestion_label: selectItem.alias,
                   },
-                ];
-              }
+                },
+              ];
+            }
 
-              return [];
-            })
-            .flat();
+            return [];
+          })
+          .flat();
 
-        // Remove column duplicates by keeping the column from the table that appears last in the query
-        return sortedUniqBy(
-          orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
-          'label'
-        );
-      });
+      // Remove column duplicates by keeping the column from the table that appears last in the query
+      osquerySchemaOptions.current = sortedUniqBy(
+        orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
+        'label'
+      );
     }, [query]);
 
-    useEffect(() => {
-      Object.keys(formRefs.current).forEach((key) => {
-        if (!value[key]) {
-          delete formRefs.current[key];
+    useLayoutEffect(() => {
+      if (isMounted) {
+        if (!lastItemPath.current && onAdd.current) {
+          onAdd.current();
+
+          return;
         }
-      });
-    }, [value]);
 
-    const handleAddRow = useCallback(
-      (newRow) => {
-        if (newRow?.key && newRow?.value) {
-          setValue(
-            produce((draft) => {
-              draft[newRow.key] = newRow.value;
-
-              return draft;
-            })
-          );
+        if (euiFieldProps?.isDisabled) {
+          return;
         }
-      },
-      [setValue]
-    );
 
-    const handleUpdateRow = useCallback(
-      (currentKey: string) => (updatedRow: FormData) => {
-        if (updatedRow?.key && updatedRow?.value) {
-          setValue(
-            produce((draft) => {
-              if (currentKey !== updatedRow.key) {
-                delete draft[currentKey];
-              }
+        const itemKey = get(formData, `${lastItemPath.current}.key`);
 
-              draft[updatedRow.key] = updatedRow.value;
+        if (itemKey) {
+          const serializedFormData = formDataSerializer();
+          const itemValue =
+            serializedFormData.ecs_mapping && serializedFormData.ecs_mapping[`${itemKey}`]?.field;
 
-              return draft;
-            })
-          );
-        }
-      },
-      [setValue]
-    );
-
-    const handleDeleteRow = useCallback(
-      (key) => {
-        if (key) {
-          setValue(
-            produce((draft) => {
-              if (draft[key]) {
-                delete draft[key];
-              }
-
-              return draft;
-            })
-          );
-
-          if (formRefs.current[key]) {
-            delete formRefs.current[key];
+          if (itemValue && onAdd.current) {
+            onAdd.current();
           }
         }
-      },
-      [setValue]
-    );
+      }
+    }, [euiFieldProps?.isDisabled, formData, formDataSerializer, isMounted, onAdd]);
 
     return (
       <>
@@ -1145,45 +989,31 @@ export const ECSMappingEditorField = React.memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        {Object.entries(value).map(([ecsKey, ecsValue]) => (
-          <ECSMappingEditorForm
-            // eslint-disable-next-line
-            ref={(formRef) => {
-              if (formRef) {
-                formRefs.current[ecsKey] = formRef;
-              }
-            }}
-            key={ecsKey}
-            osquerySchemaOptions={osquerySchemaOptions}
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            defaultValue={{
-              key: ecsKey,
-              value: ecsValue,
-            }}
-            onChange={handleUpdateRow(ecsKey)}
-            onDelete={handleDeleteRow}
-            isDisabled={!!euiFieldProps?.isDisabled}
-          />
-        ))}
-        {!euiFieldProps?.isDisabled && (
-          <ECSMappingEditorForm
-            // eslint-disable-next-line
-            ref={(formRef) => {
-              if (formRef) {
-                formRefs.current.new = formRef;
-              }
-            }}
-            osquerySchemaOptions={osquerySchemaOptions}
-            onAdd={handleAddRow}
-          />
-        )}
+        <UseArray path="ecs_mapping">
+          {({ items, addItem, removeItem }) => {
+            lastItemPath.current = items[items.length - 1]?.path;
+            onAdd.current = addItem;
+
+            return (
+              <>
+                {items.map((item, index) => (
+                  <ECSMappingEditorForm
+                    key={item.id}
+                    osquerySchemaOptions={osquerySchemaOptions.current}
+                    item={item}
+                    isLastItem={index === items.length - 1}
+                    onDelete={removeItem}
+                    isDisabled={!!euiFieldProps?.isDisabled}
+                  />
+                ))}
+              </>
+            );
+          }}
+        </UseArray>
       </>
     );
   },
-  (prevProps, nextProps) =>
-    prevProps.field.value === nextProps.field.value &&
-    prevProps.query === nextProps.query &&
-    deepEqual(prevProps.euiFieldProps, nextProps.euiFieldProps)
+  (prevProps, nextProps) => deepEqual(prevProps.euiFieldProps, nextProps.euiFieldProps)
 );
 
 // eslint-disable-next-line import/no-default-export

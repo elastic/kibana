@@ -7,6 +7,7 @@
  */
 
 import { convertIntervalToUnit } from '../../helpers/unit_to_seconds';
+import { getLastMetric } from '../../helpers/get_last_metric';
 import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
@@ -16,7 +17,7 @@ import { evaluate } from '@kbn/tinymath';
 
 export function mathAgg(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
-    const mathMetric = last(series.metrics);
+    const mathMetric = getLastMetric(series);
     if (mathMetric.type !== 'math') return next(results);
     // Filter the results down to only the ones that match the series.id. Sometimes
     // there will be data from other series mixed in.

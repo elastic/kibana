@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationRangeColor,
+  isRangeAnnotation,
+} from '@kbn/event-annotation-plugin/public';
 import { layerTypes } from '../../../common';
 import type { FramePublicAPI, Visualization } from '../../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -28,6 +32,13 @@ const MIN_DATE = -8640000000000000;
 export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
   defaultMessage: 'Event',
 });
+
+export const defaultRangeAnnotationLabel = i18n.translate(
+  'xpack.lens.xyChart.defaultRangeAnnotationLabel',
+  {
+    defaultMessage: 'Event range',
+  }
+);
 
 export function getStaticDate(dataLayers: XYDataLayerConfig[], frame: FramePublicAPI) {
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
@@ -124,6 +135,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
     : undefined;
 
   let resultAnnotations = [...inputAnnotations] as XYAnnotationLayerConfig['annotations'];
+
   if (!currentConfig) {
     resultAnnotations.push({
       label: defaultAnnotationLabel,
@@ -161,7 +173,9 @@ export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig
     return {
       columnId: annotation.id,
       triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
-      color: annotation?.color || defaultAnnotationColor,
+      color:
+        annotation?.color ||
+        (isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
     };
   });
 };

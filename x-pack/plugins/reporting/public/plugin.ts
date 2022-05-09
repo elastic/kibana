@@ -254,9 +254,9 @@ export class ReportingPublicPlugin
   }
 
   public start(core: CoreStart) {
-    const { notifications } = core;
+    const { notifications, docLinks } = core;
     const apiClient = this.getApiClient(core.http, core.uiSettings);
-    const streamHandler = new StreamHandler(notifications, apiClient, core.theme);
+    const streamHandler = new StreamHandler(notifications, apiClient, core.theme, docLinks);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
       .pipe(

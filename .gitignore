@@ -57,6 +57,7 @@ selenium
 *.swo
 *.out
 package-lock.json
+!/.buildkite/package-lock.json
 .yo-rc.json
 .vscode
 *.sublime-*

@@ -39,6 +39,8 @@ export default class CiStatsJestReporter extends BaseReporter {
   private readonly reportName: string;
   private readonly rootDir: string;
   private startTime: number | undefined;
+  private passCount = 0;
+  private failCount = 0;
 
   private group: CiStatsReportTestsOptions['group'] | undefined;
   private readonly testRuns: CiStatsReportTestsOptions['testRuns'] = [];
@@ -79,6 +81,7 @@ export default class CiStatsJestReporter extends BaseReporter {
       startTime: new Date(this.startTime).toJSON(),
       meta: {},
       durationMs: 0,
+      result: 'skip',
     };
   }
 
@@ -89,6 +92,14 @@ export default class CiStatsJestReporter extends BaseReporter {
 
     let elapsedTime = 0;
     for (const t of testResult.testResults) {
+      const result = t.status === 'failed' ? 'fail' : t.status === 'passed' ? 'pass' : 'skip';
+
+      if (result === 'fail') {
+        this.failCount += 1;
+      } else if (result === 'pass') {
+        this.passCount += 1;
+      }
+
       const startTime = new Date(testResult.perfStats.start + elapsedTime).toJSON();
       elapsedTime += t.duration ?? 0;
       this.testRuns.push({
@@ -97,7 +108,7 @@ export default class CiStatsJestReporter extends BaseReporter {
         seq: this.testRuns.length + 1,
         file: Path.relative(this.rootDir, testResult.testFilePath),
         name: t.title,
-        result: t.status === 'failed' ? 'fail' : t.status === 'passed' ? 'pass' : 'skip',
+        result,
         suites: t.ancestorTitles,
         type: 'test',
         error: t.failureMessages.join('\n\n'),
@@ -107,11 +118,12 @@ export default class CiStatsJestReporter extends BaseReporter {
   }
 
   async onRunComplete() {
-    if (!this.reporter || !this.group || !this.testRuns.length || !this.startTime) {
+    if (!this.reporter || !this.group || !this.startTime) {
       return;
     }
 
     this.group.durationMs = Date.now() - this.startTime;
+    this.group.result = this.failCount ? 'fail' : this.passCount ? 'pass' : 'skip';
 
     await this.reporter.reportTests({
       group: this.group,

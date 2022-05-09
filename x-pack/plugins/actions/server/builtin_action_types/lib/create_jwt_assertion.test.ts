@@ -17,6 +17,8 @@ import { createJWTAssertion } from './create_jwt_assertion';
 const jwtSign = jwt.sign as jest.Mock;
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
+Date.now = jest.fn(() => 0);
+
 describe('createJWTAssertion', () => {
   test('creating a JWT token from provided claims with default values', () => {
     jwtSign.mockReturnValueOnce('123456qwertyjwttoken');
@@ -27,6 +29,28 @@ describe('createJWTAssertion', () => {
       subject: 'test@gmail.com',
     });
 
+    expect(jwtSign).toHaveBeenCalledWith(
+      { aud: '1', exp: 3600, iat: 0, iss: 'someappid', sub: 'test@gmail.com' },
+      { key: 'test', passphrase: '123456' },
+      { algorithm: 'RS256' }
+    );
+    expect(assertion).toMatchInlineSnapshot('"123456qwertyjwttoken"');
+  });
+
+  test('creating a JWT token when private key password is null', () => {
+    jwtSign.mockReturnValueOnce('123456qwertyjwttoken');
+
+    const assertion = createJWTAssertion(mockLogger, 'test', null, {
+      audience: '1',
+      issuer: 'someappid',
+      subject: 'test@gmail.com',
+    });
+
+    expect(jwtSign).toHaveBeenCalledWith(
+      { aud: '1', exp: 3600, iat: 0, iss: 'someappid', sub: 'test@gmail.com' },
+      'test',
+      { algorithm: 'RS256' }
+    );
     expect(assertion).toMatchInlineSnapshot('"123456qwertyjwttoken"');
   });
 
