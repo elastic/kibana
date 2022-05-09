@@ -200,16 +200,20 @@ export const ThrottlingConfigKeyCodec = t.union([
 export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
 
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
-  t.interface({
-    [ConfigKey.IS_PUSH_MONITOR]: t.boolean,
-    [ConfigKey.JOURNEY_ID]: t.string,
-    [ConfigKey.PROJECT_ID]: t.string,
-    [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
-    [ConfigKey.METADATA]: MetadataCodec,
-    [ConfigKey.SOURCE_ZIP_URL]: t.string,
-    [ConfigKey.SOURCE_ZIP_FOLDER]: t.string,
-    [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
-  }),
+  t.union([
+    t.interface({
+      [ConfigKey.METADATA]: MetadataCodec,
+      [ConfigKey.SOURCE_ZIP_URL]: t.string,
+      [ConfigKey.SOURCE_ZIP_FOLDER]: t.string,
+      [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
+    }),
+    t.partial({
+      [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
+      [ConfigKey.JOURNEY_ID]: t.string,
+      [ConfigKey.PROJECT_ID]: t.string,
+      [ConfigKey.IS_PUSH_MONITOR]: t.boolean,
+    }),
+  ]),
   ZipUrlTLSFieldsCodec,
   ZipUrlTLSSensitiveFieldsCodec,
   CommonFieldsCodec,
