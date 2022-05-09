@@ -6,7 +6,7 @@
   },
   "version": "kibana",
   "server": true,
-  "ui": false,
+  "ui": true,
   "requiredPlugins": [
     "usageCollection"
   ],

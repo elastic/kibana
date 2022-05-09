@@ -16,3 +16,9 @@ export const detectCloudServiceMock = mock.detectCloudService;
 jest.doMock('./collectors/cloud/detector', () => ({
   CloudDetector: jest.fn().mockImplementation(() => mock),
 }));
+
+export const registerEbtCountersMock = jest.fn();
+
+jest.doMock('./ebt_counters', () => ({
+  registerEbtCounters: registerEbtCountersMock,
+}));

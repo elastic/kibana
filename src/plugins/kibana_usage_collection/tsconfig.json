@@ -9,6 +9,7 @@
   },
   "include": [
     "common/*",
+    "public/**/**/*",
     "server/**/**/*",
     "../../../typings/*"
   ],
