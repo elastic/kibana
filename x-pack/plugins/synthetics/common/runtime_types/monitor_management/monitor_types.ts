@@ -204,6 +204,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
     [ConfigKey.IS_PUSH_MONITOR]: t.boolean,
     [ConfigKey.JOURNEY_ID]: t.string,
     [ConfigKey.PROJECT_ID]: t.string,
+    [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.SOURCE_ZIP_URL]: t.string,
     [ConfigKey.SOURCE_ZIP_FOLDER]: t.string,

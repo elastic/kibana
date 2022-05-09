@@ -23,11 +23,16 @@ export const PushBrowserMonitorCodec = t.intersection([
     tags: t.array(t.string),
     ignoreHTTPSErrors: t.boolean,
     apmServiceName: t.string,
+    playwrightOptions: t.record(t.string, t.unknown),
+    filter: t.interface({
+      match: t.string,
+    }),
+    params: t.record(t.string, t.unknown),
   }),
 ]);
 
 export const PushMonitorsRequestCodec = t.interface({
-  projectId: t.string,
+  project: t.string,
   keep_stale: t.boolean,
   monitors: t.array(PushBrowserMonitorCodec),
 });

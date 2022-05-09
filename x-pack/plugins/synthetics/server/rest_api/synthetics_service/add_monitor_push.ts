@@ -53,14 +53,14 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
   path: API_URLS.SYNTHETICS_MONITORS_PUSH,
   validate: {
     body: schema.object({
-      projectId: schema.string(),
+      project: schema.string(),
       keep_stale: schema.boolean(),
       monitors: schema.arrayOf(schema.any()),
     }),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
     const monitors = (request.body?.monitors as PushBrowserMonitor[]) || [];
-    const { keep_stale: keepStale, projectId } = request.body || {};
+    const { keep_stale: keepStale, project: projectId } = request.body || {};
     const locations: Locations = (await getServiceLocations(server)).locations;
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
     const staleMonitorsMap = await getAllPushMonitorsForSuite(savedObjectsClient, projectId);

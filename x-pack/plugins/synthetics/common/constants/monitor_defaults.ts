@@ -60,6 +60,7 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   ...DEFAULT_COMMON_FIELDS,
   [ConfigKey.JOURNEY_ID]: '',
   [ConfigKey.PROJECT_ID]: '',
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: '',
   [ConfigKey.IS_PUSH_MONITOR]: false,
   [ConfigKey.METADATA]: {
     script_source: {

@@ -35,9 +35,7 @@ type NormalizedPublicFields = Omit<
   | ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE
   | ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE
   | ConfigKey.ZIP_URL_TLS_VERSION
-  | ConfigKey.JOURNEY_FILTERS_MATCH
   | ConfigKey.JOURNEY_FILTERS_TAGS
-  | ConfigKey.PARAMS
   | ConfigKey.SYNTHETICS_ARGS
   | ConfigKey.PORT
   | ConfigKey.URLS
@@ -91,6 +89,11 @@ export const normalizePushedMonitor = ({
       monitor.ignoreHTTPSErrors || defaultFields[ConfigKey.IGNORE_HTTPS_ERRORS],
     [ConfigKey.SCREENSHOTS]: monitor.screenshots || defaultFields[ConfigKey.SCREENSHOTS],
     [ConfigKey.TAGS]: monitor.tags || defaultFields[ConfigKey.TAGS],
+    [ConfigKey.PLAYWRIGHT_OPTIONS]:
+      JSON.stringify(monitor.playwrightOptions) || defaultFields[ConfigKey.PLAYWRIGHT_OPTIONS],
+    [ConfigKey.PARAMS]: JSON.stringify(monitor.params) || defaultFields[ConfigKey.PARAMS],
+    [ConfigKey.JOURNEY_FILTERS_MATCH]:
+      monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
   };
   return {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -101,11 +104,13 @@ export const normalizePushedMonitor = ({
 export const normalizePushedMonitors = ({
   locations = [],
   monitors = [],
+  projectId,
 }: {
   locations: Locations;
   monitors: PushBrowserMonitor[];
+  projectId: string;
 }) => {
   return monitors.map((monitor) => {
-    return normalizePushedMonitor({ monitor, locations });
+    return normalizePushedMonitor({ monitor, locations, projectId });
   });
 };

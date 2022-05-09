@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/s/${space}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId} AND ${syntheticsMonitorType}.attributes.project_id: ${projectId} `,
+            query: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId} AND ${syntheticsMonitorType}.attributes.project_id: ${projectId}`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           pushMonitors.monitors.map((monitor) => {
-            return deleteMonitor(monitor.id, pushMonitors.projectId);
+            return deleteMonitor(monitor.id, pushMonitors.project);
           }),
         ]);
       }
@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           pushMonitors.monitors.map((monitor) => {
-            return deleteMonitor(monitor.id, pushMonitors.projectId);
+            return deleteMonitor(monitor.id, pushMonitors.project);
           }),
         ]);
       }
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           pushMonitors.monitors.map((monitor) => {
-            return deleteMonitor(monitor.id, pushMonitors.projectId);
+            return deleteMonitor(monitor.id, pushMonitors.project);
           }),
         ]);
       }
@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           pushMonitors.monitors.map((monitor) => {
-            return deleteMonitor(monitor.id, pushMonitors.projectId);
+            return deleteMonitor(monitor.id, pushMonitors.project);
           }),
         ]);
       }
@@ -226,7 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id, pushMonitors.projectId);
+            return deleteMonitor(monitor.id, pushMonitors.project);
           }),
         ]);
       }
@@ -274,7 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id, pushMonitors.projectId);
+            return deleteMonitor(monitor.id, pushMonitors.project);
           }),
         ]);
       }
@@ -322,7 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id, pushMonitors.projectId);
+            return deleteMonitor(monitor.id, pushMonitors.project);
           }),
         ]);
 
@@ -394,16 +394,10 @@ export default function ({ getService }: FtrProviderContext) {
       } finally {
         await Promise.all([
           testMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id, pushMonitors.projectId, 'default', username, password);
+            return deleteMonitor(monitor.id, pushMonitors.project, 'default', username, password);
           }),
         ]);
-        await deleteMonitor(
-          secondMonitor.id,
-          pushMonitors.projectId,
-          SPACE_NAME,
-          username,
-          password
-        );
+        await deleteMonitor(secondMonitor.id, pushMonitors.project, SPACE_NAME, username, password);
         await security.user.delete(username);
         await security.role.delete(roleName);
       }
