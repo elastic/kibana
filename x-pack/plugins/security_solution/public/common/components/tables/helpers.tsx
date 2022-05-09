@@ -156,13 +156,18 @@ export const getRowItemDraggables = ({
   }
 };
 
+export interface OnToggleTopNParams {
+  displayType: 'topN' | null | undefined;
+  selectedItemValue: string | null | undefined;
+}
 interface OverflowItemProps {
   dataProvider?: DataProvider | DataProvider[] | undefined;
   dragDisplayValue?: string;
   field: string;
-  render?: (item: RowItemTypes) => React.ReactNode;
+  render?: (item: string) => React.ReactNode;
   rowItem: string;
   enableOverflowButton?: boolean;
+  onToggleTopN?: (params?: OnToggleTopNParams) => void;
 }
 
 export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
@@ -172,28 +177,28 @@ export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
   render,
   rowItem,
   enableOverflowButton,
-  topNCallback,
+  onToggleTopN,
 }) => {
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const { timelineId: timelineIdFind } = useContext(TimelineContext);
   const [hoverActionsOwnFocus] = useState<boolean>(false);
   const toggleTopN = useCallback(() => {
-    if (topNCallback) {
-      topNCallback({ displayType: 'topN', selectedItemValue: rowItem, selectedItemField: field });
+    if (onToggleTopN) {
+      onToggleTopN({ displayType: 'topN', selectedItemValue: rowItem, selectedItemField: field });
     }
 
     setShowTopN((prevShowTopN) => {
       const newShowTopN = !prevShowTopN;
       return newShowTopN;
     });
-  }, [field, rowItem, topNCallback]);
+  }, [field, rowItem, onToggleTopN]);
 
   const closeTopN = useCallback(() => {
     setShowTopN(false);
-    if (topNCallback) {
-      topNCallback({});
+    if (onToggleTopN) {
+      onToggleTopN();
     }
-  }, [topNCallback]);
+  }, [onToggleTopN]);
 
   return (
     <EuiFlexGroup
