@@ -252,6 +252,13 @@ export class ScreenshotObservableHandler {
     }`.trim();
   }
 
+  private shouldCapturePdf(): boolean {
+    return (
+      this.layout.id === LayoutTypes.PRINT &&
+      (this.options as PdfScreenshotOptions).format === 'pdf'
+    );
+  }
+
   public getScreenshots() {
     return (withRenderComplete: Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
@@ -262,15 +269,14 @@ export class ScreenshotObservableHandler {
             getDefaultElementPosition(this.layout.getViewport(1));
           let screenshots: Screenshot[] = [];
           try {
-            screenshots =
-              this.layout.id === LayoutTypes.PRINT
-                ? await getPdf(
-                    this.driver,
-                    this.eventLogger,
-                    this.getTitle(data.timeRange),
-                    (this.options as PdfScreenshotOptions).logo
-                  )
-                : await getScreenshots(this.driver, this.eventLogger, elements);
+            screenshots = this.shouldCapturePdf()
+              ? await getPdf(
+                  this.driver,
+                  this.eventLogger,
+                  this.getTitle(data.timeRange),
+                  (this.options as PdfScreenshotOptions).logo
+                )
+              : await getScreenshots(this.driver, this.eventLogger, elements);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }
