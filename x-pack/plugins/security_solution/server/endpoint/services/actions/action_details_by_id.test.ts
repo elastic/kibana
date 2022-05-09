@@ -15,72 +15,28 @@ import {
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import {
-  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-  ENDPOINT_ACTIONS_INDEX,
-} from '../../../../common/endpoint/constants';
 import { getActionDetailsById } from '..';
 import { NotFoundError } from '../../errors';
+import {
+  applyActionsEsSearchMock,
+  createActionRequestsEsSearchResultsMock,
+  createActionResponsesEsSearchResultsMock,
+} from './mocks';
 
 describe('When using `getActionDetailsById()', () => {
   let esClient: ElasticsearchClientMock;
   let endpointActionGenerator: EndpointActionGenerator;
-  let fleetActionGenerator: FleetActionGenerator;
   let actionRequests: estypes.SearchResponse<EndpointAction | LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     endpointActionGenerator = new EndpointActionGenerator('seed');
-    fleetActionGenerator = new FleetActionGenerator('seed');
 
-    actionRequests = endpointActionGenerator.toEsSearchResponse<
-      EndpointAction | LogsEndpointAction
-    >([
-      fleetActionGenerator.generateActionEsHit({
-        action_id: '123',
-        agents: ['agent-a'],
-        '@timestamp': '2022-04-27T16:08:47.449Z',
-      }),
-      endpointActionGenerator.generateActionEsHit({
-        EndpointActions: { action_id: '123' },
-        agent: { id: 'agent-a' },
-        '@timestamp': '2022-04-27T16:08:47.449Z',
-      }),
-    ]);
+    actionRequests = createActionRequestsEsSearchResultsMock();
+    actionResponses = createActionResponsesEsSearchResultsMock();
 
-    actionResponses = endpointActionGenerator.toEsSearchResponse<
-      LogsEndpointActionResponse | EndpointActionResponse
-    >([
-      fleetActionGenerator.generateResponseEsHit({
-        action_id: '123',
-        agent_id: 'agent-a',
-        error: '',
-        '@timestamp': '2022-04-30T16:08:47.449Z',
-      }),
-      endpointActionGenerator.generateResponseEsHit({
-        agent: { id: 'agent-a' },
-        EndpointActions: { action_id: '123' },
-        '@timestamp': '2022-04-30T16:08:47.449Z',
-      }),
-    ]);
-
-    esClient.search.mockImplementation(async (params = {}) => {
-      const indexes = Array.isArray(params.index) ? params.index : [params.index];
-
-      if (indexes.includes(AGENT_ACTIONS_INDEX) || indexes.includes(ENDPOINT_ACTIONS_INDEX)) {
-        return actionRequests;
-      } else if (
-        indexes.includes(AGENT_ACTIONS_RESULTS_INDEX) ||
-        indexes.includes(ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN)
-      ) {
-        return actionResponses;
-      }
-
-      return endpointActionGenerator.toEsSearchResponse([]);
-    });
+    applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
   });
 
   it('should return expected output', async () => {
@@ -125,7 +81,7 @@ describe('When using `getActionDetailsById()', () => {
               error: '',
               started_at: expect.any(String),
             },
-            id: '8861a097-71c6-47fb-bfb5-a8e32a612685',
+            id: expect.any(String),
           },
           type: 'fleetResponse',
         },
@@ -146,7 +102,7 @@ describe('When using `getActionDetailsById()', () => {
                 id: 'agent-a',
               },
             },
-            id: '61a09771-c647-4b3f-b5a8-e32a612685f7',
+            id: expect.any(String),
           },
           type: 'response',
         },
@@ -178,6 +134,8 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should throw an error if action id does not exist', async () => {
+    actionRequests.hits.hits = [];
+    (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
     actionRequests = endpointActionGenerator.toEsSearchResponse([]);
 
     await expect(getActionDetailsById(esClient, '123')).rejects.toBeInstanceOf(NotFoundError);
