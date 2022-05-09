@@ -7,8 +7,8 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { RULES_PATH, SecurityPageName } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detections/pages/detection_engine/rules';

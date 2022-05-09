@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import {
-  AllCases,
+  Cases,
   Case,
   FilterOptions,
   QueryParams,
@@ -21,7 +21,7 @@ import * as i18n from './translations';
 import { getCases, patchCase } from './api';
 
 export interface UseGetCasesState {
-  data: AllCases;
+  data: Cases;
   filterOptions: FilterOptions;
   isError: boolean;
   loading: string[];
@@ -39,7 +39,7 @@ export type Action =
   | { type: 'FETCH_INIT'; payload: string }
   | {
       type: 'FETCH_CASES_SUCCESS';
-      payload: AllCases;
+      payload: Cases;
     }
   | { type: 'FETCH_FAILURE'; payload: string }
   | { type: 'FETCH_UPDATE_CASE_SUCCESS' }
@@ -114,11 +114,11 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   sortOrder: 'desc',
 };
 
-export const initialData: AllCases = {
+export const initialData: Cases = {
   cases: [],
-  countClosedCases: null,
-  countInProgressCases: null,
-  countOpenCases: null,
+  countClosedCases: 0,
+  countInProgressCases: 0,
+  countOpenCases: 0,
   page: 0,
   perPage: 0,
   total: 0,

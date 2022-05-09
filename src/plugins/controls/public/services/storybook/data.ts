@@ -7,22 +7,13 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { PluginServiceFactory } from '../../../../presentation_util/public';
-import { DataPublicPluginStart } from '../../../../data/public';
-import { DataViewField, DataView } from '../../../../data_views/common';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { ControlsDataService } from '../data';
-
-let valueSuggestionMethod = ({ field, query }: { field: DataViewField; query: string }) =>
-  Promise.resolve(['storybook', 'default', 'values']);
-export const replaceValueSuggestionMethod = (
-  newMethod: ({ field, query }: { field: DataViewField; query: string }) => Promise<string[]>
-) => (valueSuggestionMethod = newMethod);
 
 export type DataServiceFactory = PluginServiceFactory<ControlsDataService>;
 export const dataServiceFactory: DataServiceFactory = () => ({
-  autocomplete: {
-    getValueSuggestions: valueSuggestionMethod,
-  } as unknown as DataPublicPluginStart['autocomplete'],
   query: {} as unknown as DataPublicPluginStart['query'],
   searchSource: {
     create: () => ({

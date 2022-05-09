@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'maps']);
 
-  describe('Maps app meets ally validations', () => {
+  describe('Maps app Accessibility', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('displays exit full screen logo button', async () => {
-      await testSubjects.click('exitFullScreenModeLogo');
+      await testSubjects.click('exitFullScreenModeButton');
       await a11y.testAppSnapshot();
     });
 

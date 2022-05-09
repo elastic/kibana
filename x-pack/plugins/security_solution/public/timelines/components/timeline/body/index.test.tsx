@@ -38,7 +38,7 @@ jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  const mockCasesContract = jest.requireActual('../../../../../../cases/public/mocks');
+  const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({

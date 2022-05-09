@@ -11,6 +11,7 @@ import React from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -33,7 +34,6 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { GeoJsonWithMeta } from '../vector_source';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { getIsGoldPlus } from '../../../licensed_features';

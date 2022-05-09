@@ -19,8 +19,9 @@ import {
   Plugin,
   PluginInitializerContext,
   IClusterClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
+import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 import {
   ILicense,
   PublicLicense,
@@ -119,6 +120,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       clientPromise,
       pollingFrequency.asMilliseconds()
     );
+
+    registerAnalyticsContextProvider(core.analytics, license$);
 
     core.status.set(getPluginStatus$(license$, this.stop$.asObservable()));
 

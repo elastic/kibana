@@ -4,10 +4,9 @@ exports[`ElasticAgentCardComponent props button 1`] = `
 <RedirectAppLinks
   currentAppId$={
     Observable {
-      "_isScalar": false,
       "source": Subject {
-        "_isScalar": false,
         "closed": false,
+        "currentObservers": null,
         "hasError": false,
         "isStopped": false,
         "observers": Array [],
@@ -30,10 +29,9 @@ exports[`ElasticAgentCardComponent props href 1`] = `
 <RedirectAppLinks
   currentAppId$={
     Observable {
-      "_isScalar": false,
       "source": Subject {
-        "_isScalar": false,
         "closed": false,
+        "currentObservers": null,
         "hasError": false,
         "isStopped": false,
         "observers": Array [],
@@ -56,10 +54,9 @@ exports[`ElasticAgentCardComponent renders 1`] = `
 <RedirectAppLinks
   currentAppId$={
     Observable {
-      "_isScalar": false,
       "source": Subject {
-        "_isScalar": false,
         "closed": false,
+        "currentObservers": null,
         "hasError": false,
         "isStopped": false,
         "observers": Array [],
@@ -81,10 +78,9 @@ exports[`ElasticAgentCardComponent renders with canAccessFleet false 1`] = `
 <RedirectAppLinks
   currentAppId$={
     Observable {
-      "_isScalar": false,
       "source": Subject {
-        "_isScalar": false,
         "closed": false,
+        "currentObservers": null,
         "hasError": false,
         "isStopped": false,
         "observers": Array [],

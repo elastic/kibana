@@ -12,8 +12,8 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   Render,
-} from '../../../../expressions/common';
-import { prepareLogTable, Dimension } from '../../../../visualizations/public';
+} from '@kbn/expressions-plugin/common';
+import { prepareLogTable, Dimension } from '@kbn/visualizations-plugin/public';
 import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
 
@@ -23,6 +23,7 @@ export interface RenderValue {
   visType: ChartType;
   visConfig: VisParams;
   syncColors: boolean;
+  syncTooltips: boolean;
 }
 
 export type VisTypeXyExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -348,6 +349,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         visConfig,
         visData: context,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+        syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       },
     };
   },

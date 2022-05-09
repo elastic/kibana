@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 

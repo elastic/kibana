@@ -6,8 +6,8 @@
  */
 
 import { Logger } from '@kbn/logging';
-import type { IBasePath } from 'kibana/server';
-import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
+import type { IBasePath } from '@kbn/core/server';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';

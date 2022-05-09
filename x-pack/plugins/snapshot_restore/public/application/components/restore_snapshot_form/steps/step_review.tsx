@@ -25,7 +25,7 @@ import {
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { EuiCodeEditor } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
-import { StepProps } from './';
+import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists/collapsible_indices_list';
 
 export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({

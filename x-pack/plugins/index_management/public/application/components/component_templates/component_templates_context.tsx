@@ -14,8 +14,8 @@ import {
   NotificationsSetup,
   CoreStart,
   ExecutionContextStart,
-} from 'src/core/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
+} from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);

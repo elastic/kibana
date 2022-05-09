@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { CorrelationsParams } from '../../../../common/correlations/types';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
@@ -16,7 +16,7 @@ import { splitAllSettledPromises } from '../utils';
 import {
   fetchFailedTransactionsCorrelationPValues,
   fetchTransactionDurationHistogramRangeSteps,
-} from './index';
+} from '.';
 
 export const fetchPValues = async (
   esClient: ElasticsearchClient,

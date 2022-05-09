@@ -6,20 +6,20 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   IEsSearchRequest,
   IEsSearchResponse,
   ISearchStrategy,
   SearchStrategyDependencies,
-} from 'src/plugins/data/server';
-import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+} from '@kbn/data-plugin/server';
+import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
 import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
 import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
 import { createLogViewsServiceStartMock } from '../log_views/log_views_service.mock';
@@ -53,8 +53,8 @@ describe('LogEntries search strategy', () => {
       logViews: logViewsMock,
     });
 
-    const response = await logEntriesSearchStrategy
-      .search(
+    const response = await lastValueFrom(
+      logEntriesSearchStrategy.search(
         {
           params: {
             sourceId: 'SOURCE_ID',
@@ -66,7 +66,7 @@ describe('LogEntries search strategy', () => {
         {},
         mockDependencies
       )
-      .toPromise();
+    );
 
     expect(logViewsMock.getScopedClient).toHaveBeenCalled();
     expect(logViewsClientMock.getResolvedLogView).toHaveBeenCalled();
@@ -138,8 +138,8 @@ describe('LogEntries search strategy', () => {
       esRequestId: 'ASYNC_REQUEST_ID',
     });
 
-    const response = await logEntriesSearchStrategy
-      .search(
+    const response = await lastValueFrom(
+      logEntriesSearchStrategy.search(
         {
           id: requestId,
           params: {
@@ -152,7 +152,7 @@ describe('LogEntries search strategy', () => {
         {},
         mockDependencies
       )
-      .toPromise();
+    );
 
     expect(logViewsMock.getScopedClient).toHaveBeenCalled();
     expect(logViewsClientMock.getResolvedLogView).toHaveBeenCalled();

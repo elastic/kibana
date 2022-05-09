@@ -6,21 +6,24 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { CSSObject } from '@emotion/react';
+import { euiLightVars } from '@kbn/ui-theme';
+import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
   isDisplayedAbove: boolean;
 }
 
 export const useStyles = ({ isDisplayedAbove }: StylesDeps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, colors, font } = euiTheme;
+    const { size, font } = euiTheme;
 
-    const buttonBackgroundColor = colors.primary;
+    const buttonStyle = {
+      color: euiLightVars.euiColorEmptyShade,
+      backgroundColor: euiLightVars.euiColorPrimaryText,
+    };
 
     const container: CSSObject = {
       position: 'absolute',
@@ -41,18 +44,18 @@ export const useStyles = ({ isDisplayedAbove }: StylesDeps) => {
 
     if (isDisplayedAbove) {
       container.top = 0;
-      container.background = `linear-gradient(180deg, ${theme.euiColorLightestShade} 0%, transparent 100%)`;
+      container.background = `linear-gradient(180deg, ${euiVars.euiColorLightestShade} 0%, transparent 100%)`;
     } else {
       container.bottom = 0;
-      container.background = `linear-gradient(360deg, ${theme.euiColorLightestShade} 0%, transparent 100%)`;
+      container.background = `linear-gradient(360deg, ${euiVars.euiColorLightestShade} 0%, transparent 100%)`;
     }
 
     return {
       container,
       jumpBackBadge,
-      buttonBackgroundColor,
+      buttonStyle,
     };
-  }, [isDisplayedAbove, euiTheme]);
+  }, [isDisplayedAbove, euiTheme, euiVars]);
 
   return cached;
 };

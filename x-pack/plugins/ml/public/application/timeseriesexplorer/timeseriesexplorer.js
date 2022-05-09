@@ -32,7 +32,7 @@ import {
   EuiAccordion,
   EuiBadge,
 } from '@elastic/eui';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';

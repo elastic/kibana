@@ -18,7 +18,7 @@ export const PLATFORM_OPTIONS: Array<{
   {
     id: 'linux',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux', {
-      defaultMessage: 'Linux',
+      defaultMessage: 'Linux Tar',
     }),
     'data-test-subj': 'platformTypeLinux',
   },

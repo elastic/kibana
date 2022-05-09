@@ -12,7 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '../..';
 
 const createSearchResponse = (count: number): estypes.SearchResponse => {
   return {

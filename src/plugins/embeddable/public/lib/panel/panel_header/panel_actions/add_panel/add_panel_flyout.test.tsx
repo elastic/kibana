@@ -18,7 +18,7 @@ import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/cont
 import { ContainerInput } from '../../../../containers';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import { coreMock } from '../../../../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { embeddablePluginMock } from '../../../../../mocks';
 

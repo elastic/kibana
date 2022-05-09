@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/server';
-import { KibanaFeature } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/server';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+
 import { Actions } from '../../actions';
 import { FeaturePrivilegeCasesBuilder } from './cases';
 

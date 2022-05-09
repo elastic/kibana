@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '../../../plugins/alerting/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 
 export const ALERTING_EXAMPLE_APP_ID = 'AlertingExample';
 

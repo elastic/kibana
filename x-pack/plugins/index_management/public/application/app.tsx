@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { UIM_APP_LOAD } from '../../common/constants';
 import { useExecutionContext } from '../shared_imports';

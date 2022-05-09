@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { TimeSeriesQuery } from '@kbn/triggers-actions-ui-plugin/server';
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
-import { TimeSeriesQuery } from '../../../../../../../plugins/triggers_actions_ui/server';
 
 import { createEsDocuments } from './create_test_data';
 

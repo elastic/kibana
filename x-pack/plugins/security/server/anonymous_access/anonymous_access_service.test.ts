@@ -7,15 +7,15 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
-import { spacesMock } from '../../../spaces/server/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
 import { AnonymousAccessService } from './anonymous_access_service';

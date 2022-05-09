@@ -7,9 +7,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { TelemetryCounter } from 'src/core/server';
+import type { TelemetryCounter } from '@kbn/core/server';
+import { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
 import { FtrProviderContext } from '../services';
-import { Action } from '../__fixtures__/plugins/analytics_plugin_a/server/custom_shipper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   ): Promise<TelemetryCounter[]> => {
     const resp = await supertest
       .get(`/internal/analytics_plugin_a/stats`)
-      .query({ takeNumberOfCounters })
+      .query({ takeNumberOfCounters, eventType: 'test-plugin-lifecycle' })
       .set('kbn-xsrf', 'xxx')
       .expect(200);
 
@@ -63,8 +63,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ebtServerHelper.setOptIn(true);
 
       const actions = await getActions(3);
+
       // Validating the remote PID because that's the only field that it's added by the FTR plugin.
       const context = actions[1].meta;
+      expect(context).to.have.property('pid');
+      expect(context.pid).to.be.a('number');
+
+      // Some context providers emit very early. We are OK with that.
+      const initialContext = actions[2].meta[0].context;
+
+      const reportEventContext = actions[2].meta[1].context;
       expect(context).to.have.property('pid');
       expect(context.pid).to.be.a('number');
 
@@ -77,13 +85,13 @@ export default function ({ getService }: FtrProviderContext) {
             {
               timestamp: actions[2].meta[0].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context: {},
+              context: initialContext,
               properties: { plugin: 'analyticsPluginA', step: 'setup' },
             },
             {
               timestamp: actions[2].meta[1].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context,
+              context: reportEventContext,
               properties: { plugin: 'analyticsPluginA', step: 'start' },
             },
           ],
@@ -96,13 +104,13 @@ export default function ({ getService }: FtrProviderContext) {
         {
           timestamp: actions[2].meta[0].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context: {},
+          context: initialContext,
           properties: { plugin: 'analyticsPluginA', step: 'setup' },
         },
         {
           timestamp: actions[2].meta[1].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context,
+          context: reportEventContext,
           properties: { plugin: 'analyticsPluginA', step: 'start' },
         },
       ]);

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ConfigDeprecationFactory, ConfigDeprecation } from 'kibana/server';
+import { ConfigDeprecationFactory, ConfigDeprecation } from '@kbn/core/server';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
 
 /**

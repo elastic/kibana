@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import type { Adapters } from 'src/plugins/inspector/public';
+import type { Adapters } from '@kbn/inspector-plugin/public';
 import { MapDetails } from './map_details';
 import { Stats } from './types';
 

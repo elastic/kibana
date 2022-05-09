@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { TypedLensByValueInput } from '../../../../../../lens/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   parseCommentString,

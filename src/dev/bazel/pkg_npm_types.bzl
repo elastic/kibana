@@ -142,7 +142,7 @@ pkg_npm_types = rule(
     "_packager": attr.label(
       doc = "Target that executes the npm types package assembler binary",
       executable = True,
-      cfg = "host",
+      cfg = "target",
       default = Label("//packages/kbn-type-summarizer:bazel-cli"),
     ),
   },

@@ -6,27 +6,32 @@
  */
 
 import { uniq, map } from 'lodash';
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
   AgentService,
-} from '../../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import type {
   GetAgentPoliciesResponseItem,
   PackagePolicy,
   AgentPolicy,
   ListResult,
-} from '../../../../fleet/common';
-import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
+} from '@kbn/fleet-plugin/common';
+import { CspRuleSchema } from '../../../common/schemas/csp_rule';
+import {
+  BENCHMARKS_ROUTE_PATH,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  cspRuleAssetSavedObjectType,
+} from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
   benchmarksInputSchema,
   BenchmarksQuerySchema,
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark, CspRulesStatus } from '../../../common/types';
 import { isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 
@@ -41,7 +46,7 @@ const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): str
   return kquery;
 };
 
-export const getPackagePolicies = (
+export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
@@ -91,10 +96,49 @@ const addRunningAgentToAgentPolicy = async (
     )
   );
 };
+export interface RulesStatusAggregation {
+  enabled_status: {
+    doc_count: number;
+  };
+}
+export const getCspRulesStatus = (
+  soClient: SavedObjectsClientContract,
+  packagePolicy: PackagePolicy
+): Promise<SavedObjectsFindResponse<CspRuleSchema, RulesStatusAggregation>> => {
+  const cspRules = soClient.find<CspRuleSchema, RulesStatusAggregation>({
+    type: cspRuleAssetSavedObjectType,
+    filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
+    aggs: {
+      enabled_status: {
+        filter: {
+          term: {
+            [`${cspRuleAssetSavedObjectType}.attributes.enabled`]: true,
+          },
+        },
+      },
+    },
+    perPage: 0,
+  });
+  return cspRules;
+};
+
+export const addPackagePolicyCspRules = async (
+  soClient: SavedObjectsClientContract,
+  packagePolicy: PackagePolicy
+): Promise<CspRulesStatus> => {
+  const rules = await getCspRulesStatus(soClient, packagePolicy);
+  const packagePolicyRules = {
+    all: rules.total,
+    enabled: rules.aggregations?.enabled_status.doc_count || 0,
+    disabled: rules.total - (rules.aggregations?.enabled_status.doc_count || 0),
+  };
+  return packagePolicyRules;
+};
 
 export const createBenchmarkEntry = (
   agentPolicy: GetAgentPoliciesResponseItem,
-  packagePolicy: PackagePolicy
+  packagePolicy: PackagePolicy,
+  cspRulesStatus: CspRulesStatus
 ): Benchmark => ({
   package_policy: {
     id: packagePolicy.id,
@@ -118,26 +162,33 @@ export const createBenchmarkEntry = (
     name: agentPolicy.name,
     agents: agentPolicy.agents,
   },
+  rules: cspRulesStatus,
 });
 
 const createBenchmarks = (
+  soClient: SavedObjectsClientContract,
   agentPolicies: GetAgentPoliciesResponseItem[],
-  packagePolicies: PackagePolicy[]
-): Benchmark[] =>
-  packagePolicies.flatMap((packagePolicy) => {
-    return agentPolicies
-      .map((agentPolicy) => {
-        const agentPkgPolicies = agentPolicy.package_policies as string[];
-        const isExistsOnAgent = agentPkgPolicies.find(
-          (pkgPolicy) => pkgPolicy === packagePolicy.id
-        );
-        if (isExistsOnAgent) {
-          return createBenchmarkEntry(agentPolicy, packagePolicy);
-        }
-        return;
-      })
-      .filter(isNonNullable);
-  });
+  cspPackagePolicies: PackagePolicy[]
+): Promise<Benchmark[]> => {
+  const cspPackagePoliciesMap = new Map(
+    cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
+  );
+  return Promise.all(
+    agentPolicies.flatMap((agentPolicy) => {
+      const cspPackagesOnAgent = agentPolicy.package_policies
+        .map((pckPolicyId) => {
+          if (typeof pckPolicyId === 'string') return cspPackagePoliciesMap.get(pckPolicyId);
+        })
+        .filter(isNonNullable);
+      const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
+        const cspRulesStatus = await addPackagePolicyCspRules(soClient, cspPackage);
+        const benchmark = createBenchmarkEntry(agentPolicy, cspPackage, cspRulesStatus);
+        return benchmark;
+      });
+      return benchmarks;
+    })
+  );
+};
 
 export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
@@ -146,12 +197,12 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
       validate: { query: benchmarksInputSchema },
     },
     async (context, request, response) => {
-      if (!context.fleet.authz.fleet.all) {
+      if (!(await context.fleet).authz.fleet.all) {
         return response.forbidden();
       }
 
       try {
-        const soClient = context.core.savedObjects.client;
+        const soClient = (await context.core).savedObjects.client;
         const { query } = request;
 
         const agentService = cspContext.service.agentService;
@@ -162,24 +213,29 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
           throw new Error(`Failed to get Fleet services`);
         }
 
-        const packagePolicies = await getPackagePolicies(
+        const cspPackagePolicies = await getCspPackagePolicies(
           soClient,
           packagePolicyService,
-          CIS_KUBERNETES_PACKAGE_NAME,
+          CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
           query
         );
 
         const agentPolicies = await getAgentPolicies(
           soClient,
-          packagePolicies.items,
+          cspPackagePolicies.items,
           agentPolicyService
         );
+
         const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
-        const benchmarks = createBenchmarks(enrichAgentPolicies, packagePolicies.items);
+        const benchmarks = await createBenchmarks(
+          soClient,
+          enrichAgentPolicies,
+          cspPackagePolicies.items
+        );
 
         return response.ok({
           body: {
-            ...packagePolicies,
+            ...cspPackagePolicies,
             items: benchmarks,
           },
         });

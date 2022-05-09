@@ -15,12 +15,8 @@ import apm from 'elastic-apm-node';
 import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity, defaults, flow } from 'lodash';
-import {
-  Logger,
-  SavedObjectsErrorHelpers,
-  ExecutionContextStart,
-} from '../../../../../src/core/server';
-import { UsageCounter } from '../../../../../src/plugins/usage_collection/server';
+import { Logger, SavedObjectsErrorHelpers, ExecutionContextStart } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Middleware } from '../lib/middleware';
 import {
   asOk,

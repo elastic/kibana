@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
-import { Datatable } from '../../../../expressions';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { Datatable } from '@kbn/expressions-plugin';
 import { createMockVisData } from '../mocks';
 import { generateFormatters, getAvailableFormatter, getFormatter } from './formatters';
 import { BucketColumns } from '../../common/types';

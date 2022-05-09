@@ -6,7 +6,11 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { ActionFactoryRegistry } from '../types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { SavedObjectReference } from '@kbn/core/types';
+import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import { DrilldownDefinition } from '../drilldowns';
 import {
   ActionFactory,
   ActionFactoryDefinition,
@@ -14,11 +18,7 @@ import {
   BaseActionFactoryContext,
   SerializedEvent,
 } from '../dynamic_actions';
-import { DrilldownDefinition } from '../drilldowns';
-import { ILicense } from '../../../licensing/common/types';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
-import { SavedObjectReference } from '../../../../../src/core/types';
-import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
+import { ActionFactoryRegistry } from '../types';
 
 import { DynamicActionsState } from '../../common/types';
 

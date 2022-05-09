@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { ManagementContainer } from './index';
-import '../../common/mock/match_media.ts';
+import { ManagementContainer } from '.';
+import '../../common/mock/match_media';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { endpointPageHttpMock } from './endpoint_hosts/mocks';

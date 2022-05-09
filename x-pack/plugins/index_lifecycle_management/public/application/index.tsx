@@ -14,8 +14,8 @@ import {
   ApplicationStart,
   UnmountCallback,
   CoreTheme,
-} from 'src/core/public';
-import { DocLinksStart, ExecutionContextStart } from 'kibana/public';
+} from '@kbn/core/public';
+import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
 import {
   CloudSetup,

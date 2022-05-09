@@ -6,13 +6,9 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from 'src/core/public';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/public';
-import {
-  DataView,
-  DataViewAttributes,
-  DataViewsContract,
-} from '../../../../../../../src/plugins/data_views/public';
+import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { DataView, DataViewAttributes, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { matchAllQuery } from '../../common';
 

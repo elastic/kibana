@@ -6,12 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsType, SavedObjectsValidationMap } from '../../../../../src/core/server';
-import {
-  type CspRuleSchema,
-  cspRuleSchema,
-  cspRuleAssetSavedObjectType,
-} from '../../common/schemas/csp_rule';
+import type { SavedObjectsType, SavedObjectsValidationMap } from '@kbn/core/server';
+import { cspRuleAssetSavedObjectType } from '../../common/constants';
+import { type CspRuleSchema, cspRuleSchema } from '../../common/schemas/csp_rule';
 
 const validationMap: SavedObjectsValidationMap = {
   '1.0.0': cspRuleSchema,
@@ -29,8 +26,22 @@ export const ruleAssetSavedObjectMappings: SavedObjectsType<CspRuleSchema>['mapp
         },
       },
     },
+    package_policy_id: {
+      type: 'keyword',
+    },
+    policy_id: {
+      type: 'keyword',
+    },
     description: {
       type: 'text',
+    },
+    enabled: {
+      type: 'boolean',
+      fields: {
+        keyword: {
+          type: 'keyword', // sort
+        },
+      },
     },
   },
 };

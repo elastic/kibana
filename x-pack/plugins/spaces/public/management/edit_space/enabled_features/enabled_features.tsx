@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import type { KibanaFeatureConfig } from '../../../../../features/public';
 import type { Space } from '../../../../common';
 import { SectionPanel } from '../section_panel';
 import { FeatureTable } from './feature_table';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../../alerting/server/mocks';
+import dateMath from '@kbn/datemath';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { eqlExecutor } from './eql';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryListMock } from '../../../../../../lists/common/schemas/types/entry_list.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
 import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schemas.mock';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';

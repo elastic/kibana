@@ -9,13 +9,13 @@
 import { ReactElement } from 'react';
 import React from 'react';
 
-import { ControlGroupInput } from '../types';
-import { pluginServices } from '../../services';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   ReduxContainerContextServices,
   ReduxEmbeddableContext,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
+import { ControlGroupInput } from '../types';
+import { pluginServices } from '../../services';
 
 /**
  * The overlays service creates its divs outside the flow of the component. This necessitates

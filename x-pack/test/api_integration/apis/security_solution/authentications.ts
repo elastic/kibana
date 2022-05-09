@@ -12,7 +12,7 @@ import {
   UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
   UsersQueries,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 

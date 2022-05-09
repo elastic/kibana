@@ -140,6 +140,7 @@ const TopNComponent: React.FC<Props> = ({
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
+            queryType="topN"
             showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}

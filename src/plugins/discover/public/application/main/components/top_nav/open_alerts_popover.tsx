@@ -8,11 +8,11 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart } from 'kibana/public';
+import { I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiLink, EuiContextMenu, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ISearchSource } from '../../../../../../data/common';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { ISearchSource } from '@kbn/data-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { updateSearchSource } from '../../utils/update_search_source';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';

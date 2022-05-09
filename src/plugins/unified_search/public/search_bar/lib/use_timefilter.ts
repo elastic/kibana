@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { DataPublicPluginStart, TimeRange, RefreshInterval } from '../../../../data/public';
+import { DataPublicPluginStart, TimeRange, RefreshInterval } from '@kbn/data-plugin/public';
 
 interface UseTimefilterProps {
   dateRangeFrom?: string;

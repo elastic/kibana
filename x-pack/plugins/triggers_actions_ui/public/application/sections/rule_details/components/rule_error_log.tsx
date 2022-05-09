@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -20,12 +20,12 @@ import {
   EuiTableSortingType,
   EuiBasicTableColumn,
 } from '@elastic/eui';
+import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
-import { IExecutionErrors } from '../../../../../../alerting/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,

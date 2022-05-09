@@ -17,7 +17,7 @@ import {
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
 
-import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
+import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RuleStep,
   RuleStepProps,

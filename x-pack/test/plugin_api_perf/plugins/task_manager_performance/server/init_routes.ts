@@ -13,12 +13,9 @@ import {
   IKibanaResponse,
   IRouter,
   CoreSetup,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { range, chunk } from 'lodash';
-import {
-  TaskManagerStartContract,
-  ConcreteTaskInstance,
-} from '../../../../../plugins/task_manager/server';
+import { TaskManagerStartContract, ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PerfApi, PerfResult } from './types';
 
 const scope = 'perf-testing';

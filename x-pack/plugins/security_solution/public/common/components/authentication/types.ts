@@ -6,26 +6,10 @@
  */
 
 import { AuthenticationsEdges } from '../../../../common/search_strategy';
+import { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
 import { Columns } from '../paginated_table';
 
-export type AuthTableColumns =
-  | [
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>
-    ]
-  | [
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>,
-      Columns<AuthenticationsEdges>
-    ];
+export type AuthTableColumns = Array<Columns<AuthenticationsEdges>>;
+export interface AuthenticationsUserTableProps extends UsersComponentsQueryProps {
+  userName?: string;
+}

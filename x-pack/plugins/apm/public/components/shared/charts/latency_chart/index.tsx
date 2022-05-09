@@ -13,13 +13,13 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
+import { TimeseriesChart } from '../timeseries_chart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../../../shared/charts/transaction_charts/helper';
-import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
-import * as urlHelpers from '../../../shared/links/url_helpers';
+} from '../transaction_charts/helper';
+import { MLHeader } from '../transaction_charts/ml_header';
+import * as urlHelpers from '../../links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';

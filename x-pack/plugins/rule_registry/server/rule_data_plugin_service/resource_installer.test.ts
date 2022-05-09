@@ -11,7 +11,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,

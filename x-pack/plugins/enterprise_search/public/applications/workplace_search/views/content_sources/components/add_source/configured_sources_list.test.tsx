@@ -24,12 +24,12 @@ describe('ConfiguredSourcesList', () => {
   it('renders', () => {
     const wrapper = shallow(<ConfiguredSourcesList {...props} />);
 
-    expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(16);
+    expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(20);
     expect(wrapper.find('[data-test-subj="AccountOnlyTooltip"]')).toHaveLength(2);
-    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(19);
+    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(23);
   });
 
-  it('does not show connect button for a connected external source', () => {
+  it('does show connect button for a connected external source', () => {
     const wrapper = shallow(
       <ConfiguredSourcesList
         {...{
@@ -38,7 +38,7 @@ describe('ConfiguredSourcesList', () => {
         }}
       />
     );
-    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(0);
+    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(1);
   });
 
   it('does show connect button for an unconnected external source', () => {

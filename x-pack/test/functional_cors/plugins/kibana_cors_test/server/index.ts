@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { CorsTestPlugin } from './plugin';
 import { configSchema, ConfigSchema } from './config';
 

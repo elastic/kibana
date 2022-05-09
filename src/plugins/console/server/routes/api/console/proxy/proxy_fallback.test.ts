@@ -9,7 +9,7 @@
 import { duration } from 'moment';
 import { getProxyRouteHandlerDeps } from './mocks';
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import * as requestModule from '../../../../lib/proxy_request';
 import { createHandler } from './create_handler';
 

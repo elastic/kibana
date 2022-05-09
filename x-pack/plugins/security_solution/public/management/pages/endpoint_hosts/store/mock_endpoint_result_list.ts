@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
+import {
+  GetAgentPoliciesResponse,
+  GetAgentPoliciesResponseItem,
+  GetPackagesResponse,
+  GetAgentsResponse,
+} from '@kbn/fleet-plugin/common/types/rest_spec';
 import {
   GetHostPolicyResponse,
   HostInfo,
@@ -21,12 +27,6 @@ import {
   INGEST_API_PACKAGE_POLICIES,
   INGEST_API_FLEET_AGENTS,
 } from '../../../services/policies/ingest';
-import {
-  GetAgentPoliciesResponse,
-  GetAgentPoliciesResponseItem,
-  GetPackagesResponse,
-  GetAgentsResponse,
-} from '../../../../../../fleet/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
 import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
 import {

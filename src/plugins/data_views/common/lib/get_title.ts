@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '../../../../core/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../constants';
 import { DataViewAttributes } from '../types';
 

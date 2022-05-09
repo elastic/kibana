@@ -17,7 +17,7 @@ import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules'
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { dismissCallOut, getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
@@ -26,7 +26,8 @@ describe('All rules - read only', () => {
   before(() => {
     cleanKibana();
     createCustomRule(getNewRule(), '1');
-    loginAndWaitForPageWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.reader);
+    login(ROLES.reader);
+    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.reader);
     waitForRulesTableToBeLoaded();
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });

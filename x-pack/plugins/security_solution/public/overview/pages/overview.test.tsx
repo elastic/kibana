@@ -16,7 +16,7 @@ import {
   useMessagesStorage,
   UseMessagesStorage,
 } from '../../common/containers/local_storage/use_messages_storage';
-import { Overview } from './index';
+import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
@@ -27,7 +27,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import { EndpointPrivileges } from '../../../common/endpoint/types';
 import { useHostRiskScore } from '../../risk_score/containers';
-import { mockCasesContract } from '../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
 const mockNavigateToApp = jest.fn();

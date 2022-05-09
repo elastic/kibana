@@ -20,11 +20,11 @@ import {
 import moment from 'moment';
 import React, { Fragment } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
-} from 'src/core/public';
+} from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
 import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';

@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { createHash } from 'crypto';
 import { once } from 'lodash';
-import { HttpResources, HttpResponseOptions, PackageInfo } from '../../../../../src/core/server';
+import { HttpResources, HttpResponseOptions, PackageInfo } from '@kbn/core/server';
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;

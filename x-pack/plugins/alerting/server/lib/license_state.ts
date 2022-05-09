@@ -11,8 +11,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { assertNever } from '@kbn/std';
 import { capitalize } from 'lodash';
 import { Observable, Subscription } from 'rxjs';
-import { LicensingPluginStart } from '../../../licensing/server';
-import { ILicense, LicenseType } from '../../../licensing/common/types';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 import {

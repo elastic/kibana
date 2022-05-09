@@ -6,7 +6,7 @@
  */
 
 import { buildAuthenticationsHistogramQuery } from './query.authentications_histogram.dsl';
-import { mockOptions, expectedDsl } from './__mocks__/';
+import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildAuthenticationsHistogramQuery', () => {
   test('build query from options correctly', () => {

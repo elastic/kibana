@@ -14,8 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
-import { PersistedState } from '../../../../../../visualizations/public';
-import { IInterpreterRenderHandlers } from '../../../../../../expressions/public';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
 import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';

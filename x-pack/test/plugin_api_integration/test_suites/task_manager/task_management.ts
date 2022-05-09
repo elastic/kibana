@@ -8,13 +8,10 @@
 import { random, times } from 'lodash';
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
+import { DEFAULT_MAX_WORKERS, DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
-import {
-  DEFAULT_MAX_WORKERS,
-  DEFAULT_POLL_INTERVAL,
-} from '../../../../plugins/task_manager/server/config';
-import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 const {
   task: { properties: taskManagerIndexMapping },
@@ -56,8 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  // Failing: See https://github.com/elastic/kibana/issues/128065
-  describe.skip('scheduling and running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -828,7 +824,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
     });
 
-    async function expectReschedule(
+    function expectReschedule(
       originalRunAt: number,
       task: SerializedConcreteTaskInstance<any, any>,
       expectedDiff: number

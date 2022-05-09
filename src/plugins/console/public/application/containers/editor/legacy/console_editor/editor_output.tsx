@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { VectorTile } from '@mapbox/vector-tile';
+import Protobuf from 'pbf';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
+import { convertMapboxVectorTileToJson } from './mapbox_vector_tile';
 
 // Ensure the modes we might switch to dynamically are available
 import 'brace/mode/text';
@@ -46,7 +48,7 @@ function modeForContentType(contentType?: string) {
   if (!contentType) {
     return 'ace/mode/text';
   }
-  if (isJSONContentType(contentType)) {
+  if (isJSONContentType(contentType) || isMapboxVectorTile(contentType)) {
     // Using hjson will allow us to use comments in editor output and solves the problem with error markers
     return 'ace/mode/hjson';
   } else if (contentType.indexOf('application/yaml') >= 0) {
@@ -86,15 +88,19 @@ function EditorOutputUI() {
         data
           .map((result) => {
             const { value, contentType } = result.response;
+
+            let editorOutput;
             if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
-              return safeExpandLiteralStrings(value as string);
+              editorOutput = safeExpandLiteralStrings(value as string);
+            } else if (isMapboxVectorTile(contentType)) {
+              const vectorTile = new VectorTile(new Protobuf(value as ArrayBuffer));
+              const vectorTileJson = convertMapboxVectorTileToJson(vectorTile);
+              editorOutput = safeExpandLiteralStrings(vectorTileJson as string);
+            } else {
+              editorOutput = value;
             }
-            if (isMapboxVectorTile(contentType)) {
-              return i18n.translate('console.outputCannotPreviewBinaryData', {
-                defaultMessage: 'Cannot preview binary data.',
-              });
-            }
-            return value;
+
+            return editorOutput;
           })
           .join('\n'),
         mode

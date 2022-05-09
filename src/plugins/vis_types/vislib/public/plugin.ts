@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { LEGACY_PIE_CHARTS_LIBRARY } from '../../pie/common/index';
-import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../../heatmap/common/index';
-import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../../gauge/common/index';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LEGACY_PIE_CHARTS_LIBRARY } from '@kbn/vis-type-pie-plugin/common';
+import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
+import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
 import { heatmapVisTypeDefinition } from './heatmap';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';

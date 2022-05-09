@@ -21,7 +21,7 @@ import { asTaskPollingCycleEvent, asTaskRunEvent, TaskPersistence } from './task
 import { TaskRunResult } from './task_running';
 import { TaskPoolRunResult } from './task_pool';
 import { TaskPoolMock } from './task_pool.mock';
-import { executionContextServiceMock } from '../../../../src/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 

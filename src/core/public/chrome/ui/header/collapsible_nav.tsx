@@ -26,7 +26,7 @@ import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { OnIsLockedUpdate } from './';
+import { OnIsLockedUpdate } from '.';
 import {
   createEuiListItem,
   createRecentNavLink,
@@ -85,7 +85,7 @@ interface Props {
   button: EuiCollapsibleNavProps['button'];
 }
 
-const overviewIDsToHide = ['kibanaOverview', 'enterpriseSearch'];
+const overviewIDsToHide = ['kibanaOverview'];
 const overviewIDs = [
   ...overviewIDsToHide,
   'observability-overview',

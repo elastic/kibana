@@ -41,8 +41,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
               ...job.layout,
               // TODO: We do not do a runtime check for supported layout id types for now. But technically
               // we should.
-              id: job.layout?.id as PngScreenshotOptions['layout']['id'],
-            },
+              id: job.layout?.id,
+            } as PngScreenshotOptions['layout'],
           });
         }),
         tap(({ buffer }) => stream.write(buffer)),
@@ -56,6 +56,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
       );
 
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };

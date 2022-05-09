@@ -7,15 +7,15 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
-import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
+import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { DataViewField } from './fields';
-import { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
 
 export type { QueryDslQueryContainer };
 

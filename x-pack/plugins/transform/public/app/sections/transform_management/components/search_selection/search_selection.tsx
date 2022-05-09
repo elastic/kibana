@@ -9,7 +9,7 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
-import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SearchSelectionProps {

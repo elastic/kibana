@@ -10,14 +10,14 @@ import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-import { pluginServices } from '../../services';
-import { ControlEditorProps } from '../../types';
-import { DataViewListItem, DataView } from '../../../../data_views/common';
+import { DataViewListItem, DataView } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
   withSuspense,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
+import { pluginServices } from '../../services';
+import { ControlEditorProps } from '../../types';
 import { TimeSliderStrings } from './time_slider_strings';
 
 interface TimeSliderEditorState {
@@ -80,10 +80,13 @@ export const TimeSliderEditor = ({
           selectedDataViewId={dataView?.id}
           onChangeDataViewId={(dataViewId) => {
             setLastUsedDataViewId?.(dataViewId);
+            if (dataViewId === dataView?.id) return;
+
             onChange({ dataViewId });
-            get(dataViewId).then((newDataView) =>
-              setState((s) => ({ ...s, dataView: newDataView }))
-            );
+            setState((s) => ({ ...s, fieldName: undefined }));
+            get(dataViewId).then((newDataView) => {
+              setState((s) => ({ ...s, dataView: newDataView }));
+            });
           }}
           trigger={{
             label: state.dataView?.title ?? TimeSliderStrings.editor.getNoDataViewTitle(),

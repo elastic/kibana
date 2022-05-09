@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { NetworkContainer } from './pages';
 
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { NETWORK_PATH } from '../../common/constants';
 

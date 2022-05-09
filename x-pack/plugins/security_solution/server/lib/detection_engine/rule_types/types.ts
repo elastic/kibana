@@ -10,15 +10,20 @@ import { Moment } from 'moment';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { RuleExecutorOptions, RuleType } from '../../../../../alerting/server';
+import { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeState,
   WithoutReservedActionGroups,
-} from '../../../../../alerting/common';
-import { ListClient } from '../../../../../lists/server';
-import { PersistenceServices, IRuleDataClient } from '../../../../../rule_registry/server';
+} from '@kbn/alerting-plugin/common';
+import { ListClient } from '@kbn/lists-plugin/server';
+import {
+  PersistenceServices,
+  IRuleDataClient,
+  IRuleDataReader,
+} from '@kbn/rule-registry-plugin/server';
+import { IEventLogService } from '@kbn/event-log-plugin/server';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
@@ -30,7 +35,6 @@ import {
   WrapSequences,
 } from '../signals/types';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { IEventLogService } from '../../../../../event_log/server';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { RuleExecutionLogForExecutorsFactory } from '../rule_execution_log';
 
@@ -61,6 +65,7 @@ export interface RunOpts<TParams extends RuleParams> {
   };
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  ruleDataReader: IRuleDataReader;
 }
 
 export type SecurityAlertType<

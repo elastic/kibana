@@ -51,19 +51,18 @@ yarn kbn watch
 [discrete]
 === List of Already Migrated Packages to Bazel
 
-- @elastic/datemath
 - @elastic/eslint-config-kibana
 - @elastic/safer-lodash-set
 - @kbn/ace
 - @kbn/analytics
 - @kbn/apm-config-loader
 - @kbn/apm-utils
-- @kbn/babel-code-parser
 - @kbn/babel-preset
 - @kbn/cli-dev-mode
 - @kbn/config
 - @kbn/config-schema
 - @kbn/crypto
+- @kbn/datemath
 - @kbn/dev-utils
 - @kbn/docs-utils
 - @kbn/es

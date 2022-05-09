@@ -10,14 +10,14 @@ import { EuiCallOut, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
-import { RuleTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { DataView } from '@kbn/data-plugin/common';
+import { Query } from '@kbn/data-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
-import { DataView } from '../../../../../../../src/plugins/data/common';
-import { Query } from '../../../../../../../src/plugins/data/public';
-import { QueryStringInput } from '../../../../../../../src/plugins/unified_search/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',

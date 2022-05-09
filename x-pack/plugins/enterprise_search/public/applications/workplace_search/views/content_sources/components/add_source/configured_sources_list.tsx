@@ -124,39 +124,32 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                     </EuiFlexGroup>
                   </EuiSplitPanel.Inner>
                   <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-                    {
-                      // TODO: Remove this once external connectors are multi-tenant
-                      // This prevents connecting more than one external content source
-                      (serviceType !== 'external' || !connected) &&
-                        (((!isOrganization || (isOrganization && !accountContextOnly)) && (
-                          <EuiButtonEmptyTo
-                            className="eui-fullWidth"
-                            to={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/${
-                              hasMultipleConnectorOptions(sourceData) && isOrganization
-                                ? ''
-                                : 'connect'
-                            }`}
-                          >
-                            {!connected
-                              ? i18n.translate(
-                                  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
-                                  {
-                                    defaultMessage: 'Connect',
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectAnotherButton',
-                                  {
-                                    defaultMessage: 'Connect another',
-                                  }
-                                )}
-                          </EuiButtonEmptyTo>
-                        )) || (
-                          <EuiButtonEmpty className="eui-fullWidth" isDisabled>
-                            {ADD_SOURCE_ORG_SOURCES_TITLE}
-                          </EuiButtonEmpty>
-                        ))
-                    }
+                    {((!isOrganization || (isOrganization && !accountContextOnly)) && (
+                      <EuiButtonEmptyTo
+                        className="eui-fullWidth"
+                        to={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/${
+                          hasMultipleConnectorOptions(sourceData) && isOrganization ? '' : 'connect'
+                        }`}
+                      >
+                        {!connected
+                          ? i18n.translate(
+                              'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
+                              {
+                                defaultMessage: 'Connect',
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectAnotherButton',
+                              {
+                                defaultMessage: 'Connect another',
+                              }
+                            )}
+                      </EuiButtonEmptyTo>
+                    )) || (
+                      <EuiButtonEmpty className="eui-fullWidth" isDisabled>
+                        {ADD_SOURCE_ORG_SOURCES_TITLE}
+                      </EuiButtonEmpty>
+                    )}
                   </EuiSplitPanel.Inner>
                 </EuiSplitPanel.Outer>
               </EuiCard>

@@ -11,7 +11,7 @@ import {
   AsyncTestBedConfig,
   findTestSubject,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 

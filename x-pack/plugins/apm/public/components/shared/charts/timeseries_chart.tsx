@@ -25,7 +25,7 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';

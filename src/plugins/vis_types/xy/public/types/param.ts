@@ -7,14 +7,15 @@
  */
 
 import type { Fit, Position } from '@elastic/charts';
-import type { Style, Labels, PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { Style, Labels } from '@kbn/charts-plugin/public';
 import type {
   SchemaConfig,
   ExpressionValueXYDimension,
   FakeParams,
   HistogramParams,
   DateHistogramParams,
-} from '../../../../visualizations/public';
+} from '@kbn/visualizations-plugin/public';
 import type { ChartType, XyVisType } from '../../common';
 import type {
   ExpressionValueCategoryAxis,

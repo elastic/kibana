@@ -7,7 +7,7 @@
 
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import { useQueryClient } from 'react-query';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback } from 'react';
 import { useBulkUpdateArtifact } from '../../../../../hooks/artifacts';

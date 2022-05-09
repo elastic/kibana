@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams, HeatmapTypeProps } from '../../types';
 
 const HeatmapOptionsLazy = lazy(() => import('./heatmap'));

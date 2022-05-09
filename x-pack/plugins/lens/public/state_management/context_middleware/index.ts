@@ -7,7 +7,7 @@
 
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   setState,
   LensDispatch,

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';

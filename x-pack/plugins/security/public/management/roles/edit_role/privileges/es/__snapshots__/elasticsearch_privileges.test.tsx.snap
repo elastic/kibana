@@ -179,7 +179,6 @@ exports[`it renders without crashing 1`] = `
     license={
       Object {
         "features$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],

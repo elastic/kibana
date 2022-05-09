@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from 'src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { ReportingPublicPlugin } from './plugin';
 import type { ReportingPublicComponents } from './shared/get_shared_components';
 

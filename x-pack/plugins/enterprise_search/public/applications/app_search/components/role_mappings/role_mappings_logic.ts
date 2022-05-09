@@ -47,9 +47,6 @@ const emptyUser = { username: '', email: '' } as ElasticsearchUser;
 interface RoleMappingsActions extends RoleMappingsBaseActions {
   setRoleMapping(roleMapping: ASRoleMapping): { roleMapping: ASRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
-  setRoleMappings({ roleMappings }: { roleMappings: ASRoleMapping[] }): {
-    roleMappings: ASRoleMapping[];
-  };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   handleAccessAllEnginesChange(selected: boolean): { selected: boolean };
   handleEngineSelectionChange(engineNames: string[]): { engineNames: string[] };
@@ -322,8 +319,8 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const route = '/internal/app_search/role_mappings/enable_role_based_access';
 
       try {
-        const response = await http.post<{ roleMappings: ASRoleMapping[] }>(route);
-        actions.setRoleMappings(response);
+        await http.post<{ roleMappings: ASRoleMapping[] }>(route);
+        actions.initializeRoleMappings();
       } catch (e) {
         flashAPIErrors(e);
       }

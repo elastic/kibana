@@ -309,7 +309,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "minimumLicense": "platinum",
+                "minimumLicense": "gold",
                 "name": "Generate PDF or PNG reports",
                 "savedObject": Object {
                   "all": Array [],
@@ -401,7 +401,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "minimumLicense": "platinum",
+                "minimumLicense": "gold",
                 "name": "Generate PDF or PNG reports",
                 "savedObject": Object {
                   "all": Array [],

@@ -42,7 +42,7 @@ import { SCHEMA_TITLE } from '../schema';
 import { SEARCH_UI_TITLE } from '../search_ui';
 import { SYNONYMS_TITLE } from '../synonyms';
 
-import { EngineLogic, generateEnginePath } from './';
+import { EngineLogic, generateEnginePath } from '.';
 
 import './engine_nav.scss';
 

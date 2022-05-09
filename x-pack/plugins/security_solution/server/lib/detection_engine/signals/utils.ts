@@ -9,7 +9,7 @@ import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -20,24 +20,24 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import {
-  TimestampOverrideOrUndefined,
-  Privilege,
-  RuleExecutionStatus,
-} from '../../../../common/detection_engine/schemas/common';
 import type {
   ElasticsearchClient,
   IUiSettingsClient,
   Logger,
   SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
+} from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
   parseDuration,
-} from '../../../../../alerting/server';
-import type { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
+} from '@kbn/alerting-plugin/server';
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
+import {
+  TimestampOverrideOrUndefined,
+  Privilege,
+  RuleExecutionStatus,
+} from '../../../../common/detection_engine/schemas/common';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,

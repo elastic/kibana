@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ToastsStart } from 'kibana/public';
-import type { Rule } from '../../../../../../x-pack/plugins/alerting/common';
-import type { RuleTypeParams } from '../../../../../../x-pack/plugins/alerting/common';
-import { SerializedSearchSourceFields } from '../../../../data/common';
-import type { DataPublicPluginStart } from '../../../../data/public';
-import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
+import { CoreStart, ToastsStart } from '@kbn/core/public';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;

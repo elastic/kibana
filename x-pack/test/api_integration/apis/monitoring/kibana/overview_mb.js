@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { normalizeDataTypeDifferences } from '../normalize_data_type_differences';
-import overviewFixture from './fixtures/overview';
+import overviewFixture from './fixtures/overview.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {

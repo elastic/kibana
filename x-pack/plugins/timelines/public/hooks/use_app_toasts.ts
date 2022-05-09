@@ -10,14 +10,9 @@ import { isString } from 'lodash/fp';
 import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { AppError } from '@kbn/securitysolution-t-grid';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import type {
-  ErrorToastOptions,
-  ToastsStart,
-  Toast,
-  NotificationsStart,
-} from '../../../../../src/core/public';
-import { IEsError, isEsError } from '../../../../../src/plugins/data/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ErrorToastOptions, ToastsStart, Toast, NotificationsStart } from '@kbn/core/public';
+import { IEsError, isEsError } from '@kbn/data-plugin/public';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
   api: ToastsStart;

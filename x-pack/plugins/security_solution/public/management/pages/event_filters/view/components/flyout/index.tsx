@@ -25,6 +25,7 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
+import { lastValueFrom } from 'rxjs';
 import { AppAction } from '../../../../../../common/store/actions';
 import { EventFiltersForm } from '../form';
 import { useEventFiltersSelector, useEventFiltersNotification } from '../../hooks';
@@ -105,8 +106,8 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     useEffect(() => {
       const enrichEvent = async () => {
         if (!data || !data._index) return;
-        const searchResponse = await search
-          .search({
+        const searchResponse = await lastValueFrom(
+          search.search({
             params: {
               index: data._index,
               body: {
@@ -118,7 +119,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
               },
             },
           })
-          .toPromise();
+        );
 
         setEnrichedData({
           ...data,

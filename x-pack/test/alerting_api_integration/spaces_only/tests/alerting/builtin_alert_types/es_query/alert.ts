@@ -37,7 +37,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  describe('alert', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/129380
+  describe.skip('alert', async () => {
     let endDate: string;
     let actionId: string;
     const objectRemover = new ObjectRemover(supertest);

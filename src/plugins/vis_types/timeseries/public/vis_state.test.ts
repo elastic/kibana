@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { updateOldState } from '../../../visualizations/public';
+import { updateOldState } from '@kbn/visualizations-plugin/public';
 
 /**
  * The reason we add this test is to ensure that `convertNumIdsToStringsForTSVB` of the updateOldState runs correctly

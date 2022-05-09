@@ -15,6 +15,7 @@ export type {
   XYState,
   XYReferenceLineLayerConfig,
   XYLayerConfig,
+  ValidLayer,
   XYDataLayerConfig,
   XYAnnotationLayerConfig,
 } from './xy_visualization/types';
@@ -70,7 +71,7 @@ export type {
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,
-  YConfig,
+  ExtendedYConfig,
   XYRender,
   LayerType,
   YAxisMode,
@@ -80,30 +81,29 @@ export type {
   YScaleType,
   XScaleType,
   AxisConfig,
-  ValidLayer,
   XYCurveType,
   XYChartProps,
   LegendConfig,
   IconPosition,
-  YConfigResult,
+  ExtendedYConfigResult,
   DataLayerArgs,
   LensMultiTable,
   ValueLabelMode,
   AxisExtentMode,
+  DataLayerConfig,
   FittingFunction,
   AxisExtentConfig,
   LegendConfigResult,
   AxesSettingsConfig,
   GridlinesConfigResult,
-  DataLayerConfigResult,
   TickLabelsConfigResult,
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
   LabelsOrientationConfig,
+  ReferenceLineLayerConfig,
   LabelsOrientationConfigResult,
-  ReferenceLineLayerConfigResult,
   AxisTitlesVisibilityConfigResult,
-} from '../../../../src/plugins/chart_expressions/expression_xy/common';
+} from '@kbn/expression-xy-plugin/common';
 export type { LensEmbeddableInput } from './embeddable';
 export { layerTypes } from '../common';
 

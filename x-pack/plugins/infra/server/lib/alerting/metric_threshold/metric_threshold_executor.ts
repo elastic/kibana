@@ -13,8 +13,9 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
-} from '../../../../../alerting/common';
-import { Alert, RuleTypeState } from '../../../../../alerting/server';
+} from '@kbn/alerting-plugin/common';
+import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
@@ -30,7 +31,6 @@ import { UNGROUPED_FACTORY_KEY, getViewInAppUrl } from '../common/utils';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
-import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
 export type MetricThresholdRuleParams = Record<string, any>;
 export type MetricThresholdRuleTypeState = RuleTypeState & {

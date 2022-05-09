@@ -8,13 +8,13 @@
 import { enforceOptions } from 'broadcast-channel';
 import { Observable } from 'rxjs';
 
-import type { CoreSetup } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import { managementPluginMock } from 'src/plugins/management/public/mocks';
+import type { CoreSetup } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 
-import type { FeaturesPluginStart } from '../../features/public';
-import { licensingMock } from '../../licensing/public/mocks';
 import { ManagementService } from './management';
 import type { PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';

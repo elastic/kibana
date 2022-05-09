@@ -93,6 +93,13 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
         props: { index: 1, item: { attributes: { id: savedQueryId } } },
       }).click();
       findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
+      // Run in test configuration
+      cy.contains('Test configuration').click();
+      selectAllAgents();
+      submitQuery();
+      checkResults();
+
+      // Save edited
       cy.react('EuiButton').contains('Update query').click();
       cy.contains(`${savedQueryDescription} Edited`);
 

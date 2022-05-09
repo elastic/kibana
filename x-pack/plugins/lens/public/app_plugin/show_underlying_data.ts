@@ -15,15 +15,10 @@ import {
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Capabilities } from 'kibana/public';
+import { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource } from '../types';
-
-export const getShowUnderlyingDataLabel = () =>
-  i18n.translate('xpack.lens.app.exploreRawData', {
-    defaultMessage: 'Explore raw data',
-  });
 
 /**
  * Joins a series of queries.

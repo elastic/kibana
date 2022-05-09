@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useMlKibana } from './kibana_context';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 /**
  * Set of reasonable defaults for formatters for the ML app.

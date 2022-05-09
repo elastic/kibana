@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
@@ -21,14 +21,12 @@ export function useSummaryArtifact(
     policies: string[];
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
-  customQueryOptions: Partial<
-    UseQueryOptions<ExceptionListSummarySchema, HttpFetchError>
-  > = DEFAULT_OPTIONS
+  customQueryOptions: Partial<UseQueryOptions<ExceptionListSummarySchema, HttpFetchError>>
 ): QueryObserverResult<ExceptionListSummarySchema, HttpFetchError> {
   const { filter = '', policies = [] } = options;
 
   return useQuery<ExceptionListSummarySchema, HttpFetchError>(
-    ['summary', exceptionListApiClient, options],
+    ['summary', exceptionListApiClient, filter, policies],
     () => {
       return exceptionListApiClient.summary(
         parsePoliciesAndFilterToKql({
@@ -37,12 +35,6 @@ export function useSummaryArtifact(
         })
       );
     },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      keepPreviousData: true,
-      ...customQueryOptions,
-    }
+    customQueryOptions
   );
 }

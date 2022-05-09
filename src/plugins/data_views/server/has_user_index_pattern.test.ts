@@ -7,7 +7,7 @@
  */
 
 import { hasUserIndexPattern } from './has_user_index_pattern';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '../../../core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('hasUserIndexPattern', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;

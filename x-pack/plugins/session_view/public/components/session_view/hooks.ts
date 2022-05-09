@@ -7,8 +7,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useQuery, useInfiniteQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { CoreStart } from 'kibana/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AlertStatusEventEntityIdMap,
   ProcessEvent,
@@ -54,7 +54,7 @@ export const useFetchSessionViewProcessEvents = (
 
       const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
 
-      return { events, cursor };
+      return { events, cursor, total: res.total };
     },
     {
       getNextPageParam: (lastPage) => {

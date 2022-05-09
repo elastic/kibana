@@ -10,14 +10,11 @@ import { Router, Redirect, Switch, Route } from 'react-router-dom';
 import type { RouteProps } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { allNavigationItems } from '../common/navigation/constants';
 import { CspNavigationItem } from '../common/navigation/types';
 import { UnknownRoute } from '../components/unknown_route';
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '../../../../../src/core/public';
 import type { CspClientPluginStartDeps } from '../types';
 import { pageToComponentMapping } from './constants';
 

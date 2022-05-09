@@ -17,8 +17,8 @@ import {
   SwitchOption,
   LongLegendOptions,
   LegendSizeSettings,
-} from '../../../../../../../vis_default_editor/public';
-import { BUCKET_TYPES } from '../../../../../../../data/public';
+} from '@kbn/vis-default-editor-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
 import { VisParams } from '../../../../types';
 import { GridPanel } from './grid_panel';

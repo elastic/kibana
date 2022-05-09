@@ -9,10 +9,7 @@ import type { UseQueryResult } from 'react-query';
 import { NavLink } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiErrorBoundary, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  KibanaPageTemplate,
-  type KibanaPageTemplateProps,
-} from '../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate, type KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import { allNavigationItems } from '../common/navigation/constants';
 import type { CspNavigationItem } from '../common/navigation/types';
 import { CspLoadingState } from './csp_loading_state';

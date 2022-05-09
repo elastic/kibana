@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableRegistryDefinition } from '../../../../embeddable/server';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import { TIME_SLIDER_CONTROL } from '../../../common';
 import {
   createTimeSliderExtract,

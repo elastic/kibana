@@ -7,10 +7,10 @@
 
 import { JsonObject } from '@kbn/utility-types';
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
-import { Ecs } from '../../../../../common/ecs';
+import { Ecs } from '../../../../ecs';
 
 export interface TimelineEventsDetailsItem {
   ariaRowindex?: Maybe<number>;

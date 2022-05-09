@@ -14,7 +14,7 @@ import {
   TopAggregateParamEditorProps,
 } from './top_aggregate';
 import { aggParamCommonPropsMock } from './test_utils';
-import { IAggConfig } from 'src/plugins/data/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 
 describe('TopAggregateParamEditor', () => {
   let agg: IAggConfig;

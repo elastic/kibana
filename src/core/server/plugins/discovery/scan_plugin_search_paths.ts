@@ -13,8 +13,8 @@ import { catchError, mergeMap } from 'rxjs/operators';
 import { Logger } from '../../logging';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
-const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
-const fsStat$ = bindNodeCallback<PathLike, Stats>(stat);
+const fsReadDir$ = bindNodeCallback<[string], [string[]]>(readdir);
+const fsStat$ = bindNodeCallback<[PathLike], [Stats]>(stat);
 
 const maxScanDepth = 5;
 

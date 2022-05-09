@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-} from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getAlertsTelemetryData } from './alerts';
 
 describe('alerts', () => {

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getJobConfig } from './index';
+import { getJobConfig } from '.';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 

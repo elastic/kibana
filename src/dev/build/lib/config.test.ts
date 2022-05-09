@@ -9,7 +9,7 @@
 import { resolve } from 'path';
 
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
 

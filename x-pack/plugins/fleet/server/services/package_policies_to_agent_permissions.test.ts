@@ -6,9 +6,10 @@
  */
 
 jest.mock('./epm/packages');
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import type { PackagePolicy, RegistryDataStream } from '../types';
 
 import { getPackageInfo } from './epm/packages';

@@ -18,6 +18,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
             className="euiFormControlLayout__childrenWrapper"
           >
             <input
+              aria-invalid={false}
               aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
               className="euiFieldSearch euiFieldSearch--fullWidth"
               data-test-subj="tableListSearchBox"
@@ -381,6 +382,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     className="euiLink euiLink--primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-2"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>
@@ -557,6 +559,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     className="euiLink euiLink--primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-1"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>
@@ -733,6 +736,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     className="euiLink euiLink--primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-0"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>

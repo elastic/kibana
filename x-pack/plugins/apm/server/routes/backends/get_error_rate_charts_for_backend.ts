@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { EventOutcome } from '../../../common/event_outcome';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';

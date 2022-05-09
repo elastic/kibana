@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CaseResponse, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   postCaseReq,
   postCommentUserReq,
@@ -23,11 +24,6 @@ import {
   updateCase,
   createComment,
 } from '../../../../common/lib/utils';
-import {
-  CaseResponse,
-  CaseStatuses,
-  CommentType,
-} from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,
@@ -521,8 +517,15 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('returns a bad request on malformed parameter', async () => {
-        await findCases({ supertest, query: { from: '<' }, expectedHttpCode: 400 });
+      it('escapes correctly', async () => {
+        const cases = await findCases({
+          supertest,
+          query: { from: '2022-03-15T10:16:56.252Z', to: '2022-03-20T10:16:56.252' },
+        });
+
+        expect(cases.total).to.be(2);
+        expect(cases.count_open_cases).to.be(2);
+        expect(cases.cases.length).to.be(2);
       });
     });
 

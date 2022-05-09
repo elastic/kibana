@@ -24,7 +24,7 @@ import {
 } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
 import { HapiResponseAdapter } from './response_adapter';
-import { RequestHandlerContext } from '../../../server';
+import { RequestHandlerContext } from '../..';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 

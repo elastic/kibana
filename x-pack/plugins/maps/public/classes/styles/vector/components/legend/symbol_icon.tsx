@@ -7,7 +7,7 @@
 
 import React, { Component, CSSProperties } from 'react';
 // @ts-expect-error
-import { CUSTOM_ICON_PREFIX_SDF, getSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
+import { styleSvg, buildSrcUrl } from '../../symbol_utils';
 
 interface Props {
   symbolId: string;

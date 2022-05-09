@@ -9,7 +9,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { CommentRequestAlertType, CommentType } from '../../../../common/api';
 import { GENERATED_ALERT } from '../constants';
 import { logError } from '../utils';

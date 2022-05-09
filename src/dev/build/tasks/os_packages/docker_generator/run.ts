@@ -10,7 +10,7 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/utils';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
@@ -92,6 +92,7 @@ export async function runDockerGenerator(
     dockerTargetFilename,
     dockerPush,
     dockerTagQualifier,
+    dockerCrossCompile,
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,

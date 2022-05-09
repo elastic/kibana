@@ -8,9 +8,9 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LensEmbeddableInput, TypedLensByValueInput } from '../../../../../../../lens/public';
+import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAppServices } from '../../../../../application/types';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { AddToCaseAction } from '../../header/add_to_case_action';
 
 export function ExpViewActionMenuContent({

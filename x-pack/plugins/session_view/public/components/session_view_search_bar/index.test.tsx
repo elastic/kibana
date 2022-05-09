@@ -8,7 +8,7 @@
 import React from 'react';
 import { processMock } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { SessionViewSearchBar } from './index';
+import { SessionViewSearchBar } from '.';
 import userEvent from '@testing-library/user-event';
 import { fireEvent } from '@testing-library/dom';
 
@@ -34,7 +34,7 @@ describe('SessionViewSearchBar component', () => {
       />
     );
 
-    const searchInput = renderResult.getByTestId('sessionView:searchInput').querySelector('input');
+    const searchInput = renderResult.getByTestId('sessionView:searchBar').querySelector('input');
 
     expect(searchInput?.value).toEqual('ls');
 
@@ -73,7 +73,7 @@ describe('SessionViewSearchBar component', () => {
     userEvent.click(renderResult.getByTestId('pagination-button-next'));
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('2 of 3');
 
-    const searchInput = renderResult.getByTestId('sessionView:searchInput').querySelector('input');
+    const searchInput = renderResult.getByTestId('sessionView:searchBar').querySelector('input');
 
     if (searchInput) {
       userEvent.type(searchInput, ' -la');

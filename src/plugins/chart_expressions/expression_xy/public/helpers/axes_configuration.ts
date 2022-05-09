@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
-import { AxisExtentConfig, DataLayerConfigResult } from '../../common';
-import { Datatable } from '../../../../../plugins/expressions/public';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../plugins/field_formats/common';
+import { AxisExtentConfig, CommonXYDataLayerConfig, ExtendedYConfig, YConfig } from '../../common';
+import { isDataLayer } from './visualization';
 
-interface FormattedMetric {
+export interface Series {
   layer: string;
   accessor: string;
+}
+
+interface FormattedMetric extends Series {
   fieldFormat: SerializedFieldFormat;
 }
 
 export type GroupsConfiguration = Array<{
-  groupId: string;
+  groupId: 'left' | 'right';
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
-  series: Array<{ layer: string; accessor: string }>;
+  series: Series[];
 }>;
 
 export function isFormatterCompatible(
@@ -34,10 +34,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(
-  layers: DataLayerConfigResult[],
-  tables?: Record<string, Datatable>
-) {
+export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -50,15 +47,19 @@ export function groupAxesByType(
     bottom: [],
   };
 
-  layers?.forEach((layer) => {
-    const table = tables?.[layer.layerId];
+  layers.forEach((layer) => {
+    const { table } = layer;
     layer.accessors.forEach((accessor) => {
+      const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
       const mode =
-        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
-        'auto';
-      let formatter: SerializedFieldFormat = table?.columns.find((column) => column.id === accessor)
+        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode || 'auto';
+      let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
         ?.meta?.params || { id: 'number' };
-      if (layer.seriesType.includes('percentage') && formatter.id !== 'percent') {
+      if (
+        isDataLayer(layer) &&
+        layer.seriesType.includes('percentage') &&
+        formatter.id !== 'percent'
+      ) {
         formatter = {
           id: 'percent',
           params: {
@@ -74,10 +75,12 @@ export function groupAxesByType(
     });
   });
 
+  const tablesExist = layers.filter(({ table }) => Boolean(table)).length > 0;
+
   series.auto.forEach((currentSeries) => {
     if (
       series.left.length === 0 ||
-      (tables &&
+      (tablesExist &&
         series.left.every((leftSeries) =>
           isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
         ))
@@ -85,7 +88,7 @@ export function groupAxesByType(
       series.left.push(currentSeries);
     } else if (
       series.right.length === 0 ||
-      (tables &&
+      (tablesExist &&
         series.left.every((leftSeries) =>
           isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
         ))
@@ -101,12 +104,11 @@ export function groupAxesByType(
 }
 
 export function getAxesConfiguration(
-  layers: DataLayerConfigResult[],
+  layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
-  tables?: Record<string, Datatable>,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {
-  const series = groupAxesByType(layers, tables);
+  const series = groupAxesByType(layers);
 
   const axisGroups: GroupsConfiguration = [];
 

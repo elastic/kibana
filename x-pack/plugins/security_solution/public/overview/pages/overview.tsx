@@ -124,6 +124,7 @@ const OverviewComponent = () => {
                       indexPattern={indexPattern}
                       indexNames={selectedPatterns}
                       query={query}
+                      queryType="overview"
                       setQuery={setQuery}
                       to={to}
                     />

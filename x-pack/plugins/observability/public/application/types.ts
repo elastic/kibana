@@ -15,16 +15,16 @@ import type {
   OverlayStart,
   SavedObjectsStart,
   ThemeServiceStart,
-} from 'kibana/public';
-import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
-import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
-import { LensPublicStart } from '../../../lens/public';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
-import { CasesUiStart } from '../../../cases/public';
-import { TimelinesUIStart } from '../../../timelines/public';
+} from '@kbn/core/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 
 export interface ObservabilityAppServices {
   application: ApplicationStart;

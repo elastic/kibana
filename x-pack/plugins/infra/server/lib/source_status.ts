@@ -18,38 +18,34 @@ export class InfraSourceStatus {
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<string[]> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
+    const soClient = (await requestContext.core).savedObjects.client;
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(soClient, sourceId);
     const indexNames = await this.adapter.getIndexNames(
       requestContext,
       sourceConfiguration.configuration.metricAlias
     );
     return indexNames;
   }
+
   public async hasMetricAlias(
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<boolean> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
+    const soClient = (await requestContext.core).savedObjects.client;
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(soClient, sourceId);
     const hasAlias = await this.adapter.hasAlias(
       requestContext,
       sourceConfiguration.configuration.metricAlias
     );
     return hasAlias;
   }
+
   public async hasMetricIndices(
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<boolean> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
+    const soClient = (await requestContext.core).savedObjects.client;
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(soClient, sourceId);
     const indexStatus = await this.adapter.getIndexStatus(
       requestContext,
       sourceConfiguration.configuration.metricAlias
@@ -65,7 +61,9 @@ export interface InfraSourceStatusAdapter {
     requestContext: InfraPluginRequestHandlerContext,
     aliasName: string
   ): Promise<string[]>;
+
   hasAlias(requestContext: InfraPluginRequestHandlerContext, aliasName: string): Promise<boolean>;
+
   getIndexStatus(
     requestContext: InfraPluginRequestHandlerContext,
     indexNames: string

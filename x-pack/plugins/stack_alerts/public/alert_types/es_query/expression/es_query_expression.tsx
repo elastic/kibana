@@ -6,6 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,20 +24,20 @@ import {
   EuiLink,
   EuiIconTip,
 } from '@elastic/eui';
-import { DocLinksStart, HttpSetup } from 'kibana/public';
+import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { XJson, EuiCodeEditor } from '../../../../../../../src/plugins/es_ui_shared/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { XJson, EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   getFields,
   ValueExpression,
   RuleTypeParamsExpressionProps,
   ForLastExpression,
   ThresholdExpression,
-} from '../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import { validateExpression } from '../validation';
-import { parseDuration } from '../../../../../alerting/common';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
@@ -147,8 +148,8 @@ export const EsQueryExpression = ({
         const timeWindow = parseDuration(window);
         const parsedQuery = JSON.parse(esQuery);
         const now = Date.now();
-        const { rawResponse } = await data.search
-          .search({
+        const { rawResponse } = await firstValueFrom(
+          data.search.search({
             params: buildSortedEventsQuery({
               index,
               from: new Date(now - timeWindow).toISOString(),
@@ -160,7 +161,7 @@ export const EsQueryExpression = ({
               track_total_hits: true,
             }),
           })
-          .toPromise();
+        );
 
         const hits = rawResponse.hits;
         setTestQueryResult(

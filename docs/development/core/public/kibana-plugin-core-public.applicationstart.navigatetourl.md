@@ -23,7 +23,7 @@ navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  url | string | an absolute URL, an absolute path or a relative path, to navigate to. |
-|  options | NavigateToUrlOptions |  |
+|  options | NavigateToUrlOptions | navigation options |
 
 <b>Returns:</b>
 

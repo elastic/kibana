@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Agent } from '../../../../../../fleet/common';
+import { Agent } from '@kbn/fleet-plugin/common';
 import { METADATA_UNITED_INDEX } from '../../../../../common/endpoint/constants';
 import { HostMetadata, UnitedAgentMetadata } from '../../../../../common/endpoint/types';
 

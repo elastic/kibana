@@ -7,7 +7,7 @@
 
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { SavedObject, SavedObjectsType } from 'src/core/server';
+import { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { logViewSavedObjectRT } from './types';
 
 export const logViewSavedObjectName = 'infrastructure-monitoring-log-view';

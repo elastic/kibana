@@ -27,7 +27,7 @@ const observeCompiler = (
   compiler: webpack.Compiler
 ): Rx.Observable<CompilerMsg> => {
   const compilerMsgs = new CompilerMsgs(bundle.id);
-  const done$ = new Rx.Subject();
+  const done$ = new Rx.Subject<void>();
   const { beforeRun, watchRun, done } = compiler.hooks;
 
   /**

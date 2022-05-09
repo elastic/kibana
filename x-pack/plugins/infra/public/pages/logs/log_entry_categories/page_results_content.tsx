@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiSuperDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '../../../../../ml/public';
-import { useTrackPageview } from '../../../../../observability/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';

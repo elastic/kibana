@@ -5,46 +5,30 @@
  * 2.0.
  */
 
-import type { Transaction } from 'elastic-apm-node';
-import { defer, forkJoin, throwError, Observable } from 'rxjs';
+import type { Headers } from '@kbn/core/server';
+import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import type { Headers, Logger } from 'src/core/server';
 import { errors } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
+import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
+import { ConfigType, durationToNumber as toNumber } from '../config';
 import type { Layout } from '../layouts';
+import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
-import { getScreenshots } from './get_screenshots';
 import type { Screenshot } from './get_screenshots';
+import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
-export interface PhaseTimeouts {
-  /**
-   * Open URL phase timeout.
-   */
-  openUrl: number;
-
-  /**
-   * Timeout of the page readiness phase.
-   */
-  waitForElements: number;
-
-  /**
-   * Timeout of the page render phase.
-   */
-  renderComplete: number;
-
-  /**
-   * An additional delay to wait until the visualizations are ready.
-   */
-  loadDelay: number;
+type CaptureTimeouts = ConfigType['capture']['timeouts'];
+export interface PhaseTimeouts extends CaptureTimeouts {
+  loadDelay: ConfigType['capture']['loadDelay'];
 }
 
 type Url = string;
@@ -62,11 +46,6 @@ export interface ScreenshotObservableOptions {
    * Custom headers to be sent with each request.
    */
   headers?: Headers;
-
-  /**
-   * Timeouts for each phase of the screenshot.
-   */
-  timeouts: PhaseTimeouts;
 
   /**
    * The list or URL to take screenshots of.
@@ -111,7 +90,9 @@ interface PageSetupResults {
   renderErrors?: string[];
 }
 
-const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
+const getDefaultElementPosition = (
+  dimensions: { height?: number; width?: number } | null
+): ElementsPositionAndAttribute[] => {
   const height = dimensions?.height || DEFAULT_VIEWPORT.height;
   const width = dimensions?.width || DEFAULT_VIEWPORT.width;
 
@@ -138,7 +119,8 @@ const getDefaultViewPort = () => ({
 export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
-    private readonly logger: Logger,
+    private readonly config: ConfigType,
+    private readonly eventLogger: EventLogger,
     private readonly layout: Layout,
     private options: ScreenshotObservableOptions
   ) {}
@@ -174,66 +156,84 @@ export class ScreenshotObservableHandler {
 
       return openUrl(
         this.driver,
-        this.logger,
-        this.options.timeouts.openUrl,
+        this.eventLogger,
+        toNumber(this.config.capture.timeouts.openUrl),
         index,
         url,
         { ...(context ?? {}), layout: this.layout.id },
         this.options.headers ?? {}
       );
-    }).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
+    }).pipe(this.waitUntil(toNumber(this.config.capture.timeouts.openUrl), 'open URL'));
   }
 
   private waitForElements() {
     const driver = this.driver;
-    const waitTimeout = this.options.timeouts.waitForElements;
+    const waitTimeout = toNumber(this.config.capture.timeouts.waitForElements);
 
-    return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
+    return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
       mergeMap(async (itemsCount) => {
         // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
         const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
 
         // Set the viewport allowing time for the browser to handle reflow and redraw
         // before checking for readiness of visualizations.
-        await driver.setViewport(viewport, this.logger);
-        await waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout);
+        await driver.setViewport(viewport, this.eventLogger.kbnLogger);
+        await waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
   }
 
-  private completeRender(apmTrans: Transaction | null) {
+  private completeRender() {
     const driver = this.driver;
     const layout = this.layout;
-    const logger = this.logger;
+    const eventLogger = this.eventLogger;
 
     return defer(async () => {
       // Waiting till _after_ elements have rendered before injecting our CSS
       // allows for them to be displayed properly in many cases
-      await injectCustomCss(driver, logger, layout);
+      await injectCustomCss(driver, eventLogger, layout);
 
-      const apmPositionElements = apmTrans?.startSpan('position-elements', 'correction');
-      // position panel elements for print layout
-      await layout.positionElements?.(driver, logger);
-      apmPositionElements?.end();
+      const spanEnd = this.eventLogger.logScreenshottingEvent(
+        'get positions of visualization elements',
+        Actions.GET_ELEMENT_POSITION_DATA,
+        'read'
+      );
+      try {
+        // position panel elements for print layout
+        await layout.positionElements?.(driver, eventLogger.kbnLogger);
+        spanEnd();
+      } catch (error) {
+        eventLogger.error(error, Actions.GET_ELEMENT_POSITION_DATA);
+        throw error;
+      }
 
-      await waitForRenderComplete(driver, logger, this.options.timeouts.loadDelay, layout);
+      await waitForRenderComplete(
+        driver,
+        eventLogger,
+        toNumber(this.config.capture.loadDelay),
+        layout
+      );
     }).pipe(
       mergeMap(() =>
         forkJoin({
-          timeRange: getTimeRange(driver, logger, layout),
-          elementsPositionAndAttributes: getElementPositionAndAttributes(driver, logger, layout),
-          renderErrors: getRenderErrors(driver, logger, layout),
+          timeRange: getTimeRange(driver, eventLogger, layout),
+          elementsPositionAndAttributes: getElementPositionAndAttributes(
+            driver,
+            eventLogger,
+            layout
+          ),
+          renderErrors: getRenderErrors(driver, eventLogger, layout),
         })
       ),
-      this.waitUntil(this.options.timeouts.renderComplete, 'render complete')
+      this.waitUntil(toNumber(this.config.capture.timeouts.renderComplete), 'render complete')
     );
   }
 
-  public setupPage(index: number, url: UrlOrUrlWithContext, apmTrans: Transaction | null) {
+  public setupPage(index: number, url: UrlOrUrlWithContext) {
     return this.openUrl(index, url).pipe(
       switchMapTo(this.waitForElements()),
-      switchMapTo(this.completeRender(apmTrans))
+      switchMapTo(this.completeRender())
     );
   }
 
@@ -247,7 +247,7 @@ export class ScreenshotObservableHandler {
             getDefaultElementPosition(this.layout.getViewport(1));
           let screenshots: Screenshot[] = [];
           try {
-            screenshots = await getScreenshots(this.driver, this.logger, elements);
+            screenshots = await getScreenshots(this.driver, this.eventLogger, elements);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }

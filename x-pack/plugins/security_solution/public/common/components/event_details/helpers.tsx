@@ -13,7 +13,7 @@ import {
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { BrowserField, BrowserFields } from '../../containers/source';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,

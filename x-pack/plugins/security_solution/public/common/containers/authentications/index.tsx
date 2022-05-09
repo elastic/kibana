@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import {
   AuthenticationsEdges,
   AuthStackByField,
@@ -21,16 +21,15 @@ import {
 import { PageInfoPaginated, DocValueFields, SortField } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
-import { inputsModel } from '../../../common/store';
-import { createFilter } from '../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { useKibana } from '../../../common/lib/kibana';
+import { inputsModel } from '../../store';
+import { createFilter } from '../helpers';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { useKibana } from '../../lib/kibana';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
 import * as i18n from './translations';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
@@ -73,7 +72,6 @@ export const useAuthentications = ({
   const [loading, setLoading] = useState(false);
   const [authenticationsRequest, setAuthenticationsRequest] =
     useState<UserAuthenticationsRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
@@ -162,26 +160,19 @@ export const useAuthentications = ({
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        docValueFields: docValueFields ?? [],
         factoryQueryType: UsersQueries.authentications,
-        indices: indexNames,
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
+        stackByField,
+        pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-      });
-
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        docValueFields: docValueFields ?? [],
-        factoryQueryType,
-        filterQuery: createFilter(filterQuery),
-        stackByField,
-        pagination: generateTablePaginationOptions(activePage, limit),
-        timerange,
         sort: {} as SortField,
       };
       if (!deepEqual(prevRequest, myRequest)) {
@@ -198,7 +189,6 @@ export const useAuthentications = ({
     stackByField,
     limit,
     startDate,
-    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {

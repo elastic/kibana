@@ -33,7 +33,7 @@ import {
   activateViewSelected,
   activateViewAll,
 } from '../../tasks/fields_browser';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
 
@@ -51,10 +51,13 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', () => {
+  before(() => {
+    cleanKibana();
+    login();
+  });
   context('Fields Browser rendering', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
@@ -124,8 +127,7 @@ describe('Fields Browser', () => {
 
   context('Editing the timeline', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();

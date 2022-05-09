@@ -8,6 +8,7 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
+  "requiredBundles": ["kibanaReact"],
   "requiredPlugins": ["globalSearch"],
   "optionalPlugins": ["usageCollection", "savedObjectsTagging"],
   "configPath": ["xpack", "global_search_bar"]

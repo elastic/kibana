@@ -9,7 +9,7 @@ import {
   AggregationsAggregationContainer,
   MappingRuntimeFields,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { GenericSavedUsage } from './types';
 
 export function createMetricQuery(

@@ -6,15 +6,15 @@
  */
 
 import * as Rx from 'rxjs';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../../../';
+import { ReportingCore } from '../../..';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { cryptoFactory } from '../../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
-import { runTaskFnFactory } from './';
+import { runTaskFnFactory } from '.';
 
 jest.mock('../lib/generate_pdf');
 

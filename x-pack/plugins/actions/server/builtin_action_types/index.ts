@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { Logger } from '../../../../../src/core/server';
 
 import { getActionType as getEmailActionType } from './email';
 import { getActionType as getIndexActionType } from './es_index';

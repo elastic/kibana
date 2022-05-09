@@ -18,7 +18,7 @@ export const getRuleTaskTimeout = ({
   ruleTaskTimeout?: string;
   ruleTypeId: string;
 }): string => {
-  const ruleTypeConfig = config.execution.ruleTypeOverrides?.find(
+  const ruleTypeConfig = config.run.ruleTypeOverrides?.find(
     (ruleType) => ruleTypeId === ruleType.id
   );
 
@@ -27,9 +27,6 @@ export const getRuleTaskTimeout = ({
   // if not, ruleTaskTimeout is applied that is passed from the rule type registering plugin
   // if none of above is set, DEFAULT_EXECUTION_TIMEOUT is applied
   return (
-    ruleTypeConfig?.timeout ||
-    config.execution.timeout ||
-    ruleTaskTimeout ||
-    DEFAULT_EXECUTION_TIMEOUT
+    ruleTypeConfig?.timeout || config.run.timeout || ruleTaskTimeout || DEFAULT_EXECUTION_TIMEOUT
   );
 };

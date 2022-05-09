@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'src/core/server';
-import { ExceptionListClient } from '../../../lists/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import {
   CasesClient,
   PluginStartContract as CasesPluginStartContract,
-} from '../../../cases/server';
-import { SecurityPluginStart } from '../../../security/server';
+} from '@kbn/cases-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   AgentService,
   FleetStartContract,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
-} from '../../../fleet/server';
-import { PluginStartContract as AlertsPluginStartContract } from '../../../alerting/server';
+} from '@kbn/fleet-plugin/server';
+import { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
+import type { ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -39,7 +40,6 @@ import {
   EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
 } from './services/fleet/endpoint_fleet_services_factory';
-import type { ListsServerExtensionRegistrar } from '../../../lists/server';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
 import { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';

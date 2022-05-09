@@ -20,7 +20,7 @@ import {
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import {
   PageLoading,

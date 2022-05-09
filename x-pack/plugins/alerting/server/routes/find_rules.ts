@@ -6,8 +6,8 @@
  */
 
 import { omit } from 'lodash';
-import { IRouter } from 'kibana/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { IRouter } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
@@ -140,7 +140,7 @@ const buildFindRulesRoute = ({
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
 
         trackLegacyTerminology(
           [req.query.search, req.query.search_fields, req.query.sort_field].filter(

@@ -7,17 +7,25 @@
  */
 
 import { Subject } from 'rxjs';
-import type { IShipper, Event } from 'src/core/server';
+import type { AnalyticsClientInitContext } from '@kbn/analytics-client';
+import type { IShipper, Event } from '@kbn/core/server';
 
 export class CustomShipper implements IShipper {
   public static shipperName = 'FTR-helpers-shipper';
 
-  constructor(private readonly events$: Subject<Event>) {}
+  constructor(
+    private readonly events$: Subject<Event>,
+    private readonly initContext: AnalyticsClientInitContext
+  ) {}
 
   public reportEvents(events: Event[]) {
+    this.initContext.logger.info(
+      `Reporting ${events.length} events to ${CustomShipper.shipperName}: ${JSON.stringify(events)}`
+    );
     events.forEach((event) => {
       this.events$.next(event);
     });
   }
   optIn(isOptedIn: boolean) {}
+  shutdown() {}
 }
