@@ -34,7 +34,10 @@ disabled:
   - x-pack/test/functional_enterprise_search/with_host_configured.config.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
+
+  # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
+  - x-pack/plugins/synthetics/e2e/playwright_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - test/visual_regression/config.ts

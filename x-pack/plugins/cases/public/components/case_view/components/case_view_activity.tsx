@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { CaseSeverity } from '../../../../common/api';
 import { useConnectors } from '../../../containers/configure/use_connectors';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import { UpdateKey, UseFetchAlertData } from '../../../../common/ui/types';
@@ -23,6 +24,7 @@ import * as i18n from '../translations';
 import { getNoneConnector, normalizeActionConnector } from '../../configure_cases/utils';
 import { getConnectorById } from '../../utils';
 import { UseGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 
 export const CaseViewActivity = ({
   initLoadingData,
@@ -108,6 +110,12 @@ export const CaseViewActivity = ({
     (newTags) => onUpdateField({ key: 'tags', value: newTags }),
     [onUpdateField]
   );
+
+  const onUpdateSeverity = useCallback(
+    (newSeverity: CaseSeverity) => onUpdateField({ key: 'severity', value: newSeverity }),
+    [onUpdateField]
+  );
+
   const { loading: isLoadingConnectors, connectors } = useConnectors();
 
   const [connectorName, isValidConnector] = useMemo(() => {
@@ -180,6 +188,12 @@ export const CaseViewActivity = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
+        <SeveritySidebarSelector
+          isDisabled={!userCanCrud}
+          isLoading={isLoading}
+          selectedSeverity={caseData.severity}
+          onSeverityChange={onUpdateSeverity}
+        />
         <UserList
           data-test-subj="case-view-user-list-reporter"
           email={emailContent}

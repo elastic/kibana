@@ -37,6 +37,7 @@ import {
   changeLayerIndexPattern,
   extractReferences,
   injectReferences,
+  loadIndexPatterns,
 } from './loader';
 import { toExpression } from './to_expression';
 import {
@@ -181,6 +182,10 @@ export function getIndexPatternDatasource({
 
     getPersistableState(state: IndexPatternPrivateState) {
       return extractReferences(state);
+    },
+
+    getCurrentIndexPatternId(state: IndexPatternPrivateState) {
+      return state.currentIndexPatternId;
     },
 
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
@@ -444,6 +449,30 @@ export function getIndexPatternDatasource({
             );
           }
         : undefined;
+    },
+
+    updateCurrentIndexPatternId: ({ state, indexPatternId, setState }) => {
+      handleChangeIndexPattern(indexPatternId, state, setState);
+    },
+
+    refreshIndexPatternsList: async ({ indexPatternId, setState }) => {
+      const newlyMappedIndexPattern = await loadIndexPatterns({
+        indexPatternsService: dataViews,
+        cache: {},
+        patterns: [indexPatternId],
+      });
+      const indexPatternRefs = await dataViews.getIdsWithTitle();
+      const indexPattern = newlyMappedIndexPattern[indexPatternId];
+      setState((s) => {
+        return {
+          ...s,
+          indexPatterns: {
+            ...s.indexPatterns,
+            [indexPattern.id]: indexPattern,
+          },
+          indexPatternRefs,
+        };
+      });
     },
 
     // Reset the temporary invalid state when closing the editor, but don't
