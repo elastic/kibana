@@ -200,7 +200,7 @@ describe('helpers', () => {
       fields: {
         '@timestamp': ['time'],
         'process.name': ['process-1'],
-        'process.title': ['title-1'],
+        'process.args': ['args-1'],
       },
       cursor: 'cursor-1',
       sort: [0],
@@ -219,7 +219,7 @@ describe('helpers', () => {
           instances: 100,
           process: {
             name: ['process-1'],
-            title: ['title-1'],
+            args: ['args-1'],
           },
         },
       };
@@ -227,7 +227,21 @@ describe('helpers', () => {
     });
 
     test('it formats a uncommon process data without any data if fields map is empty', () => {
-      const data = formatUncommonProcessesData(hit, {});
+      const emptyHit: HostsUncommonProcessHit = {
+        _index: 'index-123',
+        _type: 'type-123',
+        _id: 'id-123',
+        _score: 10,
+        total: {
+          value: 0,
+          relation: 'eq',
+        },
+        host: [],
+        fields: {},
+        cursor: '',
+        sort: [0],
+      };
+      const data = formatUncommonProcessesData(emptyHit, processFieldsMap);
       const expected: HostsUncommonProcessesEdges = {
         cursor: {
           tiebreaker: null,

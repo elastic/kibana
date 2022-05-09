@@ -6,7 +6,7 @@
  */
 
 import { CloudEcs } from '../../../ecs/cloud';
-import { HostEcs, OsEcs } from '../../../ecs/host';
+import { HostEcs } from '../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../common';
 
 export enum HostPolicyResponseActionStatus {
@@ -55,10 +55,11 @@ export interface HostOsHitsItem {
     max_score: number | null;
     hits: Array<{
       fields: {
-        'host.os.name': string[];
-        'host.os.family': string[];
-        'host.os.version': string[];
-        'host.os.platform': string[];
+        'host.os.name'?: string[];
+        'host.os.family'?: string[];
+        'host.os.version'?: string[];
+        'host.os.platform'?: string[];
+        '@timestamp'?: string[];
       };
       sort?: [number];
       _index?: string;

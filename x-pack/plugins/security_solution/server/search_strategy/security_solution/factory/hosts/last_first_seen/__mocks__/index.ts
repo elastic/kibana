@@ -22,7 +22,6 @@ export const mockOptions: HostFirstLastSeenRequestOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  docValueFields: [],
   factoryQueryType: HostsQueries.firstOrLastSeen,
   hostName: 'siem-kibana',
   order: Direction.asc,
