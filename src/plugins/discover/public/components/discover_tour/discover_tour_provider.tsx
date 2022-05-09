@@ -270,7 +270,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
           <EuiButton
             {...actionButtonProps}
             onClick={onFinishTour}
-            data-test-subj="discoverTourButtonNext"
+            data-test-subj="discoverTourButtonEnd"
           >
             {EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })}
           </EuiButton>
@@ -278,7 +278,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
           <EuiButton
             {...actionButtonProps}
             onClick={onNextTourStep}
-            data-test-subj="discoverTourButtonEnd"
+            data-test-subj="discoverTourButtonNext"
           >
             {EuiI18n({ token: 'core.euiTourStep.nextStep', default: 'Next' })}
           </EuiButton>
