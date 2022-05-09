@@ -54,6 +54,85 @@ type AggResultsResponse = { key?: number } & {
 const TIME_RANGE_PADDING = 10;
 
 /**
+ * TODO Replace with URL generator when https://github.com/elastic/kibana/issues/59453 is resolved
+ */
+export function buildExplorerUrl(
+  jobIds: string[],
+  timeRange: { from: string; to: string },
+  type: AnomalyResultType,
+  r?: AlertExecutionResult
+): string {
+  const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
+
+  /**
+   * Disabled until Anomaly Explorer page is fixed and properly
+   * support single point time selection
+   */
+  const highlightSwimLaneSelection = false;
+
+  const globalState = {
+    ml: {
+      jobIds,
+    },
+    time: {
+      from: timeRange.from,
+      to: timeRange.to,
+      mode: 'absolute',
+    },
+  };
+
+  const appState = {
+    explorer: {
+      mlExplorerFilter: {
+        ...(r && isInfluencerResult
+          ? {
+              filterActive: true,
+              filteredFields: [
+                r.topInfluencers![0].influencer_field_name,
+                r.topInfluencers![0].influencer_field_value,
+              ],
+              influencersFilterQuery: {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match_phrase: {
+                        [r.topInfluencers![0].influencer_field_name]:
+                          r.topInfluencers![0].influencer_field_value,
+                      },
+                    },
+                  ],
+                },
+              },
+              queryString: `${r.topInfluencers![0].influencer_field_name}:"${
+                r.topInfluencers![0].influencer_field_value
+              }"`,
+            }
+          : {}),
+      },
+      mlExplorerSwimlane: {
+        ...(r && highlightSwimLaneSelection
+          ? {
+              selectedLanes: [
+                isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
+              ],
+              selectedTimes: r.timestampEpoch,
+              selectedType: isInfluencerResult ? 'viewBy' : 'overall',
+              ...(isInfluencerResult
+                ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
+                : {}),
+              ...(isInfluencerResult ? {} : { showTopFieldValues: true }),
+            }
+          : {}),
+      },
+    },
+  };
+  return `/app/ml/explorer/?_g=${encodeURIComponent(
+    rison.encode(globalState)
+  )}&_a=${encodeURIComponent(rison.encode(appState))}`;
+}
+
+/**
  * Mapping for result types and corresponding score fields.
  */
 const resultTypeScoreMapping = {
@@ -627,108 +706,32 @@ export function alertingServiceProvider(
     return getResultsFormatter(params.resultType, false, formatters)(topResult);
   };
 
-  /**
-   * TODO Replace with URL generator when https://github.com/elastic/kibana/issues/59453 is resolved
-   * @param r
-   * @param type
-   */
-  const buildExplorerUrl = (r: AlertExecutionResult, type: AnomalyResultType): string => {
-    const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
-
-    /**
-     * Disabled until Anomaly Explorer page is fixed and properly
-     * support single point time selection
-     */
-    const highlightSwimLaneSelection = false;
-
-    const globalState = {
-      ml: {
-        jobIds: r.jobIds,
-      },
-      time: {
-        from: r.bucketRange.start,
-        to: r.bucketRange.end,
-        mode: 'absolute',
-      },
-    };
-
-    const appState = {
-      explorer: {
-        mlExplorerFilter: {
-          ...(isInfluencerResult
-            ? {
-                filterActive: true,
-                filteredFields: [
-                  r.topInfluencers![0].influencer_field_name,
-                  r.topInfluencers![0].influencer_field_value,
-                ],
-                influencersFilterQuery: {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match_phrase: {
-                          [r.topInfluencers![0].influencer_field_name]:
-                            r.topInfluencers![0].influencer_field_value,
-                        },
-                      },
-                    ],
-                  },
-                },
-                queryString: `${r.topInfluencers![0].influencer_field_name}:"${
-                  r.topInfluencers![0].influencer_field_value
-                }"`,
-              }
-            : {}),
-        },
-        mlExplorerSwimlane: {
-          ...(highlightSwimLaneSelection
-            ? {
-                selectedLanes: [
-                  isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
-                ],
-                selectedTimes: r.timestampEpoch,
-                selectedType: isInfluencerResult ? 'viewBy' : 'overall',
-                ...(isInfluencerResult
-                  ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
-                  : {}),
-                ...(isInfluencerResult ? {} : { showTopFieldValues: true }),
-              }
-            : {}),
-        },
-      },
-    };
-    return `/app/ml/explorer/?_g=${encodeURIComponent(
-      rison.encode(globalState)
-    )}&_a=${encodeURIComponent(rison.encode(appState))}`;
-  };
-
   return {
     /**
      * Return the result of an alert condition execution.
      *
      * @param params - Alert params
-     * @param startedAt
-     * @param previousStartedAt
      */
     execute: async (
-      params: MlAnomalyDetectionAlertParams,
-      startedAt: Date,
-      previousStartedAt: Date | null
-    ): Promise<AnomalyDetectionAlertContext | undefined> => {
+      params: MlAnomalyDetectionAlertParams
+    ): Promise<{ context: AnomalyDetectionAlertContext; name: string } | undefined> => {
       const result = await fetchResult(params);
 
       if (!result) return;
 
-      const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType);
+      const anomalyExplorerUrl = buildExplorerUrl(
+        result.jobIds,
+        { from: result.bucketRange.start, to: result.bucketRange.end },
+        params.resultType,
+        result
+      );
 
       const executionResult = {
         ...result,
-        name: result.alertInstanceKey,
         anomalyExplorerUrl,
       };
 
-      return executionResult;
+      return { context: executionResult, name: result.alertInstanceKey };
     },
     /**
      * Checks how often the alert condition will fire an alert instance

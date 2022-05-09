@@ -13,6 +13,7 @@ import {
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
+import { buildExplorerUrl } from './alerting_service';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -23,17 +24,23 @@ import {
 import { RegisterAlertParams } from './register_ml_alerts';
 import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
 
-export type AnomalyDetectionAlertContext = {
-  name: string;
+/**
+ * Base Anomaly detection alerting rule context.
+ * Relevant for both active and recovered alerts.
+ */
+export type AnomalyDetectionAlertBaseContext = AlertInstanceContext & {
   jobIds: string[];
+  anomalyExplorerUrl: string;
+};
+
+export type AnomalyDetectionAlertContext = AnomalyDetectionAlertBaseContext & {
   timestampIso8601: string;
   timestamp: number;
   score: number;
   isInterim: boolean;
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
-  anomalyExplorerUrl: string;
-} & AlertInstanceContext;
+};
 
 export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
 
@@ -129,18 +136,39 @@ export function registerAnomalyDetectionAlertType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
-    async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
+    doesSetRecoveryContext: true,
+    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name }) {
       const fakeRequest = {} as KibanaRequest;
       const { execute } = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest
       );
-      const executionResult = await execute(params, startedAt, previousStartedAt);
+      const executionResult = await execute(params);
 
       if (executionResult) {
         const alertInstanceName = executionResult.name;
         const alertInstance = services.alertFactory.create(alertInstanceName);
-        alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult);
+        alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult.context);
+      }
+
+      // Set context for recovered alerts
+      const { getRecoveredAlerts } = services.alertFactory.done();
+      for (const recoveredAlert of getRecoveredAlerts()) {
+        const recoveredAlertId = recoveredAlert.getId();
+
+        const jobIds = [recoveredAlertId];
+
+        recoveredAlert.setContext({
+          jobIds,
+          anomalyExplorerUrl: buildExplorerUrl(
+            jobIds,
+            {
+              from: previousStartedAt!.toISOString(),
+              to: 'now',
+            },
+            params.resultType
+          ),
+        } as AnomalyDetectionAlertContext);
       }
     },
   });
