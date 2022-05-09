@@ -26,6 +26,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '..';
+import { DEFAULT_CONTROL_WIDTH } from '../../common';
 
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
@@ -91,6 +92,8 @@ export const ControlGroupStoryComponent: FC<{
       );
       const controlGroupContainerEmbeddable = await factory.create({
         controlStyle: 'oneLine',
+        defaultControlWidth: DEFAULT_CONTROL_WIDTH,
+        defaultControlGrow: true,
         chainingSystem: 'NONE', // a chaining system doesn't make sense in storybook since the controls aren't backed by elasticsearch
         panels: panels ?? {},
         id: uuid.v4(),
@@ -139,10 +142,10 @@ export const ConfiguredControlGroupStory = () => (
       optionsList1: {
         type: OPTIONS_LIST_CONTROL,
         order: 1,
-        width: 'small',
-        grow: true,
         explicitInput: {
           title: 'Origin City',
+          width: 'small',
+          grow: true,
           id: 'optionsList1',
           dataViewId: 'demoDataFlights',
           fieldName: 'OriginCityName',
@@ -152,10 +155,10 @@ export const ConfiguredControlGroupStory = () => (
       optionsList2: {
         type: OPTIONS_LIST_CONTROL,
         order: 2,
-        width: 'medium',
-        grow: true,
         explicitInput: {
           title: 'Destination City',
+          width: 'medium',
+          grow: true,
           id: 'optionsList2',
           dataViewId: 'demoDataFlights',
           fieldName: 'DestCityName',
@@ -165,10 +168,10 @@ export const ConfiguredControlGroupStory = () => (
       optionsList3: {
         type: 'TIME_SLIDER',
         order: 3,
-        width: 'large',
-        grow: true,
         explicitInput: {
           title: 'Carrier',
+          width: 'large',
+          grow: true,
           id: 'optionsList3',
           dataViewId: 'demoDataFlights',
           fieldName: 'Carrier',
@@ -177,10 +180,10 @@ export const ConfiguredControlGroupStory = () => (
       rangeSlider1: {
         type: RANGE_SLIDER_CONTROL,
         order: 4,
-        width: 'medium',
-        grow: true,
         explicitInput: {
           id: 'rangeSlider1',
+          width: 'medium',
+          grow: true,
           title: 'Average ticket price',
           dataViewId: 'demoDataFlights',
           fieldName: 'AvgTicketPrice',
@@ -198,10 +201,10 @@ export const RangeSliderControlGroupStory = () => (
       rangeSlider1: {
         type: RANGE_SLIDER_CONTROL,
         order: 1,
-        width: 'medium',
-        grow: true,
         explicitInput: {
           id: 'rangeSlider1',
+          width: 'medium',
+          grow: true,
           title: 'Average ticket price',
           dataViewId: 'demoDataFlights',
           fieldName: 'AvgTicketPrice',
@@ -212,10 +215,10 @@ export const RangeSliderControlGroupStory = () => (
       rangeSlider2: {
         type: RANGE_SLIDER_CONTROL,
         order: 2,
-        width: 'medium',
-        grow: true,
         explicitInput: {
           id: 'rangeSlider2',
+          width: 'medium',
+          grow: true,
           title: 'Total distance in miles',
           dataViewId: 'demoDataFlights',
           fieldName: 'DistanceMiles',
@@ -226,10 +229,10 @@ export const RangeSliderControlGroupStory = () => (
       rangeSlider3: {
         type: RANGE_SLIDER_CONTROL,
         order: 3,
-        width: 'medium',
-        grow: true,
         explicitInput: {
           id: 'rangeSlider3',
+          width: 'medium',
+          grow: true,
           title: 'Flight duration in hour',
           dataViewId: 'demoDataFlight',
           fieldName: 'FlightTimeHour',

@@ -25,6 +25,7 @@ export type ControlInput = EmbeddableInput & {
   filters?: Filter[];
   timeRange?: TimeRange;
   ignoreParentSettings?: ParentIgnoreSettings;
+  controlStyle?: ControlStyle;
   width?: ControlWidth;
   grow?: boolean;
 };

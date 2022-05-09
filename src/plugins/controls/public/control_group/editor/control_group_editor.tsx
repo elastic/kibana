@@ -15,7 +15,6 @@
  */
 
 import { omit } from 'lodash';
-import fastIsEqual from 'fast-deep-equal';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlyoutHeader,
@@ -42,8 +41,7 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { ControlStyle, ControlWidth } from '../../types';
 import { ParentIgnoreSettings } from '../..';
 import { ControlGroupInput } from '..';
-import { DEFAULT_CONTROL_WIDTH, getDefaultControlGroupInput } from '../../../common';
-import { pluginServices } from '../../services';
+import { getDefaultControlGroupInput } from '../../../common';
 
 interface EditControlGroupProps {
   initialInput: ControlGroupInput;

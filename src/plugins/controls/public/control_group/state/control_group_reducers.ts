@@ -9,7 +9,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
-import { ControlWidth } from '../../types';
 import { ControlGroupInput } from '../types';
 
 export const controlGroupReducers = {
@@ -24,18 +23,6 @@ export const controlGroupReducers = {
     action: PayloadAction<ControlGroupInput['defaultControlWidth']>
   ) => {
     state.defaultControlWidth = action.payload;
-  },
-  setControlWidth: (
-    state: WritableDraft<ControlGroupInput>,
-    action: PayloadAction<{ width: ControlWidth; embeddableId: string }>
-  ) => {
-    state.panels[action.payload.embeddableId].width = action.payload.width;
-  },
-  setControlGrow: (
-    state: WritableDraft<ControlGroupInput>,
-    action: PayloadAction<{ grow: boolean; embeddableId: string }>
-  ) => {
-    state.panels[action.payload.embeddableId].grow = action.payload.grow;
   },
   setControlOrders: (
     state: WritableDraft<ControlGroupInput>,

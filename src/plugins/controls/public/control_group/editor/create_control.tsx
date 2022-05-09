@@ -15,7 +15,6 @@ import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
-import { DEFAULT_CONTROL_WIDTH } from '../../../common/control_group/control_group_constants';
 import { setFlyoutRef } from '../embeddable/control_group_container';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
