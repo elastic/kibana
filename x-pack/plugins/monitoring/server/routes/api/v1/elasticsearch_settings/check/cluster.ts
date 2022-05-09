@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { getElasticsearchSettingsClusterResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
 import { checkClusterSettings } from '../../../../../lib/elasticsearch_settings';
 import { handleSettingsError } from '../../../../../lib/errors';
+import { MonitoringCore } from '../../../../../types';
 
 /*
  * Cluster Settings Check Route
  */
-export function clusterSettingsCheckRoute(server) {
+export function clusterSettingsCheckRoute(server: MonitoringCore) {
   server.route({
-    method: 'GET',
+    method: 'get',
     path: '/api/monitoring/v1/elasticsearch_settings/check/cluster',
-    config: {
-      validate: {},
-    },
+    validate: {},
     async handler(req) {
       try {
         const response = await checkClusterSettings(req); // needs to be try/catch to handle privilege error
-        return response;
+        return getElasticsearchSettingsClusterResponsePayloadRT.encode(response);
       } catch (err) {
-        console.log(err);
+        server.log.error(err);
         throw handleSettingsError(err);
       }
     },
