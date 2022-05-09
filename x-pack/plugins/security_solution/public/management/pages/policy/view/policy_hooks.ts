@@ -103,6 +103,15 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
 }
 
 export const useIsPolicySettingsBarVisible = () => {
-  const policySettingsRegex = /administration\/policy\/[A-Za-z0-9-]+/;
-  return window.location.pathname.match(policySettingsRegex) !== null;
+  const policyTabs = [
+    '/settings',
+    '/trustedApps',
+    '/eventFilters',
+    '/hostIsolationExceptions',
+    '/blocklists',
+  ];
+  return (
+    window.location.pathname.includes('administration/policy') &&
+    policyTabs.includes(window.location.pathname)
+  );
 };
