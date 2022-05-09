@@ -83,10 +83,22 @@ describe('initAction', () => {
     const result = await task();
     expect(Either.isRight(result)).toEqual(true);
   });
-  it('resolves left when persistent cluster settings are incompatible', async () => {
+  it('resolves right when valid transient settings, incompatible persistent settings', async () => {
     const clusterSettingsResponse = {
       transient: { 'cluster.routing.allocation.enable': 'all' },
       persistent: { 'cluster.routing.allocation.enable': 'primaries' },
+    };
+    const client = elasticsearchClientMock.createInternalClient(
+      new Promise((res) => res(clusterSettingsResponse))
+    );
+    const task = initAction({ client, indices: ['my_index'] });
+    const result = await task();
+    expect(Either.isRight(result)).toEqual(true);
+  });
+  it('resolves left when valid persistent settings, incompatible transient settings', async () => {
+    const clusterSettingsResponse = {
+      transient: { 'cluster.routing.allocation.enable': 'primaries' },
+      persistent: { 'cluster.routing.allocation.enable': 'alls' },
     };
     const client = elasticsearchClientMock.createInternalClient(
       new Promise((res) => res(clusterSettingsResponse))
