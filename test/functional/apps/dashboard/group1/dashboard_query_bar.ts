@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('causes panels to reload when refresh is clicked', async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
-
+      await elasticChart.setNewChartUiDebugFlag(true);
       await queryBar.clickQuerySubmitButton();
       await retry.tryForTime(5000, async () => {
         const headers = await PageObjects.discover.getColumnHeaders();

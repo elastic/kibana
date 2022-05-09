@@ -327,7 +327,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Filter Test: animals: linked to search with filter'
         );
         await elasticChart.setNewChartUiDebugFlag(true);
-        await pieChart.expectPieSliceCount(7);
+        await pieChart.expectSliceCountForAllPies(7);
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
@@ -335,7 +335,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await pieChart.expectPieSliceCount(5);
+        await pieChart.expectSliceCountForAllPies(5);
       });
     });
   });

@@ -152,8 +152,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`Navigating to ${url}`);
 
         await browser.get(url, true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await queryBar.submitQuery();
         await dashboardExpect.selectedLegendColorCount('#000000', 5);
       });
