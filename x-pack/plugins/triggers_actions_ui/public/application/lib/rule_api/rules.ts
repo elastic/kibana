@@ -23,6 +23,7 @@ export async function loadRules({
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
+  tagsFilter,
   sort = { field: 'name', direction: 'asc' },
 }: {
   http: HttpSetup;
@@ -30,6 +31,7 @@ export async function loadRules({
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
+  tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   sort?: Sorting;
@@ -42,6 +44,7 @@ export async function loadRules({
   const filters = mapFiltersToKql({
     typesFilter,
     actionTypesFilter,
+    tagsFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
   });
