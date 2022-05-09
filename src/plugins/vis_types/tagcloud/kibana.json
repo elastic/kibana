@@ -3,7 +3,7 @@
   "version": "kibana",
   "ui": true,
   "server": true,
-  "requiredPlugins": ["data", "expressions", "visualizations", "charts"],
+  "requiredPlugins": ["data", "expressions", "visualizations", "charts", "embeddable"],
   "requiredBundles": ["kibanaReact", "visDefaultEditor"],
   "owner": {
     "name": "Vis Editors",

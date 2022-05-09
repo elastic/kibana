@@ -77,8 +77,8 @@ const getEventScopeFromRangeSelectTriggerContext = (
 const getEventScopeFromValueClickTriggerContext = (
   eventScopeInput: ValueClickContext
 ): ValueClickTriggerEventScope => {
-  const negate = eventScopeInput.data.negate ?? false;
-  const points = eventScopeInput.data.data.map(({ table, value, column: columnIndex }) => {
+  const negate = eventScopeInput.negate ?? false;
+  const points = eventScopeInput.data.map(({ table, value, column: columnIndex }) => {
     const column = table.columns[columnIndex];
     return {
       value: toPrimitiveOrUndefined(value) as Primitive,

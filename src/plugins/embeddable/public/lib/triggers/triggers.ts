@@ -17,16 +17,14 @@ export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
 
 export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
-  data: {
-    data: Array<{
-      table: Pick<Datatable, 'rows' | 'columns'>;
-      column: number;
-      row: number;
-      value: any;
-    }>;
-    timeFieldName?: string;
-    negate?: boolean;
-  };
+  data: Array<{
+    table: Pick<Datatable, 'rows' | 'columns'>;
+    column: number;
+    row: number;
+    value: any;
+  }>;
+  timeFieldName?: string;
+  negate?: boolean;
 }
 
 export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {

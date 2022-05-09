@@ -18,7 +18,7 @@ export const getClickFilterData = (
   tables: TSVBTables,
   model: TimeseriesVisParams
 ) => {
-  const data: ValueClickContext['data']['data'] = [];
+  const data: ValueClickContext['data'] = [];
   points.forEach((point) => {
     const [geometry] = point;
     const { specId } = point[1];

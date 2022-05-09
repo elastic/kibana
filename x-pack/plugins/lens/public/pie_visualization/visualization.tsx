@@ -12,7 +12,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type {
   Visualization,
   OperationMetadata,
@@ -103,7 +103,7 @@ export const getPieVisualization = ({
     shape: visualizationTypeId as PieVisualizationState['shape'],
   }),
 
-  triggers: [VIS_EVENT_TO_TRIGGER.filter],
+  triggers: [VALUE_CLICK_TRIGGER],
 
   initialize(addNewLayer, state, mainPalette) {
     return (

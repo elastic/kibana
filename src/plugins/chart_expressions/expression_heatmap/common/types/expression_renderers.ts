@@ -13,13 +13,14 @@ import type {
   RangeSelectContext,
   ValueClickContext,
   SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { HeatmapExpressionProps } from './expression_functions';
 
 export interface FilterEvent {
-  name: 'filter';
-  data: ValueClickContext['data'];
+  name: typeof VALUE_CLICK_TRIGGER;
+  data: ValueClickContext;
 }
 
 export interface BrushEvent {

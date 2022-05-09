@@ -11,7 +11,8 @@ import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { ColorSchemas } from '@kbn/charts-plugin/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
@@ -29,7 +30,7 @@ export const getHeatmapVisTypeDefinition = ({
     defaultMessage: 'Display values as colors in a matrix.',
   }),
   toExpressionAst,
-  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  getSupportedTriggers: () => [VALUE_CLICK_TRIGGER],
   visConfig: {
     defaults: {
       type: 'heatmap',

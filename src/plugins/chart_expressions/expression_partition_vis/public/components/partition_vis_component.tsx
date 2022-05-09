@@ -30,6 +30,7 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
   PartitionVisParams,
@@ -155,7 +156,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         splitChartDimension,
         splitChartFormatter
       );
-      props.fireEvent({ name: 'filter', data: { data } });
+      props.fireEvent({ name: VALUE_CLICK_TRIGGER, data: { data } });
     },
     [props]
   );
@@ -167,7 +168,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         const data = getFilterEventData(vData, series);
 
         return {
-          name: 'filter',
+          name: VALUE_CLICK_TRIGGER,
           data: {
             negate: false,
             data,

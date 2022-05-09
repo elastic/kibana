@@ -21,7 +21,7 @@ import type { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 export interface ClickTriggerEvent {
   name: 'filterBucket';
-  data: ValueClickContext['data'];
+  data: ValueClickContext;
 }
 
 export interface BrushTriggerEvent {
@@ -184,7 +184,7 @@ export const getFilterFromChartClickEventFn =
     negate: boolean = false
   ) =>
   (points: Array<[GeometryValue, XYChartSeriesIdentifier]>): ClickTriggerEvent => {
-    const data: ValueClickContext['data']['data'] = [];
+    const data: ValueClickContext['data'] = [];
 
     points.forEach((point) => {
       const [geometry, { yAccessor, splitAccessors }] = point;
@@ -243,7 +243,7 @@ export const getFilterFromSeriesFn =
     const row = table.rows.findIndex(
       rowFindPredicate(null, null, null, allSplitAccessors, splitChartAccessor, splitChartValue)
     );
-    const data: ValueClickContext['data']['data'] = columns.map(([column, id]) => ({
+    const data: ValueClickContext['data'] = columns.map(([column, id]) => ({
       table,
       column,
       row,

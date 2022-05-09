@@ -19,16 +19,14 @@ export interface ValueClickContext {
   // Need to make this unknown to prevent circular dependencies.
   // Apps using this property will need to cast to `IEmbeddable`.
   embeddable?: unknown;
-  data: {
-    data: Array<{
-      table: Pick<Datatable, 'rows' | 'columns'>;
-      column: number;
-      row: number;
-      value: any;
-    }>;
-    timeFieldName?: string;
-    negate?: boolean;
-  };
+  data: Array<{
+    table: Pick<Datatable, 'rows' | 'columns'>;
+    column: number;
+    row: number;
+    value: any;
+  }>;
+  timeFieldName?: string;
+  negate?: boolean;
 }
 
 export function createValueClickAction(
@@ -40,12 +38,12 @@ export function createValueClickAction(
     shouldAutoExecute: async () => true,
     execute: async (context: ValueClickActionContext) => {
       try {
-        const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
+        const filters: Filter[] = await createFiltersFromValueClickAction(context);
         if (filters.length > 0) {
           await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
             filters,
             embeddable: context.embeddable,
-            timeFieldName: context.data.timeFieldName,
+            timeFieldName: context.timeFieldName,
           });
         }
       } catch (e) {

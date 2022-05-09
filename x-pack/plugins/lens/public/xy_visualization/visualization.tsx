@@ -15,14 +15,13 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import {
   FillStyle,
   SeriesType,
   YAxisMode,
   ExtendedYConfig,
 } from '@kbn/expression-xy-plugin/common';
-import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
@@ -146,7 +145,7 @@ export const getXyVisualization = ({
 
   getSuggestions,
 
-  triggers: [VIS_EVENT_TO_TRIGGER.filter, SELECT_RANGE_TRIGGER],
+  triggers: [SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER],
 
   initialize(addNewLayer, state) {
     return (

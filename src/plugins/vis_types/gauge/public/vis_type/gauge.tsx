@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import { Alignment, GaugeType, GaugeTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
@@ -28,7 +29,7 @@ export const getGaugeVisTypeDefinition = (
   description: i18n.translate('visTypeGauge.gauge.gaugeDescription', {
     defaultMessage: 'Show the status of a metric.',
   }),
-  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  getSupportedTriggers: () => [VALUE_CLICK_TRIGGER],
   toExpressionAst,
   visConfig: {
     defaults: {

@@ -32,7 +32,6 @@ import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import {
   Embeddable as AbstractEmbeddable,
@@ -612,7 +611,7 @@ export class Embeddable
   }
 
   private getExtraActionContext = (event: ExpressionRendererEvent) => {
-    if (isLensBrushEvent(event)) {
+    if (isLensBrushEvent(event) || isLensFilterEvent(event)) {
       return {
         embeddable: this,
         timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
@@ -628,18 +627,8 @@ export class Embeddable
     if (isLensBrushEvent(event) && this.input.onBrushEnd) {
       this.input.onBrushEnd(event.data);
     }
-    if (isLensFilterEvent(event)) {
-      event.preventDefault();
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName: event.data.timeFieldName || inferTimeField(event.data),
-        },
-        embeddable: this,
-      });
-      if (this.input.onFilter) {
-        this.input.onFilter(event.data);
-      }
+    if (isLensFilterEvent(event) && this.input.onFilter) {
+      this.input.onFilter(event.data);
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {

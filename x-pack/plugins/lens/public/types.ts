@@ -23,7 +23,7 @@ import type {
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Query } from '@kbn/data-plugin/public';
 import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
-import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
@@ -937,8 +937,8 @@ export interface Visualization<T = unknown> {
 }
 
 export interface LensFilterEvent {
-  name: 'filter';
-  data: ValueClickContext['data'];
+  name: typeof VALUE_CLICK_TRIGGER;
+  data: ValueClickContext;
 }
 
 export interface LensBrushEvent {
@@ -973,7 +973,7 @@ export interface LensTableRowContextMenuEvent {
 }
 
 export function isLensFilterEvent(event: unknown): event is LensFilterEvent {
-  return (event as Record<string, unknown>)?.name === 'filter';
+  return (event as Record<string, unknown>)?.name === VALUE_CLICK_TRIGGER;
 }
 
 export function isLensBrushEvent(event: unknown): event is LensBrushEvent {

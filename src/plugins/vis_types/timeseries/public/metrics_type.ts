@@ -9,15 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import {
-  Vis,
-  VIS_EVENT_TO_TRIGGER,
-  VisGroups,
-  VisParams,
-  VisTypeDefinition,
-} from '@kbn/visualizations-plugin/public';
+import { Vis, VisGroups, VisParams, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { TSVB_EDITOR_NAME } from './application/editor_controller';
 import { PANEL_TYPES, TOOLTIP_MODES } from '../common/enums';
 import {
@@ -164,7 +158,7 @@ export const metricsVisDefinition: VisTypeDefinition<
   toExpressionAst,
   getSupportedTriggers: (params?: VisParams) => {
     if (params?.type === PANEL_TYPES.TIMESERIES) {
-      return [VIS_EVENT_TO_TRIGGER.filter, SELECT_RANGE_TRIGGER];
+      return [SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER];
     }
     return [];
   },

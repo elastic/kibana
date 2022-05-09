@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type {
   SuggestionRequest,
   Visualization,
@@ -89,7 +89,7 @@ export const getDatatableVisualization = ({
 
   switchVisualizationType: (_, state) => state,
 
-  triggers: [VIS_EVENT_TO_TRIGGER.filter, ROW_CLICK_TRIGGER],
+  triggers: [ROW_CLICK_TRIGGER, VALUE_CLICK_TRIGGER],
 
   initialize(addNewLayer, state) {
     return (

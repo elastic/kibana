@@ -23,7 +23,12 @@ import { Document } from '../persistence';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock, httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { IBasePath } from '@kbn/core/public';
-import { AttributeService, ViewMode, SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import {
+  AttributeService,
+  ViewMode,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
 import { act } from 'react-dom/test-utils';
@@ -1017,7 +1022,7 @@ describe('embeddable', () => {
     expressionRenderer = jest.fn(({ onEvent }) => {
       setTimeout(() => {
         onEvent?.({
-          name: 'filter',
+          name: VALUE_CLICK_TRIGGER,
           data: { pings: false, table: { rows: [], columns: [] }, column: 0 },
           preventDefault: jest.fn(),
         });

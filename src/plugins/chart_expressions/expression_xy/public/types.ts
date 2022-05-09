@@ -15,6 +15,7 @@ import type {
   RangeSelectContext,
   ValueClickContext,
   SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 
@@ -33,8 +34,8 @@ export type ExpressionXyPluginSetup = void;
 export type ExpressionXyPluginStart = void;
 
 export interface FilterEvent {
-  name: 'filter';
-  data: ValueClickContext['data'];
+  name: typeof VALUE_CLICK_TRIGGER;
+  data: ValueClickContext;
 }
 
 export interface BrushEvent {

@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
@@ -20,7 +20,7 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
     title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
     icon: 'visTagCloud',
     getSupportedTriggers: () => {
-      return [VIS_EVENT_TO_TRIGGER.filter];
+      return [VALUE_CLICK_TRIGGER];
     },
     description: i18n.translate('visTypeTagCloud.vis.tagCloudDescription', {
       defaultMessage: 'Display word frequency with font size.',

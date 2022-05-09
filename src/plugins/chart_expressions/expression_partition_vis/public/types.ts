@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type { ValueClickContext, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import {
   Plugin as ExpressionsPublicPlugin,
@@ -25,6 +25,6 @@ export interface StartDeps {
 }
 
 export interface FilterEvent {
-  name: 'filter';
-  data: ValueClickContext['data'];
+  name: typeof VALUE_CLICK_TRIGGER;
+  data: ValueClickContext;
 }

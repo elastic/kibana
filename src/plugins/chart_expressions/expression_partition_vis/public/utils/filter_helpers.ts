@@ -31,8 +31,8 @@ export const getFilterClickData = (
   visData: Datatable,
   splitChartDimension?: DatatableColumn,
   splitChartFormatter?: FieldFormat
-): ValueClickContext['data']['data'] => {
-  const data: ValueClickContext['data']['data'] = [];
+): ValueClickContext['data'] => {
+  const data: ValueClickContext['data'] = [];
   const matchingIndex = visData.rows.findIndex((row) =>
     clickedLayers.every((layer, index) => {
       const columnId = bucketColumns[index].id;
@@ -72,8 +72,8 @@ export const getFilterClickData = (
 export const getFilterEventData = (
   visData: Datatable,
   series: SeriesIdentifier
-): ValueClickContext['data']['data'] => {
-  return visData.columns.reduce<ValueClickContext['data']['data']>((acc, { id }, column) => {
+): ValueClickContext['data'] => {
+  return visData.columns.reduce<ValueClickContext['data']>((acc, { id }, column) => {
     const value = series.key;
     const row = visData.rows.findIndex((r) => r[id] === value);
     if (row > -1) {

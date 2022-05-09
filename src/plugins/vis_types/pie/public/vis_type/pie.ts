@@ -9,7 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   PartitionVisParams,
   LabelPositions,
@@ -34,7 +35,7 @@ export const getPieVisTypeDefinition = ({
     defaultMessage: 'Compare data in proportion to a whole.',
   }),
   toExpressionAst,
-  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  getSupportedTriggers: () => [VALUE_CLICK_TRIGGER],
   visConfig: {
     defaults: {
       type: 'pie',

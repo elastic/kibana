@@ -12,7 +12,7 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   EXPRESSION_HEATMAP_NAME,
   HeatmapExpressionProps,
@@ -39,7 +39,7 @@ export const heatmapRenderer: (
       unmountComponentAtNode(domNode);
     });
     const onClickValue = (data: FilterEvent['data']) => {
-      handlers.event({ name: 'filter', data });
+      handlers.event({ name: VALUE_CLICK_TRIGGER, data });
     };
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: SELECT_RANGE_TRIGGER, data });

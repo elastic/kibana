@@ -48,7 +48,7 @@ export const getXyChartRenderer = ({
   render: async (domNode: Element, config: XYChartProps, handlers) => {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     const onClickValue = (data: FilterEvent['data']) => {
-      handlers.event({ name: 'filter', data });
+      handlers.event({ name: 'VALUE_CLICK_TRIGGER', data });
     };
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'SELECT_RANGE_TRIGGER', data });

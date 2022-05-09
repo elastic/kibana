@@ -31,7 +31,6 @@ import type {
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import {
@@ -292,7 +291,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   }, [expressionExists, localState.expressionToRender]);
 
   const getExtraActionContext = useCallback((event) => {
-    if (isLensBrushEvent(event)) {
+    if (isLensBrushEvent(event) || isLensFilterEvent(event)) {
       return {
         timeFieldName: inferTimeField(event.data),
       };
@@ -301,15 +300,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
-      if (isLensFilterEvent(event)) {
-        event.preventDefault();
-        plugins.uiActions?.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-          data: {
-            ...event.data,
-            timeFieldName: inferTimeField(event.data),
-          },
-        });
-      }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
         event.preventDefault();
         dispatchLens(
@@ -320,7 +310,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         );
       }
     },
-    [plugins.uiActions, activeVisualization, dispatchLens]
+    [activeVisualization, dispatchLens]
   );
 
   useEffect(() => {

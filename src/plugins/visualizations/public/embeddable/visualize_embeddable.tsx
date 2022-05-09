@@ -32,6 +32,7 @@ import {
   ReferenceOrValueEmbeddable,
   AttributeService,
   SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import {
   IExpressionLoaderParams,
@@ -43,7 +44,6 @@ import type { RenderMode } from '@kbn/expressions-plugin';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { Vis, SerializedVis } from '../vis';
 import { getExecutionContext, getExpressions, getTheme, getUiActions } from '../services';
-import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
@@ -367,17 +367,17 @@ export class VisualizeEmbeddable
 
         if (
           !this.input.disableTriggers &&
-          ![APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER].includes(event.name)
+          ![APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER].includes(event.name)
         ) {
           event.preventDefault();
 
-          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
           const context = {
             embeddable: this,
-            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
+            timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+            ...event.data,
           };
 
-          getUiActions().getTrigger(triggerId).exec(context);
+          getUiActions().getTrigger(VALUE_CLICK_TRIGGER).exec(context);
         }
       })
     );
