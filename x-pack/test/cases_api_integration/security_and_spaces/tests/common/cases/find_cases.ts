@@ -845,12 +845,45 @@ export default ({ getService }: FtrProviderContext): void => {
           // Only security solution cases are being returned
           ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
         });
+      });
 
-        it('should respect the owner filter when filtering severities', async () => {
+      describe('RBAC query filter', () => {
+        it('should return the correct cases when trying to query filter by severity', async () => {
+          await Promise.all([
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'observabilityFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsOnly,
+                space: 'space1',
+              }
+            ),
+          ]);
+
+          // User with permissions only to security solution request cases from observability
           const res = await findCases({
             supertest: supertestWithoutAuth,
             query: {
-              severity: CaseSeverity.LOW,
+              severity: CaseSeverity.HIGH,
             },
             auth: {
               user: secOnly,
