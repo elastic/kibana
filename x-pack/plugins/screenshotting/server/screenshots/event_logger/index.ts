@@ -12,7 +12,7 @@ import { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
 import { ConfigType } from '../../config';
 import { ElementPosition } from '../get_element_position_data';
-import { Screenshot } from '../get_screenshots';
+import type { Screenshot } from '../types';
 
 export enum Actions {
   OPEN_URL = 'open-url',
