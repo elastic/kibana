@@ -173,11 +173,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
-export const EXCLUDE_ELASTIC_CLOUD_INDICES = [
-  '-*elastic-cloud-logs-*',
-  '-.ds-logs-elastic_agent*',
-  '-.ds-logs-system-*',
-];
+export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const INCLUDE_INDEX_PATTERN = [
