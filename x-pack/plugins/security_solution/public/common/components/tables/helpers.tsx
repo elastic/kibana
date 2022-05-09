@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiLink,
@@ -25,7 +25,7 @@ import { MoreRowItems } from '../page';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { HoverActions } from '../hover_actions';
-import { DataProvider, QueryOperator } from '../../../../common/types';
+import { DataProvider } from '../../../../common/types';
 import {
   DEFAULT_MORE_MAX_HEIGHT,
   MoreContainer,

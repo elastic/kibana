@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, Fragment, useMemo, useState, useContext } from 'react';
@@ -393,7 +393,6 @@ export const MoreContainer = React.memo<MoreContainerProps>(
         }}
       >
         <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="overflow-items">
-          {/* Do not render hover actions if row items are Reputation Links */}
           {attrName != null ? moreItemsWithHoverActions : moreItems}
         </EuiFlexGroup>
       </div>
