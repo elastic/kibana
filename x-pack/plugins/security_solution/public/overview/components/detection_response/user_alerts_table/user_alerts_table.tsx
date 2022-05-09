@@ -27,7 +27,7 @@ import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
-import { LastUpdatedAt, SEVERITY_COLOR } from '../util';
+import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
 import { UserAlertsItem, useUserAlertsItems } from './use_user_alerts_items';
 
 export interface UserAlertsTableProps {
