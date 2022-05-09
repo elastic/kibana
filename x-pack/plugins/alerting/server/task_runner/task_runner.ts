@@ -840,12 +840,12 @@ export class TaskRunner<
         );
         set(
           event,
-          'kibana.alert.rule.execution.metrics.number_of_active_alerts',
+          'kibana.alert.rule.execution.metrics.alert_counts.active',
           executionMetrics.numberOfActiveAlerts
         );
         set(
           event,
-          'kibana.alert.rule.execution.metrics.number_of_new_alerts',
+          'kibana.alert.rule.execution.metrics.alert_counts.new',
           executionMetrics.numberOfNewAlerts
         );
         set(
@@ -856,7 +856,7 @@ export class TaskRunner<
         );
         set(
           event,
-          'kibana.alert.rule.execution.metrics.number_of_recovered_alerts',
+          'kibana.alert.rule.execution.metrics.alert_counts.recovered',
           executionMetrics.numberOfRecoveredAlerts
         );
       }
