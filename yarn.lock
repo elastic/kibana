@@ -3204,11 +3204,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-avatar-solution@link:bazel-bin/packages/shared-ux/avatar/solution":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen":
   version "0.0.0"
   uid ""
 
 "@kbn/shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app":
   version "0.0.0"
   uid ""
 
@@ -6292,11 +6300,19 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__shared-ux-avatar-solution@link:bazel-bin/packages/shared-ux/avatar/solution/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/npm_module_types":
   version "0.0.0"
   uid ""
 
