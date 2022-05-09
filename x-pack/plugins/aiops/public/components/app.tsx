@@ -151,7 +151,8 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
                 label={i18n.translate(
                   'xpack.aiops.explainLogRateSpikes.simulateErrorsCheckboxLabel',
                   {
-                    defaultMessage: 'Simulate errors.',
+                    defaultMessage:
+                      'Simulate errors (gets applied to new streams only, not currently running ones).',
                   }
                 )}
                 checked={simulateErrors}
