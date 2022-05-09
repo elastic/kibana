@@ -75,7 +75,7 @@ export const useNavItems: () => NavItem[] = () => {
     },
     {
       id: SecurityPageName.timelines,
-      label: 'Investigations',
+      label: 'Timelines',
       ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.timelines }),
     },
     {
