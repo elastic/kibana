@@ -16,7 +16,7 @@ import { useNoDataConfig } from './use_no_data_config';
 import { EmptyStateLoading } from '../components/overview/empty_state/empty_state_loading';
 import { EmptyStateError } from '../components/overview/empty_state/empty_state_error';
 import { useHasData } from '../components/overview/empty_state/use_has_data';
-import { useBreakpoints } from '../hooks/use_breakpoints';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 
 interface Props {
   path: string;

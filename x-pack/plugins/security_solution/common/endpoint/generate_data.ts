@@ -464,16 +464,17 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     const agentVersion = this.randomVersion();
     const minCapabilitiesVersion = '7.15.0';
     const capabilities = ['isolation'];
+    const agentId = this.seededUUIDv4();
 
     return {
       agent: {
         version: agentVersion,
-        id: this.seededUUIDv4(),
+        id: agentId,
         type: 'endpoint',
       },
       elastic: {
         agent: {
-          id: this.seededUUIDv4(),
+          id: agentId,
         },
       },
       host: {
