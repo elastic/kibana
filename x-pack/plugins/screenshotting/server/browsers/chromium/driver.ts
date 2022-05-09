@@ -359,7 +359,7 @@ export class HeadlessChromiumDriver {
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
-    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    // IE: https://feeds.elastic.co/kibana/v8.0.0.json
     const derivedPort = (protocol: string | null, port: string | null, url: string) => {
       if (port) {
         return port;
