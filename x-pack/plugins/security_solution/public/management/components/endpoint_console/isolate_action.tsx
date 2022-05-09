@@ -9,8 +9,8 @@ import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
-import { useIsolateHost } from '../../../hooks/endpoint/use_isolate_host';
-import { CommandExecutionComponentProps } from '../../console/types';
+import { useIsolateHost } from '../../hooks/endpoint/use_isolate_host';
+import { CommandExecutionComponentProps } from '../console/types';
 
 export const IsolateActionResult = memo<CommandExecutionComponentProps>(
   ({ command, setStore, store, status, setStatus }) => {

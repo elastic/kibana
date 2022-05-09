@@ -9,14 +9,14 @@ import React, { memo, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
-import { useFetchEndpointPendingActionsSummary } from '../../../hooks/endpoint/use_fetch_endpoint_pending_actions_summary';
-import { FormattedDate } from '../../../../common/components/formatted_date';
-import { EndpointPolicyStatus } from '../../endpoint_policy_status';
-import { EndpointAgentAndIsolationStatus } from '../../endpoint_agent_and_isolation_status';
-import { useGetEndpointHostInfo } from '../../../hooks';
-import { CommandExecutionComponentProps } from '../../console/types';
-import { FormattedError } from '../../formatted_error';
+import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
+import { useFetchEndpointPendingActionsSummary } from '../../hooks/endpoint/use_fetch_endpoint_pending_actions_summary';
+import { FormattedDate } from '../../../common/components/formatted_date';
+import { EndpointPolicyStatus } from '../endpoint_policy_status';
+import { EndpointAgentAndIsolationStatus } from '../endpoint_agent_and_isolation_status';
+import { useGetEndpointHostInfo } from '../../hooks';
+import { CommandExecutionComponentProps } from '../console/types';
+import { FormattedError } from '../formatted_error';
 
 export const EndpointStatusActionResult = memo<CommandExecutionComponentProps>(
   ({ command, status, setStatus }) => {

@@ -6,9 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import { EndpointConsoleCommandService } from '../../components/endpoint_console/endpoint_console_command_service';
+import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_console/endoint_response_actions_console_commands';
 import { useConsoleManager } from '../../components/console';
-import { HostMetadata } from '../../../../common/endpoint/types';
+import type { HostMetadata } from '../../../../common/endpoint/types';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
@@ -17,19 +17,20 @@ export const useShowEndpointResponseActionsConsole = (): ShowEndpointResponseAct
 
   return useCallback(
     (endpointMetadata: HostMetadata) => {
-      const endpointRunningConsole = consoleManager.getOne(endpointMetadata.agent.id);
+      const endpointAgentId = endpointMetadata.agent.id;
+      const endpointRunningConsole = consoleManager.getOne(endpointAgentId);
 
       if (endpointRunningConsole) {
         endpointRunningConsole.show();
       } else {
         consoleManager
           .register({
-            id: endpointMetadata.agent.id,
+            id: endpointAgentId,
             title: `${endpointMetadata.host.name} - Endpoint v${endpointMetadata.agent.version}`,
             consoleProps: {
+              commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
               'data-test-subj': 'endpointResponseActionsConsole',
               prompt: `endpoint-${endpointMetadata.agent.version}`,
-              commandService: new EndpointConsoleCommandService(endpointMetadata),
             },
           })
           .show();

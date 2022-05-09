@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { handleIsolateAction } from './isolate_action';
-export { handleStatusAction } from './status_action';
+export { getEndpointResponseActionsConsoleCommands } from './endoint_response_actions_console_commands';
