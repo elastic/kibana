@@ -20,7 +20,6 @@ import {
   ExpressionAstExpression,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
-  ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
@@ -108,15 +107,28 @@ function getExpressionForLayer(
       }
     });
 
+    function makeid(length = 10) {
+      let result = '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const charactersLength = characters.length;
+      for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
+    }
+
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
     const esAggsToOriginalColumnIdMap: Record<string, OriginalColumn> = {};
+    const expressionBuilderToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
+        const esAggsId = makeid();
+
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${index}-metric` : String(index),
+          wrapInFilter ? `${esAggsId}-metric` : esAggsId,
           indexPattern,
           layer,
           uiSettings,
@@ -142,21 +154,19 @@ function getExpressionForLayer(
             }
           ).toAst();
         }
-        aggs.push(
-          buildExpression({
-            type: 'expression',
-            chain: [aggAst],
-          })
-        );
 
-        const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-          ? `col-${index + (col.isBucketed ? 0 : 1)}-${index}`
-          : `col-${index}-${index}`;
+        const expressionBuilder = buildExpression({
+          type: 'expression',
+          chain: [aggAst],
+        });
+        aggs.push(expressionBuilder);
 
         esAggsToOriginalColumnIdMap[esAggsId] = {
           ...col,
           id: colId,
         };
+
+        expressionBuilderToEsAggsIdMap.set(expressionBuilder, esAggsId);
       }
     });
 
@@ -192,7 +202,9 @@ function getExpressionForLayer(
       }
     });
 
-    Object.values(percentileExpressionsByArgs).forEach(([first, ...rest]) => {
+    Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
+      const [first, ...rest] = expressionBuilders;
+
       if (!rest.length) {
         // don't need to optimize if there's only one
         return;
@@ -202,8 +214,10 @@ function getExpressionForLayer(
         functions: [firstFnBuilder],
       } = first;
 
+      const esAggsColumnId = makeid();
+
       const aggPercentilesConfig: AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES> = {
-        id: 'foo-foo',
+        id: esAggsColumnId,
         enabled: firstFnBuilder.getArgument('enabled')?.[0],
         schema: firstFnBuilder.getArgument('schema')?.[0],
         field: firstFnBuilder.getArgument('field')?.[0],
@@ -227,12 +241,27 @@ function getExpressionForLayer(
       ).toAst();
 
       aggs = [
-        ...aggs.filter((agg) => ![first, ...rest].includes(agg)),
+        ...aggs.filter((aggBuilder) => ![first, ...rest].includes(aggBuilder)),
         buildExpression({
           type: 'expression',
           chain: [multiPercentilesAst],
         }),
       ];
+
+      expressionBuilders.forEach((expressionBuilder) => {
+        const currentEsAggsId = expressionBuilderToEsAggsIdMap.get(expressionBuilder);
+        if (currentEsAggsId === undefined) {
+          throw new Error('Could not find current column ID for percentile agg expression builder');
+        }
+        // esAggs appends the percent number to the agg id. We're anticipating that here.
+        const newEsAggsId = `${esAggsColumnId}.${
+          expressionBuilder.functions[0].getArgument('percentile')![0]
+        }`;
+
+        esAggsToOriginalColumnIdMap[newEsAggsId] = esAggsToOriginalColumnIdMap[currentEsAggsId];
+
+        delete esAggsToOriginalColumnIdMap[currentEsAggsId];
+      });
     });
 
     const columnsWithFormatters = columnEntries.filter(

@@ -27,17 +27,30 @@ export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
 ) => {
   const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
 
+  const columnIdMap = Object.keys(idMap).reduce((acc, esAggsId) => {
+    const columnId = data.columns.map((column) => column.id).find((id) => id.includes(esAggsId));
+
+    if (columnId === undefined) {
+      throw new Error(`Could not find column corresponding to aggregation with id ${esAggsId}`);
+    }
+
+    return {
+      ...acc,
+      [columnId]: idMap[esAggsId],
+    };
+  }, {} as Record<string, OriginalColumn>);
+
   return {
     ...data,
     rows: data.rows.map((row) => {
       const mappedRow: Record<string, unknown> = {};
-      Object.entries(idMap).forEach(([fromId, toId]) => {
+      Object.entries(columnIdMap).forEach(([fromId, toId]) => {
         mappedRow[toId.id] = row[fromId];
       });
 
       Object.entries(row).forEach(([id, value]) => {
-        if (id in idMap) {
-          mappedRow[idMap[id].id] = value;
+        if (id in columnIdMap) {
+          mappedRow[columnIdMap[id].id] = value;
         } else {
           mappedRow[id] = value;
         }
@@ -46,7 +59,7 @@ export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
       return mappedRow;
     }),
     columns: data.columns.map((column) => {
-      const mappedItem = idMap[column.id];
+      const mappedItem = columnIdMap[column.id];
 
       if (!mappedItem) {
         return column;
