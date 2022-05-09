@@ -266,7 +266,7 @@ export function SavedQueryManagementList({
                 placeholder: i18n.translate(
                   'unifiedSearch.query.queryBar.indexPattern.findFilterSet',
                   {
-                    defaultMessage: 'Find a filter set',
+                    defaultMessage: 'Find a saved query',
                   }
                 ),
               }}
@@ -323,7 +323,7 @@ export function SavedQueryManagementList({
               aria-label={i18n.translate(
                 'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                 {
-                  defaultMessage: 'Apply filter set',
+                  defaultMessage: 'Apply saved query',
                 }
               )}
               data-test-subj="saved-query-management-apply-changes-button"
@@ -332,13 +332,13 @@ export function SavedQueryManagementList({
                 ? i18n.translate(
                     'unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel',
                     {
-                      defaultMessage: 'Replace with selected filter set',
+                      defaultMessage: 'Replace with selected saved query',
                     }
                   )
                 : i18n.translate(
                     'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                     {
-                      defaultMessage: 'Apply filter set',
+                      defaultMessage: 'Apply saved query',
                     }
                   )}
             </EuiButton>
