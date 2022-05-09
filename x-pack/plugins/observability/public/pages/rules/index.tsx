@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { capitalize, sortBy } from 'lodash';
 import {
   EuiButton,
@@ -168,6 +168,14 @@ function RulesPage() {
       text: RULES_BREADCRUMB_TEXT,
     },
   ]);
+
+  useEffect(() => {
+    if (tagsError) {
+      toasts.addDanger({
+        title: tagsError,
+      });
+    }
+  }, [tagsError, toasts]);
 
   const getRulesTableColumns = () => {
     return [
@@ -426,7 +434,6 @@ function RulesPage() {
       </>
     );
   };
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -492,10 +499,6 @@ function RulesPage() {
       {error &&
         toasts.addDanger({
           title: error,
-        })}
-      {tagsError &&
-        toasts.addDanger({
-          title: tagsError,
         })}
       {currentRuleToEdit && <EditRuleFlyout onSave={reload} currentRule={currentRuleToEdit} />}
       {createRuleFlyoutVisibility && CreateRuleFlyout}
