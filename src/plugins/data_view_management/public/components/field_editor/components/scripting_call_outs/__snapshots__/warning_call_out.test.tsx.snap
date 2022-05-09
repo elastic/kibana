@@ -1,344 +1,88 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ScriptingWarningCallOut should render normally 1`] = `
-<ScriptingWarningCallOut
-  isVisible={true}
->
-  <EuiText
-    size="s"
+Array [
+  <div
+    class="euiText euiText--small"
   >
-    <div
-      className="euiText euiText--small"
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Familiarize yourself with {scripFields} and {scriptsInAggregation} before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable."
-          id="indexPatternManagement.warningCallOutLabel.callOutDetail"
-          values={
-            Object {
-              "scripFields": <EuiLink
-                target="_blank"
-              >
-                <FormattedMessage
-                  defaultMessage="scripted fields"
-                  id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
-                  values={Object {}}
-                />
-              </EuiLink>,
-              "scriptsInAggregation": <EuiLink
-                target="_blank"
-              >
-                <FormattedMessage
-                  defaultMessage="scripts in aggregations"
-                  id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
-                  values={Object {}}
-                />
-              </EuiLink>,
-            }
-          }
+    <p>
+      <span>
+        Familiarize yourself with 
+        <button
+          class="euiLink euiLink--primary"
+          type="button"
         >
           <span>
-            Familiarize yourself with 
-            <EuiLink
-              target="_blank"
-            >
-              <button
-                className="euiLink euiLink--primary"
-                disabled={false}
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="scripted fields"
-                  id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
-                  values={Object {}}
-                >
-                  <span>
-                    scripted fields
-                  </span>
-                </FormattedMessage>
-              </button>
-            </EuiLink>
-             and 
-            <EuiLink
-              target="_blank"
-            >
-              <button
-                className="euiLink euiLink--primary"
-                disabled={false}
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="scripts in aggregations"
-                  id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
-                  values={Object {}}
-                >
-                  <span>
-                    scripts in aggregations
-                  </span>
-                </FormattedMessage>
-              </button>
-            </EuiLink>
-             before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable.
+            scripted fields
           </span>
-        </FormattedMessage>
-      </p>
-    </div>
-  </EuiText>
-  <EuiSpacer
-    size="m"
+        </button>
+         and 
+        <button
+          class="euiLink euiLink--primary"
+          type="button"
+        >
+          <span>
+            scripts in aggregations
+          </span>
+        </button>
+         before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable.
+      </span>
+    </p>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+  />,
+  <div
+    class="euiCallOut euiCallOut--warning"
   >
     <div
-      css="unknown styles"
+      class="euiCallOutHeader"
     >
-      <Insertion
-        cache={
-          Object {
-            "insert": [Function],
-            "inserted": Object {
-              "hg1jdf-euiSpacer-m": true,
-            },
-            "key": "css",
-            "nonce": undefined,
-            "registered": Object {},
-            "sheet": StyleSheet {
-              "_alreadyInsertedOrderInsensitiveRule": true,
-              "_insertTag": [Function],
-              "before": null,
-              "container": <head>
-                <style
-                  data-emotion="css"
-                  data-s=""
-                >
-                  
-                  .css-hg1jdf-euiSpacer-m{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:16px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQXVCUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
-                </style>
-                <style
-                  data-styled="active"
-                  data-styled-version="5.1.0"
-                />
-              </head>,
-              "ctr": 1,
-              "insertionPoint": undefined,
-              "isSpeedy": false,
-              "key": "css",
-              "nonce": undefined,
-              "prepend": undefined,
-              "tags": Array [
-                <style
-                  data-emotion="css"
-                  data-s=""
-                >
-                  
-                  .css-hg1jdf-euiSpacer-m{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:16px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQXVCUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
-                </style>,
-              ],
-            },
-          }
-        }
-        isStringTag={true}
-        serialized={
-          Object {
-            "map": "/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQXVCUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */",
-            "name": "hg1jdf-euiSpacer-m",
-            "next": undefined,
-            "styles": "flex-shrink:0;label:euiSpacer;;;height:16px;;label:m;;;",
-            "toString": [Function],
-          }
-        }
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        color="inherit"
+        data-euiicon-type="alert"
       />
-      <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
-      />
-    </div>
-  </EuiSpacer>
-  <EuiCallOut
-    color="warning"
-    iconType="alert"
-    title={
-      <FormattedMessage
-        defaultMessage="Scripted fields are deprecated"
-        description="Deprecation warning title within scripted field editor"
-        id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
-        values={Object {}}
-      />
-    }
-  >
-    <div
-      className="euiCallOut euiCallOut--warning"
-    >
-      <div
-        className="euiCallOutHeader"
+      <span
+        class="euiCallOutHeader__title"
       >
-        <EuiIcon
-          aria-hidden="true"
-          className="euiCallOutHeader__icon"
-          color="inherit"
-          size="m"
-          type="alert"
-        >
-          <span
-            aria-hidden="true"
-            className="euiCallOutHeader__icon"
-            color="inherit"
-            data-euiicon-type="alert"
-            size="m"
-          />
-        </EuiIcon>
-        <span
-          className="euiCallOutHeader__title"
-        >
-          <FormattedMessage
-            defaultMessage="Scripted fields are deprecated"
-            description="Deprecation warning title within scripted field editor"
-            id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
-            values={Object {}}
-          >
-            <span>
-              Scripted fields are deprecated
-            </span>
-          </FormattedMessage>
+        <span>
+          Scripted fields are deprecated
         </span>
-      </div>
-      <EuiText
-        color="default"
-        size="s"
+      </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <div
+        class="euiTextColor euiTextColor--default"
       >
         <div
-          className="euiText euiText--small"
+          class="euiText euiText--small"
         >
-          <EuiTextColor
-            color="default"
-            component="div"
-          >
-            <div
-              className="euiTextColor euiTextColor--default"
-              style={Object {}}
-            >
-              <EuiText
-                size="s"
+          <p>
+            <span>
+              For greater flexibility and Painless script support, use 
+              <button
+                class="euiLink euiLink--primary"
+                type="button"
               >
-                <div
-                  className="euiText euiText--small"
-                >
-                  <p>
-                    <FormattedMessage
-                      defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
-                      id="indexPatternManagement.scriptedFieldsDeprecatedBody"
-                      values={
-                        Object {
-                          "runtimeDocs": <EuiLink
-                            target="_blank"
-                          >
-                            <FormattedMessage
-                              defaultMessage="runtime fields"
-                              id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                              values={Object {}}
-                            />
-                          </EuiLink>,
-                        }
-                      }
-                    >
-                      <span>
-                        For greater flexibility and Painless script support, use 
-                        <EuiLink
-                          target="_blank"
-                        >
-                          <button
-                            className="euiLink euiLink--primary"
-                            disabled={false}
-                            type="button"
-                          >
-                            <FormattedMessage
-                              defaultMessage="runtime fields"
-                              id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                              values={Object {}}
-                            >
-                              <span>
-                                runtime fields
-                              </span>
-                            </FormattedMessage>
-                          </button>
-                        </EuiLink>
-                        .
-                      </span>
-                    </FormattedMessage>
-                  </p>
-                </div>
-              </EuiText>
-            </div>
-          </EuiTextColor>
+                <span>
+                  runtime fields
+                </span>
+              </button>
+              .
+            </span>
+          </p>
         </div>
-      </EuiText>
+      </div>
     </div>
-  </EuiCallOut>
-  <EuiSpacer
-    size="m"
-  >
-    <div
-      css="unknown styles"
-    >
-      <Insertion
-        cache={
-          Object {
-            "insert": [Function],
-            "inserted": Object {
-              "hg1jdf-euiSpacer-m": true,
-            },
-            "key": "css",
-            "nonce": undefined,
-            "registered": Object {},
-            "sheet": StyleSheet {
-              "_alreadyInsertedOrderInsensitiveRule": true,
-              "_insertTag": [Function],
-              "before": null,
-              "container": <head>
-                <style
-                  data-emotion="css"
-                  data-s=""
-                >
-                  
-                  .css-hg1jdf-euiSpacer-m{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:16px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQXVCUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
-                </style>
-                <style
-                  data-styled="active"
-                  data-styled-version="5.1.0"
-                />
-              </head>,
-              "ctr": 1,
-              "insertionPoint": undefined,
-              "isSpeedy": false,
-              "key": "css",
-              "nonce": undefined,
-              "prepend": undefined,
-              "tags": Array [
-                <style
-                  data-emotion="css"
-                  data-s=""
-                >
-                  
-                  .css-hg1jdf-euiSpacer-m{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:16px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQXVCUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
-                </style>,
-              ],
-            },
-          }
-        }
-        isStringTag={true}
-        serialized={
-          Object {
-            "map": "/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQXVCUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */",
-            "name": "hg1jdf-euiSpacer-m",
-            "next": undefined,
-            "styles": "flex-shrink:0;label:euiSpacer;;;height:16px;;label:m;;;",
-            "toString": [Function],
-          }
-        }
-      />
-      <div
-        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
-      />
-    </div>
-  </EuiSpacer>
-</ScriptingWarningCallOut>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+  />,
+]
 `;
 
 exports[`ScriptingWarningCallOut should render nothing if not visible 1`] = `

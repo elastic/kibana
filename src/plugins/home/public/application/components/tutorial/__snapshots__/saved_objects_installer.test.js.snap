@@ -1,607 +1,125 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`bulkCreate should display error message when bulkCreate request fails 1`] = `
-<SavedObjectsInstallerUi
-  bulkCreate={[Function]}
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  savedObjects={
-    Array [
-      Object {
-        "attributes": Object {},
-        "id": "1",
-        "type": "index-pattern",
-      },
-    ]
-  }
->
-  <EuiTitle
-    size="m"
+Array [
+  <h2
+    class="euiTitle euiTitle--medium"
   >
-    <h2
-      className="euiTitle euiTitle--medium"
-    >
-      Load Kibana objects
-    </h2>
-  </EuiTitle>
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
+    Load Kibana objects
+  </h2>,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-    >
-      <EuiFlexItem>
-        <div
-          className="euiFlexItem"
-        >
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
-            >
-              <p>
-                Imports index pattern, visualizations and pre-defined dashboards.
-              </p>
-            </div>
-          </EuiText>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <EuiButton
-            data-test-subj="loadSavedObjects"
-            isLoading={false}
-            onClick={[Function]}
-          >
-            <EuiButtonDisplay
-              baseClassName="euiButton"
-              data-test-subj="loadSavedObjects"
-              disabled={false}
-              element="button"
-              isDisabled={false}
-              isLoading={false}
-              onClick={[Function]}
-              type="button"
-            >
-              <button
-                className="euiButton euiButton--primary"
-                data-test-subj="loadSavedObjects"
-                disabled={false}
-                onClick={[Function]}
-                style={
-                  Object {
-                    "minWidth": undefined,
-                  }
-                }
-                type="button"
-              >
-                <EuiButtonContent
-                  className="euiButton__content"
-                  iconSide="left"
-                  isLoading={false}
-                  textProps={
-                    Object {
-                      "className": "euiButton__text",
-                    }
-                  }
-                >
-                  <span
-                    className="euiButtonContent euiButton__content"
-                  >
-                    <span
-                      className="euiButton__text"
-                    >
-                      Load Kibana objects
-                    </span>
-                  </span>
-                </EuiButtonContent>
-              </button>
-            </EuiButtonDisplay>
-          </EuiButton>
-        </div>
-      </EuiFlexItem>
-    </div>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
-  >
-    <div
-      css="unknown styles"
-    >
-      <Insertion
-        cache={
-          Object {
-            "insert": [Function],
-            "inserted": Object {
-              "i2qclb-euiSpacer-s": true,
-            },
-            "key": "css",
-            "nonce": undefined,
-            "registered": Object {},
-            "sheet": StyleSheet {
-              "_alreadyInsertedOrderInsensitiveRule": true,
-              "_insertTag": [Function],
-              "before": null,
-              "container": <head>
-                <style
-                  data-styled="active"
-                  data-styled-version="5.1.0"
-                />
-                <style
-                  data-styled="active"
-                  data-styled-version="5.1.0"
-                />
-                <style
-                  data-styled="active"
-                  data-styled-version="5.1.0"
-                />
-                <style
-                  data-emotion="css"
-                  data-s=""
-                >
-                  
-                  .css-i2qclb-euiSpacer-s{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:8px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
-                </style>
-              </head>,
-              "ctr": 1,
-              "insertionPoint": undefined,
-              "isSpeedy": false,
-              "key": "css",
-              "nonce": undefined,
-              "prepend": undefined,
-              "tags": Array [
-                <style
-                  data-emotion="css"
-                  data-s=""
-                >
-                  
-                  .css-i2qclb-euiSpacer-s{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:8px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
-                </style>,
-              ],
-            },
-          }
-        }
-        isStringTag={true}
-        serialized={
-          Object {
-            "map": "/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */",
-            "name": "i2qclb-euiSpacer-s",
-            "next": undefined,
-            "styles": "flex-shrink:0;label:euiSpacer;;;height:8px;;label:s;;;",
-            "toString": [Function],
-          }
-        }
-      />
-      <div
-        className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
-      />
-    </div>
-  </EuiSpacer>
-  <EuiCallOut
-    color="warning"
-    data-test-subj="loadSavedObjects_failed"
-    title="Request failed, Error: simulated bulkRequest error"
-  >
-    <div
-      className="euiCallOut euiCallOut--warning"
-      data-test-subj="loadSavedObjects_failed"
+      class="euiFlexItem"
     >
       <div
-        className="euiCallOutHeader"
+        class="euiText euiText--medium"
       >
-        <span
-          className="euiCallOutHeader__title"
-        >
-          Request failed, Error: simulated bulkRequest error
-        </span>
+        <p>
+          Imports index pattern, visualizations and pre-defined dashboards.
+        </p>
       </div>
     </div>
-  </EuiCallOut>
-</SavedObjectsInstallerUi>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        class="euiButton euiButton--primary"
+        data-test-subj="loadSavedObjects"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Load Kibana objects
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+  />,
+  <div
+    class="euiCallOut euiCallOut--warning"
+    data-test-subj="loadSavedObjects_failed"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Request failed, Error: simulated bulkRequest error
+      </span>
+    </div>
+  </div>,
+]
 `;
 
 exports[`bulkCreate should display success message when bulkCreate is successful 1`] = `
-<SavedObjectsInstallerUi
-  bulkCreate={[Function]}
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  savedObjects={
-    Array [
-      Object {
-        "attributes": Object {},
-        "id": "1",
-        "type": "index-pattern",
-      },
-    ]
-  }
->
-  <EuiTitle
-    size="m"
+Array [
+  <h2
+    class="euiTitle euiTitle--medium"
   >
-    <h2
-      className="euiTitle euiTitle--medium"
-    >
-      Load Kibana objects
-    </h2>
-  </EuiTitle>
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
+    Load Kibana objects
+  </h2>,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-    >
-      <EuiFlexItem>
-        <div
-          className="euiFlexItem"
-        >
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
-            >
-              <p>
-                Imports index pattern, visualizations and pre-defined dashboards.
-              </p>
-            </div>
-          </EuiText>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <EuiButton
-            data-test-subj="loadSavedObjects"
-            isLoading={false}
-            onClick={[Function]}
-          >
-            <EuiButtonDisplay
-              baseClassName="euiButton"
-              data-test-subj="loadSavedObjects"
-              disabled={false}
-              element="button"
-              isDisabled={false}
-              isLoading={false}
-              onClick={[Function]}
-              type="button"
-            >
-              <button
-                className="euiButton euiButton--primary"
-                data-test-subj="loadSavedObjects"
-                disabled={false}
-                onClick={[Function]}
-                style={
-                  Object {
-                    "minWidth": undefined,
-                  }
-                }
-                type="button"
-              >
-                <EuiButtonContent
-                  className="euiButton__content"
-                  iconSide="left"
-                  isLoading={false}
-                  textProps={
-                    Object {
-                      "className": "euiButton__text",
-                    }
-                  }
-                >
-                  <span
-                    className="euiButtonContent euiButton__content"
-                  >
-                    <span
-                      className="euiButton__text"
-                    >
-                      Load Kibana objects
-                    </span>
-                  </span>
-                </EuiButtonContent>
-              </button>
-            </EuiButtonDisplay>
-          </EuiButton>
-        </div>
-      </EuiFlexItem>
-    </div>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
-  >
-    <div
-      css="unknown styles"
-    >
-      <Insertion
-        cache={
-          Object {
-            "insert": [Function],
-            "inserted": Object {
-              "i2qclb-euiSpacer-s": true,
-            },
-            "key": "css",
-            "nonce": undefined,
-            "registered": Object {},
-            "sheet": StyleSheet {
-              "_alreadyInsertedOrderInsensitiveRule": true,
-              "_insertTag": [Function],
-              "before": null,
-              "container": <head>
-                <style
-                  data-styled="active"
-                  data-styled-version="5.1.0"
-                />
-                <style
-                  data-styled="active"
-                  data-styled-version="5.1.0"
-                />
-                <style
-                  data-emotion="css"
-                  data-s=""
-                >
-                  
-                  .css-i2qclb-euiSpacer-s{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:8px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
-                </style>
-              </head>,
-              "ctr": 1,
-              "insertionPoint": undefined,
-              "isSpeedy": false,
-              "key": "css",
-              "nonce": undefined,
-              "prepend": undefined,
-              "tags": Array [
-                <style
-                  data-emotion="css"
-                  data-s=""
-                >
-                  
-                  .css-i2qclb-euiSpacer-s{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:8px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
-                </style>,
-              ],
-            },
-          }
-        }
-        isStringTag={true}
-        serialized={
-          Object {
-            "map": "/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */",
-            "name": "i2qclb-euiSpacer-s",
-            "next": undefined,
-            "styles": "flex-shrink:0;label:euiSpacer;;;height:8px;;label:s;;;",
-            "toString": [Function],
-          }
-        }
-      />
-      <div
-        className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
-      />
-    </div>
-  </EuiSpacer>
-  <EuiCallOut
-    color="success"
-    data-test-subj="loadSavedObjects_success"
-    title="1 saved objects successfully added"
-  >
-    <div
-      className="euiCallOut euiCallOut--success"
-      data-test-subj="loadSavedObjects_success"
+      class="euiFlexItem"
     >
       <div
-        className="euiCallOutHeader"
+        class="euiText euiText--medium"
       >
-        <span
-          className="euiCallOutHeader__title"
-        >
-          1 saved objects successfully added
-        </span>
+        <p>
+          Imports index pattern, visualizations and pre-defined dashboards.
+        </p>
       </div>
     </div>
-  </EuiCallOut>
-</SavedObjectsInstallerUi>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        class="euiButton euiButton--primary"
+        data-test-subj="loadSavedObjects"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Load Kibana objects
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+  />,
+  <div
+    class="euiCallOut euiCallOut--success"
+    data-test-subj="loadSavedObjects_success"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        class="euiCallOutHeader__title"
+      >
+        1 saved objects successfully added
+      </span>
+    </div>
+  </div>,
+]
 `;
 
 exports[`renders 1`] = `
