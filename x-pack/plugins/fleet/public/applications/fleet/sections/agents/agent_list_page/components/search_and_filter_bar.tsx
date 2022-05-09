@@ -204,6 +204,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
                       isSelected={isTagsFilterOpen}
                       hasActiveFilters={selectedTags.length > 0}
+                      numFilters={selectedTags.length}
                       disabled={tags.length === 0}
                       data-test-subj="agentList.tagsFilter"
                     >

@@ -19,8 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
-import { sampleSize } from 'lodash';
-
 import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
@@ -55,19 +53,6 @@ import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { Tags } from './components/tags';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
-
-const MOCK_TAGS = [
-  'linux',
-  'windows',
-  'test',
-  'a really long tag title',
-  'fleet server',
-  'production',
-  'staging',
-  'temporary',
-  'debugging',
-  'web servers',
-];
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -160,7 +145,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     if (selectedTags.length) {
-      kueryBuilder = `${kueryBuilder} and ${AGENTS_PREFIX}.tags : (${selectedTags.join(' or ')})`;
+      kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
+        .map((tag) => `"${tag}"`)
+        .join(' or ')})`;
     }
 
     if (selectedStatus.length) {
@@ -202,11 +189,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentsStatus, setAgentsStatus] = useState<
     { [key in SimplifiedAgentStatus]: number } | undefined
   >();
+  const [allTags, setAllTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
-
-  const allTags = Array.from(new Set(agents.flatMap((agent) => agent.tags ?? [])));
 
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
@@ -254,13 +240,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
-        setAgents(
-          agentsRequest.data.items.map((item) => {
-            // TEMP: Mock tags data for building out tags UI
-            item.tags = sampleSize(MOCK_TAGS, Math.floor(Math.random() * MOCK_TAGS.length));
-            return item;
-          })
-        );
+        // Only set tags on the first request - we don't want the list of tags to update based
+        // on the returned set of agents from the API
+        if (allTags === undefined) {
+          const newAllTags = Array.from(
+            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
+          );
+
+          setAllTags(newAllTags);
+        }
+
+        setAgents(agentsRequest.data.items);
         setTotalAgents(agentsRequest.data.total);
         setTotalInactiveAgents(agentsRequest.data.totalInactive);
       } catch (error) {
@@ -273,7 +263,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       setIsLoading(false);
     }
     fetchDataAsync();
-  }, [pagination, kuery, showInactive, showUpgradeable, notifications.toasts]);
+  }, [
+    pagination.currentPage,
+    pagination.pageSize,
+    kuery,
+    showInactive,
+    showUpgradeable,
+    allTags,
+    notifications.toasts,
+  ]);
 
   // Send request to get agent list and status
   useEffect(() => {
@@ -525,7 +523,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onSelectedStatusChange={setSelectedStatus}
         showUpgradeable={showUpgradeable}
         onShowUpgradeableChange={setShowUpgradeable}
-        tags={allTags}
+        tags={allTags ?? []}
         selectedTags={selectedTags}
         onSelectedTagsChange={setSelectedTags}
         totalAgents={totalAgents}
