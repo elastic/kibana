@@ -143,7 +143,8 @@ export function Detail() {
     resendRequest: refreshPackageInfo,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
-  const { isFirstTimeAgentUser, isLoading: firstTimeUserLoading } = useIsFirstTimeAgentUser();
+  const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
+    useIsFirstTimeAgentUser();
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
