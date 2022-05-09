@@ -13,6 +13,8 @@ import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { OsqueryActionItem } from '../../osquery/osquery_action_item';
+import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -63,6 +65,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   timelineQuery,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
   const [routeProps] = useRouteSpy();
 
   const onMenuItemClick = useCallback(() => {
@@ -175,16 +178,36 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     onAddEventFilterClick: handleOnAddEventFilterClick,
     disabled: !isEvent || !canCreateEndpointEventFilters,
   });
+  const agentId = useMemo(() => get(0, ecsRowData?.agent?.id), [ecsRowData]);
+  const handleOnOsqueryClick = useCallback(() => {
+    setOsqueryFlyoutOpen((prevValue) => !prevValue);
+    setPopover(false);
+  }, []);
+
+  const osqueryActionItem = useMemo(
+    () =>
+      OsqueryActionItem({
+        handleClick: handleOnOsqueryClick,
+      }),
+    [handleOnOsqueryClick]
+  );
+
   const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
-        ? [...addToCaseActionItems, ...statusActionItems, ...exceptionActionItems]
-        : [...addToCaseActionItems, ...eventFilterActionItems],
+        ? [
+            ...addToCaseActionItems,
+            ...statusActionItems,
+            ...exceptionActionItems,
+            osqueryActionItem,
+          ]
+        : [...addToCaseActionItems, ...eventFilterActionItems, osqueryActionItem],
     [
       statusActionItems,
       addToCaseActionItems,
       eventFilterActionItems,
       exceptionActionItems,
+      osqueryActionItem,
       isEvent,
       ruleId,
     ]
@@ -227,6 +250,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
+      )}
+      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
+        <OsqueryFlyout agentId={agentId} onClose={handleOnOsqueryClick} />
       )}
     </>
   );
