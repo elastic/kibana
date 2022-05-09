@@ -541,4 +541,95 @@ describe('rule_event_log_list', () => {
       'These are the first 1000 matching your search, refine your search to see others. Back to top.'
     );
   });
+
+  it('shows the correct pagination results when results are 0', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 0,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
+    ).toEqual('Showing 0 of 0 log entries');
+  });
+
+  it('shows the correct pagination result when result is 1', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 1,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
+    ).toEqual('Showing 1 - 1 of 1 log entry');
+  });
+
+  it('shows the correct pagination result when paginated', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 85,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
+    ).toEqual('Showing 1 - 10 of 85 log entries');
+
+    wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
+    ).toEqual('Showing 11 - 20 of 85 log entries');
+
+    wrapper.find('[data-test-subj="pagination-button-8"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
+    ).toEqual('Showing 81 - 85 of 85 log entries');
+  });
 });
