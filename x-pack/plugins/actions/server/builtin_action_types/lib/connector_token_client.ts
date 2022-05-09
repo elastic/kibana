@@ -38,6 +38,7 @@ interface UpdateOrReplaceOptions {
   token: ConnectorToken | null;
   newToken: string;
   expiresInSec: number;
+  tokenRequestDate: number;
   deleteExisting: boolean;
 }
 export class ConnectorTokenClient {
@@ -258,9 +259,11 @@ export class ConnectorTokenClient {
     token,
     newToken,
     expiresInSec,
+    tokenRequestDate,
     deleteExisting,
   }: UpdateOrReplaceOptions) {
     expiresInSec = expiresInSec ?? 3600;
+    tokenRequestDate = tokenRequestDate ?? Date.now();
     if (token === null) {
       if (deleteExisting) {
         await this.deleteConnectorTokens({
@@ -272,14 +275,14 @@ export class ConnectorTokenClient {
       await this.create({
         connectorId,
         token: newToken,
-        expiresAtMillis: new Date(Date.now() + expiresInSec * 1000).toISOString(),
+        expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
         tokenType: 'access_token',
       });
     } else {
       await this.update({
         id: token.id!.toString(),
         token: newToken,
-        expiresAtMillis: new Date(Date.now() + expiresInSec * 1000).toISOString(),
+        expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
         tokenType: 'access_token',
       });
     }

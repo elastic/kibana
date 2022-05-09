@@ -375,6 +375,7 @@ describe('updateOrReplace()', () => {
       connectorId: '1',
       token: null,
       newToken: 'newToken',
+      tokenRequestDate: Date.now(),
       expiresInSec: 1000,
       deleteExisting: false,
     });
@@ -434,6 +435,7 @@ describe('updateOrReplace()', () => {
       connectorId: '1',
       token: null,
       newToken: 'newToken',
+      tokenRequestDate: Date.now(),
       expiresInSec: 1000,
       deleteExisting: true,
     });
@@ -483,6 +485,7 @@ describe('updateOrReplace()', () => {
         expiresAt: new Date().toISOString(),
       },
       newToken: 'newToken',
+      tokenRequestDate: Date.now(),
       expiresInSec: 1000,
       deleteExisting: true,
     });
