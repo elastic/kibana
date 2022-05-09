@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { TimelineType } from '../../../common/types/timeline';
 

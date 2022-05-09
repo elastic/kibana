@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';

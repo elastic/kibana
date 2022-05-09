@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { AllCases } from '../all_cases';
 import { CaseView } from '../case_view';
 import { CreateCase } from '../create';

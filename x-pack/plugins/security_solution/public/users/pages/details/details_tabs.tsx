@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { UsersTableType } from '../../store/model';
 import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';

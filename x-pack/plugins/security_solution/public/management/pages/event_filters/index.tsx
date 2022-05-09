@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { NotFoundPage } from '../../../app/404';
 import { MANAGEMENT_ROUTING_EVENT_FILTERS_PATH } from '../../common/constants';
