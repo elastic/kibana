@@ -24,7 +24,7 @@ export const getTextClassificationOutputComponent = (
     | LangIdentInference
 ) => <TextClassificationOutput inferrer={inferrer} />;
 
-const TextClassificationOutput: FC<{
+export const TextClassificationOutput: FC<{
   inferrer:
     | TextClassificationInference
     | ZeroShotClassificationInference

@@ -10,10 +10,8 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { InferenceBase, InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getNerOutputComponent } from './ner_output';
-
-interface MlInferTrainedModelDeploymentResponse {
-  inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
-}
+import { MlInferTrainedModelDeploymentResponse } from '../../../../../services/ml_api_service/trained_models';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
 export type FormattedNerResponse = Array<{
   value: string;
@@ -26,6 +24,8 @@ export type NerResponse = InferResponse<
 >;
 
 export class NerInference extends InferenceBase<NerResponse> {
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.NER;
+
   public async infer() {
     try {
       this.setRunning();

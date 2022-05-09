@@ -11,12 +11,12 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 import { processResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
 const MASK = '[MASK]';
 
 export class FillMaskInference extends InferenceBase<TextClassificationResponse> {
-  // @ts-expect-error model type is wrong
-  private numTopClasses = this.model.inference_config?.fill_mask?.num_top_classes || 5;
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.FILL_MASK;
 
   public async infer() {
     try {
@@ -24,7 +24,7 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
       const inputText = this.inputText$.value;
       const payload = {
         docs: [{ [this.inputField]: inputText }],
-        inference_config: { fill_mask: { num_top_classes: this.numTopClasses } },
+        ...this.getNumTopClassesConfig(),
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,

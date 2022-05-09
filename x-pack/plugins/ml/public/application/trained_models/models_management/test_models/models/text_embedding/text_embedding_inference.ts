@@ -10,6 +10,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { InferenceBase, InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
 export interface RawTextEmbeddingResponse {
   inference_results: [{ predicted_value: number[] }];
@@ -25,6 +26,8 @@ export type TextEmbeddingResponse = InferResponse<
 >;
 
 export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse> {
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
+
   public async infer() {
     try {
       this.setRunning();

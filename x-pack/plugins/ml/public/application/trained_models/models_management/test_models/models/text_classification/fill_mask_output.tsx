@@ -10,7 +10,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import type { FillMaskInference } from './fill_mask_inference';
-import { getTextClassificationOutputComponent } from './text_classification_output';
+import { TextClassificationOutput } from './text_classification_output';
 
 export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => (
   <FillMaskOutput inferrer={inferrer} />
@@ -33,7 +33,7 @@ const FillMaskOutput: FC<{
       </EuiTitle>
 
       <EuiSpacer />
-      {getTextClassificationOutputComponent(inferrer)}
+      <TextClassificationOutput inferrer={inferrer} />
     </>
   );
 };

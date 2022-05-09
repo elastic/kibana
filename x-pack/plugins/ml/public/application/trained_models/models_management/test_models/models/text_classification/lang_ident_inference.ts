@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { InferenceBase } from '../inference_base';
+import { InferenceBase, InferenceType } from '../inference_base';
 import { processResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getLangIdentOutputComponent } from './lang_ident_output';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
 export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
-  private numTopClasses = this.model.inference_config?.classification?.num_top_classes || 5;
+  protected inferenceType: InferenceType = 'classification';
 
   public async infer() {
     try {
@@ -20,7 +20,7 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
       const inputText = this.inputText$.value;
       const payload = {
         docs: [{ [this.inputField]: inputText }],
-        inference_config: { classification: { num_top_classes: this.numTopClasses } },
+        ...this.getNumTopClassesConfig(),
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,

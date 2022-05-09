@@ -47,6 +47,10 @@ export interface InferenceStatsResponse {
   trained_model_stats: TrainedModelStat[];
 }
 
+export interface MlInferTrainedModelDeploymentResponse {
+  inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
+}
+
 /**
  * Service with APIs calls to perform inference operations.
  * @param httpService
@@ -143,9 +147,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     inferTrainedModel(modelId: string, payload: any, timeout?: string) {
       const body = JSON.stringify(payload);
-      return httpService.http<{
-        inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
-      }>({
+      return httpService.http<MlInferTrainedModelDeploymentResponse>({
         path: `${apiBasePath}/trained_models/infer/${modelId}`,
         method: 'POST',
         body,

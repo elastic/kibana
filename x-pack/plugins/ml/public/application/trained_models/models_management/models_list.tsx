@@ -482,7 +482,7 @@ export const ModelsList: FC<Props> = ({
           isPrimary: true,
           available: isTestable,
           onClick: setShowTestFlyout,
-          enabled: (item) => isTestEnabled,
+          enabled: isTestEnabled,
         },
       ] as Array<Action<ModelItem>>)
     );
