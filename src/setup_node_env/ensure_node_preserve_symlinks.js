@@ -107,5 +107,8 @@
   process.on('SIGTERM', function () {});
 
   var spawnResult = cp.spawnSync(nodeArgv[0], nodeArgs.concat(restArgs), { stdio: 'inherit' });
-  process.exit(getExitCodeFromSpawnResult(spawnResult));
+  var code = getExitCodeFromSpawnResult(spawnResult);
+  console.log(`--- ensure_node_preserve_symlinks exit code [${code}]`);
+  console.dir(spawnResult, { depth: Infinity });
+  process.exit(code);
 })();
