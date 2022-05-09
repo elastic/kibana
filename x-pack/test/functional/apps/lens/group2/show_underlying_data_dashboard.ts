@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
+  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const browser = getService('browser');
   const retry = getService('retry');
 
@@ -58,8 +59,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should bring both dashboard context and visualization context to discover', async () => {
       await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.clickEdit();
-
+      await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('lucene');
+      await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
       await filterBarService.addFilter('geo.src', 'is', 'AF');
@@ -67,8 +69,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.sleep(1000);
 
       await PageObjects.lens.saveAndReturn();
-
+      await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('kql');
+      await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       await queryBar.setQuery('request.keyword : "/apm"');
       await queryBar.submitQuery();
       await filterBarService.addFilter(
