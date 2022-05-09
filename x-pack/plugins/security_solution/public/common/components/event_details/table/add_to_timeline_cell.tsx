@@ -61,7 +61,7 @@ const AddToTimelineCell = React.memo<AlertSummaryRow['description']>(
             selectedPatterns: ['.alerts-security.alerts-default'],
           })
         );
-        // Lock the time range by default
+        // Unlock the time range from the global time range
         dispatch(inputsActions.removeGlobalLinkTo());
       }
     }, [dispatch, clearTimeline, actionCellConfig]);
