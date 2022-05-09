@@ -73,13 +73,11 @@ export function makeMbClampedNumberExpression({
   fieldName,
   minValue,
   maxValue,
-  fallback,
 }: {
   lookupFunction: MB_LOOKUP_FUNCTION;
   fieldName: string;
   minValue: number;
   maxValue: number;
-  fallback: number;
 }) {
   const clamp = ['max', ['min', ['to-number', [lookupFunction, fieldName]], maxValue], minValue];
   return [
@@ -90,7 +88,7 @@ export function makeMbClampedNumberExpression({
       minValue - 1, // == does a JS-y like check where returns true for null and undefined
       clamp,
     ],
-    fallback,
+    minValue - 1,
   ];
 }
 

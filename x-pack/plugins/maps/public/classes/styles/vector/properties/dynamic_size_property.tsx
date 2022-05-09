@@ -50,7 +50,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   syncHaloWidthWithMb(mbLayerId: string, mbMap: MbMap) {
-    const haloWidth = this.getMbSizeExpression();
+    const haloWidth = this.getMbSizeExpression(false);
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
   }
 
@@ -80,26 +80,32 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   syncCircleStrokeWidthWithMb(mbLayerId: string, mbMap: MbMap) {
-    const lineWidth = this.getMbSizeExpression();
+    const lineWidth = this.getMbSizeExpression(false);
     mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
   }
 
   syncCircleRadiusWithMb(mbLayerId: string, mbMap: MbMap) {
-    const circleRadius = this.getMbSizeExpression();
+    const rangeFieldMeta = this.getRangeFieldMeta();
+    const circleRadius = this.getMbSizeExpression(true);
+    console.log(JSON.stringify(circleRadius, null, 2));
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
   }
 
   syncLineWidthWithMb(mbLayerId: string, mbMap: MbMap) {
-    const lineWidth = this.getMbSizeExpression();
+    const lineWidth = this.getMbSizeExpression(false);
     mbMap.setPaintProperty(mbLayerId, 'line-width', lineWidth);
   }
 
   syncLabelSizeWithMb(mbLayerId: string, mbMap: MbMap) {
-    const lineWidth = this.getMbSizeExpression();
+    const lineWidth = this.getMbSizeExpression(false);
     mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
   }
 
-  getMbSizeExpression() {
+  /*
+   * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [minSize, maxSize]
+   * @param {boolean} isArea When true, translate square root of domain value to display range.
+   */
+  getMbSizeExpression(isArea: boolean) {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (!this._isSizeDynamicConfigComplete() || !rangeFieldMeta) {
       // return min of size to avoid flashing
@@ -109,40 +115,43 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       return this._options.minSize >= 0 ? this._options.minSize : null;
     }
 
-    return this._getMbDataDrivenSize({
-      targetName: this.getMbFieldName(),
-      minSize: this._options.minSize,
-      maxSize: this._options.maxSize,
-      minValue: rangeFieldMeta.min,
-      maxValue: rangeFieldMeta.max,
-    });
-  }
+    // isArea === true
+    // It's a mistake to linearly map a data value to an area dimension (i.e. cirle radius).
+    // Area squares area dimension ("pie * r * r" or "x * x"), visually distorting proportions.
+    // Since it is the quadratic function that is causing this, 
+    // we need to counteract its effects by applying its inverse function — the square-root function. 
+    // https://bl.ocks.org/guilhermesimoes/e6356aa90a16163a6f917f53600a2b4a
 
-  _getMbDataDrivenSize({
-    targetName,
-    minSize,
-    maxSize,
-    minValue,
-    maxValue,
-  }: {
-    targetName: string;
-    minSize: number;
-    maxSize: number;
-    minValue: number;
-    maxValue: number;
-  }) {
+    // can not take square root of 0 or negative number
+    // shift values to be positive integers >= 2
+    // Why 2? fallback for hit with property value is "minValue - 1"
+    const valueShift = rangeFieldMeta.min < 2
+      ? rangeFieldMeta.min <= 0 ? Math.abs(rangeFieldMeta.min) + 2 : 2 - rangeFieldMeta.min
+      : 0;
+
+    const maxValueStop = isArea ? Math.sqrt(rangeFieldMeta.max + valueShift) : rangeFieldMeta.max;
+    const minValueStop = isArea ? Math.sqrt(rangeFieldMeta.min + valueShift) : rangeFieldMeta.min;
     const stops =
-      minValue === maxValue ? [maxValue, maxSize] : [minValue, minSize, maxValue, maxSize];
+      rangeFieldMeta.min === rangeFieldMeta.max 
+        ? [maxValueStop, this._options.maxSize] 
+        : [minValueStop, this._options.minSize, maxValueStop, this._options.maxSize];
+
+    const valueExpression = makeMbClampedNumberExpression({
+      lookupFunction: this.getMbLookupFunction(),
+      maxValue: rangeFieldMeta.max,
+      minValue: rangeFieldMeta.min,
+      fieldName: this.getMbFieldName(),
+    });
+    const valueShiftExpression = rangeFieldMeta.min < 2
+      ? ['+', valueExpression, valueShift]
+      : valueExpression;
+    const sqrtValueExpression = ['sqrt', valueShiftExpression];
+    const inputExpression = isArea ? sqrtValueExpression : valueExpression;
+
     return [
       'interpolate',
       ['linear'],
-      makeMbClampedNumberExpression({
-        lookupFunction: this.getMbLookupFunction(),
-        maxValue,
-        minValue,
-        fieldName: targetName,
-        fallback: 0,
-      }),
+      inputExpression,
       ...stops,
     ];
   }
