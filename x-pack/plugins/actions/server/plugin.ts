@@ -324,12 +324,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     });
 
     // Routes
-    defineRoutes(
-      core.http.createRouter<ActionsRequestHandlerContext>(),
-      this.licenseState,
+    defineRoutes({
+      router: core.http.createRouter<ActionsRequestHandlerContext>(),
+      licenseState: this.licenseState,
+      logger: this.logger,
       actionsConfigUtils,
-      this.usageCounter
-    );
+      usageCounter: this.usageCounter,
+    });
 
     // Cleanup failed execution task definition
     if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
