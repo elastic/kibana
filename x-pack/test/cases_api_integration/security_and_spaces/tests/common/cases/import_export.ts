@@ -27,6 +27,7 @@ import {
   CommentUserAction,
   CreateCaseUserAction,
   CaseStatuses,
+  CaseSeverity,
 } from '@kbn/cases-plugin/common/api';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -204,6 +205,10 @@ const expectExportToHaveCaseSavedObject = (
   expect(createdCaseSO.attributes.connector.name).to.eql(caseRequest.connector.name);
   expect(createdCaseSO.attributes.connector.fields).to.eql([]);
   expect(createdCaseSO.attributes.settings).to.eql(caseRequest.settings);
+  expect(createdCaseSO.attributes.status).to.eql(CaseStatuses.open);
+  expect(createdCaseSO.attributes.severity).to.eql(CaseSeverity.LOW);
+  expect(createdCaseSO.attributes.duration).to.eql(null);
+  expect(createdCaseSO.attributes.tags).to.eql(caseRequest.tags);
 };
 
 const expectExportToHaveUserActions = (objects: SavedObject[], caseRequest: CasePostRequest) => {
@@ -239,6 +244,7 @@ const expectCaseCreateUserAction = (
   expect(restParsedCreateCase).to.eql({
     ...restCreateCase,
     status: CaseStatuses.open,
+    severity: CaseSeverity.LOW,
   });
   expect(restParsedConnector).to.eql(restConnector);
 };

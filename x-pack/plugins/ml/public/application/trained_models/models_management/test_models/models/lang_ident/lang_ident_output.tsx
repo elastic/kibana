@@ -6,22 +6,28 @@
  */
 
 import React, { FC } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiBasicTable, EuiTitle } from '@elastic/eui';
 
-import type { FormattedLangIdentResp } from './lang_ident_inference';
+import type { LangIdentInference } from './lang_ident_inference';
 import { getLanguage } from './lang_codes';
 
 const PROBABILITY_SIG_FIGS = 3;
 
-export const LangIdentOutput: FC<{ result: FormattedLangIdentResp }> = ({ result }) => {
-  if (result.length === 0) {
+export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => (
+  <LangIdentOutput inferrer={inferrer} />
+);
+
+const LangIdentOutput: FC<{ inferrer: LangIdentInference }> = ({ inferrer }) => {
+  const result = useObservable(inferrer.inferenceResult$);
+  if (!result || result.response.length === 0) {
     return null;
   }
 
-  const lang = getLanguage(result[0].className);
+  const lang = getLanguage(result.response[0].className);
 
-  const items = result.map(({ className, classProbability }, i) => {
+  const items = result.response.map(({ className, classProbability }, i) => {
     return {
       noa: `${i + 1}`,
       className: getLanguage(className),
@@ -70,7 +76,7 @@ export const LangIdentOutput: FC<{ result: FormattedLangIdentResp }> = ({ result
         })
       : i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.output.titleUnknown', {
           defaultMessage: 'Language code unknown: {code}',
-          values: { code: result[0].className },
+          values: { code: result.response[0].className },
         });
 
   return (

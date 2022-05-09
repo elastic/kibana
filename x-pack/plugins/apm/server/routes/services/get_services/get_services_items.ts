@@ -16,7 +16,7 @@ import { ServiceGroup } from '../../../../common/service_groups';
 
 export type ServicesItemsSetup = Setup;
 
-const MAX_NUMBER_OF_SERVICES = 50;
+const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServicesItems({
   environment,

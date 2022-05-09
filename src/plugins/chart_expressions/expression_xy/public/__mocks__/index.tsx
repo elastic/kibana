@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { DataLayerConfigResult, LensMultiTable, XYArgs } from '../../common';
+import { LensMultiTable } from '../../common';
 import { LayerTypes } from '../../common/constants';
+import { DataLayerConfig, XYProps } from '../../common/types';
 import { mockPaletteOutput, sampleArgs } from '../../common/__mocks__';
 
 const chartSetupContract = chartPluginMock.createSetupContract();
@@ -166,9 +168,9 @@ export const dateHistogramData: LensMultiTable = {
   },
 };
 
-export const dateHistogramLayer: DataLayerConfigResult = {
+export const dateHistogramLayer: DataLayerConfig = {
+  layerId: 'dateHistogramLayer',
   type: 'dataLayer',
-  layerId: 'timeLayer',
   layerType: LayerTypes.DATA,
   hide: false,
   xAccessor: 'xAccessorId',
@@ -179,46 +181,37 @@ export const dateHistogramLayer: DataLayerConfigResult = {
   seriesType: 'bar_stacked',
   accessors: ['yAccessorId'],
   palette: mockPaletteOutput,
+  table: dateHistogramData.tables.timeLayer,
 };
 
 export function sampleArgsWithReferenceLine(value: number = 150) {
-  const { data, args } = sampleArgs();
-
-  return {
-    data: {
-      ...data,
-      tables: {
-        ...data.tables,
-        referenceLine: {
-          type: 'datatable',
-          columns: [
-            {
-              id: 'referenceLine-a',
-              meta: { params: { id: 'number' }, type: 'number' },
-              name: 'Static value',
-            },
-          ],
-          rows: [{ 'referenceLine-a': value }],
-        },
+  const { args: sArgs } = sampleArgs();
+  const data: Datatable = {
+    type: 'datatable',
+    columns: [
+      {
+        id: 'referenceLine-a',
+        meta: { params: { id: 'number' }, type: 'number' },
+        name: 'Static value',
       },
-    } as LensMultiTable,
-    args: {
-      ...args,
-      layers: [
-        ...args.layers,
-        {
-          layerType: LayerTypes.REFERENCELINE,
-          accessors: ['referenceLine-a'],
-          layerId: 'referenceLine',
-          seriesType: 'line',
-          xScaleType: 'linear',
-          yScaleType: 'linear',
-          palette: mockPaletteOutput,
-          isHistogram: false,
-          hide: true,
-          yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'yConfig' }],
-        },
-      ],
-    } as XYArgs,
+    ],
+    rows: [{ 'referenceLine-a': value }],
   };
+
+  const args: XYProps = {
+    ...sArgs,
+    layers: [
+      ...sArgs.layers,
+      {
+        layerId: 'referenceLine-a',
+        type: 'referenceLineLayer',
+        layerType: LayerTypes.REFERENCELINE,
+        accessors: ['referenceLine-a'],
+        yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'extendedYConfig' }],
+        table: data,
+      },
+    ],
+  };
+
+  return { data, args };
 }
