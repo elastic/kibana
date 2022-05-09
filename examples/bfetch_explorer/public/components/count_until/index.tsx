@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import useList from 'react-use/lib/useList';
 import { EuiForm, EuiSpacer, EuiFieldNumber, EuiFormRow, EuiButton } from '@elastic/eui';
-import { BfetchPublicSetup } from '../../../../../src/plugins/bfetch/public';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 
 export interface Props {
   fetchStreaming: BfetchPublicSetup['fetchStreaming'];

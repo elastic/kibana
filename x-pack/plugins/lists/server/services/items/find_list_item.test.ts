@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 import { getFoundListItemSchemaMock } from '../../../common/schemas/response/found_list_item_schema.mock';
 import { getShardMock } from '../../schemas/common/get_shard.mock';

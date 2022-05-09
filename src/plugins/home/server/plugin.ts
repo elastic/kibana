@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -15,11 +17,9 @@ import {
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
 } from './services';
-import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';
-import { CustomIntegrationsPluginSetup } from '../../custom_integrations/server';
 
 export interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;

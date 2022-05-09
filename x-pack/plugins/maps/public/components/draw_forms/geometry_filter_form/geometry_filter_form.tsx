@@ -17,11 +17,11 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { getEsSpatialRelationLabel } from '../../../../common/i18n_getters';
 import { ActionSelect } from '../../action_select';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/unified_search/public';
-import { Action, ActionExecutionContext } from '../../../../../../../src/plugins/ui_actions/public';
 
 interface Props {
   buttonLabel: string;

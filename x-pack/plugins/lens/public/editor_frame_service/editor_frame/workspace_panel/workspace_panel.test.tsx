@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ReactExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { FramePublicAPI, Visualization } from '../../../types';
 import {
   createMockVisualization,
@@ -28,13 +28,13 @@ import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { fromExpression } from '@kbn/interpreter';
 import { buildExistsFilter } from '@kbn/es-query';
-import { coreMock } from 'src/core/public/mocks';
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
-import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
-import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
-import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
+import { coreMock } from '@kbn/core/public/mocks';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
 import {
   applyChanges,
   setState,
@@ -42,7 +42,7 @@ import {
   updateVisualizationState,
 } from '../../../state_management';
 import { getLensInspectorService } from '../../../lens_inspector_service';
-import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {

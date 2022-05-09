@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import {
   getDefaultChartsData,
@@ -12,7 +13,6 @@ import {
 } from '../../explorer_charts/explorer_charts_container_service';
 import { AnomaliesTableData, ExplorerJob } from '../../explorer_utils';
 import { AnnotationsTable } from '../../../../../common/types/annotations';
-import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import type { InfluencerValueData } from '../../../components/influencers_list/influencers_list';
 
 export interface ExplorerState {

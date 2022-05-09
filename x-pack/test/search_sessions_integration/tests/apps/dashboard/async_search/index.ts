@@ -14,8 +14,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const searchSessions = getService('searchSessions');
 
   describe('Dashboard', function () {
-    this.tags('ciGroup3');
-
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/dashboard/async_search');

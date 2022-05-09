@@ -10,9 +10,16 @@ import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  AgentNotFoundError,
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
+} from '@kbn/fleet-plugin/server';
+import { getAgentStatus } from '@kbn/fleet-plugin/common/services/agent_status';
 import {
   HostInfo,
   HostMetadata,
@@ -21,12 +28,6 @@ import {
   PolicyData,
   UnitedAgentMetadata,
 } from '../../../../common/endpoint/types';
-import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
-import {
-  AgentNotFoundError,
-  AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
-} from '../../../../../fleet/server';
 import {
   EndpointHostNotFoundError,
   EndpointHostUnEnrolledError,
@@ -52,7 +53,6 @@ import {
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';

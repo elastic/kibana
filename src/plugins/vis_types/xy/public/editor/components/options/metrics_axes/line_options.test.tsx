@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { NumberInputOption } from '../../../../../../../vis_default_editor/public';
+import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
 
 import { LineOptions, LineOptionsParams } from './line_options';
 import { seriesParam } from './mocks';

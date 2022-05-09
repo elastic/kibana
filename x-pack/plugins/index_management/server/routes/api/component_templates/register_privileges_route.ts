@@ -6,9 +6,9 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Privileges } from 'src/plugins/es_ui_shared/public';
+import { Privileges } from '@kbn/es-ui-shared-plugin/public';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
   Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
@@ -41,7 +41,7 @@ export const registerPrivilegesRoute = ({
         return response.ok({ body: privilegesResult });
       }
 
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
         const { has_all_requested: hasAllPrivileges, cluster } =

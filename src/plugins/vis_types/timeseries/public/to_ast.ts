@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import type { Vis } from '../../../visualizations/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { TimeseriesExpressionFunctionDefinition } from './metrics_fn';
 import type { TimeseriesVisParams } from './types';
 

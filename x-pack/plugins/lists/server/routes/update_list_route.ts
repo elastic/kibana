@@ -31,7 +31,7 @@ export const updateListRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { name, description, id, meta, _version, version } = request.body;
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const list = await lists.updateList({ _version, description, id, meta, name, version });
         if (list == null) {
           return siemResponse.error({

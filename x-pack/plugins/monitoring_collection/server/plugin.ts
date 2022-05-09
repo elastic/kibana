@@ -6,10 +6,10 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { CoreSetup, Plugin, PluginInitializerContext, Logger } from 'kibana/server';
+import { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { ServiceStatus } from '@kbn/core/server';
 import { registerDynamicRoute } from './routes';
-import { MakeSchemaFrom } from '../../../../src/plugins/usage_collection/server';
-import { ServiceStatus } from '../../../../src/core/server';
 import { TYPE_ALLOWLIST } from './constants';
 
 export interface MonitoringCollectionSetup {

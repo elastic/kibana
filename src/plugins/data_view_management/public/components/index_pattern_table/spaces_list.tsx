@@ -9,12 +9,9 @@
 import React, { FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { Capabilities } from 'src/core/public';
-import type {
-  SpacesPluginStart,
-  ShareToSpaceFlyoutProps,
-} from '../../../../../../x-pack/plugins/spaces/public';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../data_views/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 
 interface Props {
   spacesApi: SpacesPluginStart;

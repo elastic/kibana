@@ -7,22 +7,22 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
-import { FtrService } from '../../functional/ftr_provider_context';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
   METADATA_UNITED_INDEX,
-} from '../../../plugins/security_solution/common/endpoint/constants';
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
-} from '../../../plugins/security_solution/common/endpoint/index_data';
-import { TransformConfigUnion } from '../../../plugins/transform/common/types/transform';
-import { GetTransformsResponseSchema } from '../../../plugins/transform/common/api_schemas/transforms';
-import { catchAndWrapError } from '../../../plugins/security_solution/server/endpoint/utils';
-import { installOrUpgradeEndpointFleetPackage } from '../../../plugins/security_solution/common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
+} from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { TransformConfigUnion } from '@kbn/transform-plugin/common/types/transform';
+import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { catchAndWrapError } from '@kbn/security-solution-plugin/server/endpoint/utils';
+import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
+import { FtrService } from '../../functional/ftr_provider_context';
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');

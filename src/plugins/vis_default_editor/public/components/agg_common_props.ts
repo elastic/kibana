@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { VisParams, Schema } from 'src/plugins/visualizations/public';
-import type { IAggType, IAggConfig, AggGroupName } from 'src/plugins/data/public';
+import type { VisParams, Schema } from '@kbn/visualizations-plugin/public';
+import type { IAggType, IAggConfig, AggGroupName } from '@kbn/data-plugin/public';
 
 import type { EditorVisState } from './sidebar/state/reducers';
 

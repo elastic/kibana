@@ -9,12 +9,9 @@ import type { Filter, FilterMeta } from '@kbn/es-query';
 import { Position } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../src/plugins/field_formats/common';
-import type { Datatable } from '../../../../src/plugins/expressions/common';
-import type { ColorMode } from '../../../../src/plugins/charts/common';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { ColorMode } from '@kbn/charts-plugin/common';
 import {
   CategoryDisplay,
   layerTypes,
@@ -60,8 +57,7 @@ export type CustomPaletteParamsConfig = CustomPaletteParams & {
 
 export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
-// Shared by XY Chart and Heatmap as for now
-export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
+export type ValueLabelConfig = 'hide' | 'show';
 
 export type PieChartType = $Values<typeof PieChartTypes>;
 export type CategoryDisplayType = $Values<typeof CategoryDisplay>;

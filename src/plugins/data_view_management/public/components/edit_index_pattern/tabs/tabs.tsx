@@ -23,14 +23,14 @@ import {
   FilterChecked,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
+import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
 import {
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
   META_FIELDS,
-} from '../../../../../../plugins/data_views/public';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
+} from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';

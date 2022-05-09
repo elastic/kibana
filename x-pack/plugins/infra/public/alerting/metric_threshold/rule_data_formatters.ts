@@ -6,7 +6,7 @@
  */
 
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
+import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
 import { LINK_TO_METRICS_EXPLORER } from '../../../common/alerting/metrics';
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';

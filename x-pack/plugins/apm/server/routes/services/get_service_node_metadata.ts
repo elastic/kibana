@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { Setup } from '../../lib/helpers/setup_request';
 import {
   HOST_NAME,
@@ -16,7 +17,6 @@ import {
   SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import {
   environmentQuery,
   serviceNodeNameQuery,

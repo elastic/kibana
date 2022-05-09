@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { getObservabilityAlerts } from './get_observability_alerts';
 
 const basePath = { prepend: (path: string) => path };

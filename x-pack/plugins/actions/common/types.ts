@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 export interface ActionType {
   id: string;
@@ -14,6 +14,17 @@ export interface ActionType {
   enabledInConfig: boolean;
   enabledInLicense: boolean;
   minimumLicenseRequired: LicenseType;
+}
+
+export enum InvalidEmailReason {
+  invalid = 'invalid',
+  notAllowed = 'notAllowed',
+}
+
+export interface ValidatedEmail {
+  address: string;
+  valid: boolean;
+  reason?: InvalidEmailReason;
 }
 
 export interface ActionResult {
@@ -48,4 +59,8 @@ export function isActionTypeExecutorResult(
     typeof unsafeResult?.actionId === 'string' &&
     ActionTypeExecutorResultStatusValues.includes(unsafeResult?.status)
   );
+}
+
+export interface ActionsPublicConfigType {
+  allowedEmailDomains: string[];
 }

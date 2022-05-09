@@ -7,7 +7,7 @@
  */
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
 import { HeatmapLegendConfig, HeatmapLegendConfigResult } from '../types';
 

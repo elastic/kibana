@@ -9,9 +9,9 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
-import { ExceptionItem } from './';
-import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
+import { ExceptionItem } from '.';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
 import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../lib/kibana');

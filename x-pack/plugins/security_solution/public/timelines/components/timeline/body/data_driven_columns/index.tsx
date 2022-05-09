@@ -10,9 +10,9 @@ import React, { useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
+import type { SetEventsLoading, SetEventsDeleted } from '@kbn/timelines-plugin/common';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import type { SetEventsLoading, SetEventsDeleted } from '../../../../../../../timelines/common';
 import {
   ColumnHeaderOptions,
   CellValueElementProps,

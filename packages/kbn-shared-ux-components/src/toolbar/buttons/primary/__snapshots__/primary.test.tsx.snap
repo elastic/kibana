@@ -5,9 +5,16 @@ exports[`<ToolbarButton /> is rendered 1`] = `
   application={
     Object {
       "currentAppId$": Observable {
-        "_isScalar": false,
+        "_subscribe": [Function],
       },
       "navigateToUrl": [Function],
+    }
+  }
+  data={
+    Object {
+      "hasDataView": [Function],
+      "hasESData": [Function],
+      "hasUserDataView": [Function],
     }
   }
   docLinks={

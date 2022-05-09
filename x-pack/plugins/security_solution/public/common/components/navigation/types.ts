@@ -38,6 +38,7 @@ export interface NavTab {
   disabled: boolean;
   urlKey?: UrlStateType;
   pageId?: SecurityPageName;
+  isBeta?: boolean;
 }
 
 export type SecurityNavKey =

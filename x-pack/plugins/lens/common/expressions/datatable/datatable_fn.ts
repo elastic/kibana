@@ -7,15 +7,12 @@
 
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
+import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import type { DatatableColumnMeta, ExecutionContext } from '@kbn/expressions-plugin';
 import { FormatFactory, LensMultiTable } from '../../types';
 import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
 import { getSortingCriteria } from './sorting';
-import type {
-  DatatableColumnMeta,
-  ExecutionContext,
-} from '../../../../../../src/plugins/expressions';
 import type { DatatableExpressionFunction } from './types';
 
 function isRange(meta: { params?: { id?: string } } | undefined) {

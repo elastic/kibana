@@ -59,7 +59,7 @@ export const DetailPanelAlertListItem = ({
   const forceState = !isInvestigated ? 'open' : undefined;
 
   return minimal ? (
-    <div data-test-subj={ALERT_LIST_ITEM_TEST_ID}>
+    <div data-test-subj={ALERT_LIST_ITEM_TEST_ID} css={styles.firstAlertPad}>
       <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
@@ -93,8 +93,8 @@ export const DetailPanelAlertListItem = ({
       data-test-subj={ALERT_LIST_ITEM_TEST_ID}
       arrowDisplay={isInvestigated ? 'right' : 'none'}
       buttonContent={
-        <EuiText css={styles.alertTitle} size="s">
-          <p>
+        <EuiText css={styles.alertTitleContainer} size="s">
+          <p css={styles.alertTitle}>
             <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
             {dataOrDash(name)}
           </p>

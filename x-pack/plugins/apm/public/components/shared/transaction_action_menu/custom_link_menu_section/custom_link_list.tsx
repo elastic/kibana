@@ -7,10 +7,7 @@
 
 import Mustache from 'mustache';
 import React from 'react';
-import {
-  SectionLink,
-  SectionLinks,
-} from '../../../../../../observability/public';
+import { SectionLink, SectionLinks } from '@kbn/observability-plugin/public';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { unit } from '../../../../utils/style';

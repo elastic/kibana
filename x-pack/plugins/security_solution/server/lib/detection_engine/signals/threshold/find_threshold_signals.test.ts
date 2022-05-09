@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { mockLogger } from '../__mocks__/es_results';
 import { buildRuleMessageFactory } from '../rule_messages';

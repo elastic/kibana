@@ -22,8 +22,6 @@ import {
   StatItems,
 } from '../../../../common/components/stat_items';
 import { UpdateDateRange } from '../../../../common/components/charts/common';
-import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../common/constants';
 import { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
 
 const kpiWidgetHeight = 247;
@@ -47,11 +45,6 @@ interface KpiBaseComponentProps {
 
 export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
   ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange, setQuerySkip }) => {
-    const { cases } = useKibana().services;
-    const CasesContext = cases.ui.getCasesContext();
-    const userPermissions = useGetUserCasesPermissions();
-    const userCanCrud = userPermissions?.crud ?? false;
-
     const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
       fieldsMapping,
       data,
@@ -65,11 +58,9 @@ export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
 
     return (
       <EuiFlexGroup wrap>
-        <CasesContext owner={[APP_ID]} userCanCrud={userCanCrud ?? false}>
-          {statItemsProps.map((mappedStatItemProps) => (
-            <StatItemsComponent {...mappedStatItemProps} showInspectButton={false} />
-          ))}
-        </CasesContext>
+        {statItemsProps.map((mappedStatItemProps) => (
+          <StatItemsComponent {...mappedStatItemProps} showInspectButton={false} />
+        ))}
       </EuiFlexGroup>
     );
   },

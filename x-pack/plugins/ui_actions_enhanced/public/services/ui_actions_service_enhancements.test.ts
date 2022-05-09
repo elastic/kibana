@@ -10,7 +10,7 @@ import {
   UiActionsServiceEnhancementsParams,
 } from './ui_actions_service_enhancements';
 import { ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
-import { licensingMock } from '../../../licensing/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 const deps: UiActionsServiceEnhancementsParams = {
   getLicense: () => licensingMock.createLicense(),

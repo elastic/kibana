@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { docLinksServiceMock } from '../../../../../../../src/core/public/mocks';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { init as initDocumentation } from '../../../app/services/documentation_links';
 import { init as initHttpRequests } from './http_requests';
 import { setHttpClient } from '../../../app/services/api';

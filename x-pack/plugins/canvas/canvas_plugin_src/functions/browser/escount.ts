@@ -8,7 +8,7 @@
 import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
 
 // @ts-expect-error untyped local
 import { buildESRequest } from '../../../common/lib/request/build_es_request';

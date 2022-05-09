@@ -33,6 +33,8 @@ import { AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
 import { KIBANA_DATE_FORMAT } from '../../../common/constants';
 import { useStyles } from './styles';
+import { SplitText } from './split_text';
+import { Nbsp } from './nbsp';
 
 export interface ProcessDeps {
   process: Process;
@@ -41,9 +43,9 @@ export interface ProcessDeps {
   onProcessSelected?: (process: Process) => void;
   jumpToEntityId?: string;
   investigatedAlertId?: string;
-  selectedProcessId?: string;
-  timeStampOn?: boolean;
-  verboseModeOn?: boolean;
+  selectedProcess?: Process | null;
+  showTimestamp: boolean;
+  verboseMode: boolean;
   searchResults?: Process[];
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
@@ -62,9 +64,9 @@ export function ProcessTreeNode({
   onProcessSelected,
   jumpToEntityId,
   investigatedAlertId,
-  selectedProcessId,
-  timeStampOn = true,
-  verboseModeOn = true,
+  selectedProcess,
+  showTimestamp,
+  verboseMode,
   searchResults,
   scrollerRef,
   onChangeJumpToEventVisibility,
@@ -78,9 +80,18 @@ export function ProcessTreeNode({
   const [alertsExpanded, setAlertsExpanded] = useState(false);
   const { searchMatched } = process;
 
+  // forces nodes to expand if the selected process is a descendant
   useEffect(() => {
-    setChildrenExpanded(isSessionLeader || process.autoExpand);
-  }, [isSessionLeader, process.autoExpand]);
+    if (!childrenExpanded && selectedProcess) {
+      if (selectedProcess.isDescendantOf(process)) {
+        setChildrenExpanded(true);
+      }
+    }
+  }, [selectedProcess, process, childrenExpanded]);
+
+  useEffect(() => {
+    setChildrenExpanded(process.autoExpand);
+  }, [process.autoExpand]);
 
   const alerts = process.getAlerts();
   const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
@@ -94,9 +105,9 @@ export function ProcessTreeNode({
       ),
     [hasAlerts, alerts, investigatedAlertId]
   );
-  const isSelected = selectedProcessId === process.id;
-  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected });
-  const buttonStyles = useButtonStyles({});
+  const isSelected = selectedProcess?.id === process.id;
+  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected, isSessionLeader });
+  const buttonStyles = useButtonStyles();
 
   const nodeRef = useVisible({
     viewPortEl: scrollerRef.current,
@@ -108,6 +119,12 @@ export function ProcessTreeNode({
     ),
     shouldAddListener: hasInvestigatedAlert,
   });
+
+  useEffect(() => {
+    if (process.id === selectedProcess?.id && nodeRef.current?.scrollIntoView) {
+      nodeRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selectedProcess, process, nodeRef]);
 
   // Automatically expand alerts list when investigating an alert
   useEffect(() => {
@@ -194,15 +211,14 @@ export function ProcessTreeNode({
       // hidden processes.
     }
 
-    return process.getChildren(verboseModeOn);
-  }, [process, verboseModeOn, searchResults]);
+    return process.getChildren(verboseMode);
+  }, [process, verboseMode, searchResults]);
 
   if (!processDetails?.process) {
     return null;
   }
 
   const id = process.id;
-  const { user } = processDetails;
   const {
     args,
     name,
@@ -210,12 +226,13 @@ export function ProcessTreeNode({
     parent,
     working_directory: workingDirectory,
     start,
+    user,
   } = processDetails.process;
 
   const shouldRenderChildren = childrenExpanded && children?.length > 0;
   const childrenTreeDepth = depth + 1;
 
-  const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent?.user?.id;
+  const showUserEscalation = !isSessionLeader && !!user?.name && user.name !== parent?.user?.name;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'desktop' : 'gear';
   const iconTestSubj = hasExec
@@ -240,28 +257,37 @@ export function ProcessTreeNode({
           onClick={onProcessClicked}
         >
           {isSessionLeader ? (
-            <>
-              <EuiIcon type={sessionIcon} />{' '}
-              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
-              <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
-              <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
-            </>
+            <span css={styles.sessionLeader}>
+              <EuiIcon type={sessionIcon} css={styles.icon} />
+              <Nbsp />
+              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>
+              <Nbsp />
+              <span>
+                <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />
+              </span>
+              <Nbsp />
+              <EuiIcon type="user" />
+              <Nbsp />
+              <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
+            </span>
           ) : (
-            <span>
-              {timeStampOn && (
+            <>
+              {showTimestamp && (
                 <span data-test-subj="sessionView:processTreeNodeTimestamp" css={styles.timeStamp}>
                   {timeStampsNormal}
                 </span>
               )}
               <EuiToolTip position="top" content={iconTooltip}>
-                <EuiIcon data-test-subj={iconTestSubj} type={processIcon} />
-              </EuiToolTip>{' '}
-              <span ref={textRef}>
-                <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>&nbsp;
-                <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>{' '}
-                {args?.slice(1).join(' ')}
+                <EuiIcon data-test-subj={iconTestSubj} type={processIcon} css={styles.icon} />
+              </EuiToolTip>
+              <span ref={textRef} css={styles.textSection}>
+                <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>
+                <Nbsp />
+                <span css={styles.darkText}>{dataOrDash(args?.[0])}</span>
+                <Nbsp />
+                <SplitText>{args?.slice(1).join(' ') || ''}</SplitText>
               </span>
-            </span>
+            </>
           )}
 
           {showUserEscalation && (
@@ -273,7 +299,7 @@ export function ProcessTreeNode({
                 id="xpack.sessionView.execUserChange"
                 defaultMessage="Exec user change: "
               />
-              <span css={buttonStyles.userChangedButtonUsername}>{user.name}</span>
+              <span>{user.name}</span>
             </EuiButton>
           )}
           {!isSessionLeader && children.length > 0 && (
@@ -293,7 +319,7 @@ export function ProcessTreeNode({
         <ProcessTreeAlerts
           alerts={alerts}
           investigatedAlertId={investigatedAlertId}
-          isProcessSelected={selectedProcessId === process.id}
+          isProcessSelected={isSelected}
           onAlertSelected={onProcessClicked}
           onShowAlertDetails={onShowAlertDetails}
         />
@@ -311,9 +337,9 @@ export function ProcessTreeNode({
                 onProcessSelected={onProcessSelected}
                 jumpToEntityId={jumpToEntityId}
                 investigatedAlertId={investigatedAlertId}
-                selectedProcessId={selectedProcessId}
-                timeStampOn={timeStampOn}
-                verboseModeOn={verboseModeOn}
+                selectedProcess={selectedProcess}
+                showTimestamp={showTimestamp}
+                verboseMode={verboseMode}
                 searchResults={searchResults}
                 scrollerRef={scrollerRef}
                 onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}

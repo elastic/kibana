@@ -9,10 +9,10 @@ import React, { FC, memo, useCallback } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteOutput } from '@kbn/coloring';
-import { FieldFormat } from '../../../../field_formats/common';
-import type { CustomPaletteState } from '../../../../charts/public';
-import { EmptyPlaceholder } from '../../../../charts/public';
-import { isVisDimension } from '../../../../visualizations/common/utils';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
@@ -399,6 +399,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
             bands={bands}
             ticks={ticks}
+            domain={{ min, max }}
             bandFillColor={
               colorMode === GaugeColorModes.PALETTE
                 ? (val) => {

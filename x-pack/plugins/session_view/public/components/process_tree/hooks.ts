@@ -31,6 +31,7 @@ interface UseProcessTreeDeps {
   alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  verboseMode: boolean;
   jumpToEntityId?: string;
 }
 
@@ -54,10 +55,16 @@ export class ProcessImpl implements Process {
     this.searchMatched = null;
   }
 
-  addEvent(event: ProcessEvent) {
+  addEvent(newEvent: ProcessEvent) {
     // rather than push new events on the array, we return a new one
     // this helps the below memoizeOne functions to behave correctly.
-    this.events = this.events.concat(event);
+    const exists = this.events.find((event) => {
+      return event.event?.id === newEvent.event?.id;
+    });
+
+    if (!exists) {
+      this.events = this.events.concat(newEvent);
+    }
   }
 
   addAlert(alert: ProcessEvent) {
@@ -66,7 +73,6 @@ export class ProcessImpl implements Process {
 
   clearSearch() {
     this.searchMatched = null;
-    this.autoExpand = false;
   }
 
   getChildren(verboseMode: boolean) {
@@ -74,28 +80,22 @@ export class ProcessImpl implements Process {
 
     // if there are orphans, we just render them inline with the other child processes (currently only session leader does this)
     if (this.orphans.length) {
-      children = [...children, ...this.orphans].sort(sortProcesses);
+      children = [...children, ...this.orphans];
     }
     // When verboseMode is false, we filter out noise via a few techniques.
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {
-      return children.filter((child) => {
+      children = children.filter((child) => {
         if (child.events.length === 0) {
           return false;
         }
 
-        const { group_leader: groupLeader, session_leader: sessionLeader } =
-          child.getDetails().process ?? {};
-
-        // search matches or processes with alerts will never be filtered out
-        if (child.autoExpand || child.searchMatched || child.hasAlerts()) {
+        // processes with alerts will never be filtered out
+        if (child.autoExpand || child.hasAlerts()) {
           return true;
         }
 
-        // Hide processes that have their session leader as their process group leader.
-        // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
-        // other shell startup activities (e.g bashrc .profile etc)
-        if (!groupLeader || !sessionLeader || groupLeader.pid === sessionLeader.pid) {
+        if (child.isVerbose()) {
           return false;
         }
 
@@ -103,7 +103,27 @@ export class ProcessImpl implements Process {
       });
     }
 
-    return children;
+    return children.sort(sortProcesses);
+  }
+
+  isVerbose() {
+    const {
+      group_leader: groupLeader,
+      session_leader: sessionLeader,
+      entry_leader: entryLeader,
+    } = this.getDetails().process ?? {};
+
+    // Processes that have their session leader as their process group leader are considered "verbose"
+    // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
+    // other shell startup activities (e.g bashrc .profile etc)
+    if (
+      this.id !== entryLeader?.entity_id &&
+      (!groupLeader || !sessionLeader || groupLeader.pid === sessionLeader.pid)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   hasOutput() {
@@ -221,6 +241,20 @@ export class ProcessImpl implements Process {
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
     return filtered[filtered.length - 1] ?? {};
   });
+
+  isDescendantOf(process: Process) {
+    let parent = this.parent;
+
+    while (parent) {
+      if (parent === process) {
+        return true;
+      }
+
+      parent = parent.parent;
+    }
+
+    return false;
+  }
 }
 
 export const useProcessTree = ({
@@ -229,6 +263,7 @@ export const useProcessTree = ({
   alerts,
   searchQuery,
   updatedAlertsStatus,
+  verboseMode,
   jumpToEntityId,
 }: UseProcessTreeDeps) => {
   // initialize map, as well as a placeholder for session leader process
@@ -289,8 +324,9 @@ export const useProcessTree = ({
       setProcessMap({ ...updatedProcessMap });
       setProcessedPages([...processedPages, ...newProcessedPages]);
       setOrphans(newOrphans);
+      autoExpandProcessTree(updatedProcessMap, jumpToEntityId);
     }
-  }, [data, processMap, orphans, processedPages, sessionEntityId]);
+  }, [data, processMap, orphans, processedPages, sessionEntityId, jumpToEntityId]);
 
   useEffect(() => {
     // currently we are loading a single page of alerts, with no pagination
@@ -303,9 +339,8 @@ export const useProcessTree = ({
   }, [processMap, alerts, alertsProcessed]);
 
   useEffect(() => {
-    setSearchResults(searchProcessTree(processMap, searchQuery));
-    autoExpandProcessTree(processMap, jumpToEntityId);
-  }, [searchQuery, processMap, jumpToEntityId]);
+    setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));
+  }, [searchQuery, processMap, verboseMode]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];

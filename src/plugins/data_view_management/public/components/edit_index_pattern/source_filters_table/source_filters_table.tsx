@@ -10,8 +10,8 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { AddFilter, Table, Header, DeleteFilterConfirmationModal } from './components';
-import { DataView, DataViewsPublicPluginStart } from '../../../../../../plugins/data_views/public';
 import { SourceFiltersTableFilter } from './types';
 
 export interface SourceFiltersTableProps {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { fromRoot } from '@kbn/utils';
 
 import { parseMilliseconds, parse } from './settings';

@@ -7,14 +7,15 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
+import { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
 import {
+  coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
@@ -162,7 +163,9 @@ describe('Action Log API', () => {
           path.startsWith(ENDPOINT_ACTION_LOG_ROUTE)
         )!;
         await routeHandler(
-          createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
+          coreMock.createCustomRequestHandlerContext(
+            createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())
+          ) as SecuritySolutionRequestHandlerContext,
           req,
           mockResponse
         );

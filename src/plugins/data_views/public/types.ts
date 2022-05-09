@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewsServicePublicMethods } from './data_views';
 import { HasDataService } from '../common';
 

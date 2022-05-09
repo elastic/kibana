@@ -89,7 +89,7 @@ import {
   METRIC_TYPES,
   aggFilteredMetric,
   aggSinglePercentile,
-} from './';
+} from '.';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
 import { AggParamsSignificantText } from './buckets/significant_text';

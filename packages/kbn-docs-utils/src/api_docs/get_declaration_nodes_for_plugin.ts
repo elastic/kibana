@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Project, SourceFile, Node } from 'ts-morph';
 import { ApiScope, PluginOrPackage } from './types';
 import { isNamedNode, getSourceFileMatching } from './tsmorph_utils';

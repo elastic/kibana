@@ -6,7 +6,7 @@
  */
 
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { Datatable } from 'src/plugins/expressions';
+import type { Datatable } from '@kbn/expressions-plugin';
 import { applyPaletteParams, findMinMaxByColumnId } from '../shared_components';
 import { DEFAULT_PALETTE_NAME } from './constants';
 import type { HeatmapVisualizationState, Palette } from './types';

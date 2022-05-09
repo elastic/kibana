@@ -20,7 +20,8 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
-import { IDataPluginServices } from 'src/plugins/data/public';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   GraphState,
   hasDatasourceSelector,
@@ -30,8 +31,6 @@ import {
 } from '../../state_management';
 import { IndexPatternSavedObject } from '../../types';
 import { openSourceModal } from '../../services/source_modal';
-
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface GuidancePanelProps {
   onFillWorkspace: () => void;

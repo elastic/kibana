@@ -7,8 +7,8 @@
  */
 
 import Path from 'path';
-import { Observable } from 'rxjs';
-import { filter, first, map, tap, toArray } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
+import { filter, map, tap, toArray } from 'rxjs/operators';
 import { getFlattenedObject } from '@kbn/std';
 
 import { CoreService } from '../../types';
@@ -111,7 +111,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   }
 
   public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     const { error$, plugin$ } = discover(config, this.coreContext, {
       uuid: environment.instanceUuid,
@@ -151,7 +151,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async preboot(deps: PluginsServicePrebootSetupDeps) {
     this.log.debug('Prebooting plugins service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (config.initialize) {
       await this.prebootPluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
@@ -165,7 +165,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async setup(deps: PluginsServiceSetupDeps) {
     this.log.debug('Setting up plugins service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
@@ -186,7 +186,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Plugins service starts plugins');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (!config.initialize) {
       this.log.info(
         'Skipping `start` for `standard` plugins since plugin initialization is disabled.'
@@ -246,13 +246,13 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       PluginDiscoveryErrorType.InvalidManifest,
     ];
 
-    const errors = await error$
-      .pipe(
+    const errors = await firstValueFrom(
+      error$.pipe(
         filter((error) => errorTypesToReport.includes(error.type)),
         tap((pluginError) => this.log.error(pluginError)),
         toArray()
       )
-      .toPromise();
+    );
     if (errors.length > 0) {
       throw new Error(
         `Failed to initialize plugins:${errors.map((err) => `\n\t${err.message}`).join('')}`
@@ -265,7 +265,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
     >();
-    const plugins = await plugin$.pipe(toArray()).toPromise();
+    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
 
     // Register config descriptors and deprecations
     for (const plugin of plugins) {

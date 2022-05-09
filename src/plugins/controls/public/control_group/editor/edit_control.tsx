@@ -10,16 +10,16 @@ import { isEqual } from 'lodash';
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { useEffect, useRef } from 'react';
 
+import { OverlayRef } from '@kbn/core/public';
+import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
 import { ControlEditor } from './control_editor';
 import { pluginServices } from '../../services';
 import { forwardAllContext } from './forward_all_context';
-import { OverlayRef } from '../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { IEditableControlFactory, ControlInput } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { EmbeddableFactoryNotFoundError } from '../../../../embeddable/public';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {

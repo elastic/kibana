@@ -10,8 +10,8 @@ import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { lastValueFrom } from '@kbn/std';
-import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -83,7 +83,7 @@ interface DeleteObjectsOptions {
 
 async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
   if (arr.length) {
-    await lastValueFrom(
+    await Rx.lastValueFrom(
       Rx.from(arr).pipe(mergeMap(async (item) => await fn(item), maxConcurrency))
     );
   }

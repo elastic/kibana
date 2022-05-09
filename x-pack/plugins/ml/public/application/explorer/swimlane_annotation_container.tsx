@@ -68,7 +68,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         )
         .attr('x', Y_AXIS_LABEL_WIDTH - Y_AXIS_LABEL_PADDING)
         .attr('y', ANNOTATION_CONTAINER_HEIGHT / 2)
-        .attr('alignment-baseline', 'middle')
+        .attr('dominant-baseline', 'middle')
         .style('fill', euiTheme.euiTextSubduedColor)
         .style('font-size', euiTheme.euiFontSizeXS);
 

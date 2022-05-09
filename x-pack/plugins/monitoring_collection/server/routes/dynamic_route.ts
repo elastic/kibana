@@ -6,7 +6,7 @@
  */
 import { JsonObject } from '@kbn/utility-types';
 import { schema } from '@kbn/config-schema';
-import { IRouter, ServiceStatus } from '../../../../../src/core/server';
+import { IRouter, ServiceStatus } from '@kbn/core/server';
 import { getESClusterUuid, getKibanaStats } from '../lib';
 import { MetricResult } from '../plugin';
 
@@ -47,9 +47,10 @@ export function registerDynamicRoute({
     },
     async (context, req, res) => {
       const type = req.params.type;
+      const esClient = (await context.core).elasticsearch.client;
       const [data, clusterUuid, kibana] = await Promise.all([
         getMetric(type),
-        getESClusterUuid(context.core.elasticsearch.client),
+        getESClusterUuid(esClient),
         getKibanaStats({ config, getStatus }),
       ]);
 

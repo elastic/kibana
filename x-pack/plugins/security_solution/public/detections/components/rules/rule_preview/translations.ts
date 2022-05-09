@@ -146,13 +146,6 @@ export const ML_PREVIEW_HISTOGRAM_DISCLAIMER = i18n.translate(
   }
 );
 
-export const QUERY_PREVIEW_SUBTITLE_LOADING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSubtitleLoading',
-  {
-    defaultMessage: '...loading',
-  }
-);
-
 export const QUERY_PREVIEW_EQL_SEQUENCE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewEqlSequenceTitle',
   {

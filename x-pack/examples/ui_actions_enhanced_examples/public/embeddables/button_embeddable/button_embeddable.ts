@@ -7,12 +7,8 @@
 
 import { createElement } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AdvancedUiActionsStart } from '../../../../../plugins/ui_actions_enhanced/public';
-import {
-  Embeddable,
-  EmbeddableInput,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/embeddable/public';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
+import { Embeddable, EmbeddableInput, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ButtonEmbeddableComponent } from './button_embeddable_component';
 
 export const BUTTON_EMBEDDABLE = 'BUTTON_EMBEDDABLE';

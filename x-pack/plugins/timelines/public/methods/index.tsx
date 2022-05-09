@@ -8,8 +8,8 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Store } from 'redux';
-import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TGridProps } from '../types';
 import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '../components';
 import { initialTGridState } from '../store/t_grid/reducer';

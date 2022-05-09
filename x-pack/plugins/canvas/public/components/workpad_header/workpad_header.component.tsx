@@ -16,10 +16,10 @@ import {
   AddFromLibraryButton,
   QuickButtonGroup,
   SolutionToolbar,
-} from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 import { getElementStrings } from '../../../i18n';
 import { CommitFn, ElementSpec } from '../../../types';
-import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { RefreshControl } from './refresh_control';
 // @ts-expect-error untyped local
 import { FullscreenControl } from './fullscreen_control';

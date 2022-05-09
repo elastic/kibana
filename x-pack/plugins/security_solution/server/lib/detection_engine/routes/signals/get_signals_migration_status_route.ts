@@ -31,11 +31,15 @@ export const getSignalsMigrationStatusRoute = (router: SecuritySolutionPluginRou
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const soClient = context.core.savedObjects.client;
+
+      const core = await context.core;
+      const securitySolution = await context.securitySolution;
+
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const soClient = core.savedObjects.client;
 
       try {
-        const appClient = context.securitySolution?.getAppClient();
+        const appClient = securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }

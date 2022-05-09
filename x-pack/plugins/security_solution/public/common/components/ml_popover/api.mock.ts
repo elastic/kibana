@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '../../../../../ml/public';
+import { MlSummaryJob } from '@kbn/ml-plugin/public';
 import {
   Group,
   Module,

@@ -78,6 +78,11 @@ export class HomePageObject extends FtrService {
     });
   }
 
+  async launchSampleDiscover(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Discover');
+  }
+
   async launchSampleDashboard(id: string) {
     await this.launchSampleDataSet(id);
     await this.find.clickByLinkText('Dashboard');
@@ -91,6 +96,21 @@ export class HomePageObject extends FtrService {
   async launchSampleMap(id: string) {
     await this.launchSampleDataSet(id);
     await this.find.clickByLinkText('Map');
+  }
+
+  async launchSampleLogs(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Logs');
+  }
+
+  async launchSampleGraph(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Graph');
+  }
+
+  async launchSampleML(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('ML jobs');
   }
 
   async launchSampleDataSet(id: string) {

@@ -15,12 +15,15 @@ const APM_SERVER_URL = 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es
 const APM_PUBLIC_TOKEN = 'CTs9y3cvcfq13bQqsB';
 
 export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   const testFiles = [require.resolve('./tests/playwright')];
 
-  const testJobId = process.env.TEST_JOB_ID ?? uuid();
-  log.info(`👷 JOB ID ${testJobId}👷`);
+  const testBuildId = process.env.BUILDKITE_BUILD_ID ?? `local-${uuid()}`;
+  const testJobId = process.env.BUILDKITE_JOB_ID ?? `local-${uuid()}`;
+  const executionId = uuid();
+
+  log.info(` 👷‍♀️ BUILD ID ${testBuildId}\n 👷 JOB ID ${testJobId}\n 👷‍♂️ EXECUTION ID:${executionId}`);
 
   return {
     testFiles,
@@ -60,6 +63,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           performancePhase: process.env.TEST_PERFORMANCE_PHASE,
           journeyName: process.env.JOURNEY_NAME,
           testJobId,
+          testBuildId,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),

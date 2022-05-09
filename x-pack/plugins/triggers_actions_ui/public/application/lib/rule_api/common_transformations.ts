@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleExecutionStatus } from '../../../../../alerting/common';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { Rule, RuleAction, ResolvedRule } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleAction> = ({

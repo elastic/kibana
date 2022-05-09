@@ -61,6 +61,8 @@ export class Job {
 
   public locatorParams?: BaseParamsV2['locatorParams'];
 
+  public error_code?: ReportOutput['error_code'];
+
   constructor(report: ReportApiJSON) {
     this.id = report.id;
     this.index = report.index;
@@ -90,6 +92,7 @@ export class Job {
     this.csv_contains_formulas = report.output?.csv_contains_formulas;
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;
+    this.error_code = report.output?.error_code;
     this.locatorParams = (report.payload as BaseParamsV2).locatorParams;
     this.metrics = report.metrics;
   }

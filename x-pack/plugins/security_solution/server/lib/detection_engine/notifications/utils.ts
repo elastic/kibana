@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { APP_PATH } from '../../../../common/constants';
 import { SignalSearchResponse } from '../signals/types';
 

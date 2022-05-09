@@ -40,7 +40,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Empty filt
               >
                 <select
                   aria-label="Use aria labels when no actual label is in use"
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   defaultValue=""
                   onChange={[Function]}
                   onMouseUp={[Function]}
@@ -127,7 +127,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               >
                 <select
                   aria-label="Use aria labels when no actual label is in use"
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   onChange={[Function]}
                   onMouseUp={[Function]}
                   value="filterGroup"
@@ -271,7 +271,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               >
                 <select
                   aria-label="Use aria labels when no actual label is in use"
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   onChange={[Function]}
                   onMouseUp={[Function]}
                   value="column"
@@ -415,7 +415,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent Filters gr
               >
                 <select
                   aria-label="Use aria labels when no actual label is in use"
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   defaultValue=""
                   onChange={[Function]}
                   onMouseUp={[Function]}
@@ -559,7 +559,7 @@ exports[`Storyshots components/WorkpadFilters/WorkpadFiltersComponent default 1`
               >
                 <select
                   aria-label="Use aria labels when no actual label is in use"
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   defaultValue=""
                   onChange={[Function]}
                   onMouseUp={[Function]}

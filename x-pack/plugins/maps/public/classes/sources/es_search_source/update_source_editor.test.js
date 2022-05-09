@@ -26,6 +26,7 @@ const defaultProps = {
   tooltipFields: [],
   sortOrder: 'DESC',
   scalingType: SCALING_TYPES.LIMIT,
+  numberOfJoins: 0,
 };
 
 test('should render update source editor', async () => {

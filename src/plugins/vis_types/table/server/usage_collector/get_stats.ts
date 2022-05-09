@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { VIS_TYPE_TABLE } from '../../common';
-
 import type {
   ISavedObjectsRepository,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
-} from '../../../../../core/server';
-import type { SavedVisState } from '../../../../visualizations/common';
+} from '@kbn/core/server';
+import type { SavedVisState } from '@kbn/visualizations-plugin/common';
+import { VIS_TYPE_TABLE } from '../../common';
 
 export interface VisTypeTableUsage {
   /**

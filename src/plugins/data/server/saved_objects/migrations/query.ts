@@ -7,10 +7,10 @@
  */
 
 import { mapValues } from 'lodash';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
+import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
 import { SavedQueryAttributes } from '../../../common';
 import { extract, getAllMigrations } from '../../../common/query/persistable_state';
-import { mergeMigrationFunctionMaps } from '../../../../kibana_utils/common';
 
 const extractFilterReferences = (doc: SavedObject<SavedQueryAttributes>) => {
   const { state: filters, references } = extract(doc.attributes.filters ?? []);

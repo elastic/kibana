@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useUncommonProcesses } from './index';
+import { useUncommonProcesses } from '.';
 import { HostsType } from '../../store/model';
 
 describe('useUncommonProcesses', () => {

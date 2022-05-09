@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useState, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { debounce } from 'lodash';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { useStateObservable } from '../../hooks/use_state_observable';
-import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { timeSliderReducers } from './time_slider_reducers';
 import { TimeSlider as Component } from './time_slider.component';
@@ -59,10 +59,6 @@ export const TimeSlider: FC<TimeSliderProps> = ({
 
   const { value } = useEmbeddableSelector((state) => state);
 
-  const [selectedValue, setSelectedValue] = useState<[number | null, number | null]>(
-    value || [null, null]
-  );
-
   const dispatchChange = useCallback(
     (range: [number | null, number | null]) => {
       dispatch(selectRange(range));
@@ -75,15 +71,14 @@ export const TimeSlider: FC<TimeSliderProps> = ({
   const onChangeComplete = useCallback(
     (range: [number | null, number | null]) => {
       debouncedDispatchChange(range);
-      setSelectedValue(range);
     },
-    [setSelectedValue, debouncedDispatchChange]
+    [debouncedDispatchChange]
   );
 
   return (
     <Component
       onChange={onChangeComplete}
-      value={selectedValue}
+      value={value ?? [null, null]}
       range={[min, max]}
       dateFormat={dateFormat}
       timezone={timezone}

@@ -134,7 +134,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
 export const eventRenderedProps: EventRenderedViewProps = {
   alertToolbar: <></>,
   appId: '',
-  browserFields: mockBrowserFields,
   events: mockTimelineData,
   leadingControlColumns: [],
   onChangePage: () => null,

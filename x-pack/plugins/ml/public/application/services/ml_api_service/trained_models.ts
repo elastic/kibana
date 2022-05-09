@@ -8,9 +8,9 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { useMemo } from 'react';
-import { HttpFetchQuery } from 'kibana/public';
+import { HttpFetchQuery } from '@kbn/core/public';
 import { HttpService } from '../http_service';
-import { basePath } from './index';
+import { basePath } from '.';
 import { useMlKibana } from '../../contexts/kibana';
 import type {
   TrainedModelConfigResponse,

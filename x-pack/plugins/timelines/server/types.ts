@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PluginSetup, PluginStart } from '../../../../src/plugins/data/server';
-import { PluginStartContract as AlertingPluginStartContract } from '../../alerting/server';
-import { SecurityPluginSetup } from '../../security/server';
+import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
+import { PluginStartContract as AlertingPluginStartContract } from '@kbn/alerting-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TimelinesPluginUI {}

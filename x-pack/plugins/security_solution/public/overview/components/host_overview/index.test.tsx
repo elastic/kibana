@@ -11,7 +11,7 @@ import React from 'react';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
-import { HostOverview } from './index';
+import { HostOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 import { useHostRiskScore } from '../../../risk_score/containers/all';

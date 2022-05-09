@@ -10,7 +10,6 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
 import { Ecs } from '../../../../../../../common/ecs';
 
 import { NetflowRenderer } from '../netflow';
@@ -24,7 +23,6 @@ const Details = styled.div`
 Details.displayName = 'Details';
 
 export const SuricataDetails = React.memo<{
-  browserFields: BrowserFields;
   data: Ecs;
   isDraggable?: boolean;
   timelineId: string;

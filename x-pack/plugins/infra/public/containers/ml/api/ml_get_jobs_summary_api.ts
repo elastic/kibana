@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 
 import { getJobId, jobCustomSettingsRT } from '../../../../common/infra_ml';
 import { decodeOrThrow } from '../../../../common/runtime_types';
@@ -47,6 +47,7 @@ const datafeedStateRT = rt.keyof({
   '': null,
 });
 
+// this is the union of the ML API's job state and block reasons
 const jobStateRT = rt.keyof({
   closed: null,
   closing: null,
@@ -54,6 +55,8 @@ const jobStateRT = rt.keyof({
   failed: null,
   opened: null,
   opening: null,
+  resetting: null,
+  reverting: null,
 });
 
 const jobCategorizationStatusRT = rt.keyof({

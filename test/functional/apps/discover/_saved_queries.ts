@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const browser = getService('browser');
@@ -21,9 +20,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
-  const defaultSettings = {
-    defaultIndex: 'logstash-*',
+  const config = getService('config');
+  const localArchiveDirectories = {
+    nested: 'test/functional/fixtures/kbn_archiver/date_nested.json',
+    discover: 'test/functional/fixtures/kbn_archiver/discover.json',
   };
+  const remoteArchiveDirectories = {
+    nested: 'test/functional/fixtures/kbn_archiver/ccs/date_nested.json',
+    discover: 'test/functional/fixtures/kbn_archiver/ccs/discover.json',
+  };
+  const logstashIndexPatternString = config.get('esTestCluster.ccs')
+    ? 'ftr-remote:logstash-*'
+    : 'logstash-*';
+  const dateNestedIndexPattern = config.get('esTestCluster.ccs')
+    ? 'ftr-remote:date-nested'
+    : 'date-nested';
+  const defaultSettings = {
+    defaultIndex: logstashIndexPatternString,
+  };
+  const esNode = config.get('esTestCluster.ccs')
+    ? getService('remoteEsArchiver' as 'esArchiver')
+    : getService('esArchiver');
+  const kbnArchives = config.get('esTestCluster.ccs')
+    ? remoteArchiveDirectories
+    : localArchiveDirectories;
 
   const from = 'Sep 20, 2015 @ 08:00:00.000';
   const to = 'Sep 21, 2015 @ 08:00:00.000';
@@ -34,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('set up a query with filters to save');
     await PageObjects.common.setTime({ from, to });
     await PageObjects.common.navigateToApp('discover');
-    await PageObjects.discover.selectIndexPattern('logstash-*');
+    await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
     await retry.try(async function tryingForTime() {
       const hitCount = await PageObjects.discover.getHitCount();
       expect(hitCount).to.be('4,731');
@@ -59,12 +79,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'query'] });
 
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-      await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/date_nested.json'
-      );
-      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(kbnArchives.discover);
+      await kibanaServer.importExport.load(kbnArchives.nested);
+      await esNode.load('test/functional/fixtures/es_archiver/date_nested');
+      await esNode.load('test/functional/fixtures/es_archiver/logstash_functional');
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
@@ -72,12 +90,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
+      await kibanaServer.importExport.unload(kbnArchives.discover);
+      await kibanaServer.importExport.unload(kbnArchives.nested);
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'query'] });
       await kibanaServer.savedObjects.clean({ types: ['search', 'query'] });
-      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.unload('test/functional/fixtures/es_archiver/date_nested');
+      await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.common.unsetTime();
     });
 
@@ -102,14 +120,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('date-nested');
+        await PageObjects.discover.selectIndexPattern(dateNestedIndexPattern);
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
         const currentDataView = await PageObjects.discover.getCurrentlySelectedDataView();
-        expect(currentDataView).to.be('logstash-*');
+        expect(currentDataView).to.be(logstashIndexPatternString);
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be('4,731');
@@ -126,12 +144,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('saved query management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
-      it('should show the saved query management component when there are no saved queries', async () => {
+      it('should show the saved query management load button as disabled when there are no saved queries', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
-        const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
-        expect(descriptionText).to.eql(
-          'Saved Queries\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
-        );
+        const loadFilterSetBtn = await testSubjects.find('saved-query-management-load-button');
+        const isDisabled = await loadFilterSetBtn.getAttribute('disabled');
+        expect(isDisabled).to.equal('true');
       });
 
       it('should allow a query to be saved via the saved objects management component', async () => {
@@ -171,9 +188,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
+        const contextMenuPanelTitleButton = await testSubjects.exists(
+          'contextMenuPanelTitleButton'
+        );
+        if (contextMenuPanelTitleButton) {
+          await testSubjects.click('contextMenuPanelTitleButton');
+        }
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
@@ -181,9 +205,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('allows saving the currently loaded query as a new query', async () => {
+        await queryBar.setQuery('response:400');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'OkResponseCopy',
-          '200 responses',
+          '400 responses',
           false,
           false
         );
@@ -197,6 +222,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('does not allow saving a query with a non-unique name', async () => {
+        // this check allows this test to run stand alone, also should fix occacional flakiness
+        const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
+        if (!savedQueryExists) {
+          await savedQueryManagementComponent.saveNewQuery(
+            'OkResponse',
+            '200 responses for .jpg over 24 hours',
+            true,
+            true
+          );
+          await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        }
+        await queryBar.setQuery('response:400');
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 
@@ -214,17 +251,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('allows clearing if non default language was remembered in localstorage', async () => {
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');
         await PageObjects.common.navigateToApp('discover'); // makes sure discovered is reloaded without any state in url
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.expectQueryLanguageOrFail('lucene'); // make sure lucene is remembered after refresh (comes from localstorage)
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.expectQueryLanguageOrFail('kql');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.expectQueryLanguageOrFail('lucene');
       });
 
       it('changing language removes saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');
         expect(await queryBar.getQueryString()).to.eql('');
       });

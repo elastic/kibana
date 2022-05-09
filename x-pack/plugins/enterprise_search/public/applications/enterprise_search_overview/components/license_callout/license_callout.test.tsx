@@ -15,7 +15,7 @@ import { EuiPanel, EuiText } from '@elastic/eui';
 
 import { ManageLicenseButton } from '../../../shared/licensing';
 
-import { LicenseCallout } from './';
+import { LicenseCallout } from '.';
 
 describe('LicenseCallout', () => {
   it('renders when non-platinum or on trial', () => {

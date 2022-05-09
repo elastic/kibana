@@ -50,7 +50,7 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
           item_id: itemId,
           tags,
         } = request.body;
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const exceptionListItem = await exceptionLists.updateEndpointListItem({
           _version,
           comments,

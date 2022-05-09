@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Datatable } from 'src/plugins/expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 import type { PaletteOutput } from '@kbn/coloring';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   Visualization,
   Datasource,
   TableSuggestion,
   DatasourceSuggestion,
-  DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
   VisualizeEditorContext,
   Suggestion,
+  DatasourceLayers,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { LayerType, layerTypes } from '../../../common';
@@ -261,7 +261,7 @@ export function switchToSuggestion(
 }
 
 export function getTopSuggestionForField(
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   visualization: VisualizationState,
   datasourceStates: DatasourceStates,
   visualizationMap: Record<string, Visualization<unknown>>,

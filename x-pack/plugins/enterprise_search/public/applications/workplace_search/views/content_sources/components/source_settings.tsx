@@ -43,7 +43,7 @@ import {
 } from '../../../constants';
 import { getEditPath } from '../../../routes';
 import { handlePrivateKeyUpload } from '../../../utils';
-import { AddSourceLogic } from '../components/add_source/add_source_logic';
+
 import {
   SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
@@ -58,6 +58,8 @@ import {
   SYNC_DIAGNOSTICS_BUTTON,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
+
+import { AddSourceLogic } from './add_source/add_source_logic';
 
 import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 

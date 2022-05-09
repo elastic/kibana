@@ -6,14 +6,10 @@
  */
 
 import { registerDynamicRoute } from './dynamic_route';
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  ServiceStatusLevels,
-} from '../../../../../src/core/server';
-import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
+import { KibanaRequest, KibanaResponseFactory, ServiceStatusLevels } from '@kbn/core/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 beforeEach(() => {
   jest.resetAllMocks();

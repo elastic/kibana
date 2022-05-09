@@ -10,17 +10,17 @@ import './management_app.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 
-import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
-import { ManagementRouter } from './management_router';
-import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateProps,
   reactRouterNavigate,
   KibanaThemeProvider,
-} from '../../../../kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
+import { ManagementRouter } from './management_router';
+import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import { SectionsServiceStart } from '../../types';
 
 interface ManagementAppProps {

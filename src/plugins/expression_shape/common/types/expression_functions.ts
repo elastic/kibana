@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition, ExpressionValueRender, Style } from '../../../expressions';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
+  Style,
+} from '@kbn/expressions-plugin';
 
 export enum Shape {
   ARROW = 'arrow',

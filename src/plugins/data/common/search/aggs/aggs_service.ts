@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../../../common';
+import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../..';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -15,7 +15,7 @@ import {
   getAggTypes,
   getAggTypesFunctions,
   getCalculateAutoTimeExpression,
-} from './';
+} from '.';
 import { AggsCommonSetup, AggsCommonStart } from './types';
 
 /** @internal */

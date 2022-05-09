@@ -21,11 +21,11 @@ import {
   ReplaySubject,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { now, AbortError } from '../../../kibana_utils/common';
-import { Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstArgument,
@@ -224,6 +224,7 @@ export class Execution<
         inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
+      isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
       ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
@@ -281,8 +282,8 @@ export class Execution<
       this.context.inspectorAdapters.requests?.reset();
     }
 
-    if (isObservable<Input>(input)) {
-      input.subscribe(this.input$);
+    if (isObservable(input)) {
+      (input as Observable<Input>).subscribe(this.input$);
     } else if (isPromise(input)) {
       from(input).subscribe(this.input$);
     } else {
@@ -480,7 +481,7 @@ export class Execution<
       );
 
       // Check for missing required arguments.
-      for (const { aliases, default: argDefault, name, required } of Object.values(argDefs)) {
+      for (const { default: argDefault, name, required } of Object.values(argDefs)) {
         if (!(name in dealiasedArgAsts) && typeof argDefault !== 'undefined') {
           dealiasedArgAsts[name] = [parse(argDefault as string, 'argument')];
         }
@@ -489,13 +490,7 @@ export class Execution<
           continue;
         }
 
-        if (!aliases?.length) {
-          throw new Error(`${fnDef.name} requires an argument`);
-        }
-
-        // use an alias if _ is the missing arg
-        const errorArg = name === '_' ? aliases[0] : name;
-        throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
+        throw new Error(`${fnDef.name} requires the "${name}" argument`);
       }
 
       // Create the functions to resolve the argument ASTs into values

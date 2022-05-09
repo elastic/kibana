@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType } from './types';
+import { FieldSpec } from '..';
 
-export const fields: IFieldType[] = [
+export const fields: FieldSpec[] = [
   {
     name: 'bytes',
     type: 'number',
@@ -308,4 +308,4 @@ export const fields: IFieldType[] = [
   },
 ];
 
-export const getField = (name: string) => fields.find((field) => field.name === name) as IFieldType;
+export const getField = (name: string) => fields.find((field) => field.name === name) as FieldSpec;

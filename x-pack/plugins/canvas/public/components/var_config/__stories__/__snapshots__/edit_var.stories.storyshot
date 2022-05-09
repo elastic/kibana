@@ -67,7 +67,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -99,7 +99,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -124,6 +124,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -138,7 +139,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -363,7 +364,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -395,7 +396,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -420,6 +421,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -434,7 +436,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -600,7 +602,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -632,7 +634,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -657,6 +659,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -671,7 +674,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -810,7 +813,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -842,7 +845,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -867,6 +870,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -881,7 +885,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div

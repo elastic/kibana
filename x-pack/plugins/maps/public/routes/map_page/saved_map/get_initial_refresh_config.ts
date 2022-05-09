@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryState } from 'src/plugins/data/public';
+import { QueryState } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 import { SerializedMapState } from './types';
 
 export function getInitialRefreshConfig({

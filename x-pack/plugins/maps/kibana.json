@@ -25,8 +25,7 @@
     "mapsEms",
     "savedObjects",
     "share",
-    "presentationUtil",
-    "sharedUX"
+    "presentationUtil"
   ],
   "optionalPlugins": [
     "cloud",
@@ -47,7 +46,6 @@
     "kibanaReact",
     "kibanaUtils",
     "usageCollection",
-    "home",
     "unifiedSearch"
   ]
 }

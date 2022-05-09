@@ -6,14 +6,14 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { securityMock } from '../../../../plugins/security/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
   PluginStartContract as FeaturesStartContract,
   KibanaFeature,
-} from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
+} from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import {
   AlertingAuthorization,
   WriteOperations,

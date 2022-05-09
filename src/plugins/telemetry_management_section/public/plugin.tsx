@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { CoreStart, CoreSetup, DocLinksStart } from 'src/core/public';
+import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { CoreStart, CoreSetup, DocLinksStart } from '@kbn/core/public';
 
 import {
   telemetryManagementSectionWrapper,

@@ -8,9 +8,9 @@
 
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, DatatableColumn } from '../../../../expressions/common';
-import { SerializedFieldFormat } from '../../../../field_formats/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { ChartTypes, ExpressionValuePartitionLabels } from './expression_functions';
 
 export enum EmptySizeRatios {

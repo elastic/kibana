@@ -9,8 +9,8 @@ import { render } from 'enzyme';
 import React from 'react';
 
 import { EmbeddedMap } from './embedded_map';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { embeddablePluginMock } from '../../../../../../../../src/plugins/embeddable/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 describe('Embedded Map', () => {
   test('it renders', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensMultiTable } from '../../../../lens/common';
+import type { LensMultiTable } from '@kbn/lens-plugin/common';
 
 export interface ChoroplethChartState {
   layerId: string;

@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
-import { MlAnomalyRecordDoc as Anomaly } from '../../../../ml/server';
+import { MlAnomalyRecordDoc as Anomaly } from '@kbn/ml-plugin/server';
 
 export type { Anomaly };
 export type AnomalyResults = estypes.SearchResponse<Anomaly>;

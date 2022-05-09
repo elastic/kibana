@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DataView } from '../../../../data/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { Panel, Series } from '../../common/types';
-import { triggerTSVBtoLensConfiguration } from './';
+import { triggerTSVBtoLensConfiguration } from '.';
 
 const dataViewsMap: Record<string, DataView> = {
   test1: { id: 'test1', title: 'test1', timeFieldName: 'timeField1' } as DataView,

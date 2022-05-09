@@ -9,11 +9,14 @@
 export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
 export const LEGACY_TIME_AXIS = 'visualization:useLegacyTimeAxis';
 
-export type { CustomPaletteArguments, CustomPaletteState, SystemPaletteArguments } from './palette';
+export type {
+  CustomPaletteArguments,
+  CustomPaletteState,
+  SystemPaletteArguments,
+} from './expressions/palette';
+export { palette, systemPalette } from './expressions/palette';
 
-export { defaultCustomColors, palette, systemPalette } from './palette';
-
-export { paletteIds } from './constants';
+export { paletteIds, defaultCustomColors } from './constants';
 export type { ColorSchema, RawColorSchema, ColorMap } from './static';
 export {
   ColorSchemas,
@@ -29,11 +32,3 @@ export {
 } from './static';
 
 export type { ColorSchemaParams, Labels, Style } from './types';
-
-/** @deprecated **/
-/** Please import directly from @kbn/coloring **/
-export { checkIsMinContinuity, checkIsMaxContinuity } from '@kbn/coloring';
-
-/** @deprecated **/
-/** Please import directly from @kbn/coloring **/
-export type { PaletteOutput, PaletteContinuity } from '@kbn/coloring';

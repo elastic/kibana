@@ -9,9 +9,9 @@
 import { Filter } from '@kbn/es-query';
 
 import { Subject } from 'rxjs';
+import { EmbeddableContainerSettings, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ControlEmbeddable } from '../../types';
 import { ChildEmbeddableOrderCache } from './control_group_container';
-import { EmbeddableContainerSettings, isErrorEmbeddable } from '../../../../embeddable/public';
 import { ControlGroupChainingSystem, ControlGroupInput } from '../../../common/control_group/types';
 
 interface GetPrecedingFiltersProps {
@@ -59,7 +59,7 @@ export const ControlGroupChainingSystems: {
     onChildChange: ({ childOutputChangedId, childOrder, recalculateFilters$, getChild }) => {
       if (childOutputChangedId === childOrder.lastChildId) {
         // the last control's output has updated, recalculate filters
-        recalculateFilters$.next();
+        recalculateFilters$.next(null);
         return;
       }
 
@@ -75,6 +75,6 @@ export const ControlGroupChainingSystems: {
   NONE: {
     getContainerSettings: () => undefined,
     getPrecedingFilters: () => undefined,
-    onChildChange: ({ recalculateFilters$ }) => recalculateFilters$.next(),
+    onChildChange: ({ recalculateFilters$ }) => recalculateFilters$.next(null),
   },
 };

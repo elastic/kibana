@@ -251,6 +251,22 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.AwaitedProperties",
+        "type": "Type",
+        "tags": [],
+        "label": "AwaitedProperties",
+        "description": [
+          "\nUnwrap all promise attributes of the given type"
+        ],
+        "signature": [
+          "{ [K in keyof T]: Awaited<T[K]>; }"
+        ],
+        "path": "packages/kbn-utility-types/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-server.Class",
         "type": "Type",
         "tags": [

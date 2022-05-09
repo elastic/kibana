@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JobFieldType } from './index';
+import type { JobFieldType } from '.';
 
 export interface Percentile {
   percent: number;

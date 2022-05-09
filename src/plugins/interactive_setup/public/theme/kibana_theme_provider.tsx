@@ -12,7 +12,8 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
-import type { CoreTheme } from '../../../../core/public';
+import type { CoreTheme } from '@kbn/core/public';
+
 import { getColorMode } from './utils';
 
 interface KibanaThemeProviderProps {

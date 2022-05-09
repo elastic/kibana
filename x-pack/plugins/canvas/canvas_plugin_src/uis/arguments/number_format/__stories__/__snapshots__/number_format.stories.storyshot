@@ -9,7 +9,7 @@ Array [
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--compressed"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
         id="NumberFormatExample3"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -94,7 +94,7 @@ Array [
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--compressed"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
         id="NumberFormatExample1"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -178,7 +178,7 @@ exports[`Storyshots arguments/NumberFormat with preset format 1`] = `
     className="euiFormControlLayout__childrenWrapper"
   >
     <select
-      className="euiSelect euiSelect--compressed"
+      className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
       id="NumberFormatExample2"
       onChange={[Function]}
       onMouseUp={[Function]}

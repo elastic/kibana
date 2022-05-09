@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { CodeEditor, KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDocLinks, getHttp, getUiSettings } from '../kibana_services';
 import { ImportResults } from '../importer';
 

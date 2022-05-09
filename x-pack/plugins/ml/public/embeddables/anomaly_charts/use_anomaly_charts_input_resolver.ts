@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { MlStartDependencies } from '../../plugin';
 import {
   AppStateSelectedCells,

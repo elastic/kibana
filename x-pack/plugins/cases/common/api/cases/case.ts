@@ -39,6 +39,20 @@ export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
 
+export enum CaseSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+export const CaseSeverityRt = rt.union([
+  rt.literal(CaseSeverity.LOW),
+  rt.literal(CaseSeverity.MEDIUM),
+  rt.literal(CaseSeverity.HIGH),
+  rt.literal(CaseSeverity.CRITICAL),
+]);
+
 const CaseBasicRt = rt.type({
   /**
    * The description of the case
@@ -68,6 +82,10 @@ const CaseBasicRt = rt.type({
    * The plugin owner of the case
    */
   owner: rt.string,
+  /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
 });
 
 /**
@@ -95,6 +113,7 @@ export const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, r
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
   rt.type({
+    duration: rt.union([rt.number, rt.null]),
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
@@ -105,33 +124,42 @@ export const CaseAttributesRt = rt.intersection([
   }),
 ]);
 
-export const CasePostRequestRt = rt.type({
-  /**
-   * Description of the case
-   */
-  description: rt.string,
-  /**
-   * Identifiers for the case.
-   */
-  tags: rt.array(rt.string),
-  /**
-   * Title of the case
-   */
-  title: rt.string,
-  /**
-   * The external configuration for the case
-   */
-  connector: CaseConnectorRt,
-  /**
-   * Sync settings for alerts
-   */
-  settings: SettingsRt,
-  /**
-   * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
-   * creating this case must also be granted access to that plugin's feature.
-   */
-  owner: rt.string,
-});
+export const CasePostRequestRt = rt.intersection([
+  rt.type({
+    /**
+     * Description of the case
+     */
+    description: rt.string,
+    /**
+     * Identifiers for the case.
+     */
+    tags: rt.array(rt.string),
+    /**
+     * Title of the case
+     */
+    title: rt.string,
+    /**
+     * The external configuration for the case
+     */
+    connector: CaseConnectorRt,
+    /**
+     * Sync settings for alerts
+     */
+    settings: SettingsRt,
+    /**
+     * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
+     * creating this case must also be granted access to that plugin's feature.
+     */
+    owner: rt.string,
+  }),
+  rt.partial({
+    /**
+     * The severity of the case. The severity is
+     * default it to "low" if not provided.
+     */
+    severity: CaseSeverityRt,
+  }),
+]);
 
 export const CasesFindRequestRt = rt.partial({
   /**
@@ -142,6 +170,10 @@ export const CasesFindRequestRt = rt.partial({
    * The status of the case (open, closed, in-progress)
    */
   status: CaseStatusRt,
+  /**
+   * The severity of the case
+   */
+  severity: CaseSeverityRt,
   /**
    * The reporters to filter by
    */

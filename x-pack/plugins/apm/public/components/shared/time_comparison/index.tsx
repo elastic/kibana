@@ -9,12 +9,12 @@ import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useUiTracker } from '../../../../../observability/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import * as urlHelpers from '../../shared/links/url_helpers';
+import * as urlHelpers from '../links/url_helpers';
 import { getComparisonOptions } from './get_comparison_options';
 
 const PrependContainer = euiStyled.div`

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import { DeprecationsFactory } from './deprecations_factory';
 import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
@@ -144,10 +144,9 @@ export class DeprecationsService
   public async setup({ http }: DeprecationsSetupDeps): Promise<InternalDeprecationsServiceSetup> {
     this.logger.debug('Setting up Deprecations service');
 
-    const config = await this.configService
-      .atPath<DeprecationConfigType>(deprecationConfig.path)
-      .pipe(take(1))
-      .toPromise();
+    const config = await firstValueFrom(
+      this.configService.atPath<DeprecationConfigType>(deprecationConfig.path)
+    );
 
     this.deprecationsFactory = new DeprecationsFactory({
       logger: this.logger,

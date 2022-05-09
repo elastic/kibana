@@ -6,10 +6,10 @@
  */
 
 import _ from 'lodash';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import { RuleExecutorServices } from '../../../../alerting/server';
 import {
   ActionGroupId,
   GeoContainmentInstanceState,

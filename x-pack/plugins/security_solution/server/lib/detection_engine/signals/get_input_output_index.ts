@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
+import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 

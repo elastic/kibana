@@ -90,6 +90,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         <EuiFieldText
           data-test-subj="groupByInclude"
           onChange={[Function]}
+          value=""
         />
       </EuiFormRow>
     </EuiFlexItem>
@@ -113,6 +114,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         <EuiFieldText
           data-test-subj="groupByExclude"
           onChange={[Function]}
+          value=""
         />
       </EuiFormRow>
     </EuiFlexItem>

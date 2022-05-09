@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract, SavedObjectsServiceStart } from 'kibana/server';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
   FleetStartContract,
   PackagePolicyServiceInterface,
   PackageClient,
-} from '../../../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 
 export interface EndpointFleetServicesFactoryInterface {

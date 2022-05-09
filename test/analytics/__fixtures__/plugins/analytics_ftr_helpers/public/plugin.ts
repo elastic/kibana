@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ReplaySubject } from 'rxjs';
-import { filter, take, toArray } from 'rxjs/operators';
-import type { Plugin, CoreSetup, Event } from 'src/core/public';
+import { ReplaySubject, firstValueFrom, filter, take, toArray } from 'rxjs';
+import type { Plugin, CoreSetup, Event } from '@kbn/core/public';
 import { CustomShipper } from './custom_shipper';
 import './types';
 
@@ -23,8 +22,8 @@ export class AnalyticsFTRHelpers implements Plugin {
         analytics.optIn({ global: { enabled: optIn } });
       },
       getLastEvents: async (takeNumberOfEvents, eventTypes = []) =>
-        this.events$
-          .pipe(
+        firstValueFrom(
+          this.events$.pipe(
             filter((event) => {
               if (eventTypes.length > 0) {
                 return eventTypes.includes(event.event_type);
@@ -34,7 +33,7 @@ export class AnalyticsFTRHelpers implements Plugin {
             take(takeNumberOfEvents),
             toArray()
           )
-          .toPromise(),
+        ),
     };
   }
   public start() {}

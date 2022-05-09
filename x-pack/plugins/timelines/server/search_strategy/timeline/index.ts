@@ -12,13 +12,16 @@ import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
   PluginStartContract as AlertingPluginStartContract,
-} from '../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
 import {
   ISearchStrategy,
   PluginStart,
   SearchStrategyDependencies,
   shimHitsTotal,
-} from '../../../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
+import { ENHANCED_ES_SEARCH_STRATEGY, ISearchOptions } from '@kbn/data-plugin/common';
+import { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { AlertAuditAction, alertAuditEvent } from '@kbn/rule-registry-plugin/server';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
@@ -28,12 +31,6 @@ import {
 import { timelineFactory } from './factory';
 import { TimelineFactory } from './factory/types';
 import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';
-import {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  ISearchOptions,
-} from '../../../../../../src/plugins/data/common';
-import { AuditLogger, SecurityPluginSetup } from '../../../../security/server';
-import { AlertAuditAction, alertAuditEvent } from '../../../../rule_registry/server';
 
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
@@ -212,17 +209,13 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   };
 
   const collapse = {
-    field: 'process.entity_id',
-    inner_hits: {
-      name: 'last_event',
-      size: 1,
-      sort: [{ '@timestamp': 'desc' }],
-    },
+    field: 'process.entry_leader.entity_id',
   };
+
   const aggs = {
     total: {
       cardinality: {
-        field: 'process.entity_id',
+        field: 'process.entry_leader.entity_id',
       },
     },
   };

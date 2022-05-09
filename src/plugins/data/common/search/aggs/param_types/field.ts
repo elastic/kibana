@@ -7,15 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
+import { isNestedField, IndexPatternField, DataViewField } from '@kbn/data-views-plugin/common';
 import { IAggConfig } from '../agg_config';
-import {
-  SavedFieldNotFound,
-  SavedFieldTypeInvalidForAgg,
-} from '../../../../../../plugins/kibana_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
-import { isNestedField, IndexPatternField, DataViewField } from '../../../../../data_views/common';
 
 const filterByType = propFilter('type');
 

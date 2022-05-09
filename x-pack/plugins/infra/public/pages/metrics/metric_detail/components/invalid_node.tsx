@@ -8,9 +8,9 @@
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { ViewSourceConfigurationButton } from '../../../../components/source_configuration/view_source_configuration_button';
-import { useLinkProps } from '../../../../../../observability/public';
 
 interface InvalidNodeErrorProps {
   nodeName: string;

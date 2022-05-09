@@ -90,7 +90,7 @@ describe('RecentlyAccessed#start()', () => {
 
   it('exposes an observable', async () => {
     const { recentlyAccessed } = await getStart();
-    const stop$ = new Subject();
+    const stop$ = new Subject<void>();
     const observedValues$ = recentlyAccessed
       .get$()
       .pipe(bufferCount(3), takeUntil(stop$))

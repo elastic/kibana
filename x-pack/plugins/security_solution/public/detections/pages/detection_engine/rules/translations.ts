@@ -196,7 +196,7 @@ export const BULK_ACTION_DELETE_TAGS = i18n.translate(
 export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
   {
-    defaultMessage: 'Apply timeline template',
+    defaultMessage: 'Apply Timeline template',
   }
 );
 

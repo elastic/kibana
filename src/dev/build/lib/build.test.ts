@@ -7,7 +7,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/utils';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
 import { Build } from './build';

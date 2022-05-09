@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { first } from 'rxjs/operators';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { firstValueFrom } from 'rxjs';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { PLUGIN, MANAGEMENT_ID } from '../common/constants';
 import { init as initUiMetric } from './app/services/track_ui_metric';
@@ -75,7 +75,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
     // NOTE: We enable the plugin by default instead of disabling it by default because this
     // creates a race condition that causes functional tests to fail on CI (see #66781).
-    Promise.all([licensing.license$.pipe(first()).toPromise(), getStartServices()]).then(
+    Promise.all([firstValueFrom(licensing.license$), getStartServices()]).then(
       ([license, startServices]) => {
         const licenseStatus = license.check(PLUGIN.ID, PLUGIN.minimumLicenseType);
         const isLicenseOk = licenseStatus.state === 'valid';

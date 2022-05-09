@@ -10,7 +10,7 @@ import type {
   SavedObjectsFindResult,
   Logger,
   SavedObjectsCreatePointInTimeFinderOptions,
-} from 'kibana/server';
+} from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from '../../lib/detection_engine/rule_actions/legacy_types';
 

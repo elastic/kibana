@@ -32,10 +32,10 @@ export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
   // Fired when a user changes the timerange
-  private timeUpdate$ = new Subject();
+  private timeUpdate$ = new Subject<void>();
   // Fired when a user changes the the autorefresh settings
-  private refreshIntervalUpdate$ = new Subject();
-  private fetch$ = new Subject();
+  private refreshIntervalUpdate$ = new Subject<void>();
+  private fetch$ = new Subject<void>();
 
   private _time: TimeRange;
   // Denotes whether setTime has been called, can be used to determine if the constructor defaults are being used.

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { CaseViewRefreshPropInterface } from '../../../../cases/common';
+import { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';

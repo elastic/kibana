@@ -27,6 +27,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
+import {
+  CreatePackagePolicyRouteState,
+  AgentPolicyDetailsDeployAgentAction,
+  pagePathGetters,
+} from '@kbn/fleet-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -40,11 +46,6 @@ import { PolicyEmptyState, HostsEmptyState } from '../../../components/managemen
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
-import {
-  CreatePackagePolicyRouteState,
-  AgentPolicyDetailsDeployAgentAction,
-  pagePathGetters,
-} from '../../../../../../fleet/public';
 import { SecurityPageName } from '../../../../app/types';
 import {
   getEndpointListPath,
@@ -57,7 +58,6 @@ import { EndpointAction } from '../store/action';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';

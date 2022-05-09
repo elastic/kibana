@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from '..';
 import type {
   IRouter,
   RouteConfig,

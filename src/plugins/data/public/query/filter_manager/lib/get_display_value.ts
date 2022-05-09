@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Filter } from '../../../../common';
-import { DataView, DataViewField } from '../../../../../data_views/public';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
 function getValueFormatter(indexPattern?: DataView, key?: string) {
@@ -26,6 +26,14 @@ function getValueFormatter(indexPattern?: DataView, key?: string) {
     );
   }
   return indexPattern.getFormatterForField(field);
+}
+
+export function getFieldDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
+  const { key } = filter.meta;
+  const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
+  if (!indexPattern) return '';
+  const field = indexPattern.fields.find((f: DataViewField) => f.name === key);
+  return field?.customLabel ?? '';
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {

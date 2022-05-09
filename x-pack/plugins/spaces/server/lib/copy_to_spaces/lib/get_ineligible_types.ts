@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectTypeRegistry } from 'src/core/server';
+import type { SavedObjectTypeRegistry } from '@kbn/core/server';
 
 /**
  * This function returns any importable/exportable saved object types that are namespace-agnostic. Even if these are eligible for

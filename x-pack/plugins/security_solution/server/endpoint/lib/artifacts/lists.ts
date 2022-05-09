@@ -22,7 +22,7 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import {
   InternalArtifactCompleteSchema,
   TranslatedEntry,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { getMarkdownRenderer } from '../';
+import { getMarkdownRenderer } from '..';
 import { Render } from '../../__stories__/render';
 
 const markdown = getMarkdownRenderer();

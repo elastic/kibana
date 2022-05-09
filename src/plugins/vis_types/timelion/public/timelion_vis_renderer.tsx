@@ -9,10 +9,10 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { RangeFilterParams } from '@kbn/es-query';
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../kibana_react/public';
-import { VisualizationContainer } from '../../../visualizations/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
 import { UI_SETTINGS } from '../common/constants';
@@ -28,7 +28,7 @@ export const getTimelionVisRenderer: (
   name: 'timelion_vis',
   displayName: 'Timelion visualization',
   reuseDomNode: true,
-  render: (domNode, { visData, visParams }, handlers) => {
+  render: (domNode, { visData, visParams, syncTooltips }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -69,6 +69,7 @@ export const getTimelionVisRenderer: (
                 seriesList={seriesList}
                 renderComplete={handlers.done}
                 onBrushEvent={onBrushEvent}
+                syncTooltips={syncTooltips}
               />
             )}
           </KibanaContextProvider>

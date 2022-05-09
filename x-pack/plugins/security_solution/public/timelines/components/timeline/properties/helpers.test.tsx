@@ -12,7 +12,7 @@ import { waitFor } from '@testing-library/react';
 import { AddToFavoritesButton, NewTimeline, NewTimelineProps } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { kibanaObservable, TestProviders } from '../../../../common/mock/test_providers';
-import { timelineActions } from '../../../../timelines/store/timeline';
+import { timelineActions } from '../../../store/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import {
   createSecuritySolutionStorageMock,

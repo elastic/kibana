@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import multiclusterFixture from './fixtures/multicluster';
+import multiclusterFixture from './fixtures/multicluster.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {

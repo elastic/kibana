@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { EventDetailsPanel } from './';
+import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
@@ -23,8 +23,8 @@ import {
   mockDocValueFields,
   mockRuntimeMappings,
 } from '../../../../common/containers/source/mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 const ecsData: Ecs = {
   _id: '1',

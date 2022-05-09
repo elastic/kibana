@@ -13,12 +13,13 @@ import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   EuiButtonIcon,
   EuiDataGrid,
+  EuiDataGridRefProps,
   EuiDataGridControlColumn,
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';
@@ -55,6 +56,8 @@ export const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
+
   const [firstTable] = Object.values(props.data.tables);
 
   const isInteractive = props.interactive;
@@ -272,7 +275,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         onColumnHide,
         alignments,
         headerRowHeight,
-        headerRowLines
+        headerRowLines,
+        dataGridRef.current?.closeCellPopover
       ),
     [
       bucketColumns,
@@ -454,6 +458,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}
+          ref={dataGridRef}
         />
       </DataContext.Provider>
     </VisualizationContainer>

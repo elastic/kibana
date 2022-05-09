@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import type { PaletteOutput } from '@kbn/coloring';
-import type { ChartsPluginSetup } from '../../../charts/public';
-import { ExpressionValueVisDimension } from '../../../visualizations/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
 
 interface TagCloudCommonParams {
   scale: 'linear' | 'log' | 'square root';

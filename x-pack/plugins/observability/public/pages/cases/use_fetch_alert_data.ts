@@ -9,8 +9,8 @@ import { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { HttpSetup } from 'kibana/public';
-import { BASE_RAC_ALERTS_API_PATH } from '../../../../rule_registry/common/constants';
+import { HttpSetup } from '@kbn/core/public';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useDataFetcher } from './use_data_fetcher';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {

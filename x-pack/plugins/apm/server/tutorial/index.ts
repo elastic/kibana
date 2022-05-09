@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '..';
 import {
   ArtifactsSchema,
   TutorialsCategory,
   TutorialSchema,
-} from '../../../../../src/plugins/home/server';
-import { CloudSetup } from '../../../cloud/server';
+} from '@kbn/home-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { APMConfig } from '..';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 import { getApmDataViewAttributes } from '../routes/data_view/get_apm_data_view_attributes';
 import { getApmDataViewTitle } from '../routes/data_view/get_apm_data_view_title';

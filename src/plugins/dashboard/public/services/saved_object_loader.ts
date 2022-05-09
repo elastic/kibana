@@ -11,8 +11,8 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
   SavedObjectReference,
-} from 'kibana/public';
-import { SavedObject } from '../../../saved_objects/public';
+} from '@kbn/core/public';
+import { SavedObject } from '@kbn/saved-objects-plugin/public';
 import { upperFirst } from './string_utils';
 
 /**

@@ -9,15 +9,13 @@ import { noop, isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { APP_ID } from '../../../../../common/constants';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
   getActionsColumnWidth,
-} from '../../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
@@ -229,65 +227,59 @@ export const StatefulBody = React.memo<Props>(
       },
       [columnHeaders.length, containerRef, data.length]
     );
-    const kibana = useKibana();
-    const casesPermissions = useGetUserCasesPermissions();
-    const CasesContext = kibana.services.cases.ui.getCasesContext();
 
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
-          <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
-            <EventsTable
-              $activePage={activePage}
-              $columnCount={columnCount}
-              data-test-subj={`${tabType}-events-table`}
-              columnWidths={totalWidth}
-              onKeyDown={onKeyDown}
-              $rowCount={data.length}
-              $totalPages={totalPages}
-            >
-              <ColumnHeaders
-                actionsColumnWidth={actionsColumnWidth}
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                isEventViewer={isEventViewer}
-                isSelectAllChecked={isSelectAllChecked}
-                onSelectAll={onSelectAll}
-                show={show}
-                showEventsSelect={false}
-                showSelectAllCheckbox={showCheckboxes}
-                sort={sort}
-                tabType={tabType}
-                timelineId={id}
-                leadingControlColumns={leadingControlColumns}
-                trailingControlColumns={trailingControlColumns}
-              />
+          <EventsTable
+            $activePage={activePage}
+            $columnCount={columnCount}
+            data-test-subj={`${tabType}-events-table`}
+            columnWidths={totalWidth}
+            onKeyDown={onKeyDown}
+            $rowCount={data.length}
+            $totalPages={totalPages}
+          >
+            <ColumnHeaders
+              actionsColumnWidth={actionsColumnWidth}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              isEventViewer={isEventViewer}
+              isSelectAllChecked={isSelectAllChecked}
+              onSelectAll={onSelectAll}
+              show={show}
+              showEventsSelect={false}
+              showSelectAllCheckbox={showCheckboxes}
+              sort={sort}
+              tabType={tabType}
+              timelineId={id}
+              leadingControlColumns={leadingControlColumns}
+              trailingControlColumns={trailingControlColumns}
+            />
 
-              <Events
-                containerRef={containerRef}
-                actionsColumnWidth={actionsColumnWidth}
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                data={data}
-                eventIdToNoteIds={eventIdToNoteIds}
-                id={id}
-                isEventViewer={isEventViewer}
-                lastFocusedAriaColindex={lastFocusedAriaColindex}
-                loadingEventIds={loadingEventIds}
-                onRowSelected={onRowSelected}
-                pinnedEventIds={pinnedEventIds}
-                refetch={refetch}
-                renderCellValue={renderCellValue}
-                rowRenderers={enabledRowRenderers}
-                onRuleChange={onRuleChange}
-                selectedEventIds={selectedEventIds}
-                showCheckboxes={showCheckboxes}
-                leadingControlColumns={leadingControlColumns}
-                trailingControlColumns={trailingControlColumns}
-                tabType={tabType}
-              />
-            </EventsTable>
-          </CasesContext>
+            <Events
+              containerRef={containerRef}
+              actionsColumnWidth={actionsColumnWidth}
+              columnHeaders={columnHeaders}
+              data={data}
+              eventIdToNoteIds={eventIdToNoteIds}
+              id={id}
+              isEventViewer={isEventViewer}
+              lastFocusedAriaColindex={lastFocusedAriaColindex}
+              loadingEventIds={loadingEventIds}
+              onRowSelected={onRowSelected}
+              pinnedEventIds={pinnedEventIds}
+              refetch={refetch}
+              renderCellValue={renderCellValue}
+              rowRenderers={enabledRowRenderers}
+              onRuleChange={onRuleChange}
+              selectedEventIds={selectedEventIds}
+              showCheckboxes={showCheckboxes}
+              leadingControlColumns={leadingControlColumns}
+              trailingControlColumns={trailingControlColumns}
+              tabType={tabType}
+            />
+          </EventsTable>
         </TimelineBody>
         <TimelineBodyGlobalStyle />
       </>

@@ -11,7 +11,7 @@ import noDataResponse from './mock_responses/no_data.json';
 import dataResponse from './mock_responses/data.json';
 import { APMConfig } from '../../..';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
 const mockIndices: ApmIndicesConfig = {
   sourcemap: 'myIndex',

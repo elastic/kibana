@@ -15,6 +15,7 @@ import {
   buildQueryFromFilters,
   Filter,
 } from '@kbn/es-query';
+import { lastValueFrom } from 'rxjs';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IAggType } from '../agg_type';
@@ -342,8 +343,8 @@ export const createOtherBucketPostFlightRequest = (
 
       nestedSearchSource.setField('aggs', filterAgg);
 
-      const { rawResponse: response } = await nestedSearchSource
-        .fetch$({
+      const { rawResponse: response } = await lastValueFrom(
+        nestedSearchSource.fetch$({
           abortSignal,
           sessionId: searchSessionId,
           inspector: {
@@ -358,7 +359,7 @@ export const createOtherBucketPostFlightRequest = (
             }),
           },
         })
-        .toPromise();
+      );
 
       resp = mergeOtherBucketAggResponse(
         aggConfigs,

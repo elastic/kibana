@@ -25,7 +25,6 @@
     "cloud"
   ],
   "requiredBundles": [
-    "home",
     "kibanaReact",
     "maps",
     "esUiShared",

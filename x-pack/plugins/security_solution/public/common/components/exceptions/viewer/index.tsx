@@ -18,10 +18,10 @@ import type {
 import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
-import { useUserData } from '../../../../../public/detections/components/user_info';
-import { useKibana } from '../../../../common/lib/kibana';
-import { Panel } from '../../../../common/components/panel';
-import { Loader } from '../../../../common/components/loader';
+import { useUserData } from '../../../../detections/components/user_info';
+import { useKibana } from '../../../lib/kibana';
+import { Panel } from '../../panel';
+import { Loader } from '../../loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListItemIdentifiers, Filter } from '../types';
 import { allExceptionItemsReducer, State, ViewerFlyoutName } from './reducer';
