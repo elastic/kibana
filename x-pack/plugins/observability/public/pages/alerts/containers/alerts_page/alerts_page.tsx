@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
@@ -38,6 +36,7 @@ import {
 } from '../state_container';
 import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
+import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { OBSERVABILITY_RULE_TYPES } from '../../../rules/config';
 
@@ -56,11 +55,6 @@ export interface TopAlert {
   link?: string;
   active: boolean;
 }
-
-const Divider = euiStyled.div`
-  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  height: 100%;
-`;
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 const NO_INDEX_PATTERNS: DataViewBase[] = [];
@@ -251,54 +245,7 @@ function AlertsPage() {
             <ExperimentalBadge />
           </>
         ),
-        rightSideItems: [
-          <EuiStat
-            title={ruleStats.total}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.ruleCount', {
-              defaultMessage: 'Rule count',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statRuleCount"
-          />,
-          <EuiStat
-            title={ruleStats.disabled}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.disabled', {
-              defaultMessage: 'Disabled',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statDisabled"
-          />,
-          <EuiStat
-            title={ruleStats.muted + ruleStats.snoozed}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.muted', {
-              defaultMessage: 'Snoozed',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statMuted"
-          />,
-          <EuiStat
-            title={ruleStats.error}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
-              defaultMessage: 'Errors',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statErrors"
-          />,
-          <Divider />,
-          <EuiButtonEmpty href={manageRulesHref}>
-            {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
-              defaultMessage: 'Manage Rules',
-            })}
-          </EuiButtonEmpty>,
-        ].reverse(),
+        rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
       }}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
