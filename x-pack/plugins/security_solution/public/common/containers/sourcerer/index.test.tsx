@@ -10,12 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import {
-  EXCLUDE_ELASTIC_CLOUD_INDICES,
-  getScopeFromPath,
-  useInitSourcerer,
-  useSourcererDataView,
-} from '.';
+import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
 import { mockPatterns } from './mocks';
 import { RouteSpyState } from '../../utils/route/types';
 import { DEFAULT_INDEX_PATTERN, SecurityPageName } from '../../../../common/constants';
