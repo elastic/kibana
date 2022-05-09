@@ -27,7 +27,7 @@ export interface InitActionParams {
   indices: string[];
 }
 
-export interface UnsupportedClusterRoutingAllocation {
+export interface IncompatibleClusterRoutingAllocation {
   type: 'incompatible_cluster_routing_allocation';
 }
 
