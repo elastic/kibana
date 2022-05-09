@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
