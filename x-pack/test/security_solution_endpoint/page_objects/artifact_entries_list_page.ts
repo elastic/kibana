@@ -24,14 +24,14 @@ export function ArtifactEntriesListPageProvider({
     },
 
     // /**
-    //  * ensures that the blocklist page is the currently display view
+    //  * ensures that the ArtifactType page is the currently display view
     //  */
-    async ensureIsOnBlocklistPage(artifactTypePage: string) {
+    async ensureIsOnArtifactTypePage(artifactTypePage: string) {
       await testSubjects.existOrFail(`${artifactTypePage}-container`);
     },
 
     // /**
-    //  * Clicks on the actions menu icon in the (only one) blocklist card to show the popup with list of actions
+    //  * Clicks on the actions menu icon in the (only one) ArtifactType card to show the popup with list of actions
     //  */
     async clickCardActionMenu(artifactTypePage: string) {
       await testSubjects.existOrFail(`${artifactTypePage}-container`);
