@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiButtonProps,
   EuiImage,
   EuiSpacer,
   EuiI18n,
@@ -245,21 +246,43 @@ export const DiscoverTourStepFooterAction: React.FC<{
   onNextTourStep: DiscoverTourContextProps['onNextTourStep'];
   onFinishTour: DiscoverTourContextProps['onFinishTour'];
 }> = ({ isLastStep, onNextTourStep, onFinishTour }) => {
+  const actionButtonProps: Partial<EuiButtonProps> = {
+    size: 's',
+    color: 'success',
+  };
+
   return (
     <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
       {!isLastStep && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="text" size="xs" onClick={onFinishTour}>
+          <EuiButtonEmpty
+            color="text"
+            size="xs"
+            onClick={onFinishTour}
+            data-test-subj="discoverTourButtonSkip"
+          >
             {EuiI18n({ token: 'core.euiTourStep.skipTour', default: 'Skip tour' })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButton size="s" color="success" onClick={isLastStep ? onFinishTour : onNextTourStep}>
-          {isLastStep
-            ? EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })
-            : EuiI18n({ token: 'core.euiTourStep.nextStep', default: 'Next' })}
-        </EuiButton>
+        {isLastStep ? (
+          <EuiButton
+            {...actionButtonProps}
+            onClick={onFinishTour}
+            data-test-subj="discoverTourButtonNext"
+          >
+            {EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })}
+          </EuiButton>
+        ) : (
+          <EuiButton
+            {...actionButtonProps}
+            onClick={onNextTourStep}
+            data-test-subj="discoverTourButtonEnd"
+          >
+            {EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })}
+          </EuiButton>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

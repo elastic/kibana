@@ -8,4 +8,4 @@
 
 export { DiscoverTourProvider } from './discover_tour_provider';
 export { useDiscoverTourContext } from './discover_tour_context';
-export { DISCOVER_TOUR_STEP_ANCHOR_IDS } from './discover_tour_anchors';
+export { DISCOVER_TOUR_STEP_ANCHOR_IDS, DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
