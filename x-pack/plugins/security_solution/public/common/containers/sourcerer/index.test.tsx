@@ -118,17 +118,7 @@ describe('Sourcerer Hooks', () => {
         payload: {
           id: 'timeline',
           selectedDataViewId: 'security-solution',
-          selectedPatterns: [
-            '.siem-signals-spacename',
-            'apm-*-transaction*',
-            'auditbeat-*',
-            'endgame-*',
-            'filebeat-*',
-            'logs-*',
-            'packetbeat-*',
-            'traces-apm*',
-            'winlogbeat-*',
-          ],
+          selectedPatterns: ['.siem-signals-spacename', ...DEFAULT_INDEX_PATTERN],
         },
       });
     });

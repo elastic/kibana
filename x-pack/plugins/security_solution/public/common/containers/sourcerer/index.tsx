@@ -28,7 +28,11 @@ import {
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import {
+  checkIfIndicesExist,
+  getScopePatternListSelection,
+  sortWithExcludesAtEnd,
+} from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
@@ -289,17 +293,6 @@ export const useInitSourcerer = (
     signalIndexName,
     signalIndexNameSourcerer,
   ]);
-};
-
-const sortWithExcludesAtEnd = (indices: string[]) => {
-  const allSorted = indices.reduce(
-    (acc: { includes: string[]; excludes: string[] }, index) =>
-      index.trim().startsWith('-')
-        ? { includes: acc.includes, excludes: [...acc.excludes, index] }
-        : { includes: [...acc.includes, index], excludes: acc.excludes },
-    { includes: [], excludes: [] }
-  );
-  return [...allSorted.includes.sort(), ...allSorted.excludes.sort()];
 };
 
 export const useSourcererDataView = (
