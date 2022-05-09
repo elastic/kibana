@@ -7,6 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { take } from 'rxjs/operators';
 import { Lifecycle } from '../lifecycle';
 import { Mocha } from '../../fake_mocha_types';
 
@@ -27,7 +28,7 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha, abortSignal?:
 
   Rx.race(
     lifecycle.cleanup.before$,
-    abortSignal ? Rx.fromEvent(abortSignal, 'abort').pipe(Rx.take(1)) : Rx.NEVER
+    abortSignal ? Rx.fromEvent(abortSignal, 'abort').pipe(take(1)) : Rx.NEVER
   ).subscribe({
     next() {
       if (!runComplete) {
