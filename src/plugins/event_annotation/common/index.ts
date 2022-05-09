@@ -17,4 +17,8 @@ export type {
 export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
-export type { EventAnnotationConfig, RangeEventAnnotationConfig } from './types';
+export type {
+  EventAnnotationConfig,
+  RangeEventAnnotationConfig,
+  AvailableAnnotationIcon,
+} from './types';

@@ -65,7 +65,7 @@ export const ActionBar = ({
     }
     return setMonitor({
       monitor,
-      id: monitorId ? Buffer.from(monitorId, 'base64').toString('utf8') : undefined,
+      id: monitorId,
     });
   }, [monitor, monitorId, isValid, isSaving]);
 
