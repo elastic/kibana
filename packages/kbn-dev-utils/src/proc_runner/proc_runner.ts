@@ -7,7 +7,6 @@
  */
 
 import * as Rx from 'rxjs';
-import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -93,29 +92,30 @@ export class ProcRunner {
     try {
       if (wait instanceof RegExp) {
         // wait for process to log matching line
-        await Rx.race(
-          proc.lines$.pipe(
-            filter((line) => wait.test(line)),
-            first(),
-            catchError((err) => {
-              if (err.name !== 'EmptyError') {
-                throw createFailError(`[${name}] exited without matching pattern: ${wait}`);
-              } else {
-                throw err;
-              }
-            })
-          ),
-          waitTimeout === false
-            ? Rx.NEVER
-            : Rx.timer(waitTimeout).pipe(
-                map(() => {
-                  const sec = waitTimeout / SECOND;
-                  throw createFailError(
-                    `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
-                  );
-                })
-              )
-        ).toPromise();
+        await Rx.lastValueFrom(
+          Rx.race(
+            proc.lines$.pipe(
+              Rx.filter((line) => wait.test(line)),
+              Rx.take(1),
+              Rx.defaultIfEmpty(undefined),
+              Rx.map((line) => {
+                if (line === undefined) {
+                  throw createFailError(`[${name}] exited without matching pattern: ${wait}`);
+                }
+              })
+            ),
+            waitTimeout === false
+              ? Rx.NEVER
+              : Rx.timer(waitTimeout).pipe(
+                  Rx.map(() => {
+                    const sec = waitTimeout / SECOND;
+                    throw createFailError(
+                      `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
+                    );
+                  })
+                )
+          )
+        );
       }
 
       if (wait === true) {

@@ -278,7 +278,7 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; color?: string | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; className?: string | undefined; title?: string | undefined; id?: string | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; field: (string & {}) | keyof ",
+              "{ children?: React.ReactNode; color?: string | undefined; className?: string | undefined; title?: string | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; id?: string | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; field: (string & {}) | keyof ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -501,7 +501,7 @@
             "label": "obj",
             "description": [],
             "signature": [
-              "{ type: string; id: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
+              "{ id: string; type: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false

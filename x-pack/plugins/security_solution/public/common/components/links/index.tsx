@@ -38,9 +38,10 @@ import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import { getUsersDetailsUrl } from '../link_to/redirect_to_users';
+import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
 import { LinkAnchor, GenericLinkButton, PortContainer, Comma, LinkButton } from './helpers';
 import { HostsTableType } from '../../../hosts/store/model';
+import { UsersTableType } from '../../../users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -52,10 +53,11 @@ const UserDetailsLinkComponent: React.FC<{
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   userName: string;
+  userTab?: UsersTableType;
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, Component, userName, isButton, onClick, title }) => {
+}> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
   const encodedUserName = encodeURIComponent(userName);
 
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
@@ -65,17 +67,29 @@ const UserDetailsLinkComponent: React.FC<{
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.users,
-        path: getUsersDetailsUrl(encodedUserName, search),
+        path: userTab
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab, search)
+          : getUsersDetailsUrl(encodedUserName, search),
       });
     },
-    [encodedUserName, navigateToApp, search]
+    [encodedUserName, navigateToApp, search, userTab]
+  );
+
+  const href = useMemo(
+    () =>
+      formatUrl(
+        userTab
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab)
+          : getUsersDetailsUrl(encodedUserName)
+      ),
+    [formatUrl, encodedUserName, userTab]
   );
 
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-user-details"
-      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
+      href={href}
       onClick={onClick ?? goToUsersDetails}
       title={title ?? userName}
     >
@@ -85,7 +99,7 @@ const UserDetailsLinkComponent: React.FC<{
     <LinkAnchor
       data-test-subj="users-link-anchor"
       onClick={onClick ?? goToUsersDetails}
-      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
+      href={href}
     >
       {children ? children : userName}
     </LinkAnchor>
