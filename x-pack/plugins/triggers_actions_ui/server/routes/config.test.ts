@@ -25,7 +25,7 @@ describe('createConfigRoute', () => {
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
-      body: { minimumScheduleInterval: { value: '1m', enforce: false } },
+      body: { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } },
     });
   });
 });

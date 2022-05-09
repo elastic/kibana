@@ -36,9 +36,10 @@ jest.mock('../../lib/rule_api', () => ({
 }));
 
 jest.mock('../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest
-    .fn()
-    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+  triggersActionsUiConfig: jest.fn().mockResolvedValue({
+    isUsingSecurity: true,
+    minimumScheduleInterval: { value: '1m', enforce: false },
+  }),
 }));
 
 jest.mock('./rule_errors', () => ({
@@ -231,7 +232,10 @@ describe('rule_edit', () => {
     await setup();
     const lastCall = getRuleErrors.mock.calls[getRuleErrors.mock.calls.length - 1];
     expect(lastCall[2]).toBeDefined();
-    expect(lastCall[2]).toEqual({ minimumScheduleInterval: { value: '1m', enforce: false } });
+    expect(lastCall[2]).toEqual({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
   });
 
   it('should render an alert icon next to save button stating the potential change in permissions', async () => {
