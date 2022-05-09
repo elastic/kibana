@@ -88,6 +88,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
+  const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
+
+  const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -173,7 +176,14 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
-    disabled: !isEvent || !canCreateEndpointEventFilters,
+    disabled:
+      !isEndpointEvent ||
+      !canCreateEndpointEventFilters ||
+      timelineId !== TimelineId.hostsPageEvents,
+    tooltipMessage:
+      timelineId !== TimelineId.hostsPageEvents
+        ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
+        : undefined,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
