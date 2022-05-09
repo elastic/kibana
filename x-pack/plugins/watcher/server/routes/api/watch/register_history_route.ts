@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
-import { WatchHistoryItem } from '../../../models/watch_history_item/index';
+import { WatchHistoryItem } from '../../../models/watch_history_item';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
@@ -66,7 +66,8 @@ export function registerHistoryRoute({
       const { startTime } = request.query;
 
       try {
-        const hits = await fetchHistoryItems(ctx.core.elasticsearch.client, watchId, startTime);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hits = await fetchHistoryItems(esClient, watchId, startTime);
         const watchHistoryItems = hits.map((hit: any) => {
           const id = get(hit, '_id');
           const watchHistoryItemJson = get(hit, '_source');

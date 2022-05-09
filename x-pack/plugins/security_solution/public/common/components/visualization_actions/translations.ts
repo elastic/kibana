@@ -39,6 +39,13 @@ export const ADD_TO_EXISTING_CASE = i18n.translate(
   }
 );
 
+export const ADD_TO_CASE_SUCCESS = i18n.translate(
+  'xpack.securitySolution.visualizationActions.addToCaseSuccessContent',
+  {
+    defaultMessage: 'Successfully added visualization to the case',
+  }
+);
+
 export const SOURCE_CHART_LABEL = i18n.translate(
   'xpack.securitySolution.visualizationActions.uniqueIps.sourceChartLabel',
   {

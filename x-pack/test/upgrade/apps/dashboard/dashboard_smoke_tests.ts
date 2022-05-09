@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
 
-  describe('dashboard smoke tests', function describeIndexTests() {
+  describe('upgrade dashboard smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ];
 
     spaces.forEach(({ space, basePath }) => {
-      describe('space ' + space, () => {
+      describe('space: ' + space, () => {
         beforeEach(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,

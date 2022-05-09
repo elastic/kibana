@@ -88,3 +88,15 @@ export const VIEW_COLUMN = (field: string) =>
     values: { field },
     defaultMessage: 'View {field} column',
   });
+
+export const VIEW_LABEL = i18n.translate('xpack.timelines.fieldBrowser.viewLabel', {
+  defaultMessage: 'View',
+});
+
+export const VIEW_VALUE_SELECTED = i18n.translate('xpack.timelines.fieldBrowser.viewSelected', {
+  defaultMessage: 'selected',
+});
+
+export const VIEW_VALUE_ALL = i18n.translate('xpack.timelines.fieldBrowser.viewAll', {
+  defaultMessage: 'all',
+});

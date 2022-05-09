@@ -19,9 +19,8 @@ import React, { Component, memo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
-import type { Space, SpacesApiUi } from '../../../../../../spaces/public';
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '@kbn/spaces-plugin/common';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
 interface Props {
   spaces: Space[];
@@ -137,7 +136,6 @@ export class SpacesPopoverList extends Component<Props, State> {
         key={`spcMenuList`}
         data-search-term={searchTerm}
         className="spcMenu__spacesList"
-        hasFocus={this.state.allowSpacesListFocus}
         initialFocusedItemIndex={this.state.allowSpacesListFocus ? 0 : undefined}
         items={items}
       />

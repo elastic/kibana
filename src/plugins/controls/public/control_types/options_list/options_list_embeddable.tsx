@@ -20,20 +20,20 @@ import deepEqual from 'fast-deep-equal';
 import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import {
+  withSuspense,
+  LazyReduxEmbeddableWrapper,
+  ReduxEmbeddableWrapperPropsWithChildren,
+} from '@kbn/presentation-util-plugin/public';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { DataView, DataViewField } from '../../../../data_views/public';
-import { Embeddable, IContainer } from '../../../../embeddable/public';
 import { ControlsDataViewsService } from '../../services/data_views';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from '../../../../presentation_util/public';
 import { ControlsOptionsListService } from '../../services/options_list';
 
 const OptionsListReduxWrapper = withSuspense<
@@ -56,6 +56,7 @@ interface OptionsListDataFetchProps {
   search?: string;
   fieldName: string;
   dataViewId: string;
+  validate?: boolean;
   query?: ControlInput['query'];
   filters?: ControlInput['filters'];
 }
@@ -115,6 +116,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private setupSubscriptions = () => {
     const dataFetchPipe = this.getInput$().pipe(
       map((newInput) => ({
+        validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
@@ -218,12 +220,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       await this.optionsListService.runOptionsListRequest(
         {
           field,
+          query,
+          filters,
           dataView,
+          timeRange,
           selectedOptions,
           searchString: this.searchString,
-          ...(ignoreParentSettings?.ignoreQuery ? {} : { query }),
-          ...(ignoreParentSettings?.ignoreFilters ? {} : { filters }),
-          ...(ignoreParentSettings?.ignoreTimerange ? {} : { timeRange }),
         },
         this.abortController.signal
       );

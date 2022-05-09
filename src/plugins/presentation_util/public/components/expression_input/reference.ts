@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunction, ExpressionFunctionParameter } from 'src/plugins/expressions/common';
+import { ExpressionFunction, ExpressionFunctionParameter } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 const BOLD_MD_TOKEN = '**';

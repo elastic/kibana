@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Datatable } from 'src/plugins/expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 
 export interface TSVBTables {
   [key: string]: Datatable;

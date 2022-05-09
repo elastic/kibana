@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
+import { NodeID, TimeRange, docValueFields, validIDs } from '../utils';
 
 interface DescendantsParams {
   schema: ResolverSchema;

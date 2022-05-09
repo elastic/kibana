@@ -29,11 +29,13 @@
     "ruleRegistry",
     "timelines",
     "triggersActionsUi",
-    "inspector"
+    "inspector",
+    "unifiedSearch"
   ],
   "ui": true,
   "server": true,
   "requiredBundles": [
+    "unifiedSearch",
     "data",
     "dataViews",
     "embeddable",

@@ -8,7 +8,7 @@
 import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TGridIntegrated, TGridIntegratedProps } from './index';
+import { TGridIntegrated, TGridIntegratedProps } from '.';
 import { TestProviders, tGridIntegratedProps } from '../../../mock';
 
 const mockId = tGridIntegratedProps.id;

@@ -29,7 +29,7 @@ import { ecsEventMock } from '../test_utils';
 import { getInitialExceptionFromEvent } from './utils';
 import { EventFiltersListPageState, EventFiltersPageLocation } from '../types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import {
   asStaleResourceState,
   createFailedResourceState,

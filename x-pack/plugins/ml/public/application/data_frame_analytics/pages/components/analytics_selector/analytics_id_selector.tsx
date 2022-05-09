@@ -109,15 +109,19 @@ const modelColumns = [
 interface Props {
   setAnalyticsId: React.Dispatch<React.SetStateAction<AnalyticsSelectorIds | undefined>>;
   jobsOnly?: boolean;
+  setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props) {
+export function AnalyticsIdSelector({
+  setAnalyticsId,
+  jobsOnly = false,
+  setIsIdSelectorFlyoutVisible,
+}: Props) {
   const [selected, setSelected] = useState<
     { model_id?: string; job_id?: string; analysis_type?: string } | undefined
   >();
   const [analyticsJobs, setAnalyticsJobs] = useState<DataFrameAnalyticsConfig[]>([]);
   const [trainedModels, setTrainedModels] = useState<TrainedModelConfigResponse[]>([]);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { displayErrorToast } = useToastNotificationService();
   const trainedModelsApiService = useTrainedModelsApiService();
@@ -165,7 +169,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   }
 
   function closeFlyout() {
-    setIsFlyoutVisible(false);
+    setIsIdSelectorFlyoutVisible(false);
   }
 
   // Fetch analytics jobs and models on flyout open
@@ -184,17 +188,19 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
   }, [selected?.model_id, selected?.job_id]);
 
   const pagination = {
-    initialPageSize: 5,
-    pageSizeOptions: [3, 5, 8],
+    initialPageSize: 20,
+    pageSizeOptions: [5, 10, 20, 50],
   };
 
   const selectionValue = {
     selectable: (item: TableItem) => {
-      const selectedId = selected?.job_id ?? selected?.model_id;
       const isDFA = isDataFrameAnalyticsConfigs(item);
       const itemId = isDFA ? item.id : item.model_id;
       const isBuiltInModel = isDFA ? false : item.tags.includes(BUILT_IN_MODEL_TAG);
-      return (selected === undefined || selectedId === itemId) && !isBuiltInModel;
+      return (
+        (selected === undefined || selected?.job_id === itemId || selected?.model_id === itemId) &&
+        !isBuiltInModel
+      );
     },
     onSelectionChange: (selectedItem: TableItem[]) => {
       const item = selectedItem[0];
@@ -208,7 +214,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
 
       setSelected({
         model_id: isDFA ? undefined : item.model_id,
-        job_id: isDFA ? item.id : undefined,
+        job_id: isDFA ? item.id : item.metadata?.analytics_config.id,
         analysis_type: analysisType,
       });
     },
@@ -256,7 +262,7 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
     });
   }
 
-  return isFlyoutVisible ? (
+  return (
     <EuiFlyout
       onClose={closeFlyout}
       data-test-subj="mlFlyoutJobSelector"
@@ -301,5 +307,5 @@ export function AnalyticsIdSelector({ setAnalyticsId, jobsOnly = false }: Props)
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
-  ) : null;
+  );
 }

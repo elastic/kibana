@@ -8,7 +8,7 @@
 import { scaleLinear } from 'd3-scale';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryTime } from '../../../../common/log_entry';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';

@@ -9,6 +9,9 @@
 import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
+import { NoDataViewsComponent } from '@kbn/shared-ux-components';
+import { EuiFlyoutBody } from '@elastic/eui';
+import { DEFAULT_ASSETS_TO_IGNORE } from '@kbn/data-plugin/common';
 import { useKibana } from '../../shared_imports';
 
 import { MatchedItem, DataViewEditorContext } from '../../types';
@@ -16,9 +19,7 @@ import { MatchedItem, DataViewEditorContext } from '../../types';
 import { getIndices } from '../../lib';
 
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const removeAliases = (mItem: MatchedItem) => !mItem.item.indices;
 
@@ -26,6 +27,7 @@ interface Props {
   onCancel: () => void;
   allSources: MatchedItem[];
   loadSources: () => void;
+  showEmptyPrompt?: boolean;
 }
 
 export function isUserDataIndex(source: MatchedItem) {
@@ -44,7 +46,13 @@ export function isUserDataIndex(source: MatchedItem) {
   return true;
 }
 
-export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {
+export const EmptyPrompts: FC<Props> = ({
+  allSources,
+  onCancel,
+  children,
+  loadSources,
+  showEmptyPrompt,
+}) => {
   const {
     services: { docLinks, application, http, searchClient, dataViews },
   } = useKibana<DataViewEditorContext>();
@@ -79,29 +87,36 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       // load data
       return (
         <>
-          <EmptyIndexListPrompt
-            onRefresh={loadSources}
-            closeFlyout={onCancel}
-            createAnyway={() => setGoToForm(true)}
-            canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
-            navigateToApp={application.navigateToApp}
-            addDataUrl={docLinks.links.indexPatterns.introduction}
-          />
+          <EuiFlyoutBody>
+            <EmptyIndexListPrompt
+              onRefresh={loadSources}
+              closeFlyout={onCancel}
+              createAnyway={() => setGoToForm(true)}
+              canSaveIndexPattern={!!application.capabilities.indexPatterns.save}
+              navigateToApp={application.navigateToApp}
+              addDataUrl={docLinks.links.indexPatterns.introduction}
+            />
+          </EuiFlyoutBody>
+          <PromptFooter onCancel={onCancel} />
+        </>
+      );
+    } else if (showEmptyPrompt) {
+      // first time
+      return (
+        <>
+          <EuiFlyoutBody>
+            <NoDataViewsComponent
+              onClickCreate={() => setGoToForm(true)}
+              canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
+              dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+              emptyPromptColor={'subdued'}
+            />
+          </EuiFlyoutBody>
           <PromptFooter onCancel={onCancel} />
         </>
       );
     } else {
-      // first time
-      return (
-        <>
-          <EmptyIndexPatternPrompt
-            goToCreate={() => setGoToForm(true)}
-            indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
-            canSaveIndexPattern={dataViews.getCanSaveSync()}
-          />
-          <PromptFooter onCancel={onCancel} />
-        </>
-      );
+      setGoToForm(true);
     }
   }
 

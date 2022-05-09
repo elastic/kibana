@@ -7,13 +7,13 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
-import { appContextService, agentPolicyService } from '../../services';
+import { appContextService, agentPolicyService } from '..';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENTS_PREFIX, AGENTS_INDEX } from '../../constants';

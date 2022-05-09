@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataView } from '../../../data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 export function getListBreadcrumbs() {
   return [

@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Windows operating systems are utilizing the time provider architecture in order to obtain accurate time stamps from other network devices or clients in the network. Time providers are implemented in the form of a DLL file which resides in System32 folder. The service W32Time initiates during the startup of Windows and loads w32time.dll. Adversaries may abuse this architecture to establish persistence, specifically by registering and enabling a malicious DLL as a time provider.",
+  "description": "Identifies modification of the Time Provider. Adversaries may establish persistence by registering and enabling a malicious DLL as a time provider. Windows uses the time provider architecture to obtain accurate time stamps from other network devices or clients in the network. Time providers are implemented in the form of a DLL file which resides in the System32 folder. The service W32Time initiates during the startup of Windows and loads w32time.dll.",
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*"
@@ -50,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 3
 }

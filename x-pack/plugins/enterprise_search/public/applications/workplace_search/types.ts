@@ -30,8 +30,6 @@ export interface Group {
   createdAt: string;
   updatedAt: string;
   contentSources: ContentSource[];
-  users: User[];
-  usersCount: number;
   color?: string;
 }
 
@@ -66,7 +64,6 @@ export interface Configuration {
   needsConfiguration?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
-  helpText?: string;
   documentationUrl: string;
   applicationPortalUrl?: string;
   applicationLinkTitle?: string;
@@ -93,6 +90,7 @@ export interface SourceDataItem {
 export interface ContentSource {
   id: string;
   serviceType: string;
+  baseServiceType?: string;
   name: string;
 }
 

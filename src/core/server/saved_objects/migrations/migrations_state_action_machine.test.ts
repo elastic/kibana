@@ -8,7 +8,7 @@
 
 import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
+import { loggingSystemMock, elasticsearchServiceMock, docLinksServiceMock } from '../../mocks';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -33,6 +33,7 @@ describe('migrationsStateActionMachine', () => {
 
   const mockLogger = loggingSystemMock.create();
   const typeRegistry = typeRegistryMock.create();
+  const docLinks = docLinksServiceMock.createSetupContract();
 
   const initialState = createInitialState({
     kibanaVersion: '7.11.0',
@@ -48,6 +49,7 @@ describe('migrationsStateActionMachine', () => {
       retryAttempts: 5,
     },
     typeRegistry,
+    docLinks,
   });
 
   const next = jest.fn((s: State) => {

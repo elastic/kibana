@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../features/server';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+
 import { validateReservedPrivileges } from './validate_reserved_privileges';
 
 it('allows features to be defined without privileges', () => {

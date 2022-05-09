@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense } from '../../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { isAtLeast } from './license';
 import { PolicyConfig } from '../endpoint/types';
 import {

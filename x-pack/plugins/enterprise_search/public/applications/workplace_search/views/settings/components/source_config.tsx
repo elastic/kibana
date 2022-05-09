@@ -9,7 +9,14 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
@@ -76,6 +83,32 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceData }) => {
             }
           )}
         </EuiConfirmModal>
+      )}
+      {serviceType === 'external' && (
+        <>
+          <EuiSpacer />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                size="s"
+                color="primary"
+                iconType="email"
+                title={
+                  <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.workplaceSearch.settings.feedbackCallOutText',
+                      {
+                        defaultMessage:
+                          'Have feedback about deploying a {name} Connector Package? Let us know.',
+                        values: { name },
+                      }
+                    )}
+                  </EuiLink>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
     </WorkplaceSearchPageTemplate>
   );

@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import type { ElasticsearchErrorDetails } from 'src/core/server';
+import type { ElasticsearchErrorDetails } from '@kbn/core/server';
 
 import { isESClientError } from './utils';
 
@@ -51,7 +51,7 @@ export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError
     );
   }
 }
-
+export class FleetEncryptedSavedObjectEncryptionKeyRequired extends IngestManagerError {}
 export class FleetSetupError extends IngestManagerError {}
 export class GenerateServiceTokenError extends IngestManagerError {}
 export class FleetUnauthorizedError extends IngestManagerError {}

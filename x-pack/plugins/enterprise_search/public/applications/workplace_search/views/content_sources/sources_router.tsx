@@ -30,8 +30,8 @@ import { hasMultipleConnectorOptions } from '../../utils';
 
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
 import { AddCustomSource } from './components/add_source/add_custom_source';
+import { ExternalConnectorConfig } from './components/add_source/add_external_connector';
 import { ConfigurationChoice } from './components/add_source/configuration_choice';
-import { ExternalConnectorConfig } from './components/add_source/external_connector_config';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
 import { staticCustomSourceData, staticSourceData as sources } from './source_data';

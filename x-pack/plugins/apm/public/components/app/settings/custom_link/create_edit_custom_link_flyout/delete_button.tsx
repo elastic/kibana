@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from '@kbn/core/public';
 import React, { useState } from 'react';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';

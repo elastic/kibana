@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';

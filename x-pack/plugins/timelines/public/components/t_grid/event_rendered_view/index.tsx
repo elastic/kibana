@@ -21,9 +21,9 @@ import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
-import type { BrowserFields, TimelineItem } from '../../../../common/search_strategy';
+import type { TimelineItem } from '../../../../common/search_strategy';
 import type { RowRenderer } from '../../../../common/types';
 import { RuleName } from '../../rule_name';
 import { isEventBuildingBlockType } from '../body/helpers';
@@ -62,7 +62,6 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
 export interface EventRenderedViewProps {
   alertToolbar: React.ReactNode;
   appId: string;
-  browserFields: BrowserFields;
   events: TimelineItem[];
   leadingControlColumns: EuiDataGridControlColumn[];
   onChangePage: (newActivePage: number) => void;
@@ -85,7 +84,6 @@ export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateCompone
 const EventRenderedViewComponent = ({
   alertToolbar,
   appId,
-  browserFields,
   events,
   leadingControlColumns,
   onChangePage,
@@ -142,7 +140,8 @@ const EventRenderedViewComponent = ({
             </ActionsContainer>
           );
         },
-        width: '152px',
+        // TODO: derive this from ACTION_BUTTON_COUNT as other columns are done
+        width: '184px',
       },
       {
         field: 'ecs.timestamp',
@@ -192,7 +191,6 @@ const EventRenderedViewComponent = ({
                     <EventRenderedFlexItem className="eui-xScroll">
                       <div className="eui-displayInlineBlock">
                         {rowRenderer.renderRow({
-                          browserFields,
                           data: ecsData,
                           isDraggable: false,
                           timelineId: 'NONE',
@@ -207,7 +205,7 @@ const EventRenderedViewComponent = ({
         width: '60%',
       },
     ],
-    [ActionTitle, browserFields, events, leadingControlColumns, rowRenderers, appId]
+    [ActionTitle, events, leadingControlColumns, rowRenderers, appId]
   );
 
   const handleTableChange = useCallback(

@@ -24,7 +24,6 @@ export const createSavedQueryAlertType = (
   return {
     id: SAVED_QUERY_RULE_TYPE_ID,
     name: 'Saved Query Rule',
-    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {

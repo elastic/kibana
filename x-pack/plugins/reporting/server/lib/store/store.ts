@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, Logger } from 'kibana/server';
-import { statuses } from '../';
-import type { ReportingCore } from '../../';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { statuses } from '..';
+import type { ReportingCore } from '../..';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import type { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import type { ReportTaskParams } from '../tasks';
-import type { IReport, Report, ReportDocument } from './';
-import { SavedReport } from './';
+import type { IReport, Report, ReportDocument } from '.';
+import { SavedReport } from '.';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
@@ -296,7 +297,10 @@ export class ReportingStore {
       throw err;
     }
 
-    this.reportingCore.getEventLogger(report).logClaimTask();
+    // log the amount of time the report waited in "pending" status
+    this.reportingCore.getEventLogger(report).logClaimTask({
+      queueDurationMs: moment.utc().valueOf() - moment.utc(report.created_at).valueOf(),
+    });
 
     return body;
   }

@@ -30,7 +30,7 @@ import {
   processResults,
 } from '../../../common/components/utils';
 
-import { Chat } from '../../../../../../cloud/public';
+import { Chat } from '@kbn/cloud-plugin/public';
 
 import { MODE } from './constants';
 
@@ -74,7 +74,7 @@ export class FileDataVisualizerView extends Component {
     // note, calling hasImportPermission with no arguments just checks the
     // cluster privileges, the user will still need index privileges to create and ingest
     const hasPermissionToImport = await this.props.fileUpload.hasImportPermission({
-      checkCreateIndexPattern: false,
+      checkCreateDataView: false,
       checkHasManagePipeline: true,
     });
     this.setState({ hasPermissionToImport });
@@ -369,7 +369,7 @@ export class FileDataVisualizerView extends Component {
               hideBottomBar={this.hideBottomBar}
               savedObjectsClient={this.savedObjectsClient}
               fileUpload={this.props.fileUpload}
-              resultsLinks={this.props.resultsLinks}
+              getAdditionalLinks={this.props.getAdditionalLinks}
               capabilities={this.props.capabilities}
             />
 

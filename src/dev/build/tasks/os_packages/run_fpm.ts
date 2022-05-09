@@ -8,7 +8,7 @@
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { exec, Config, Build } from '../../lib';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { OsqueryAppContext } from '../lib/osquery_app_context_services';
-import { MakeSchemaFrom } from '../../../../../src/plugins/usage_collection/server';
 import { SetupPlugins } from '../types';
 
 export type CollectorDependencies = {

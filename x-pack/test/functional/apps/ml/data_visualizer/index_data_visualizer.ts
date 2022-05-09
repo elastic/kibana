@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
@@ -14,7 +15,6 @@ import {
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
@@ -254,7 +254,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         const lensMetricField = testData.expected.metricFields![0];
 
         if (lensMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(lensMetricField.fieldName);
+          await ml.dataVisualizerTable.assertLensActionShowChart(
+            lensMetricField.fieldName,
+            'mtrVis'
+          );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
@@ -262,7 +265,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         );
 
         if (lensNonMetricField) {
-          await ml.dataVisualizerTable.assertLensActionShowChart(lensNonMetricField.fieldName);
+          await ml.dataVisualizerTable.assertLensActionShowChart(
+            lensNonMetricField.fieldName,
+            'mtrVis'
+          );
           await ml.navigation.browserBackTo('dataVisualizerTable');
         }
       });

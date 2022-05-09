@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreService } from 'src/core/types';
-import { CoreStart } from 'src/core/public';
+import { CoreService } from '../../types';
+import { CoreStart } from '..';
 import { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_client';
 
 /**

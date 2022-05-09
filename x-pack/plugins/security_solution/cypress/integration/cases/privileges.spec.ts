@@ -18,9 +18,11 @@ import {
   filterStatusOpen,
 } from '../../tasks/create_new_case';
 import {
-  loginAndWaitForHostDetailsPage,
-  loginWithUserAndWaitForPageWithoutDateRange,
+  login,
+  loginWithUser,
   logout,
+  visitHostDetailsPage,
+  visitWithUser,
 } from '../../tasks/login';
 import {
   createUsersAndRoles,
@@ -37,7 +39,7 @@ const usersToCreate = [secAllUser, secReadCasesAllUser];
 const rolesToCreate = [secAll, secReadCasesAll];
 // needed to generate index pattern
 const visitSecuritySolution = () => {
-  loginAndWaitForHostDetailsPage();
+  visitHostDetailsPage();
   openSourcerer();
   logout();
 };
@@ -52,13 +54,13 @@ const testCase: TestCaseWithoutTimeline = {
 describe('Cases privileges', () => {
   before(() => {
     cleanKibana();
+    login();
     createUsersAndRoles(usersToCreate, rolesToCreate);
     visitSecuritySolution();
   });
 
   after(() => {
     deleteUsersAndRoles(usersToCreate, rolesToCreate);
-    cleanKibana();
   });
 
   beforeEach(() => {
@@ -67,7 +69,8 @@ describe('Cases privileges', () => {
 
   for (const user of [secAllUser, secReadCasesAllUser]) {
     it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, () => {
-      loginWithUserAndWaitForPageWithoutDateRange(CASES_URL, user);
+      loginWithUser(user);
+      visitWithUser(CASES_URL, user);
       goToCreateNewCase();
       fillCasesMandatoryfields(testCase);
       createCase();

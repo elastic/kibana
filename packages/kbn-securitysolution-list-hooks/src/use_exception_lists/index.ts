@@ -39,9 +39,7 @@ const DEFAULT_PAGINATION = {
  * @param filterOptions filter by certain fields
  * @param namespaceTypes spaces to be searched
  * @param notifications kibana service for displaying toasters
- * @param showTrustedApps boolean - include/exclude trusted app lists
- * @param showEventFilters boolean - include/exclude event filters lists
- * @param showHostIsolationExceptions boolean - include/exclude host isolation exceptions lists
+ * @param hideLists a list of listIds we don't want to query
  * @param initialPagination
  *
  */
@@ -52,9 +50,7 @@ export const useExceptionLists = ({
   filterOptions = {},
   namespaceTypes,
   notifications,
-  showTrustedApps = false,
-  showEventFilters = false,
-  showHostIsolationExceptions = false,
+  hideLists = [],
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
@@ -67,11 +63,9 @@ export const useExceptionLists = ({
       getFilters({
         filters: filterOptions,
         namespaceTypes,
-        showTrustedApps,
-        showEventFilters,
-        showHostIsolationExceptions,
+        hideLists,
       }),
-    [namespaceTypes, filterOptions, showTrustedApps, showEventFilters, showHostIsolationExceptions]
+    [namespaceTypes, filterOptions, hideLists]
   );
 
   const fetchData = useCallback(async (): Promise<void> => {

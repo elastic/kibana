@@ -43,8 +43,8 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 
 /**
- * Params is an "record", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/alert.ts
+ * Params is an "record", since it is a type of RuleActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/rule.ts
  * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
@@ -217,19 +217,6 @@ export interface FetchRulesResponse {
 export interface FetchRuleProps {
   id: string;
   signal: AbortSignal;
-}
-
-export interface EnableRulesProps {
-  ids: string[];
-  enabled: boolean;
-}
-
-export interface DeleteRulesProps {
-  ids: string[];
-}
-
-export interface DuplicateRulesProps {
-  rules: Rule[];
 }
 
 export interface BulkActionProps<Action extends BulkAction> {

@@ -8,8 +8,8 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useReadListIndex } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getAcknowledgeSchemaResponseMock } from '../../../common/schemas/response/acknowledge_schema.mock';
 
 jest.mock('@kbn/securitysolution-list-api');

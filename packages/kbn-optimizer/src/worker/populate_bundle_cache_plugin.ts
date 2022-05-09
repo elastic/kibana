@@ -12,7 +12,14 @@ import { inspect } from 'util';
 
 import webpack from 'webpack';
 
-import { Bundle, WorkerConfig, ascending, parseFilePath, Hashes } from '../common';
+import {
+  Bundle,
+  WorkerConfig,
+  ascending,
+  parseFilePath,
+  Hashes,
+  ParsedDllManifest,
+} from '../common';
 import { BundleRefModule } from './bundle_ref_module';
 import {
   isExternalModule,
@@ -47,7 +54,11 @@ function isBazelPackage(pkgJsonPath: string) {
 }
 
 export class PopulateBundleCachePlugin {
-  constructor(private readonly workerConfig: WorkerConfig, private readonly bundle: Bundle) {}
+  constructor(
+    private readonly workerConfig: WorkerConfig,
+    private readonly bundle: Bundle,
+    private readonly dllManifest: ParsedDllManifest
+  ) {}
 
   public apply(compiler: webpack.Compiler) {
     const { bundle, workerConfig } = this;
@@ -79,6 +90,8 @@ export class PopulateBundleCachePlugin {
 
           return rawHashes.set(path, Hashes.hash(content));
         };
+
+        const dllRefKeys = new Set<string>();
 
         if (bundle.manifestPath) {
           addReferenced(bundle.manifestPath);
@@ -136,7 +149,13 @@ export class PopulateBundleCachePlugin {
             continue;
           }
 
-          if (isExternalModule(module) || isIgnoredModule(module) || isDelegatedModule(module)) {
+          if (isDelegatedModule(module)) {
+            // delegated modules are the references to the ui-shared-deps-npm dll
+            dllRefKeys.add(module.userRequest);
+            continue;
+          }
+
+          if (isExternalModule(module) || isIgnoredModule(module)) {
             continue;
           }
 
@@ -144,14 +163,21 @@ export class PopulateBundleCachePlugin {
         }
 
         const referencedPaths = Array.from(paths).sort(ascending((p) => p));
+        const sortedDllRefKeys = Array.from(dllRefKeys).sort(ascending((p) => p));
 
         bundle.cache.set({
           bundleRefExportIds: bundleRefExportIds.sort(ascending((p) => p)),
           optimizerCacheKey: workerConfig.optimizerCacheKey,
-          cacheKey: bundle.createCacheKey(referencedPaths, new Hashes(rawHashes)),
+          cacheKey: bundle.createCacheKey(
+            referencedPaths,
+            new Hashes(rawHashes),
+            this.dllManifest,
+            sortedDllRefKeys
+          ),
           moduleCount,
           workUnits,
           referencedPaths,
+          dllRefKeys: sortedDllRefKeys,
         });
 
         // write the cache to the compilation so that it isn't cleaned by clean-webpack-plugin

@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useEmailConfig } from './use_email_config';
 
 const http = {

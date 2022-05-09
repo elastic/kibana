@@ -12,8 +12,8 @@ jest.mock('../utils', () => ({
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { coreMock } from '../../../../../core/public/mocks';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { coreMock } from '@kbn/core/public/mocks';
 import { TableVisConfig, TableVisData } from '../types';
 import TableVisualizationComponent from './table_visualization';
 import { useUiState } from '../utils';

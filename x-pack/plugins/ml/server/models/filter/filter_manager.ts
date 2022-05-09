@@ -41,128 +41,93 @@ interface FiltersInUse {
   [id: string]: FilterUsage;
 }
 
-// interface PartialDetector {
-//   detector_description: string;
-//   custom_rules: DetectorRule[];
-// }
-
-// interface PartialJob {
-//   job_id: string;
-//   analysis_config: {
-//     detectors: PartialDetector[];
-//   };
-// }
-
 export class FilterManager {
   constructor(private _mlClient: MlClient) {}
 
   async getFilter(filterId: string) {
-    try {
-      const [JOBS, FILTERS] = [0, 1];
-      const results = await Promise.all([
-        this._mlClient.getJobs(),
-        this._mlClient.getFilters({ filter_id: filterId }),
-      ]);
-
-      if (results[FILTERS] && (results[FILTERS] as estypes.MlGetFiltersResponse).filters.length) {
-        let filtersInUse: FiltersInUse = {};
-        if (results[JOBS] && (results[JOBS] as estypes.MlGetJobsResponse).jobs) {
-          filtersInUse = this.buildFiltersInUse((results[JOBS] as estypes.MlGetJobsResponse).jobs);
-        }
-
-        const filter = (results[FILTERS] as estypes.MlGetFiltersResponse).filters[0];
-        return {
-          ...filter,
-          used_by: filtersInUse[filter.filter_id],
-          item_count: 0,
-        } as FilterStats;
-      } else {
-        throw Boom.notFound(`Filter with the id "${filterId}" not found`);
-      }
-    } catch (error) {
-      throw Boom.badRequest(error);
+    const {
+      filters: [filter],
+    } = await this._mlClient.getFilters({ filter_id: filterId });
+    if (filter === undefined) {
+      // could be an empty list rather than a 404 if a wildcard was used,
+      // so throw our own 404
+      throw Boom.notFound(`Filter with the id "${filterId}" not found`);
     }
+
+    const { jobs } = await this._mlClient.getJobs();
+    const filtersInUse = this.buildFiltersInUse(jobs);
+
+    return {
+      ...filter,
+      used_by: filtersInUse[filter.filter_id],
+      item_count: 0,
+    } as FilterStats;
   }
 
   async getAllFilters() {
-    try {
-      const body = await this._mlClient.getFilters({ size: 1000 });
-      return body.filters;
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
+    const body = await this._mlClient.getFilters({ size: 1000 });
+    return body.filters;
   }
 
   async getAllFilterStats() {
-    try {
-      const [JOBS, FILTERS] = [0, 1];
-      const results = await Promise.all([
-        this._mlClient.getJobs(),
-        this._mlClient.getFilters({ size: 1000 }),
-      ]);
+    const [JOBS, FILTERS] = [0, 1];
+    const results = await Promise.all([
+      this._mlClient.getJobs(),
+      this._mlClient.getFilters({ size: 1000 }),
+    ]);
 
-      // Build a map of filter_ids against jobs and detectors using that filter.
-      let filtersInUse: FiltersInUse = {};
-      if (results[JOBS] && (results[JOBS] as estypes.MlGetJobsResponse).jobs) {
-        filtersInUse = this.buildFiltersInUse((results[JOBS] as estypes.MlGetJobsResponse).jobs);
-      }
-
-      // For each filter, return just
-      //  filter_id
-      //  description
-      //  item_count
-      //  jobs using the filter
-      const filterStats: FilterStats[] = [];
-      if (results[FILTERS] && (results[FILTERS] as estypes.MlGetFiltersResponse).filters) {
-        (results[FILTERS] as estypes.MlGetFiltersResponse).filters.forEach((filter: Filter) => {
-          const stats: FilterStats = {
-            filter_id: filter.filter_id,
-            description: filter.description,
-            item_count: filter.items.length,
-            used_by: filtersInUse[filter.filter_id],
-          };
-          filterStats.push(stats);
-        });
-      }
-
-      return filterStats;
-    } catch (error) {
-      throw Boom.badRequest(error);
+    // Build a map of filter_ids against jobs and detectors using that filter.
+    let filtersInUse: FiltersInUse = {};
+    if (results[JOBS] && (results[JOBS] as estypes.MlGetJobsResponse).jobs) {
+      filtersInUse = this.buildFiltersInUse((results[JOBS] as estypes.MlGetJobsResponse).jobs);
     }
+
+    // For each filter, return just
+    //  filter_id
+    //  description
+    //  item_count
+    //  jobs using the filter
+    const filterStats: FilterStats[] = [];
+    if (results[FILTERS] && (results[FILTERS] as estypes.MlGetFiltersResponse).filters) {
+      (results[FILTERS] as estypes.MlGetFiltersResponse).filters.forEach((filter: Filter) => {
+        const stats: FilterStats = {
+          filter_id: filter.filter_id,
+          description: filter.description,
+          item_count: filter.items.length,
+          used_by: filtersInUse[filter.filter_id],
+        };
+        filterStats.push(stats);
+      });
+    }
+
+    return filterStats;
   }
 
   async newFilter(filter: FormFilter) {
     const { filterId, ...body } = filter;
-    try {
-      // Returns the newly created filter.
-      return await this._mlClient.putFilter({ filter_id: filterId, body });
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
+
+    // Returns the newly created filter.
+    return await this._mlClient.putFilter({ filter_id: filterId, body });
   }
 
   async updateFilter(filterId: string, filter: UpdateFilter) {
-    try {
-      const body: FilterRequest = { filter_id: filterId };
-      if (filter.description !== undefined) {
-        body.description = filter.description;
-      }
-      if (filter.addItems !== undefined) {
-        body.add_items = filter.addItems;
-      }
-      if (filter.removeItems !== undefined) {
-        body.remove_items = filter.removeItems;
-      }
-
-      // Returns the newly updated filter.
-      const resp = await this._mlClient.updateFilter({
-        filter_id: filterId,
-        body,
-      });
-      return resp;
-    } catch (error) {
-      throw Boom.badRequest(error);
+    const body: FilterRequest = { filter_id: filterId };
+    if (filter.description !== undefined) {
+      body.description = filter.description;
     }
+    if (filter.addItems !== undefined) {
+      body.add_items = filter.addItems;
+    }
+    if (filter.removeItems !== undefined) {
+      body.remove_items = filter.removeItems;
+    }
+
+    // Returns the newly updated filter.
+    const resp = await this._mlClient.updateFilter({
+      filter_id: filterId,
+      body,
+    });
+    return resp;
   }
 
   async deleteFilter(filterId: string) {

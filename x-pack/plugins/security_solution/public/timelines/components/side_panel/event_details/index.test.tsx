@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { EventDetailsPanel } from './';
+import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
@@ -23,8 +23,8 @@ import {
   mockDocValueFields,
   mockRuntimeMappings,
 } from '../../../../common/containers/source/mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -166,5 +166,14 @@ describe('event details footer component', () => {
       </TestProviders>
     );
     expect(wrapper.getByTestId('side-panel-flyout-footer')).toBeTruthy();
+  });
+  test("it doesn't render the take action dropdown when readOnly prop is passed", () => {
+    const wrapper = render(
+      <TestProviders>
+        <EventDetailsPanel {...{ ...defaultProps, isReadOnly: true }} isFlyoutView={true} />
+      </TestProviders>
+    );
+    const element = wrapper.queryByTestId('side-panel-flyout-footer');
+    expect(element).toBeNull();
   });
 });

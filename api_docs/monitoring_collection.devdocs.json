@@ -11,7 +11,89 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "monitoringCollection",
+        "id": "def-server.Metric",
+        "type": "Interface",
+        "tags": [],
+        "label": "Metric",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "monitoringCollection",
+            "scope": "server",
+            "docId": "kibMonitoringCollectionPluginApi",
+            "section": "def-server.Metric",
+            "text": "Metric"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "monitoringCollection",
+            "id": "def-server.Metric.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "monitoringCollection",
+            "id": "def-server.Metric.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "{ [Key in keyof Required<T>]: Required<T>[Key] extends (infer U)[] ? { type: \"array\"; items: ",
+              "RecursiveMakeSchemaFrom",
+              "<U>; } : ",
+              "RecursiveMakeSchemaFrom",
+              "<Required<T>[Key]>; }"
+            ],
+            "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "monitoringCollection",
+            "id": "def-server.Metric.fetch",
+            "type": "Function",
+            "tags": [],
+            "label": "fetch",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "monitoringCollection",
+                "scope": "server",
+                "docId": "kibMonitoringCollectionPluginApi",
+                "section": "def-server.MetricResult",
+                "text": "MetricResult"
+              },
+              "<T> | ",
+              {
+                "pluginId": "monitoringCollection",
+                "scope": "server",
+                "docId": "kibMonitoringCollectionPluginApi",
+                "section": "def-server.MetricResult",
+                "text": "MetricResult"
+              },
+              "<T>[]>"
+            ],
+            "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -64,7 +146,13 @@
           "description": [],
           "signature": [
             "<T>(metric: ",
-            "Metric",
+            {
+              "pluginId": "monitoringCollection",
+              "scope": "server",
+              "docId": "kibMonitoringCollectionPluginApi",
+              "section": "def-server.Metric",
+              "text": "Metric"
+            },
             "<T>) => void"
           ],
           "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
@@ -78,7 +166,13 @@
               "label": "metric",
               "description": [],
               "signature": [
-                "Metric",
+                {
+                  "pluginId": "monitoringCollection",
+                  "scope": "server",
+                  "docId": "kibMonitoringCollectionPluginApi",
+                  "section": "def-server.Metric",
+                  "text": "Metric"
+                },
                 "<T>"
               ],
               "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",

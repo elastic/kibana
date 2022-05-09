@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Headers, ISavedObjectsRepository } from 'src/core/server';
+import type { Headers, ISavedObjectsRepository } from '@kbn/core/server';
 
 import type { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
 import { SPACES_USAGE_STATS_ID, SPACES_USAGE_STATS_TYPE } from './constants';

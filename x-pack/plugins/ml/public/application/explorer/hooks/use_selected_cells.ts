@@ -13,7 +13,7 @@ export interface SelectionTimeRange {
 }
 
 export function getTimeBoundsFromSelection(
-  selectedCells: AppStateSelectedCells | undefined
+  selectedCells: AppStateSelectedCells | undefined | null
 ): SelectionTimeRange | undefined {
   if (selectedCells?.times === undefined) {
     return;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { Agent, PackagePolicy, UpdatePackagePolicy } from '../../../../fleet/common';
+import { ApplicationStart } from '@kbn/core/public';
+import { Agent, PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { ManifestSchema } from '../schema/manifest';
 
 export * from './actions';
@@ -984,6 +984,7 @@ export interface PolicyConfig {
       file: boolean;
       process: boolean;
       network: boolean;
+      session_data: boolean;
     };
     malware: ProtectionFields & BlocklistFields;
     behavior_protection: ProtectionFields & SupportedFields;

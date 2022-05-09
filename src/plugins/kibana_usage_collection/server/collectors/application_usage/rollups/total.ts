@@ -7,8 +7,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ISavedObjectsRepository } from 'kibana/server';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../../usage_collection/common/constants';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import {
   ApplicationUsageDaily,
   ApplicationUsageTotal,

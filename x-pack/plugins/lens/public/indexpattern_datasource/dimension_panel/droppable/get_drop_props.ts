@@ -89,12 +89,13 @@ export function getDropProps(props: GetDropProps) {
   ) {
     const sourceColumn = state.layers[dragging.layerId].columns[dragging.columnId];
     const targetColumn = state.layers[layerId].columns[columnId];
-    const layerIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-
     const isSameGroup = groupId === dragging.groupId;
     if (isSameGroup) {
-      return getDropPropsForSameGroup(targetColumn);
-    } else if (filterOperations(sourceColumn)) {
+      return getDropPropsForSameGroup(!targetColumn);
+    }
+    const layerIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+
+    if (filterOperations(sourceColumn)) {
       return getDropPropsForCompatibleGroup(
         props.dimensionGroups,
         dragging.columnId,
@@ -164,8 +165,8 @@ function getDropPropsForField({
   return;
 }
 
-function getDropPropsForSameGroup(targetColumn?: GenericIndexPatternColumn): DropProps {
-  return targetColumn ? { dropTypes: ['reorder'] } : { dropTypes: ['duplicate_compatible'] };
+function getDropPropsForSameGroup(isNew?: boolean): DropProps {
+  return !isNew ? { dropTypes: ['reorder'] } : { dropTypes: ['duplicate_compatible'] };
 }
 
 function getDropPropsForCompatibleGroup(

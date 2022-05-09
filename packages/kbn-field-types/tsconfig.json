@@ -5,6 +5,11 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "rootDir": "src",
+    "types": [
+      "jest",
+    ],
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }

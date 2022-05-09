@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../src/core/server';
-import type { SecurityPluginSetup, AuthenticatedUser } from '../../../security/server';
+import { IRouter } from '@kbn/core/server';
+import type { SecurityPluginSetup, AuthenticatedUser } from '@kbn/security-plugin/server';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../../common/constants';
 import type { GetChatUserDataResponseBody } from '../../common/types';
 import { generateSignedJwt } from '../util/generate_jwt';

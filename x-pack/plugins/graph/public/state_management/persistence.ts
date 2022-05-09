@@ -8,6 +8,7 @@
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
 import { GraphStoreDependencies, GraphState, submitSearch } from '.';
 import { datasourceSelector } from './datasource';
@@ -25,7 +26,6 @@ import { updateMetaData, metaDataSelector } from './meta_data';
 import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
 import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
-import type { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export interface LoadSavedWorkspacePayload {
   indexPatterns: IndexPatternSavedObject[];
@@ -68,7 +68,7 @@ export const loadingSaga = ({
     const selectedIndexPatternId = lookupIndexPatternId(savedWorkspace);
     let indexPattern;
     try {
-      indexPattern = (yield call(indexPatternProvider.get, selectedIndexPatternId)) as IndexPattern;
+      indexPattern = (yield call(indexPatternProvider.get, selectedIndexPatternId)) as DataView;
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {

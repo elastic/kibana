@@ -12,6 +12,5 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../monitoring/tsconfig.json" },
   ]
 }

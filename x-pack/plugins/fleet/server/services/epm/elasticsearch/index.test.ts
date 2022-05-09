@@ -7,7 +7,7 @@
 
 import type { RegistryDataStream } from '../../../types';
 
-import { getRegistryDataStreamAssetBaseName } from './index';
+import { getRegistryDataStreamAssetBaseName } from '.';
 
 test('getBaseName', () => {
   const dataStream: RegistryDataStream = {

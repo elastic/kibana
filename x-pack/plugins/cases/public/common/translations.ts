@@ -198,6 +198,10 @@ export const MARKED_CASE_AS = i18n.translate('xpack.cases.caseView.markedCaseAs'
   defaultMessage: 'marked case as',
 });
 
+export const SET_SEVERITY_TO = i18n.translate('xpack.cases.caseView.setSeverityTo', {
+  defaultMessage: 'set severity to',
+});
+
 export const OPEN_CASES = i18n.translate('xpack.cases.caseTable.openCases', {
   defaultMessage: 'Open cases',
 });
@@ -258,12 +262,21 @@ export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appro
 export const CASE_SUCCESS_TOAST = (title: string) =>
   i18n.translate('xpack.cases.actions.caseSuccessToast', {
     values: { title },
+    defaultMessage: '{title} has been updated',
+  });
+
+export const CASE_ALERT_SUCCESS_TOAST = (title: string) =>
+  i18n.translate('xpack.cases.actions.caseAlertSuccessToast', {
+    values: { title },
     defaultMessage: 'An alert has been added to "{title}"',
   });
 
-export const CASE_SUCCESS_SYNC_TEXT = i18n.translate('xpack.cases.actions.caseSuccessSyncText', {
-  defaultMessage: 'Alerts in this case have their status synched with the case status',
-});
+export const CASE_ALERT_SUCCESS_SYNC_TEXT = i18n.translate(
+  'xpack.cases.actions.caseAlertSuccessSyncText',
+  {
+    defaultMessage: 'Alerts in this case have their status synched with the case status',
+  }
+);
 
 export const VIEW_CASE = i18n.translate('xpack.cases.actions.viewCase', {
   defaultMessage: 'View Case',

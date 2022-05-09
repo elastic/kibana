@@ -4,29 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { uniq, map } from 'lodash';
-import type { IRouter, SavedObjectsClientContract } from 'src/core/server';
-import { schema as rt, TypeOf } from '@kbn/config-schema';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
   AgentService,
-} from '../../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import type {
   GetAgentPoliciesResponseItem,
   PackagePolicy,
   AgentPolicy,
   ListResult,
-} from '../../../../fleet/common';
-import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
+} from '@kbn/fleet-plugin/common';
+import { CspRuleSchema } from '../../../common/schemas/csp_rule';
+import {
+  BENCHMARKS_ROUTE_PATH,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  cspRuleAssetSavedObjectType,
+} from '../../../common/constants';
+import {
+  BENCHMARK_PACKAGE_POLICY_PREFIX,
+  benchmarksInputSchema,
+  BenchmarksQuerySchema,
+} from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark, CspRulesStatus } from '../../../common/types';
 import { isNonNullable } from '../../../common/utils/helpers';
+import { CspRouter } from '../../types';
 
-type BenchmarksQuerySchema = TypeOf<typeof benchmarksInputSchema>;
-
-export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
 const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): string => {
@@ -38,21 +46,25 @@ const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): str
   return kquery;
 };
 
-export const getPackagePolicies = (
+export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
-  queryParams: BenchmarksQuerySchema
+  queryParams: Partial<BenchmarksQuerySchema>
 ): Promise<ListResult<PackagePolicy>> => {
   if (!packagePolicyService) {
     throw new Error('packagePolicyService is undefined');
   }
 
+  const sortField = queryParams.sort_field?.startsWith(BENCHMARK_PACKAGE_POLICY_PREFIX)
+    ? queryParams.sort_field.substring(BENCHMARK_PACKAGE_POLICY_PREFIX.length)
+    : queryParams.sort_field;
+
   return packagePolicyService?.list(soClient, {
     kuery: getPackageNameQuery(packageName, queryParams.benchmark_name),
     page: queryParams.page,
     perPage: queryParams.per_page,
-    sortField: queryParams.sort_field,
+    sortField,
     sortOrder: queryParams.sort_order,
   });
 };
@@ -84,10 +96,49 @@ const addRunningAgentToAgentPolicy = async (
     )
   );
 };
+export interface RulesStatusAggregation {
+  enabled_status: {
+    doc_count: number;
+  };
+}
+export const getCspRulesStatus = (
+  soClient: SavedObjectsClientContract,
+  packagePolicy: PackagePolicy
+): Promise<SavedObjectsFindResponse<CspRuleSchema, RulesStatusAggregation>> => {
+  const cspRules = soClient.find<CspRuleSchema, RulesStatusAggregation>({
+    type: cspRuleAssetSavedObjectType,
+    filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
+    aggs: {
+      enabled_status: {
+        filter: {
+          term: {
+            [`${cspRuleAssetSavedObjectType}.attributes.enabled`]: true,
+          },
+        },
+      },
+    },
+    perPage: 0,
+  });
+  return cspRules;
+};
+
+export const addPackagePolicyCspRules = async (
+  soClient: SavedObjectsClientContract,
+  packagePolicy: PackagePolicy
+): Promise<CspRulesStatus> => {
+  const rules = await getCspRulesStatus(soClient, packagePolicy);
+  const packagePolicyRules = {
+    all: rules.total,
+    enabled: rules.aggregations?.enabled_status.doc_count || 0,
+    disabled: rules.total - (rules.aggregations?.enabled_status.doc_count || 0),
+  };
+  return packagePolicyRules;
+};
 
 export const createBenchmarkEntry = (
   agentPolicy: GetAgentPoliciesResponseItem,
-  packagePolicy: PackagePolicy
+  packagePolicy: PackagePolicy,
+  cspRulesStatus: CspRulesStatus
 ): Benchmark => ({
   package_policy: {
     id: packagePolicy.id,
@@ -111,36 +162,47 @@ export const createBenchmarkEntry = (
     name: agentPolicy.name,
     agents: agentPolicy.agents,
   },
+  rules: cspRulesStatus,
 });
 
 const createBenchmarks = (
+  soClient: SavedObjectsClientContract,
   agentPolicies: GetAgentPoliciesResponseItem[],
-  packagePolicies: PackagePolicy[]
-): Benchmark[] =>
-  packagePolicies.flatMap((packagePolicy) => {
-    return agentPolicies
-      .map((agentPolicy) => {
-        const agentPkgPolicies = agentPolicy.package_policies as string[];
-        const isExistsOnAgent = agentPkgPolicies.find(
-          (pkgPolicy) => pkgPolicy === packagePolicy.id
-        );
-        if (isExistsOnAgent) {
-          return createBenchmarkEntry(agentPolicy, packagePolicy);
-        }
-        return;
-      })
-      .filter(isNonNullable);
-  });
+  cspPackagePolicies: PackagePolicy[]
+): Promise<Benchmark[]> => {
+  const cspPackagePoliciesMap = new Map(
+    cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
+  );
+  return Promise.all(
+    agentPolicies.flatMap((agentPolicy) => {
+      const cspPackagesOnAgent = agentPolicy.package_policies
+        .map((pckPolicyId) => {
+          if (typeof pckPolicyId === 'string') return cspPackagePoliciesMap.get(pckPolicyId);
+        })
+        .filter(isNonNullable);
+      const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
+        const cspRulesStatus = await addPackagePolicyCspRules(soClient, cspPackage);
+        const benchmark = createBenchmarkEntry(agentPolicy, cspPackage, cspRulesStatus);
+        return benchmark;
+      });
+      return benchmarks;
+    })
+  );
+};
 
-export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppContext): void =>
+export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
     {
       path: BENCHMARKS_ROUTE_PATH,
       validate: { query: benchmarksInputSchema },
     },
     async (context, request, response) => {
+      if (!(await context.fleet).authz.fleet.all) {
+        return response.forbidden();
+      }
+
       try {
-        const soClient = context.core.savedObjects.client;
+        const soClient = (await context.core).savedObjects.client;
         const { query } = request;
 
         const agentService = cspContext.service.agentService;
@@ -151,24 +213,29 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
           throw new Error(`Failed to get Fleet services`);
         }
 
-        const packagePolicies = await getPackagePolicies(
+        const cspPackagePolicies = await getCspPackagePolicies(
           soClient,
           packagePolicyService,
-          CIS_KUBERNETES_PACKAGE_NAME,
+          CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
           query
         );
 
         const agentPolicies = await getAgentPolicies(
           soClient,
-          packagePolicies.items,
+          cspPackagePolicies.items,
           agentPolicyService
         );
+
         const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
-        const benchmarks = createBenchmarks(enrichAgentPolicies, packagePolicies.items);
+        const benchmarks = await createBenchmarks(
+          soClient,
+          enrichAgentPolicies,
+          cspPackagePolicies.items
+        );
 
         return response.ok({
           body: {
-            ...packagePolicies,
+            ...cspPackagePolicies,
             items: benchmarks,
           },
         });
@@ -182,44 +249,3 @@ export const defineGetBenchmarksRoute = (router: IRouter, cspContext: CspAppCont
       }
     }
   );
-
-export const benchmarksInputSchema = rt.object({
-  /**
-   * The page of objects to return
-   */
-  page: rt.number({ defaultValue: 1, min: 1 }),
-  /**
-   * The number of objects to include in each page
-   */
-  per_page: rt.number({ defaultValue: DEFAULT_BENCHMARKS_PER_PAGE, min: 0 }),
-  /**
-   *  Once of PackagePolicy fields for sorting the found objects.
-   *  Sortable fields: id, name, policy_id, namespace, updated_at, updated_by, created_at, created_by,
-   *  package.name,  package.title, package.version
-   */
-  sort_field: rt.maybe(
-    rt.oneOf(
-      [
-        rt.literal('id'),
-        rt.literal('name'),
-        rt.literal('policy_id'),
-        rt.literal('namespace'),
-        rt.literal('updated_at'),
-        rt.literal('updated_by'),
-        rt.literal('created_at'),
-        rt.literal('created_by'),
-        rt.literal('package.name'),
-        rt.literal('package.title'),
-      ],
-      { defaultValue: 'name' }
-    )
-  ),
-  /**
-   * The order to sort by
-   */
-  sort_order: rt.oneOf([rt.literal('asc'), rt.literal('desc')], { defaultValue: 'desc' }),
-  /**
-   * Benchmark filter
-   */
-  benchmark_name: rt.maybe(rt.string()),
-});

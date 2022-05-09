@@ -6,7 +6,7 @@
  */
 
 import { buildOverviewHostQuery as buildQuery } from './query.overview_host.dsl';
-import { mockOptions, expectedDsl } from './__mocks__/';
+import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildQuery', () => {
   test('build query from options correctly', () => {

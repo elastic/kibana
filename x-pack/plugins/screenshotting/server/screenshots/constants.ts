@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/server';
+import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`;
 
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';

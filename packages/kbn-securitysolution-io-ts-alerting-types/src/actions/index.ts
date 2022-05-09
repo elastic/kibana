@@ -12,8 +12,8 @@ import * as t from 'io-ts';
 import { saved_object_attributes } from '../saved_object_attributes';
 
 /**
- * Params is an "object", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/alert.ts
+ * Params is an "object", since it is a type of RuleActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/rule.ts
  */
 export const action_group = t.string;
 export const action_id = t.string;

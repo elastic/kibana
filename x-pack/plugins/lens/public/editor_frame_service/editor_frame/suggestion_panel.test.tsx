@@ -15,7 +15,7 @@ import {
   createMockFramePublicAPI,
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
@@ -32,7 +32,7 @@ import {
 import { setChangesApplied } from '../../state_management/lens_slice';
 
 const SELECTORS = {
-  APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsSuggestionApplyChanges"]',
+  APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsApplyChanges__suggestions"]',
   SUGGESTIONS_PANEL: '[data-test-subj="lnsSuggestionsPanel"]',
   SUGGESTION_TILE_BUTTON: 'button[data-test-subj="lnsSuggestion"]',
 };

@@ -8,6 +8,7 @@
 import Path from 'path';
 import { Logger } from '../../lib/utils/create_logger';
 import { Scenario } from '../scenario';
+import { Fields } from '../../lib/entity';
 
 export function getScenario({ file, logger }: { file: unknown; logger: Logger }) {
   const location = Path.join(process.cwd(), String(file));
@@ -19,5 +20,5 @@ export function getScenario({ file, logger }: { file: unknown; logger: Logger })
       return m.default;
     }
     throw new Error(`Could not find scenario at ${location}`);
-  }) as Promise<Scenario>;
+  }) as Promise<Scenario<Fields>>;
 }

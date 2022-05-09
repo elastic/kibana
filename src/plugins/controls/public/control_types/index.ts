@@ -7,3 +7,4 @@
  */
 
 export * from './options_list';
+export * from './range_slider';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter } from '../..';
 
 import { registerDeleteRoute } from './delete';
 import { registerGetRoute } from './get';

@@ -206,6 +206,7 @@ export function registerAccountCreateSourceRoute({
       validate: {
         body: schema.object({
           service_type: schema.string(),
+          base_service_type: schema.maybe(schema.string()),
           name: schema.maybe(schema.string()),
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
@@ -566,6 +567,7 @@ export function registerOrgCreateSourceRoute({
       validate: {
         body: schema.object({
           service_type: schema.string(),
+          base_service_type: schema.maybe(schema.string()),
           name: schema.maybe(schema.string()),
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),

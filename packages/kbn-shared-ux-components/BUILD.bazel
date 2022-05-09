@@ -11,6 +11,7 @@ SOURCE_FILES = glob(
     "src/**/*.tsx",
     "src/**/*.scss",
     "src/**/*.mdx",
+    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
@@ -50,6 +51,7 @@ RUNTIME_DEPS = [
   "@npm//classnames",
   "@npm//react-use",
   "@npm//react",
+  "@npm//url-loader",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -67,6 +69,7 @@ TYPES_DEPS = [
   "//packages/kbn-shared-ux-services:npm_module_types",
   "//packages/kbn-shared-ux-storybook:npm_module_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
+  "//packages/kbn-ambient-ui-types",
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",

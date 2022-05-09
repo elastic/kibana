@@ -12,6 +12,7 @@ import { toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
 import { PluginDiscoveryError } from './plugin_discovery_error';
+import { firstValueFrom } from 'rxjs';
 
 const KIBANA_ROOT = process.cwd();
 
@@ -82,7 +83,7 @@ describe('scanPluginSearchPaths', () => {
     );
 
     const pluginOrErrors$ = scanPluginSearchPaths(scanPaths, logger);
-    const { paths, errors } = extract(await pluginOrErrors$.pipe(toArray()).toPromise());
+    const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
 
     expect(paths).toHaveLength(3);
     expect(errors).toHaveLength(0);
@@ -106,7 +107,7 @@ describe('scanPluginSearchPaths', () => {
     );
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
-    const { paths, errors } = extract(await pluginOrErrors$.pipe(toArray()).toPromise());
+    const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
 
     expect(paths).toHaveLength(1);
     expect(errors).toHaveLength(0);
@@ -128,7 +129,7 @@ describe('scanPluginSearchPaths', () => {
     );
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
-    const { paths, errors } = extract(await pluginOrErrors$.pipe(toArray()).toPromise());
+    const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
 
     expect(paths).toHaveLength(0);
     expect(errors).toHaveLength(1);
@@ -153,7 +154,7 @@ describe('scanPluginSearchPaths', () => {
     );
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
-    const { paths, errors } = extract(await pluginOrErrors$.pipe(toArray()).toPromise());
+    const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
 
     expect(errors).toHaveLength(0);
     expect(paths).toHaveLength(4);
@@ -180,7 +181,7 @@ describe('scanPluginSearchPaths', () => {
     );
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
-    const { paths, errors } = extract(await pluginOrErrors$.pipe(toArray()).toPromise());
+    const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
 
     expect(errors).toHaveLength(0);
     expect(paths).toHaveLength(1);
@@ -203,7 +204,7 @@ describe('scanPluginSearchPaths', () => {
     );
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/src/plugins`], logger);
-    const { paths, errors } = extract(await pluginOrErrors$.pipe(toArray()).toPromise());
+    const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
 
     expect(errors).toHaveLength(0);
     expect(paths).toHaveLength(5);
@@ -236,7 +237,7 @@ describe('scanPluginSearchPaths', () => {
     );
 
     const pluginOrErrors$ = scanPluginSearchPaths([`${KIBANA_ROOT}/plugins`], logger);
-    const { paths, errors } = extract(await pluginOrErrors$.pipe(toArray()).toPromise());
+    const { paths, errors } = extract(await firstValueFrom(pluginOrErrors$.pipe(toArray())));
 
     expect(errors).toHaveLength(0);
     expect(paths).toHaveLength(2);

@@ -26,7 +26,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
 import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
@@ -169,6 +169,8 @@ export const DataGrid: FC<Props> = memo(
             );
           } else if (schema === 'featureInfluence') {
             return <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>;
+          } else {
+            return <DefaultCellPopover {...popoverProps} />;
           }
         } else {
           return <DefaultCellPopover {...popoverProps} />;

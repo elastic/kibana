@@ -25,8 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { getAnalysisType } from '../../data_frame_analytics/common';
-import { ModelsTableToConfigMapping } from './index';
+import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { useMlKibana, useMlLocator, useNavigateToPath, useTimefilter } from '../../contexts/kibana';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
@@ -47,12 +48,12 @@ import { isPopulatedObject } from '../../../../common';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
+import { TestTrainedModelFlyout, isTestable } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -134,6 +135,7 @@ export const ModelsList: FC<Props> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+  const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const navigateToPath = useNavigateToPath();
@@ -470,6 +472,22 @@ export const ModelsList: FC<Props> = ({
             return !isPopulatedObject(item.pipelines);
           },
         },
+        {
+          name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
+            defaultMessage: 'Test model',
+          }),
+          description: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
+            defaultMessage: 'Test model',
+          }),
+          icon: 'inputOutput',
+          type: 'icon',
+          isPrimary: true,
+          available: isTestable,
+          onClick: setShowTestFlyout,
+          enabled: (item) =>
+            isPopulatedObject(item.stats?.deployment_stats) &&
+            item.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED,
+        },
       ] as Array<Action<ModelItem>>)
     );
   }
@@ -714,11 +732,7 @@ export const ModelsList: FC<Props> = ({
     <>
       {isManagementTable ? null : (
         <>
-          <SavedObjectsWarning
-            mlSavedObjectType="trained-model"
-            onCloseFlyout={fetchModelsData}
-            forceRefresh={isLoading}
-          />
+          <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
         </>
       )}
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -767,6 +781,12 @@ export const ModelsList: FC<Props> = ({
             }
           }}
           modelIds={modelIdsToDelete}
+        />
+      )}
+      {showTestFlyout === null ? null : (
+        <TestTrainedModelFlyout
+          model={showTestFlyout}
+          onClose={setShowTestFlyout.bind(null, null)}
         />
       )}
     </>

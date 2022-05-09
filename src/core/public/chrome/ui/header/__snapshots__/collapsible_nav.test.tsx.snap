@@ -4,48 +4,32 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
 <CollapsibleNav
   appId$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": "test",
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -65,7 +49,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
   closeNav={[Function]}
   customNavLink$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Object {
         "baseUrl": "/",
         "category": undefined,
@@ -77,45 +60,30 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         "url": "/",
       },
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -127,7 +95,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
   isNavOpen={true}
   navLinks$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [
         Object {
           "baseUrl": "/",
@@ -246,45 +213,30 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         },
       ],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -295,7 +247,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [
         Object {
           "id": "recent 1",
@@ -309,45 +260,30 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         },
       ],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2073,48 +2009,32 @@ exports[`CollapsibleNav renders the default nav 1`] = `
 <CollapsibleNav
   appId$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": "test",
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2134,48 +2054,32 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   closeNav={[Function]}
   customNavLink$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": undefined,
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2187,48 +2091,32 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   isNavOpen={false}
   navLinks$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2239,48 +2127,32 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2321,48 +2193,32 @@ exports[`CollapsibleNav renders the default nav 2`] = `
 <CollapsibleNav
   appId$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": "test",
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2382,48 +2238,32 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   closeNav={[Function]}
   customNavLink$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": undefined,
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2436,48 +2276,32 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   isOpen={true}
   navLinks$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2488,48 +2312,32 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,

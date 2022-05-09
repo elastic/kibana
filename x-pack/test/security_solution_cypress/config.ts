@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
+    require.resolve('../functional/config.base.js')
   );
 
   return {
@@ -46,12 +46,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
         // Without below line, default interval for rules is 1m
         // See https://github.com/elastic/kibana/pull/125396 for details
-        '--xpack.alerting.minimumScheduleInterval=1s',
+        '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'riskyHostsEnabled',
-          'usersEnabled',
-          'ruleRegistryEnabled',
+          'riskyUsersEnabled',
         ])}`,
         `--home.disableWelcomeScreen=true`,
       ],

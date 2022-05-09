@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAggTypes } from './index';
+import { getAggTypes } from '.';
 import { mockGetFieldFormatsStart } from './test_helpers';
 
 import { isBucketAggType } from './buckets/bucket_agg_type';

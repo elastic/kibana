@@ -10,11 +10,11 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useMount from 'react-use/lib/useMount';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { LogEntryAnomaly, isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { isCategoryAnomaly, LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
-import { useLogSourceContext } from '../../../../../containers/logs/log_source';
+import { useLogViewContext } from '../../../../../hooks/use_log_view';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
 import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
 
@@ -28,7 +28,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   anomaly: LogEntryAnomaly;
   timeRange: TimeRange;
 }> = ({ anomaly, timeRange }) => {
-  const { sourceId } = useLogSourceContext();
+  const { logViewId } = useLogViewContext();
 
   const {
     getLogEntryExamples,
@@ -39,7 +39,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     dataset: anomaly.dataset,
     endTime: anomaly.startTime + anomaly.duration,
     exampleCount: EXAMPLE_COUNT,
-    sourceId,
+    sourceId: logViewId,
     startTime: anomaly.startTime,
     categoryId: isCategoryAnomaly(anomaly) ? anomaly.categoryId : undefined,
   });

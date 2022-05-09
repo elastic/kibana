@@ -8,9 +8,8 @@
 import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
-export const MAPPINGS_TEMPLATE_SUFFIX = '@mappings';
 
-export const SETTINGS_TEMPLATE_SUFFIX = '@settings';
+export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
 

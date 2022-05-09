@@ -1,0 +1,5 @@
+.selectableSecondaryContentLabel {
+  &:not(:last-child) {
+    padding-right: $euiSizeL;
+  }
+}

@@ -27,6 +27,7 @@ const testBoxes = [
     goToAppLink: '/app/logs/stream',
     hasData: false,
     modules: [],
+    weight: 1,
   },
   {
     id: 'apm',
@@ -40,6 +41,7 @@ const testBoxes = [
     goToAppLink: '/app/apm/services',
     hasData: false,
     modules: [],
+    weight: 2,
   },
   {
     id: 'infra_metrics',
@@ -52,6 +54,7 @@ const testBoxes = [
     goToAppLink: '/app/metrics/inventory',
     hasData: false,
     modules: [],
+    weight: 3,
   },
   {
     id: 'synthetics',
@@ -64,6 +67,7 @@ const testBoxes = [
     goToAppLink: '/app/uptime',
     hasData: false,
     modules: [],
+    weight: 4,
   },
   {
     id: 'ux',
@@ -77,6 +81,7 @@ const testBoxes = [
     goToAppLink: '/app/ux',
     hasData: true,
     modules: [],
+    weight: 5,
   },
   {
     id: 'alert',
@@ -90,6 +95,7 @@ const testBoxes = [
     goToAppLink: '/app/observability/alerts',
     hasData: true,
     modules: [],
+    weight: 6,
   },
 ];
 

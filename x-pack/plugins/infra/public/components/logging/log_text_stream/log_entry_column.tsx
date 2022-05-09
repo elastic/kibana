@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TextScale } from '../../../../common/log_text_scale';
 import {
   LogColumnRenderConfiguration,

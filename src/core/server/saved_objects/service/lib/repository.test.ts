@@ -75,7 +75,7 @@ import {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
-} from 'kibana/server';
+} from '../../..';
 import { InternalBulkResolveError } from './internal_bulk_resolve';
 
 const { nodeTypes } = esKuery;

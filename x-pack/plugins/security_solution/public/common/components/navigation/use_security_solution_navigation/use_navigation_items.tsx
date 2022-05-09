@@ -77,6 +77,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
               id: 'main',
               name: '',
               items: [
+                navTabs[SecurityPageName.landing],
                 navTabs[SecurityPageName.overview],
                 // Temporary check for detectionAndResponse while page is feature flagged
                 ...(navTabs[SecurityPageName.detectionAndResponse] != null

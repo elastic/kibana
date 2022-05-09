@@ -7,8 +7,8 @@
  */
 
 import { share } from 'rxjs/operators';
-import { HttpStart, IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';

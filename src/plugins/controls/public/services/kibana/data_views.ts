@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsPluginStartDeps } from '../../types';
 import { ControlsDataViewsService } from '../data_views';
-import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
 
 export type DataViewsServiceFactory = KibanaPluginServiceFactory<
   ControlsDataViewsService,

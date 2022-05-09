@@ -6,35 +6,39 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { InfraPluginRequestHandlerContext, InfraRequestHandlerContext } from '../../types';
-import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob, getLogEntryDatasets } from './common';
 import {
+  AnomaliesSort,
   getJobId,
-  logEntryCategoriesJobTypes,
-  logEntryRateJobTypes,
+  isCategoryAnomaly,
   jobCustomSettingsRT,
   LogEntryAnomalyDatasets,
-  AnomaliesSort,
+  logEntryCategoriesJobTypes,
+  logEntryRateJobTypes,
   Pagination,
-  isCategoryAnomaly,
 } from '../../../common/log_analysis';
-import type { ResolvedLogSourceConfiguration } from '../../../common/log_sources';
-import type { MlSystem, MlAnomalyDetectors } from '../../types';
-import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
+import { ResolvedLogView } from '../../../common/log_views';
+import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
+import { decodeOrThrow } from '../../../common/runtime_types';
+import type {
+  InfraPluginRequestHandlerContext,
+  InfraRequestHandlerContext,
+  MlAnomalyDetectors,
+  MlSystem,
+} from '../../types';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
+import { fetchMlJob, getLogEntryDatasets } from './common';
 import {
   InsufficientAnomalyMlJobsConfigured,
   InsufficientLogAnalysisMlJobConfigurationError,
-  UnknownCategoryError,
   isMlPrivilegesError,
+  UnknownCategoryError,
 } from './errors';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { fetchLogEntryCategories } from './log_entry_categories_analysis';
+import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
 import {
   createLogEntryExamplesQuery,
   logEntryExamplesResponseRT,
 } from './queries/log_entry_examples';
-import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { fetchLogEntryCategories } from './log_entry_categories_analysis';
 
 interface MappedAnomalyHit {
   id: string;
@@ -92,7 +96,9 @@ async function getCompatibleAnomaliesJobIds(
 }
 
 export async function getLogEntryAnomalies(
-  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & {
+    infra: Promise<Required<InfraRequestHandlerContext>>;
+  },
   sourceId: string,
   startTime: number,
   endTime: number,
@@ -102,13 +108,14 @@ export async function getLogEntryAnomalies(
 ) {
   const finalizeLogEntryAnomaliesSpan = startTracingSpan('get log entry anomalies');
 
+  const infraContext = await context.infra;
   const {
     jobIds,
     timing: { spans: jobSpans },
   } = await getCompatibleAnomaliesJobIds(
-    context.infra.spaceId,
+    infraContext.spaceId,
     sourceId,
-    context.infra.mlAnomalyDetectors
+    infraContext.mlAnomalyDetectors
   );
 
   if (jobIds.length === 0) {
@@ -123,7 +130,7 @@ export async function getLogEntryAnomalies(
     hasMoreEntries,
     timing: { spans: fetchLogEntryAnomaliesSpans },
   } = await fetchLogEntryAnomalies(
-    context.infra.mlSystem,
+    infraContext.mlSystem,
     jobIds,
     startTime,
     endTime,
@@ -147,13 +154,13 @@ export async function getLogEntryAnomalies(
   }, []);
 
   const logEntryCategoriesCountJobId = getJobId(
-    context.infra.spaceId,
+    infraContext.spaceId,
     sourceId,
     logEntryCategoriesJobTypes[0]
   );
 
   const { logEntryCategoriesById } = await fetchLogEntryCategories(
-    context,
+    { infra: infraContext },
     logEntryCategoriesCountJobId,
     categoryIds
   );
@@ -321,20 +328,23 @@ async function fetchLogEntryAnomalies(
 }
 
 export async function getLogEntryExamples(
-  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & {
+    infra: Promise<Required<InfraRequestHandlerContext>>;
+  },
   sourceId: string,
   startTime: number,
   endTime: number,
   dataset: string,
   exampleCount: number,
-  resolvedSourceConfiguration: ResolvedLogSourceConfiguration,
+  resolvedLogView: ResolvedLogView,
   callWithRequest: KibanaFramework['callWithRequest'],
   categoryId?: string
 ) {
   const finalizeLogEntryExamplesSpan = startTracingSpan('get log entry rate example log entries');
+  const infraContext = await context.infra;
 
   const jobId = getJobId(
-    context.infra.spaceId,
+    infraContext.spaceId,
     sourceId,
     categoryId != null ? logEntryCategoriesJobTypes[0] : logEntryRateJobTypes[0]
   );
@@ -342,12 +352,12 @@ export async function getLogEntryExamples(
   const {
     mlJob,
     timing: { spans: fetchMlJobSpans },
-  } = await fetchMlJob(context.infra.mlAnomalyDetectors, jobId);
+  } = await fetchMlJob(infraContext.mlAnomalyDetectors, jobId);
 
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
-  const { tiebreakerField, runtimeMappings } = resolvedSourceConfiguration;
+  const { tiebreakerField, runtimeMappings } = resolvedLogView;
 
   if (indices == null || timestampField == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(
@@ -384,7 +394,9 @@ export async function getLogEntryExamples(
 }
 
 export async function fetchLogEntryExamples(
-  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & {
+    infra: Promise<Required<InfraRequestHandlerContext>>;
+  },
   sourceId: string,
   indices: string,
   runtimeMappings: estypes.MappingRuntimeFields,
@@ -399,6 +411,7 @@ export async function fetchLogEntryExamples(
 ) {
   const finalizeEsSearchSpan = startTracingSpan('Fetch log rate examples from ES');
 
+  const infraContext = await context.infra;
   let categoryQuery: string | undefined;
 
   // Examples should be further scoped to a specific ML category
@@ -406,13 +419,13 @@ export async function fetchLogEntryExamples(
     const parsedCategoryId = parseInt(categoryId, 10);
 
     const logEntryCategoriesCountJobId = getJobId(
-      context.infra.spaceId,
+      infraContext.spaceId,
       sourceId,
       logEntryCategoriesJobTypes[0]
     );
 
     const { logEntryCategoriesById } = await fetchLogEntryCategories(
-      context,
+      { infra: infraContext },
       logEntryCategoriesCountJobId,
       [parsedCategoryId]
     );

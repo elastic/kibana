@@ -46,11 +46,11 @@ import {
 } from '../../tasks/rules_bulk_edit';
 
 import { hasIndexPatterns } from '../../tasks/rule_details';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   getExistingRule,
   getNewOverrideRule,
@@ -58,6 +58,7 @@ import {
   getNewThresholdRule,
   totalNumberOfPrebuiltRules,
 } from '../../objects/rule';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -73,17 +74,20 @@ const customRule = {
 };
 
 describe('Detection rules, bulk edit', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-
+    login();
+  });
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    esArchiverResetKibana();
     createCustomRule(customRule, '1');
     createCustomRule(getExistingRule(), '2');
     createCustomRule(getNewOverrideRule(), '3');
     createCustomRule(getNewThresholdRule(), '4');
     createCustomRule({ ...getNewRule(), name: 'rule # 5' }, '5');
     createCustomRule({ ...getNewRule(), name: 'rule # 6' }, '6');
-
-    loginAndWaitForPageWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
     waitForRulesTableToBeLoaded();
   });
 

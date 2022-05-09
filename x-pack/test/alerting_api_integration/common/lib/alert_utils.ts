@@ -97,6 +97,17 @@ export class AlertUtils {
     return request;
   }
 
+  public getUnsnoozeRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_unsnooze`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
   public getMuteAllRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/_mute_all`)

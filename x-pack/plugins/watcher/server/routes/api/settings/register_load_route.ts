@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
-import { Settings } from '../../../models/settings/index';
+import { Settings } from '../../../models/settings';
 import { RouteDependencies } from '../../../types';
 
 function fetchClusterSettings(client: IScopedClusterClient) {
@@ -25,7 +25,8 @@ export function registerLoadRoute({ router, license, lib: { handleEsError } }: R
     },
     license.guardApiRoute(async (ctx, request, response) => {
       try {
-        const settings = await fetchClusterSettings(ctx.core.elasticsearch.client);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const settings = await fetchClusterSettings(esClient);
         return response.ok({ body: Settings.fromUpstreamJson(settings).downstreamJson });
       } catch (e) {
         return handleEsError({ error: e, response });

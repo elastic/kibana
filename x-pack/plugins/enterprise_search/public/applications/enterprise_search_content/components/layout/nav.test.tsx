@@ -12,7 +12,7 @@ jest.mock('../search_index/index_nav', () => ({
   useSearchIndicesNav: () => [],
 }));
 
-import { useEnterpriseSearchContentNav } from './';
+import { useEnterpriseSearchContentNav } from '.';
 
 describe('useEnterpriseSearchContentNav', () => {
   it('returns an array of top-level Enterprise Search nav items', () => {
@@ -37,10 +37,16 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Search indices',
           },
           {
-            href: '/settings',
-            id: 'search_indices',
+            href: '/connector_settings',
+            id: 'connector_settings',
             items: undefined,
-            name: 'Settings',
+            name: 'Connector settings',
+          },
+          {
+            href: '/crawler_settings',
+            id: 'crawler_settings',
+            items: undefined,
+            name: 'Web crawler settings',
           },
         ],
       },
@@ -48,12 +54,14 @@ describe('useEnterpriseSearchContentNav', () => {
         id: 'app_search',
         name: 'App Search',
         emphasize: true,
+        items: undefined,
         href: '/app/enterprise_search/app_search',
       },
       {
         id: 'workplace_search',
         name: 'Workplace Search',
         emphasize: true,
+        items: undefined,
         href: '/app/enterprise_search/workplace_search',
       },
     ]);

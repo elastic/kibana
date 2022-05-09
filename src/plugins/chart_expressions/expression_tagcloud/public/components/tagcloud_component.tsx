@@ -11,14 +11,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
-import type { PaletteRegistry, PaletteOutput } from '../../../../charts/public';
-import { IInterpreterRenderHandlers } from '../../../../expressions/public';
-import { getFormatService } from '../format_service';
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import {
   getColumnByAccessor,
   getAccessor,
   getFormatByAccessor,
-} from '../../../../visualizations/common/utils';
+} from '@kbn/visualizations-plugin/common/utils';
+import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { IRouter } from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import { License } from './services';
-import type { AlertingPlugin } from '../../alerting/server';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;

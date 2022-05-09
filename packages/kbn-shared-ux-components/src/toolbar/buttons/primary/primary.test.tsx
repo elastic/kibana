@@ -27,10 +27,6 @@ describe('<ToolbarButton />', () => {
       enzymeMount(<SharedUxServicesProvider {...services}>{element}</SharedUxServicesProvider>);
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   test('is rendered', () => {
     const component = mount(<ToolbarButton label="test" />);
 

@@ -23,11 +23,12 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { dataTypes } from '../../../../../../common';
-import { agentPolicyFormValidation } from '../components';
 
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
 import { sendCreateAgentPolicy } from '../../../hooks';
+
+import { agentPolicyFormValidation } from '.';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';

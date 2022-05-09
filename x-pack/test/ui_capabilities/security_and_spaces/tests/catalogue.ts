@@ -65,6 +65,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const exceptions = [
               'monitoring',
               'enterpriseSearch',
+              'enterpriseSearchContent',
               'appSearch',
               'workplaceSearch',
               'spaces',
@@ -89,6 +90,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'ml_file_data_visualizer',
               'monitoring',
               'enterpriseSearch',
+              'enterpriseSearchContent',
               'appSearch',
               'workplaceSearch',
               'spaces',

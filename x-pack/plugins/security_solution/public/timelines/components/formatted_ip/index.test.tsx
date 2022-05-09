@@ -8,10 +8,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { FormattedIp } from './index';
+import { FormattedIp } from '.';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
-import { StatefulEventContext } from '../../../../../timelines/public';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { timelineActions } from '../../store/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
 

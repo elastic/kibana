@@ -14,16 +14,17 @@ import {
   IRouter,
   KibanaRequest,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
-import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { InfraPluginSetup } from '../../infra/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/core/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
@@ -52,7 +53,7 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
-import { ConfigType } from './';
+import { ConfigType } from '.';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -89,6 +90,12 @@ export class EnterpriseSearchPlugin implements Plugin {
   ) {
     const config = this.config;
     const log = this.logger;
+    const PLUGIN_IDS = [
+      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      APP_SEARCH_PLUGIN.ID,
+      WORKPLACE_SEARCH_PLUGIN.ID,
+    ];
 
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(http, customIntegrations);
@@ -107,17 +114,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      app: [
-        'kibana',
-        ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-        APP_SEARCH_PLUGIN.ID,
-        WORKPLACE_SEARCH_PLUGIN.ID,
-      ],
-      catalogue: [
-        ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-        APP_SEARCH_PLUGIN.ID,
-        WORKPLACE_SEARCH_PLUGIN.ID,
-      ],
+      app: ['kibana', ...PLUGIN_IDS],
+      catalogue: PLUGIN_IDS,
       privileges: null,
     });
 
@@ -130,16 +128,18 @@ export class EnterpriseSearchPlugin implements Plugin {
       const dependencies = { config, security, spaces, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-      const showEnterpriseSearchOverview = hasAppSearchAccess || hasWorkplaceSearchAccess;
+      const showEnterpriseSearch = hasAppSearchAccess || hasWorkplaceSearchAccess;
 
       return {
         navLinks: {
-          enterpriseSearch: showEnterpriseSearchOverview,
+          enterpriseSearch: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
-          enterpriseSearch: showEnterpriseSearchOverview,
+          enterpriseSearch: showEnterpriseSearch,
+          enterpriseSearchContent: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },

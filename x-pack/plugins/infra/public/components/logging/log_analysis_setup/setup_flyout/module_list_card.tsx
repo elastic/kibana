@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
+import { CreateJobButton, RecreateJobButton } from '../create_job_button';
 
 export const LogAnalysisModuleListCard: React.FC<{
   jobId: string;

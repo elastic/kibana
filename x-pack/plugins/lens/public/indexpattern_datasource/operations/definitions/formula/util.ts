@@ -12,13 +12,13 @@ import type {
   TinymathFunction,
   TinymathNamedArgument,
   TinymathVariable,
-} from 'packages/kbn-tinymath';
-import type { Query } from 'src/plugins/data/public';
+} from '@kbn/tinymath';
+import type { Query } from '@kbn/data-plugin/public';
 import type {
   OperationDefinition,
   GenericIndexPatternColumn,
   GenericOperationDefinition,
-} from '../index';
+} from '..';
 import type { GroupedNodes } from './types';
 
 export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;

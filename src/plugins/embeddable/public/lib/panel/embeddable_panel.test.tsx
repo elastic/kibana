@@ -13,7 +13,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart } from '../../../../ui_actions/public';
+import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -28,10 +28,10 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { inspectorPluginMock } from '../../../../inspector/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
-import { applicationServiceMock, themeServiceMock } from '../../../../../core/public/mocks';
+import { applicationServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();

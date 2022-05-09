@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   firstNonNullValue,
   values,
@@ -17,7 +17,7 @@ import {
   ResolverSchema,
 } from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
-import { NodeID } from './index';
+import { NodeID } from '.';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { StatsQuery } from '../queries/stats';
 

@@ -264,7 +264,7 @@ describe('ConnectorsDropdown', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    const tooltips = screen.getAllByLabelText(
+    const tooltips = screen.getAllByText(
       'This connector is deprecated. Update it, or create a new one.'
     );
     expect(tooltips[0]).toBeInTheDocument();

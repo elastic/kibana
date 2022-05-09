@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaFeatureConfig } from '../../../../features/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+
 import type { Space } from '../../../common';
 
 export function getEnabledFeatures(features: KibanaFeatureConfig[], space: Partial<Space>) {

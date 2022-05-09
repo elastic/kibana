@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
-import type { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 
 import { cloneDeep } from 'lodash';
 

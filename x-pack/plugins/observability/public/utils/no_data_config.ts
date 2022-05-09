@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from '../../../../../src/core/public';
-import { KibanaPageTemplateProps } from '../../../../../src/plugins/kibana_react/public';
+import { IBasePath } from '@kbn/core/public';
+import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 
 export function getNoDataConfig({
   docsLink,

@@ -281,6 +281,7 @@ export class CommonPageObject extends FtrService {
         }
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
+          await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
         }
         return currentUrl;
       });
@@ -517,7 +518,7 @@ export class CommonPageObject extends FtrService {
    */
   formatTime(time: TimeStrings, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
     return Object.keys(time)
-      .map((x) => moment(time[x], [fmt]).format())
+      .map((x) => moment.utc(time[x], [fmt]).format())
       .reduce(
         (acc, curr, idx) => {
           if (idx === 0) acc.from = curr;

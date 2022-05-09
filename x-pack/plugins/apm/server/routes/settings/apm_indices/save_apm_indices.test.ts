@@ -6,7 +6,7 @@
  */
 
 import { saveApmIndices } from './save_apm_indices';
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('saveApmIndices', () => {
   it('should trim and strip empty settings', async () => {

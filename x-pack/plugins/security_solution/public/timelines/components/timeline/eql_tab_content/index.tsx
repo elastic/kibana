@@ -24,7 +24,7 @@ import { InPortal } from 'react-reverse-portal';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
 import { TimelineItem } from '../../../../../common/search_strategy';
-import { useTimelineEvents } from '../../../containers/index';
+import { useTimelineEvents } from '../../../containers';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
@@ -43,10 +43,10 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useEqlEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../../store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
@@ -181,7 +181,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const ACTION_BUTTON_COUNT = 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { METRIC_TYPES } from 'src/plugins/data/public';
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric, MetricType } from '../../common/types';
 import { getPercentilesSeries, getParentPipelineSeries } from './metrics_helpers';
 

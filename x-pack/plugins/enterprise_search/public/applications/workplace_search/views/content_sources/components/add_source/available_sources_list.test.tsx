@@ -26,7 +26,7 @@ describe('AvailableSourcesList', () => {
     const wrapper = shallow(<AvailableSourcesList sources={mergedAvailableSources} />);
 
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="AvailableSourceListItem"]')).toHaveLength(20);
+    expect(wrapper.find('[data-test-subj="AvailableSourceListItem"]')).toHaveLength(24);
     expect(wrapper.find('[data-test-subj="CustomAPISourceLink"]')).toHaveLength(1);
   });
 

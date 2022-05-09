@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 import { ShapeTreeNode } from '@elastic/charts';
-import { PaletteDefinition, SeriesLayer } from '../../../../../charts/public';
-import { dataPluginMock } from '../../../../../data/public/mocks';
-import type { DataPublicPluginStart } from '../../../../../data/public';
+import type { PaletteDefinition, SeriesLayer } from '@kbn/coloring';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
 import { ChartTypes } from '../../../common/types';

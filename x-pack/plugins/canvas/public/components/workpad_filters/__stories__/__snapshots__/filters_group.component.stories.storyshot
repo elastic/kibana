@@ -33,7 +33,9 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
             color="inherit"
             data-euiicon-type="arrowRight"
             size="m"
-          />
+          >
+            
+          </span>
         </button>
         <button
           aria-controls="canvas-filter-group-0"
@@ -95,7 +97,9 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 
             color="inherit"
             data-euiicon-type="arrowRight"
             size="m"
-          />
+          >
+            
+          </span>
         </button>
         <button
           aria-controls="canvas-filter-group-0"

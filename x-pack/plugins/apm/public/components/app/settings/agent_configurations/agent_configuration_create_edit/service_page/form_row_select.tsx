@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiDescribedFormGroup,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
   EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiDescribedFormGroup,
+  EuiFormRow,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 interface Props {
   title: string;
   description: string;
@@ -22,6 +22,7 @@ interface Props {
   isDisabled: boolean;
   value?: string;
   onChange: (value?: string) => void;
+  dataTestSubj?: string;
 }
 
 export function FormRowSelect({
@@ -32,22 +33,20 @@ export function FormRowSelect({
   options,
   isDisabled,
   onChange,
+  value,
+  dataTestSubj,
 }: Props) {
-  const [selectedOptions, setSelected] = useState<
-    Array<EuiComboBoxOptionOption<string>> | undefined
-  >([]);
+  const selectedOptions = useMemo(() => {
+    const optionFound = options?.find((option) => option.value === value);
+    return optionFound ? [optionFound] : undefined;
+  }, [options, value]);
 
   const handleOnChange = (
     nextSelectedOptions: Array<EuiComboBoxOptionOption<string>>
   ) => {
     const [selectedOption] = nextSelectedOptions;
-    setSelected(nextSelectedOptions);
     onChange(selectedOption.value);
   };
-
-  useEffect(() => {
-    setSelected(undefined);
-  }, [isLoading]);
 
   return (
     <EuiDescribedFormGroup
@@ -68,6 +67,7 @@ export function FormRowSelect({
             'xpack.apm.agentConfig.servicePage.environment.placeholder',
             { defaultMessage: 'Select Option' }
           )}
+          data-test-subj={dataTestSubj}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

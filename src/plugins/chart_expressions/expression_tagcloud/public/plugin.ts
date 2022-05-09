@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, ThemeServiceStart } from '../../../../core/public';
-import { ExpressionsStart, ExpressionsSetup } from '../../../expressions/public';
-import { ChartsPluginSetup } from '../../../charts/public';
+import { CoreSetup, CoreStart, Plugin, ThemeServiceStart } from '@kbn/core/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { tagcloudRenderer } from './expression_renderers';
 import { tagcloudFunction } from '../common/expression_functions';
-import { FieldFormatsStart } from '../../../field_formats/public';
 import { setFormatService } from './format_service';
 
 interface SetupDeps {

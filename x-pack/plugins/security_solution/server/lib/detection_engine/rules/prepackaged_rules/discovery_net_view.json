@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Windows Network Enumeration",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  ((process.name : \"net.exe\" or process.pe.original_file_name == \"net.exe\") or\n   ((process.name : \"net1.exe\" or process.pe.original_file_name == \"net1.exe\") and\n       not process.parent.name : \"net.exe\")) and\n  (process.args : \"view\" or (process.args : \"time\" and process.args : \"\\\\\\\\*\"))\n\n\n  /* expand when ancestry is available\n  and not descendant of [process where event.type == (\"start\", \"process_started\") and process.name : \"cmd.exe\" and\n                           ((process.parent.name : \"userinit.exe\") or\n                            (process.parent.name : \"gpscript.exe\") or\n                            (process.parent.name : \"explorer.exe\" and\n                               process.args : \"C:\\\\*\\\\Start Menu\\\\Programs\\\\Startup\\\\*.bat*\"))]\n  */\n",
   "risk_score": 47,
   "rule_id": "7b8bfc26-81d2-435e-965c-d722ee397ef1",
@@ -47,5 +48,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

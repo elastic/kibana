@@ -9,8 +9,8 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreStart } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { CoreStart } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, Query, UI_SETTINGS } from '../../../common';
 
 export class QueryStringManager {

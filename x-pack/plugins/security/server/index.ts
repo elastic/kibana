@@ -6,12 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RecursiveReadonly } from '@kbn/utility-types';
 import type {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { RecursiveReadonly } from '@kbn/utility-types';
 
 import { ConfigSchema } from './config';
 import { securityConfigDeprecationProvider } from './config_deprecations';

@@ -62,6 +62,7 @@ export interface HeaderPageProps extends HeaderProps {
   subtitle2?: SubtitleProps['items'];
   title: string | React.ReactNode;
   titleNode?: React.ReactElement;
+  'data-test-subj'?: string;
 }
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
@@ -73,6 +74,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   subtitle2,
   title,
   titleNode,
+  'data-test-subj': dataTestSubj,
 }) => {
   const { releasePhase } = useCasesContext();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
@@ -88,7 +90,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   );
 
   return (
-    <Header border={border}>
+    <Header border={border} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center">
         <FlexItem>
           {showBackButton && (

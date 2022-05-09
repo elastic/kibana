@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '../../../../../../../../../../src/core/server';
-import { elasticsearchServiceMock } from '../../../../../../../../../../src/core/server/mocks';
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 
 import {

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import listingFixture from './fixtures/listing';
+import listingFixture from './fixtures/listing.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

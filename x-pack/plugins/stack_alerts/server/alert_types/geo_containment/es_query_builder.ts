@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { Logger } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   fromKueryExpression,

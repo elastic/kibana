@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPanel,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
@@ -30,15 +36,30 @@ export function TransactionBreakdownChart({
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
-                defaultMessage: 'Time spent by span type',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
+                  defaultMessage: 'Time spent by span type',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.apm.transactionBreakdown.chartHelp',
+                {
+                  defaultMessage:
+                    'The average duration of each span type. "app" indicates something was happening within the service—this could mean that the time was spent in application code and not in database or external requests, or that APM agent auto-instrumentation doesn\'t cover the executed code.',
+                }
+              )}
+              position="right"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <BreakdownChart
             fetchStatus={status}

@@ -13,6 +13,7 @@ import { EuiContextMenu } from '@elastic/eui';
 
 import { SolutionToolbar } from './solution_toolbar';
 import { SolutionToolbarPopover } from './items';
+
 import { AddFromLibraryButton, PrimaryActionButton, QuickButtonGroup } from './items';
 
 const quickButtons = [

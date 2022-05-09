@@ -12,15 +12,10 @@ import { setupEnvironment, pageHelpers, nextTick, delay, getRandomString } from 
 const { setup } = pageHelpers.autoFollowPatternList;
 
 describe('<AutoFollowPatternList />', () => {
-  let server;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   beforeEach(() => {
@@ -213,7 +208,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(rows.length).toBe(2);
 
         // We wil delete the *first* auto-follow pattern in the table
-        httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse({
+        httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse(autoFollowPattern1.name, {
           itemsDeleted: [autoFollowPattern1.name],
         });
 

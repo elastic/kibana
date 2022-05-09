@@ -5,22 +5,21 @@
  * 2.0.
  */
 
+import { AUTHENTICATIONS_TABLE } from '../../screens/hosts/authentications';
 import { INSPECT_MODAL } from '../../screens/inspect';
 import { ALL_USERS_TABLE } from '../../screens/users/all_users';
-import { cleanKibana } from '../../tasks/common';
+import { AUTHENTICATIONS_TAB } from '../../screens/users/user_authentications';
 
 import { clickInspectButton, closesModal } from '../../tasks/inspect';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
 describe('Inspect', () => {
-  before(() => {
-    cleanKibana();
-  });
   context('Users stats and tables', () => {
     before(() => {
-      loginAndWaitForPage(USERS_URL);
+      login();
+      visit(USERS_URL);
     });
     afterEach(() => {
       closesModal();
@@ -28,6 +27,12 @@ describe('Inspect', () => {
 
     it(`inspects all users table`, () => {
       clickInspectButton(ALL_USERS_TABLE);
+      cy.get(INSPECT_MODAL).should('be.visible');
+    });
+
+    it(`inspects authentications table`, () => {
+      cy.get(AUTHENTICATIONS_TAB).click();
+      clickInspectButton(AUTHENTICATIONS_TABLE);
       cy.get(INSPECT_MODAL).should('be.visible');
     });
   });

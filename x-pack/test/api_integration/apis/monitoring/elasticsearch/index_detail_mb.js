@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import indexDetailFixture from './fixtures/index_detail';
-import indexDetailAdvancedFixture from './fixtures/index_detail_advanced';
+import indexDetailFixture from './fixtures/index_detail.json';
+import indexDetailAdvancedFixture from './fixtures/index_detail_advanced.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {

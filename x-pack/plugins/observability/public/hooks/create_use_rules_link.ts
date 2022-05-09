@@ -11,7 +11,7 @@ export function createUseRulesLink(isNewRuleManagementEnabled = false) {
     const linkProps = isNewRuleManagementEnabled
       ? {
           app: 'observability',
-          pathname: '/rules',
+          pathname: '/alerts/rules',
         }
       : {
           app: 'management',

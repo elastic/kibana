@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DatatableColumn } from '../../../../../../src/plugins/expressions/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { OriginalColumn, RenameColumnsExpressionFunction } from './types';
 
 function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColumn) {
@@ -28,7 +28,7 @@ export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
   const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
 
   return {
-    type: 'datatable',
+    ...data,
     rows: data.rows.map((row) => {
       const mappedRow: Record<string, unknown> = {};
       Object.entries(idMap).forEach(([fromId, toId]) => {

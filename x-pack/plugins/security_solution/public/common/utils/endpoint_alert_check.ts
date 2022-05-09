@@ -6,7 +6,7 @@
  */
 
 import { find, getOr, some } from 'lodash/fp';
-import { TimelineEventsDetailsItem } from '../../../../timelines/common';
+import { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { Ecs } from '../../../common/ecs';
 
 /**

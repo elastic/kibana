@@ -2411,7 +2411,7 @@
         "label": "MAJOR_VERSION",
         "description": [],
         "signature": [
-          "\"8.2.0\""
+          "\"8.3.0\""
         ],
         "path": "x-pack/plugins/index_management/common/constants/plugin.ts",
         "deprecated": false,

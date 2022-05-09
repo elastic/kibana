@@ -11,7 +11,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-utils';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { FtrProviderContext } from './../functional/ftr_provider_context';
+import { FtrProviderContext } from '../functional/ftr_provider_context';
 
 const baseSimulationPath = 'src/test/scala/org/kibanaLoadTest/simulation';
 const simulationPackage = 'org.kibanaLoadTest.simulation';

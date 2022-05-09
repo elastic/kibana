@@ -14,7 +14,7 @@ const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
 const errorDetailsPageHref = url.format({
   pathname:
-    '/app/apm/services/opbeans-java/errors/0000000000000000000000000Error%201',
+    '/app/apm/services/opbeans-java/errors/0000000000000000000000000Error%200',
   query: {
     rangeFrom: start,
     rangeTo: end,
@@ -89,7 +89,7 @@ describe('Error details', () => {
       describe('when clicking on View x occurences in discover', () => {
         it('should redirects the user to discover', () => {
           cy.visit(errorDetailsPageHref);
-          cy.contains('span', 'Discover').click();
+          cy.contains('View 1 occurrence in Discover.').click();
           cy.url().should('include', 'app/discover');
         });
       });

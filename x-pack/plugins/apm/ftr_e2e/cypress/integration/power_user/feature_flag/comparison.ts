@@ -62,6 +62,14 @@ describe('Comparison feature flag', () => {
   });
 
   describe('when comparison feature is disabled', () => {
+    // Reverts to default state, which is comparison enabled
+    after(() => {
+      cy.visit(settingsPath);
+      cy.get(comparisonToggle).click();
+      cy.contains('Save changes').should('not.be.disabled');
+      cy.contains('Save changes').click();
+    });
+
     it('shows the flag as disabled in kibana advanced settings', () => {
       cy.visit(settingsPath);
       cy.get(comparisonToggle).click();

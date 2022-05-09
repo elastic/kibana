@@ -9,7 +9,7 @@ import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { Logger, LogMeta } from '../../../../../src/core/server';
+import { Logger, LogMeta } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { withoutControlCharacters } from './lib/string_utils';
 

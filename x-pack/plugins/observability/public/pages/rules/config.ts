@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Status, RuleStatus } from './types';
+import { RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
+import { Rule, RuleTypeIndex, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RULE_STATUS_OK,
   RULE_STATUS_ACTIVE,
@@ -14,23 +15,10 @@ import {
   RULE_STATUS_UNKNOWN,
   RULE_STATUS_WARNING,
 } from './translations';
-import { AlertExecutionStatuses } from '../../../../alerting/common';
-import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/public';
-
-export const statusMap: Status = {
-  [RuleStatus.enabled]: {
-    color: 'primary',
-    label: 'Enabled',
-  },
-  [RuleStatus.disabled]: {
-    color: 'default',
-    label: 'Disabled',
-  },
-};
 
 export const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
 
-export function getHealthColor(status: AlertExecutionStatuses) {
+export function getHealthColor(status: RuleExecutionStatuses) {
   switch (status) {
     case 'active':
       return 'success';
@@ -93,3 +81,8 @@ export function convertRulesToTableItems(
     enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
   }));
 }
+
+type Capabilities = Record<string, any>;
+
+export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.execute;

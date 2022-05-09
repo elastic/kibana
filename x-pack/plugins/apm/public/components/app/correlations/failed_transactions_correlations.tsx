@@ -26,7 +26,7 @@ import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import {
   asPercent,

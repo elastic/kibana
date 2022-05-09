@@ -30,7 +30,7 @@ interface CardProps {
   description: string;
   buttonText: string;
   onClick: () => void;
-  betaBadgeLabel?: string;
+  badgeLabel?: string;
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
@@ -75,14 +75,14 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
     description,
     buttonText,
     onClick,
-    betaBadgeLabel,
+    badgeLabel,
   }: CardProps) => (
     <EuiFlexItem grow>
       <EuiCard
         hasBorder
         title={title}
         description={description}
-        betaBadgeProps={{ label: betaBadgeLabel }}
+        betaBadgeProps={{ label: badgeLabel }}
         footer={
           <EuiButton color="primary" onClick={onClick}>
             {buttonText}
@@ -96,19 +96,26 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
     title: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.title',
       {
-        defaultMessage: 'Default connector',
+        defaultMessage: 'Connector',
       }
     ),
     description: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.description',
       {
-        defaultMessage: 'Use our out-of-the-box connector to get started quickly.',
+        defaultMessage:
+          'Use this connector to get started quickly without deploying additional infrastructure.',
       }
     ),
     buttonText: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.internal.button',
       {
         defaultMessage: 'Connect',
+      }
+    ),
+    badgeLabel: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.recommendedLabel',
+      {
+        defaultMessage: 'Recommended',
       }
     ),
     onClick: goToInternal,
@@ -118,13 +125,14 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
     title: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.title',
       {
-        defaultMessage: 'Custom connector',
+        defaultMessage: 'Connector Package',
       }
     ),
     description: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.description',
       {
-        defaultMessage: 'Set up a custom connector for more configurability and control.',
+        defaultMessage:
+          'Deploy this connector package on self-managed infrastructure for advanced use cases.',
       }
     ),
     buttonText: i18n.translate(
@@ -134,7 +142,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
       }
     ),
     onClick: goToExternal,
-    betaBadgeLabel: i18n.translate(
+    badgeLabel: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.betaLabel',
       {
         defaultMessage: 'Beta',

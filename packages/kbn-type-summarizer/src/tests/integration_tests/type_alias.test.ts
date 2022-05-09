@@ -40,3 +40,42 @@ it('prints basic type alias', async () => {
     "
   `);
 });
+
+it(`prints export type'd type alias`, async () => {
+  const output = await run(
+    `
+      export type { Name } from './name'
+    `,
+    {
+      otherFiles: {
+        ['name.ts']: `
+          export type Name = 'foo';
+        `,
+      },
+    }
+  );
+
+  expect(output.code).toMatchInlineSnapshot(`
+    "export type Name = 'foo'
+    //# sourceMappingURL=index.d.ts.map"
+  `);
+  expect(output.map).toMatchInlineSnapshot(`
+    Object {
+      "file": "index.d.ts",
+      "mappings": "YAAY,I",
+      "names": Array [],
+      "sourceRoot": "../../../src",
+      "sources": Array [
+        "name.ts",
+      ],
+      "version": 3,
+    }
+  `);
+  expect(output.logs).toMatchInlineSnapshot(`
+    "debug loaded sourcemaps for [
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts',
+      'packages/kbn-type-summarizer/__tmp__/dist_dts/name.d.ts'
+    ]
+    "
+  `);
+});

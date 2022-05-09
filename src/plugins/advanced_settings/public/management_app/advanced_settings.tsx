@@ -20,20 +20,20 @@ import {
   ToastsStart,
   ScopedHistory,
   ThemeServiceStart,
-} from '../../../../core/public';
-import { url } from '../../../kibana_utils/public';
+} from '@kbn/core/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
-import { ComponentRegistry } from '../';
+import { ComponentRegistry } from '..';
 
 import { getAriaName, toEditableConfig, fieldSorter, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
 import { parseErrorMsg } from './components/search/search';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export const QUERY = 'query';
 

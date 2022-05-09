@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious JAVA Child Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"java\" and\n  process.name : (\"sh\", \"bash\", \"dash\", \"ksh\", \"tcsh\", \"zsh\", \"curl\", \"wget\")\n",
   "references": [
     "https://www.lunasec.io/docs/blog/log4j-zero-day/",
@@ -54,5 +55,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

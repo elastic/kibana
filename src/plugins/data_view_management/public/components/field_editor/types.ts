@@ -8,7 +8,7 @@
 
 import { ReactText } from 'react';
 import { Query } from '@kbn/es-query';
-import { HttpStart } from 'src/core/public';
+import { HttpStart } from '@kbn/core/public';
 
 export type SampleInput = ReactText | ReactText[] | Record<string, ReactText | ReactText[]>;
 export interface Sample {

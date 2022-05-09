@@ -11,7 +11,7 @@ import type {
   SavedObjectMigrationMap,
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { ServerShortUrlClientFactory } from '..';
 import { UrlService, LocatorDefinition } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';

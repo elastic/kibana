@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 /**
  * Creates the destination index to be used during the migration of a
@@ -37,8 +37,8 @@ export const createMigrationIndex = async ({
     body: {
       settings: {
         index: {
+          // @ts-expect-error `name` is required on IndicesIndexSettingsLifecycle
           lifecycle: {
-            // @ts-expect-error typings don't contain the property yet
             indexing_complete: true,
           },
         },

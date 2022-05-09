@@ -13,13 +13,20 @@ import { getTimezone } from '../get_timezone';
 import { LegacyRequest } from '../../types';
 import { INDEX_PATTERN_TYPES } from '../../../common/constants';
 
-type Metric = string | { keys: string | string[]; name: string };
+export interface NamedMetricDescriptor {
+  keys: string | string[];
+  name: string;
+}
+
+export type SimpleMetricDescriptor = string;
+
+export type MetricDescriptor = SimpleMetricDescriptor | NamedMetricDescriptor;
 
 // TODO: Switch to an options object argument here
 export async function getMetrics(
   req: LegacyRequest,
   moduleType: INDEX_PATTERN_TYPES,
-  metricSet: Metric[] = [],
+  metricSet: MetricDescriptor[] = [],
   filters: Array<Record<string, any>> = [],
   metricOptions: Record<string, any> = {},
   numOfBuckets: number = 0,
@@ -42,7 +49,7 @@ export async function getMetrics(
   }
 
   return Promise.all(
-    metricSet.map((metric: Metric) => {
+    metricSet.map((metric: MetricDescriptor) => {
       // metric names match the literal metric name, but they can be supplied in groups or individually
       let metricNames;
 

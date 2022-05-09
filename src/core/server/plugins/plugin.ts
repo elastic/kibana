@@ -8,8 +8,7 @@
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { firstValueFrom, Subject } from 'rxjs';
 import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
 
@@ -63,7 +62,7 @@ export class PluginWrapper<
     | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
-  public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
+  public readonly startDependencies = firstValueFrom(this.startDependencies$);
 
   constructor(
     public readonly params: {

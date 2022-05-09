@@ -33,6 +33,24 @@ describe('NetworkTopCountries Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
   const mount = useMountAppended();
+  const defaultProps = {
+    data: mockData.NetworkTopCountries.edges,
+    fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo),
+    flowTargeted: FlowTargetSourceDest.source,
+    id: 'topCountriesSource',
+    indexPattern: mockIndexPattern,
+    isInspect: false,
+    loading: false,
+    loadPage,
+    setQuerySkip: jest.fn(),
+    showMorePagesIndicator: getOr(
+      false,
+      'showMorePagesIndicator',
+      mockData.NetworkTopCountries.pageInfo
+    ),
+    totalCount: mockData.NetworkTopCountries.totalCount,
+    type: networkModel.NetworkType.page,
+  };
 
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
@@ -45,23 +63,7 @@ describe('NetworkTopCountries Table Component', () => {
     test('it renders the default NetworkTopCountries table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkTopCountriesTable
-            data={mockData.NetworkTopCountries.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
-            flowTargeted={FlowTargetSourceDest.source}
-            id="topCountriesSource"
-            indexPattern={mockIndexPattern}
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.NetworkTopCountries.pageInfo
-            )}
-            totalCount={mockData.NetworkTopCountries.totalCount}
-            type={networkModel.NetworkType.page}
-          />
+          <NetworkTopCountriesTable {...defaultProps} />
         </ReduxStoreProvider>
       );
 
@@ -70,23 +72,7 @@ describe('NetworkTopCountries Table Component', () => {
     test('it renders the IP Details NetworkTopCountries table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkTopCountriesTable
-            data={mockData.NetworkTopCountries.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
-            flowTargeted={FlowTargetSourceDest.source}
-            id="topCountriesSource"
-            indexPattern={mockIndexPattern}
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.NetworkTopCountries.pageInfo
-            )}
-            totalCount={mockData.NetworkTopCountries.totalCount}
-            type={networkModel.NetworkType.details}
-          />
+          <NetworkTopCountriesTable {...defaultProps} type={networkModel.NetworkType.details} />
         </ReduxStoreProvider>
       );
 
@@ -98,23 +84,7 @@ describe('NetworkTopCountries Table Component', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <NetworkTopCountriesTable
-            data={mockData.NetworkTopCountries.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo)}
-            flowTargeted={FlowTargetSourceDest.source}
-            id="topCountriesSource"
-            isInspect={false}
-            indexPattern={mockIndexPattern}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.NetworkTopCountries.pageInfo
-            )}
-            totalCount={mockData.NetworkTopCountries.totalCount}
-            type={networkModel.NetworkType.page}
-          />
+          <NetworkTopCountriesTable {...defaultProps} />
         </TestProviders>
       );
       expect(store.getState().network.page.queries.topCountriesSource.sort).toEqual({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ServiceNode } from '../../../../plugins/apm/common/connections';
+import { ServiceNode } from '@kbn/apm-plugin/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateData } from './generate_data';
 

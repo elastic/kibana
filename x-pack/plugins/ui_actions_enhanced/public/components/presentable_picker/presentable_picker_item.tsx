@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip } from '@elastic/eui';
+import { UiActionsPresentable as Presentable } from '@kbn/ui-actions-plugin/public';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,
   txtInsufficientLicenseLevel,
 } from './i18n';
-import { UiActionsPresentable as Presentable } from '../../../../../../src/plugins/ui_actions/public';
 
 import './styles.scss';
 

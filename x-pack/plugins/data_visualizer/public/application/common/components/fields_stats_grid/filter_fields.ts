@@ -6,15 +6,15 @@
  */
 
 import { JOB_FIELD_TYPES } from '../../../../../common/constants';
-import type {
-  FileBasedFieldVisConfig,
-  FileBasedUnknownFieldVisConfig,
-} from '../../../../../common/types/field_vis_config';
 
-export function filterFields(
-  fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>,
-  visibleFieldNames: string[],
-  visibleFieldTypes: string[]
+interface CommonFieldConfig {
+  type: string;
+  fieldName?: string;
+}
+export function filterFields<T extends CommonFieldConfig>(
+  fields: T[],
+  visibleFieldNames: string[] | undefined,
+  visibleFieldTypes: string[] | undefined
 ) {
   let items = fields;
 

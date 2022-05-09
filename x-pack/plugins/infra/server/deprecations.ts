@@ -12,7 +12,7 @@ import {
   ConfigDeprecation,
   DeprecationsDetails,
   GetDeprecationsContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   TIMESTAMP_FIELD,
   TIEBREAKER_FIELD,

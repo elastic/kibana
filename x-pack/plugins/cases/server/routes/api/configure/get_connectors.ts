@@ -17,7 +17,8 @@ export const getConnectorsRoute = createCasesRoute({
   path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
   handler: async ({ context, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
 
       return response.ok({ body: await client.configure.getConnectors() });
     } catch (error) {

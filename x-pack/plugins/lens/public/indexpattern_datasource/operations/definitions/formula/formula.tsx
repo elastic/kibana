@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BaseIndexPatternColumn, OperationDefinition } from '../index';
+import type { BaseIndexPatternColumn, OperationDefinition } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
@@ -168,6 +168,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         // otherwise the filter has been already migrated into the formula text
         filter:
           previousColumn?.operationType === 'formula' ? getFilter(previousColumn, {}) : undefined,
+        timeScale: previousColumn?.timeScale,
       };
     },
     isTransferable: () => {
@@ -181,6 +182,6 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         operations: operationDefinitionMap,
       }).layer;
     },
-
+    timeScalingMode: 'optional',
     paramEditor: WrappedFormulaEditor,
   };

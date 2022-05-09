@@ -10,20 +10,28 @@ import React, { Fragment, Component } from 'react';
 import uuid from 'uuid/v4';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
+import { IndexPatternField, indexPatterns } from '@kbn/data-plugin/public';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
+import {
+  AGG_TYPE,
+  ES_GEO_FIELD_TYPE,
+  GRID_RESOLUTION,
+  LAYER_TYPE,
+  RENDER_AS,
+} from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { isMetricCountable } from '../../util/is_metric_countable';
-import { IndexPatternField, indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { RenderAsSelect } from './render_as_select';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../source';
 import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
+import { isMvt } from './is_mvt';
 
 interface Props {
   currentLayerType?: string;
+  geoFieldName: string;
   indexPatternId: string;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
   metrics: AggDescriptor[];
@@ -32,6 +40,7 @@ interface Props {
 }
 
 interface State {
+  geoFieldType?: ES_GEO_FIELD_TYPE;
   metricsEditorKey: string;
   fields: IndexPatternField[];
   loadError?: string;
@@ -70,9 +79,28 @@ export class UpdateSourceEditor extends Component<Props, State> {
       return;
     }
 
+    const geoField = indexPattern.fields.getByName(this.props.geoFieldName);
+
     this.setState({
       fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      geoFieldType: geoField ? (geoField.type as ES_GEO_FIELD_TYPE) : undefined,
     });
+  }
+
+  _getNewLayerType(renderAs: RENDER_AS, resolution: GRID_RESOLUTION): LAYER_TYPE | undefined {
+    let nextLayerType: LAYER_TYPE | undefined;
+    if (renderAs === RENDER_AS.HEATMAP) {
+      nextLayerType = LAYER_TYPE.HEATMAP;
+    } else if (isMvt(renderAs, resolution)) {
+      nextLayerType = LAYER_TYPE.MVT_VECTOR;
+    } else {
+      nextLayerType = LAYER_TYPE.GEOJSON_VECTOR;
+    }
+
+    // only return newLayerType if there is a change from current layer type
+    return nextLayerType !== undefined && nextLayerType !== this.props.currentLayerType
+      ? nextLayerType
+      : undefined;
   }
 
   _onMetricsChange = (metrics: AggDescriptor[]) => {
@@ -80,20 +108,13 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _onResolutionChange = async (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => {
-    let newLayerType;
-    if (
-      this.props.currentLayerType === LAYER_TYPE.GEOJSON_VECTOR ||
-      this.props.currentLayerType === LAYER_TYPE.MVT_VECTOR
-    ) {
-      newLayerType =
-        resolution === GRID_RESOLUTION.SUPER_FINE
-          ? LAYER_TYPE.MVT_VECTOR
-          : LAYER_TYPE.GEOJSON_VECTOR;
-    }
-
     await this.props.onChange(
       { propName: 'metrics', value: metrics },
-      { propName: 'resolution', value: resolution, newLayerType }
+      {
+        propName: 'resolution',
+        value: resolution,
+        newLayerType: this._getNewLayerType(this.props.renderAs, resolution),
+      }
     );
 
     // Metrics editor persists metrics in state.
@@ -102,7 +123,11 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _onRequestTypeSelect = (requestType: RENDER_AS) => {
-    this.props.onChange({ propName: 'requestType', value: requestType });
+    this.props.onChange({
+      propName: 'requestType',
+      value: requestType,
+      newLayerType: this._getNewLayerType(requestType, this.props.resolution),
+    });
   };
 
   _getMetricsFilter() {
@@ -155,13 +180,14 @@ export class UpdateSourceEditor extends Component<Props, State> {
           </EuiTitle>
           <EuiSpacer size="m" />
           <ResolutionEditor
-            isHeatmap={this.props.currentLayerType === LAYER_TYPE.HEATMAP}
+            renderAs={this.props.renderAs}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
             metrics={this.props.metrics}
           />
           <RenderAsSelect
             isColumnCompressed
+            geoFieldType={this.state.geoFieldType}
             renderAs={this.props.renderAs}
             onChange={this._onRequestTypeSelect}
           />

@@ -10,7 +10,7 @@ import {
   Render,
   Style,
   ExpressionFunctionDefinition,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 
 type Context = Datatable | null;

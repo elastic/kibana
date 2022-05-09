@@ -104,7 +104,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     );
 
     const viewBySwimlaneData = useObservable(anomalyTimelineStateService.getViewBySwimLaneData$());
-    const selectedCells = useObservable(anomalyTimelineStateService.getSelectedCells$());
+    const selectedCells = useObservable(
+      anomalyTimelineStateService.getSelectedCells$(),
+      anomalyTimelineStateService.getSelectedCells()
+    );
     const swimLaneSeverity = useObservable(anomalyTimelineStateService.getSwimLaneSeverity$());
     const viewBySwimlaneFieldName = useObservable(
       anomalyTimelineStateService.getViewBySwimlaneFieldName$()

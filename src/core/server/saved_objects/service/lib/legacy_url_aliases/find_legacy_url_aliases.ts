@@ -68,15 +68,20 @@ export async function findLegacyUrlAliases(
 
 function createAliasKueryFilter(objects: Array<{ type: string; id: string }>) {
   const { buildNode } = esKuery.nodeTypes.function;
-  // Note: these nodes include '.attributes' for type-level fields because these are eventually passed to `validateConvertFilterToKueryNode`, which requires it
   const kueryNodes = objects.reduce<unknown[]>((acc, { type, id }) => {
-    const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.targetType`, type);
-    const match2 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.sourceId`, id);
+    // Escape Kuery values to prevent parsing errors and unintended behavior (object types/IDs can contain KQL special characters/operators)
+    const match1 = buildNode('is', getKueryKey('targetType'), esKuery.escapeKuery(type));
+    const match2 = buildNode('is', getKueryKey('sourceId'), esKuery.escapeKuery(id));
     acc.push(buildNode('and', [match1, match2]));
     return acc;
   }, []);
   return buildNode('and', [
-    buildNode('not', buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.disabled`, true)), // ignore aliases that have been disabled
+    buildNode('not', buildNode('is', getKueryKey('disabled'), true)), // ignore aliases that have been disabled
     buildNode('or', kueryNodes),
   ]);
+}
+
+function getKueryKey(attribute: string) {
+  // Note: these node keys include '.attributes' for type-level fields because these are eventually passed to `validateConvertFilterToKueryNode`, which requires it
+  return `${LEGACY_URL_ALIAS_TYPE}.attributes.${attribute}`;
 }

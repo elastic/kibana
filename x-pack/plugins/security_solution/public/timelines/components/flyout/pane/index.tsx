@@ -51,7 +51,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   }, [dispatch, timelineId]);
 
   return (
-    <div data-test-subj="flyout-pane" style={{ visibility: visible ? 'visible' : 'hidden' }}>
+    <div data-test-subj="flyout-pane" style={{ display: visible ? 'block' : 'none' }}>
       <StyledEuiFlyout
         aria-label={i18n.TIMELINE_DESCRIPTION}
         className="timeline-flyout"
@@ -60,7 +60,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         onClose={handleClose}
         size="100%"
         ownFocus={false}
-        style={{ visibility: visible ? 'visible' : 'hidden' }}
+        style={{ display: visible ? 'block' : 'none' }}
       >
         <IndexPatternFieldEditorOverlayGlobalStyle />
         <StatefulTimeline

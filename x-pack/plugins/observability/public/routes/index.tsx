@@ -88,7 +88,7 @@ export const routes = {
     },
     exact: true,
   },
-  '/rules': {
+  '/alerts/rules': {
     handler: () => {
       return <RulesPage />;
     },

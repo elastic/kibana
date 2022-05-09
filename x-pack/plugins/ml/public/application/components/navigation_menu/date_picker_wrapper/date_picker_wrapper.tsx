@@ -19,9 +19,10 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { TimeHistoryContract, TimeRange } from 'src/plugins/data/public';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+import { TimeHistoryContract, TimeRange } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
+import { wrapWithTheme, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
 import { useMlKibana } from '../../../contexts/kibana';
@@ -30,10 +31,6 @@ import {
   useTimeRangeUpdates,
 } from '../../../contexts/kibana/use_timefilter';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
-import {
-  wrapWithTheme,
-  toMountPoint,
-} from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface TimePickerQuickRange {
   from: string;

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 import type {
   Agent,

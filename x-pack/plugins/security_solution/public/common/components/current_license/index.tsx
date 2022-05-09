@@ -8,9 +8,9 @@
 import React, { FC, memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseService } from '../../hooks/use_license';
 import { AppAction } from '../../store/actions';
-import { ILicense } from '../../../../../licensing/common/types';
 
 export const CurrentLicense: FC = memo(({ children }) => {
   const dispatch = useDispatch<Dispatch<AppAction>>();

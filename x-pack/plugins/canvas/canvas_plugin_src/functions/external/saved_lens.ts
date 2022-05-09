@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { PaletteOutput } from '@kbn/coloring';
 import { Filter as DataFilter } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/common';
+import { TimeRange } from '@kbn/data-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';
 import {
@@ -17,7 +18,6 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { SavedObjectReference } from '../../../../../../src/core/types';
 interface Arguments {
   id: string;
   title: string | null;

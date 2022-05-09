@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   IndexSettings,
   LegacyTemplateSerialized,
   TemplateFromEs,
-} from '../../../../../index_management/common/types';
+} from '@kbn/index-management-plugin/common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
@@ -88,10 +88,8 @@ export function registerFetchRoute({ router, license, lib: { handleEsError } }: 
     license.guardApiRoute(async (context, request, response) => {
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
       try {
-        const templates = await fetchTemplates(
-          context.core.elasticsearch.client.asCurrentUser,
-          isLegacy
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const templates = await fetchTemplates(esClient.asCurrentUser, isLegacy);
         const okResponse = { body: filterTemplates(templates, isLegacy) };
         return response.ok(okResponse);
       } catch (error) {

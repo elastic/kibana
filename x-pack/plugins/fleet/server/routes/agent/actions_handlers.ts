@@ -7,7 +7,7 @@
 
 // handlers that handle agent actions request
 
-import type { RequestHandler } from 'kibana/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
@@ -24,7 +24,7 @@ export const postNewAgentActionHandlerBuilder = function (
 > {
   return async (context, request, response) => {
     try {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
       const agent = await actionsService.getAgent(esClient, request.params.agentId);
 

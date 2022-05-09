@@ -8,7 +8,7 @@
 import { getOr, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
-import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { APP_NAME, APP_UI_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
@@ -26,8 +26,8 @@ import {
   AdministrationRouteSpyState,
   UsersRouteSpyState,
 } from '../../../utils/route/types';
-import { getAppOverviewUrl } from '../../link_to';
-import { timelineActions } from '../../../../../public/timelines/store/timeline';
+import { getAppLandingUrl } from '../../link_to/redirect_to_landing';
+import { timelineActions } from '../../../../timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
@@ -91,10 +91,11 @@ export const getBreadcrumbsForRoute = (
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.overview });
+  const landingPath = getUrlForApp(APP_UI_ID, { deepLinkId: SecurityPageName.landing });
+
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
-    href: getAppOverviewUrl(overviewPath),
+    href: getAppLandingUrl(landingPath),
   };
   if (isHostsRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };

@@ -6,26 +6,33 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { CoreProvidersProps } from '../../../apps/common_providers';
+import { InfraClientStartServices } from '../../../types';
 import type { SourceProviderProps, UseNodeMetricsTableOptions } from '../shared';
 
 const LazyIntegratedContainerMetricsTable = lazy(
   () => import('./integrated_container_metrics_table')
 );
 
-export function createLazyContainerMetricsTable(coreProvidersProps: CoreProvidersProps) {
+export function createLazyContainerMetricsTable(getStartServices: () => InfraClientStartServices) {
   return ({
     timerange,
     filterClauseDsl,
     sourceId,
-  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => (
-    <Suspense fallback={null}>
-      <LazyIntegratedContainerMetricsTable
-        {...coreProvidersProps}
-        sourceId={sourceId || 'default'}
-        timerange={timerange}
-        filterClauseDsl={filterClauseDsl}
-      />
-    </Suspense>
-  );
+  }: UseNodeMetricsTableOptions & Partial<SourceProviderProps>) => {
+    const [core, plugins, pluginStart] = getStartServices();
+
+    return (
+      <Suspense fallback={null}>
+        <LazyIntegratedContainerMetricsTable
+          core={core}
+          plugins={plugins}
+          pluginStart={pluginStart}
+          theme$={core.theme.theme$}
+          sourceId={sourceId || 'default'}
+          timerange={timerange}
+          filterClauseDsl={filterClauseDsl}
+        />
+      </Suspense>
+    );
+  };
 }

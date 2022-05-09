@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
+import '@testing-library/jest-dom';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -37,6 +37,24 @@ jest.mock('../../../resolver/view/use_state_syncing_actions');
 const useStateSyncingActionsMock = useStateSyncingActions as jest.Mock;
 
 jest.mock('../../../resolver/view/use_sync_selected_node');
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        sessionView: {
+          getSessionView: () => <div />,
+        },
+        data: {
+          search: {
+            search: jest.fn(),
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('GraphOverlay', () => {
   const { storage } = createSecuritySolutionStorageMock();
@@ -54,20 +72,18 @@ describe('GraphOverlay', () => {
   });
 
   describe('when used in an events viewer (i.e. in the Detections view, or the Host > Events view)', () => {
-    test('it has 100% width when NOT in full screen mode', async () => {
-      const wrapper = mount(
+    test('it has 100% width when NOT in full screen mode', () => {
+      const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} />
+          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
-      await waitFor(() => {
-        const overlayContainer = wrapper.find('[data-test-subj="overlayContainer"]').first();
-        expect(overlayContainer).toHaveStyleRule('width', '100%');
-      });
+      const overlayContainer = wrapper.getByTestId('overlayContainer');
+      expect(overlayContainer).toHaveStyleRule('width', '100%');
     });
 
-    test('it has a fixed position when in full screen mode', async () => {
+    test('it has a fixed position when in full screen mode', () => {
       (useGlobalFullScreen as jest.Mock).mockReturnValue({
         globalFullScreen: true,
         setGlobalFullScreen: jest.fn(),
@@ -77,20 +93,18 @@ describe('GraphOverlay', () => {
         setTimelineFullScreen: jest.fn(),
       });
 
-      const wrapper = mount(
+      const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} />
+          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
-      await waitFor(() => {
-        const overlayContainer = wrapper.find('[data-test-subj="overlayContainer"]').first();
-        expect(overlayContainer).toHaveStyleRule('position', 'fixed');
-      });
+      const overlayContainer = wrapper.getByTestId('overlayContainer');
+      expect(overlayContainer).toHaveStyleRule('position', 'fixed');
     });
 
     test('it gets index pattern from default data view', () => {
-      mount(
+      render(
         <TestProviders
           store={createStore(
             {
@@ -110,7 +124,7 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={TimelineId.test} />
+          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
@@ -123,20 +137,18 @@ describe('GraphOverlay', () => {
   describe('when used in the active timeline', () => {
     const timelineId = TimelineId.active;
 
-    test('it has 100% width when NOT in full screen mode', async () => {
-      const wrapper = mount(
+    test('it has 100% width when NOT in full screen mode', () => {
+      const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} />
+          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
-      await waitFor(() => {
-        const overlayContainer = wrapper.find('[data-test-subj="overlayContainer"]').first();
-        expect(overlayContainer).toHaveStyleRule('width', '100%');
-      });
+      const overlayContainer = wrapper.getByTestId('overlayContainer');
+      expect(overlayContainer).toHaveStyleRule('width', '100%');
     });
 
-    test('it has 100% width when the active timeline is in full screen mode', async () => {
+    test('it has 100% width when the active timeline is in full screen mode', () => {
       (useGlobalFullScreen as jest.Mock).mockReturnValue({
         globalFullScreen: false,
         setGlobalFullScreen: jest.fn(),
@@ -146,20 +158,18 @@ describe('GraphOverlay', () => {
         setTimelineFullScreen: jest.fn(),
       });
 
-      const wrapper = mount(
+      const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} />
+          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
-      await waitFor(() => {
-        const overlayContainer = wrapper.find('[data-test-subj="overlayContainer"]').first();
-        expect(overlayContainer).toHaveStyleRule('width', '100%');
-      });
+      const overlayContainer = wrapper.getByTestId('overlayContainer');
+      expect(overlayContainer).toHaveStyleRule('width', '100%');
     });
 
     test('it gets index pattern from Timeline data view', () => {
-      mount(
+      render(
         <TestProviders
           store={createStore(
             {
@@ -189,11 +199,54 @@ describe('GraphOverlay', () => {
             storage
           )}
         >
-          <GraphOverlay timelineId={timelineId} />
+          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
         </TestProviders>
       );
 
       expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(mockIndexNames);
+    });
+
+    test('it renders session view controls', () => {
+      (useGlobalFullScreen as jest.Mock).mockReturnValue({
+        globalFullScreen: false,
+        setGlobalFullScreen: jest.fn(),
+      });
+      (useTimelineFullScreen as jest.Mock).mockReturnValue({
+        timelineFullScreen: true,
+        setTimelineFullScreen: jest.fn(),
+      });
+
+      const wrapper = render(
+        <TestProviders
+          store={createStore(
+            {
+              ...mockGlobalState,
+              timeline: {
+                ...mockGlobalState.timeline,
+                timelineById: {
+                  [timelineId]: {
+                    ...mockGlobalState.timeline.timelineById[timelineId],
+                    sessionViewConfig: {
+                      sessionEntityId: 'testId',
+                    },
+                  },
+                },
+              },
+            },
+            SUB_PLUGINS_REDUCER,
+            kibanaObservable,
+            storage
+          )}
+        >
+          <GraphOverlay
+            timelineId={timelineId}
+            SessionView={<div />}
+            Navigation={<div>{'Close Session'}</div>}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.getByText('Close Session')).toBeTruthy();
     });
   });
 });

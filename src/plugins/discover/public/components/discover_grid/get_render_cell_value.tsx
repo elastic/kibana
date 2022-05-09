@@ -7,15 +7,16 @@
  */
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
+import classnames from 'classnames';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
-import type { DataView, DataViewField } from 'src/plugins/data_views/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   EuiDataGridCellValueElementProps,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '../../../../field_formats/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
@@ -25,6 +26,8 @@ import { formatHit } from '../../utils/format_hit';
 import { ElasticSearchHit } from '../../types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
+
+const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 
 export const getRenderCellValueFn =
   (
@@ -67,7 +70,7 @@ export const getRenderCellValueFn =
     }, [ctx, row, setCellProps]);
 
     if (typeof row === 'undefined' || typeof rowFlattened === 'undefined') {
-      return <span>-</span>;
+      return <span className={CELL_CLASS}>-</span>;
     }
 
     /**
@@ -102,7 +105,11 @@ export const getRenderCellValueFn =
         : formatHit(row, dataView, fieldsToShow, maxEntries, fieldFormats);
 
       return (
-        <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
+        <EuiDescriptionList
+          type="inline"
+          compressed
+          className={classnames('dscDiscoverGrid__descriptionList', CELL_CLASS)}
+        >
           {pairs.map(([key, value]) => (
             <Fragment key={key}>
               <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
@@ -118,6 +125,7 @@ export const getRenderCellValueFn =
 
     return (
       <span
+        className={CELL_CLASS}
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
@@ -170,6 +178,7 @@ function renderPopoverContent({
 
   return (
     <span
+      className="dscDiscoverGrid__cellPopoverValue"
       // formatFieldValue guarantees sanitized values
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{

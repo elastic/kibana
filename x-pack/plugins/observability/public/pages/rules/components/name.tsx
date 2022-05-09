@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { RuleNameProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -34,17 +33,5 @@ export function Name({ name, rule }: RuleNameProps) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-  return (
-    <>
-      {link}
-      {rule.enabled && rule.muteAll && (
-        <EuiBadge data-test-subj="mutedActionsBadge" color="hollow">
-          <FormattedMessage
-            id="xpack.observability.rules.rulesTable.columns.mutedBadge"
-            defaultMessage="Muted"
-          />
-        </EuiBadge>
-      )}
-    </>
-  );
+  return <>{link}</>;
 }

@@ -8,7 +8,8 @@
 import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
+import { lastValueFrom } from 'rxjs';
 import { searchService } from '../../../public/services';
 import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
@@ -69,11 +70,11 @@ export function essql(): ExpressionFunctionDefinition<
         filter: input.and,
       };
 
-      return search
-        .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
+      return lastValueFrom(
+        search.search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
           strategy: ESSQL_SEARCH_STRATEGY,
         })
-        .toPromise()
+      )
         .then((resp: EssqlSearchStrategyResponse) => {
           return {
             type: 'datatable',
