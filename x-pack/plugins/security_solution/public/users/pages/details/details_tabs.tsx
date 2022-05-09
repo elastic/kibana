@@ -21,6 +21,7 @@ import { EventsQueryTabBody } from '../../../common/components/events_tab/events
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { userNameExistsFilter } from './helpers';
 import { AuthenticationsQueryTabBody } from '../navigation';
+import { UserRiskTabBody } from '../navigation/user_risk_tab_body';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({
@@ -106,6 +107,9 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
             pageFilters={alertsPageFilters}
             {...tabProps}
           />
+        </Route>
+        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
+          <UserRiskTabBody {...tabProps} />
         </Route>
       </Switch>
     );

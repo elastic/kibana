@@ -27,7 +27,7 @@ import {
   TCPSimpleFields,
 } from '../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
-import { useBreakpoints } from '../../../../apps/synthetics/hooks/use_breakpoints';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
