@@ -65,7 +65,6 @@ export const ControlGroupEditor = ({
   const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
 
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
-    defaultControlWidth: DEFAULT_CONTROL_WIDTH,
     ...getDefaultControlGroupInput(),
     ...initialInput,
   });

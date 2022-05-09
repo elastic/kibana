@@ -122,6 +122,7 @@ export class ControlGroupContainer extends Container<
       <CreateControlButton
         buttonType={buttonType}
         defaultControlWidth={this.getInput().defaultControlWidth}
+        defaultControlGrow={this.getInput().defaultControlGrow}
         updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
         updateDefaultGrow={(defaultControlGrow: boolean) =>
           this.updateInput({ defaultControlGrow })

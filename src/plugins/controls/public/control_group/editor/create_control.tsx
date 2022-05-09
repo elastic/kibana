@@ -21,6 +21,7 @@ import { setFlyoutRef } from '../embeddable/control_group_container';
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
   defaultControlWidth?: ControlWidth;
+  defaultControlGrow: boolean;
   updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
   updateDefaultGrow: (defaultControlGrow: boolean) => void;
   addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
@@ -38,6 +39,7 @@ interface CreateControlResult {
 export const CreateControlButton = ({
   buttonType,
   defaultControlWidth,
+  defaultControlGrow,
   addNewEmbeddable,
   closePopover,
   getRelevantDataViewId,
@@ -83,6 +85,7 @@ export const CreateControlButton = ({
               getRelevantDataViewId={getRelevantDataViewId}
               isCreate={true}
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
+              grow={defaultControlGrow ?? true}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
               updateGrow={updateDefaultGrow}

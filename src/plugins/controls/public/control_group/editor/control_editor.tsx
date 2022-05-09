@@ -52,6 +52,7 @@ interface EditControlProps {
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
+  grow: boolean;
   onSave: (type: string) => void;
   onCancel: () => void;
   removeControl?: () => void;
@@ -68,6 +69,7 @@ export const ControlEditor = ({
   isCreate,
   title,
   width,
+  grow,
   onSave,
   onCancel,
   removeControl,
@@ -87,7 +89,7 @@ export const ControlEditor = ({
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
-  const [currentGrow, setCurrentGrow] = useState(true);
+  const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
 
   const getControlTypeEditor = (type: string) => {

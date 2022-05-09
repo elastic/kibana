@@ -42,7 +42,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels } = useEmbeddableSelector((state) => state);
+  const { panels, defaultControlGrow } = useEmbeddableSelector((state) => state);
 
   // keep up to date ref of latest panel state for comparison when closing editor.
   const latestPanelState = useRef(panels[embeddableId]);
@@ -91,6 +91,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         <ControlEditor
           isCreate={false}
           width={panel.width}
+          grow={defaultControlGrow ?? true}
           embeddable={embeddable}
           title={embeddable.getTitle()}
           onCancel={() => onCancel(flyoutInstance)}
