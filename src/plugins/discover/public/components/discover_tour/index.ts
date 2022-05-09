@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { DscTourProvider } from './dsc_tour_provider';
-export { useDscTourContext } from './dsc_tour_context';
-export { DSC_TOUR_STEP_ANCHOR_IDS } from './dsc_tour_anchors';
+export { DiscoverTourProvider } from './discover_tour_provider';
+export { useDiscoverTourContext } from './discover_tour_context';
+export { DISCOVER_TOUR_STEP_ANCHOR_IDS } from './discover_tour_anchors';

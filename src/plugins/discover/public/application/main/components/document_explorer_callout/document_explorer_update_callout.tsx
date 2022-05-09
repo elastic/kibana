@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { useDscTourContext } from '../../../../components/dsc_tour';
+import { useDiscoverTourContext } from '../../../../components/discover_tour';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';
 
@@ -38,7 +38,7 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
 export const DocumentExplorerUpdateCallout = () => {
   const { storage, capabilities } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
-  const onStartTour = useDscTourContext().onStartTour;
+  const onStartTour = useDiscoverTourContext().onStartTour;
 
   const onCloseCallout = useCallback(() => {
     updateStoredCalloutState(true, storage);

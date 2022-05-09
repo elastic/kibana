@@ -25,8 +25,8 @@ import {
 } from '@elastic/eui';
 import { PLUGIN_ID } from '../../../common';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { DscTourContext, DscTourContextProps } from './dsc_tour_context';
-import { DSC_TOUR_STEP_ANCHORS } from './dsc_tour_anchors';
+import { DiscoverTourContext, DiscoverTourContextProps } from './discover_tour_context';
+import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
 
 const MAX_WIDTH = 350;
 
@@ -41,7 +41,7 @@ interface TourStepDefinition {
 
 const tourStepDefinitions: TourStepDefinition[] = [
   {
-    anchor: DSC_TOUR_STEP_ANCHORS.addFields,
+    anchor: DISCOVER_TOUR_STEP_ANCHORS.addFields,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepAddFields.title', {
       defaultMessage: 'Add fields to the table',
@@ -58,7 +58,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     imageName: 'add_fields.gif',
   },
   {
-    anchor: DSC_TOUR_STEP_ANCHORS.reorderColumns,
+    anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepReorderColumns.title', {
       defaultMessage: 'Reorder columns',
@@ -73,7 +73,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     isOptional: true,
   },
   {
-    anchor: DSC_TOUR_STEP_ANCHORS.sort,
+    anchor: DISCOVER_TOUR_STEP_ANCHORS.sort,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepSort.title', {
       defaultMessage: 'Sort on one or more fields',
@@ -86,7 +86,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     ),
   },
   {
-    anchor: DSC_TOUR_STEP_ANCHORS.changeRowHeight,
+    anchor: DISCOVER_TOUR_STEP_ANCHORS.changeRowHeight,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepChangeRowHeight.title', {
       defaultMessage: 'Change the row height',
@@ -100,7 +100,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     imageName: 'rows_per_line.gif',
   },
   {
-    anchor: DSC_TOUR_STEP_ANCHORS.expandDocument,
+    anchor: DISCOVER_TOUR_STEP_ANCHORS.expandDocument,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepExpand.title', {
       defaultMessage: 'Compare and expand',
@@ -176,11 +176,12 @@ const tourConfig: EuiTourState = {
   tourSubtitle: '',
 };
 
-export const DscTourProvider: React.FC = ({ children }) => {
+export const DiscoverTourProvider: React.FC = ({ children }) => {
   const services = useDiscoverServices();
   const prependToBasePath = services.core.http.basePath.prepend;
   const getAssetPath = useCallback(
     (imageName: string) => {
+      // TODO: update dir name
       return prependToBasePath(`/plugins/${PLUGIN_ID}/assets/dsc_tour/${imageName}`);
     },
     [prependToBasePath]
@@ -210,7 +211,7 @@ export const DscTourProvider: React.FC = ({ children }) => {
     actions.finishTour();
   }, [actions]);
 
-  const contextValue: DscTourContextProps = useMemo(
+  const contextValue: DiscoverTourContextProps = useMemo(
     () => ({
       onStartTour,
       onNextTourStep,
@@ -220,13 +221,13 @@ export const DscTourProvider: React.FC = ({ children }) => {
   );
 
   return (
-    <DscTourContext.Provider value={contextValue}>
+    <DiscoverTourContext.Provider value={contextValue}>
       {steps.map((step) => (
         <EuiTourStep
           key={`step-${step.step}-is-${String(step.isStepOpen)}`}
           {...step}
           footerAction={
-            <DscTourStepFooterAction
+            <DiscoverTourStepFooterAction
               isLastStep={step.step === steps[steps.length - 1].step}
               onNextTourStep={onNextTourStep}
               onFinishTour={onFinishTour}
@@ -235,14 +236,14 @@ export const DscTourProvider: React.FC = ({ children }) => {
         />
       ))}
       {children}
-    </DscTourContext.Provider>
+    </DiscoverTourContext.Provider>
   );
 };
 
-export const DscTourStepFooterAction: React.FC<{
+export const DiscoverTourStepFooterAction: React.FC<{
   isLastStep: boolean;
-  onNextTourStep: DscTourContextProps['onNextTourStep'];
-  onFinishTour: DscTourContextProps['onFinishTour'];
+  onNextTourStep: DiscoverTourContextProps['onNextTourStep'];
+  onFinishTour: DiscoverTourContextProps['onFinishTour'];
 }> = ({ isLastStep, onNextTourStep, onFinishTour }) => {
   return (
     <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">

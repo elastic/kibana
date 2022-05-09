@@ -8,18 +8,18 @@
 
 import { createContext, useContext } from 'react';
 
-export interface DscTourContextProps {
+export interface DiscoverTourContextProps {
   onStartTour: () => void;
   onNextTourStep: () => void;
   onFinishTour: () => void;
 }
 
-export const DscTourContext = createContext<DscTourContextProps>({
+export const DiscoverTourContext = createContext<DiscoverTourContextProps>({
   onStartTour: () => {},
   onNextTourStep: () => {},
   onFinishTour: () => {},
 });
 
-export const useDscTourContext = () => {
-  return useContext(DscTourContext);
+export const useDiscoverTourContext = () => {
+  return useContext(DiscoverTourContext);
 };

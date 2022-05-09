@@ -39,7 +39,7 @@ import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './l
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { DSC_TOUR_STEP_ANCHOR_IDS } from '../../../../components/dsc_tour';
+import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { ElasticSearchHit } from '../../../../types';
 
 /**
@@ -413,7 +413,7 @@ export function DiscoverSidebarComponent({
                   initialIsOpen={true}
                   buttonContent={
                     <EuiText size="xs" id="available_fields">
-                      <strong id={DSC_TOUR_STEP_ANCHOR_IDS.addFields}>
+                      <strong id={DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields}>
                         <FormattedMessage
                           id="discover.fieldChooser.filter.availableFieldsTitle"
                           defaultMessage="Available fields"
