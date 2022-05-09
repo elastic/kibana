@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
   const { common } = getPageObjects(['common']);
 
-  describe('Core Context Providers', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/131729
+  describe.skip('Core Context Providers', () => {
     let event: Event;
     before(async () => {
       await common.navigateToApp('home');
