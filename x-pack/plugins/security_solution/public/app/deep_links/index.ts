@@ -59,8 +59,10 @@ import {
   THREAT_HUNTING_PATH,
   DASHBOARDS_PATH,
   MANAGE_PATH,
+  RULES_CREATE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
+import { ADD_NEW_RULE } from '../../detections/pages/detection_engine/rules/translations';
 
 const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
@@ -183,6 +185,15 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           }),
         ],
         searchable: true,
+        deepLinks: [
+          {
+            id: SecurityPageName.rulesCreate,
+            title: ADD_NEW_RULE,
+            path: RULES_CREATE_PATH,
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: false,
+          },
+        ],
       },
       {
         id: SecurityPageName.exceptions,
