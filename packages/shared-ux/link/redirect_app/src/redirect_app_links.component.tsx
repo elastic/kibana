@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, MouseEventHandler } from 'react';
+import React, { useRef, MouseEventHandler, useCallback } from 'react';
 import type { HTMLAttributes, DetailedHTMLProps, FC } from 'react';
 
 import { navigateToUrlClickHandler } from './click_handler';
@@ -37,13 +37,16 @@ export const RedirectAppLinks: FC<Props> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleClick: MouseEventHandler<HTMLDivElement> = (event) =>
-    navigateToUrlClickHandler({
-      event,
-      currentAppId,
-      navigateToUrl,
-      container: containerRef.current,
-    });
+  const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(
+    (event) =>
+      navigateToUrlClickHandler({
+        event,
+        currentAppId,
+        navigateToUrl,
+        container: containerRef.current,
+      }),
+    [currentAppId, navigateToUrl]
+  );
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
