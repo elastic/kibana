@@ -286,7 +286,7 @@ describe('rule_details', () => {
           .find('EuiPageHeader')
           .props() as EuiPageHeaderProps;
         const rightSideItems = pageHeaderProps.rightSideItems;
-        expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+        expect(!!rightSideItems && rightSideItems[3]!).toMatchInlineSnapshot(`
         <React.Fragment>
           <EuiButtonEmpty
             data-test-subj="openEditRuleFlyoutButton"
@@ -584,7 +584,7 @@ describe('rule_details', () => {
         .find('EuiPageHeader')
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
-      expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+      expect(!!rightSideItems && rightSideItems[3]!).toMatchInlineSnapshot(`
       <React.Fragment>
         <EuiButtonEmpty
           data-test-subj="openEditRuleFlyoutButton"
@@ -648,7 +648,7 @@ describe('rule_details', () => {
         .find('EuiPageHeader')
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
-      expect(!!rightSideItems && rightSideItems[2]!).toMatchInlineSnapshot(`
+      expect(!!rightSideItems && rightSideItems[3]!).toMatchInlineSnapshot(`
       <React.Fragment>
         <EuiButtonEmpty
           data-test-subj="openEditRuleFlyoutButton"
@@ -866,8 +866,6 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
-      actionsButton.simulate('click');
 
       const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').first();
       expect(refreshButton.exists()).toBeTruthy();

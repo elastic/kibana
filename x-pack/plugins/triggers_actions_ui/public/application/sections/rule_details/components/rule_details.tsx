@@ -230,7 +230,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
   };
 
-  const rightPageHeaderButtons = hasEditButton ? (
+  const editButton = hasEditButton ? (
     <>
       <EuiButtonEmpty
         data-test-subj="openEditRuleFlyoutButton"
@@ -395,10 +395,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           </EuiFlexGroup>
         }
         rightSideItems={[
-          <ViewInApp rule={rule} />,
           <RuleActionsPopover
+            canSaveRule={canSaveRule}
             rule={rule}
-            onRefresh={requestRefresh}
             onDelete={(ruleId) => {
               setRulesToDelete([ruleId]);
             }}
@@ -406,7 +405,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               setRulesToUpdateAPIKey([ruleId]);
             }}
           />,
-          rightPageHeaderButtons,
+          editButton,
+          <EuiButtonEmpty
+            data-test-subj="refreshRulesButton"
+            iconType="refresh"
+            onClick={requestRefresh}
+            name="refresh"
+            color="primary"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButtonEmpty>,
+          <ViewInApp rule={rule} />,
         ]}
       />
       <EuiSpacer size="l" />

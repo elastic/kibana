@@ -12,14 +12,14 @@ import { Rule } from '../../../..';
 
 export interface RuleActionsPopoverProps {
   rule: Rule;
-  onRefresh: () => void;
+  canSaveRule: boolean;
   onDelete: (ruleId: string) => void;
   onApiKeyUpdate: (ruleId: string) => void;
 }
 
 export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps> = ({
   rule,
-  onRefresh,
+  canSaveRule,
   onDelete,
   onApiKeyUpdate,
 }) => {
@@ -31,6 +31,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
         <EuiButtonEmpty
           disabled={false}
           data-test-subj="ruleActionsButton"
+          data-testid="ruleActionsButton"
           iconType="boxesHorizontal"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           aria-label={i18n.translate(
@@ -51,19 +52,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
             id: 0,
             items: [
               {
-                disabled: false,
-                'data-test-subj': 'refreshRulesButton',
-                onClick: () => {
-                  setIsPopoverOpen(false);
-                  onRefresh();
-                },
-                name: i18n.translate(
-                  'xpack.triggersActionsUI.sections.ruleDetails.refreshRulesButtonLabel',
-                  { defaultMessage: 'Refresh' }
-                ),
-              },
-              {
-                disabled: false,
+                disabled: !canSaveRule,
                 'data-test-subj': 'updateAPIKeyButton',
                 onClick: () => {
                   setIsPopoverOpen(false);
@@ -75,11 +64,11 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                 ),
               },
               {
-                disabled: false,
+                disabled: !canSaveRule,
                 'data-test-subj': 'deleteRuleButton',
                 onClick: () => {
-                  onDelete(rule.id);
                   setIsPopoverOpen(false);
+                  onDelete(rule.id);
                 },
                 name: i18n.translate(
                   'xpack.triggersActionsUI.sections.ruleDetails.deleteRuleButtonLabel',
