@@ -7,6 +7,8 @@
 
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
 import {
   ActivityLogActionResponse,
@@ -43,6 +45,14 @@ export class FleetActionGenerator extends BaseDataGenerator {
     );
   }
 
+  generateActionEsHit(
+    overrides: DeepPartial<EndpointAction> = {}
+  ): estypes.SearchHit<EndpointAction> {
+    return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
+      _index: AGENT_ACTIONS_INDEX,
+    });
+  }
+
   generateIsolateAction(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
     return merge(this.generate({ data: { command: 'isolate' } }), overrides);
   }
@@ -53,7 +63,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
 
   /** Generates an endpoint action response */
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
-    const timeStamp = new Date();
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -61,8 +71,8 @@ export class FleetActionGenerator extends BaseDataGenerator {
           command: this.randomIsolateCommand(),
           comment: '',
         },
-        action_id: this.randomUUID(),
-        agent_id: this.randomUUID(),
+        action_id: this.seededUUIDv4(),
+        agent_id: this.seededUUIDv4(),
         started_at: this.randomPastDate(),
         completed_at: timeStamp.toISOString(),
         error: 'some error happened',
@@ -70,6 +80,14 @@ export class FleetActionGenerator extends BaseDataGenerator {
       },
       overrides
     );
+  }
+
+  generateResponseEsHit(
+    overrides: DeepPartial<EndpointActionResponse> = {}
+  ): estypes.SearchHit<EndpointActionResponse> {
+    return Object.assign(this.toEsSearchHit(this.generateResponse(overrides)), {
+      _index: AGENT_ACTIONS_RESULTS_INDEX,
+    });
   }
 
   /**
