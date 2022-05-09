@@ -191,11 +191,12 @@ export function createSearchBar({ core, storage, data, usageCollection }: Statef
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           iconType={props.iconType}
           nonKqlMode={props.nonKqlMode}
-          nonKqlModeHelpText={props.nonKqlModeHelpText}
           customSubmitButton={props.customSubmitButton}
           isClearable={props.isClearable}
           placeholder={props.placeholder}
           {...overrideDefaultBehaviors(props)}
+          dataViewPickerComponentProps={props.dataViewPickerComponentProps}
+          displayStyle={props.displayStyle}
         />
       </KibanaContextProvider>
     );

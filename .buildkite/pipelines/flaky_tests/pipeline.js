@@ -20,8 +20,18 @@ const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>}
   require('./groups.json').groups
 );
 
-const concurrency = 25;
-const initialJobs = 3;
+const concurrency = process.env.KIBANA_FLAKY_TEST_CONCURRENCY
+  ? parseInt(process.env.KIBANA_FLAKY_TEST_CONCURRENCY, 10)
+  : 25;
+
+if (Number.isNaN(concurrency)) {
+  throw new Error(
+    `invalid KIBANA_FLAKY_TEST_CONCURRENCY: ${process.env.KIBANA_FLAKY_TEST_CONCURRENCY}`
+  );
+}
+
+const BASE_JOBS = 1;
+const MAX_JOBS = 500;
 
 function getTestSuitesFromJson(json) {
   const fail = (errorMsg) => {
@@ -41,19 +51,39 @@ function getTestSuitesFromJson(json) {
     fail(`JSON test config must be an array`);
   }
 
-  /** @type {Array<{ key: string, count: number }>} */
+  /** @type {Array<{ type: 'group', key: string; count: number } | { type: 'ftrConfig', ftrConfig: string; count: number }>} */
   const testSuites = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
       fail(`testSuites must be objects`);
     }
-    const key = item.key;
-    if (typeof key !== 'string') {
-      fail(`testSuite.key must be a string`);
-    }
+
     const count = item.count;
     if (typeof count !== 'number') {
       fail(`testSuite.count must be a number`);
+    }
+
+    const type = item.type;
+    if (type !== 'ftrConfig' && type !== 'group') {
+      fail(`testSuite.type must be either "ftrConfig" or "group"`);
+    }
+
+    if (item.type === 'ftrConfig') {
+      const ftrConfig = item.ftrConfig;
+      if (typeof ftrConfig !== 'string') {
+        fail(`testSuite.ftrConfig must be a string`);
+      }
+
+      testSuites.push({
+        ftrConfig,
+        count,
+      });
+      continue;
+    }
+
+    const key = item.key;
+    if (typeof key !== 'string') {
+      fail(`testSuite.key must be a string`);
     }
     testSuites.push({
       key,
@@ -65,13 +95,14 @@ function getTestSuitesFromJson(json) {
 }
 
 const testSuites = getTestSuitesFromJson(configJson);
-const totalJobs = testSuites.reduce((acc, t) => acc + t.count, initialJobs);
 
-if (totalJobs > 500) {
+const totalJobs = testSuites.reduce((acc, t) => acc + t.count, BASE_JOBS);
+
+if (totalJobs > MAX_JOBS) {
   console.error('+++ Too many tests');
   console.error(
-    `Buildkite builds can only contain 500 steps in total. Found ${totalJobs} in total. Make sure your test runs are less than ${
-      500 - initialJobs
+    `Buildkite builds can only contain ${MAX_JOBS} jobs in total. Found ${totalJobs} based on this config. Make sure your test runs are less than ${
+      MAX_JOBS - BASE_JOBS
     }`
   );
   process.exit(1);
@@ -82,7 +113,7 @@ const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
   },
-  steps: steps,
+  steps,
 };
 
 steps.push({
@@ -94,76 +125,40 @@ steps.push({
 });
 
 for (const testSuite of testSuites) {
-  const TEST_SUITE = testSuite.key;
-  const RUN_COUNT = testSuite.count;
-  const UUID = process.env.UUID;
-
-  const JOB_PARTS = TEST_SUITE.split('/');
-  const IS_XPACK = JOB_PARTS[0] === 'xpack';
-  const TASK = JOB_PARTS[1];
-  const CI_GROUP = JOB_PARTS.length > 2 ? JOB_PARTS[2] : '';
-
-  if (RUN_COUNT < 1) {
+  if (testSuite.count <= 0) {
     continue;
   }
 
-  switch (TASK) {
-    case 'cigroup':
-      if (IS_XPACK) {
-        steps.push({
-          command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/xpack_cigroup.sh`,
-          label: `Default CI Group ${CI_GROUP}`,
-          agents: { queue: 'n2-4' },
-          depends_on: 'build',
-          parallelism: RUN_COUNT,
-          concurrency: concurrency,
-          concurrency_group: UUID,
-          concurrency_method: 'eager',
-        });
-      } else {
-        steps.push({
-          command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/oss_cigroup.sh`,
-          label: `OSS CI Group ${CI_GROUP}`,
-          agents: { queue: 'ci-group-4d' },
-          depends_on: 'build',
-          parallelism: RUN_COUNT,
-          concurrency: concurrency,
-          concurrency_group: UUID,
-          concurrency_method: 'eager',
-        });
-      }
-      break;
+  if (testSuite.ftrConfig) {
+    steps.push({
+      command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
+      env: {
+        FTR_CONFIG: testSuite.ftrConfig,
+      },
+      label: `FTR Config: ${testSuite.ftrConfig}`,
+      parallelism: testSuite.count,
+      concurrency: concurrency,
+      concurrency_group: process.env.UUID,
+      concurrency_method: 'eager',
+      agents: {
+        queue: 'n2-4-spot-2',
+      },
+      depends_on: 'build',
+      timeout_in_minutes: 150,
+      retry: {
+        automatic: [
+          { exit_status: '-1', limit: 3 },
+          // { exit_status: '*', limit: 1 },
+        ],
+      },
+    });
+    continue;
+  }
 
-    case 'firefox':
-      steps.push({
-        command: `.buildkite/scripts/steps/functional/${IS_XPACK ? 'xpack' : 'oss'}_firefox.sh`,
-        label: `${IS_XPACK ? 'Default' : 'OSS'} Firefox`,
-        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
-        depends_on: 'build',
-        parallelism: RUN_COUNT,
-        concurrency: concurrency,
-        concurrency_group: UUID,
-        concurrency_method: 'eager',
-      });
-      break;
-
-    case 'accessibility':
-      steps.push({
-        command: `.buildkite/scripts/steps/functional/${
-          IS_XPACK ? 'xpack' : 'oss'
-        }_accessibility.sh`,
-        label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
-        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
-        depends_on: 'build',
-        parallelism: RUN_COUNT,
-        concurrency: concurrency,
-        concurrency_group: UUID,
-        concurrency_method: 'eager',
-      });
-      break;
-
+  const keyParts = testSuite.key.split('/');
+  switch (keyParts[0]) {
     case 'cypress':
-      const CYPRESS_SUITE = CI_GROUP;
+      const CYPRESS_SUITE = keyParts[1];
       const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));
       if (!group) {
         throw new Error(
@@ -175,12 +170,14 @@ for (const testSuite of testSuites) {
         label: group.name,
         agents: { queue: 'ci-group-6' },
         depends_on: 'build',
-        parallelism: RUN_COUNT,
+        parallelism: testSuite.count,
         concurrency: concurrency,
-        concurrency_group: UUID,
+        concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
       });
       break;
+    default:
+      throw new Error(`unknown test suite: ${testSuite.key}`);
   }
 }
 
