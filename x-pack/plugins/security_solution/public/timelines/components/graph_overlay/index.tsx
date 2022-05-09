@@ -6,7 +6,13 @@
  */
 
 import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
@@ -158,7 +164,10 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     return (
       <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
         <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
+          <EuiHorizontalRule margin="none" />
           <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="m" />
           <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
         </EuiFlexGroup>
       </OverlayContainer>
