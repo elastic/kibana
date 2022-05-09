@@ -112,6 +112,7 @@ filegroup(
     "//packages/shared-ux/avatar/solution:build",
     "//packages/shared-ux/button/exit_full_screen:build",
     "//packages/shared-ux/link/redirect_app:build",
+    "//packages/shared-ux/page/analytics_no_data:build",
   ],
 )
 
@@ -207,6 +208,7 @@ filegroup(
     "//packages/shared-ux/avatar/solution:build_types",
     "//packages/shared-ux/button/exit_full_screen:build_types",
     "//packages/shared-ux/link/redirect_app:build_types",
+    "//packages/shared-ux/page/analytics_no_data:build_types",
   ],
 )
 
