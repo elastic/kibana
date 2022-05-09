@@ -300,17 +300,17 @@
                                                     "type": "long"
                                                 },
                                                 "alert_counts": {
-                                                  "properties": {
-                                                    "active": {
-                                                      "type": "long"
-                                                    },
-                                                    "new": {
-                                                      "type": "long"
-                                                    },
-                                                    "recovered": {
-                                                        "type": "long"
+                                                    "properties": {
+                                                        "active": {
+                                                            "type": "long"
+                                                        },
+                                                        "new": {
+                                                            "type": "long"
+                                                        },
+                                                        "recovered": {
+                                                            "type": "long"
+                                                        }
                                                     }
-                                                  }
                                                 },
                                                 "total_number_of_alerts": {
                                                     "type": "long"
