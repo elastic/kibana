@@ -38,8 +38,6 @@ import {
   registerCoreUsageCollector,
   registerLocalizationUsageCollector,
   registerUiCountersUsageCollector,
-  registerUiCounterSavedObjectType,
-  registerUiCountersRollups,
   registerConfigUsageCollector,
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
@@ -127,9 +125,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
 
-    registerUiCounterSavedObjectType(coreSetup.savedObjects);
-    registerUiCountersRollups(this.logger.get('ui-counters'), pluginStop$, getSavedObjectsClient);
-    registerUiCountersUsageCollector(usageCollection, pluginStop$);
+    registerUiCountersUsageCollector(usageCollection);
 
     registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);
     registerUsageCountersUsageCollector(usageCollection);
