@@ -805,9 +805,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
     const {
       took: existingTook,
       timed_out: existingTimedOut,
-      // _scroll_id: existingScrollId,
       _shards: existingShards,
-      // aggregations: existingAggregations,
       hits: existingHits,
     } = prev;
 
@@ -871,7 +869,7 @@ export const calculateThresholdSignalUuid = (
   thresholdFields: string[],
   key?: string
 ): string => {
-  // used to generate constant Threshold Signals ID when run with the same params
+  // used to generate stable Threshold Signals ID when run with the same params
   const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
 
   const startedAtString = startedAt.toISOString();
@@ -879,30 +877,6 @@ export const calculateThresholdSignalUuid = (
   const baseString = `${ruleId}${startedAtString}${thresholdFields.join(',')}${keyString}`;
 
   return uuidv5(baseString, NAMESPACE_ID);
-};
-
-export const getThresholdAggregationParts = (
-  data: object,
-  index?: number
-):
-  | {
-      field: string;
-      index: number;
-      name: string;
-    }
-  | undefined => {
-  const idx = index != null ? index.toString() : '\\d';
-  const pattern = `threshold_(?<index>${idx}):(?<name>.*)`;
-  for (const key of Object.keys(data)) {
-    const matches = key.match(pattern);
-    if (matches != null && matches.groups?.name != null && matches.groups?.index != null) {
-      return {
-        field: matches.groups.name,
-        index: parseInt(matches.groups.index, 10),
-        name: key,
-      };
-    }
-  }
 };
 
 export const getThresholdTermsHash = (
@@ -915,8 +889,27 @@ export const getThresholdTermsHash = (
     .update(
       terms
         .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
-        .map((field) => {
-          return field.value;
+        .map((term) => {
+          return `${term.field}:${term.value}`;
+        })
+        .join(',')
+    )
+    .digest('hex');
+};
+
+// deprecate
+export const getThresholdTermsHashLegacy = (
+  terms: Array<{
+    field: string;
+    value: string;
+  }>
+): string => {
+  return createHash('sha256')
+    .update(
+      terms
+        .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
+        .map((term) => {
+          return term.value;
         })
         .join(',')
     )

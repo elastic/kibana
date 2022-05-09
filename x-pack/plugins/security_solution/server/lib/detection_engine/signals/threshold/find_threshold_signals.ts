@@ -83,7 +83,7 @@ export const findThresholdSignals = async ({
               buckets_path: {
                 cardinalityCount: 'cardinality_count',
               },
-              script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: cardinality operator
+              script: `params.cardinalityCount >= ${threshold.cardinality[0].value}`, // TODO: select cardinality operator?
             },
           },
         }

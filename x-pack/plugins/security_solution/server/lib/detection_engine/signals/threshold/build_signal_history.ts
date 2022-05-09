@@ -10,7 +10,12 @@ import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 
 import { SimpleHit, ThresholdSignalHistory } from '../types';
-import { getThresholdTermsHash, isWrappedDetectionAlert, isWrappedSignalHit } from '../utils';
+import {
+  getThresholdTermsHash,
+  getThresholdTermsHashLegacy,
+  isWrappedDetectionAlert,
+  isWrappedSignalHit,
+} from '../utils';
 
 interface GetThresholdSignalHistoryParams {
   alerts: Array<SearchHit<unknown>>;
@@ -56,8 +61,9 @@ export const buildThresholdSignalHistory = ({
     }
 
     const terms = getTerms(alert as SimpleHit);
+    const legacyHash = getThresholdTermsHashLegacy(terms);
     const hash = getThresholdTermsHash(terms);
-    const existing = acc[hash];
+    const existing = acc[hash] ?? acc[legacyHash]; // deprecate
     const originalTime = getOriginalTime(alert as SimpleHit);
 
     if (existing != null) {
