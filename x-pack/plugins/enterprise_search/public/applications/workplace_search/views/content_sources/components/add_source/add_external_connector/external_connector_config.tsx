@@ -73,7 +73,6 @@ export const ExternalConnectorConfig: React.FC = () => {
     <EuiFormRow>
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>{saveButton}</EuiFlexItem>
-        <EuiFlexItem grow={false} />
       </EuiFlexGroup>
     </EuiFormRow>
   );
