@@ -10,6 +10,7 @@ import React from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
 import type { QueryStringInputProps } from './query_string_input';
+import './query_bar.scss';
 
 const Fallback = () => <div />;
 
