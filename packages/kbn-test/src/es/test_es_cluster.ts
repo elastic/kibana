@@ -145,6 +145,11 @@ export interface CreateTestEsClusterOptions {
    * defaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`
    */
   transportPort?: number | string;
+  /**
+   * Report to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing
+   * this caller to react appropriately. If this is not passed then an uncatchable exception will be thrown
+   */
+  onEarlyExit?: (msg: string) => void;
 }
 
 export function createTestEsCluster<
@@ -164,6 +169,7 @@ export function createTestEsCluster<
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
     transportPort,
+    onEarlyExit,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -257,6 +263,7 @@ export function createTestEsCluster<
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
             skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
+            onEarlyExit,
           });
         });
       }
