@@ -9,7 +9,7 @@
 import { deleteRuntimeField } from './delete_runtime_field';
 import { dataViewsService } from '../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from 'src/plugins/data_views/common';
+import { DataView } from '../../../common';
 
 describe('delete runtime field', () => {
   it('call usageCollection', () => {
@@ -19,11 +19,7 @@ describe('delete runtime field', () => {
       async (id: string) =>
         ({
           removeRuntimeField: jest.fn(),
-          fields: {
-            getByName: jest.fn().mockReturnValueOnce({
-              runtimeField: {},
-            }),
-          },
+          getRuntimeField: jest.fn().mockReturnValueOnce({}),
         } as unknown as DataView)
     );
 

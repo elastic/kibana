@@ -8,12 +8,12 @@
 import { Action } from 'redux';
 import { Observable } from 'rxjs';
 
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { inputsModel } from '../../../common/store/inputs';
 import { NotesById } from '../../../common/store/app/model';
 
 import { TimelineModel } from './model';
-import { CoreStart } from '../../../../../../../src/core/public';
 
 export interface AutoSavedWarningMsg {
   timelineId: string | null;

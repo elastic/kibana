@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   METRIC_JAVA_HEAP_MEMORY_USED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
@@ -19,7 +20,6 @@ import {
   SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../../lib/helpers/setup_request';
 

@@ -9,23 +9,27 @@ import {
   PROCESS_NAME_FIELD,
   UNCOMMON_PROCESSES_TABLE,
 } from '../../screens/hosts/uncommon_processes';
-import { FIRST_PAGE_SELECTOR, THIRD_PAGE_SELECTOR } from '../../screens/pagination';
-import { cleanKibana } from '../../tasks/common';
+import { FIRST_PAGE_SELECTOR, SECOND_PAGE_SELECTOR } from '../../screens/pagination';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-import { waitForAuthenticationsToBeLoaded } from '../../tasks/hosts/authentications';
-import { openAuthentications, openUncommonProcesses } from '../../tasks/hosts/main';
+import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
+import { openEvents, openUncommonProcesses } from '../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
-import { loginAndWaitForPage } from '../../tasks/login';
-import { goToFirstPage, goToThirdPage } from '../../tasks/pagination';
+import { login, visit } from '../../tasks/login';
+import { goToFirstPage, goToSecondPage } from '../../tasks/pagination';
 import { refreshPage } from '../../tasks/security_header';
 
 import { HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';
 
 describe('Pagination', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+    esArchiverLoad('host_uncommon_processes');
+    login();
+    visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     waitForUncommonProcessesToBeLoaded();
+  });
+  after(() => {
+    esArchiverUnload('host_uncommon_processes');
   });
 
   afterEach(() => {
@@ -42,9 +46,8 @@ describe('Pagination', () => {
       .first()
       .invoke('text')
       .then((processNameFirstPage) => {
-        goToThirdPage();
+        goToSecondPage();
         waitForUncommonProcessesToBeLoaded();
-        cy.wait(1500);
         cy.get(UNCOMMON_PROCESSES_TABLE)
           .find(PROCESS_NAME_FIELD)
           .first()
@@ -53,12 +56,11 @@ describe('Pagination', () => {
             expect(processNameFirstPage).not.to.eq(processNameSecondPage);
           });
       });
-    cy.wait(3000);
     cy.get(UNCOMMON_PROCESSES_TABLE)
       .find(FIRST_PAGE_SELECTOR)
       .should('not.have.class', 'euiPaginationButton-isActive');
     cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(THIRD_PAGE_SELECTOR)
+      .find(SECOND_PAGE_SELECTOR)
       .should('have.class', 'euiPaginationButton-isActive');
   });
 
@@ -66,19 +68,19 @@ describe('Pagination', () => {
     cy.get(UNCOMMON_PROCESSES_TABLE)
       .find(FIRST_PAGE_SELECTOR)
       .should('have.class', 'euiPaginationButton-isActive');
-    goToThirdPage();
+    goToSecondPage();
     waitForUncommonProcessesToBeLoaded();
 
     cy.get(PROCESS_NAME_FIELD)
       .first()
       .invoke('text')
       .then((expectedThirdPageResult) => {
-        openAuthentications();
-        waitForAuthenticationsToBeLoaded();
+        openEvents();
+        waitsForEventsToBeLoaded();
         cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
         openUncommonProcesses();
         waitForUncommonProcessesToBeLoaded();
-        cy.get(THIRD_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
+        cy.get(SECOND_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
         cy.get(PROCESS_NAME_FIELD)
           .first()
           .invoke('text')
@@ -92,7 +94,7 @@ describe('Pagination', () => {
     cy.get(UNCOMMON_PROCESSES_TABLE)
       .find(FIRST_PAGE_SELECTOR)
       .should('have.class', 'euiPaginationButton-isActive');
-    goToThirdPage();
+    goToSecondPage();
     waitForUncommonProcessesToBeLoaded();
     cy.get(UNCOMMON_PROCESSES_TABLE)
       .find(FIRST_PAGE_SELECTOR)

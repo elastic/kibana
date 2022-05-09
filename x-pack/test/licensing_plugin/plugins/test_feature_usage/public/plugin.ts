@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
-import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
+import { CoreSetup } from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 interface SetupPlugins {
   licensing: LicensingPluginSetup;

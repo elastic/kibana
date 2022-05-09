@@ -8,7 +8,8 @@
 import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
+import { lastValueFrom } from 'rxjs';
 
 // @ts-expect-error untyped local
 import { buildESRequest } from '../../../common/lib/request/build_es_request';
@@ -122,20 +123,19 @@ export function esdocs(): ExpressionFunctionDefinition<
 
       // We're requesting the data using the ESSQL strategy because
       // the SQL routes return type information with the result set
-      return search
-        .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
+      return lastValueFrom(
+        search.search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
           strategy: ESSQL_SEARCH_STRATEGY,
         })
-        .toPromise()
-        .then((resp: EssqlSearchStrategyResponse) => {
-          return {
-            type: 'datatable',
-            meta: {
-              type: 'essql',
-            },
-            ...resp,
-          };
-        });
+      ).then((resp: EssqlSearchStrategyResponse) => {
+        return {
+          type: 'datatable',
+          meta: {
+            type: 'essql',
+          },
+          ...resp,
+        };
+      });
     },
   };
 }

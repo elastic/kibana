@@ -6,8 +6,6 @@
     "emitDeclarationOnly": true,
     "outDir": "target_types",
     "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-alerts/src",
     "types": ["jest", "node"]
   },
   "include": ["src/**/*"],

@@ -9,16 +9,16 @@ import { cloneDeep } from 'lodash';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from 'src/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { Logger } from '@kbn/core/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import axios, { AxiosInstance } from 'axios';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { ITelemetryReceiver } from './receiver';
-import { allowlistEventFields, copyAllowlistedFields } from './filters';
+import { copyAllowlistedFields, endpointAllowlistFields } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import type { TelemetryEvent } from './types';
@@ -217,7 +217,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
     return events.map(function (obj: TelemetryEvent): TelemetryEvent {
-      return copyAllowlistedFields(allowlistEventFields, obj);
+      return copyAllowlistedFields(endpointAllowlistFields, obj);
     });
   }
 
@@ -318,6 +318,14 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
       this.logger.debug(`Error sending events: ${err}`);
+      const errorStatus = err?.response?.status;
+      if (errorStatus !== undefined && errorStatus !== null) {
+        this.telemetryUsageCounter?.incrementCounter({
+          counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+          counterType: errorStatus.toString(),
+          incrementBy: 1,
+        });
+      }
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',

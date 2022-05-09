@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup } from '../../../../charts/public';
-import type { IFieldFormat, SerializedFieldFormat } from '../../../../field_formats/common';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { GaugeExpressionProps } from './expression_functions';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
@@ -15,24 +17,6 @@ export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 export type GaugeRenderProps = GaugeExpressionProps & {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: PaletteRegistry;
+  uiState: PersistedState;
 };
-
-export interface ColorStop {
-  color: string;
-  stop: number;
-}
-
-export interface CustomPaletteParams {
-  name?: string;
-  reverse?: boolean;
-  rangeType?: 'number' | 'percent';
-  continuity?: 'above' | 'below' | 'all' | 'none';
-  progression?: 'fixed';
-  rangeMin?: number;
-  rangeMax?: number;
-  stops?: ColorStop[];
-  colorStops?: ColorStop[];
-  steps?: number;
-}
-
-export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;

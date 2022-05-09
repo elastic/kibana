@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { sampleDocSearchResultsNoSortId } from '../__mocks__/es_results';
-import { sampleThresholdSignalHistory } from '../__mocks__/threshold_signal_history.mock';
 import { calculateThresholdSignalUuid } from '../utils';
 import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
 
@@ -41,7 +39,10 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
                       key: 'garden-gnomes',
                       doc_count: 12,
                       max_timestamp: {
-                        value_as_string: '2020-04-20T21:27:45+0000',
+                        value_as_string: '2020-12-17T16:30:03.000Z',
+                      },
+                      min_timestamp: {
+                        value_as_string: '2020-12-17T16:28:03.000Z',
                       },
                       cardinality_count: {
                         value: 7,
@@ -57,12 +58,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       'test',
       startedAt,
       from,
-      undefined,
-      loggingSystemMock.createLogger(),
       threshold,
-      '1234',
-      undefined,
-      sampleThresholdSignalHistory()
+      '1234'
     );
     const _id = calculateThresholdSignalUuid(
       '1234',
@@ -92,19 +89,19 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _id,
             _index: 'test',
             _source: {
-              '@timestamp': '2020-04-20T21:27:45+0000',
+              '@timestamp': '2020-12-17T16:30:03.000Z',
               'host.name': 'garden-gnomes',
               'source.ip': '127.0.0.1',
               threshold_result: {
-                from: new Date('2020-12-17T16:28:00.000Z'), // from threshold signal history
+                from: new Date('2020-12-17T16:28:03.000Z'), // from min_timestamp
                 terms: [
-                  {
-                    field: 'host.name',
-                    value: 'garden-gnomes',
-                  },
                   {
                     field: 'source.ip',
                     value: '127.0.0.1',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'garden-gnomes',
                   },
                 ],
                 cardinality: [
@@ -155,12 +152,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       'test',
       startedAt,
       from,
-      undefined,
-      loggingSystemMock.createLogger(),
       threshold,
-      '1234',
-      undefined,
-      sampleThresholdSignalHistory()
+      '1234'
     );
     expect(transformedResults).toEqual({
       took: 10,
@@ -207,7 +200,10 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
                 key: '',
                 doc_count: 15,
                 max_timestamp: {
-                  value_as_string: '2020-04-20T21:27:45+0000',
+                  value_as_string: '2020-12-17T16:30:03.000Z',
+                },
+                min_timestamp: {
+                  value_as_string: '2020-12-17T16:28:03.000Z',
                 },
                 cardinality_count: {
                   value: 7,
@@ -220,12 +216,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
       'test',
       startedAt,
       from,
-      undefined,
-      loggingSystemMock.createLogger(),
       threshold,
-      '1234',
-      undefined,
-      sampleThresholdSignalHistory()
+      '1234'
     );
     const _id = calculateThresholdSignalUuid('1234', startedAt, [], '');
     expect(transformedResults).toEqual({
@@ -250,9 +242,9 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _id,
             _index: 'test',
             _source: {
-              '@timestamp': '2020-04-20T21:27:45+0000',
+              '@timestamp': '2020-12-17T16:30:03.000Z',
               threshold_result: {
-                from: new Date('2020-12-17T16:27:00.000Z'),
+                from: new Date('2020-12-17T16:28:03.000Z'),
                 terms: [],
                 cardinality: [
                   {

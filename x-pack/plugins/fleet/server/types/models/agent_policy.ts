@@ -32,6 +32,8 @@ export const AgentPolicyBaseSchema = {
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
     )
   ),
+  data_output_id: schema.maybe(schema.nullable(schema.string())),
+  monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
 };
 
 export const NewAgentPolicySchema = schema.object({

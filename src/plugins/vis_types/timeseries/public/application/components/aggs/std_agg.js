@@ -68,7 +68,11 @@ export function StandardAgg(props) {
               restrict={restrictFields}
               indexPattern={indexPattern}
               value={model.field}
-              onChange={handleSelectChange('field')}
+              onChange={(value) =>
+                handleChange({
+                  field: value?.[0],
+                })
+              }
               uiRestrictions={uiRestrictions}
               fullWidth
             />

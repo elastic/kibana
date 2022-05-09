@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
 export const ALL = i18n.translate('xpack.cases.status.all', {
-  defaultMessage: 'All',
+  defaultMessage: 'All status',
 });
 
 export const OPEN = i18n.translate('xpack.cases.status.open', {

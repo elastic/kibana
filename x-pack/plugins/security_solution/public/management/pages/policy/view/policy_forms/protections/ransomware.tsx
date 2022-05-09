@@ -9,10 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SecurityPageName } from '../../../../../../app/types';
-import { Immutable, OperatingSystem } from '../../../../../../../common/endpoint/types';
-import { RansomwareProtectionOSes, OS } from '../../../types';
+import { Immutable, PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
+import { RansomwareProtectionOSes } from '../../../types';
 import { ConfigForm } from '../../components/config_form';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { RadioButtons } from '../components/radio_buttons';
@@ -23,7 +24,7 @@ import { ProtectionSwitch } from '../components/protection_switch';
  *  which will configure for all relevant OSes.
  */
 export const Ransomware = React.memo(() => {
-  const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows];
+  const OSes: Immutable<RansomwareProtectionOSes[]> = [PolicyOperatingSystem.windows];
   const protection = 'ransomware';
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.ransomware',

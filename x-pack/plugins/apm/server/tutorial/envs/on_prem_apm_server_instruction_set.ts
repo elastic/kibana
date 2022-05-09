@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '../..';
 import {
   InstructionsSchema,
   INSTRUCTION_VARIANT,
-} from '../../../../../../src/plugins/home/server';
+} from '@kbn/home-plugin/server';
+import { APMConfig } from '../..';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,
@@ -124,10 +124,7 @@ export function getOnPremApmServerInstructionSet({
         index: apmConfig.indices.onboarding,
         query: {
           bool: {
-            filter: [
-              { term: { 'processor.event': 'onboarding' } },
-              { range: { 'observer.version_major': { gte: 7 } } },
-            ],
+            filter: [{ term: { 'processor.event': 'onboarding' } }],
           },
         },
       },

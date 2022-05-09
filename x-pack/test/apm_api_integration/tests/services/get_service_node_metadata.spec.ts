@@ -62,13 +62,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           timerange(start, end)
             .interval('1m')
             .rate(1)
-            .flatMap((timestamp) =>
+            .generator((timestamp) =>
               instance
                 .transaction('GET /api/product/list')
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
-                .serialize()
             )
         );
       });

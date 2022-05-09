@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { JOB_FIELD_TYPES } from '../../../../common/constants';
-import type { IndexPatternField } from '../../../../../../../src/plugins/data/common';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
 export const getJobTypeLabel = (type: string) => {
   return type in jobTypeLabels ? jobTypeLabels[type as keyof typeof jobTypeLabels] : null;
@@ -59,7 +59,7 @@ export const jobTypeLabels = {
 // convert kibana types to ML Job types
 // this is needed because kibana types only have string and not text and keyword.
 // and we can't use ES_FIELD_TYPES because it has no NUMBER type
-export function kbnTypeToJobType(field: IndexPatternField) {
+export function kbnTypeToJobType(field: DataViewField) {
   // Return undefined if not one of the supported data visualizer field types.
   let type;
   switch (field.type) {

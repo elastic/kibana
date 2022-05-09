@@ -8,12 +8,12 @@
 
 import fetch from 'node-fetch';
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import type { UnencryptedTelemetryPayload } from '../../common/types';
@@ -75,7 +75,6 @@ export function registerTelemetryOptInStatsRoutes(
 
         const statsGetterConfig: StatsGetterConfig = {
           unencrypted,
-          request: req,
         };
 
         const optInStatus = await telemetryCollectionManager.getOptInStats(

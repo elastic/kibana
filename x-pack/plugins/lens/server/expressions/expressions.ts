@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import {
-  pie,
-  xyChart,
   counterRate,
-  metricChart,
-  yAxisConfig,
-  layerConfig,
   formatColumn,
-  legendConfig,
   renameColumns,
-  gridlinesConfig,
-  datatableColumn,
-  tickLabelsConfig,
-  axisTitlesVisibilityConfig,
   getTimeScale,
   getDatatable,
   lensMultitable,
@@ -27,7 +18,6 @@ import {
 import { getFormatFactory, getTimeZoneFactory } from './utils';
 
 import type { PluginStartContract } from '../plugin';
-import type { ExpressionsServerSetup } from '../../../../../src/plugins/expressions/server';
 
 export const setupExpressions = (
   core: CoreSetup<PluginStartContract>,
@@ -36,19 +26,9 @@ export const setupExpressions = (
   [lensMultitable].forEach((expressionType) => expressions.registerType(expressionType));
 
   [
-    pie,
-    xyChart,
     counterRate,
-    metricChart,
-    yAxisConfig,
-    layerConfig,
     formatColumn,
-    legendConfig,
     renameColumns,
-    gridlinesConfig,
-    datatableColumn,
-    tickLabelsConfig,
-    axisTitlesVisibilityConfig,
     getDatatable(getFormatFactory(core)),
     getTimeScale(getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));

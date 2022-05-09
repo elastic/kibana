@@ -8,8 +8,14 @@
 
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsImportFailure,
+  SavedObjectsImportRetry,
+} from '../../types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { getObjectKey } from '../../service/lib/internal_utils';
 import type { ImportStateMap } from './types';
 import { createOriginQuery } from './utils';
 
@@ -21,11 +27,17 @@ interface CheckOriginConflictsParams {
   ignoreRegularConflicts?: boolean;
   importStateMap: ImportStateMap;
   pendingOverwrites: Set<string>;
+  retries?: SavedObjectsImportRetry[];
 }
 
-type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects' | 'importIdMap'> & {
+type CheckOriginConflictParams = Omit<
+  CheckOriginConflictsParams,
+  'objects' | 'importIdMap' | 'retries'
+> & {
   object: SavedObject<{ title?: string }>;
   objectIdsBeingImported: Set<string>;
+  retryMap: Map<string, SavedObjectsImportRetry>;
+  retryDestinations: Set<string>;
 };
 
 interface InexactMatch<T> {
@@ -64,7 +76,7 @@ const transformObjectsToAmbiguousConflictFields = (
       return a.id < b.id ? -1 : 1; // ascending
     });
 const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
-  `${object.type}:${object.originId || object.id}`;
+  getObjectKey({ type: object.type, id: object.originId || object.id });
 
 /**
  * Make a search request for an import object to check if any objects of this type that match this object's `originId` or `id` exist in the
@@ -85,12 +97,27 @@ const checkOriginConflict = async (
     namespace,
     objectIdsBeingImported,
     pendingOverwrites,
+    retryMap,
+    retryDestinations,
   } = params;
   const { type, originId, id } = object;
 
-  if (!typeRegistry.isMultiNamespace(type) || pendingOverwrites.has(`${type}:${id}`)) {
+  const key = getObjectKey(object);
+  const retry = retryMap.get(key);
+  if (
+    !typeRegistry.isMultiNamespace(type) ||
+    pendingOverwrites.has(key) ||
+    !!retry?.destinationId
+  ) {
     // Skip the search request for non-multi-namespace types, since by definition they cannot have inexact matches or ambiguous conflicts.
     // Also skip the search request for objects that we've already determined have an "exact match" conflict.
+    // Finally, skip the search request for objects that have specified a destinationId for a retry.
+
+    // The checkConflicts function is always called before this one. There are three situations where a retry would have a destinationId:
+    //   1. retry with overwrite=false, where the object already exists -> checkConflicts would return a conflict error
+    //   2. retry with overwrite=true, where the object already exists -> checkConflicts would add an entry to pendingOverwrites
+    //   3. retry where the object *doesn't* exist -> checkConflicts wouldn't return an error _or_ add an entry to pendingOverwrites
+    // Scenario (3) is why we check to see if there is a retry destinationId and skip the origin check in that case.
     return { tag: 'right', value: object };
   }
 
@@ -111,9 +138,10 @@ const checkOriginConflict = async (
     return { tag: 'right', value: object };
   }
   // This is an "inexact match" so far; filter the conflict destination(s) to exclude any that exactly match other objects we are importing.
-  const objects = savedObjects.filter(
-    (obj) => !objectIdsBeingImported.has(`${obj.type}:${obj.id}`)
-  );
+  const objects = savedObjects.filter((obj) => {
+    const destKey = getObjectKey(obj);
+    return !objectIdsBeingImported.has(destKey) && !retryDestinations.has(destKey);
+  });
   const destinations = transformObjectsToAmbiguousConflictFields(objects);
   if (destinations.length === 0) {
     // No conflict destinations remain after filtering, so this is a "no match" result.
@@ -140,16 +168,30 @@ const checkOriginConflict = async (
  *        will allow `createSavedObjects` to modify the ID before creating the object (thus ensuring a conflict during).
  *     B. Otherwise, this is an "ambiguous conflict" result; return an error.
  */
-export async function checkOriginConflicts({ objects, ...params }: CheckOriginConflictsParams) {
+export async function checkOriginConflicts({
+  objects,
+  retries = [],
+  ...params
+}: CheckOriginConflictsParams) {
   const objectIdsBeingImported = new Set<string>();
   for (const [key, { isOnlyReference }] of params.importStateMap.entries()) {
     if (!isOnlyReference) {
       objectIdsBeingImported.add(key);
     }
   }
+  const retryMap = retries.reduce(
+    (acc, cur) => acc.set(getObjectKey(cur), cur),
+    new Map<string, SavedObjectsImportRetry>()
+  );
+  const retryDestinations = retries.reduce((acc, cur) => {
+    if (cur.destinationId) {
+      acc.add(getObjectKey({ type: cur.type, id: cur.destinationId }));
+    }
+    return acc;
+  }, new Set<string>());
   // Check each object for possible destination conflicts, ensuring we don't too many concurrent searches running.
   const mapper = async (object: SavedObject<{ title?: string }>) =>
-    checkOriginConflict({ object, objectIdsBeingImported, ...params });
+    checkOriginConflict({ object, objectIdsBeingImported, retryMap, retryDestinations, ...params });
   const checkOriginConflictResults = await pMap(objects, mapper, {
     concurrency: MAX_CONCURRENT_SEARCHES,
   });
@@ -170,23 +212,23 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     if (!isLeft(result)) {
       return;
     }
-    const key = getAmbiguousConflictSourceKey(result.value);
+    const ambiguousConflictsSourceKey = getAmbiguousConflictSourceKey(result.value);
     const sources = transformObjectsToAmbiguousConflictFields(
-      ambiguousConflictSourcesMap.get(key)!
+      ambiguousConflictSourcesMap.get(ambiguousConflictsSourceKey)!
     );
     const { object, destinations } = result.value;
     const { type, id, attributes } = object;
     if (sources.length === 1 && destinations.length === 1) {
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
-      if (params.ignoreRegularConflicts) {
-        importStateMap.set(`${type}:${id}`, { destinationId: destinations[0].id });
-        pendingOverwrites.add(`${type}:${id}`);
+      const key = getObjectKey(object);
+      if (params.ignoreRegularConflicts || retryMap.get(key)?.overwrite) {
+        importStateMap.set(key, { destinationId: destinations[0].id });
+        pendingOverwrites.add(key);
       } else {
         const { title } = attributes;
         errors.push({
           type,
           id,
-          title,
           meta: { title },
           error: {
             type: 'conflict',
@@ -203,14 +245,13 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     if (sources.length > 1) {
       // In the case of ambiguous source conflicts, don't treat them as errors; instead, regenerate the object ID and reset its origin
       // (e.g., the same outcome as if `createNewCopies` was enabled for the entire import operation).
-      importStateMap.set(`${type}:${id}`, { destinationId: uuidv4(), omitOriginId: true });
+      importStateMap.set(getObjectKey(object), { destinationId: uuidv4(), omitOriginId: true });
       return;
     }
     const { title } = attributes;
     errors.push({
       type,
       id,
-      title,
       meta: { title },
       error: {
         type: 'ambiguous_conflict',

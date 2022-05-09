@@ -12,7 +12,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { buildSiemResponse } from '../utils';
 
 import { getIdError } from './utils';
@@ -22,11 +22,7 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { legacyMigrate } from '../../rules/utils';
 import { readRules } from '../../rules/read_rules';
 
-export const updateRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
-) => {
+export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -44,20 +40,21 @@ export const updateRulesRoute = (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution.getAppClient();
+        const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
+
+        const rulesClient = ctx.alerting.getRulesClient();
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const siemClient = ctx.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(request.body.type));
+        throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
         const existingRule = await readRules({
-          isRuleRegistryEnabled,
           rulesClient,
           ruleId: request.body.rule_id,
           id: request.body.id,
@@ -76,13 +73,9 @@ export const updateRulesRoute = (
         });
 
         if (rule != null) {
-          const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
+          const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleExecutionSummary,
-            isRuleRegistryEnabled
-          );
+          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

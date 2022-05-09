@@ -74,6 +74,9 @@ describe('Histogram Agg', () => {
         "chain": Array [
           Object {
             "arguments": Object {
+              "autoExtendBounds": Array [
+                false,
+              ],
               "enabled": Array [
                 true,
               ],
@@ -397,6 +400,20 @@ describe('Histogram Agg', () => {
 
           expect(output.extended_bounds).toHaveProperty('min', 99);
           expect(output.extended_bounds).toHaveProperty('max', 100);
+        });
+
+        test('writes when auto bounds and autoExtendBounds are set', () => {
+          const aggConfigs = getAggConfigs({
+            autoExtendBounds: true,
+            field: {
+              name: 'field',
+            },
+          });
+          (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
+          const output = aggConfigs.aggs[0].toDsl()[BUCKET_TYPES.HISTOGRAM];
+
+          expect(output.extended_bounds).toHaveProperty('min', 0);
+          expect(output.extended_bounds).toHaveProperty('max', 1000);
         });
 
         test('does not write when nothing is set', () => {

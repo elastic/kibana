@@ -13,7 +13,7 @@ import { EmsVectorTileLayer } from '../../layers/ems_vector_tile_layer/ems_vecto
 import { EmsTmsSourceConfig } from './tile_service_select';
 import { CreateSourceEditor } from './create_source_editor';
 import { getEMSSettings } from '../../../kibana_services';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 import { WorldMapLayerIcon } from '../../layers/wizards/icons/world_map_layer_icon';
 
 function getDescription() {
@@ -27,6 +27,7 @@ function getDescription() {
 }
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.EMS_BASEMAP,
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {

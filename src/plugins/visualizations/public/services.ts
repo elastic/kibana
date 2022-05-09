@@ -16,15 +16,16 @@ import type {
   SavedObjectsStart,
   DocLinksStart,
   ThemeServiceStart,
-} from '../../../core/public';
+  ExecutionContextSetup,
+} from '@kbn/core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TypesStart } from './vis_types';
-import { createGetterSetter } from '../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
-import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
-import { ExpressionsStart } from '../../../plugins/expressions/public';
-import { UiActionsStart } from '../../../plugins/ui_actions/public';
-import { EmbeddableStart } from '../../embeddable/public';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -64,5 +65,8 @@ export const [getAggs, setAggs] =
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+export const [getExecutionContext, setExecutionContext] =
+  createGetterSetter<ExecutionContextSetup>('ExecutionContext');
 
 export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces', false);

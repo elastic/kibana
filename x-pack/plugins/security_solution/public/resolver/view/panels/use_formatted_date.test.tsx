@@ -9,8 +9,8 @@ import { mount } from 'enzyme';
 
 import React from 'react';
 import { useFormattedDate } from './use_formatted_date';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { uiSetting } from '../../mocks/ui_setting';
 
 describe(`useFormattedDate, when the "dateFormat" UI setting is "${uiSetting(

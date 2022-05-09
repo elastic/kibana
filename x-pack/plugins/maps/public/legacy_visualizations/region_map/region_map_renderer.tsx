@@ -7,7 +7,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import type { RegionMapVisRenderValue } from './region_map_fn';
 import { LazyWrapper } from '../../lazy_wrapper';
 import { REGION_MAP_RENDER } from './types';

@@ -1,0 +1,215 @@
+{
+  "id": "cloudSecurityPosture",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloudSecurityPosture",
+      "id": "def-public.CspClientPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CspClientPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloudSecurityPosture",
+      "id": "def-public.CspClientPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CspClientPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-server.cspRuleTemplateAssetType",
+        "type": "Object",
+        "tags": [],
+        "label": "cspRuleTemplateAssetType",
+        "description": [],
+        "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_rule_template.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-server.cspRuleTemplateAssetType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_rule_template.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-server.cspRuleTemplateAssetType.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_rule_template.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-server.cspRuleTemplateAssetType.management",
+            "type": "Object",
+            "tags": [],
+            "label": "management",
+            "description": [],
+            "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_rule_template.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "cloudSecurityPosture",
+                "id": "def-server.cspRuleTemplateAssetType.management.importableAndExportable",
+                "type": "boolean",
+                "tags": [],
+                "label": "importableAndExportable",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_rule_template.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "cloudSecurityPosture",
+                "id": "def-server.cspRuleTemplateAssetType.management.visibleInManagement",
+                "type": "boolean",
+                "tags": [],
+                "label": "visibleInManagement",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_rule_template.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-server.cspRuleTemplateAssetType.namespaceType",
+            "type": "string",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [],
+            "signature": [
+              "\"agnostic\""
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_rule_template.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-server.cspRuleTemplateAssetType.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsTypeMappingDefinition",
+                "text": "SavedObjectsTypeMappingDefinition"
+              }
+            ],
+            "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_rule_template.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "setup": {
+      "parentPluginId": "cloudSecurityPosture",
+      "id": "def-server.CspServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CspServerPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/cloud_security_posture/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloudSecurityPosture",
+      "id": "def-server.CspServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CspServerPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/cloud_security_posture/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"csp\""
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudSecurityPosture",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Cloud Security\""
+        ],
+        "path": "x-pack/plugins/cloud_security_posture/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -1,0 +1,118 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ViewApiRequestFlyout is rendered 1`] = `
+<div
+  data-eui="EuiFlyout"
+  data-test-subj="apiRequestFlyout"
+  role="dialog"
+>
+  <button
+    aria-label="Close this dialog"
+    data-test-subj="euiFlyoutCloseButton"
+    type="button"
+  />
+  <div
+    class="euiFlyoutHeader"
+  >
+    <h2
+      class="euiTitle euiTitle--medium"
+      data-test-subj="apiRequestFlyoutTitle"
+    >
+      Test title
+    </h2>
+  </div>
+  <div
+    class="euiFlyoutBody"
+  >
+    <div
+      class="euiFlyoutBody__overflow"
+      tabindex="0"
+    >
+      <div
+        class="euiFlyoutBody__overflowContent"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          <p
+            data-test-subj="apiRequestFlyoutDescription"
+          >
+            Test description
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div
+          class="eui-textRight"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <button
+              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+              data-test-subj="apiRequestFlyoutCopyClipboardButton"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonContent__icon"
+                  color="inherit"
+                  data-euiicon-type="copyClipboard"
+                />
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Copy to clipboard
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div>
+          <pre>
+            <code
+              data-code-language="json"
+              data-test-subj="apiRequestFlyoutBody"
+            >
+              Hello world
+            </code>
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlyoutFooter"
+  >
+    <button
+      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+      data-test-subj="apiRequestFlyoutClose"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="cross"
+        />
+        <span
+          class="euiButtonEmpty__text"
+        >
+          Close
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

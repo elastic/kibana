@@ -20,20 +20,20 @@ import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
+import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '@kbn/discover-plugin/public';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
-import { IAggConfigs, IndexPattern, ISearchSource, AggConfigSerialized } from '../../data/public';
 import { BaseVisType } from './vis_types';
 import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
-
-import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discover/public';
 
 export type { SerializedVis, SerializedVisData };
 
 export interface VisData {
   ast?: string;
   aggs?: IAggConfigs;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   searchSource?: ISearchSource;
   savedSearchId?: string;
 }

@@ -5,9 +5,7 @@
   "description": "Adversaries can use the autostart mechanism provided by the Local Security Authority (LSA) authentication packages for privilege escalation or persistence by placing a reference to a binary in the Windows registry. The binary will then be executed by SYSTEM when the authentication packages are loaded.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -71,5 +69,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

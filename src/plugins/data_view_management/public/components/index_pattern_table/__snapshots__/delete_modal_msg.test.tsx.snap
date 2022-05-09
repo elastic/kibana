@@ -1,0 +1,274 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`delete modal content render 1`] = `
+<div>
+  <EuiCallOut
+    color="warning"
+    iconType="alert"
+    title="Data views are deleted from every space they are shared in."
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <div>
+    <FormattedMessage
+      defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
+}."
+      id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
+      values={
+        Object {
+          "count": 1,
+        }
+      }
+    />
+  </div>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Data view",
+          "sortable": true,
+        },
+        Object {
+          "align": "right",
+          "field": "namespaces",
+          "name": "Spaces",
+          "render": [Function],
+          "sortable": true,
+          "width": "100px",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "namespaces": Array [
+            "a",
+            "b",
+            "c",
+          ],
+          "title": "logstash-*",
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    responsive={true}
+    tableCaption="Data views selected for deletion"
+    tableLayout="fixed"
+  />
+</div>
+`;
+
+exports[`delete modal content render 2`] = `
+<div>
+  <EuiCallOut
+    color="warning"
+    iconType="alert"
+    title="Data views are deleted from every space they are shared in."
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <div>
+    <FormattedMessage
+      defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
+}."
+      id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
+      values={
+        Object {
+          "count": 1,
+        }
+      }
+    />
+  </div>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Data view",
+          "sortable": true,
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "namespaces": Array [
+            "a",
+            "b",
+            "c",
+          ],
+          "title": "logstash-*",
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    responsive={true}
+    tableCaption="Data views selected for deletion"
+    tableLayout="fixed"
+  />
+</div>
+`;
+
+exports[`delete modal content render 3`] = `
+<div>
+  <EuiCallOut
+    color="warning"
+    iconType="alert"
+    title="Data views are deleted from every space they are shared in."
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <div>
+    <FormattedMessage
+      defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
+}."
+      id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
+      values={
+        Object {
+          "count": 1,
+        }
+      }
+    />
+  </div>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Data view",
+          "sortable": true,
+        },
+        Object {
+          "align": "right",
+          "field": "namespaces",
+          "name": "Spaces",
+          "render": [Function],
+          "sortable": true,
+          "width": "100px",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "namespaces": Array [
+            "*",
+          ],
+          "title": "logstash-*",
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    responsive={true}
+    tableCaption="Data views selected for deletion"
+    tableLayout="fixed"
+  />
+</div>
+`;
+
+exports[`delete modal content render 4`] = `
+<div>
+  <EuiCallOut
+    color="warning"
+    iconType="alert"
+    title="Data views are deleted from every space they are shared in."
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <div>
+    <FormattedMessage
+      defaultMessage="You'll permanently delete {count, number} {count, plural, one {data view} other {data views}
+}."
+      id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
+      values={
+        Object {
+          "count": 2,
+        }
+      }
+    />
+  </div>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Data view",
+          "sortable": true,
+        },
+        Object {
+          "align": "right",
+          "field": "namespaces",
+          "name": "Spaces",
+          "render": [Function],
+          "sortable": true,
+          "width": "100px",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "namespaces": Array [
+            "*",
+          ],
+          "title": "logstash-*",
+        },
+        Object {
+          "id": "1",
+          "namespaces": Array [
+            "a",
+            "b",
+            "c",
+          ],
+          "title": "log*",
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    responsive={true}
+    tableCaption="Data views selected for deletion"
+    tableLayout="fixed"
+  />
+</div>
+`;

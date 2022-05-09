@@ -10,13 +10,13 @@ import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
-} from '../../../../plugins/security_solution/server/lib/timeline/saved_object_mappings';
-import { TimelineWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline';
-import { NoteWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline/note';
+} from '@kbn/security-solution-plugin/server/lib/timeline/saved_object_mappings';
+import { TimelineWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline';
+import { NoteWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/note';
 
+import { PinnedEventWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/pinned_event';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getSavedObjectFromES } from './utils';
-import { PinnedEventWithoutExternalRefs } from '../../../../plugins/security_solution/common/types/timeline/pinned_event';
 
 interface TimelineWithoutSavedQueryId {
   [timelineSavedObjectType]: TimelineWithoutExternalRefs;

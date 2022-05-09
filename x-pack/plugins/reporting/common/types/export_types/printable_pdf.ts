@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LayoutParams } from '../../../../screenshotting/common';
+import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsPDF {
@@ -15,14 +15,20 @@ interface BaseParamsPDF {
 }
 
 // Job params: structure of incoming user request data, after being parsed from RISON
+
 /**
  * @deprecated
  */
 export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;
 
+/**
+ * @deprecated
+ */
 export type JobAppParamsPDF = Omit<JobParamsPDFDeprecated, 'browserTimezone' | 'version'>;
 
-// Job payload: structure of stored job data provided by create_job
+/**
+ * Structure of stored job data provided by create_job
+ */
 export interface TaskPayloadPDF extends BasePayload {
   layout: LayoutParams;
   forceNow?: string;

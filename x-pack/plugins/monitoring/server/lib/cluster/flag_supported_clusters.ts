@@ -8,14 +8,14 @@
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest, Cluster } from '../../types';
 import { getNewIndexPatterns } from './get_index_patterns';
 import { Globals } from '../../static_globals';
 
 async function findSupportedBasicLicenseCluster(
   req: LegacyRequest,
-  clusters: ElasticsearchModifiedSource[],
+  clusters: Cluster[],
   ccs: string,
   kibanaUuid: string,
   serverLog: (message: string) => void
@@ -89,9 +89,8 @@ async function findSupportedBasicLicenseCluster(
  * are also flagged as supported in this method.
  */
 export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
-  const config = req.server.config();
   const serverLog = (message: string) => req.getLogger('supported-clusters').debug(message);
-  const flagAllSupported = (clusters: ElasticsearchModifiedSource[]) => {
+  const flagAllSupported = (clusters: Cluster[]) => {
     clusters.forEach((cluster) => {
       if (cluster.license || cluster.elasticsearch?.cluster?.stats?.license) {
         cluster.isSupported = true;
@@ -100,7 +99,7 @@ export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
     return clusters;
   };
 
-  return async function (clusters: ElasticsearchModifiedSource[]) {
+  return async function (clusters: Cluster[]) {
     // Standalone clusters are automatically supported in the UI so ignore those for
     // our calculations here
     let linkedClusterCount = 0;
@@ -129,7 +128,7 @@ export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
 
       // if all linked are basic licenses
       if (linkedClusterCount === basicLicenseCount) {
-        const kibanaUuid = config.get('server.uuid') as string;
+        const kibanaUuid = req.server.instanceUuid;
         return await findSupportedBasicLicenseCluster(req, clusters, ccs, kibanaUuid, serverLog);
       }
 

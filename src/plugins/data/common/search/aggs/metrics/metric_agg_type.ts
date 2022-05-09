@@ -22,6 +22,7 @@ export interface MetricAggParam<TMetricAggConfig extends AggConfig>
   extends AggParamType<TMetricAggConfig> {
   filterFieldTypes?: FieldTypes;
   onlyAggregatable?: boolean;
+  scriptable?: boolean;
 }
 
 const metricType = 'metrics';
@@ -30,6 +31,7 @@ interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig>
   extends AggTypeConfig<TMetricAggConfig, MetricAggParam<TMetricAggConfig>> {
   isScalable?: () => boolean;
   subtype?: string;
+  enableEmptyAsNull?: boolean;
 }
 
 // TODO need to make a more explicit interface for this
@@ -56,6 +58,17 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
       }) as MetricAggParam<TMetricAggConfig>
     );
 
+    if (config.enableEmptyAsNull) {
+      this.params.push(
+        new BaseParamType({
+          name: 'emptyAsNull',
+          type: 'boolean',
+          default: false,
+          write: () => {},
+        }) as MetricAggParam<TMetricAggConfig>
+      );
+    }
+
     this.getValue =
       config.getValue ||
       ((agg, bucket) => {
@@ -66,9 +79,13 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
         // Return proper values when no buckets are present
         // `Count` handles empty sets properly
-        if (!bucket[agg.id] && isSettableToZero) return 0;
+        if (!bucket[agg.id] && isSettableToZero && !agg.params.emptyAsNull) return 0;
 
-        return bucket[agg.id] && bucket[agg.id].value;
+        const val = bucket[agg.id] && bucket[agg.id].value;
+        if (val === 0 && agg.params.emptyAsNull) {
+          return null;
+        }
+        return val;
       });
 
     this.subtype =

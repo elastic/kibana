@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart } from 'kibana/server';
-import { coreMock } from 'src/core/server/mocks';
+import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ReportingCore, ReportingInternalStart } from './core';
-import { LevelLogger } from './lib';
 import { ReportingPlugin } from './plugin';
 import {
   createMockConfigSchema,
-  createMockLevelLogger,
   createMockPluginSetup,
   createMockPluginStart,
 } from './test_helpers';
@@ -27,7 +25,7 @@ describe('Reporting Plugin', () => {
   let coreStart: CoreStart;
   let pluginSetup: ReportingSetupDeps;
   let pluginStart: ReportingInternalStart;
-  let logger: jest.Mocked<LevelLogger>;
+  let logger: jest.Mocked<Logger>;
   let plugin: ReportingPlugin;
 
   beforeEach(async () => {
@@ -38,9 +36,9 @@ describe('Reporting Plugin', () => {
     pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
     pluginStart = await createMockPluginStart(coreStart, configSchema);
 
-    logger = createMockLevelLogger();
+    logger = loggingSystemMock.createLogger();
     plugin = new ReportingPlugin(initContext);
-    (plugin as unknown as { logger: LevelLogger }).logger = logger;
+    (plugin as unknown as { logger: Logger }).logger = logger;
   });
 
   it('has a sync setup process', () => {

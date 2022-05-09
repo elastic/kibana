@@ -12,8 +12,8 @@ import { MatcherFunction } from '@testing-library/react';
 /**
  * Convenience utility to remove text appended to links by EUI
  */
-export const removeExternalLinkText = (str: string) =>
-  str.replace(/\(opens in a new tab or window\)/g, '');
+export const removeExternalLinkText = (str: string | null) =>
+  str?.replace(/\(opens in a new tab or window\)/g, '');
 
 export async function waitForComponentToPaint<P = {}>(wrapper: ReactWrapper<P>, amount = 0) {
   await act(async () => {

@@ -61,7 +61,7 @@ describe('failure hooks', function () {
 
       expect(tests).toHaveLength(0);
     } catch (error) {
-      console.error('full log output', linesCopy.join('\n'));
+      error.message += `\n\nfull log output:${linesCopy.join('\n')}`;
       throw error;
     }
   });

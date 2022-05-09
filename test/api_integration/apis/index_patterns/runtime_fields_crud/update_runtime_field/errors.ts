@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
           const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
           const response = await supertest.post(`${config.path}/${id}/runtime_field/foo`).send({
             runtimeField: {
+              type: 'keyword',
               script: {
                 source: "doc['something_new'].value",
               },
@@ -34,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
           const response = await supertest.post(`${config.path}/${id}/runtime_field/foo`).send({
             name: 'foo',
             runtimeField: {
+              type: 'keyword',
               script: {
                 source: "doc['something_new'].value",
               },

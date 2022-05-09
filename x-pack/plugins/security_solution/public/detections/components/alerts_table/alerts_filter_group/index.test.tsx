@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { AlertsTableFilterGroup } from './index';
+import { AlertsTableFilterGroup } from '.';
 
 describe('AlertsTableFilterGroup', () => {
   it('renders correctly', () => {

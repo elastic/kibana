@@ -8,7 +8,7 @@
 import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { GeoJsonProperties } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { FeatureProperties } from './feature_properties';

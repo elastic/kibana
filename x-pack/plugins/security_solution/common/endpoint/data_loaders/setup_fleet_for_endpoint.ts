@@ -16,7 +16,7 @@ import {
   IBulkInstallPackageHTTPError,
   PostFleetSetupResponse,
   SETUP_API_ROUTE,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 export interface SetupFleetForEndpointResponse {

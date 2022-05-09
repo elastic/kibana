@@ -32,7 +32,6 @@ import { CleanCommand } from './clean';
 import { ResetCommand } from './reset';
 import { RunCommand } from './run';
 import { WatchCommand } from './watch';
-import { PatchNativeModulesCommand } from './patch_native_modules';
 import { Kibana } from '../utils/kibana';
 
 export const commands: { [key: string]: ICommand } = {
@@ -42,5 +41,4 @@ export const commands: { [key: string]: ICommand } = {
   reset: ResetCommand,
   run: RunCommand,
   watch: WatchCommand,
-  patch_native_modules: PatchNativeModulesCommand,
 };

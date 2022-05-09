@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 interface ESAggResponse {
@@ -26,7 +26,7 @@ export async function fetchKibanaVersions(
     config: Globals.app.config,
     moduleType: 'kibana',
     dataset: 'stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
@@ -41,7 +41,7 @@ export async function fetchKibanaVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('kibana_stats', 'kibana.stats'),
+            createDatasetFilter('kibana_stats', 'stats', 'kibana.stats'),
             {
               range: {
                 timestamp: {
@@ -104,7 +104,7 @@ export async function fetchKibanaVersions(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');
   const clusterList = get(response, 'aggregations.cluster.buckets', []) as ESAggResponse[];
   return clusterList.map((cluster) => {

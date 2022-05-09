@@ -106,9 +106,7 @@ export function FieldSelect({
             exists,
             compatible,
             className: classNames({
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'lnFieldSelect__option--incompatible': !compatible,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'lnFieldSelect__option--nonExistant': !exists,
             }),
             'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${field}`,
@@ -211,7 +209,8 @@ export function FieldSelect({
                 {
                   label: fieldIsInvalid
                     ? selectedField
-                    : currentIndexPattern.getFieldByName(selectedField)?.displayName,
+                    : currentIndexPattern.getFieldByName(selectedField)?.displayName ??
+                      selectedField,
                   value: { type: 'field', field: selectedField },
                 },
               ]

@@ -46,11 +46,6 @@ export const createTransport = ({
         // rewrites headers['x-opaque-id'] if it presents
         opts.opaqueId = opaqueId;
       }
-      // Enforce the client to return TransportResult.
-      // It's required for bwc with responses in 7.x version.
-      if (opts.meta === undefined) {
-        opts.meta = true;
-      }
 
       // add stored headers to the options
       opts.headers = {

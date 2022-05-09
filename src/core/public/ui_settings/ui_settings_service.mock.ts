@@ -8,7 +8,7 @@
 
 import * as Rx from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UiSettingsService } from './';
+import { UiSettingsService } from '.';
 import { IUiSettingsClient } from './types';
 
 const createSetupContractMock = () => {

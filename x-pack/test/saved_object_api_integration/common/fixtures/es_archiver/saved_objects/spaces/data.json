@@ -541,6 +541,24 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
+    "id": "legacy-url-alias:default:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "default",
+        "targetType": "resolvetype",
+        "targetId": "alias-match-newid"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
     "id": "legacy-url-alias:space_1:resolvetype:alias-match",
     "source": {
       "type": "legacy-url-alias",
@@ -567,6 +585,25 @@
         "title": "This is used to test that 1. the 'disabled' alias does not resolve to this target (because the alias is disabled), and 2. when this object that exists in all spaces is deleted, the alias that targets it is deleted too (even though the alias is disabled)"
       },
       "namespaces": ["*"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:default:resolvetype:disabled",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "disabled",
+        "targetNamespace": "default",
+        "targetType": "resolvetype",
+        "targetId": "disabled-newid",
+        "disabled": true
+      }
     }
   }
 }
@@ -655,6 +692,24 @@
         "title": "Resolve outcome conflict (2 of 2)"
       },
       "namespaces": ["default", "space_1", "space_2"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:default:resolvetype:conflict",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "conflict",
+        "targetNamespace": "default",
+        "targetType": "resolvetype",
+        "targetId": "conflict-newid"
+      }
     }
   }
 }
@@ -763,6 +818,41 @@
       "type": "index-pattern",
       "migrationVersion": { "index-pattern": "8.0.0" },
       "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:outbound-missing-reference-conflict-1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "This is used to test if an imported object with a missing reference will have an exact match conflict when the missing reference is replaced"
+      },
+      "type": "sharedtype",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:outbound-missing-reference-conflict-2a",
+    "index": ".kibana",
+    "source": {
+      "originId": "outbound-missing-reference-conflict-2",
+      "sharedtype": {
+        "title": "This is used to test if an imported object with a missing reference will have an inexact match conflict when the missing reference is replaced"
+      },
+      "type": "sharedtype",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
   }

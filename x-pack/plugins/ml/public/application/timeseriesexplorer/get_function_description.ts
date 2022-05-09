@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { lastValueFrom } from 'rxjs';
 import { mlResultsService } from '../services/results_service';
 import { ToastNotificationService } from '../services/toast_notification_service';
 import { getControlsForDetector } from './get_controls_for_detector';
@@ -54,9 +55,9 @@ export const getFunctionDescription = async (
   const criteriaFields = getCriteriaFields(selectedDetectorIndex, entityControls);
 
   try {
-    const resp = await mlResultsService
-      .getRecordsForCriteria([selectedJob.job_id], criteriaFields, 0, null, null, 1)
-      .toPromise();
+    const resp = await lastValueFrom(
+      mlResultsService.getRecordsForCriteria([selectedJob.job_id], criteriaFields, 0, null, null, 1)
+    );
     if (Array.isArray(resp?.records) && resp.records.length === 1) {
       // grabbing first record because records should have already been sorted by score desc
       const highestScoringAnomaly = resp.records[0];

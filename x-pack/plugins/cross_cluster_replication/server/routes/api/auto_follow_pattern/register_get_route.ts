@@ -31,7 +31,7 @@ export const registerGetRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { id } = request.params;
 
       try {
@@ -39,7 +39,7 @@ export const registerGetRoute = ({
           name: id,
         });
 
-        const autoFollowPattern = result.body.patterns[0];
+        const autoFollowPattern = result.patterns[0];
 
         return response.ok({
           // @ts-expect-error Once #98266 is merged, test this again.

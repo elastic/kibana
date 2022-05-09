@@ -22,7 +22,9 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     (state?.shape === CHART_SHAPES.HEATMAP &&
       (state.xAccessor || state.yAccessor || state.valueAccessor) &&
       table.changeType !== 'extended') ||
-    table.columns.some((col) => col.operation.isStaticValue)
+    table.columns.some((col) => col.operation.isStaticValue) ||
+    // do not use suggestions with non-numeric metrics
+    table.columns.some((col) => !col.operation.isBucketed && col.operation.dataType !== 'number')
   ) {
     return [];
   }
@@ -44,6 +46,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
 
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
+  if (groups.length === 0 && metrics.length === 0) {
+    return [];
+  }
+
   if (groups.length >= 3) {
     return [];
   }
@@ -53,6 +59,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   }
 
   const isSingleBucketDimension = groups.length === 1 && metrics.length === 0;
+  const isOnlyMetricDimension = groups.length === 0 && metrics.length === 1;
 
   /**
    * Hide for:
@@ -68,7 +75,8 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     table.changeType === 'reduced' ||
     table.changeType === 'reorder' ||
     isSingleBucketDimension ||
-    hasOnlyDatehistogramBuckets;
+    hasOnlyDatehistogramBuckets ||
+    isOnlyMetricDimension;
 
   const newState: HeatmapVisualizationState = {
     shape: CHART_SHAPES.HEATMAP,

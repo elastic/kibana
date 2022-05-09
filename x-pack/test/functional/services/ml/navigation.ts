@@ -55,7 +55,7 @@ export function MachineLearningNavigationProvider({
     async navigateToAlertsAndAction() {
       await PageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
-      await testSubjects.existOrFail('alertsList');
+      await testSubjects.existOrFail('rulesList');
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
@@ -89,13 +89,15 @@ export function MachineLearningNavigationProvider({
     },
 
     async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled(tabSubject);
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected ML tab '${tabSubject}' to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(10000, async () => {
+        const isEnabled = await testSubjects.isEnabled(tabSubject);
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected ML tab '${tabSubject}' to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
     },
 
     async assertOverviewTabEnabled(expectedValue: boolean) {

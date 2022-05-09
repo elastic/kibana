@@ -22,6 +22,7 @@
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [
+    "unifiedSearch",
     "esUiShared",
     "discover",
     "kibanaUtils",

@@ -18,6 +18,7 @@ import {
   ImmutableArray,
   ProtectionModes,
   UIPolicyConfig,
+  AdditionalOnSwitchChangeParams,
 } from '../../../../../../../common/endpoint/types';
 import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
@@ -26,10 +27,16 @@ export const ProtectionSwitch = React.memo(
     protection,
     protectionLabel,
     osList,
+    additionalOnSwitchChange,
   }: {
     protection: PolicyProtection;
     protectionLabel?: string;
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+    additionalOnSwitchChange?: ({
+      value,
+      policyConfigData,
+      protectionOsList,
+    }: AdditionalOnSwitchChangeParams) => UIPolicyConfig;
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
@@ -83,13 +90,26 @@ export const ProtectionSwitch = React.memo(
               }
             }
           }
-          dispatch({
-            type: 'userChangedPolicyConfig',
-            payload: { policyConfig: newPayload },
-          });
+          if (additionalOnSwitchChange) {
+            dispatch({
+              type: 'userChangedPolicyConfig',
+              payload: {
+                policyConfig: additionalOnSwitchChange({
+                  value: event.target.checked,
+                  policyConfigData: newPayload,
+                  protectionOsList: osList,
+                }),
+              },
+            });
+          } else {
+            dispatch({
+              type: 'userChangedPolicyConfig',
+              payload: { policyConfig: newPayload },
+            });
+          }
         }
       },
-      [dispatch, policyDetailsConfig, isPlatinumPlus, protection, osList]
+      [dispatch, policyDetailsConfig, isPlatinumPlus, protection, osList, additionalOnSwitchChange]
     );
 
     return (

@@ -26,23 +26,19 @@ export function generateData({
     .service('opbeans-node', 'production', 'nodejs')
     .instance('opbeans-node-prod-1');
 
-  return [
-    ...range
-      .interval('2m')
-      .rate(1)
-      .flatMap((timestamp, index) => [
-        ...service1
-          .transaction('GET /apple 🍎 ')
-          .timestamp(timestamp)
-          .duration(1000)
-          .success()
-          .serialize(),
-        ...opbeansNode
-          .transaction('GET /banana 🍌')
-          .timestamp(timestamp)
-          .duration(500)
-          .success()
-          .serialize(),
-      ]),
-  ];
+  return range
+    .interval('2m')
+    .rate(1)
+    .generator((timestamp) => [
+      service1
+        .transaction('GET /apple 🍎 ')
+        .timestamp(timestamp)
+        .duration(1000)
+        .success(),
+      opbeansNode
+        .transaction('GET /banana 🍌')
+        .timestamp(timestamp)
+        .duration(500)
+        .success(),
+    ]);
 }

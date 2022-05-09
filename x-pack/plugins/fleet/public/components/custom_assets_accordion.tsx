@@ -19,9 +19,10 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+
 import { AssetTitleMap } from '../applications/integrations/sections/epm/constants';
 import { useStartServices } from '../hooks';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 export interface CustomAssetsAccordionProps {
   views: Array<{

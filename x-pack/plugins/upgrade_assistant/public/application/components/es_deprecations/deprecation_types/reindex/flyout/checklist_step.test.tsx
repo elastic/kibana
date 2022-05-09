@@ -16,13 +16,16 @@ import { ChecklistFlyoutStep } from './checklist_step';
 
 jest.mock('../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual(
-    '../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
+    '@kbn/core/public/doc_links/doc_links_service.mock'
   );
 
   return {
     useAppContext: () => {
       return {
         services: {
+          api: {
+            useLoadNodeDiskSpace: () => [],
+          },
           core: {
             docLinks: docLinksServiceMock.createStartContract(),
           },

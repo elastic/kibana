@@ -10,6 +10,7 @@ import { first } from 'rxjs/operators';
 
 import { schema } from '@kbn/config-schema';
 
+import type { RouteDefinitionParams } from '.';
 import {
   ElasticsearchConnectionStatus,
   ERROR_COMPATIBILITY_FAILURE,
@@ -23,7 +24,6 @@ import { CompatibilityError } from '../compatibility_error';
 import { ElasticsearchService } from '../elasticsearch_service';
 import type { EnrollResult } from '../elasticsearch_service';
 import type { WriteConfigParameters } from '../kibana_config_writer';
-import type { RouteDefinitionParams } from './';
 
 /**
  * Defines routes to deal with Elasticsearch `enroll_kibana` APIs.

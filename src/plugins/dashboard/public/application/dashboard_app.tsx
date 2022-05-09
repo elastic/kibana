@@ -9,9 +9,9 @@
 import { History } from 'history';
 import React, { useEffect, useMemo } from 'react';
 
+import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
-import { useKibana } from '../../../kibana_react/public';
 import {
   getDashboardBreadcrumb,
   getDashboardTitle,
@@ -47,6 +47,12 @@ export function DashboardApp({
       }),
     [core.notifications.toasts, history, uiSettings]
   );
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: savedDashboardId || 'new',
+  });
 
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({

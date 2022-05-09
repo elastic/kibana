@@ -6,8 +6,6 @@
  */
 
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { createRuleTypeMocks } from './test_utils';
 
 describe('Transaction error rate alert', () => {
@@ -20,30 +18,28 @@ describe('Transaction error rate alert', () => {
 
     const params = { threshold: 1 };
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          total: {
-            relation: 'eq',
-            value: 0,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
-        took: 0,
-        timed_out: false,
-        aggregations: {
-          series: {
-            buckets: [],
-          },
+      },
+      took: 0,
+      timed_out: false,
+      aggregations: {
+        series: {
+          buckets: [],
         },
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     await executor({ params });
     expect(services.alertFactory.create).not.toBeCalled();
@@ -57,61 +53,59 @@ describe('Transaction error rate alert', () => {
       ...dependencies,
     });
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          total: {
-            relation: 'eq',
-            value: 0,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
-        aggregations: {
-          series: {
-            buckets: [
-              {
-                key: ['foo', 'env-foo', 'type-foo'],
-                outcomes: {
-                  buckets: [
-                    {
-                      key: 'success',
-                      doc_count: 90,
-                    },
-                    {
-                      key: 'failure',
-                      doc_count: 10,
-                    },
-                  ],
-                },
+      },
+      aggregations: {
+        series: {
+          buckets: [
+            {
+              key: ['foo', 'env-foo', 'type-foo'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 10,
+                  },
+                ],
               },
-              {
-                key: ['bar', 'env-bar', 'type-bar'],
-                outcomes: {
-                  buckets: [
-                    {
-                      key: 'success',
-                      doc_count: 90,
-                    },
-                    {
-                      key: 'failure',
-                      doc_count: 1,
-                    },
-                  ],
-                },
+            },
+            {
+              key: ['bar', 'env-bar', 'type-bar'],
+              outcomes: {
+                buckets: [
+                  {
+                    key: 'success',
+                    doc_count: 90,
+                  },
+                  {
+                    key: 'failure',
+                    doc_count: 1,
+                  },
+                ],
               },
-            ],
-          },
+            },
+          ],
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
@@ -130,9 +124,13 @@ describe('Transaction error rate alert', () => {
       serviceName: 'foo',
       transactionType: 'type-foo',
       environment: 'env-foo',
+      reason:
+        'Failed transactions is 10% in the last 5 mins for foo. Alert when > 10%.',
       threshold: 10,
       triggerValue: '10',
       interval: '5m',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
     });
   });
 });

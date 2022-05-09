@@ -118,7 +118,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   /** generate random OS family value */
-  protected randomOSFamily(): string {
+  public randomOSFamily(): string {
     return this.randomChoice(OS_FAMILY);
   }
 
@@ -133,7 +133,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   /** Generate a random number up to the max provided */
-  protected randomN(max: number): number {
+  public randomN(max: number): number {
     return Math.floor(this.random() * max);
   }
 

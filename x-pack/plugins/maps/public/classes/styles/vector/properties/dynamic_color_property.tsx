@@ -324,7 +324,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
-  _getOrdinalBreaks(symbolId?: string): Break[] {
+  _getOrdinalBreaks(symbolId?: string, svg?: string): Break[] {
     let colorStops: Array<number | string> | null = null;
     let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
     if (this._options.useCustomColorRamp) {
@@ -361,6 +361,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
             color: colors[colors.length - 1],
             label: this.formatField(dynamicRound(rangeFieldMeta.max)),
             symbolId,
+            svg,
           },
         ];
       }
@@ -405,18 +406,20 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         color,
         label,
         symbolId,
+        svg,
       });
     }
     return breaks;
   }
 
-  _getCategoricalBreaks(symbolId?: string): Break[] {
+  _getCategoricalBreaks(symbolId?: string, svg?: string): Break[] {
     const breaks: Break[] = [];
     const { stops, defaultColor } = this._getColorPaletteStops();
     stops.forEach(({ stop, color }: { stop: string | number | null; color: string | null }) => {
       if (stop !== null && color != null) {
         breaks.push({
           color,
+          svg,
           symbolId,
           label: this.formatField(stop),
         });
@@ -427,17 +430,18 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         color: defaultColor,
         label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
         symbolId,
+        svg,
       });
     }
     return breaks;
   }
 
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId, svg }: LegendProps) {
     let breaks: Break[] = [];
     if (this.isOrdinal()) {
-      breaks = this._getOrdinalBreaks(symbolId);
+      breaks = this._getOrdinalBreaks(symbolId, svg);
     } else if (this.isCategorical()) {
-      breaks = this._getCategoricalBreaks(symbolId);
+      breaks = this._getCategoricalBreaks(symbolId, svg);
     }
     return (
       <BreakedLegend

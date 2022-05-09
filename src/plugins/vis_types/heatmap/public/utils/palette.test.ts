@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Range } from '../../../../expressions';
-import type { ColorSchemas } from '../../../../charts/common';
+import type { Range } from '@kbn/expressions-plugin';
+import type { ColorSchemas } from '@kbn/charts-plugin/common';
 import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './palette';
 
 describe('getFilterClickData', () => {

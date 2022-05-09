@@ -26,7 +26,7 @@ import { Globals } from '../../static_globals';
  * @param  {String} clusterUuid (optional) If not undefined, getClusters will filter for a single cluster
  * @return {Promise} A promise containing an array of clusters.
  */
-export function getClustersStats(req: LegacyRequest, clusterUuid: string, ccs?: string) {
+export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
   return (
     fetchClusterStats(req, clusterUuid, ccs)
       .then((response) => handleClusterStats(response))
@@ -42,7 +42,7 @@ export function getClustersStats(req: LegacyRequest, clusterUuid: string, ccs?: 
  * @param {String} clusterUuid (optional) - if not undefined, getClusters filters for a single clusterUuid
  * @return {Promise} Object representing each cluster.
  */
-function fetchClusterStats(req: LegacyRequest, clusterUuid: string, ccs?: string) {
+function fetchClusterStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPattern = getNewIndexPatterns({
@@ -53,14 +53,14 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string, ccs?: string
     ccs: ccs || req.payload.ccs,
   });
 
-  const config = req.server.config();
+  const config = req.server.config;
   // Get the params from the POST body for the request
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
   const metric = ElasticsearchMetric.getMetricFields();
   const params = {
     index: indexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._index',

@@ -40,29 +40,33 @@ export class TestUser extends FtrService {
     super(ctx);
   }
 
-  async restoreDefaults(shouldRefreshBrowser: boolean = true) {
-    if (this.enabled) {
-      await this.setRoles(this.config.get('security.defaultRoles'), shouldRefreshBrowser);
+  async restoreDefaults(options?: { skipBrowserRefresh?: boolean }) {
+    if (!this.enabled) {
+      return;
     }
+
+    await this.setRoles(this.config.get('security.defaultRoles'), options);
   }
 
-  async setRoles(roles: string[], shouldRefreshBrowser: boolean = true) {
-    if (this.enabled) {
-      this.log.debug(`set roles = ${roles}`);
-      await this.user.create(TEST_USER_NAME, {
-        password: TEST_USER_PASSWORD,
-        roles,
-        full_name: 'test user',
-      });
+  async setRoles(roles: string[], options?: { skipBrowserRefresh?: boolean }) {
+    if (!this.enabled) {
+      return;
+    }
 
-      if (this.browser && this.testSubjects && shouldRefreshBrowser) {
-        if (await this.testSubjects.exists('kibanaChrome', { allowHidden: true })) {
-          await this.browser.refresh();
-          // accept alert if it pops up
-          const alert = await this.browser.getAlert();
-          await alert?.accept();
-          await this.testSubjects.find('kibanaChrome', this.config.get('timeouts.find') * 10);
-        }
+    this.log.debug(`set roles = ${roles}`);
+    await this.user.create(TEST_USER_NAME, {
+      password: TEST_USER_PASSWORD,
+      roles,
+      full_name: 'test user',
+    });
+
+    if (this.browser && this.testSubjects && !options?.skipBrowserRefresh) {
+      if (await this.testSubjects.exists('kibanaChrome', { allowHidden: true })) {
+        await this.browser.refresh();
+        // accept alert if it pops up
+        const alert = await this.browser.getAlert();
+        await alert?.accept();
+        await this.testSubjects.find('kibanaChrome', this.config.get('timeouts.find') * 10);
       }
     }
   }
@@ -84,6 +88,28 @@ export async function createTestUserService(ctx: FtrProviderContext, role: Role,
     // create the defined roles (need to map array to create roles)
     for (const [name, definition] of Object.entries(config.get('security.roles'))) {
       await role.create(name, definition);
+    }
+
+    // when configured to setup remote roles, load the remote es service and set them up directly via es
+    const remoteEsRoles: undefined | Record<string, any> = config.get('security.remoteEsRoles');
+    if (remoteEsRoles) {
+      let remoteEs;
+      try {
+        remoteEs = ctx.getService('remoteEs' as 'es');
+      } catch (error) {
+        throw new Error(
+          'unable to load `remoteEs` cluster, which should provide an ES client configured to talk to the remote cluster. Include that service from another FTR config or fix the error it is throwing on creation: ' +
+            error.message
+        );
+      }
+
+      for (const [name, body] of Object.entries(remoteEsRoles)) {
+        log.info(`creating ${name} role on remote cluster`);
+        await remoteEs.security.putRole({
+          name,
+          ...body,
+        });
+      }
     }
 
     // delete the test_user if present (will it error if the user doesn't exist?)

@@ -45,7 +45,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           },
         }
       : undefined;
-  }, [globalState]);
+  }, [globalState?.refreshInterval]);
 
   const redirectToTab = useCallback(
     async (defaultPathId: MlLocatorParams['page']) => {
@@ -141,6 +141,24 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab dataFrameAnalytics',
           },
+          {
+            id: 'data_frame_analytics_results_explorer',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
+              defaultMessage: 'Results Explorer',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
+          },
+          {
+            id: 'data_frame_analytics_job_map',
+            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
+              defaultMessage: 'Analytics Map',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataFrameAnalyticsMap',
+          },
         ],
       },
       {
@@ -223,7 +241,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         forceOpen: true,
       };
     },
-    [activeRoute?.path]
+    [activeRoute?.path, redirectToTab]
   );
 
   return useMemo(() => tabsDefinition.map(getTabItem), [tabsDefinition, getTabItem]);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { alertsMock } from '../../../../../alerting/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { scheduleThrottledNotificationActions } from './schedule_throttle_notification_actions';
 import {
   NotificationRuleTypeParams,
@@ -71,7 +71,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -100,7 +100,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [],
             total: 0,
@@ -130,7 +130,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [],
             total: 0,
@@ -155,7 +155,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -184,7 +184,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -224,7 +224,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -260,7 +260,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -291,7 +291,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -353,7 +353,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -420,7 +420,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -475,7 +475,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {
@@ -537,7 +537,7 @@ describe('schedule_throttle_notification_actions', () => {
       outputIndex: 'output-123',
       ruleId: 'rule-123',
       esClient: elasticsearchServiceMock.createElasticsearchClient(
-        elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        Promise.resolve({
           hits: {
             hits: [
               {

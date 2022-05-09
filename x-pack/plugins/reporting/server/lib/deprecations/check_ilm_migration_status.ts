@@ -7,7 +7,7 @@
 
 import { ILM_POLICY_NAME } from '../../../common/constants';
 import { IlmPolicyMigrationStatus } from '../../../common/types';
-import { IlmPolicyManager } from '../../lib/store/ilm_policy_manager';
+import { IlmPolicyManager } from '../store/ilm_policy_manager';
 import type { DeprecationsDependencies } from './types';
 
 export const checkIlmMigrationStatus = async ({
@@ -22,13 +22,14 @@ export const checkIlmMigrationStatus = async ({
   const store = await reportingCore.getStore();
   const indexPattern = store.getReportingIndexPattern();
 
-  const { body: reportingIndicesSettings } = await elasticsearchClient.indices.getSettings({
+  const reportingIndicesSettings = await elasticsearchClient.indices.getSettings({
     index: indexPattern,
   });
 
   const hasUnmanagedIndices = Object.values(reportingIndicesSettings).some((settings) => {
     return (
       settings?.settings?.index?.lifecycle?.name !== ILM_POLICY_NAME &&
+      // @ts-expect-error index.lifecycle not present on type def
       settings?.settings?.['index.lifecycle']?.name !== ILM_POLICY_NAME
     );
   });

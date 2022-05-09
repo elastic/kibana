@@ -8,7 +8,7 @@
 import { IconType } from '@elastic/eui';
 import { ConnectorTypes } from '../../common/api';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
-import { StartPlugins } from '../types';
+import { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import { connectorValidator as servicenowConnectorValidator } from './connectors/servicenow/validator';
 import { CaseActionConnector } from './types';
@@ -48,7 +48,7 @@ export const getConnectorsFormValidators = ({
 });
 
 export const getConnectorIcon = (
-  triggersActionsUi: StartPlugins['triggersActionsUi'],
+  triggersActionsUi: CasesPluginStart['triggersActionsUi'],
   type?: string
 ): IconType => {
   /**
@@ -74,7 +74,13 @@ export const getConnectorIcon = (
 
 // TODO: Remove when the applications are certified
 export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
-  if (connector == null) {
+  /**
+   * It is not possible to know if a preconfigured connector
+   * is deprecated or not as the config property of a
+   * preconfigured connector is not returned by the
+   * actions framework
+   */
+  if (connector == null || connector.config == null || connector.isPreconfigured) {
     return false;
   }
 

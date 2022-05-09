@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from '@kbn/data-plugin/common';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getTermsFields } from '../../../index_pattern_util';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 interface Props {
   indexPattern: DataView;

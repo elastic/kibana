@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import moment from 'moment';
+
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -18,30 +20,25 @@ import {
 } from '@elastic/eui';
 
 import { SourceIcon } from '../../../components/shared/source_icon';
+import { ContentSourceFullData } from '../../../types';
 import { REMOTE_SOURCE_LABEL, CREATED_LABEL, STATUS_LABEL, READY_TEXT } from '../constants';
 
 interface SourceInfoCardProps {
-  sourceName: string;
-  sourceType: string;
-  dateCreated: string;
-  isFederatedSource: boolean;
+  contentSource: ContentSourceFullData;
 }
 
 export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
-  sourceName,
-  sourceType,
-  dateCreated,
-  isFederatedSource,
+  contentSource: { createdAt, name, serviceType, isFederatedSource, mainIcon },
 }) => (
   <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
     <EuiFlexItem>
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={null}>
-          <SourceIcon serviceType={sourceType} name={sourceType} size="l" />
+          <SourceIcon serviceType={serviceType} name={name} iconAsBase64={mainIcon} size="l" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h1>{sourceName}</h1>
+            <h1>{name}</h1>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -60,7 +57,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
     <EuiFlexItem>
       <EuiText textAlign="right" size="s">
         <strong>{CREATED_LABEL}</strong>
-        {dateCreated}
+        {moment(createdAt).format('MMMM D, YYYY')}
       </EuiText>
 
       {isFederatedSource && (

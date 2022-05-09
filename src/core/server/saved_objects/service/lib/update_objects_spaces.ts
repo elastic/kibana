@@ -124,6 +124,7 @@ const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
 function isMgetError(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.MgetMultiGetError {
   return Boolean(doc && 'error' in doc);
 }
+
 /**
  * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
  * type.
@@ -204,7 +205,7 @@ export async function updateObjectsSpaces({
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: bulkGetDocs } },
-        { ignore: [404] }
+        { ignore: [404], meta: true }
       )
     : undefined;
   // fail fast if we can't verify a 404 response is from Elasticsearch
@@ -338,7 +339,7 @@ export async function updateObjectsSpaces({
 
         const { type, id, updatedSpaces, esRequestIndex } = expectedResult.value;
         if (esRequestIndex !== undefined) {
-          const response = bulkOperationResponse?.body.items[esRequestIndex] ?? {};
+          const response = bulkOperationResponse?.items[esRequestIndex] ?? {};
           const rawResponse = Object.values(response)[0] as any;
           const error = getBulkOperationError(type, id, rawResponse);
           if (error) {

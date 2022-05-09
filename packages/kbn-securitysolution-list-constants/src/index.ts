@@ -76,3 +76,7 @@ export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME =
   'Endpoint Security Host isolation exceptions List';
 export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION =
   'Endpoint Security Host isolation exceptions List';
+
+export const ENDPOINT_BLOCKLISTS_LIST_ID = 'endpoint_blocklists';
+export const ENDPOINT_BLOCKLISTS_LIST_NAME = 'Endpoint Security Blocklists List';
+export const ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION = 'Endpoint Security Blocklists List';

@@ -13,11 +13,11 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { DataView, DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -49,6 +49,11 @@ export interface DataViewEditorProps {
    * Sets whether a timestamp field is required to create an index pattern. Defaults to false.
    */
   requireTimestampField?: boolean;
+  /**
+   * If set to false, the screen for prompting a user to create a data view will be skipped, and the user will be taken directly
+   * to data view creation.
+   */
+  showEmptyPrompt?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -125,21 +130,6 @@ export interface IndexPatternTableItem {
   default: boolean;
   tag?: string[];
   sort: string;
-}
-
-// copied from index pattern management, needs review
-export interface MatchedItem {
-  name: string;
-  tags: Tag[];
-  item: {
-    name: string;
-    backing_indices?: string[];
-    timestamp_field?: string;
-    indices?: string[];
-    aliases?: string[];
-    attributes?: ResolveIndexResponseItemIndexAttrs[];
-    data_stream?: string;
-  };
 }
 
 export enum ResolveIndexResponseItemIndexAttrs {

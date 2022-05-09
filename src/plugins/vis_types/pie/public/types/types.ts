@@ -7,8 +7,8 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { SerializedFieldFormat } from '../../../../field_formats/common';
-import { ChartsPluginSetup } from '../../../../charts/public';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 export interface Dimension {
   accessor: number;

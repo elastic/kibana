@@ -57,7 +57,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
         agent_id: this.randomUUID(),
         started_at: this.randomPastDate(),
         completed_at: timeStamp.toISOString(),
-        error: 'some error happen',
+        error: 'some error happened',
         '@timestamp': timeStamp.toISOString(),
       },
       overrides

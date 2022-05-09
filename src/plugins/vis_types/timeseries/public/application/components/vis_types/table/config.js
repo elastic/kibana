@@ -37,7 +37,7 @@ import { QueryBarWrapper } from '../../query_bar_wrapper';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { isConfigurationFeatureEnabled } from '../../../../../common/check_ui_restrictions';
 import { filterCannotBeAppliedErrorMessage } from '../../../../../common/errors';
-import { KBN_FIELD_TYPES } from '../../../../../../../data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 export class TableSeriesConfig extends Component {
   UNSAFE_componentWillMount() {
@@ -221,7 +221,11 @@ export class TableSeriesConfig extends Component {
               fields={this.props.fields}
               indexPattern={this.props.panel.index_pattern}
               value={model.aggregate_by}
-              onChange={handleSelectChange('aggregate_by')}
+              onChange={(value) =>
+                this.props.onChange({
+                  aggregate_by: value?.[0],
+                })
+              }
               fullWidth
               restrict={[
                 KBN_FIELD_TYPES.NUMBER,

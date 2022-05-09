@@ -1,0 +1,203 @@
+---
+id: kibSharedUXServices
+slug: /kibana-dev-docs/shared-ux/packages/kbn-shared-ux-services
+title: Shared UX Services
+summary: The `@kbn/shared-ux-services` package provides a thin service abstraction for components and solutions created by the Shared UX team.
+date: 2022-03-11
+tags: ['kibana', 'dev', 'sharedUX']
+---
+
+## About Shared UX Services
+
+This package contains a set of services that are used by Shared UX components and solutions.  This package serves as a thin abstraction layer between Kibana dependencies and the components in Shared UX that use them.  It also allows us to "swap out" different implementations of the interfaces for different environments, (e.g. Storybook, Jest, etc).  This decouples the components from what could be complicated or heavily-dependent logic that is difficult to mock.
+
+## Implementations
+
+Several implementations of these interfaces exist:
+
+- `@kbn/shared-ux-services/src/services/stub`: A stub implementation free of dependencies, (and functionality).
+- `@kbn/shared-ux-services/src/services/mock`: A Jest mock implementation used in `jest` tests.
+- `@kbn/shared-ux-storybook/src/services/`: A Storybook implementation used in Storybook decorators and stories.
+- `src/plugins/shared_ux/src/services/`: A Kibana implementation used in Kibana plugins.
+
+Other implementations could easily be written to support other environments.
+
+## Architecture
+
+Lots of components require access to the services provided by other plugins.  When we identify a routine that relies on these dependencies, we can write a new method and add it to a namespace, (e.g. `platform`, `user`, etc).  These namespaces become interfaces of simple methods stored in `@kbn/shared-ux-services`.  From there, we can create implementations for each environment we support.
+
+Suppose we're creating a new service, `SharedUxFooService`:
+
+```ts
+interface SharedUxFooService {
+  getFoo(): string;
+  setBar(bar: string): void;
+  isBaz(): boolean;
+}
+```
+
+Once defined, we create factories to create those services.
+
+### Creating a `ServiceFactory`
+
+A `ServiceFactory` is a simple type that describes 1/ what service is being created, and 2/ what parameters are required to create that service for a given environment.
+
+### Stub and Mock Factories
+
+Given the service definition above, we can create a `ServiceFactory` for a stubbed service that gives the bare minimum of functionality:
+
+```ts
+/**
+ * A factory function for creating a stubbed implementation of `SharedUxFooService`.
+ */
+export type FooServiceFactory = ServiceFactory<SharedUxFooService>;
+
+/**
+ * A factory function for creating a stubbed implementation of `SharedUxFooService`.
+ */
+export const fooServiceFactory: FooServiceFactory = () => ({
+  getFoo: () => 'foo',
+  setBar: () => {},
+  isBaz: () => false,
+});
+```
+
+We can also create a mock for Jest:
+
+```ts
+/**
+ * A factory function for creating a mock implementation of `SharedUxFooService`.
+ */
+export type FooServiceFactory = ServiceFactory<SharedUxFooService>;
+
+/**
+ * A factory function for creating a stubbed implementation of `SharedUxFooService`.
+ */
+export const fooServiceFactory: FooServiceFactory = () => ({
+  getFoo: () => jest.fn(),
+  setBar: () => jest.fn(),
+  isBaz: () => jest.fn(),
+});
+```
+
+### Storybook Factories
+
+Storybook is where we can begin to take advantage of `Parameters` for a given service.  Since stories can use controls to provide parameters, we can create a `ServiceFactory` that uses the `Parameters` generic and returns a `SharedUxFooService` that uses their values.
+
+```ts
+import { action } from '@storybook/addon-actions';
+
+interface FooServiceStorybookParameters {
+  foo: string;
+  baz: boolean;
+}
+
+/**
+ * A factory function for creating a Storybook implementation of `SharedUxFooService`.
+ */
+export type FooServiceFactory = ServiceFactory<SharedUxFooService, StorybookParameters>;
+
+/**
+ * A factory function for creating a stubbed implementation of `SharedUxFooService`.
+ */
+export const fooServiceFactory: FooServiceFactory = ({ foo, baz }) => ({
+  getFoo: () => foo,
+  setBar: () => action('setBar'),
+  isBaz: () => baz,
+});
+```
+
+A story can then optionally provide values for those parameters as part of its controls.
+
+```ts
+type Params = Pick<FooServiceStorybookParameters, 'foo'>;
+
+export const ComponentStory = ({ foo }: Params) => {
+  const service = fooServiceFactory({ foo, baz: false });
+
+  return (
+    <SharedUxServicesContext.Provider value={service}><Component /></SharedUxServicesContext.Provider>;
+};
+
+PureComponent.argTypes = {
+  foo: {
+    options: ['alpha', 'beta', 'gamma', 'delta'],
+    control: { type: 'radio' },
+  },
+};
+```
+
+### Kibana Factories
+
+Using these services in Kibana is a bit more complex, but is still relatively simple.  First, we define what dependencies we'll need, (we use this interface in `src/plugins/shared_ux` as it relies on types found only in plugins, where packages cannot use them):
+
+```ts
+/**
+ * Parameters necessary to create a Kibana-based service, (e.g. during Plugin
+ * startup or setup).
+ *
+ * The `Start` generic refers to the specific Plugin `TPluginsStart`.
+ */
+export interface KibanaPluginServiceParams<Start extends {}> {
+  coreStart: CoreStart;
+  startPlugins: Start;
+  appUpdater?: BehaviorSubject<AppUpdater>;
+  initContext?: PluginInitializerContext;
+}
+
+/**
+ * A factory function for creating a Kibana-based service.
+ *
+ * The `Service` generic determines the shape of the Service being produced.
+ * The `Start` generic refers to the specific Plugin `TPluginsStart`.
+ */
+export type KibanaPluginServiceFactory<Service, Start extends {}> = (
+  params: KibanaPluginServiceParams<Start>
+) => Service;
+```
+
+From there, a plugin might have a collection of dependencies on core or other plugins:
+
+```ts
+export interface MyPluginStartDeps {
+  bar: BarPluginStart;
+  baz: BazPluginStart;
+}
+```
+
+We'd then use this dependency interface to create a `ServiceFactory` for our service in Kibana:
+
+```ts
+export type FooServiceFactory = KibanaPluginServiceFactory<
+  SharedUxFooService,
+  MyPluginStartDeps
+>;
+
+/**
+ * A factory function for creating a Kibana-based implementation of `SharedUxFooService`.
+ */
+export const fooServiceFactory: FooServiceFactory = ({ coreStart, startPlugins }) => ({
+  getFoo: startPlugins.bar.getSomeOtherFoo,
+  setBar: startPlugins.baz.setHappyPathBar,
+  isBaz: () => {
+    return coreStart.uiSettings.get('someSetting') === 'expectedValue';
+  }
+});
+```
+
+From there, the pattern is the same: invoke the service factory with the required dependencies and provide them to the `SharedUxServicesContext` Provider:
+
+```ts
+
+// plugin.tsx
+public start(coreStart: CoreStart, startPlugins: SharedUXPluginStartDeps): SharedUXPluginStart {
+  const fooService = fooServiceFactory({ coreStart, startPlugins });
+  const Context = <SharedUxServicesProvider services={{ fooService }}>{children}</SharedUxServicesProvider>;
+  
+  // ...wrap React content with the context..
+}
+```
+
+## Use in Kibana plugins
+
+In order to make consumption of these services easy by Kibana plugins, `src/plugins/shared_ux` provides a pre-wired set of services as part of the `start` lifecycle.  Plugins can simply make `sharedUX` a dependency, import `SharedUsServicesProvider` and wrap their solution root (or any component).  See the documentation for `sharedUX` for more details.

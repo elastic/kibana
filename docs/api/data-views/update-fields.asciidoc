@@ -49,7 +49,7 @@ Set popularity `count` for field `foo`:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/data-view/my-view/fields
+$ curl -X POST api/data_views/data-view/my-view/fields
 {
     "fields": {
         "foo": {
@@ -64,7 +64,7 @@ Update multiple metadata fields in one request:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/data-view/my-view/fields
+$ curl -X POST api/data_views/data-view/my-view/fields
 {
     "fields": {
         "foo": {
@@ -82,7 +82,7 @@ $ curl -X POST api/saved_objects/data-view/my-view/fields
 Use `null` value to delete metadata:
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/data-view/my-pattern/fields
+$ curl -X POST api/data_views/data-view/my-pattern/fields
 {
     "fields": {
         "foo": {

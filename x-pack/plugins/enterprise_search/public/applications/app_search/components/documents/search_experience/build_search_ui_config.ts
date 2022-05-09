@@ -9,7 +9,12 @@ import { Schema } from '../../../../shared/schema/types';
 
 import { Fields } from './types';
 
-export const buildSearchUIConfig = (apiConnector: object, schema: Schema, fields: Fields) => {
+export const buildSearchUIConfig = (
+  apiConnector: object,
+  schema: Schema,
+  fields: Fields,
+  initialState = { sortDirection: 'desc', sortField: 'id' }
+) => {
   const facets = fields.filterFields.reduce(
     (facetsConfig, fieldName) => ({
       ...facetsConfig,
@@ -22,10 +27,7 @@ export const buildSearchUIConfig = (apiConnector: object, schema: Schema, fields
     alwaysSearchOnInitialLoad: true,
     apiConnector,
     trackUrlState: false,
-    initialState: {
-      sortDirection: 'desc',
-      sortField: 'id',
-    },
+    initialState,
     searchQuery: {
       disjunctiveFacets: fields.filterFields,
       facets,

@@ -14,7 +14,7 @@ import { sourcererReducer, sourcererModel } from './sourcerer';
 
 import { HostsPluginReducer } from '../../hosts/store';
 import { NetworkPluginReducer } from '../../network/store';
-import { UebaPluginReducer } from '../../ueba/store';
+import { UsersPluginReducer } from '../../users/store';
 import { TimelinePluginReducer } from '../../timelines/store/timeline';
 
 import { SecuritySubPlugins } from '../../app/types';
@@ -26,7 +26,7 @@ import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
-  UebaPluginReducer &
+  UsersPluginReducer &
   NetworkPluginReducer &
   TimelinePluginReducer &
   ManagementPluginReducer;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isoToEpochRt } from './index';
+import { isoToEpochRt } from '.';
 import { isRight } from 'fp-ts/lib/Either';
 
 describe('isoToEpochRt', () => {

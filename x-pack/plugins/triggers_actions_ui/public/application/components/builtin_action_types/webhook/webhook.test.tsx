@@ -6,16 +6,17 @@
  */
 
 import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '.././index';
+import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
 import { WebhookActionConnector } from '../types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const ACTION_TYPE_ID = '.webhook';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -40,6 +41,7 @@ describe('webhook connector validation', () => {
       actionTypeId: '.webhook',
       name: 'webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         method: 'PUT',
         url: 'http://test.com',
@@ -74,6 +76,7 @@ describe('webhook connector validation', () => {
       actionTypeId: '.webhook',
       name: 'webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         method: 'PUT',
         url: 'http://test.com',

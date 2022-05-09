@@ -126,7 +126,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
     </EuiButton>
   );
 
-  const [query, setQuery] = useState<Query>(getQueryFromListParams(listParams));
+  const [query, setQuery] = useState<Query>(getQueryFromListParams(listParams, searchSchema));
   const [error, setError] = useState<Error | null>(null);
 
   const onSearchBarChange = (args: EuiSearchBarOnChangeArgs) => {

@@ -13,6 +13,10 @@ export const ControlGroupStrings = {
     i18n.translate('controls.controlGroup.title', {
       defaultMessage: 'Control group',
     }),
+  getControlButtonTitle: () =>
+    i18n.translate('controls.controlGroup.toolbarButtonTitle', {
+      defaultMessage: 'Controls',
+    }),
   emptyState: {
     getCallToAction: () =>
       i18n.translate('controls.controlGroup.emptyState.callToAction', {
@@ -26,6 +30,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
         defaultMessage: '...',
       }),
+    getDismissButton: () =>
+      i18n.translate('controls.controlGroup.emptyState.dismissButton', {
+        defaultMessage: 'Dismiss',
+      }),
   },
   manageControl: {
     getFlyoutCreateTitle: () =>
@@ -38,7 +46,11 @@ export const ControlGroupStrings = {
       }),
     getTitleInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.titleInputTitle', {
-        defaultMessage: 'Title',
+        defaultMessage: 'Label',
+      }),
+    getControlTypeTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.controlTypesTitle', {
+        defaultMessage: 'Control type',
       }),
     getWidthInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
@@ -60,19 +72,15 @@ export const ControlGroupStrings = {
       }),
     getManageButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.buttonTitle', {
-        defaultMessage: 'Configure controls',
+        defaultMessage: 'Settings',
       }),
     getFlyoutTitle: () =>
       i18n.translate('controls.controlGroup.management.flyoutTitle', {
-        defaultMessage: 'Configure controls',
+        defaultMessage: 'Control settings',
       }),
     getDefaultWidthTitle: () =>
       i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
         defaultMessage: 'Default size',
-      }),
-    getLayoutTitle: () =>
-      i18n.translate('controls.controlGroup.management.layoutTitle', {
-        defaultMessage: 'Layout',
       }),
     getDeleteButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.delete', {
@@ -108,18 +116,22 @@ export const ControlGroupStrings = {
           defaultMessage: 'Large',
         }),
     },
-    controlStyle: {
-      getDesignSwitchLegend: () =>
-        i18n.translate('controls.controlGroup.management.layout.designSwitchLegend', {
-          defaultMessage: 'Switch control designs',
+    labelPosition: {
+      getLabelPositionTitle: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.title', {
+          defaultMessage: 'Label position',
         }),
-      getSingleLineTitle: () =>
-        i18n.translate('controls.controlGroup.management.layout.singleLine', {
-          defaultMessage: 'Single line',
+      getLabelPositionLegend: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.designSwitchLegend', {
+          defaultMessage: 'Switch label position between inline and above',
         }),
-      getTwoLineTitle: () =>
-        i18n.translate('controls.controlGroup.management.layout.twoLine', {
-          defaultMessage: 'Double line',
+      getInlineTitle: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.inline', {
+          defaultMessage: 'Inline',
+        }),
+      getAboveTitle: () =>
+        i18n.translate('controls.controlGroup.management.labelPosition.above', {
+          defaultMessage: 'Above',
         }),
     },
     deleteControls: {
@@ -178,6 +190,55 @@ export const ControlGroupStrings = {
       getCancel: () =>
         i18n.translate('controls.controlGroup.management.deleteNew.cancel', {
           defaultMessage: 'Cancel',
+        }),
+    },
+    validateSelections: {
+      getValidateSelectionsTitle: () =>
+        i18n.translate('controls.controlGroup.management.validate.title', {
+          defaultMessage: 'Validate user selections',
+        }),
+      getValidateSelectionsSubTitle: () =>
+        i18n.translate('controls.controlGroup.management.validate.subtitle', {
+          defaultMessage:
+            'Automatically ignore any control selection that would result in no data.',
+        }),
+    },
+    controlChaining: {
+      getHierarchyTitle: () =>
+        i18n.translate('controls.controlGroup.management.hierarchy.title', {
+          defaultMessage: 'Chain controls',
+        }),
+      getHierarchySubTitle: () =>
+        i18n.translate('controls.controlGroup.management.hierarchy.subtitle', {
+          defaultMessage:
+            'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
+        }),
+    },
+    querySync: {
+      getQuerySettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.searchSettingsTitle', {
+          defaultMessage: 'Sync with query bar',
+        }),
+      getQuerySettingsSubtitle: () =>
+        i18n.translate('controls.controlGroup.management.query.useAllSearchSettingsTitle', {
+          defaultMessage:
+            'Keeps the control group in sync with the query bar by applying time range, filter pills, and queries from the query bar',
+        }),
+      getAdvancedSettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.advancedSettings', {
+          defaultMessage: 'Advanced',
+        }),
+      getIgnoreTimerangeTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreTimerange', {
+          defaultMessage: 'Ignore timerange',
+        }),
+      getIgnoreQueryTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreQuery', {
+          defaultMessage: 'Ignore query bar',
+        }),
+      getIgnoreFilterPillsTitle: () =>
+        i18n.translate('controls.controlGroup.management.query.ignoreFilterPills', {
+          defaultMessage: 'Ignore filter pills',
         }),
     },
   },

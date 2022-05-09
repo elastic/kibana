@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '../../../embeddable/public/lib/test_samples';
+export * from '@kbn/embeddable-plugin/public/lib/test_samples';

@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { IEsError } from 'src/plugins/data/public';
+import type { IEsError } from '@kbn/data-plugin/public';
 import { KibanaError, SecurityAppError } from '@kbn/securitysolution-t-grid';
 
 import { useToasts } from '../lib/kibana';
@@ -30,15 +30,18 @@ describe('useAppToasts', () => {
   let addErrorMock: jest.Mock;
   let addSuccessMock: jest.Mock;
   let addWarningMock: jest.Mock;
+  let removeMock: jest.Mock;
 
   beforeEach(() => {
     addErrorMock = jest.fn();
     addSuccessMock = jest.fn();
     addWarningMock = jest.fn();
+    removeMock = jest.fn();
     (useToasts as jest.Mock).mockImplementation(() => ({
       addError: addErrorMock,
       addSuccess: addSuccessMock,
       addWarning: addWarningMock,
+      remove: removeMock,
     }));
   });
 

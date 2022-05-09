@@ -32,11 +32,21 @@ const oauthConfigSchema = schema.object({
   base_url: schema.maybe(schema.string()),
   client_id: schema.maybe(schema.string()),
   client_secret: schema.maybe(schema.string()),
+  external_connector_api_key: schema.maybe(schema.string()),
+  external_connector_url: schema.maybe(schema.string()),
   service_type: schema.string(),
   private_key: schema.maybe(schema.string()),
   public_key: schema.maybe(schema.string()),
   consumer_key: schema.maybe(schema.string()),
 });
+
+const externalConnectorSchema = schema.object({
+  url: schema.string(),
+  api_key: schema.string(),
+  service_type: schema.string(),
+});
+
+const postConnectorSchema = schema.oneOf([externalConnectorSchema, oauthConfigSchema]);
 
 const displayFieldSchema = schema.object({
   fieldName: schema.string(),
@@ -96,9 +106,30 @@ const sourceSettingsSchema = schema.object({
             ),
           })
         ),
+        rules: schema.maybe(
+          schema.arrayOf(
+            schema.object({
+              filter_type: schema.string(),
+              exclude: schema.maybe(schema.string()),
+              include: schema.maybe(schema.string()),
+            })
+          )
+        ),
       })
     ),
   }),
+});
+
+const validateRulesSchema = schema.object({
+  rules: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        filter_type: schema.string(),
+        exclude: schema.maybe(schema.string()),
+        include: schema.maybe(schema.string()),
+      })
+    )
+  ),
 });
 
 // Account routes
@@ -175,6 +206,7 @@ export function registerAccountCreateSourceRoute({
       validate: {
         body: schema.object({
           service_type: schema.string(),
+          base_service_type: schema.maybe(schema.string()),
           name: schema.maybe(schema.string()),
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
@@ -242,9 +274,6 @@ export function registerAccountSourceReauthPrepareRoute({
         params: schema.object({
           id: schema.string(),
         }),
-        query: schema.object({
-          kibana_host: schema.string(),
-        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -269,6 +298,26 @@ export function registerAccountSourceSettingsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources/:id/settings',
+    })
+  );
+}
+
+export function registerAccountSourceValidateIndexingRulesRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/internal/workplace_search/account/sources/{id}/indexing_rules/validate',
+      validate: {
+        body: validateRulesSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:id/indexing_rules/validate',
     })
   );
 }
@@ -304,7 +353,6 @@ export function registerAccountPrepareSourcesRoute({
           serviceType: schema.string(),
         }),
         query: schema.object({
-          kibana_host: schema.string(),
           subdomain: schema.maybe(schema.string()),
         }),
       },
@@ -519,6 +567,7 @@ export function registerOrgCreateSourceRoute({
       validate: {
         body: schema.object({
           service_type: schema.string(),
+          base_service_type: schema.maybe(schema.string()),
           name: schema.maybe(schema.string()),
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
@@ -589,9 +638,6 @@ export function registerOrgSourceReauthPrepareRoute({
         params: schema.object({
           id: schema.string(),
         }),
-        query: schema.object({
-          kibana_host: schema.string(),
-        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -616,6 +662,26 @@ export function registerOrgSourceSettingsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/sources/:id/settings',
+    })
+  );
+}
+
+export function registerOrgSourceValidateIndexingRulesRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/internal/workplace_search/org/sources/{id}/indexing_rules/validate',
+      validate: {
+        body: validateRulesSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/indexing_rules/validate',
     })
   );
 }
@@ -651,7 +717,6 @@ export function registerOrgPrepareSourcesRoute({
           serviceType: schema.string(),
         }),
         query: schema.object({
-          kibana_host: schema.string(),
           index_permissions: schema.boolean(),
           subdomain: schema.maybe(schema.string()),
         }),
@@ -811,7 +876,7 @@ export function registerOrgSourceOauthConfigurationsRoute({
     {
       path: '/internal/workplace_search/org/settings/connectors',
       validate: {
-        body: oauthConfigSchema,
+        body: postConnectorSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -924,7 +989,6 @@ export function registerOauthConnectorParamsRoute({
       path: '/internal/workplace_search/sources/create',
       validate: {
         query: schema.object({
-          kibana_host: schema.string(),
           code: schema.maybe(schema.string()),
           session_state: schema.maybe(schema.string()),
           authuser: schema.maybe(schema.string()),
@@ -955,6 +1019,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceFederatedSummaryRoute(dependencies);
   registerAccountSourceReauthPrepareRoute(dependencies);
   registerAccountSourceSettingsRoute(dependencies);
+  registerAccountSourceValidateIndexingRulesRoute(dependencies);
   registerAccountPreSourceRoute(dependencies);
   registerAccountPrepareSourcesRoute(dependencies);
   registerAccountSourceSearchableRoute(dependencies);
@@ -970,6 +1035,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceFederatedSummaryRoute(dependencies);
   registerOrgSourceReauthPrepareRoute(dependencies);
   registerOrgSourceSettingsRoute(dependencies);
+  registerOrgSourceValidateIndexingRulesRoute(dependencies);
   registerOrgPreSourceRoute(dependencies);
   registerOrgPrepareSourcesRoute(dependencies);
   registerOrgSourceSearchableRoute(dependencies);

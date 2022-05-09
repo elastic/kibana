@@ -11,7 +11,6 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const docTable = getService('docTable');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -19,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
+    'doc_table:legacy': true,
   };
   describe('discover uses fields API test', function describeIndexTests() {
     before(async function () {
@@ -27,13 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
-      await kibanaServer.uiSettings.replace({ 'discover:searchFieldsFromSource': true });
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should correctly display documents', async function () {
@@ -61,8 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('displays _source viewer in doc viewer', async function () {
-      await docTable.clickRowToggle({ rowIndex: 0 });
-
+      await PageObjects.discover.clickDocTableRowToggle(0);
       await PageObjects.discover.isShowingDocViewer();
       await PageObjects.discover.clickDocViewerTab(1);
       await PageObjects.discover.expectSourceViewerToExist();

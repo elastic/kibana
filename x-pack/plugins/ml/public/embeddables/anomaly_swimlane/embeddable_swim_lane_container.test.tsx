@@ -14,12 +14,12 @@ import {
 import { BehaviorSubject, Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
 import { MlDependencies } from '../../application/app';
-import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
+import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 import { createCoreStartMock } from '../../__mocks__/core_start';
 import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
@@ -48,6 +48,9 @@ describe('ExplorerSwimlaneContainer', () => {
 
   const onInputChange = jest.fn();
   const onOutputChange = jest.fn();
+  const onRenderComplete = jest.fn();
+  const onLoading = jest.fn();
+  const onError = jest.fn();
 
   beforeEach(() => {
     embeddableContext = { id: 'test-id' } as AnomalySwimlaneEmbeddable;
@@ -102,6 +105,9 @@ describe('ExplorerSwimlaneContainer', () => {
         refresh={refresh}
         onInputChange={onInputChange}
         onOutputChange={onOutputChange}
+        onLoading={onLoading}
+        onRenderComplete={onRenderComplete}
+        onError={onError}
       />,
       defaultOptions
     );
@@ -141,6 +147,9 @@ describe('ExplorerSwimlaneContainer', () => {
         refresh={refresh}
         onInputChange={onInputChange}
         onOutputChange={onOutputChange}
+        onLoading={onLoading}
+        onRenderComplete={onRenderComplete}
+        onError={onError}
       />,
       defaultOptions
     );

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import supertest from 'supertest';
-import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
+import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const getMockJobParams = (obj: object) => {
@@ -233,6 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { language: 'kuery', query: '' },
               sort: [{ '@timestamp': 'desc' }],
             },
+            columns: ['@timestamp', 'clientip', 'extension'],
           })
         )) as supertest.Response;
         const { status: resStatus, text: resText, type: resType } = res;
@@ -271,6 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { language: 'kuery', query: '' },
               sort: [{ '@timestamp': 'desc' }],
             },
+            columns: ['@timestamp', 'clientip', 'extension'],
           })
         )) as supertest.Response;
         const { status: resStatus, text: resText, type: resType } = res;
@@ -301,6 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
               fields: ['date', 'message'],
               filter: [],
             },
+            columns: ['date', 'message'],
           })
         );
         const { status: resStatus, text: resText, type: resType } = res;
@@ -322,6 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
               fields: ['date', 'message'],
               filter: [],
             },
+            columns: ['date', 'message'],
           })
         );
         const { status: resStatus, text: resText, type: resType } = res;
@@ -378,6 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               ],
             },
+            columns: ['name', 'power'],
           })
         )) as supertest.Response;
 

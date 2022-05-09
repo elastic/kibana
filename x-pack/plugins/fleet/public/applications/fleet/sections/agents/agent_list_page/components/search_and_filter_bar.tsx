@@ -19,9 +19,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AgentPolicy } from '../../../../types';
+import type { Agent, AgentPolicy } from '../../../../types';
 import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
+
+import { AgentBulkActions } from './bulk_actions';
+import type { SelectionMode } from './types';
 
 const statusFilters = [
   {
@@ -67,6 +70,12 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onSelectedStatusChange: (selectedStatus: string[]) => void;
   showUpgradeable: boolean;
   onShowUpgradeableChange: (showUpgradeable: boolean) => void;
+  totalAgents: number;
+  totalInactiveAgents: number;
+  selectionMode: SelectionMode;
+  currentQuery: string;
+  selectedAgents: Agent[];
+  refreshAgents: () => void;
 }> = ({
   agentPolicies,
   draftKuery,
@@ -78,6 +87,12 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onSelectedStatusChange,
   showUpgradeable,
   onShowUpgradeableChange,
+  totalAgents,
+  totalInactiveAgents,
+  selectionMode,
+  currentQuery,
+  selectedAgents,
+  refreshAgents,
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 
@@ -103,10 +118,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
     <>
       {isEnrollmentFlyoutOpen ? (
         <EuiPortal>
-          <AgentEnrollmentFlyout
-            agentPolicies={agentPolicies}
-            onClose={() => setIsEnrollmentFlyoutOpen(false)}
-          />
+          <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
         </EuiPortal>
       ) : null}
 
@@ -124,6 +136,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   }
                 }}
                 indexPattern={AGENTS_INDEX}
+                dataTestSubj="agentList.queryInput"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
@@ -137,6 +150,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       isSelected={isStatusFilterOpen}
                       hasActiveFilters={selectedStatus.length > 0}
                       disabled={agentPolicies.length === 0}
+                      data-test-subj="agentList.statusFilter"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentList.statusFilterText"
@@ -177,6 +191,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       numActiveFilters={selectedAgentPolicies.length}
                       numFilters={agentPolicies.length}
                       disabled={agentPolicies.length === 0}
+                      data-test-subj="agentList.policyFilter"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentList.policyFilterText"
@@ -211,6 +226,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);
                   }}
+                  data-test-subj="agentList.showUpgradeable"
                 >
                   <FormattedMessage
                     id="xpack.fleet.agentList.showUpgradeableFilterLabel"
@@ -228,6 +244,16 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               >
                 <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
               </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AgentBulkActions
+                totalAgents={totalAgents}
+                totalInactiveAgents={totalInactiveAgents}
+                selectionMode={selectionMode}
+                currentQuery={currentQuery}
+                selectedAgents={selectedAgents}
+                refreshAgents={refreshAgents}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

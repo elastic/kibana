@@ -136,5 +136,18 @@ describe('getColumns', () => {
         ).toEqual('hover-actions-copy-button');
       });
     });
+
+    describe('does not render hover actions when readOnly prop is passed', () => {
+      test('it renders a filter for (+) button', () => {
+        actionsColumn = getColumns({ ...defaultProps, isReadOnly: true })[0] as Column;
+        const wrapper = mount(
+          <TestProviders>{actionsColumn.render(testValue, testData)}</TestProviders>
+        ) as ReactWrapper;
+
+        expect(wrapper.find('[data-test-subj="hover-actions-filter-for"]').exists()).toBeFalsy();
+        expect(wrapper.find('[data-test-subj="hover-actions-filter-out"]').exists()).toBeFalsy();
+        expect(wrapper.find('[data-test-subj="more-actions-agent.id"]').exists()).toBeFalsy();
+      });
+    });
   });
 });

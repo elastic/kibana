@@ -8,18 +8,14 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  MetricsServiceSetup,
-  ServiceStatus,
-  ServiceStatusLevels,
-} from '../../../../../core/server';
+import { MetricsServiceSetup, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {
   contextServiceMock,
   loggingSystemMock,
   metricsServiceMock,
   executionContextServiceMock,
-} from '../../../../../core/server/mocks';
-import { createHttpServer } from '../../../../../core/server/test_utils';
+} from '@kbn/core/server/mocks';
+import { createHttpServer } from '@kbn/core/server/test_utils';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
@@ -51,6 +47,7 @@ describe('/api/stats', () => {
       router,
       collectorSet: new CollectorSet({
         logger: loggingSystemMock.create().asLoggerFactory().get(),
+        executionContext: executionContextServiceMock.createSetupContract(),
       }),
       config: {
         allowAnonymous: true,

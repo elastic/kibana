@@ -12,7 +12,7 @@ import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mo
 import { mockGlobalState } from '../../../../mock/global_state';
 import { tGridActions } from '../../../../store/t_grid';
 
-import { FieldsBrowser } from './field_browser';
+import { FieldsBrowser, FieldsBrowserComponentProps } from './field_browser';
 
 import { createStore, State } from '../../../../types';
 import { createSecuritySolutionStorageMock } from '../../../../mock/mock_local_storage';
@@ -27,24 +27,28 @@ jest.mock('react-redux', () => {
 });
 const timelineId = 'test';
 const onHide = jest.fn();
-const testProps = {
+const testProps: FieldsBrowserComponentProps = {
   columnHeaders: [],
-  browserFields: mockBrowserFields,
   filteredBrowserFields: mockBrowserFields,
   searchInput: '',
+  appliedFilterInput: '',
   isSearching: false,
-  onCategorySelected: jest.fn(),
+  setSelectedCategoryIds: jest.fn(),
   onHide,
   onSearchInputChange: jest.fn(),
   restoreFocusTo: React.createRef<HTMLButtonElement>(),
-  selectedCategoryId: '',
+  selectedCategoryIds: [],
   timelineId,
+  filterSelectedEnabled: false,
+  onFilterSelectedChange: jest.fn(),
 };
 const { storage } = createSecuritySolutionStorageMock();
+
 describe('FieldsBrowser', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
+
   test('it renders the Close button', () => {
     const wrapper = mount(
       <TestProviders>
@@ -79,19 +83,7 @@ describe('FieldsBrowser', () => {
   test('it invokes updateColumns action when the user clicks the Reset Fields button', () => {
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser
-          columnHeaders={defaultHeaders}
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          searchInput={''}
-          isSearching={false}
-          onCategorySelected={jest.fn()}
-          onHide={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          restoreFocusTo={React.createRef<HTMLButtonElement>()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
+        <FieldsBrowser {...testProps} columnHeaders={defaultHeaders} />
       </TestProviders>
     );
 
@@ -127,24 +119,24 @@ describe('FieldsBrowser', () => {
     expect(wrapper.find('[data-test-subj="field-search"]').exists()).toBe(true);
   });
 
-  test('it renders the categories pane', () => {
+  test('it renders the categories selector', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="left-categories-pane"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="categories-selector"]').exists()).toBe(true);
   });
 
-  test('it renders the fields pane', () => {
+  test('it renders the fields table', () => {
     const wrapper = mount(
       <TestProviders>
         <FieldsBrowser {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="fields-pane"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="field-table"]').exists()).toBe(true);
   });
 
   test('focuses the search input when the component mounts', () => {
@@ -181,19 +173,24 @@ describe('FieldsBrowser', () => {
     expect(onSearchInputChange).toBeCalledWith(inputText);
   });
 
-  test('does not render the CreateField button when createFieldComponent is provided without a dataViewId', () => {
+  test('does not render the CreateFieldButton when it is provided but does not have a dataViewId', () => {
     const MyTestComponent = () => <div>{'test'}</div>;
 
     const wrapper = mount(
       <TestProviders>
-        <FieldsBrowser {...testProps} createFieldComponent={MyTestComponent} />
+        <FieldsBrowser
+          {...testProps}
+          options={{
+            createFieldButton: MyTestComponent,
+          }}
+        />
       </TestProviders>
     );
 
     expect(wrapper.find(MyTestComponent).exists()).toBeFalsy();
   });
 
-  test('it renders the CreateField button when createFieldComponent is provided with a dataViewId', () => {
+  test('it renders the CreateFieldButton when it is provided and have a dataViewId', () => {
     const state: State = {
       ...mockGlobalState,
       timelineById: {
@@ -210,7 +207,12 @@ describe('FieldsBrowser', () => {
 
     const wrapper = mount(
       <TestProviders store={store}>
-        <FieldsBrowser {...testProps} createFieldComponent={MyTestComponent} />
+        <FieldsBrowser
+          {...testProps}
+          options={{
+            createFieldButton: MyTestComponent,
+          }}
+        />
       </TestProviders>
     );
 

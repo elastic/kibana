@@ -7,36 +7,9 @@ $controlMinWidth: $euiSize * 14;
   min-height: $euiSize * 4;
 }
 
-.controlsWrapper {
-  &--empty {
-    display: flex;
-    @include euiBreakpoint('m', 'l', 'xl') {
-      .addControlButton {
-        text-align: center;
-      }
-      .emptyStateText {
-        padding-left: $euiSize * 2;
-      }
-      height: $euiSize * 4;
-      overflow: hidden;
-    }
-    @include euiBreakpoint('xs', 's') {
-      .addControlButton {
-        text-align: center;
-      }
-      .emptyStateText {
-        text-align: center;
-      }
-      .controlsIllustration__container {
-        margin-bottom: 0 !important;
-      }
-    }
-  }
-
-  &--twoLine {
-    .groupEditActions {
-      padding-top: $euiSize;
-    }
+.controlsWrapper--twoLine {
+  .groupEditActions {
+    padding-top: $euiSize;
   }
 }
 
@@ -75,25 +48,41 @@ $controlMinWidth: $euiSize * 14;
     @include euiFontSizeXS;
   }
 
-  .controlFrame__formControlLayout, .controlFrame__draggable {
+  .controlFrame__formControlLayout,
+  .controlFrame__draggable {
     .controlFrame__dragHandle {
       cursor: grabbing;
     }
   }
 }
 
+.controlFrame__labelToolTip {
+  max-width: 40%;
+}
+
 .controlFrameWrapper {
   flex-basis: auto;
   position: relative;
 
+  &.controlFrameWrapper-isEditable {
+    .controlFrame__formControlLayoutLabel {
+      padding-left: 0;
+    }
+  }
+
+  &:not(.controlFrameWrapper-isEditable) {
+    .controlFrameFormControlLayout--twoLine .euiFormControlLayout__childrenWrapper {
+      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
+    }
+  }
+
   .controlFrame__formControlLayout {
     width: 100%;
     min-width: $controlMinWidth;
-    transition:background-color .1s, color .1s;
+    transition: background-color .1s, color .1s;
 
     &Label {
       @include euiTextTruncate;
-      max-width: 50%;
       border-radius: $euiBorderRadius;
     }
 
@@ -148,7 +137,6 @@ $controlMinWidth: $euiSize * 14;
   &--insertBefore {
     .controlFrame__formControlLayout:after {
       left: -$euiSizeXS - 1;
-
     }
   }
 
@@ -169,7 +157,7 @@ $controlMinWidth: $euiSize * 14;
     position: absolute;
 
     &--oneLine {
-      right:$euiSizeXS;
+      right: $euiSizeXS;
       top: -$euiSizeL;
       padding: $euiSizeXS;
       border-radius: $euiBorderRadius;
@@ -178,14 +166,14 @@ $controlMinWidth: $euiSize * 14;
     }
 
     &--twoLine {
-      right:$euiSizeXS;
+      right: $euiSizeXS;
       top: -$euiSizeXS;
     }
   }
 
   &:hover {
     .controlFrameFloatingActions {
-      transition:visibility .1s, opacity .1s;
+      transition: visibility .1s, opacity .1s;
       visibility: visible;
       opacity: 1;
     }

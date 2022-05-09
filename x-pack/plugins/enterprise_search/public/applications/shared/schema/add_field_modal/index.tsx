@@ -24,9 +24,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { SchemaFieldTypeSelect } from '..';
 import { CANCEL_BUTTON_LABEL } from '../../constants';
 import { FIELD_NAME, FIELD_TYPE } from '../constants';
-import { SchemaFieldTypeSelect } from '../index';
 import { SchemaType } from '../types';
 
 import {

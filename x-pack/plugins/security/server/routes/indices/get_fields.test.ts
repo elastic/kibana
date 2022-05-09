@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineGetFieldsRoutes } from './get_fields';
@@ -40,8 +40,8 @@ describe('GET /internal/security/fields/{query}', () => {
     const mockContext = {
       core: coreMock.createRequestHandlerContext(),
     };
-    mockContext.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping.mockImplementation(
-      (async () => ({ body: mockFieldMappingResponse })) as any
+    mockContext.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping.mockResponse(
+      mockFieldMappingResponse as any
     );
 
     defineGetFieldsRoutes(mockRouteDefinitionParams);

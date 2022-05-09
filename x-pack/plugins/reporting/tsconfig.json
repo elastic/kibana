@@ -20,7 +20,6 @@
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/field_formats/tsconfig.json" },
-    { "path": "../event_log/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../screenshotting/tsconfig.json" },

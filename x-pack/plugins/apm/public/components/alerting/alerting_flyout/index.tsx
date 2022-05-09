@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AlertType,
   APM_SERVER_FEATURE_ID,
@@ -55,7 +55,7 @@ export function AlertingFlyout(props: Props) {
       services.triggersActionsUi.getAddAlertFlyout({
         consumer: APM_SERVER_FEATURE_ID,
         onClose: onCloseAddFlyout,
-        alertTypeId: alertType,
+        ruleTypeId: alertType,
         canChangeTrigger: false,
         initialValues,
         metadata: {

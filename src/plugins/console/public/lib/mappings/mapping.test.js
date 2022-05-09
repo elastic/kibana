@@ -240,4 +240,39 @@ describe('Mappings', () => {
     ]);
     expect(mappings.expandAliases('alias2')).toEqual('test_index2');
   });
+
+  test('Templates', function () {
+    mappings.loadLegacyTemplates({
+      test_index1: { order: 0 },
+      test_index2: { order: 0 },
+      test_index3: { order: 0 },
+    });
+
+    mappings.loadIndexTemplates({
+      index_templates: [{ name: 'test_index1' }, { name: 'test_index2' }, { name: 'test_index3' }],
+    });
+
+    mappings.loadComponentTemplates({
+      component_templates: [
+        { name: 'test_index1' },
+        { name: 'test_index2' },
+        { name: 'test_index3' },
+      ],
+    });
+
+    const expectedResult = ['test_index1', 'test_index2', 'test_index3'];
+
+    expect(mappings.getLegacyTemplates()).toEqual(expectedResult);
+    expect(mappings.getIndexTemplates()).toEqual(expectedResult);
+    expect(mappings.getComponentTemplates()).toEqual(expectedResult);
+  });
+
+  test('Data streams', function () {
+    mappings.loadDataStreams({
+      data_streams: [{ name: 'test_index1' }, { name: 'test_index2' }, { name: 'test_index3' }],
+    });
+
+    const expectedResult = ['test_index1', 'test_index2', 'test_index3'];
+    expect(mappings.getDataStreams()).toEqual(expectedResult);
+  });
 });

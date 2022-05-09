@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import {
@@ -57,8 +57,7 @@ export async function fetchClusterUuids(
     },
   };
 
-  const { body: response } = await callCluster.search(params);
-  return response;
+  return await callCluster.search(params);
 }
 
 /**

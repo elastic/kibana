@@ -15,17 +15,19 @@ import type {
   IUiSettingsClient,
   PluginInitializerContext,
   KibanaExecutionContext,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { History } from 'history';
 import type { Filter } from '@kbn/es-query';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
-import { UrlForwardingStart } from '../../url_forwarding/public';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
 import { Query, RefreshInterval, TimeRange } from './services/data';
@@ -37,10 +39,8 @@ import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
-import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
-import type { DashboardControlGroupInput } from './application/lib/dashboard_control_group';
 
 export type { SavedDashboardPanel };
 
@@ -69,8 +69,9 @@ export interface DashboardState {
   expandedPanelId?: string;
   options: DashboardOptions;
   panels: DashboardPanelMap;
+  timeRange?: TimeRange;
 
-  controlGroupInput?: DashboardControlGroupInput;
+  controlGroupInput?: PersistableControlGroupInput;
 }
 
 /**
@@ -80,15 +81,17 @@ export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: Saved
 
 export interface DashboardContainerInput extends ContainerInput {
   dashboardCapabilities?: DashboardAppCapabilities;
-  controlGroupInput?: DashboardControlGroupInput;
+  controlGroupInput?: PersistableControlGroupInput;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
   expandedPanelId?: string;
   timeRange: TimeRange;
+  timeRestore: boolean;
   description?: string;
   useMargins: boolean;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   viewMode: ViewMode;
   filters: Filter[];
   title: string;
@@ -152,6 +155,7 @@ export type DashboardOptions = {
   hidePanelTitles: boolean;
   useMargins: boolean;
   syncColors: boolean;
+  syncTooltips: boolean;
 };
 
 export type DashboardRedirect = (props: RedirectToProps) => void;

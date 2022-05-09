@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { Position } from '@elastic/charts';
 
-import { TextInputOption } from '../../../../../../../vis_default_editor/public';
+import { TextInputOption } from '@kbn/vis-default-editor-plugin/public';
 
 import { ValueAxis, ScaleType } from '../../../../types';
 import { LabelOptions } from './label_options';

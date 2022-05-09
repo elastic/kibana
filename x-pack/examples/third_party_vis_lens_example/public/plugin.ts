@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
-import { DataViewsPublicPluginStart, DataView } from '../../../../src/plugins/data_views/public';
-import { LensPublicSetup, LensPublicStart } from '../../../plugins/lens/public';
-import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
-import { TypedLensByValueInput, PersistedIndexPatternLayer } from '../../../plugins/lens/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
 import { getRotatingNumberVisualization } from './visualization';
 import { RotatingNumberState } from '../common/types';
+import image from './image.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
@@ -38,7 +39,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
         label: 'Count of records',
         operationType: 'count',
         scale: 'ratio',
-        sourceField: 'Records',
+        sourceField: '___records___',
       },
     },
   };
@@ -111,10 +112,11 @@ export class EmbeddedLensExamplePlugin
       appId: 'third_party_lens_vis_example',
       title: 'Third party Lens visualization',
       description: 'Add custom visualization types to the Lens editor',
+      image,
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_lens_vis_example',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_vis_lens_example',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

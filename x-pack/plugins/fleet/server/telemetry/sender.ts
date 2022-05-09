@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
-import type { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 
 import { cloneDeep } from 'lodash';
 
@@ -110,8 +110,7 @@ export class TelemetryEventsSender {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    const { body } = await this.esClient.info();
-    return body;
+    return await this.esClient.info();
   }
 
   public async sendEvents(

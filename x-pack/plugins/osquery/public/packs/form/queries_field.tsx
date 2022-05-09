@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, findIndex, forEach, pullAt, pullAllBy, pickBy } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiComboBoxProps } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,9 +21,15 @@ import { getSupportedPlatforms } from '../queries/platforms/helpers';
 interface QueriesFieldProps {
   handleNameChange: (name: string) => void;
   field: FieldHook<Array<Record<string, unknown>>>;
+  euiFieldProps: EuiComboBoxProps<{}>;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, handleNameChange }) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
+  field,
+  handleNameChange,
+  euiFieldProps,
+}) => {
+  const isReadOnly = !!euiFieldProps?.isDisabled;
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number>(-1);
   const [tableSelectedItems, setTableSelectedItems] = useState<
@@ -107,6 +113,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, handleNameC
         setValue(
           produce((draft) => {
             draft.push(newQuery);
+
             return draft;
           })
         );
@@ -174,34 +181,39 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, handleNameC
 
   return (
     <>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          {!tableSelectedItems.length ? (
-            <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
-              <FormattedMessage
-                id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"
-                defaultMessage="Add query"
-              />
-            </EuiButton>
-          ) : (
-            <EuiButton color="danger" onClick={handleDeleteQueries} iconType="trash">
-              <FormattedMessage
-                id="xpack.osquery.pack.table.deleteQueriesButtonLabel"
-                defaultMessage="Delete {queriesCount, plural, one {# query} other {# queries}}"
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                values={{
-                  queriesCount: tableSelectedItems.length,
-                }}
-              />
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+      {!isReadOnly && (
+        <>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              {!tableSelectedItems.length ? (
+                <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
+                  <FormattedMessage
+                    id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"
+                    defaultMessage="Add query"
+                  />
+                </EuiButton>
+              ) : (
+                <EuiButton color="danger" onClick={handleDeleteQueries} iconType="trash">
+                  <FormattedMessage
+                    id="xpack.osquery.pack.table.deleteQueriesButtonLabel"
+                    defaultMessage="Delete {queriesCount, plural, one {# query} other {# queries}}"
+                    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                    values={{
+                      queriesCount: tableSelectedItems.length,
+                    }}
+                  />
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+        </>
+      )}
       {field.value?.length ? (
         <PackQueriesTable
           // @ts-expect-error update types
           data={tableData}
+          isReadOnly={isReadOnly}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
           selectedItems={tableSelectedItems}
@@ -209,7 +221,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field, handleNameC
         />
       ) : null}
       <EuiSpacer />
-      {<OsqueryPackUploader onChange={handlePackUpload} />}
+      {!isReadOnly && <OsqueryPackUploader onChange={handlePackUpload} />}
       {showAddQueryFlyout && (
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}

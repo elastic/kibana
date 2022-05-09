@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { DashboardPlugin } from './plugin';
 
 export {
@@ -17,7 +17,11 @@ export {
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
-export type { DashboardAppLocator, DashboardAppLocatorParams } from './locator';
+export {
+  type DashboardAppLocator,
+  type DashboardAppLocatorParams,
+  cleanEmptyKeys,
+} from './locator';
 
 export type { DashboardSavedObject } from './saved_dashboards';
 export type { SavedDashboardPanel, DashboardContainerInput } from './types';

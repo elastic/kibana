@@ -15,6 +15,7 @@
   "references": [
     { "path": "../../../core/tsconfig.json" },
     { "path": "../../expressions/tsconfig.json" },
+    { "path": "../../presentation_util/tsconfig.json" },
     { "path": "../../data/tsconfig.json" },
     { "path": "../../field_formats/tsconfig.json" },
     { "path": "../../charts/tsconfig.json" },

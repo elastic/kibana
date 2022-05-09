@@ -326,6 +326,26 @@ export class TagManagementPageObject extends FtrService {
     }
   }
 
+  async clickActionItem(action: string) {
+    const rows = await this.testSubjects.findAll('tagsTableRow');
+    const firstRow = rows[0];
+    // if there is more than 2 actions, they are wrapped in a popover that opens from a new action.
+    const menuActionPresent = await this.testSubjects.descendantExists(
+      'euiCollapsedItemActionsButton',
+      firstRow
+    );
+    if (menuActionPresent) {
+      const actionButton = await this.testSubjects.findDescendant(
+        'euiCollapsedItemActionsButton',
+        firstRow
+      );
+      await actionButton.click();
+      await this.testSubjects.click(`tagsTableAction-${action}`);
+    } else {
+      await this.testSubjects.click(`tagsTableAction-${action}`);
+    }
+  }
+
   /**
    * Return the (table ordered) name of the tags currently displayed in the table.
    */

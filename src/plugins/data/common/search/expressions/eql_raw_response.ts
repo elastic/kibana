@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionTypeDefinition } from '../../../../expressions/common';
+import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
 import { EqlSearchStrategyResponse } from '..';
 
 const name = 'eql_raw_response';
@@ -125,6 +125,9 @@ export const eqlRawResponse: EqlRawResponseExpressionTypeDefinition = {
         meta: {
           type: 'eql',
           source: '*',
+          statistics: {
+            totalCount: (context.body as EqlSearchResponse<unknown>).hits.total?.value,
+          },
         },
         columns,
         rows,

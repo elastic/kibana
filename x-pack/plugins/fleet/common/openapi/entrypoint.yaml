@@ -49,6 +49,8 @@ paths:
     $ref: paths/agent_status_deprecated.yaml
   /agent_status:
     $ref: paths/agent_status.yaml
+  /agent_status/data:
+    $ref: paths/agent_status@data.yaml
   /agents:
     $ref: paths/agents.yaml
   /agents/bulk_upgrade:
@@ -104,6 +106,8 @@ paths:
     $ref: paths/outputs.yaml
   /outputs/{outputId}:
     $ref: paths/outputs@{output_id}.yaml
+  /logstash_api_keys:
+    $ref: paths/logstash_api_keys.yaml
 components:
   securitySchemes:
     basicAuth:

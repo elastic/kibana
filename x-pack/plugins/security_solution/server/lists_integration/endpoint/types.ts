@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateExceptionListItemOptions } from '../../../../lists/server';
+import { CreateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 
 /**
  * An Exception Like item is a structure used internally by several of the Exceptions api/service in that

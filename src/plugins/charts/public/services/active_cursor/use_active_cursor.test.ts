@@ -5,78 +5,64 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { TestScheduler } from 'rxjs/testing';
 import { renderHook } from '@testing-library/react-hooks';
+import type { Chart, PointerEvent } from '@elastic/charts';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { RefObject } from 'react';
 
-import { ActiveCursor } from './active_cursor';
+import type { ActiveCursor } from './active_cursor';
 import { useActiveCursor } from './use_active_cursor';
 
 import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
-import type { Chart, PointerEvent } from '@elastic/charts';
-import type { Datatable } from '../../../../expressions/public';
+
+/** @internal **/
+type DispatchExternalPointerEventFn = (pointerEvent: PointerEvent) => void;
 
 describe('useActiveCursor', () => {
-  let cursor: ActiveCursorPayload['cursor'];
-  let dispatchExternalPointerEvent: jest.Mock;
+  let testScheduler: TestScheduler;
 
-  const act = (
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toEqual(expected));
+  });
+
+  const act = async (
     syncOption: ActiveCursorSyncOption,
-    events: Array<Partial<ActiveCursorPayload>>,
-    eventsTimeout = 1
-  ) =>
-    new Promise(async (resolve, reject) => {
-      try {
-        const activeCursor = new ActiveCursor();
-        let allEventsExecuted = false;
-        activeCursor.setup();
-        dispatchExternalPointerEvent.mockImplementation((pointerEvent) => {
-          if (allEventsExecuted) {
-            resolve(pointerEvent);
-          }
-        });
+    events: Record<string, Partial<ActiveCursorPayload>>
+  ): Promise<{ dispatchExternalPointerEvent: DispatchExternalPointerEventFn }> =>
+    new Promise((res) => {
+      testScheduler.run(({ cold }) => {
+        const marble = `${Object.keys(events).join(`-`)} |`;
+        const activeCursor$ = cold(marble, events);
+        const dispatchExternalPointerEvent: DispatchExternalPointerEventFn = jest.fn();
+
         renderHook(() =>
           useActiveCursor(
-            activeCursor,
+            {
+              activeCursor$,
+            } as unknown as ActiveCursor,
             {
               current: {
-                dispatchExternalPointerEvent: dispatchExternalPointerEvent as (
-                  pointerEvent: PointerEvent
-                ) => void,
+                dispatchExternalPointerEvent,
               },
             } as RefObject<Chart>,
             { ...syncOption, debounce: syncOption.debounce ?? 1 }
           )
         );
 
-        for (const e of events) {
-          await new Promise((eventResolve) =>
-            setTimeout(() => {
-              if (e === events[events.length - 1]) {
-                allEventsExecuted = true;
-              }
-
-              activeCursor.activeCursor$!.next({
-                cursor,
-                ...e,
-              });
-              eventResolve(null);
-            }, eventsTimeout)
-          );
-        }
-      } catch (error) {
-        reject(error);
-      }
+        activeCursor$.subscribe({
+          complete: () => {
+            res({ dispatchExternalPointerEvent });
+          },
+        });
+      });
     });
 
-  beforeEach(() => {
-    cursor = {} as ActiveCursorPayload['cursor'];
-    dispatchExternalPointerEvent = jest.fn();
-  });
-
   test('should debounce events', async () => {
-    await act(
+    const { dispatchExternalPointerEvent } = await act(
       {
-        debounce: 50,
+        debounce: 5,
         datatables: [
           {
             columns: [
@@ -90,25 +76,30 @@ describe('useActiveCursor', () => {
           },
         ] as Datatable[],
       },
-      [
-        { accessors: ['foo_index:foo_field'] },
-        { accessors: ['foo_index:foo_field'] },
-        { accessors: ['foo_index:foo_field'] },
-        { accessors: ['foo_index:foo_field'] },
-      ]
+      {
+        a: { accessors: ['foo_index:foo_field'] },
+        b: { accessors: ['foo_index:foo_field'] },
+        c: { accessors: ['foo_index:foo_field'] },
+        d: { accessors: ['foo_index:foo_field'] },
+      }
     );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);
   });
 
   test('should trigger cursor pointer update (chart type: time, event type: time)', async () => {
-    await act({ isDateHistogram: true }, [{ isDateHistogram: true }]);
+    const { dispatchExternalPointerEvent } = await act(
+      { isDateHistogram: true },
+      {
+        a: { isDateHistogram: true },
+      }
+    );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);
   });
 
   test('should trigger cursor pointer update (chart type: datatable - time based, event type: time)', async () => {
-    await act(
+    const { dispatchExternalPointerEvent } = await act(
       {
         datatables: [
           {
@@ -126,14 +117,14 @@ describe('useActiveCursor', () => {
           },
         ] as unknown as Datatable[],
       },
-      [{ isDateHistogram: true }, { accessors: ['foo_index:foo_field'] }]
+      { a: { isDateHistogram: true }, b: { accessors: ['foo_index:foo_field'] } }
     );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(2);
   });
 
   test('should not trigger cursor pointer update (chart type: datatable, event type: time)', async () => {
-    await act(
+    const { dispatchExternalPointerEvent } = await act(
       {
         datatables: [
           {
@@ -148,14 +139,14 @@ describe('useActiveCursor', () => {
           },
         ] as Datatable[],
       },
-      [{ isDateHistogram: true }, { accessors: ['foo_index:foo_field'] }]
+      { a: { isDateHistogram: true }, b: { accessors: ['foo_index:foo_field'] } }
     );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);
   });
 
   test('should works with multi datatables (intersection)', async () => {
-    await act(
+    const { dispatchExternalPointerEvent } = await act(
       {
         datatables: [
           {
@@ -180,7 +171,7 @@ describe('useActiveCursor', () => {
           },
         ] as Datatable[],
       },
-      [{ accessors: ['foo_index:foo_field', 'ib:fb'] }]
+      { a: { accessors: ['foo_index:foo_field', 'ib:fb'] } }
     );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);

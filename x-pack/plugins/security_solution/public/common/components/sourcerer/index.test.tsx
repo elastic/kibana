@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
+import { cloneDeep } from 'lodash';
+
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
-import { Sourcerer } from './index';
+import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
   createSecuritySolutionStorageMock,
@@ -22,6 +24,7 @@ import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_sel
 import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { TimelineId, TimelineType } from '../../../../common/types';
 
 const mockDispatch = jest.fn();
 
@@ -40,8 +43,8 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,
@@ -989,6 +992,24 @@ describe('Update available', () => {
     expect(wrapper.find(`UpdateDefaultDataViewModal`).prop('isShowing')).toEqual(true);
   });
 
+  test('Show UpdateDefaultDataViewModal Callout', () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
+      'This timeline uses a legacy data view selector'
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
+    ).toEqual('The active index patterns in this timeline are: myFakebeat-*');
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-message"]`).first().text()).toEqual(
+      "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view here."
+    );
+  });
+
   test('Show Add index pattern in UpdateDefaultDataViewModal', () => {
     wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
 
@@ -1014,6 +1035,211 @@ describe('Update available', () => {
         selectedPatterns: ['myFakebeat-*'],
         shouldValidateSelectedPatterns: false,
       })
+    );
+  });
+});
+
+describe('Update available for timeline template', () => {
+  const { storage } = createSecuritySolutionStorageMock();
+  const state2 = {
+    ...mockGlobalState,
+    timeline: {
+      ...mockGlobalState.timeline,
+      timelineById: {
+        ...mockGlobalState.timeline.timelineById,
+        [TimelineId.active]: {
+          ...mockGlobalState.timeline.timelineById.test,
+          timelineType: TimelineType.template,
+        },
+      },
+    },
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      kibanaDataViews: [
+        mockGlobalState.sourcerer.defaultDataView,
+        {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '1234',
+          title: 'auditbeat-*',
+          patternList: ['auditbeat-*'],
+        },
+        {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '12347',
+          title: 'packetbeat-*',
+          patternList: ['packetbeat-*'],
+        },
+      ],
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          loading: false,
+          patternList,
+          selectedDataViewId: null,
+          selectedPatterns: ['myFakebeat-*'],
+          missingPatterns: ['myFakebeat-*'],
+        },
+      },
+    },
+  };
+
+  let wrapper: ReactWrapper;
+
+  beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      activePatterns: ['myFakebeat-*'],
+    });
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+    wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Show UpdateDefaultDataViewModal CallOut', () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
+      'This timeline template uses a legacy data view selector'
+    );
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-message"]`).first().text()).toEqual(
+      "We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view here."
+    );
+  });
+});
+
+describe('Missing index patterns', () => {
+  const { storage } = createSecuritySolutionStorageMock();
+  const state2 = {
+    ...mockGlobalState,
+    timeline: {
+      ...mockGlobalState.timeline,
+      timelineById: {
+        ...mockGlobalState.timeline.timelineById,
+        [TimelineId.active]: {
+          ...mockGlobalState.timeline.timelineById.test,
+          timelineType: TimelineType.template,
+        },
+      },
+    },
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      kibanaDataViews: [
+        mockGlobalState.sourcerer.defaultDataView,
+        {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '1234',
+          title: 'auditbeat-*',
+          patternList: ['auditbeat-*'],
+        },
+        {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '12347',
+          title: 'packetbeat-*',
+          patternList: ['packetbeat-*'],
+        },
+      ],
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          loading: false,
+          patternList,
+          selectedDataViewId: 'fake-data-view-id',
+          selectedPatterns: ['myFakebeat-*'],
+          missingPatterns: ['myFakebeat-*'],
+        },
+      },
+    },
+  };
+
+  let wrapper: ReactWrapper;
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Show UpdateDefaultDataViewModal CallOut for timeline', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      activePatterns: ['myFakebeat-*'],
+    });
+    const state3 = cloneDeep(state2);
+    state3.timeline.timelineById[TimelineId.active].timelineType = TimelineType.default;
+    store = createStore(state3, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+    wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
+      'This timeline is out of date with the Security Data View'
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
+    ).toEqual('The active index patterns in this timeline are: myFakebeat-*');
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-callout"]`).first().text()
+    ).toEqual('Security Data View is missing the following index patterns: myFakebeat-*');
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-message"]`).first().text()
+    ).toEqual(
+      "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
+    );
+  });
+
+  test('Show UpdateDefaultDataViewModal CallOut for timeline template', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      activePatterns: ['myFakebeat-*'],
+    });
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+    wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
+      'This timeline template is out of date with the Security Data View'
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
+    ).toEqual('The active index patterns in this timeline template are: myFakebeat-*');
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-callout"]`).first().text()
+    ).toEqual('Security Data View is missing the following index patterns: myFakebeat-*');
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-message"]`).first().text()
+    ).toEqual(
+      "We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
     );
   });
 });

@@ -159,6 +159,22 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
+        "id": "def-server.MAX_EXECUTION_EVENTS_DISPLAYED",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_EXECUTION_EVENTS_DISPLAYED",
+        "description": [
+          "\nMax number of execution events to aggregate in memory for the Rule Execution Log"
+        ],
+        "signature": [
+          "1000"
+        ],
+        "path": "packages/kbn-securitysolution-rules/src/configuration_constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-rules",
         "id": "def-server.ML_RULE_TYPE_ID",
         "type": "string",
         "tags": [],

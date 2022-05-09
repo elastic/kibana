@@ -41,7 +41,14 @@ export class DependencyManager {
         return cycleInfo;
       }
 
-      return DependencyManager.sortVerticesFrom(srcVertex, graph, sortedVertices, {}, {});
+      return DependencyManager.sortVerticesFrom(
+        srcVertex,
+        graph,
+        sortedVertices,
+        {},
+        {},
+        cycleInfo
+      );
     }, DependencyManager.createCycleInfo());
   }
 
@@ -58,24 +65,30 @@ export class DependencyManager {
     graph: Graph<T>,
     sortedVertices: Set<T>,
     visited: BreadCrumbs = {},
-    inpath: BreadCrumbs = {}
+    inpath: BreadCrumbs = {},
+    cycle: CycleDetectionResult<T>
   ): CycleDetectionResult<T> {
     visited[srcVertex] = true;
     inpath[srcVertex] = true;
-    const cycleInfo = graph[srcVertex]?.reduce<CycleDetectionResult<T> | undefined>(
-      (info, vertex) => {
-        if (inpath[vertex]) {
-          const path = (Object.keys(inpath) as T[]).filter(
-            (visitedVertex) => inpath[visitedVertex]
-          );
-          return DependencyManager.createCycleInfo([...path, vertex], true);
-        } else if (!visited[vertex]) {
-          return DependencyManager.sortVerticesFrom(vertex, graph, sortedVertices, visited, inpath);
-        }
-        return info;
-      },
-      undefined
-    );
+
+    const vertexEdges =
+      graph[srcVertex] === undefined || graph[srcVertex] === null ? [] : graph[srcVertex];
+
+    cycle = vertexEdges!.reduce<CycleDetectionResult<T>>((info, vertex) => {
+      if (inpath[vertex]) {
+        return { ...info, hasCycle: true };
+      } else if (!visited[vertex]) {
+        return DependencyManager.sortVerticesFrom(
+          vertex,
+          graph,
+          sortedVertices,
+          visited,
+          inpath,
+          info
+        );
+      }
+      return info;
+    }, cycle);
 
     inpath[srcVertex] = false;
 
@@ -83,7 +96,10 @@ export class DependencyManager {
       sortedVertices.add(srcVertex);
     }
 
-    return cycleInfo ?? DependencyManager.createCycleInfo<T>([...sortedVertices]);
+    return {
+      ...cycle,
+      path: [...sortedVertices],
+    };
   }
 
   private static createCycleInfo<T extends GraphVertex = GraphVertex>(

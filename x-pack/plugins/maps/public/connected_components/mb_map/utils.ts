@@ -9,7 +9,7 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { TileMetaFeature } from '../../../common/descriptor_types';
 import { isGlDrawLayer } from './sort_layers';
 import { ILayer } from '../../classes/layers/layer';
-import { ES_MVT_META_LAYER_NAME } from '../../classes/layers/vector_layer/mvt_vector_layer/mvt_vector_layer';
+import { ES_MVT_META_LAYER_NAME } from '../../classes/util/tile_meta_feature_utils';
 
 export function removeOrphanedSourcesAndLayers(
   mbMap: MbMap,
@@ -66,6 +66,7 @@ export function getTileMetaFeatures(mbMap: MbMap, mbSourceId: string): TileMetaF
   // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
   const mbFeatures = mbMap.querySourceFeatures(mbSourceId, {
     sourceLayer: ES_MVT_META_LAYER_NAME,
+    filter: [],
   });
 
   return mbFeatures

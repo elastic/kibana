@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
 import { Stream } from 'stream';
+import { IncomingHttpHeaders } from 'http';
 import { schema } from '@kbn/config-schema';
-import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
-import { IRouter } from 'src/core/server';
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
+import { decodeMvtResponseBody } from '../../common/mvt_request_body';
 import { getEsTile } from './get_tile';
 import { getEsGridTile } from './get_grid_tile';
 
@@ -57,9 +58,7 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
-      const gzippedTile = await getEsTile({
+      const { stream, headers, statusCode } = await getEsTile({
         url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
@@ -69,11 +68,11 @@ export function initMVTRoutes({
         y: parseInt((params as any).y, 10) as number,
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
-        requestBody: requestBodyDSL as any,
+        requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
         abortController,
       });
 
-      return sendResponse(response, gzippedTile);
+      return sendResponse(response, stream, headers, statusCode);
     }
   );
 
@@ -90,7 +89,7 @@ export function initMVTRoutes({
           geometryFieldName: schema.string(),
           requestBody: schema.string(),
           index: schema.string(),
-          requestType: schema.string(),
+          renderAs: schema.string(),
           token: schema.maybe(schema.string()),
           gridPrecision: schema.number(),
         }),
@@ -105,9 +104,7 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
-      const gzipTileStream = await getEsGridTile({
+      const { stream, headers, statusCode } = await getEsGridTile({
         url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
@@ -117,26 +114,41 @@ export function initMVTRoutes({
         y: parseInt((params as any).y, 10) as number,
         z: parseInt((params as any).z, 10) as number,
         index: query.index as string,
-        requestBody: requestBodyDSL as any,
-        requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
+        requestBody: decodeMvtResponseBody(query.requestBody as string) as any,
+        renderAs: query.renderAs as RENDER_AS,
         gridPrecision: parseInt(query.gridPrecision, 10),
         abortController,
       });
 
-      return sendResponse(response, gzipTileStream);
+      return sendResponse(response, stream, headers, statusCode);
     }
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, gzipTileStream: Stream | null) {
+export function sendResponse(
+  response: KibanaResponseFactory,
+  tileStream: Stream | null,
+  headers: IncomingHttpHeaders,
+  statusCode: number
+) {
+  if (statusCode >= 400) {
+    return response.customError({
+      statusCode,
+      body: tileStream ? tileStream : statusCode.toString(),
+    });
+  }
+
   const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
   const lastModified = `${new Date().toUTCString()}`;
-  if (gzipTileStream) {
+  if (tileStream) {
+    // use the content-encoding and content-length headers from elasticsearch if they exist
+    const { 'content-length': contentLength, 'content-encoding': contentEncoding } = headers;
     return response.ok({
-      body: gzipTileStream,
+      body: tileStream,
       headers: {
         'content-disposition': 'inline',
-        'content-encoding': 'gzip',
+        ...(contentLength && { 'content-length': contentLength }),
+        ...(contentEncoding && { 'content-encoding': contentEncoding }),
         'Content-Type': 'application/x-protobuf',
         'Cache-Control': cacheControl,
         'Last-Modified': lastModified,

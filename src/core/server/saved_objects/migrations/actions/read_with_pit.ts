@@ -68,12 +68,12 @@ export const readWithPit =
           query,
         },
       })
-      .then((response) => {
+      .then((body) => {
         const totalHits =
-          typeof response.body.hits.total === 'number'
-            ? response.body.hits.total // This format is to be removed in 8.0
-            : response.body.hits.total?.value;
-        const hits = response.body.hits.hits;
+          typeof body.hits.total === 'number'
+            ? body.hits.total // This format is to be removed in 8.0
+            : body.hits.total?.value;
+        const hits = body.hits.hits;
 
         if (hits.length > 0) {
           return Either.right({

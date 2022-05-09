@@ -14,7 +14,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { IndexNotFound } from './index';
+import { IndexNotFound } from '.';
 
 export interface AliasNotFound {
   type: 'alias_not_found_exception';

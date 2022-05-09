@@ -24,7 +24,11 @@ import { mountWithIntl } from '../../../../../test_helpers';
 import { StartCrawlContextMenu } from './start_crawl_context_menu';
 
 const MOCK_ACTIONS = {
+  // CrawlerLogic
   startCrawl: jest.fn(),
+  // CrawlCustomSettingsFlyoutLogic
+  showFlyout: jest.fn(),
+  // CrawlSelectDomainsModalLogic
   showModal: jest.fn(),
 };
 
@@ -58,7 +62,7 @@ describe('StartCrawlContextMenu', () => {
 
     it('can be opened', () => {
       expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
-      expect(menuItems.length).toEqual(2);
+      expect(menuItems.length).toEqual(3);
     });
 
     it('can start crawls', () => {
@@ -71,6 +75,12 @@ describe('StartCrawlContextMenu', () => {
       menuItems.at(1).simulate('click');
 
       expect(MOCK_ACTIONS.showModal).toHaveBeenCalled();
+    });
+
+    it('can open a modal to start a crawl with custom settings', () => {
+      menuItems.at(2).simulate('click');
+
+      expect(MOCK_ACTIONS.showFlyout).toHaveBeenCalled();
     });
   });
 });

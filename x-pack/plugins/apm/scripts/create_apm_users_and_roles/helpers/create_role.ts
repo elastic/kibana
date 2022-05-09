@@ -6,7 +6,7 @@
  */
 /* eslint-disable no-console */
 
-import { Role } from '../../../../security/common/model';
+import { Role } from '@kbn/security-plugin/common/model';
 import { callKibana, isAxiosError } from './call_kibana';
 import { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
 

@@ -7,7 +7,7 @@
  */
 
 import { identity } from 'lodash';
-import type { ExpressionAstExpression } from 'src/plugins/expressions';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin';
 
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';

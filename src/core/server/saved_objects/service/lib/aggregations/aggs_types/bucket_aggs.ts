@@ -13,6 +13,7 @@ import { sortOrderSchema } from './common_schemas';
  * Schemas for the Bucket aggregations.
  *
  * Currently supported:
+ * - date_range
  * - filter
  * - histogram
  * - nested
@@ -29,7 +30,6 @@ import { sortOrderSchema } from './common_schemas';
  * - children
  * - composite
  * - date_histogram
- * - date_range
  * - diversified_sampler
  * - geo_distance
  * - geohash_grid
@@ -64,6 +64,11 @@ const boolSchema = s.object({
 });
 
 export const bucketAggsSchemas: Record<string, ObjectType> = {
+  date_range: s.object({
+    field: s.string(),
+    format: s.string(),
+    ranges: s.arrayOf(s.object({ from: s.maybe(s.string()), to: s.maybe(s.string()) })),
+  }),
   filter: termSchema,
   filters: s.object({
     filters: s.recordOf(s.string(), s.oneOf([termSchema, boolSchema])),

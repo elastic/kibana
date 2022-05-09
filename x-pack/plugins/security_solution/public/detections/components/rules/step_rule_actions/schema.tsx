@@ -9,10 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  AlertAction,
-  ActionTypeRegistryContract,
-} from '../../../../../../triggers_actions_ui/public';
+import { RuleAction, ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   FormSchema,
   ValidationFunc,
@@ -23,7 +20,7 @@ import { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const validateSingleAction = async (
-  actionItem: AlertAction,
+  actionItem: RuleAction,
   actionTypeRegistry: ActionTypeRegistryContract
 ): Promise<string[]> => {
   const actionParamsErrors = await validateActionParams(actionItem, actionTypeRegistry);
@@ -37,7 +34,7 @@ export const validateRuleActionsField =
   async (
     ...data: Parameters<ValidationFunc>
   ): Promise<ValidationError<ERROR_CODE> | void | undefined> => {
-    const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
+    const [{ value, path }] = data as [{ value: RuleAction[]; path: string }];
 
     const errors = [];
     for (const actionItem of value) {

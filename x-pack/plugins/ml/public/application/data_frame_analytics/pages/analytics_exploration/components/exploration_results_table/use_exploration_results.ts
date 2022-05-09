@@ -9,11 +9,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { MlApiServices } from '../../../../../services/ml_api_service';
-import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 

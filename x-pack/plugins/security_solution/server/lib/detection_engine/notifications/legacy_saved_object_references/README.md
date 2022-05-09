@@ -10,7 +10,7 @@ until we have all users moved away from the legacy system.
 
 ## How to create a legacy notification
 
-* Create a rule and activate it normally within security_solution
+* Create a rule and enable it normally within security_solution
 * Do not add actions to the rule at this point as we are exercising the older legacy system. However, you want at least one action configured such as a slack notification.
 * Within dev tools do a query for all your actions and grab one of the `_id` of them without their prefix:
 

@@ -8,10 +8,10 @@
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import type { Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '../../../config';
-import { HeadlessChromiumDriverFactory } from '.';
+import { HeadlessChromiumDriverFactory, DEFAULT_VIEWPORT } from '.';
 
 jest.mock('puppeteer');
 
@@ -61,7 +61,7 @@ describe('HeadlessChromiumDriverFactory', () => {
 
     (puppeteer as jest.Mocked<typeof puppeteer>).launch.mockResolvedValue(mockBrowser);
 
-    factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path);
+    factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path, '');
     jest.spyOn(factory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
     jest.spyOn(factory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);
     jest.spyOn(factory, 'getPageExit').mockReturnValue(Rx.EMPTY);
@@ -70,7 +70,10 @@ describe('HeadlessChromiumDriverFactory', () => {
   describe('createPage', () => {
     it('returns browser driver, unexpected process exit observable, and close callback', async () => {
       await expect(
-        factory.createPage({ openUrlTimeout: 0 }).pipe(take(1)).toPromise()
+        factory
+          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .pipe(take(1))
+          .toPromise()
       ).resolves.toEqual(
         expect.objectContaining({
           driver: expect.anything(),
@@ -85,7 +88,10 @@ describe('HeadlessChromiumDriverFactory', () => {
         `Puppeteer Launch mock fail.`
       );
       expect(() =>
-        factory.createPage({ openUrlTimeout: 0 }).pipe(take(1)).toPromise()
+        factory
+          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .pipe(take(1))
+          .toPromise()
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Error spawning Chromium browser! Puppeteer Launch mock fail."`
       );
@@ -94,7 +100,7 @@ describe('HeadlessChromiumDriverFactory', () => {
     describe('close behaviour', () => {
       it('does not allow close to be called on the browse more than once', async () => {
         await factory
-          .createPage({ openUrlTimeout: 0 })
+          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
           .pipe(
             take(1),
             mergeMap(async ({ close }) => {

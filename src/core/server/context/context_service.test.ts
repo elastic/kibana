@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginOpaqueId } from '../../server';
+import { PluginOpaqueId } from '..';
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
 import { CoreContext } from '../core_context';

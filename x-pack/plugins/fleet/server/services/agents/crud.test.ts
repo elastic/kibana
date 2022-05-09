@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
@@ -26,19 +26,19 @@ describe('Agents CRUD test', () => {
         search: searchMock,
       } as unknown as ElasticsearchClient;
     });
+
     function getEsResponse(ids: string[], total: number) {
       return {
-        body: {
-          hits: {
-            total: { value: total },
-            hits: ids.map((id: string) => ({
-              _id: id,
-              _source: {},
-            })),
-          },
+        hits: {
+          total,
+          hits: ids.map((id: string) => ({
+            _id: id,
+            _source: {},
+          })),
         },
       };
     }
+
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2', '3', '4', '5'], 7)))

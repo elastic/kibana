@@ -7,6 +7,7 @@
 
 export const DATE_FIELD_TYPE = 'date';
 export const HOST_NAME_FIELD_NAME = 'host.name';
+export const USER_NAME_FIELD_NAME = 'user.name';
 export const IP_FIELD_TYPE = 'ip';
 export const GEO_FIELD_TYPE = 'geo_point';
 export const MESSAGE_FIELD_NAME = 'message';

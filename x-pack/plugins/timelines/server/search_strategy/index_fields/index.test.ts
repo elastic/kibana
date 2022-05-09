@@ -13,13 +13,10 @@ import {
   formatSecondFields,
   createFieldItem,
   requestIndexFieldSearch,
-} from './index';
+} from '.';
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
 import { fieldsBeat as beatFields } from '../../utils/beat_schema/fields';
-import {
-  IndexPatternsFetcher,
-  SearchStrategyDependencies,
-} from '../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 
 describe('Index Fields', () => {
   describe('formatIndexFields', () => {
@@ -830,12 +827,8 @@ describe('Fields Provider', () => {
     beforeAll(() => {
       getFieldsForWildcardMock.mockResolvedValue([]);
 
-      esClientSearchMock.mockResolvedValue({
-        body: { hits: { total: { value: 123 } } },
-      });
-      esClientFieldCapsMock.mockResolvedValue({
-        body: { indices: ['value'] },
-      });
+      esClientSearchMock.mockResolvedValue({ hits: { total: { value: 123 } } });
+      esClientFieldCapsMock.mockResolvedValue({ indices: ['value'] });
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 
@@ -925,9 +918,7 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      esClientSearchMock.mockResolvedValue({
-        body: { hits: { total: { value: 1 } } },
-      });
+      esClientSearchMock.mockResolvedValue({ hits: { total: { value: 1 } } });
       const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { DataViewFieldBase } from '@kbn/es-query';
 import { checkEmptyValue } from '../check_empty_value';
 

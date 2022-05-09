@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   DeserializerOrUndefined,
   IdOrUndefined,
@@ -68,7 +68,7 @@ export const createListItem = async ({
       ...baseBody,
       ...elasticQuery,
     };
-    const { body: response } = await esClient.index({
+    const response = await esClient.index({
       body,
       id,
       index: listItemIndex,

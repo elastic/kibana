@@ -117,9 +117,9 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
   onChange={[Function]}
   pagination={
     Object {
-      "hidePerPageOptions": true,
       "pageIndex": 0,
       "pageSize": 5,
+      "showPerPageOptions": false,
       "totalItemCount": 3,
     }
   }

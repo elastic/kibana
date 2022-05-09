@@ -18,7 +18,11 @@ import { IndexpatternDatasource, datasourceSelector } from './datasource';
 import { fieldsSelector } from './fields';
 import { metaDataSelector, updateMetaData } from './meta_data';
 import { templatesSelector } from './url_templates';
-import { migrateLegacyIndexPatternRef, appStateToSavedWorkspace } from '../services/persistence';
+import {
+  migrateLegacyIndexPatternRef,
+  appStateToSavedWorkspace,
+  lookupIndexPatternId,
+} from '../services/persistence';
 import { settingsSelector } from './advanced_settings';
 import { openSaveModal } from '../services/save_modal';
 
@@ -95,6 +99,21 @@ describe('persistence sagas', () => {
       expect(env.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalled();
       const resultingState = env.store.getState();
       expect(datasourceSelector(resultingState).current.type).toEqual('none');
+    });
+
+    it('should not crash if the data view goes missing', async () => {
+      (lookupIndexPatternId as jest.Mock).mockReturnValueOnce('missing-dataview');
+      env.store.dispatch(
+        loadSavedWorkspace({
+          savedWorkspace: {
+            title: 'my workspace',
+          },
+        } as LoadSavedWorkspacePayload)
+      );
+      await waitForPromise();
+      expect(env.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'Data view "missing-dataview" not found'
+      );
     });
   });
 

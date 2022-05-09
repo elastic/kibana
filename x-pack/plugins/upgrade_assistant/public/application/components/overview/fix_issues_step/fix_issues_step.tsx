@@ -7,13 +7,11 @@
 
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
-import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
-import { WithPrivileges } from '../../../../shared_imports';
 import type { OverviewStepProps } from '../../types';
 import { EsDeprecationIssuesPanel, KibanaDeprecationIssuesPanel } from './components';
 
@@ -51,48 +49,10 @@ const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   );
 };
 
-interface CustomProps {
-  navigateToEsDeprecationLogs: () => void;
-}
-
-const AccessDeprecationLogsMessage = ({ navigateToEsDeprecationLogs }: CustomProps) => {
-  return (
-    <WithPrivileges privileges={`index.${DEPRECATION_LOGS_INDEX}`}>
-      {({ hasPrivileges, isLoading }) => {
-        if (isLoading || !hasPrivileges) {
-          // Don't show the message with the link to access deprecation logs
-          // to users who can't access the UI anyways.
-          return null;
-        }
-
-        return (
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overview.accessEsDeprecationLogsLabel"
-            defaultMessage="If you have application code that calls Elasticsearch APIs, review the {esDeprecationLogsLink} to make sure you are not using deprecated APIs."
-            values={{
-              esDeprecationLogsLink: (
-                <EuiLink
-                  onClick={navigateToEsDeprecationLogs}
-                  data-test-subj="viewElasticsearchDeprecationLogs"
-                >
-                  {i18n.translate('xpack.upgradeAssistant.overview.esDeprecationLogsLink', {
-                    defaultMessage: 'Elasticsearch deprecation logs',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        );
-      }}
-    </WithPrivileges>
-  );
-};
-
 export const getFixIssuesStep = ({
   isComplete,
   setIsComplete,
-  navigateToEsDeprecationLogs,
-}: OverviewStepProps & CustomProps): EuiStepProps => {
+}: OverviewStepProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
   return {
@@ -105,14 +65,7 @@ export const getFixIssuesStep = ({
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.fixIssuesStepDescription"
-              defaultMessage="You must resolve any critical Elasticsearch and Kibana configuration issues before upgrading to Elastic 8.x. Ignoring warnings might result in differences in behavior after you upgrade. {accessDeprecationLogsMessage}"
-              values={{
-                accessDeprecationLogsMessage: (
-                  <AccessDeprecationLogsMessage
-                    navigateToEsDeprecationLogs={navigateToEsDeprecationLogs}
-                  />
-                ),
-              }}
+              defaultMessage="You must resolve any critical Elasticsearch and Kibana configuration issues before upgrading to Elastic 8.x. Ignoring warnings might result in differences in behavior after you upgrade."
             />
           </p>
         </EuiText>

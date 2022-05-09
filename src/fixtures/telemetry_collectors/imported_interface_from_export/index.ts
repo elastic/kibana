@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CollectorSet } from '../../../plugins/usage_collection/server/collector';
-import { loggerMock } from '../../../core/server/logging/logger.mock';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { Usage } from './types';
 
-const { makeUsageCollector } = new CollectorSet({
-  logger: loggerMock.create(),
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+const { makeUsageCollector } = createUsageCollectionSetupMock();
 
-export const myCollector = makeUsageCollector<Usage, false>({
+export const myCollector = makeUsageCollector<Usage>({
   type: 'importing_from_export_collector',
   isReady: () => true,
   fetch() {

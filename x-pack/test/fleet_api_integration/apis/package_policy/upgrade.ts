@@ -5,14 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
-
 import {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
-} from '../../../../plugins/fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -135,6 +134,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -259,6 +259,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -368,6 +369,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -476,6 +478,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
         });
       });

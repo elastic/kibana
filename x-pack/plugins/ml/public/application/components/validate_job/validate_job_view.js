@@ -33,7 +33,7 @@ import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 import { Callout, statusToEuiIconType } from '../callout';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 const defaultIconType = 'questionInCircle';
 const getDefaultState = () => ({

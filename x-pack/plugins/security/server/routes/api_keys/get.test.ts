@@ -7,17 +7,17 @@
 
 import Boom from '@hapi/boom';
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import type { LicenseCheck } from '../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineGetApiKeysRoutes } from './get';
 
 interface TestOptions {
   isAdmin?: boolean;
   licenseCheckResult?: LicenseCheck;
-  apiResponse?: () => Promise<unknown>;
+  apiResponse?: () => unknown;
   asserts: { statusCode: number; result?: Record<string, any> };
 }
 
@@ -28,14 +28,19 @@ describe('Get API keys', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
       };
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext as any,
+      });
 
       if (apiResponse) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.getApiKey.mockImplementation(
-          (async () => ({ body: await apiResponse() })) as any
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.getApiKey.mockResponse(
+          // @ts-expect-error unknown type
+          apiResponse()
         );
       }
 
@@ -56,10 +61,10 @@ describe('Get API keys', () => {
 
       if (apiResponse) {
         expect(
-          mockContext.core.elasticsearch.client.asCurrentUser.security.getApiKey
+          mockCoreContext.elasticsearch.client.asCurrentUser.security.getApiKey
         ).toHaveBeenCalledWith({ owner: !isAdmin });
       }
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 
@@ -80,7 +85,7 @@ describe('Get API keys', () => {
 
   describe('success', () => {
     getApiKeysTest('returns API keys', {
-      apiResponse: async () => ({
+      apiResponse: () => ({
         api_keys: [
           {
             id: 'YCLV7m0BJ3xI4hhWB648',
@@ -111,7 +116,7 @@ describe('Get API keys', () => {
       },
     });
     getApiKeysTest('returns only valid API keys', {
-      apiResponse: async () => ({
+      apiResponse: () => ({
         api_keys: [
           {
             id: 'YCLV7m0BJ3xI4hhWB648',

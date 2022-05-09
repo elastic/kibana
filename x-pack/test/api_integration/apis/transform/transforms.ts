@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import type { GetTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
-import { isGetTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/type_guards';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { isGetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
@@ -94,29 +94,29 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('/transforms', function () {
       it('should return a list of transforms for super-user', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get('/api/transform/transforms')
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send()
-          .expect(200);
+          .send();
+        transform.api.assertResponseStatusCode(200, status, body);
 
         assertTransformsResponseBody(body);
       });
 
       it('should return a list of transforms for transform view-only user', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/transform/transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send()
-          .expect(200);
+          .send();
+        transform.api.assertResponseStatusCode(200, status, body);
 
         assertTransformsResponseBody(body);
       });
@@ -124,43 +124,43 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('/transforms/{transformId}', function () {
       it('should return a specific transform configuration for super-user', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get('/api/transform/transforms/transform-test-get-1')
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send()
-          .expect(200);
+          .send();
+        transform.api.assertResponseStatusCode(200, status, body);
 
         assertSingleTransformResponseBody(body);
       });
 
       it('should return a specific transform configuration transform view-only user', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/transform/transforms/transform-test-get-1`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send()
-          .expect(200);
+          .send();
+        transform.api.assertResponseStatusCode(200, status, body);
 
         assertSingleTransformResponseBody(body);
       });
 
       it('should report 404 for a non-existing transform', async () => {
-        await supertest
+        const { body, status } = await supertest
           .get('/api/transform/transforms/the-non-existing-transform')
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
           .set(COMMON_REQUEST_HEADERS)
-          .send()
-          .expect(404);
+          .send();
+        transform.api.assertResponseStatusCode(404, status, body);
       });
     });
   });

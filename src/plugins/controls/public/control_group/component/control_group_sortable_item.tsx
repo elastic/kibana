@@ -12,9 +12,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
 
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
 
 interface DragInfo {
   isOver?: boolean;
@@ -81,6 +81,7 @@ const SortableControlInner = forwardRef<
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
         'controlFrameWrapper-isDragging': isDragging,
+        'controlFrameWrapper-isEditable': isEditable,
         'controlFrameWrapper--small': width === 'small',
         'controlFrameWrapper--medium': width === 'medium',
         'controlFrameWrapper--large': width === 'large',

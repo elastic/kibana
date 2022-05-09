@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useValues } from 'kea';
 
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID } from '../../../../../../../../common/constants';
 import { EntSearchLogStream } from '../../../../../../shared/log_stream';
 import { DataPanel } from '../../../../data_panel';
 import { EngineLogic } from '../../../../engine';
 
 export const RejectedCurationsHistoryPanel: React.FC = () => {
   const { engineName } = useValues(EngineLogic);
+  const [endTimestamp, setEndTimestamp] = useState(Date.now());
 
   const filters = [
     'event.kind: event',
@@ -30,14 +33,30 @@ export const RejectedCurationsHistoryPanel: React.FC = () => {
     <DataPanel
       iconType="tableDensityNormal"
       title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.rejectedCurationsHistoryPanel.tableTitle',
-            {
-              defaultMessage: 'Recently rejected suggestions',
-            }
-          )}
-        </h2>
+        <EuiFlexGroup>
+          <EuiFlexItem component="h2">
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.curations.rejectedCurationsHistoryPanel.tableTitle',
+              {
+                defaultMessage: 'Recently rejected suggestions',
+              }
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem component="span" grow={false}>
+            <EuiButtonEmpty
+              iconType="refresh"
+              size="xs"
+              onClick={() => setEndTimestamp(Date.now())}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engines.curations.rejectedCurationsHistoryPanel.refresh',
+                {
+                  defaultMessage: 'Refresh',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       subtitle={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curations.rejectedCurationsHistoryPanel.tableDescription',
@@ -48,8 +67,10 @@ export const RejectedCurationsHistoryPanel: React.FC = () => {
       hasBorder
     >
       <EntSearchLogStream
+        sourceId={ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID}
         hoursAgo={720}
         query={filters.join(' and ')}
+        endTimestamp={endTimestamp}
         columns={[
           {
             type: 'field',

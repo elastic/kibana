@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getClusterInfo } from './get_cluster_info';
 
 export function mockGetClusterInfo<ClusterInfo>(clusterInfo: ClusterInfo) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // @ts-expect-error we only care about the response body
-  esClient.info.mockResolvedValue({ body: { ...clusterInfo } });
+  esClient.info.mockResponse({ ...clusterInfo });
   return esClient;
 }
 

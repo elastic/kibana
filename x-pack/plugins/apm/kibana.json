@@ -16,7 +16,8 @@
     "licensing",
     "observability",
     "ruleRegistry",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "actions",
@@ -35,7 +36,6 @@
   "configPath": ["xpack", "apm"],
   "requiredBundles": [
     "fleet",
-    "home",
     "kibanaReact",
     "kibanaUtils",
     "ml",

@@ -36,9 +36,3 @@ The services that core provides are:
 * <<logging-service, Logging service>>
 * <<saved-objects-service, Saved Objects service>>
 * <<ui-settings-service, UI settings service>>
-
-
-
-
-
-

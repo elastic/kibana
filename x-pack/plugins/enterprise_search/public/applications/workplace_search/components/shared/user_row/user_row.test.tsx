@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiTableRow } from '@elastic/eui';
 
-import { UserRow } from './';
+import { UserRow } from '.';
 
 describe('SourcesTable', () => {
   it('renders', () => {

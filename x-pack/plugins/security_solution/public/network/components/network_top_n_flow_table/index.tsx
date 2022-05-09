@@ -31,6 +31,7 @@ interface NetworkTopNFlowTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
@@ -57,6 +58,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -166,6 +168,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
       totalCount={fakeTotalCount}

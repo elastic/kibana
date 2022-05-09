@@ -81,7 +81,7 @@ export const AccordionList: React.FC<Props> = ({
         pagination={
           showPagination
             ? {
-                hidePerPageOptions: true,
+                showPerPageOptions: false,
               }
             : false
         }

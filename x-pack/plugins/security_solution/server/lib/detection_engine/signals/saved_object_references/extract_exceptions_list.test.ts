@@ -6,7 +6,7 @@
  */
 
 import { extractExceptionsList } from './extract_exceptions_list';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RuleParams } from '../../schemas/rule_schemas';
 import {
   EXCEPTION_LIST_NAMESPACE,

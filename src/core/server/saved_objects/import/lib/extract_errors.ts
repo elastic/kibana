@@ -30,7 +30,6 @@ export function extractErrors(
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
-          title,
           meta: { title },
           error: {
             type: 'conflict',
@@ -42,7 +41,6 @@ export function extractErrors(
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
-        title,
         meta: { title },
         error: {
           ...savedObject.error,

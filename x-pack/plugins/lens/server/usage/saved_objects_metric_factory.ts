@@ -9,7 +9,7 @@ import {
   AggregationsAggregationContainer,
   MappingRuntimeFields,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { GenericSavedUsage } from './types';
 
 export function createMetricQuery(
@@ -26,7 +26,7 @@ export function createMetricQuery(
     bucketsToObject?: (arg: unknown) => Record<string, number>;
   }): Promise<GenericSavedUsage> {
     const esClient = await getEsClient();
-    const { body: results } = await esClient.search({
+    const results = await esClient.search({
       index: kibanaIndex,
       body: {
         query: {

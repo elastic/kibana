@@ -9,13 +9,13 @@
 import { History } from 'history';
 import * as Rx from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { DataPublicPluginStart } from '../../../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   createQueryParamObservable,
   getQueryParams,
   removeQueryParam,
-} from '../../../../../kibana_utils/public';
-import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../url_generator';
+} from '@kbn/kibana-utils-plugin/public';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../constants';
 
 export interface DiscoverSearchSessionManagerDeps {
   history: History;

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { saveInstalledEsRefs } from '../../packages/install';
 import { getPathParts } from '../../archive';
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
 
 import { retryTransientEsErrors } from '../retry';
+
+import { updateEsAssetReferences } from '../../packages/install';
 
 import { getAsset } from './common';
 
@@ -27,11 +28,11 @@ export const installMlModel = async (
   paths: string[],
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
+  logger: Logger,
+  esReferences: EsAssetReference[]
 ) => {
   const mlModelPath = paths.find((path) => isMlModel(path));
 
-  const installedMlModels: EsAssetReference[] = [];
   if (mlModelPath !== undefined) {
     const content = getAsset(mlModelPath).toString('utf-8');
     const pathParts = mlModelPath.split('/');
@@ -43,17 +44,22 @@ export const installMlModel = async (
     };
 
     // get and save ml model refs before installing ml model
-    await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, [mlModelRef]);
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      installablePackage.name,
+      esReferences,
+      { assetsToAdd: [mlModelRef] }
+    );
 
     const mlModel: MlModelInstallation = {
       installationName: modelId,
       content,
     };
 
-    const result = await handleMlModelInstall({ esClient, logger, mlModel });
-    installedMlModels.push(result);
+    await handleMlModelInstall({ esClient, logger, mlModel });
   }
-  return installedMlModels;
+
+  return esReferences;
 };
 
 const isMlModel = (path: string) => {
@@ -74,13 +80,20 @@ async function handleMlModelInstall({
   try {
     await retryTransientEsErrors(
       () =>
-        esClient.ml.putTrainedModel({
-          model_id: mlModel.installationName,
-          defer_definition_decompression: true,
-          timeout: '45s',
-          // @ts-expect-error expects an object not a string
-          body: mlModel.content,
-        }),
+        esClient.ml.putTrainedModel(
+          {
+            model_id: mlModel.installationName,
+            defer_definition_decompression: true,
+            timeout: '45s',
+            // @ts-expect-error expects an object not a string
+            body: mlModel.content,
+          },
+          {
+            headers: {
+              'content-type': 'application/json',
+            },
+          }
+        ),
       { logger }
     );
   } catch (err) {

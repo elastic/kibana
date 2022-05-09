@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GaugeShape } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import type { GaugeShape } from '@kbn/expression-gauge-plugin/common';
 import {
   GaugeShapes,
   GaugeTicksPositions,
   GaugeLabelMajorModes,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+} from '@kbn/expression-gauge-plugin/common';
 import type { TableSuggestion, Visualization } from '../../types';
 import { layerTypes } from '../../../common';
 import { GaugeVisualizationState } from './constants';
@@ -48,9 +48,9 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   }
 
   const shape: GaugeShape =
-    state?.shape === GaugeShapes.verticalBullet
-      ? GaugeShapes.verticalBullet
-      : GaugeShapes.horizontalBullet;
+    state?.shape === GaugeShapes.VERTICAL_BULLET
+      ? GaugeShapes.VERTICAL_BULLET
+      : GaugeShapes.HORIZONTAL_BULLET;
 
   const baseSuggestion = {
     state: {
@@ -58,8 +58,8 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       shape,
       layerId: table.layerId,
       layerType: layerTypes.DATA,
-      ticksPosition: GaugeTicksPositions.auto,
-      labelMajorMode: GaugeLabelMajorModes.auto,
+      ticksPosition: GaugeTicksPositions.AUTO,
+      labelMajorMode: GaugeLabelMajorModes.AUTO,
     },
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',
@@ -77,9 +77,9 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
             ...baseSuggestion.state,
             ...state,
             shape:
-              state?.shape === GaugeShapes.verticalBullet
-                ? GaugeShapes.horizontalBullet
-                : GaugeShapes.verticalBullet,
+              state?.shape === GaugeShapes.VERTICAL_BULLET
+                ? GaugeShapes.HORIZONTAL_BULLET
+                : GaugeShapes.VERTICAL_BULLET,
           },
         },
       ]
@@ -97,9 +97,9 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
             ...baseSuggestion.state,
             metricAccessor: table.columns[0].columnId,
             shape:
-              state?.shape === GaugeShapes.verticalBullet
-                ? GaugeShapes.horizontalBullet
-                : GaugeShapes.verticalBullet,
+              state?.shape === GaugeShapes.VERTICAL_BULLET
+                ? GaugeShapes.HORIZONTAL_BULLET
+                : GaugeShapes.VERTICAL_BULLET,
           },
         },
       ];

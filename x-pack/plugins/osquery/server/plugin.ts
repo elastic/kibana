@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ASSETS_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
-} from '../../fleet/common';
-import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -20,7 +14,8 @@ import {
   Logger,
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
@@ -30,9 +25,15 @@ import { initSavedObjects } from './saved_objects';
 import { initUsageCollectors } from './usage';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
-import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
+import {
+  packSavedObjectType,
+  packAssetSavedObjectType,
+  savedQuerySavedObjectType,
+} from '../common/types';
 import { PLUGIN_ID } from '../common';
 import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
+import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { TelemetryReceiver } from './lib/telemetry/receiver';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
@@ -51,12 +52,8 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         savedObject: {
-          all: [
-            PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            ASSETS_SAVED_OBJECT_TYPE,
-            AGENT_POLICY_SAVED_OBJECT_TYPE,
-          ],
-          read: [PACKAGES_SAVED_OBJECT_TYPE],
+          all: [],
+          read: [],
         },
         ui: ['write'],
       },
@@ -66,11 +63,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         catalogue: [PLUGIN_ID],
         savedObject: {
           all: [],
-          read: [
-            PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            PACKAGES_SAVED_OBJECT_TYPE,
-            AGENT_POLICY_SAVED_OBJECT_TYPE,
-          ],
+          read: [],
         },
         ui: ['read'],
       },
@@ -176,11 +169,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 includeIn: 'all',
                 name: 'All',
                 savedObject: {
-                  all: [
-                    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-                    ASSETS_SAVED_OBJECT_TYPE,
-                    packSavedObjectType,
-                  ],
+                  all: [packSavedObjectType, packAssetSavedObjectType],
                   read: [],
                 },
                 ui: ['writePacks', 'readPacks'],
@@ -208,10 +197,16 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly logger: Logger;
   private context: PluginInitializerContext;
   private readonly osqueryAppContextService = new OsqueryAppContextService();
+  private readonly telemetryReceiver: TelemetryReceiver;
+  private readonly telemetryEventsSender: TelemetryEventsSender;
+
+  private telemetryUsageCounter?: UsageCounter;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
     this.logger = initializerContext.logger.get();
+    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryReceiver = new TelemetryReceiver(this.logger);
   }
 
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
@@ -228,6 +223,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
       security: plugins.security,
+      telemetryEventsSender: this.telemetryEventsSender,
     };
 
     initSavedObjects(core.savedObjects);
@@ -236,6 +232,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       osqueryContext,
       usageCollection: plugins.usageCollection,
     });
+
+    this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
+
     defineRoutes(router, osqueryContext);
 
     core.getStartServices().then(([, depsStart]) => {
@@ -243,6 +242,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
     });
+
+    this.telemetryEventsSender.setup(
+      this.telemetryReceiver,
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryUsageCounter
+    );
 
     return {};
   }
@@ -260,16 +266,26 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerIngestCallback,
     });
 
+    this.telemetryReceiver.start(core, this.osqueryAppContextService);
+
+    this.telemetryEventsSender.start(
+      plugins.telemetry,
+      plugins.taskManager,
+      this.telemetryReceiver
+    );
+
     if (registerIngestCallback) {
       const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
 
       registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
     }
+
     return {};
   }
 
   public stop() {
     this.logger.debug('osquery: Stopped');
+    this.telemetryEventsSender.stop();
     this.osqueryAppContextService.stop();
   }
 }

@@ -6,9 +6,10 @@
  */
 
 jest.mock('./epm/packages');
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import type { PackagePolicy, RegistryDataStream } from '../types';
 
 import { getPackageInfo } from './epm/packages';
@@ -58,6 +59,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -67,6 +69,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -170,6 +173,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -179,6 +183,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -262,6 +267,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -271,6 +277,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],
@@ -386,6 +393,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       status: 'not_installed',
       assets: {
         kibana: {
+          csp_rule_template: [],
           dashboard: [],
           visualization: [],
           search: [],
@@ -395,6 +403,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           security_rule: [],
           ml_module: [],
           tag: [],
+          osquery_pack_asset: [],
         },
         elasticsearch: {
           component_template: [],

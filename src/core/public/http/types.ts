@@ -351,10 +351,18 @@ export interface IHttpFetchError<TResponseBody = unknown> extends Error {
   readonly response?: Response;
   /**
    * @deprecated Provided for legacy compatibility. Prefer the `request` property instead.
+   * @removeBy 8.8.0
+   *
+   * Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,
+   * so TS and code-reference navigation might not highlight them.
    */
   readonly req: Request;
   /**
    * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
+   * @removeBy 8.8.0
+   *
+   * Note to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,
+   * so TS and code-reference navigation might not highlight them.
    */
   readonly res?: Response;
   readonly body?: TResponseBody;

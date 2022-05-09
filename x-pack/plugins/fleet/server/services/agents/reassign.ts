@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 
 import type { Agent, BulkActionResult } from '../../types';
@@ -19,7 +19,7 @@ import {
   updateAgent,
   bulkUpdateAgents,
 } from './crud';
-import type { GetAgentsOptions } from './index';
+import type { GetAgentsOptions } from '.';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 import { searchHitToAgent } from './helpers';
 

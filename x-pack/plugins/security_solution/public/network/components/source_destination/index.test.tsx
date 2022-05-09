@@ -24,7 +24,7 @@ import {
   DESTINATION_PACKETS_FIELD_NAME,
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
-} from '../source_destination/source_destination_arrows';
+} from './source_destination_arrows';
 import * as i18n from '../../../timelines/components/timeline/body/renderers/translations';
 
 import { SourceDestination } from '.';
@@ -205,7 +205,7 @@ describe('SourceDestination', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
       )
-    ).toEqual('10.1.2.3:80');
+    ).toContain('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
@@ -329,7 +329,7 @@ describe('SourceDestination', () => {
 
     expect(
       removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
-    ).toEqual('192.168.1.2:9987');
+    ).toContain('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {

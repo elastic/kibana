@@ -6,15 +6,15 @@
  */
 
 import { dashboardServiceProvider } from './dashboard_service';
-import { savedObjectsServiceMock } from '../../../../../../src/core/public/mocks';
-import type { DashboardAppLocator } from '../../../../../../src/plugins/dashboard/public';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import type { DashboardAppLocator } from '@kbn/dashboard-plugin/public';
 
 describe('DashboardService', () => {
   const mockSavedObjectClient = savedObjectsServiceMock.createStartContract().client;
-  const dashboardUrlGenerator = {
+  const dashboardLocator = {
     getUrl: jest.fn(),
   } as unknown as DashboardAppLocator;
-  const dashboardService = dashboardServiceProvider(mockSavedObjectClient, dashboardUrlGenerator);
+  const dashboardService = dashboardServiceProvider(mockSavedObjectClient, dashboardLocator);
 
   test('should fetch dashboard', () => {
     // act
@@ -30,7 +30,7 @@ describe('DashboardService', () => {
 
   test('should generate edit url to the dashboard', () => {
     dashboardService.getDashboardEditUrl('test-id');
-    expect(dashboardUrlGenerator.getUrl).toHaveBeenCalledWith({
+    expect(dashboardLocator.getUrl).toHaveBeenCalledWith({
       dashboardId: 'test-id',
       useHash: false,
       viewMode: 'edit',

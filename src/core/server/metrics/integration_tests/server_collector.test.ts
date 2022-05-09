@@ -17,10 +17,7 @@ import { executionContextServiceMock } from '../../execution_context/execution_c
 import { ServerMetricsCollector } from '../collectors/server';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-const requestWaitDelay = 25;
-
-// FLAKY: https://github.com/elastic/kibana/issues/59234
-describe.skip('ServerMetricsCollector', () => {
+describe('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
   let hapiServer: HapiServer;
@@ -79,30 +76,32 @@ describe.skip('ServerMetricsCollector', () => {
 
   it('collect disconnects requests infos', async () => {
     const never = new Promise((resolve) => undefined);
-    const hitSubject = new BehaviorSubject(0);
+    const disconnectRequested$ = new Subject<void>(); // Controls the number of requests in the /disconnect endpoint
+    const disconnectAborted$ = new Subject<void>(); // Controls the abort event in the /disconnect endpoint
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
       return res.ok({ body: '' });
     });
     router.get({ path: '/disconnect', validate: false }, async (ctx, req, res) => {
-      hitSubject.next(hitSubject.value + 1);
-      await never;
+      disconnectRequested$.next();
+      req.events.aborted$.subscribe(() => {
+        disconnectAborted$.next();
+      });
+      await never; // Never resolve the request
       return res.ok({ body: '' });
     });
     await server.start();
 
     await sendGet('/');
-    // superTest.get(path).end needs to be called with a callback to actually send the request.
-    const discoReq1 = sendGet('/disconnect').end(() => null);
-    const discoReq2 = sendGet('/disconnect').end(() => null);
 
-    await hitSubject
-      .pipe(
-        filter((count) => count >= 2),
-        take(1)
-      )
-      .toPromise();
-    await delay(requestWaitDelay); // wait for the requests to send
+    // Subscribe to expect 2 requests to /disconnect
+    const waitFor2Requests = disconnectRequested$.pipe(take(2)).toPromise();
+
+    const discoReq1 = sendGet('/disconnect').end();
+    const discoReq2 = sendGet('/disconnect').end();
+
+    // Wait for 2 requests to /disconnect
+    await waitFor2Requests;
 
     let metrics = await collector.collect();
     expect(metrics.requests).toEqual(
@@ -113,8 +112,13 @@ describe.skip('ServerMetricsCollector', () => {
       })
     );
 
+    // Subscribe to the aborted$ event
+    const waitFor1stAbort = disconnectAborted$.pipe(take(1)).toPromise();
+
     discoReq1.abort();
-    await delay(requestWaitDelay);
+
+    // Wait for the aborted$ event
+    await waitFor1stAbort;
 
     metrics = await collector.collect();
     expect(metrics.requests).toEqual(
@@ -124,8 +128,13 @@ describe.skip('ServerMetricsCollector', () => {
       })
     );
 
+    // Subscribe to the aborted$ event
+    const waitFor2ndAbort = disconnectAborted$.pipe(take(1)).toPromise();
+
     discoReq2.abort();
-    await delay(requestWaitDelay);
+
+    // Wait for the aborted$ event
+    await waitFor2ndAbort;
 
     metrics = await collector.collect();
     expect(metrics.requests).toEqual(

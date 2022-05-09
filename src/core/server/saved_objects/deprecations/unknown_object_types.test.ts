@@ -12,7 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '../..';
 
 const createSearchResponse = (count: number): estypes.SearchResponse => {
   return {
@@ -48,9 +48,7 @@ describe('unknown saved object types deprecation', () => {
 
   describe('getUnknownTypesDeprecations', () => {
     beforeEach(() => {
-      esClient.asInternalUser.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(createSearchResponse(0))
-      );
+      esClient.asInternalUser.search.mockResponse(createSearchResponse(0));
     });
 
     it('calls `esClient.asInternalUser.search` with the correct parameters', async () => {
@@ -76,9 +74,7 @@ describe('unknown saved object types deprecation', () => {
     });
 
     it('returns no deprecation if no unknown type docs are found', async () => {
-      esClient.asInternalUser.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(createSearchResponse(0))
-      );
+      esClient.asInternalUser.search.mockResponse(createSearchResponse(0));
 
       const deprecations = await getUnknownTypesDeprecations({
         esClient,
@@ -91,9 +87,7 @@ describe('unknown saved object types deprecation', () => {
     });
 
     it('returns a deprecation if any unknown type docs are found', async () => {
-      esClient.asInternalUser.search.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(createSearchResponse(1))
-      );
+      esClient.asInternalUser.search.mockResponse(createSearchResponse(1));
 
       const deprecations = await getUnknownTypesDeprecations({
         esClient,

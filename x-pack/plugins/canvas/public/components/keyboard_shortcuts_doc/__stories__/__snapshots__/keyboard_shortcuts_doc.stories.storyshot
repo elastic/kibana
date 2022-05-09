@@ -6,6 +6,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
   role="dialog"
 >
   <button
+    aria-label="Close this dialog"
     data-test-subj="euiFlyoutCloseButton"
     onClick={[Function]}
     type="button"

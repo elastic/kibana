@@ -72,7 +72,6 @@ export const ColumnChart: FC<Props> = ({
       )}
       <div
         className={classNames('dataGridChart__legend', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataGridChart__legend--numeric': columnType.schema === 'number',
         })}
         data-test-subj={`${dataTestSubj}-legend`}

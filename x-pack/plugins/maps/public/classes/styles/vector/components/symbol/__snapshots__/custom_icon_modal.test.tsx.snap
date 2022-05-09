@@ -1,0 +1,311 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render a custom icon modal with an existing icon 1`] = `
+<EuiModal
+  className="mapsCustomIconModal"
+  initialFocus=".mapsCustomIconForm__image"
+  maxWidth={700}
+  onClose={[Function]}
+>
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
+      <h3>
+        Edit custom icon
+      </h3>
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiFlexGroup
+      alignItems="flexStart"
+      gutterSize="m"
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        className="mapsCustomIconForm"
+        grow={2}
+      >
+        <EuiFormRow
+          className="mapsCustomIconForm__image"
+          describedByIds={Array []}
+          display="rowCompressed"
+          error=""
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          helpText="SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering."
+          isInvalid={false}
+          labelType="label"
+        >
+          <EuiFilePicker
+            accept=".svg"
+            className="mapsImageUpload"
+            compressed={false}
+            display="large"
+            initialPromptText="Select or drag and drop an SVG icon"
+            isInvalid={false}
+            onChange={[Function]}
+            required={true}
+          />
+        </EuiFormRow>
+        <EuiSpacer />
+        <EuiFormRow
+          describedByIds={Array []}
+          display="rowCompressed"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label="Name"
+          labelType="label"
+        >
+          <EuiFieldText
+            className="mapsCustomIconForm__label"
+            data-test-subj="mapsCustomIconForm-label"
+            onChange={[Function]}
+            required={true}
+            value="square"
+          />
+        </EuiFormRow>
+        <EuiSpacer />
+        <EuiAccordion
+          arrowDisplay="left"
+          buttonContent="Advanced options"
+          buttonElement="button"
+          element="div"
+          id="advancedOptionsAccordion"
+          initialIsOpen={false}
+          isLoading={false}
+          isLoadingMessage={false}
+          paddingSize="xs"
+        >
+          <EuiPanel
+            color="subdued"
+            paddingSize="s"
+          >
+            <EuiFlexGroup
+              gutterSize="xs"
+              justifyContent="flexEnd"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <EuiButtonEmpty
+                  onClick={[Function]}
+                  size="xs"
+                >
+                  Reset
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFormRow
+              className="mapsCustomIconForm__cutoff"
+              describedByIds={Array []}
+              display="rowCompressed"
+              fullWidth={false}
+              hasChildLabel={true}
+              hasEmptyLabelSpace={false}
+              label={
+                <EuiToolTip
+                  content="Adjusts the balance of the signed distance function between the inside (approaching 1) and outside (approaching 0) of the icon."
+                  delay="regular"
+                  display="inlineBlock"
+                  position="top"
+                >
+                  <React.Fragment>
+                    Alpha threshold
+                     
+                    <EuiIcon
+                      color="subdued"
+                      type="questionInCircle"
+                    />
+                  </React.Fragment>
+                </EuiToolTip>
+              }
+              labelType="label"
+            >
+              <ValidatedRange
+                className="mapsCutoffRange"
+                compressed={true}
+                max={1}
+                min={0}
+                onChange={[Function]}
+                showInput={true}
+                showLabels={true}
+                step={0.01}
+                value={0.3}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              className="mapsCustomIconForm__radius"
+              describedByIds={Array []}
+              display="rowCompressed"
+              fullWidth={false}
+              hasChildLabel={true}
+              hasEmptyLabelSpace={false}
+              label={
+                <EuiToolTip
+                  content="Adjusts the size of the signed distance function around the Alpha threshold as a percent of icon size."
+                  delay="regular"
+                  display="inlineBlock"
+                  position="top"
+                >
+                  <React.Fragment>
+                    Radius
+                     
+                    <EuiIcon
+                      color="subdued"
+                      type="questionInCircle"
+                    />
+                  </React.Fragment>
+                </EuiToolTip>
+              }
+              labelType="label"
+            >
+              <ValidatedRange
+                className="mapsRadiusRange"
+                compressed={true}
+                max={1}
+                min={0}
+                onChange={[Function]}
+                showInput={true}
+                showLabels={true}
+                step={0.01}
+                value={0.15}
+              />
+            </EuiFormRow>
+          </EuiPanel>
+        </EuiAccordion>
+      </EuiFlexItem>
+      <EuiFlexItem
+        className="mapsIconPreview__wrapper mapsCustomIconForm__preview"
+        grow={false}
+      >
+        <IconPreview
+          cutoff={0.3}
+          isSvgInvalid={false}
+          radius={0.15}
+          svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          onClick={[Function]}
+        >
+          Cancel
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="danger"
+          data-test-subj="mapsCustomIconForm-submit"
+          onClick={[Function]}
+        >
+          Delete
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="mapsCustomIconForm-submit"
+          fill={true}
+          isDisabled={false}
+          onClick={[Function]}
+        >
+          Save
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiModalFooter>
+</EuiModal>
+`;
+
+exports[`should render an empty custom icon modal 1`] = `
+<EuiModal
+  className="mapsCustomIconModal"
+  initialFocus=".mapsCustomIconForm__image"
+  maxWidth={700}
+  onClose={[Function]}
+>
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
+      <h3>
+        Custom Icon
+      </h3>
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiFlexGroup
+      alignItems="flexStart"
+      gutterSize="m"
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        className="mapsCustomIconForm"
+        grow={2}
+      >
+        <EuiFormRow
+          className="mapsCustomIconForm__image"
+          describedByIds={Array []}
+          display="rowCompressed"
+          error=""
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          helpText="SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering."
+          isInvalid={false}
+          labelType="label"
+        >
+          <EuiFilePicker
+            accept=".svg"
+            className="mapsImageUpload"
+            compressed={false}
+            display="large"
+            initialPromptText="Select or drag and drop an SVG icon"
+            isInvalid={false}
+            onChange={[Function]}
+            required={true}
+          />
+        </EuiFormRow>
+        <EuiSpacer />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          onClick={[Function]}
+        >
+          Cancel
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="mapsCustomIconForm-submit"
+          fill={true}
+          isDisabled={true}
+          onClick={[Function]}
+        >
+          Save
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiModalFooter>
+</EuiModal>
+`;

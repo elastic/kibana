@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getCaseCommentsUrl } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
@@ -15,6 +16,7 @@ import {
   createComment,
   getAllComments,
   superUserSpace1Auth,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -27,6 +29,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -146,6 +149,19 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
+      });
+    });
+
+    describe('deprecations', () => {
+      it('should return a warning header', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseCommentsUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+
+        assertWarningHeader(warningHeader);
+
+        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+        expect(warningValue).to.be('Deprecated endpoint');
       });
     });
   });

@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the use of Distributed Component Object Model (DCOM) to execute commands from a remote host, which are launched via the HTA Application COM Object. This behavior may indicate an attacker abusing a DCOM application to move laterally while attempting to evading detection.",
+  "description": "Identifies the use of Distributed Component Object Model (DCOM) to execute commands from a remote host, which are launched via the HTA Application COM Object. This behavior may indicate an attacker abusing a DCOM application to move laterally while attempting to evade detection.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -73,5 +73,5 @@
     }
   ],
   "type": "eql",
-  "version": 5
+  "version": 6
 }

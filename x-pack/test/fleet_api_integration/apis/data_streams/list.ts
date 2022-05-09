@@ -145,7 +145,8 @@ export default function (providerContext: FtrProviderContext) {
 
         body.data_streams.forEach((dataStream: any) => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          const { index, size_in_bytes, last_activity_ms, ...coreFields } = dataStream;
+          const { index, size_in_bytes, size_in_bytes_formatted, last_activity_ms, ...coreFields } =
+            dataStream;
           expect(expectedStreamsByDataset[coreFields.dataset]).not.to.eql(undefined);
           expect(coreFields).to.eql(expectedStreamsByDataset[coreFields.dataset]);
         });

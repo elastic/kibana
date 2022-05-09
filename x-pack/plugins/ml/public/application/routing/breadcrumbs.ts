@@ -9,7 +9,7 @@ import { EuiBreadcrumb } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { NavigateToPath } from '../contexts/kibana';
 

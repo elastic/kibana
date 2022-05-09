@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectDecoratorConfig } from '../../../saved_objects/public';
+import { SavedObjectDecoratorConfig } from '@kbn/saved-objects-plugin/public';
 import { tagDecoratorFactory, decoratorId } from './factory';
 import { InternalTagDecoratedSavedObject } from './types';
 

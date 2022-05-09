@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFeature } from '../../../../../plugins/features/server';
+import { KibanaFeature } from '@kbn/features-plugin/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -111,6 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
             'apm',
             'stackAlerts',
             'canvas',
+            'generalCases',
             'infrastructure',
             'logs',
             'maps',

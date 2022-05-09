@@ -15,3 +15,4 @@ export type { CheckSavedObjectsPrivileges } from './check_saved_objects_privileg
 export type { CheckPrivilegesPayload } from './types';
 export type { ElasticsearchRole } from './roles';
 export { transformElasticsearchRoleToRole } from './roles';
+export type { CasesSupportedOperations } from './privileges';

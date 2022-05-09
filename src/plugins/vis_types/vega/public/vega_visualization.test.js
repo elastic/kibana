@@ -19,14 +19,14 @@ import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
 
 import { setInjectedVars, setData, setNotifications } from './services';
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('./default_spec', () => ({
   getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
 }));
 
-// FLAKY: https://github.com/elastic/kibana/issues/71713
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
@@ -39,6 +39,7 @@ describe('VegaVisualizations', () => {
 
   const coreStart = coreMock.createStart();
   const dataPluginStart = dataPluginMock.createStartContract();
+  const dataViewsPluginStart = dataViewPluginMocks.createStartContract();
 
   const setupDOM = (width = 512, height = 512) => {
     mockedWidthValue = width;
@@ -94,7 +95,7 @@ describe('VegaVisualizations', () => {
           JSON.stringify(vegaliteGraph),
           new SearchAPI({
             search: dataPluginStart.search,
-            indexPatterns: dataPluginStart.indexPatterns,
+            indexPatterns: dataViewsPluginStart,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
           }),
@@ -127,7 +128,7 @@ describe('VegaVisualizations', () => {
           JSON.stringify(vegaGraph),
           new SearchAPI({
             search: dataPluginStart.search,
-            indexPatterns: dataPluginStart.indexPatterns,
+            indexPatterns: dataViewsPluginStart,
             uiSettings: coreStart.uiSettings,
             injectedMetadata: coreStart.injectedMetadata,
           }),

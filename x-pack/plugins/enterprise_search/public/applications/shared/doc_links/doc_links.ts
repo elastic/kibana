@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
   public appSearchApis: string;
@@ -16,6 +16,7 @@ class DocLinks {
   public appSearchCurations: string;
   public appSearchDuplicateDocuments: string;
   public appSearchEntryPoints: string;
+  public appSearchElasticsearchIndexedEngines: string;
   public appSearchGuide: string;
   public appSearchIndexingDocs: string;
   public appSearchIndexingDocsSchema: string;
@@ -29,12 +30,35 @@ class DocLinks {
   public appSearchSynonyms: string;
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
+  public clientsGoIndex: string;
+  public clientsGuide: string;
+  public clientsJavaBasicAuthentication: string;
+  public clientsJavaInstallation: string;
+  public clientsJavaIntroduction: string;
+  public clientsJavaRestLow: string;
+  public clientsJsClientConnecting: string;
+  public clientsJsIntro: string;
+  public clientsNetIntroduction: string;
+  public clientsNetNest: string;
+  public clientsNetSingleNode: string;
+  public clientsPhpConnecting: string;
+  public clientsPhpInstallation: string;
+  public clientsPhpOverview: string;
+  public clientsPythonAuthentication: string;
+  public clientsPythonOverview: string;
+  public clientsRubyAuthentication: string;
+  public clientsRubyOverview: string;
+  public clientsRustOverview: string;
   public cloudIndexManagement: string;
+  public elasticsearchCreateIndex: string;
+  public elasticsearchGettingStarted: string;
   public enterpriseSearchConfig: string;
   public enterpriseSearchMailService: string;
+  public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
   public kibanaSecurity: string;
   public licenseManagement: string;
+  public queryDsl: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
@@ -43,6 +67,7 @@ class DocLinks {
   public workplaceSearchCustomSourcePermissions: string;
   public workplaceSearchDocumentPermissions: string;
   public workplaceSearchDropbox: string;
+  public workplaceSearchExternalSharePointOnline: string;
   public workplaceSearchExternalIdentities: string;
   public workplaceSearchGettingStarted: string;
   public workplaceSearchGitHub: string;
@@ -57,6 +82,7 @@ class DocLinks {
   public workplaceSearchSecurity: string;
   public workplaceSearchServiceNow: string;
   public workplaceSearchSharePoint: string;
+  public workplaceSearchSharePointServer: string;
   public workplaceSearchSlack: string;
   public workplaceSearchSynch: string;
   public workplaceSearchZendesk: string;
@@ -70,6 +96,7 @@ class DocLinks {
     this.appSearchCurations = '';
     this.appSearchDuplicateDocuments = '';
     this.appSearchEntryPoints = '';
+    this.appSearchElasticsearchIndexedEngines = '';
     this.appSearchGuide = '';
     this.appSearchIndexingDocs = '';
     this.appSearchIndexingDocsSchema = '';
@@ -83,12 +110,35 @@ class DocLinks {
     this.appSearchSynonyms = '';
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
+    this.clientsGoIndex = '';
+    this.clientsGuide = '';
+    this.clientsJavaBasicAuthentication = '';
+    this.clientsJavaInstallation = '';
+    this.clientsJavaIntroduction = '';
+    this.clientsJavaRestLow = '';
+    this.clientsJsIntro = '';
+    this.clientsJsClientConnecting = '';
+    this.clientsNetIntroduction = '';
+    this.clientsNetNest = '';
+    this.clientsNetSingleNode = '';
+    this.clientsPhpConnecting = '';
+    this.clientsPhpInstallation = '';
+    this.clientsPhpOverview = '';
+    this.clientsPythonAuthentication = '';
+    this.clientsPythonOverview = '';
+    this.clientsRubyAuthentication = '';
+    this.clientsRubyOverview = '';
+    this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
+    this.elasticsearchCreateIndex = '';
+    this.elasticsearchGettingStarted = '';
     this.enterpriseSearchConfig = '';
     this.enterpriseSearchMailService = '';
+    this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
     this.kibanaSecurity = '';
     this.licenseManagement = '';
+    this.queryDsl = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
@@ -97,6 +147,7 @@ class DocLinks {
     this.workplaceSearchCustomSourcePermissions = '';
     this.workplaceSearchDocumentPermissions = '';
     this.workplaceSearchDropbox = '';
+    this.workplaceSearchExternalSharePointOnline = '';
     this.workplaceSearchExternalIdentities = '';
     this.workplaceSearchGettingStarted = '';
     this.workplaceSearchGitHub = '';
@@ -111,6 +162,7 @@ class DocLinks {
     this.workplaceSearchSecurity = '';
     this.workplaceSearchServiceNow = '';
     this.workplaceSearchSharePoint = '';
+    this.workplaceSearchSharePointServer = '';
     this.workplaceSearchSlack = '';
     this.workplaceSearchSynch = '';
     this.workplaceSearchZendesk = '';
@@ -124,6 +176,8 @@ class DocLinks {
     this.appSearchCrawlRules = docLinks.links.appSearch.crawlRules;
     this.appSearchCurations = docLinks.links.appSearch.curations;
     this.appSearchDuplicateDocuments = docLinks.links.appSearch.duplicateDocuments;
+    this.appSearchElasticsearchIndexedEngines =
+      docLinks.links.appSearch.elasticsearchIndexedEngines;
     this.appSearchEntryPoints = docLinks.links.appSearch.entryPoints;
     this.appSearchGuide = docLinks.links.appSearch.guide;
     this.appSearchIndexingDocs = docLinks.links.appSearch.indexingDocuments;
@@ -138,12 +192,35 @@ class DocLinks {
     this.appSearchSynonyms = docLinks.links.appSearch.synonyms;
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
+    this.clientsGoIndex = docLinks.links.clients.goIndex;
+    this.clientsGuide = docLinks.links.clients.guide;
+    this.clientsJavaBasicAuthentication = docLinks.links.clients.javaBasicAuthentication;
+    this.clientsJavaInstallation = docLinks.links.clients.javaInstallation;
+    this.clientsJavaIntroduction = docLinks.links.clients.javaIntroduction;
+    this.clientsJavaRestLow = docLinks.links.clients.javaRestLow;
+    this.clientsJsClientConnecting = docLinks.links.clients.jsClientConnecting;
+    this.clientsJsIntro = docLinks.links.clients.jsIntro;
+    this.clientsNetIntroduction = docLinks.links.clients.netIntroduction;
+    this.clientsNetNest = docLinks.links.clients.netNest;
+    this.clientsNetSingleNode = docLinks.links.clients.netSingleNode;
+    this.clientsPhpConnecting = docLinks.links.clients.phpConnecting;
+    this.clientsPhpInstallation = docLinks.links.clients.phpInstallation;
+    this.clientsPhpOverview = docLinks.links.clients.phpOverview;
+    this.clientsPythonAuthentication = docLinks.links.clients.pythonAuthentication;
+    this.clientsPythonOverview = docLinks.links.clients.pythonOverview;
+    this.clientsRubyAuthentication = docLinks.links.clients.rubyAuthentication;
+    this.clientsRubyOverview = docLinks.links.clients.rubyOverview;
+    this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
+    this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
+    this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
+    this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.queryDsl = docLinks.links.query.queryDsl;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
@@ -153,6 +230,8 @@ class DocLinks {
       docLinks.links.workplaceSearch.customSourcePermissions;
     this.workplaceSearchDocumentPermissions = docLinks.links.workplaceSearch.documentPermissions;
     this.workplaceSearchDropbox = docLinks.links.workplaceSearch.dropbox;
+    this.workplaceSearchExternalSharePointOnline =
+      docLinks.links.workplaceSearch.externalSharePointOnline;
     this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
     this.workplaceSearchGettingStarted = docLinks.links.workplaceSearch.gettingStarted;
     this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
@@ -167,6 +246,7 @@ class DocLinks {
     this.workplaceSearchSecurity = docLinks.links.workplaceSearch.security;
     this.workplaceSearchServiceNow = docLinks.links.workplaceSearch.serviceNow;
     this.workplaceSearchSharePoint = docLinks.links.workplaceSearch.sharePoint;
+    this.workplaceSearchSharePointServer = docLinks.links.workplaceSearch.sharePointServer;
     this.workplaceSearchSlack = docLinks.links.workplaceSearch.slack;
     this.workplaceSearchSynch = docLinks.links.workplaceSearch.synch;
     this.workplaceSearchZendesk = docLinks.links.workplaceSearch.zendesk;

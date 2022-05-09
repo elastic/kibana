@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, set, upperFirst } from 'lodash';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 import { ConfigType } from './schema';
 

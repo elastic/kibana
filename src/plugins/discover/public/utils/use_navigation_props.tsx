@@ -11,8 +11,9 @@ import { useHistory, matchPath } from 'react-router-dom';
 import type { Location } from 'history';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-import { esFilters, FilterManager } from '../../../data/public';
-import { url } from '../../../kibana_utils/common';
+import { disableFilter } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { url } from '@kbn/kibana-utils-plugin/common';
 import { useDiscoverServices } from './use_discover_services';
 
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
@@ -39,7 +40,7 @@ export const getContextHash = (columns: string[], filterManager: FilterManager) 
       }),
       _a: rison.encode({
         columns,
-        filters: (appFilters || []).map(esFilters.disableFilter),
+        filters: (appFilters || []).map(disableFilter),
       }),
     }),
     { encode: false, sort: false }

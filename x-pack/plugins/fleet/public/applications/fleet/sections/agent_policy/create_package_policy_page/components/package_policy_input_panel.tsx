@@ -193,7 +193,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               packageInputVars={packageInput.vars}
               packagePolicyInput={packagePolicyInput}
               updatePackagePolicyInput={updatePackagePolicyInput}
-              inputVarsValidationResults={{ vars: inputValidationResults.vars }}
+              inputVarsValidationResults={{ vars: inputValidationResults?.vars }}
               forceShowErrors={forceShowErrors}
             />
             {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
@@ -238,7 +238,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults.streams![packagePolicyInputStream!.data_stream!.dataset]
+                    inputValidationResults?.streams![packagePolicyInputStream!.data_stream!.dataset]
                   }
                   forceShowErrors={forceShowErrors}
                 />

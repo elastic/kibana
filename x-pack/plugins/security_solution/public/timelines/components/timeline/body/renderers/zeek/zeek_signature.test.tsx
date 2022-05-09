@@ -101,7 +101,11 @@ describe('ZeekSignature', () => {
 
     test('should render value', () => {
       const wrapper = mount(<Link value={'abc'} />);
-      expect(removeExternalLinkText(wrapper.text())).toEqual('abc');
+      const extractEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
+        'External link',
+        ''
+      );
+      expect(extractEuiIconText).toEqual('abc');
     });
 
     test('should render value and link', () => {

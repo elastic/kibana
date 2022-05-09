@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginConfigDescriptor } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CoreSetup, PluginConfigDescriptor } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { configSchema, ConfigSchema } from '../config';
 import { registerVisTypeTableUsageCollector } from './usage_collector';

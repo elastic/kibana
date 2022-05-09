@@ -9,6 +9,7 @@
 import { HttpService } from '../public/http';
 import { fatalErrorsServiceMock } from '../public/fatal_errors/fatal_errors_service.mock';
 import { injectedMetadataServiceMock } from '../public/injected_metadata/injected_metadata_service.mock';
+import { executionContextServiceMock } from '../public/execution_context/execution_context_service.mock';
 
 export type SetupTap = (
   injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>,
@@ -28,7 +29,8 @@ export function setup(tap: SetupTap = defaultTap) {
   tap(injectedMetadata, fatalErrors);
 
   const httpService = new HttpService();
-  const http = httpService.setup({ fatalErrors, injectedMetadata });
+  const executionContext = executionContextServiceMock.createSetupContract();
+  const http = httpService.setup({ fatalErrors, injectedMetadata, executionContext });
 
   return { httpService, injectedMetadata, fatalErrors, http };
 }

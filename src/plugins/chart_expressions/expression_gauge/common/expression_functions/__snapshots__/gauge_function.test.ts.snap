@@ -1,6 +1,139 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`interpreter/functions#gauge returns an object with the correct structure 1`] = `
+exports[`interpreter/functions#gauge logs correct datatable to inspector 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "col-0-1",
+      "meta": Object {
+        "dimensionName": "Metric",
+        "type": "number",
+      },
+      "name": "Count",
+    },
+    Object {
+      "id": "col-1-2",
+      "meta": Object {
+        "dimensionName": "Min",
+        "type": "string",
+      },
+      "name": "Dest",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "col-0-1": 0,
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the arc if centralMajor and centralMajorMode are passed 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "centralMajor": "Some label",
+      "centralMajorMode": "custom",
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "arc",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the arc shape 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": "auto",
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "arc",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the auto labelMajorMode 1`] = `
 Object {
   "as": "gauge",
   "type": "render",
@@ -8,14 +141,17 @@ Object {
     "args": Object {
       "ariaLabel": undefined,
       "colorMode": "none",
-      "goalAccessor": undefined,
+      "commonLabel": undefined,
+      "goal": undefined,
       "labelMajor": "title",
-      "labelMajorMode": "custom",
+      "labelMajorMode": "auto",
       "labelMinor": undefined,
-      "maxAccessor": undefined,
-      "metricAccessor": "col-0-1",
-      "minAccessor": "col-1-2",
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
       "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
@@ -46,3 +182,561 @@ Object {
   },
 }
 `;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the auto ticksPosition 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "horizontalBullet",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the bands ticksPosition 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "horizontalBullet",
+      "ticksPosition": "bands",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the circle if centralMajor and centralMajorMode are passed 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "centralMajor": "Some label",
+      "centralMajorMode": "custom",
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "circle",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the circle shape 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "centralMajor": undefined,
+      "centralMajorMode": "auto",
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "circle",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the custom labelMajorMode 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "horizontalBullet",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the hidden ticksPosition 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "horizontalBullet",
+      "ticksPosition": "hidden",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the horizontalBullet shape 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "horizontalBullet",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the none colorMode 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "horizontalBullet",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the none labelMajorMode 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "none",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "horizontalBullet",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the palette colorMode 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "palette",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "horizontalBullet",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge returns an object with the correct structure for the verticalBullet shape 1`] = `
+Object {
+  "as": "gauge",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "colorMode": "none",
+      "commonLabel": undefined,
+      "goal": undefined,
+      "labelMajor": "title",
+      "labelMajorMode": "custom",
+      "labelMinor": undefined,
+      "max": undefined,
+      "metric": "col-0-1",
+      "min": "col-1-2",
+      "palette": undefined,
+      "percentageMode": false,
+      "respectRanges": false,
+      "shape": "verticalBullet",
+      "ticksPosition": "auto",
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;
+
+exports[`interpreter/functions#gauge throws error if centralMajor or centralMajorMode are provided for the horizontalBullet shape 1`] = `"Fields \\"centralMajor\\" and \\"centralMajorMode\\" are not supported by the shape \\"horizontalBullet\\""`;
+
+exports[`interpreter/functions#gauge throws error if centralMajor or centralMajorMode are provided for the vertical shape 1`] = `"Fields \\"centralMajor\\" and \\"centralMajorMode\\" are not supported by the shape \\"verticalBullet\\""`;

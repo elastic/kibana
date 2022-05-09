@@ -29,6 +29,7 @@ export class TimePickerPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly common = this.ctx.getPageObject('common');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly quickSelectTimeMenuToggle = this.ctx.getService('menuToggle').create({
@@ -47,7 +48,9 @@ export class TimePickerPageObject extends FtrService {
   }
 
   async ensureHiddenNoDataPopover() {
-    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton');
+    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton', {
+      timeout: 100,
+    });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
     }
@@ -102,15 +105,19 @@ export class TimePickerPageObject extends FtrService {
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
-    const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton');
-    if (isShowDatesButton) {
-      await this.testSubjects.click('superDatePickerShowDatesButton');
-    }
-    await this.testSubjects.exists('superDatePickerstartDatePopoverButton');
-    // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
-    if (isShowDatesButton) {
-      await this.testSubjects.click('superDatePickerstartDatePopoverButton');
-    }
+    await this.retry.tryForTime(5000, async () => {
+      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton', {
+        timeout: 50,
+      });
+      if (isShowDatesButton) {
+        await this.testSubjects.click('superDatePickerShowDatesButton', 50);
+      }
+      await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
+      // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
+      if (isShowDatesButton) {
+        await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+      }
+    });
   }
 
   /**
@@ -155,11 +162,12 @@ export class TimePickerPageObject extends FtrService {
 
     await this.retry.waitFor('Timepicker popover to close', async () => {
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput'));
+      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
     });
 
     const superDatePickerApplyButtonExists = await this.testSubjects.exists(
-      'superDatePickerApplyTimeButton'
+      'superDatePickerApplyTimeButton',
+      { timeout: 100 }
     );
     if (superDatePickerApplyButtonExists) {
       // Timepicker is in top nav
@@ -244,6 +252,9 @@ export class TimePickerPageObject extends FtrService {
     const panel = await this.getTimePickerPanel();
     await this.testSubjects.click('superDatePickerAbsoluteTab');
     const end = await this.testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
+
+    // Wait until closing popover again to avoid https://github.com/elastic/eui/issues/5619
+    await this.common.sleep(2000);
 
     // get from time
     await this.testSubjects.click('superDatePickerstartDatePopoverButton');

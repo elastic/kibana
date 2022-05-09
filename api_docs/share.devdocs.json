@@ -1,164 +1,7 @@
 {
   "id": "share",
   "client": {
-    "classes": [
-      {
-        "parentPluginId": "share",
-        "id": "def-public.UrlGeneratorsService",
-        "type": "Class",
-        "tags": [],
-        "label": "UrlGeneratorsService",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorsService",
-            "text": "UrlGeneratorsService"
-          },
-          " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
-          "<",
-          "UrlGeneratorsSetup",
-          ", ",
-          "UrlGeneratorsStart",
-          ", object, object>"
-        ],
-        "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorsService.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorsService.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>) => ",
-              "UrlGeneratorsSetup"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.UrlGeneratorsService.setup.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>"
-                ],
-                "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorsService.start",
-            "type": "Function",
-            "tags": [],
-            "label": "start",
-            "description": [],
-            "signature": [
-              "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
-              ") => ",
-              "UrlGeneratorsStart"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.UrlGeneratorsService.start.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
-                ],
-                "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorsService.stop",
-            "type": "Function",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_service.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "share",
@@ -594,12 +437,10 @@
             "parentPluginId": "share",
             "id": "def-public.LocatorPublic.getUrl",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "getUrl",
             "description": [
-              "\nReturns a URL as a string.\n"
+              "\nReturns a URL as a string.\n\nYou may want to use `getRedirectUrl` instead. `getRedirectUrl` will\npreserve the location state, whereas the `getUrl` just returns the URL\nwithout the location state. Use this method if you know you don't need\nremember the location state and version of the URL locator.\n"
             ],
             "signature": [
               "(params: P, getUrlParams?: ",
@@ -607,137 +448,7 @@
               " | undefined) => Promise<string>"
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": true,
-            "references": [
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/ml_page/side_nav.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/actions.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/actions.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_view/use_view_action.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_map/use_map_action.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/actions.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/components/jobs_action_menu/jobs_action_menu.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/job_map.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/routing/routes/data_frame_analytics/analytics_job_exploration.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/anomaly_results_view_selector/anomaly_results_view_selector.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/app.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/components/logging/log_analysis_setup/setup_flyout/module_list_card.tsx"
-              },
-              {
-                "plugin": "ingestPipelines",
-                "path": "x-pack/plugins/ingest_pipelines/public/locator.test.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_create/step_create_form.tsx"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/__jest__/client_integration/helpers/app_context.mock.ts"
-              }
-            ],
+            "deprecated": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1419,352 +1130,27 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
-        "id": "def-public.UrlGeneratorContract",
-        "type": "Interface",
-        "tags": [],
-        "label": "UrlGeneratorContract",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorContract",
-            "text": "UrlGeneratorContract"
-          },
-          "<Id>"
-        ],
-        "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorContract.id",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "Id"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorContract.createUrl",
-            "type": "Function",
-            "tags": [],
-            "label": "createUrl",
-            "description": [],
-            "signature": [
-              "(state: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"State\"]) => Promise<string>"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.UrlGeneratorContract.createUrl.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "share",
-                    "scope": "public",
-                    "docId": "kibSharePluginApi",
-                    "section": "def-public.UrlGeneratorStateMapping",
-                    "text": "UrlGeneratorStateMapping"
-                  },
-                  "[Id][\"State\"]"
-                ],
-                "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorContract.isDeprecated",
-            "type": "boolean",
-            "tags": [],
-            "label": "isDeprecated",
-            "description": [],
-            "path": "src/plugins/share/public/url_generators/url_generator_contract.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
-        "id": "def-public.UrlGeneratorsDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "UrlGeneratorsDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorsDefinition",
-            "text": "UrlGeneratorsDefinition"
-          },
-          "<Id>"
-        ],
-        "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorsDefinition.id",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "Id"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorsDefinition.createUrl",
-            "type": "Function",
-            "tags": [],
-            "label": "createUrl",
-            "description": [],
-            "signature": [
-              "((state: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"State\"]) => Promise<string>) | undefined"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.UrlGeneratorsDefinition.createUrl.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "share",
-                    "scope": "public",
-                    "docId": "kibSharePluginApi",
-                    "section": "def-public.UrlGeneratorStateMapping",
-                    "text": "UrlGeneratorStateMapping"
-                  },
-                  "[Id][\"State\"]"
-                ],
-                "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorsDefinition.isDeprecated",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDeprecated",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorsDefinition.migrate",
-            "type": "Function",
-            "tags": [],
-            "label": "migrate",
-            "description": [],
-            "signature": [
-              "((state: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"State\"]) => Promise<{ state: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"MigratedState\"]; id: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorStateMapping",
-                "text": "UrlGeneratorStateMapping"
-              },
-              "[Id][\"MigratedId\"]; }>) | undefined"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "share",
-                "id": "def-public.UrlGeneratorsDefinition.migrate.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "share",
-                    "scope": "public",
-                    "docId": "kibSharePluginApi",
-                    "section": "def-public.UrlGeneratorStateMapping",
-                    "text": "UrlGeneratorStateMapping"
-                  },
-                  "[Id][\"State\"]"
-                ],
-                "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
-        "id": "def-public.UrlGeneratorState",
-        "type": "Interface",
-        "tags": [],
-        "label": "UrlGeneratorState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "share",
-            "scope": "public",
-            "docId": "kibSharePluginApi",
-            "section": "def-public.UrlGeneratorState",
-            "text": "UrlGeneratorState"
-          },
-          "<S, I, MS>"
-        ],
-        "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorState.State",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "State",
-            "description": [],
-            "signature": [
-              "S"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorState.MigratedId",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "MigratedId",
-            "description": [],
-            "signature": [
-              "I | undefined"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorState.MigratedState",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "MigratedState",
-            "description": [],
-            "signature": [
-              "MS | undefined"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
-        "id": "def-public.UrlGeneratorStateMapping",
-        "type": "Interface",
-        "tags": [],
-        "label": "UrlGeneratorStateMapping",
-        "description": [],
-        "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "share",
-            "id": "def-public.UrlGeneratorStateMapping.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: UrlGeneratorState<any, string | undefined, object | undefined>",
-            "description": [],
-            "signature": [
-              "[key: string]:  ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorState",
-                "text": "UrlGeneratorState"
-              },
-              "<any, string | undefined, object | undefined>"
-            ],
-            "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "share",
+        "id": "def-public.BrowserUrlService",
+        "type": "Type",
+        "tags": [],
+        "label": "BrowserUrlService",
+        "description": [],
+        "signature": [
+          "UrlService",
+          "<null, ",
+          "BrowserShortUrlClient",
+          ">"
+        ],
+        "path": "src/plugins/share/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "share",
         "id": "def-public.CSV_QUOTE_VALUES_SETTING",
@@ -1806,20 +1192,6 @@
         "path": "src/plugins/share/public/lib/download_as.ts",
         "deprecated": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "share",
-        "id": "def-public.UrlGeneratorId",
-        "type": "Type",
-        "tags": [],
-        "label": "UrlGeneratorId",
-        "description": [],
-        "signature": [
-          "string"
-        ],
-        "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
-        "deprecated": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -1839,11 +1211,15 @@
           "section": "def-public.ShareMenuProvider",
           "text": "ShareMenuProvider"
         },
-        ") => void; } & { urlGenerators: ",
-        "UrlGeneratorsSetup",
-        "; url: ",
-        "UrlService",
-        "<unknown>; navigate(options: ",
+        ") => void; } & { url: ",
+        {
+          "pluginId": "share",
+          "scope": "public",
+          "docId": "kibSharePluginApi",
+          "section": "def-public.BrowserUrlService",
+          "text": "BrowserUrlService"
+        },
+        "; navigate(options: ",
         "RedirectOptions",
         "<",
         "SerializableRecord",
@@ -1878,11 +1254,15 @@
           "section": "def-public.ShowShareMenuOptions",
           "text": "ShowShareMenuOptions"
         },
-        ") => void; } & { urlGenerators: ",
-        "UrlGeneratorsStart",
-        "; url: ",
-        "UrlService",
-        "<unknown>; navigate(options: ",
+        ") => void; } & { url: ",
+        {
+          "pluginId": "share",
+          "scope": "public",
+          "docId": "kibSharePluginApi",
+          "section": "def-public.BrowserUrlService",
+          "text": "BrowserUrlService"
+        },
+        "; navigate(options: ",
         "RedirectOptions",
         "<",
         "SerializableRecord",
@@ -1951,6 +1331,8 @@
             "UrlService",
             "<",
             "ServerShortUrlClientFactoryCreateParams",
+            ", ",
+            "IShortUrlClient",
             ">"
           ],
           "path": "src/plugins/share/server/plugin.ts",
@@ -1981,6 +1363,8 @@
             "UrlService",
             "<",
             "ServerShortUrlClientFactoryCreateParams",
+            ", ",
+            "IShortUrlClient",
             ">"
           ],
           "path": "src/plugins/share/server/plugin.ts",
@@ -2351,12 +1735,10 @@
             "parentPluginId": "share",
             "id": "def-common.LocatorPublic.getUrl",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "getUrl",
             "description": [
-              "\nReturns a URL as a string.\n"
+              "\nReturns a URL as a string.\n\nYou may want to use `getRedirectUrl` instead. `getRedirectUrl` will\npreserve the location state, whereas the `getUrl` just returns the URL\nwithout the location state. Use this method if you know you don't need\nremember the location state and version of the URL locator.\n"
             ],
             "signature": [
               "(params: P, getUrlParams?: ",
@@ -2364,137 +1746,7 @@
               " | undefined) => Promise<string>"
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": true,
-            "references": [
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/contexts/kibana/use_create_url.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/ml_page/side_nav.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/actions.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/actions.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_view/use_view_action.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_map/use_map_action.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/actions.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/components/jobs_action_menu/jobs_action_menu.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/index_data_visualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/file_based/file_datavisualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/components/controls.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/job_map/job_map.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/routing/routes/data_frame_analytics/analytics_job_exploration.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/anomaly_results_view_selector/anomaly_results_view_selector.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/app.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/ui_actions/open_in_anomaly_explorer_action.tsx"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/public/components/logging/log_analysis_setup/setup_flyout/module_list_card.tsx"
-              },
-              {
-                "plugin": "ingestPipelines",
-                "path": "x-pack/plugins/ingest_pipelines/public/locator.test.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_create/step_create_form.tsx"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/__jest__/client_integration/helpers/app_context.mock.ts"
-              }
-            ],
+            "deprecated": false,
             "children": [
               {
                 "parentPluginId": "share",

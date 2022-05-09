@@ -7,51 +7,54 @@
 
 import React from 'react';
 import { isString } from 'lodash';
-import { EuiBetaBadge, EuiBadge, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiBetaBadge, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { BadgeOptions, TitleProp } from './types';
 import { TruncatedText } from '../truncated_text';
-
-const StyledEuiBetaBadge = styled(EuiBetaBadge)`
-  vertical-align: middle;
-`;
-
-StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
-
-const Badge = styled(EuiBadge)`
-  letter-spacing: 0;
-` as unknown as typeof EuiBadge;
-Badge.displayName = 'Badge';
+import { ReleasePhase } from '../types';
+import * as i18n from './translations';
 
 interface Props {
-  badgeOptions?: BadgeOptions;
-  title: TitleProp;
+  title: string | React.ReactNode;
+  releasePhase: ReleasePhase;
+  children?: React.ReactNode;
 }
 
-const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
-  <EuiTitle size="l">
-    <h1 data-test-subj="header-page-title">
-      {isString(title) ? <TruncatedText text={title} /> : title}
-      {badgeOptions && (
-        <>
-          {' '}
-          {badgeOptions.beta ? (
-            <StyledEuiBetaBadge
-              label={badgeOptions.text}
-              tooltipContent={badgeOptions.tooltip}
-              tooltipPosition="bottom"
-            />
-          ) : (
-            <Badge color="hollow" title="">
-              {badgeOptions.text}
-            </Badge>
-          )}
-        </>
-      )}
-    </h1>
-  </EuiTitle>
+const ExperimentalBadge: React.FC = () => (
+  <EuiBetaBadge
+    label={i18n.EXPERIMENTAL_LABEL}
+    tooltipContent={i18n.EXPERIMENTAL_DESC}
+    tooltipPosition="bottom"
+  />
 );
-TitleComponent.displayName = 'Title';
 
+ExperimentalBadge.displayName = 'ExperimentalBadge';
+
+const BetaBadge: React.FC = () => (
+  <EuiBetaBadge label={i18n.BETA_LABEL} tooltipContent={i18n.BETA_DESC} tooltipPosition="bottom" />
+);
+
+BetaBadge.displayName = 'BetaBadge';
+
+const TitleComponent: React.FC<Props> = ({ title, releasePhase, children }) => (
+  <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="l">
+            <h1 data-test-subj="header-page-title">
+              {isString(title) ? <TruncatedText text={title} /> : title}
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      {releasePhase === 'experimental' && <ExperimentalBadge />}
+      {releasePhase === 'beta' && <BetaBadge />}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+TitleComponent.displayName = 'Title';
 export const Title = React.memo(TitleComponent);

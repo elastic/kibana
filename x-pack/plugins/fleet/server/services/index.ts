@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';

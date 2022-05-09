@@ -11,8 +11,8 @@ import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
 import { Execution } from '../execution';
 import { ExpressionAstFunction, parseExpression, formatExpression } from '../ast';
-import { MigrateFunction } from '../../../kibana_utils/common/persistable_state';
-import { SavedObjectReference } from 'src/core/types';
+import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import { SavedObjectReference } from '@kbn/core/types';
 
 describe('Executor', () => {
   test('can instantiate', () => {

@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { MAX_GROUPS } from '../index';
+import { MAX_GROUPS } from '..';
 
 export const CoreQueryParamsSchemaProperties = {
   // name of the indices to search

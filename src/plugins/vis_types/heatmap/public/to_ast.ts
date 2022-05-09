@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './utils/palette';
 import type { HeatmapVisParams } from './types';
 import { getEsaggsFn } from './to_ast_esaggs';
@@ -20,6 +20,7 @@ const prepareLegend = (params: HeatmapVisParams) => {
     position: params.legendPosition,
     shouldTruncate: params.truncateLegend ?? true,
     maxLines: params.maxLegendLines ?? 1,
+    legendSize: params.legendSize,
   });
 
   return buildExpression([legend]);

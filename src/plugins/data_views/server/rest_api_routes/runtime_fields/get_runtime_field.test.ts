@@ -9,7 +9,7 @@
 import { getRuntimeField } from './get_runtime_field';
 import { dataViewsService } from '../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from 'src/plugins/data_views/common';
+import { DataView } from '../../../common';
 
 describe('get runtime field', () => {
   it('call usageCollection', () => {
@@ -23,6 +23,8 @@ describe('get runtime field', () => {
               runtimeField: {},
             }),
           },
+          getRuntimeField: jest.fn().mockReturnValueOnce({}),
+          getFieldsByRuntimeFieldName: jest.fn().mockReturnValueOnce({}),
         } as unknown as DataView)
     );
 

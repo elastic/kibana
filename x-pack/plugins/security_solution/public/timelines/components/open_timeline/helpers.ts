@@ -38,9 +38,9 @@ import {
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
-} from '../../../timelines/store/timeline/actions';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+} from '../../store/timeline/actions';
+import { TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 
 import {
   defaultColumnHeaderType,
@@ -375,6 +375,7 @@ export const queryTimelineById = <TCache>({
           resolveTimelineConfig: {
             outcome: data.outcome,
             alias_target_id: data.alias_target_id,
+            alias_purpose: data.alias_purpose,
           },
           timeline: {
             ...timeline,

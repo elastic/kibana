@@ -7,7 +7,6 @@
  */
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
@@ -28,7 +27,7 @@ export const configureClient = (
     scoped?: boolean;
     getExecutionContext?: () => string | undefined;
   }
-): KibanaClient => {
+): Client => {
   const clientOptions = parseClientOptions(config, scoped);
   const KibanaTransport = createTransport({ getExecutionContext });
 
@@ -40,5 +39,5 @@ export const configureClient = (
 
   instrumentEsQueryAndDeprecationLogger({ logger, client, type });
 
-  return client as KibanaClient;
+  return client;
 };

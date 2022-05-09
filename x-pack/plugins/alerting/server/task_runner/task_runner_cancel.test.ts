@@ -6,35 +6,43 @@
  */
 
 import sinon from 'sinon';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
-  AlertExecutorOptions,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleExecutorOptions,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   httpServiceMock,
   executionContextServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
+  savedObjectsServiceMock,
+  elasticsearchServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { IEventLogger } from '../../../event_log/server';
-import { Alert, RecoveredActionGroup } from '../../common';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { Rule, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+}));
+jest.mock('../lib/wrap_scoped_cluster_client', () => ({
+  createWrappedScopedClusterClientFactory: jest.fn(),
 }));
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
@@ -75,6 +83,8 @@ describe('Task Runner Cancel', () => {
       taskType: 'alerting:test',
       params: {
         alertId: '1',
+        spaceId: 'default',
+        consumer: 'bar',
       },
       ownerId: null,
     };
@@ -83,10 +93,15 @@ describe('Task Runner Cancel', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-  const services = alertsMock.createAlertServices();
+  const services = alertsMock.createRuleExecutorServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+  const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+  const uiSettingsService = uiSettingsServiceMock.createStartContract();
+  const dataPlugin = dataPluginMock.createStartContract();
+  const inMemoryMetrics = inMemoryMetricsMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -95,7 +110,10 @@ describe('Task Runner Cancel', () => {
   };
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
-    getServices: jest.fn().mockReturnValue(services),
+    data: dataPlugin,
+    savedObjects: savedObjectsService,
+    uiSettings: uiSettingsService,
+    elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
@@ -111,11 +129,16 @@ describe('Task Runner Cancel', () => {
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
     usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 1000,
+      },
+    },
   };
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-  const mockedRuleSavedObject: Alert<AlertTypeParams> = {
+  const mockedRuleSavedObject: Rule<RuleTypeParams> = {
     id: '1',
     consumer: 'bar',
     createdAt: mockDate,
@@ -162,7 +185,18 @@ describe('Task Runner Cancel', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
+    jest
+      .requireMock('../lib/wrap_scoped_cluster_client')
+      .createWrappedScopedClusterClientFactory.mockReturnValue({
+        client: () => services.scopedClusterClient,
+        getMetrics: () => ({
+          numSearches: 3,
+          esSearchDurationMs: 33,
+          totalSearchDurationMs: 23423,
+        }),
+      });
+    savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
+    elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
@@ -181,6 +215,7 @@ describe('Task Runner Cancel', () => {
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
         enabled: true,
+        consumer: 'bar',
       },
       references: [],
     });
@@ -192,7 +227,8 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     const promise = taskRunner.run();
@@ -219,9 +255,11 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -232,6 +270,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -254,9 +293,11 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -267,6 +308,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: `rule: test:1: '' execution cancelled due to timeout - exceeded rule type timeout of 5m`,
       rule: {
@@ -286,12 +328,22 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               metrics: {
+                number_of_searches: 3,
                 number_of_triggered_actions: 0,
+                number_of_generated_actions: 0,
+                number_of_active_alerts: 0,
+                number_of_new_alerts: 0,
+                number_of_recovered_alerts: 0,
+                total_number_of_alerts: 0,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -305,6 +357,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
         task: {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
@@ -337,6 +390,7 @@ describe('Task Runner Cancel', () => {
           lastDuration: 0,
           lastExecutionDate: '1970-01-01T00:00:00.000Z',
           status: 'error',
+          warning: null,
         },
       },
       { refresh: false, namespace: undefined }
@@ -352,9 +406,9 @@ describe('Task Runner Cancel', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -363,10 +417,15 @@ describe('Task Runner Cancel', () => {
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
-    const taskRunner = new TaskRunner(ruleType, mockedTaskInstance, {
-      ...taskRunnerFactoryInitializerParams,
-      cancelAlertsOnRuleTimeout: false,
-    });
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      {
+        ...taskRunnerFactoryInitializerParams,
+        cancelAlertsOnRuleTimeout: false,
+      },
+      inMemoryMetrics
+    );
 
     const promise = taskRunner.run();
     await Promise.resolve();
@@ -386,9 +445,9 @@ describe('Task Runner Cancel', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -403,7 +462,8 @@ describe('Task Runner Cancel', () => {
         cancelAlertsOnRuleTimeout: false,
       },
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     const promise = taskRunner.run();
@@ -420,9 +480,9 @@ describe('Task Runner Cancel', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -433,7 +493,8 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner(
       ruleType,
       mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
     );
 
     const promise = taskRunner.run();
@@ -442,7 +503,7 @@ describe('Task Runner Cancel', () => {
     await promise;
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).toHaveBeenCalledTimes(8);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -466,7 +527,11 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      8,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -481,9 +546,11 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         task: {
@@ -498,6 +565,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: `rule execution start: \"1\"`,
       rule: {
@@ -516,9 +584,11 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -530,6 +600,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: `rule: test:1: '' execution cancelled due to timeout - exceeded rule type timeout of 5m`,
       rule: {
@@ -549,12 +620,22 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               metrics: {
+                number_of_searches: 3,
                 number_of_triggered_actions: 0,
+                number_of_generated_actions: 0,
+                number_of_active_alerts: 0,
+                number_of_recovered_alerts: 0,
+                number_of_new_alerts: 0,
+                total_number_of_alerts: 0,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -573,6 +654,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: "rule executed: test:1: 'rule-name'",
       rule: {
@@ -593,7 +675,7 @@ describe('Task Runner Cancel', () => {
 
   function testActionsExecute() {
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -613,7 +695,11 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"numberOfTriggeredActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      7,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"triggeredActionsStatus":"complete"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -627,9 +713,11 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         task: {
@@ -645,6 +733,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: `rule execution start: "1"`,
       rule: {
@@ -663,9 +752,11 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         saved_objects: [
@@ -677,6 +768,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: `rule: test:1: '' execution cancelled due to timeout - exceeded rule type timeout of 5m`,
       rule: {
@@ -691,15 +783,17 @@ describe('Task Runner Cancel', () => {
         action: 'new-instance',
         category: ['alerts'],
         kind: 'alert',
-        duration: 0,
+        duration: '0',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -715,6 +809,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: "test:1: 'rule-name' created new alert: '1'",
       rule: {
@@ -730,16 +825,18 @@ describe('Task Runner Cancel', () => {
       event: {
         action: 'active-instance',
         category: ['alerts'],
-        duration: 0,
+        duration: '0',
         kind: 'alert',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -749,6 +846,7 @@ describe('Task Runner Cancel', () => {
         saved_objects: [
           { id: '1', namespace: undefined, rel: 'primary', type: 'alert', type_id: 'test' },
         ],
+        space_ids: ['default'],
       },
       message: "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
       rule: {
@@ -768,9 +866,11 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -790,6 +890,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'action',
           },
         ],
+        space_ids: ['default'],
       },
       message:
         "alert: test:1: 'rule-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
@@ -806,12 +907,22 @@ describe('Task Runner Cancel', () => {
       kibana: {
         alert: {
           rule: {
+            consumer: 'bar',
             execution: {
               metrics: {
+                number_of_searches: 3,
                 number_of_triggered_actions: 1,
+                number_of_generated_actions: 1,
+                number_of_active_alerts: 1,
+                number_of_new_alerts: 1,
+                number_of_recovered_alerts: 0,
+                total_number_of_alerts: 1,
+                es_search_duration_ms: 33,
+                total_search_duration_ms: 23423,
               },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
+            rule_type_id: 'test',
           },
         },
         alerting: {
@@ -830,6 +941,7 @@ describe('Task Runner Cancel', () => {
             type_id: 'test',
           },
         ],
+        space_ids: ['default'],
       },
       message: "rule executed: test:1: 'rule-name'",
       rule: {

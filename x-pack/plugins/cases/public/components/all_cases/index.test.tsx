@@ -15,10 +15,8 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { useKibana } from '../../common/lib/kibana';
 import { CaseStatuses } from '../../../common/api';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 
@@ -27,19 +25,15 @@ jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
-jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
 describe('AllCases', () => {
-  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
-
   const dispatchUpdateCaseProperty = jest.fn();
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
@@ -70,7 +64,6 @@ describe('AllCases', () => {
   };
 
   beforeAll(() => {
-    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
     (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],

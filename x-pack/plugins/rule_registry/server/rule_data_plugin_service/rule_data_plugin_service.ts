@@ -8,13 +8,13 @@
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { INDEX_PREFIX } from '../config';
 import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
 import { Dataset, IndexOptions } from './index_options';
-import { ResourceInstaller } from './resource_installer';
+import { IResourceInstaller, ResourceInstaller } from './resource_installer';
 import { joinWithDash } from './utils';
 
 /**
@@ -71,7 +71,7 @@ export interface IRuleDataService {
    * Looks up the index information associated with the given Kibana "feature".
    * Note: features are used in RBAC.
    */
-  findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[];
+  findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null;
 }
 
 // TODO: This is a leftover. Remove its usage from the "observability" plugin and delete it.
@@ -89,7 +89,7 @@ interface ConstructorOptions {
 export class RuleDataService implements IRuleDataService {
   private readonly indicesByBaseName: Map<string, IndexInfo>;
   private readonly indicesByFeatureId: Map<string, IndexInfo[]>;
-  private readonly resourceInstaller: ResourceInstaller;
+  private readonly resourceInstaller: IResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
 
@@ -214,8 +214,13 @@ export class RuleDataService implements IRuleDataService {
     return this.indicesByBaseName.get(baseName) ?? null;
   }
 
-  public findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[] {
+  public findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null {
     const foundIndices = this.indicesByFeatureId.get(featureId) ?? [];
-    return dataset ? foundIndices.filter((i) => i.indexOptions.dataset === dataset) : foundIndices;
+    if (dataset && foundIndices.length > 0) {
+      return foundIndices.filter((i) => i.indexOptions.dataset === dataset)[0];
+    } else if (foundIndices.length > 0) {
+      return foundIndices[0];
+    }
+    return null;
   }
 }

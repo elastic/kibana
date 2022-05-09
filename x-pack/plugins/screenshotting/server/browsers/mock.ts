@@ -91,8 +91,7 @@ export function createMockBrowserDriverFactory(
       of({
         driver: driver ?? createMockBrowserDriver(),
         unexpectedExit$: NEVER,
-        metrics$: NEVER,
-        close: () => of(undefined),
+        close: () => of({}),
       })
     ),
     diagnose: jest.fn(() => of('message')),

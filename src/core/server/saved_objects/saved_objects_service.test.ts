@@ -36,6 +36,7 @@ import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure
 import { SavedObjectsRepository } from './service/lib/repository';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 
 jest.mock('./service/lib/repository');
 jest.mock('./object_types');
@@ -79,6 +80,7 @@ describe('SavedObjectsService', () => {
     return {
       pluginsInitialized,
       elasticsearch: elasticsearchServiceMock.createInternalStart(),
+      docLinks: docLinksServiceMock.createStartContract(),
     };
   };
 

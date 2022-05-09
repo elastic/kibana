@@ -69,7 +69,7 @@ export interface ChromeNavLinks {
 }
 
 export class NavLinksService {
-  private readonly stop$ = new ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());

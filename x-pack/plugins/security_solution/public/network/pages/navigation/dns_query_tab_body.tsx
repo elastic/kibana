@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkDnsTable } from '../../components/network_dns_table';
-import { useNetworkDns } from '../../containers/network_dns';
+import { useNetworkDns, ID } from '../../containers/network_dns';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { NetworkComponentQueryProps } from './types';
@@ -23,6 +23,8 @@ import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { dnsTopDomainsLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/network/dns_top_domains';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
@@ -44,6 +46,7 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   histogramType: MatrixHistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
+  lensAttributes: dnsTopDomainsLensAttributes,
 };
 
 const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
@@ -70,6 +73,11 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     };
   }, [deleteQuery]);
 
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { totalCount, networkDns, pageInfo, loadPage, id, inspect, isInspected, refetch },
@@ -78,7 +86,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     endDate,
     filterQuery,
     indexNames,
-    skip,
+    skip: querySkip,
     startDate,
     type,
   });
@@ -120,6 +128,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         loadPage={loadPage}
         refetch={refetch}
         setQuery={setQuery}
+        setQuerySkip={setQuerySkip}
         showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
         totalCount={totalCount}
         type={type}

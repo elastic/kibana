@@ -133,8 +133,6 @@ exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
-exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
-
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
 exports[`Error POD_NAME 1`] = `undefined`;
@@ -381,8 +379,6 @@ exports[`Span METRICSET_NAME 1`] = `undefined`;
 exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
-
-exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
 
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
@@ -636,8 +632,6 @@ exports[`Transaction METRICSET_NAME 1`] = `undefined`;
 exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
-
-exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 

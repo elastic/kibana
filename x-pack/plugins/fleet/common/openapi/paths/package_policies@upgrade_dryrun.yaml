@@ -29,5 +29,7 @@ post:
                   type: boolean
                 diff:
                   $ref: ../components/schemas/upgrade_diff.yaml
+                agent_diff:
+                  $ref: ../components/schemas/upgrade_agent_diff.yaml
               required:
                 - hasErrors

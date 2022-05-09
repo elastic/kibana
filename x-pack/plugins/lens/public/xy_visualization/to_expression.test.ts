@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import { Ast, fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { getXyVisualization } from './xy_visualization';
-import { Operation } from '../types';
+import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -22,27 +23,47 @@ describe('#toExpression', () => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),
     useLegacyTimeAxis: false,
+    eventAnnotationService: eventAnnotationServiceMock,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+  let datasourceExpressionsByLayers: Record<string, Ast>;
 
   beforeEach(() => {
     frame = createMockFramePublicAPI();
     mockDatasource = createMockDatasource('testDatasource');
 
     mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-      { columnId: 'd' },
-      { columnId: 'a' },
-      { columnId: 'b' },
-      { columnId: 'c' },
+      { columnId: 'd', fields: [] },
+      { columnId: 'a', fields: [] },
+      { columnId: 'b', fields: [] },
+      { columnId: 'c', fields: [] },
     ]);
 
     mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((col) => {
-      return { label: `col_${col}`, dataType: 'number' } as Operation;
+      return { label: `col_${col}`, dataType: 'number' } as OperationDescriptor;
     });
 
     frame.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
+    };
+
+    const datasourceExpression = mockDatasource.toExpression(
+      frame.datasourceLayers.first,
+      'first'
+    ) ?? {
+      type: 'expression',
+      chain: [],
+    };
+    const exprAst =
+      typeof datasourceExpression === 'string'
+        ? fromExpression(datasourceExpression)
+        : datasourceExpression;
+
+    datasourceExpressionsByLayers = {
+      first: exprAst,
+      referenceLine: exprAst,
     };
   });
 
@@ -54,6 +75,8 @@ describe('#toExpression', () => {
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
+          endValue: 'Nearest',
+          emphasizeFitting: true,
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
           labelsOrientation: {
             x: 0,
@@ -78,7 +101,9 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame.datasourceLayers
+        frame.datasourceLayers,
+        undefined,
+        datasourceExpressionsByLayers
       )
     ).toMatchSnapshot();
   });
@@ -102,7 +127,9 @@ describe('#toExpression', () => {
               },
             ],
           },
-          frame.datasourceLayers
+          frame.datasourceLayers,
+          undefined,
+          datasourceExpressionsByLayers
         ) as Ast
       ).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
@@ -125,7 +152,9 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame.datasourceLayers
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
     ) as Ast;
     expect(
       (expression.chain[0].arguments.axisTitlesVisibilitySettings[0] as Ast).chain[0].arguments
@@ -153,7 +182,9 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame.datasourceLayers
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
     ) as Ast;
     expect((expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.xAccessor).toEqual(
       []
@@ -178,7 +209,9 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame.datasourceLayers
+        frame.datasourceLayers,
+        undefined,
+        datasourceExpressionsByLayers
       )
     ).toBeNull();
   });
@@ -200,7 +233,9 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame.datasourceLayers
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
     )! as Ast;
 
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
@@ -237,7 +272,9 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame.datasourceLayers
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
     ) as Ast;
     expect(
       (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments
@@ -265,7 +302,9 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame.datasourceLayers
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
     ) as Ast;
     expect((expression.chain[0].arguments.labelsOrientation[0] as Ast).chain[0].arguments).toEqual({
       x: [0],
@@ -291,7 +330,9 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame.datasourceLayers
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
     ) as Ast;
     expect(
       (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments
@@ -306,7 +347,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'inside',
+        valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -319,16 +360,18 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame.datasourceLayers
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
     ) as Ast;
-    expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('inside');
+    expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('show');
   });
 
   it('should compute the correct series color fallback based on the layer type', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'inside',
+        valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -343,15 +386,14 @@ describe('#toExpression', () => {
           {
             layerId: 'referenceLine',
             layerType: layerTypes.REFERENCELINE,
-            seriesType: 'area',
-            splitAccessor: 'd',
-            xAccessor: 'a',
             accessors: ['b', 'c'],
             yConfig: [{ forAccessor: 'a' }],
           },
         ],
       },
-      { ...frame.datasourceLayers, referenceLine: mockDatasource.publicAPIMock }
+      { ...frame.datasourceLayers, referenceLine: mockDatasource.publicAPIMock },
+      undefined,
+      datasourceExpressionsByLayers
     ) as Ast;
 
     function getYConfigColorForLayer(ast: Ast, index: number) {

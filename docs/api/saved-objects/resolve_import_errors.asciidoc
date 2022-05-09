@@ -25,7 +25,7 @@ To resolve errors, you can:
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the <<xpack-spaces,space>>. When `space_id` is unspecfied in the URL, the default space is used.
+  (Optional, string) An identifier for the <<xpack-spaces,space>>. When `space_id` is unspecified in the URL, the default space is used.
 
 [[saved-objects-api-resolve-import-errors-query-params]]
 ==== Query parameters

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AlertActionParam } from '../../../../alerting/common';
+import { RuleActionParam } from '@kbn/alerting-plugin/common';
 import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
 
-export type DefaultActionParams = Record<string, AlertActionParam> | undefined;
+export type DefaultActionParams = Record<string, RuleActionParam> | undefined;
 export type DefaultActionParamsGetter = (
   actionTypeId: string,
   actionGroupId: string
@@ -29,5 +29,14 @@ export const getDefaultsForActionParams = (
         pagerDutyDefaults.eventAction = EventActionOptions.RESOLVE;
       }
       return pagerDutyDefaults;
+    case '.xmatters':
+      const xmattersDefaults = {
+        alertActionGroupName: `{{${AlertProvidedActionVariables.alertActionGroupName}}}`,
+        signalId: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+        ruleName: `{{${AlertProvidedActionVariables.ruleName}}}`,
+        date: `{{${AlertProvidedActionVariables.date}}}`,
+        spaceId: `{{${AlertProvidedActionVariables.ruleSpaceId}}}`,
+      };
+      return xmattersDefaults;
   }
 };

@@ -19,18 +19,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
-import { IndexPatternField } from '../../../../../../../../src/plugins/data_views/common';
 
 interface Props {
   stats: FieldVisStats | undefined;
   fieldFormat?: any;
   barColor?: 'primary' | 'success' | 'danger' | 'subdued' | 'accent';
   compressed?: boolean;
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 function getPercentLabel(docCount: number, topValuesSampleSize: number): string {

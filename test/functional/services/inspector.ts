@@ -195,8 +195,12 @@ export class InspectorService extends FtrService {
    */
   public async openInspectorView(viewId: string): Promise<void> {
     this.log.debug(`Open Inspector view ${viewId}`);
-    await this.testSubjects.click('inspectorViewChooser');
-    await this.testSubjects.click(viewId);
+    await this.retry.try(async () => {
+      await this.testSubjects.click('inspectorViewChooser');
+      // check whether popover menu opens, if not, fail and retry opening
+      await this.testSubjects.existOrFail(viewId, { timeout: 2000 });
+      await this.testSubjects.click(viewId);
+    });
   }
 
   /**

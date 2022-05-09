@@ -93,18 +93,21 @@ const RootContainer = styled.div`
   }
 `;
 
-const DefaultNoItemsFound = memo(() => {
-  return (
-    <EuiEmptyPrompt
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.paginatedContent.noItemsFoundTitle"
-          defaultMessage="No items found"
-        />
-      }
-    />
-  );
-});
+const DefaultNoItemsFound = memo<{ 'data-test-subj'?: string }>(
+  ({ 'data-test-subj': dataTestSubj }) => {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj={dataTestSubj}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.paginatedContent.noItemsFoundTitle"
+            defaultMessage="No items found"
+          />
+        }
+      />
+    );
+  }
+);
 
 DefaultNoItemsFound.displayName = 'DefaultNoItemsFound';
 
@@ -227,7 +230,8 @@ export const PaginatedContent = memo(
           return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
-      if (!loading) return noItemsMessage || <DefaultNoItemsFound />;
+      if (!loading)
+        return noItemsMessage || <DefaultNoItemsFound data-test-subj={getTestId('noResults')} />;
     }, [
       ItemComponent,
       error,
@@ -266,7 +270,7 @@ export const PaginatedContent = memo(
               itemsPerPage={pagination.pageSize}
               itemsPerPageOptions={pagination.pageSizeOptions}
               pageCount={pageCount}
-              hidePerPageOptions={pagination.hidePerPageOptions}
+              showPerPageOptions={pagination.showPerPageOptions}
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={handlePageChange}
             />

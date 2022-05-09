@@ -26,7 +26,7 @@ import { createTextHandler } from './lib/create_text_handler';
 import { IndexPatternSelect } from './lib/index_pattern_select';
 import { YesNo } from './yes_no';
 import { LastValueModePopover } from './last_value_mode_popover';
-import { KBN_FIELD_TYPES } from '../../../../../data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,8 +36,8 @@ import { isTimerangeModeEnabled } from '../../../common/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 import { PanelModelContext } from '../contexts/panel_model_context';
 import { FormValidationContext } from '../contexts/form_validation_context';
-import { getDataStart, getUISettings } from '../../services';
-import { UI_SETTINGS } from '../../../../../data/common';
+import { getUISettings, getDataViewsStart } from '../../services';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
@@ -143,7 +143,7 @@ export const IndexPattern = ({
 
   useEffect(() => {
     async function fetchIndex() {
-      const { indexPatterns } = getDataStart();
+      const dataViews = getDataViewsStart();
       let fetchedIndexPattern = {
         indexPattern: undefined,
         indexPatternString: undefined,
@@ -153,12 +153,12 @@ export const IndexPattern = ({
 
       try {
         fetchedIndexPattern = indexPatternToFetch
-          ? await fetchIndexPattern(indexPatternToFetch, indexPatterns, {
+          ? await fetchIndexPattern(indexPatternToFetch, dataViews, {
               fetchKibanaIndexForStringIndexes: true,
             })
           : {
               ...fetchedIndexPattern,
-              defaultIndex: await indexPatterns.getDefault(),
+              defaultIndex: await dataViews.getDefault(),
             };
       } catch {
         // nothing to be here
@@ -259,7 +259,11 @@ export const IndexPattern = ({
             restrict={RESTRICT_FIELDS}
             value={model[timeFieldName]}
             disabled={disabled}
-            onChange={handleSelectChange(timeFieldName)}
+            onChange={(value) =>
+              onChange({
+                [timeFieldName]: value?.[0],
+              })
+            }
             indexPattern={model[indexPatternName]}
             fields={fields}
             placeholder={

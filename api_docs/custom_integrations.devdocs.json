@@ -387,7 +387,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -434,7 +434,7 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -646,7 +646,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -748,7 +748,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+              "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -769,7 +769,7 @@
           "\nThe list of all available categories."
         ],
         "signature": [
-          "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+          "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -785,7 +785,7 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -1019,6 +1019,16 @@
           },
           {
             "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.microsoft_365",
+            "type": "string",
+            "tags": [],
+            "label": "microsoft_365",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.monitoring",
             "type": "string",
             "tags": [],
@@ -1136,6 +1146,16 @@
             "description": [
               "// Kibana added"
             ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search",
+            "type": "string",
+            "tags": [],
+            "label": "enterprise_search",
+            "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
           },

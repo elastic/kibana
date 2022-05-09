@@ -38,7 +38,7 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
       },
     },
     async (ctx, req, res) => {
-      const { client } = ctx.core.elasticsearch;
+      const { client } = (await ctx.core).elasticsearch;
 
       const type = req.body.context.split('_field')[0] as estypes.MappingRuntimeFieldType;
       const body = {
@@ -70,7 +70,7 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
           body,
         });
 
-        const fieldValue = response.body.hits.hits[0]?.fields?.my_runtime_field ?? '';
+        const fieldValue = response.hits.hits[0]?.fields?.my_runtime_field ?? '';
 
         return res.ok({ body: { values: fieldValue } });
       } catch (error: any) {

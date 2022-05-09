@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { ConnectorTokenClient } from './connector_token_client';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ConnectorToken } from '../../types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
@@ -355,5 +355,146 @@ describe('delete()', () => {
         "token2",
       ]
     `);
+  });
+});
+
+describe('updateOrReplace()', () => {
+  test('creates new SO if current token is null', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      attributes: {
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAt: new Date().toISOString(),
+      },
+      references: [],
+    });
+    await connectorTokenClient.updateOrReplace({
+      connectorId: '1',
+      token: null,
+      newToken: 'newToken',
+      expiresInSec: 1000,
+      deleteExisting: false,
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect((unsecuredSavedObjectsClient.create.mock.calls[0][1] as ConnectorToken).token).toBe(
+      'newToken'
+    );
+
+    expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+  });
+
+  test('creates new SO and deletes all existing tokens for connector if current token is null and deleteExisting is true', async () => {
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      attributes: {
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAt: new Date().toISOString(),
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'connector_token',
+          attributes: {
+            connectorId: '123',
+            tokenType: 'access_token',
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date().toISOString(),
+          },
+          score: 1,
+          references: [],
+        },
+        {
+          id: '2',
+          type: 'connector_token',
+          attributes: {
+            connectorId: '123',
+            tokenType: 'access_token',
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date().toISOString(),
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    });
+    await connectorTokenClient.updateOrReplace({
+      connectorId: '1',
+      token: null,
+      newToken: 'newToken',
+      expiresInSec: 1000,
+      deleteExisting: true,
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect((unsecuredSavedObjectsClient.create.mock.calls[0][1] as ConnectorToken).token).toBe(
+      'newToken'
+    );
+
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
+  });
+
+  test('updates existing SO if current token exists', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      attributes: {
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        createdAt: new Date().toISOString(),
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
+      errors: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      attributes: {
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        expiresAt: new Date().toISOString(),
+      },
+      references: [],
+    });
+    await connectorTokenClient.updateOrReplace({
+      connectorId: '1',
+      token: {
+        id: '3',
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date().toISOString(),
+      },
+      newToken: 'newToken',
+      expiresInSec: 1000,
+      deleteExisting: true,
+    });
+
+    expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.checkConflicts).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect((unsecuredSavedObjectsClient.create.mock.calls[0][1] as ConnectorToken).token).toBe(
+      'newToken'
+    );
   });
 });

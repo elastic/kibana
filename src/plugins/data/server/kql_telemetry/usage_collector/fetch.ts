@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
@@ -20,7 +20,7 @@ export interface Usage {
 
 export function fetchProvider(index: string) {
   return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
-    const [{ body: response }, { body: config }] = await Promise.all([
+    const [response, config] = await Promise.all([
       esClient.get(
         {
           index,

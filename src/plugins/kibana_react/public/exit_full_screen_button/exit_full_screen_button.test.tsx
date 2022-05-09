@@ -10,7 +10,7 @@ import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { keys } from '@elastic/eui';
-import type { ChromeStart } from '../../../../core/public';
+import type { ChromeStart } from '@kbn/core/public';
 
 const MockChrome = {
   setIsVisible: jest.fn(),

@@ -16,5 +16,6 @@ export function isErrorThatHandlesItsOwnResponse(
 
 export type { ErrorThatHandlesItsOwnResponse, ElasticsearchError };
 export { getEsErrorMessage };
-export type { AlertTypeDisabledReason } from './alert_type_disabled';
-export { AlertTypeDisabledError } from './alert_type_disabled';
+export type { RuleTypeDisabledReason } from './rule_type_disabled';
+export { RuleTypeDisabledError } from './rule_type_disabled';
+export { RuleMutedError } from './rule_muted';

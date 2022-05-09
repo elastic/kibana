@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type {
   AgentPolicy,
@@ -201,6 +201,59 @@ describe('agent policy', () => {
       await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, 'output-id-123');
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removeOutputFromAll', () => {
+    let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
+      ReturnType<typeof agentPolicyService['update']>
+    >;
+    beforeEach(() => {
+      mockedAgentPolicyServiceUpdate = jest
+        .spyOn(agentPolicyService, 'update')
+        .mockResolvedValue({} as any);
+    });
+
+    afterEach(() => {
+      mockedAgentPolicyServiceUpdate.mockRestore();
+    });
+    it('should update policies using deleted output', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test1',
+            attributes: {
+              data_output_id: 'output-id-123',
+              monitoring_output_id: 'output-id-another-output',
+            },
+          },
+          {
+            id: 'test2',
+            attributes: {
+              data_output_id: 'output-id-another-output',
+              monitoring_output_id: 'output-id-123',
+            },
+          },
+        ],
+      } as any);
+
+      await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
+
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test1',
+        { data_output_id: null, monitoring_output_id: 'output-id-another-output' }
+      );
+      expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test2',
+        { data_output_id: 'output-id-another-output', monitoring_output_id: null }
+      );
     });
   });
 

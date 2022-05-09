@@ -6,13 +6,13 @@
  */
 
 import { cloneDeep, mapValues } from 'lodash';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
-} from '../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/kibana-utils-plugin/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
@@ -23,10 +23,15 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  VisState810,
+  VisState820,
+  VisState830,
   CustomVisualizationMigrations,
   LensDocShape810,
+  LensDocShape830,
+  VisStatePre830,
 } from './types';
-import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -192,6 +197,64 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715): LensD
   return newAttributes as LensDocShape810;
 };
 
+export const commonSetLastValueShowArrayValues = (attributes: LensDocShape810): LensDocShape810 => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (
+        column.operationType === 'last_value' &&
+        !(typeof column.params.showArrayValues === 'boolean')
+      ) {
+        column.params.showArrayValues = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
+export const commonEnhanceTableRowHeight = (
+  attributes: LensDocShape810<VisState810>
+): LensDocShape810<VisState820> => {
+  if (attributes.visualizationType !== 'lnsDatatable') {
+    return attributes as LensDocShape810<VisState820>;
+  }
+  const visState810 = attributes.state.visualization as VisState810;
+  const newAttributes = cloneDeep(attributes);
+  const vizState = newAttributes.state.visualization as VisState820;
+  vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
+  vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
+  return newAttributes as LensDocShape810<VisState820>;
+};
+
+export const commonSetIncludeEmptyRowsDateHistogram = (
+  attributes: LensDocShape810
+): LensDocShape810 => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (column.operationType === 'date_histogram') {
+        column.params.includeEmptyRows = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
+export const commonLockOldMetricVisSettings = (
+  attributes: LensDocShape810
+): LensDocShape830<VisState830> => {
+  const newAttributes = cloneDeep(attributes);
+  if (newAttributes.visualizationType !== 'lnsMetric') {
+    return newAttributes as LensDocShape830<VisState830>;
+  }
+
+  const visState = newAttributes.state.visualization as MetricState;
+  visState.textAlign = visState.textAlign ?? 'center';
+  visState.titlePosition = visState.titlePosition ?? 'bottom';
+  visState.size = visState.size ?? 'xl';
+  return newAttributes as LensDocShape830<VisState830>;
+};
+
 const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
   return (savedObject: { attributes: LensDocShape }) => {
     if (savedObject.attributes.visualizationType !== id) return savedObject;
@@ -280,4 +343,26 @@ export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): L
       })
     );
   return newAttributes as LensDocShape810;
+};
+
+export const commonFixValueLabelsInXY = (
+  attributes: LensDocShape830<VisStatePre830>
+): LensDocShape830<VisState830> => {
+  if (attributes.visualizationType !== 'lnsXY') {
+    return attributes as LensDocShape830<VisState830>;
+  }
+
+  const newAttributes: LensDocShape830<VisStatePre830> = cloneDeep(attributes);
+  const { visualization } = newAttributes.state;
+  const { valueLabels } = visualization;
+  return {
+    ...newAttributes,
+    state: {
+      ...newAttributes.state,
+      visualization: {
+        ...visualization,
+        valueLabels: valueLabels && valueLabels !== 'hide' ? 'show' : valueLabels,
+      },
+    },
+  };
 };

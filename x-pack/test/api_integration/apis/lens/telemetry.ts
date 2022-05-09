@@ -7,12 +7,10 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { convertToKibanaClient } from '@kbn/test';
 
+import { getDailyEvents } from '@kbn/lens-plugin/server/usage/task';
+import { getVisualizationCounts } from '@kbn/lens-plugin/server/usage/visualization_counts';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-import { getDailyEvents } from '../../../../plugins/lens/server/usage/task';
-import { getVisualizationCounts } from '../../../../plugins/lens/server/usage/visualization_counts';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -106,8 +104,8 @@ export default ({ getService }: FtrProviderContext) => {
         },
         refresh: 'wait_for',
       });
-      const kibanaClient = convertToKibanaClient(es);
-      const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
+
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
 
       expect(result).to.eql({
         byDate: {},
@@ -149,8 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
           getEvent('revert', date1, 'suggestion'),
         ],
       });
-      const kibanaClient = convertToKibanaClient(es);
-      const result = await getDailyEvents('.kibana', () => Promise.resolve(kibanaClient));
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
 
       expect(result).to.eql({
         byDate: {
@@ -177,8 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
 
-      const kibanaClient = convertToKibanaClient(es);
-      const results = await getVisualizationCounts(() => Promise.resolve(kibanaClient), '.kibana');
+      const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
 
       expect(results).to.have.keys([
         'saved_overall',

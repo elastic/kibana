@@ -9,8 +9,8 @@
 import React, { useState } from 'react';
 
 import useMount from 'react-use/lib/useMount';
+import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DataViewPicker } from './data_view_picker';
-import { DataView, DataViewListItem } from '../../../../data_views/common';
 import { injectStorybookDataView } from '../../services/storybook/data_views';
 import { storybookFlightsDataView } from '../../mocks';
 import { pluginServices, registry, StorybookParams } from '../../services/storybook';

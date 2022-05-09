@@ -16,6 +16,7 @@ import { getMetricsField } from './get_metrics_field';
 import { createFieldFormatter } from './create_field_formatter';
 import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
+import { getFieldsForTerms } from '../../../../common/fields_utils';
 
 export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap) => {
   const variables = {};
@@ -50,10 +51,16 @@ export const convertSeriesToVars = (series, model, getConfig = null, fieldFormat
             }),
           },
         };
-        const rowLabel =
-          seriesModel.split_mode === BUCKET_TYPES.TERMS
-            ? createFieldFormatter(seriesModel.terms_field, fieldFormatMap)(row.label)
-            : row.label;
+
+        let rowLabel = row.label;
+        if (seriesModel.split_mode === BUCKET_TYPES.TERMS) {
+          const fieldsForTerms = getFieldsForTerms(seriesModel.terms_field);
+
+          if (fieldsForTerms.length === 1) {
+            rowLabel = createFieldFormatter(fieldsForTerms[0], fieldFormatMap)(row.label);
+          }
+        }
+
         set(variables, varName, data);
         set(variables, `${label}.label`, rowLabel);
 

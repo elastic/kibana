@@ -7,8 +7,8 @@
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimefilterContract } from 'src/plugins/data/public';
-import { DataView } from 'src/plugins/data/common';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-plugin/common';
 
 import {
   EuiButton,
@@ -31,7 +31,7 @@ export const ML_FROZEN_TIER_PREFERENCE = 'ml.frozenDataTierPreference';
 
 interface Props {
   timefilter: TimefilterContract;
-  indexPattern: DataView;
+  dataView: DataView;
   disabled: boolean;
   query?: QueryDslQueryContainer;
   callback?: (a: any) => void;
@@ -48,7 +48,7 @@ type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TI
 // to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
 export const FullTimeRangeSelector: FC<Props> = ({
   timefilter,
-  indexPattern,
+  dataView,
   query,
   disabled,
   callback,
@@ -63,7 +63,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
   const setRange = useCallback(
     async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
       try {
-        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData);
+        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData, toasts);
         if (typeof callback === 'function') {
           callback(fullTimeRange);
         }
@@ -92,10 +92,10 @@ export const FullTimeRangeSelector: FC<Props> = ({
   const setPreference = useCallback(
     (id: string) => {
       setFrozenDataPreference(id as FrozenTierPreference);
-      setRange(indexPattern, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
+      setRange(dataView, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
       closePopover();
     },
-    [indexPattern, query, setFrozenDataPreference, setRange]
+    [dataView, query, setFrozenDataPreference, setRange]
   );
 
   const onButtonClick = () => {
@@ -164,7 +164,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
       <EuiToolTip content={buttonTooltip}>
         <EuiButton
           isDisabled={disabled}
-          onClick={() => setRange(indexPattern, query, true)}
+          onClick={() => setRange(dataView, query, true)}
           data-test-subj="dataVisualizerButtonUseFullData"
         >
           <FormattedMessage

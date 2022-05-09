@@ -8,9 +8,9 @@
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from 'src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,

@@ -14,19 +14,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageViewsChart } from '../charts/page_views_chart';
-import { createExploratoryViewUrl } from '../../../../../../observability/public';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
 export function PageViewsTrend() {
   const { http } = useKibanaServices();
 
-  const { urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
   const { serviceName } = uxUiFilters;
 
   const { start, end, searchTerm, rangeTo, rangeFrom } = urlParams;
@@ -54,7 +54,9 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [start, end, serviceName, uxUiFilters, searchTerm, breakdown]
+    // `rangeId` acts as a cache buster for stable ranges like "Today"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [start, end, serviceName, uxUiFilters, searchTerm, breakdown, rangeId]
   );
 
   const exploratoryViewLink = createExploratoryViewUrl(

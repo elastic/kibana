@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { AGENTS_INDEX } from '../../../plugins/fleet/common';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   metadataIndexPattern,
   eventsIndexPattern,
@@ -16,7 +16,7 @@ import {
   telemetryIndexPattern,
   METADATA_UNITED_INDEX,
   METADATA_DATASTREAM,
-} from '../../../plugins/security_solution/common/endpoint/constants';
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
 
 export function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
   const client = getService('es');

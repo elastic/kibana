@@ -10,18 +10,18 @@ import {
   TransformGetTransformStatsResponse,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreSetup, ElasticsearchClient, Logger } from 'src/core/server';
+import { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   throwUnrecoverableError,
-} from '../../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
+import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { EndpointAppContext } from '../../types';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES } from '../../../../common/constants';
 import { wrapErrorIfNeeded } from '../../utils';
-import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '../../../../../fleet/common';
 
 const SCOPE = ['securitySolution'];
 const INTERVAL = '2h';
@@ -110,9 +110,12 @@ export class CheckMetadataTransformsTask {
 
     let transformStatsResponse: TransportResult<TransformGetTransformStatsResponse>;
     try {
-      transformStatsResponse = await esClient?.transform.getTransformStats({
-        transform_id: METADATA_TRANSFORMS_PATTERN,
-      });
+      transformStatsResponse = await esClient?.transform.getTransformStats(
+        {
+          transform_id: METADATA_TRANSFORMS_PATTERN,
+        },
+        { meta: true }
+      );
     } catch (e) {
       const err = wrapErrorIfNeeded(e);
       const errMessage = `failed to get transform stats with error: ${err}`;

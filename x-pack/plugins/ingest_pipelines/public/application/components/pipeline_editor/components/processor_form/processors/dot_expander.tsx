@@ -40,11 +40,15 @@ export const DotExpander: FunctionComponent = () => {
           {
             validator: ({ value }) => {
               if (typeof value === 'string' && value.length) {
-                return !value.includes('.')
+                const allowedPattern = value.includes('.') || value === '*';
+                return !allowedPattern
                   ? {
                       message: i18n.translate(
                         'xpack.ingestPipelines.pipelineEditor.dotExpanderForm.fieldNameRequiresDotError',
-                        { defaultMessage: 'A field value requires at least one dot character.' }
+                        {
+                          defaultMessage:
+                            'The field name must be an asterisk or contain a dot character.',
+                        }
                       ),
                     }
                   : undefined;

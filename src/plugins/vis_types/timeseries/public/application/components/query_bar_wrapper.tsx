@@ -8,11 +8,11 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
+import { QueryStringInput, QueryStringInputProps } from '@kbn/unified-search-plugin/public';
 import { CoreStartContext } from '../contexts/query_input_bar_context';
 import type { IndexPatternValue } from '../../../common/types';
 
-import { QueryStringInput, QueryStringInputProps } from '../../../../../../plugins/data/public';
-import { getDataStart } from '../../services';
+import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/index_patterns_utils';
 
 type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange' | 'isInvalid'> & {
@@ -27,7 +27,7 @@ export function QueryBarWrapper({
   indexPatterns,
   'data-test-subj': dataTestSubj,
 }: QueryBarWrapperProps) {
-  const { indexPatterns: indexPatternsService } = getDataStart();
+  const dataViews = getDataViewsStart();
   const [indexes, setIndexes] = useState<QueryStringInputProps['indexPatterns']>([]);
 
   const coreStartContext = useContext(CoreStartContext);
@@ -41,14 +41,14 @@ export function QueryBarWrapper({
           if (isStringTypeIndexPattern(index)) {
             i.push(index);
           } else if (index?.id) {
-            const { indexPattern } = await fetchIndexPattern(index, indexPatternsService);
+            const { indexPattern } = await fetchIndexPattern(index, dataViews);
 
             if (indexPattern) {
               i.push(indexPattern);
             }
           }
         } else {
-          const defaultIndex = await indexPatternsService.getDefault();
+          const defaultIndex = await dataViews.getDefault();
 
           if (defaultIndex) {
             i.push(defaultIndex);
@@ -59,7 +59,7 @@ export function QueryBarWrapper({
     }
 
     fetchIndexes();
-  }, [indexPatterns, indexPatternsService]);
+  }, [indexPatterns, dataViews]);
 
   return (
     <QueryStringInput

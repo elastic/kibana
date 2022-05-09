@@ -41,4 +41,5 @@ export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './definitions';

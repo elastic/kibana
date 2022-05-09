@@ -109,7 +109,7 @@ describe('EmbeddedMapComponent', () => {
 
   beforeEach(() => {
     setQuery.mockClear();
-    mockGetStorage.mockReturnValue(false);
+    mockGetStorage.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -190,11 +190,14 @@ describe('EmbeddedMapComponent', () => {
   });
 
   test('map hidden on close', async () => {
+    mockGetStorage.mockReturnValue(false);
     const wrapper = mount(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
+
+    expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(false);
 
     const container = wrapper.find('[data-test-subj="false-toggle-network-map"]').at(0);
     container.simulate('click');
@@ -202,24 +205,25 @@ describe('EmbeddedMapComponent', () => {
     await waitFor(() => {
       wrapper.update();
       expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', true);
+      expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(true);
     });
   });
 
   test('map visible on open', async () => {
-    mockGetStorage.mockReturnValue(true);
-
     const wrapper = mount(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
 
+    expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(true);
     const container = wrapper.find('[data-test-subj="true-toggle-network-map"]').at(0);
     container.simulate('click');
 
     await waitFor(() => {
       wrapper.update();
       expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
+      expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(false);
     });
   });
 });

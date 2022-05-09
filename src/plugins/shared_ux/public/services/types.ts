@@ -7,16 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreStart, AppUpdater, PluginInitializerContext } from 'src/core/public';
-
-/**
- * A factory function for creating one or more services.
- *
- * The `S` generic determines the shape of the API being produced.
- * The `Parameters` generic determines what parameters are expected to
- * create the service.
- */
-export type PluginServiceFactory<S, Parameters = void> = (params: Parameters) => S;
+import { CoreStart, AppUpdater, PluginInitializerContext } from '@kbn/core/public';
 
 /**
  * Parameters necessary to create a Kibana-based service, (e.g. during Plugin

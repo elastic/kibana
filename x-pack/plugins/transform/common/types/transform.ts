@@ -13,7 +13,7 @@ import type { PivotAggDict } from './pivot_aggs';
 import type { TransformHealthAlertRule } from './alerting';
 
 export type IndexName = string;
-export type IndexPattern = string;
+export type DataView = string;
 export type TransformId = string;
 
 /**

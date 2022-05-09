@@ -50,9 +50,17 @@ export class File {
   }
 
   public isFixture() {
-    return (
-      this.relativePath.split(sep).includes('__fixtures__') || this.path.endsWith('.test-d.ts')
-    );
+    const parts = this.relativePath.split(sep);
+    if (parts.includes('__fixtures__') || this.path.endsWith('.test-d.ts')) {
+      return true;
+    }
+
+    const i = parts.indexOf('kbn-generate');
+    if (i >= 0 && parts[i + 1] === 'templates') {
+      return true;
+    }
+
+    return false;
   }
 
   public getRelativeParentDirs() {

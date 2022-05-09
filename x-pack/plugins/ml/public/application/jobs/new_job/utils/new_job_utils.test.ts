@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { createSearchItems } from './new_job_utils';
 

@@ -9,13 +9,13 @@ import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import type { TimelineNonEcsData } from '../../../../../timelines/common/search_strategy';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   ColumnHeaderOptions,
   DataProvider,
   TGridCellAction,
-} from '../../../../../timelines/common/types';
-import { getPageRowIndex } from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/common/types';
+import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import { Ecs } from '../../../../common/ecs';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
@@ -25,6 +25,7 @@ import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { useKibana } from '../kibana';
 import { getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 /** a noop required by the filter in / out buttons */
 const onFilterAdded = () => {};
@@ -59,8 +60,9 @@ const useFormattedFieldProps = ({
   pageSize: number;
 }) => {
   const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
   const ecs = ecsData[pageRowIndex];
-  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
+  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField, usersEnabled);
   const linkField = header?.linkField ? header?.linkField : link?.linkField;
   const linkValues = header && getOr([], linkField ?? '', ecs);
   const eventId = (header && get('_id' ?? '', ecs)) || '';
@@ -82,7 +84,8 @@ const useFormattedFieldProps = ({
     const normalizedLink = getLinkColumnDefinition(
       normalizedColumnId,
       header?.type,
-      normalizedLinkField
+      normalizedLinkField,
+      usersEnabled
     );
     return {
       pageRowIndex,
@@ -278,19 +281,20 @@ export const cellActions: TGridCellAction[] = [
     header,
     timelineId,
     pageSize,
+    closeCellPopover,
   }: {
     data: TimelineNonEcsData[][];
     ecsData: Ecs[];
     header?: ColumnHeaderOptions;
     timelineId: string;
     pageSize: number;
+    closeCellPopover?: () => void;
   }) => {
     if (header !== undefined) {
       return function FieldValue({
         rowIndex,
         columnId,
         Component,
-        closePopover,
       }: EuiDataGridColumnCellActionProps) {
         const {
           pageRowIndex,
@@ -328,7 +332,7 @@ export const cellActions: TGridCellAction[] = [
             truncate={false}
             title={title}
             linkValue={linkValue}
-            onClick={closePopover}
+            onClick={closeCellPopover}
           />
         ) : (
           // data grid expects each cell action always return an element, it crashes if returns null

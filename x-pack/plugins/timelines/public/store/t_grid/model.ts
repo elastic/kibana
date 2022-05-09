@@ -7,7 +7,7 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { FilterManager } from '../../../../../../src/plugins/data/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
@@ -66,8 +66,6 @@ export interface TGridModel extends TGridModelSettings {
   /** Uniquely identifies the timeline */
   id: string;
   indexNames: string[];
-  isAddToExistingCaseOpen: boolean;
-  isCreateNewCaseOpen: boolean;
   isLoading: boolean;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;

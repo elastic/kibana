@@ -16,8 +16,8 @@ import {
   CombinedState,
 } from 'redux';
 import { RouteProps } from 'react-router-dom';
-import { AppMountParameters } from '../../../../../src/core/public';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { StartServices } from '../types';
 
 /**
@@ -52,8 +52,8 @@ export interface SecuritySubPlugin {
 
 export type SecuritySubPluginKeyStore =
   | 'hosts'
+  | 'users'
   | 'network'
-  | 'ueba'
   | 'timeline'
   | 'hostList'
   | 'alertList'

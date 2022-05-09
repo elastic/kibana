@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { EsArchiver } from '@kbn/es-archiver';
-import { SavedObject } from 'src/core/server';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
+import { SavedObject } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -163,7 +163,6 @@ export function resolveCopyToSpaceConflictsSuite(
                 destinationId: `cts_ip_1_${destination}`, // this conflicted with another index pattern in the destination space because of a shared originId
               },
               id: `cts_ip_1_${sourceSpaceId}`,
-              title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
               meta: {
                 title: `Copy to Space index pattern 1 from ${sourceSpaceId} space`,
                 icon: 'indexPatternApp',
@@ -176,7 +175,6 @@ export function resolveCopyToSpaceConflictsSuite(
                 destinationId: `cts_vis_3_${destination}`, // this conflicted with another visualization in the destination space because of a shared originId
               },
               id: `cts_vis_3_${sourceSpaceId}`,
-              title: `CTS vis 3 from ${sourceSpaceId} space`,
               meta: {
                 title: `CTS vis 3 from ${sourceSpaceId} space`,
                 icon: 'visualizeApp',
@@ -211,7 +209,6 @@ export function resolveCopyToSpaceConflictsSuite(
               },
               id: `cts_dashboard_${sourceSpaceId}`,
               type: 'dashboard',
-              title: `This is the ${sourceSpaceId} test space CTS dashboard`,
               meta: {
                 title: `This is the ${sourceSpaceId} test space CTS dashboard`,
                 icon: 'dashboardApp',

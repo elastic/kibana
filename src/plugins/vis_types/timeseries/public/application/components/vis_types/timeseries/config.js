@@ -182,6 +182,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesStackedComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -285,6 +286,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesStackedComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>

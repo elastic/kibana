@@ -2,7 +2,7 @@
   "author": [
     "Austin Songer"
   ],
-  "description": "Identifies the creation of suppression rules in Azure. Suppression rules are a mechanism used to suppress alerts previously identified as False Positives or too noisy to be in Production. This mechanism can be abused or mistakenly configured, resulting in defense evasions and loss of security visibility.",
+  "description": "Identifies the creation of suppression rules in Azure. Suppression rules are a mechanism used to suppress alerts previously identified as false positives or too noisy to be in production. This mechanism can be abused or mistakenly configured, resulting in defense evasions and loss of security visibility.",
   "false_positives": [
     "Suppression Rules can be created legitimately by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Suppression Rules created by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
@@ -50,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }

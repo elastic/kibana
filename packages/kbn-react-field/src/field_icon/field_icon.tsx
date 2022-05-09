@@ -46,7 +46,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   ip: { iconType: 'tokenIP' },
   ip_range: { iconType: 'tokenIP' },
   // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
-  murmur3: { iconType: 'tokenFile' },
+  murmur3: { iconType: 'tokenSearchType' },
   number: { iconType: 'tokenNumber' },
   number_range: { iconType: 'tokenNumber' },
   histogram: { iconType: 'tokenHistogram' },

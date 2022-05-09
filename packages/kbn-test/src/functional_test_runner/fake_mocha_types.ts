@@ -31,6 +31,7 @@ export interface Test {
   file?: string;
   parent?: Suite;
   isPassed: () => boolean;
+  pending?: boolean;
 }
 
 export interface Runner extends EventEmitter {

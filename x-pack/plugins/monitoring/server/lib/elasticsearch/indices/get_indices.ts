@@ -186,12 +186,12 @@ export function getIndices(
   const { min: start, max: end } = req.payload.timeRange;
 
   const clusterUuid = req.params.clusterUuid;
-  const config = req.server.config();
+  const config = req.server.config;
   const params = buildGetIndicesQuery(req, clusterUuid, {
     start,
     end,
     showSystemIndices,
-    size: parseInt(config.get('monitoring.ui.max_bucket_size') || '', 10),
+    size: config.ui.max_bucket_size,
   });
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

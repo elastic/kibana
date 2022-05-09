@@ -432,6 +432,37 @@
       },
       {
         "parentPluginId": "visDefaultEditor",
+        "id": "def-public.LegendSizeSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "LegendSizeSettings",
+        "description": [],
+        "signature": [
+          "({ legendSize, onLegendSizeChange, isVerticalLegend, }: LegendSizeSettingsProps) => JSX.Element"
+        ],
+        "path": "src/plugins/vis_default_editor/public/components/options/legend_size_settings.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visDefaultEditor",
+            "id": "def-public.LegendSizeSettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  legendSize,\n  onLegendSizeChange,\n  isVerticalLegend,\n}",
+            "description": [],
+            "signature": [
+              "LegendSizeSettingsProps"
+            ],
+            "path": "src/plugins/vis_default_editor/public/components/options/legend_size_settings.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visDefaultEditor",
         "id": "def-public.LongLegendOptions",
         "type": "Function",
         "tags": [],

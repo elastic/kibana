@@ -6,14 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/core/server';
+import { lastValueFrom } from 'rxjs';
+import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { ReportingCore } from '../..';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { omitBlockedHeaders, generatePngObservable } from '../../export_types/common';
+import { generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
-import { LevelLogger as Logger } from '../../lib';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { DiagnosticResponse } from './';
+import { DiagnosticResponse } from '.';
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -24,9 +25,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       path: `${API_DIAGNOSE_URL}/screenshot`,
       validate: {},
     },
-    authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
+    authorizedUserPreRouting(reporting, async (_user, _context, request, res) => {
       const config = reporting.getConfig();
-      const decryptedHeaders = req.headers as Record<string, string>;
       const [basePath, protocol, hostname, port] = [
         config.kbnConfig.get('server', 'basePath'),
         config.get('kibanaServer', 'protocol'),
@@ -51,24 +51,16 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      const conditionalHeaders = {
-        headers: omitBlockedHeaders(decryptedHeaders),
-        conditions: {
-          hostname,
-          port: +port,
-          basePath,
-          protocol,
-        },
-      };
-
-      return generatePngObservable(reporting, logger, {
-        conditionalHeaders,
-        layout,
-        browserTimezone: 'America/Los_Angeles',
-        urls: [hashUrl],
-      })
-        .pipe()
-        .toPromise()
+      return lastValueFrom(
+        generatePngObservable(reporting, logger, {
+          layout,
+          request,
+          browserTimezone: 'America/Los_Angeles',
+          urls: [hashUrl],
+        })
+          // Pipe is required to ensure that we can subscribe to it
+          .pipe()
+      )
         .then((screenshot) => {
           // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
           if (screenshot.warnings.length) {

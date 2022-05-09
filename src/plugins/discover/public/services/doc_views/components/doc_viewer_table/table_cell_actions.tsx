@@ -9,7 +9,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewField } from '../../../../../../data/common';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { DocViewFilterFn } from '../../doc_views_types';
 
 interface TableActionsProps {
@@ -109,8 +109,8 @@ export const TableActions = ({
     : i18n.translate('discover.docViews.table.pinFieldAriaLabel', { defaultMessage: 'Pin field' });
   const pinnedIconType = pinned ? 'pinFilled' : 'pin';
 
-  const openPopover = useCallback(() => setIsOpen(true), [setIsOpen]);
-  const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const toggleOpenPopover = useCallback(() => setIsOpen((current) => !current), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePinned = useCallback(() => onTogglePinned(field), [field, onTogglePinned]);
   const onClickAction = useCallback(
     (callback: () => void) => () => {
@@ -147,7 +147,8 @@ export const TableActions = ({
           toolTipContent: filtersExistsToolTip,
           icon: 'filter',
           disabled: filtersExistsDisabled,
-          onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-')),
+          'data-test-subj': `addExistsFilterButton-${field}`,
+          onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
         },
         {
           name: toggleColumnsLabel,
@@ -172,7 +173,7 @@ export const TableActions = ({
         <EuiButtonIcon
           data-test-subj={`openFieldActionsButton-${field}`}
           aria-label={openActionsLabel}
-          onClick={openPopover}
+          onClick={toggleOpenPopover}
           iconType="boxesHorizontal"
           color="text"
         />

@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { Settings, TooltipType, Heatmap } from '@elastic/charts';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import { EmptyPlaceholder } from '../../../../charts/public';
-import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
@@ -26,6 +26,17 @@ jest.mock('@elastic/charts', () => {
     getSpecId: jest.fn(() => {}),
   };
 });
+
+const actWithTimeout = (action: Function, timer: number = 1) =>
+  act(
+    () =>
+      new Promise((resolve) =>
+        setTimeout(async () => {
+          await action();
+          resolve();
+        }, timer)
+      )
+  );
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
@@ -110,6 +121,9 @@ describe('HeatmapComponent', function () {
 
   it('renders the legend toggle component if uiState is set', async () => {
     const component = mountWithIntl(<HeatmapComponent {...wrapperProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     await act(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
@@ -118,6 +132,9 @@ describe('HeatmapComponent', function () {
   it('not renders the legend toggle component if uiState is undefined', async () => {
     const newProps = { ...wrapperProps, uiState: undefined } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     await act(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(0);
     });
@@ -125,6 +142,9 @@ describe('HeatmapComponent', function () {
 
   it('renders the legendColorPicker if uiState is set', async () => {
     const component = mountWithIntl(<HeatmapComponent {...wrapperProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     await act(async () => {
       expect(component.find(Settings).prop('legendColorPicker')).toBeDefined();
     });
@@ -133,6 +153,9 @@ describe('HeatmapComponent', function () {
   it('not renders the legendColorPicker if uiState is undefined', async () => {
     const newProps = { ...wrapperProps, uiState: undefined } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     await act(async () => {
       expect(component.find(Settings).prop('legendColorPicker')).toBeUndefined();
     });

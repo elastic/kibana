@@ -8,21 +8,22 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
   getFailedAndUnrecognizedTasksPerDay,
+  parsePercentileAggsByRuleType,
 } from './alerting_telemetry';
 
 describe('alerting telemetry', () => {
   test('getTotalCountInUse should replace "." symbols with "__" in rule types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byRuleTypeId: {
             value: {
@@ -40,7 +41,7 @@ describe('alerting telemetry', () => {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getTotalCountInUse(mockEsClient, 'test');
@@ -62,9 +63,9 @@ Object {
 
   test('getTotalCountAggregations should return min/max connectors in use', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byRuleTypeId: {
             value: {
@@ -88,7 +89,7 @@ Object {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getTotalCountAggregations(mockEsClient, 'test');
@@ -135,9 +136,9 @@ Object {
 
   test('getExecutionsPerDayCount should return execution aggregations for total count, count by rule type and number of failed executions', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byRuleTypeId: {
             value: {
@@ -150,6 +151,16 @@ Object {
                 '.index-threshold': 2087868,
                 'logs.alert.document.count': 1675765,
                 'document.test.': 17687687,
+              },
+              ruleTypesEsSearchDuration: {
+                '.index-threshold': 23,
+                'logs.alert.document.count': 526,
+                'document.test.': 534,
+              },
+              ruleTypesTotalSearchDuration: {
+                '.index-threshold': 62,
+                'logs.alert.document.count': 588,
+                'document.test.': 637,
               },
             },
           },
@@ -165,11 +176,73 @@ Object {
             },
           },
           avgDuration: { value: 10 },
+          avgEsSearchDuration: {
+            value: 25.785714285714285,
+          },
+          avgTotalSearchDuration: {
+            value: 30.642857142857142,
+          },
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+          percentileAlerts: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 22.0,
+              '99.0': 22.0,
+            },
+          },
+          aggsByType: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '.index-threshold',
+                doc_count: 149,
+                percentileScheduledActions: {
+                  values: {
+                    '50.0': 4.0,
+                    '90.0': 26.0,
+                    '99.0': 26.0,
+                  },
+                },
+                percentileAlerts: {
+                  values: {
+                    '50.0': 10.0,
+                    '90.0': 22.0,
+                    '99.0': 22.0,
+                  },
+                },
+              },
+              {
+                key: 'logs.alert.document.count',
+                doc_count: 1,
+                percentileScheduledActions: {
+                  values: {
+                    '50.0': 10.0,
+                    '90.0': 10.0,
+                    '99.0': 10.0,
+                  },
+                },
+                percentileAlerts: {
+                  values: {
+                    '50.0': 5.0,
+                    '90.0': 13.0,
+                    '99.0': 13.0,
+                  },
+                },
+              },
+            ],
+          },
         },
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test');
@@ -177,11 +250,23 @@ Object {
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
     expect(telemetry).toStrictEqual({
+      avgEsSearchDuration: 26,
+      avgEsSearchDurationByType: {
+        '__index-threshold': 12,
+        document__test__: 534,
+        logs__alert__document__count: 526,
+      },
       avgExecutionTime: 0,
       avgExecutionTimeByType: {
         '__index-threshold': 1043934,
         document__test__: 17687687,
         logs__alert__document__count: 1675765,
+      },
+      avgTotalSearchDuration: 31,
+      avgTotalSearchDurationByType: {
+        '__index-threshold': 31,
+        document__test__: 637,
+        logs__alert__document__count: 588,
       },
       countByType: {
         '__index-threshold': 2,
@@ -200,14 +285,52 @@ Object {
       },
       countTotal: 4,
       countTotalFailures: 4,
+      generatedActionsPercentiles: {
+        p50: 4,
+        p90: 26,
+        p99: 26,
+      },
+      generatedActionsPercentilesByType: {
+        p50: {
+          '__index-threshold': 4,
+          logs__alert__document__count: 10,
+        },
+        p90: {
+          '__index-threshold': 26,
+          logs__alert__document__count: 10,
+        },
+        p99: {
+          '__index-threshold': 26,
+          logs__alert__document__count: 10,
+        },
+      },
+      alertsPercentiles: {
+        p50: 10,
+        p90: 22,
+        p99: 22,
+      },
+      alertsPercentilesByType: {
+        p50: {
+          '__index-threshold': 10,
+          logs__alert__document__count: 5,
+        },
+        p90: {
+          '__index-threshold': 22,
+          logs__alert__document__count: 13,
+        },
+        p99: {
+          '__index-threshold': 22,
+          logs__alert__document__count: 13,
+        },
+      },
     });
   });
 
   test('getExecutionTimeoutsPerDayCount should return execution aggregations for total timeout count and count by rule type', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byRuleTypeId: {
             value: {
@@ -222,7 +345,7 @@ Object {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getExecutionTimeoutsPerDayCount(mockEsClient, 'test');
@@ -241,9 +364,9 @@ Object {
 
   test('getFailedAndUnrecognizedTasksPerDay should aggregations for total count, count by status and count by status and rule type for failed and unrecognized tasks', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-    mockEsClient.search.mockReturnValue(
+    mockEsClient.search.mockResponse(
       // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
+      {
         aggregations: {
           byTaskTypeId: {
             value: {
@@ -263,7 +386,7 @@ Object {
         hits: {
           hits: [],
         },
-      })
+      }
     );
 
     const telemetry = await getFailedAndUnrecognizedTasksPerDay(mockEsClient, 'test');
@@ -286,6 +409,190 @@ Object {
         },
       },
       countTotal: 5,
+    });
+  });
+
+  test('parsePercentileAggsByRuleType', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+          percentileAlerts: {
+            values: {
+              '50.0': 3.0,
+              '90.0': 22.0,
+              '99.0': 22.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+          percentileAlerts: {
+            values: {
+              '50.0': 5.0,
+              '90.0': 16.0,
+              '99.0': 16.0,
+            },
+          },
+        },
+        {
+          key: 'document.test.',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': null,
+              '90.0': null,
+              '99.0': null,
+            },
+          },
+          percentileAlerts: {
+            values: {
+              '50.0': null,
+              '90.0': null,
+              '99.0': null,
+            },
+          },
+        },
+      ],
+    };
+    expect(
+      parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileScheduledActions.values')
+    ).toEqual({
+      p50: {
+        '__index-threshold': 4,
+        document__test__: 0,
+        logs__alert__document__count: 10,
+      },
+      p90: {
+        '__index-threshold': 26,
+        document__test__: 0,
+        logs__alert__document__count: 10,
+      },
+      p99: {
+        '__index-threshold': 26,
+        document__test__: 0,
+        logs__alert__document__count: 10,
+      },
+    });
+    expect(parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileAlerts.values')).toEqual({
+      p50: {
+        '__index-threshold': 3,
+        document__test__: 0,
+        logs__alert__document__count: 5,
+      },
+      p90: {
+        '__index-threshold': 22,
+        document__test__: 0,
+        logs__alert__document__count: 16,
+      },
+      p99: {
+        '__index-threshold': 22,
+        document__test__: 0,
+        logs__alert__document__count: 16,
+      },
+    });
+  });
+
+  test('parsePercentileAggsByRuleType handles unknown path', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+        },
+      ],
+    };
+    expect(parsePercentileAggsByRuleType(aggsByType.buckets, 'foo.values')).toEqual({
+      p50: {},
+      p90: {},
+      p99: {},
+    });
+  });
+
+  test('parsePercentileAggsByRuleType handles unrecognized percentiles', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '75.0': 8.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '75.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+        },
+      ],
+    };
+    expect(
+      parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileScheduledActions.values')
+    ).toEqual({
+      p50: {
+        '__index-threshold': 4,
+        logs__alert__document__count: 10,
+      },
+      p90: {
+        '__index-threshold': 26,
+        logs__alert__document__count: 10,
+      },
+      p99: {
+        '__index-threshold': 26,
+        logs__alert__document__count: 10,
+      },
     });
   });
 });

@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-  EuiTitle,
-  OnRefreshChangeProps,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSuperDatePicker, OnRefreshChangeProps } from '@elastic/eui';
 import React, { useContext, useCallback, useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MonitoringTimeContainer } from '../../application/hooks/use_monitoring_time';
 import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { Legacy } from '../../legacy_shims';
 import { MonitoringStartServices } from '../../types';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 interface MonitoringToolbarProps {
   pageTitle?: string;
   onRefresh?: () => void;
@@ -83,39 +77,21 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
   );
 
   return (
-    <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" responsive>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceEvenly" direction="column" responsive>
-          <EuiFlexItem>
-            <div id="setupModeNav">{/* HERE GOES THE SETUP BUTTON */}</div>
-          </EuiFlexItem>
-          <EuiFlexItem className="monTopNavSecondItem">
-            {pageTitle && (
-              <div data-test-subj="monitoringPageTitle">
-                <EuiTitle size="xs">
-                  <h1>{pageTitle}</h1>
-                </EuiTitle>
-              </div>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <div style={{ padding: 8 }}>
-          <EuiSuperDatePicker
-            isDisabled={isDisabled}
-            start={currentTimerange.from}
-            end={currentTimerange.to}
-            onTimeChange={onTimeChange}
-            onRefresh={onRefresh}
-            isPaused={isPaused}
-            refreshInterval={refreshInterval}
-            onRefreshChange={onRefreshChange}
-            commonlyUsedRanges={commonlyUsedRanges}
-          />
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiPageHeader
+      pageTitle={pageTitle}
+      rightSideItems={[
+        <EuiSuperDatePicker
+          isDisabled={isDisabled}
+          start={currentTimerange.from}
+          end={currentTimerange.to}
+          onTimeChange={onTimeChange}
+          onRefresh={onRefresh}
+          isPaused={isPaused}
+          refreshInterval={refreshInterval}
+          onRefreshChange={onRefreshChange}
+          commonlyUsedRanges={commonlyUsedRanges}
+        />,
+      ]}
+    />
   );
 };

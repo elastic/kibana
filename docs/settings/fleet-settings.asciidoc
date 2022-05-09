@@ -81,7 +81,7 @@ Optional properties are:
   `namespace`:: String identifying this policy's namespace.
   `monitoring_enabled`:: List of keywords that specify the monitoring data to collect.
   Valid values include `['logs']`, `['metrics']`, and `['logs', 'metrics']`.
-  `is_managed`:: If `true`, this policy is editable by the user and can only
+  `is_managed`:: If `true`, this policy is not editable by the user and can only
   be changed by updating the {kib} config.
   `is_default`:: If `true`, this policy is the default agent policy.
   `is_default_fleet_server`:: If `true`, this policy is the default {fleet-server} agent policy.

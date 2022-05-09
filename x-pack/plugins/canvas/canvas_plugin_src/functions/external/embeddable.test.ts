@@ -9,7 +9,6 @@ import { embeddableFunctionFactory } from './embeddable';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';
 import { encode } from '../../../common/lib/embeddable_dataurl';
-import { InitializeArguments } from '.';
 
 const filterContext: ExpressionValueFilter = {
   type: 'filter',
@@ -32,8 +31,16 @@ const filterContext: ExpressionValueFilter = {
   ],
 };
 
+const embeddablePersistableStateServiceMock = {
+  extract: jest.fn(),
+  inject: jest.fn(),
+  getAllMigrations: jest.fn(),
+};
+
 describe('embeddable', () => {
-  const fn = embeddableFunctionFactory({} as InitializeArguments)().fn;
+  const fn = embeddableFunctionFactory({
+    embeddablePersistableStateService: embeddablePersistableStateServiceMock,
+  })().fn;
   const config = {
     id: 'some-id',
     timerange: { from: '15m', to: 'now' },

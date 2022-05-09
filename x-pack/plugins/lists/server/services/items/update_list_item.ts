@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Id,
   ListItemSchema,
@@ -60,7 +60,7 @@ export const updateListItem = async ({
         ...elasticQuery,
       };
 
-      const { body: response } = await esClient.update({
+      const response = await esClient.update({
         ...decodeVersion(_version),
         body: {
           doc,

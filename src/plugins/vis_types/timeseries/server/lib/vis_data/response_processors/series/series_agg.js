@@ -33,7 +33,7 @@ export function seriesAgg(resp, panel, series, meta, extractFields) {
           return (fn && fn(acc)) || acc;
         }, targetSeries);
 
-      const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+      const fieldsForSeries = meta.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];
 
       results.push({
         id: `${series.id}`,

@@ -17,15 +17,21 @@ interface HeaderRowProps<Item> {
   columns: Array<Column<Item>>;
   // Cell to put in first column before other columns
   leftAction?: React.ReactNode;
+  spacingForRowIdentifier?: boolean;
 }
 
-export const HeaderRow = <Item extends object>({ columns, leftAction }: HeaderRowProps<Item>) => {
+export const HeaderRow = <Item extends object>({
+  columns,
+  leftAction,
+  spacingForRowIdentifier = false,
+}: HeaderRowProps<Item>) => {
   return (
     <div className="reorderableTableHeader">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFlexGroup>
-            {!!leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
+            {leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
+            {spacingForRowIdentifier && <Cell {...DRAGGABLE_UX_STYLE} flexBasis="24px" />}
             {columns.map((column, columnIndex) => (
               <Cell key={`table_header_cell_${columnIndex}`} {...column}>
                 <EuiText size="s">

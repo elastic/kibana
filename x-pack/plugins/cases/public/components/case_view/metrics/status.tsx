@@ -8,7 +8,8 @@
 import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
-import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   CASE_CREATED,
   CASE_IN_PROGRESS_DURATION,
@@ -20,7 +21,6 @@ import {
 import { getMaybeDate } from '../../formatted_date/maybe_date';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyTagValue } from '../../empty_value';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { CaseViewMetricsProps } from './types';
 
 export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =
@@ -90,10 +90,10 @@ export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 
 CaseStatusMetrics.displayName = 'CaseStatusMetrics';
 
 const useGetLifespanMetrics = (
-  metrics: CaseMetrics | null,
-  features: CaseMetricsFeature[]
-): CaseMetrics['lifespan'] | undefined => {
-  return useMemo<CaseMetrics['lifespan']>(() => {
+  metrics: SingleCaseMetrics | null,
+  features: SingleCaseMetricsFeature[]
+): SingleCaseMetrics['lifespan'] | undefined => {
+  return useMemo<SingleCaseMetrics['lifespan']>(() => {
     const lifespan = metrics?.lifespan ?? {
       closeDate: '',
       creationDate: '',

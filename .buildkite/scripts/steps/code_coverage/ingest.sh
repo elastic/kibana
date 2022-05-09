@@ -52,4 +52,4 @@ echo "--- Upload coverage static site"
 .buildkite/scripts/steps/code_coverage/reporting/uploadStaticSite.sh
 
 echo "--- Ingest results to Kibana stats cluster"
-.buildkite/scripts/steps/code_coverage/reporting/ingestData.sh 'elastic+kibana+code-coverage' ${BUILDKITE_BUILD_ID} ${BUILDKITE_BUILD_URL} ${previousSha} 'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt'
+.buildkite/scripts/steps/code_coverage/reporting/ingestData.sh 'elastic+kibana+code-coverage' ${BUILDKITE_BUILD_NUMBER} ${BUILDKITE_BUILD_URL} ${previousSha} 'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt'

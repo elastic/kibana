@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext as CommonFtrProviderContext } from '../../../common/ftr_provider_context';
+import { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
 import { Role, User, UserInfo } from './types';
 import { users } from './users';
 import { roles } from './roles';

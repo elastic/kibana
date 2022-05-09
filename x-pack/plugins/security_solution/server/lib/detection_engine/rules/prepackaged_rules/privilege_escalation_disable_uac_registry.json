@@ -12,7 +12,8 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Disabling User Account Control via Registry Modification",
-  "query": "registry where event.type == \"change\" and\n  registry.path :\n    (\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\EnableLUA\",\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\ConsentPromptBehaviorAdmin\",\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\PromptOnSecureDesktop\"\n    ) and\n  registry.data.strings : \"0\"\n",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "registry where event.type == \"change\" and\n  registry.path :\n    (\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\EnableLUA\",\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\ConsentPromptBehaviorAdmin\",\n      \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\PromptOnSecureDesktop\"\n    ) and\n  registry.data.strings : (\"0\", \"0x00000000\")\n",
   "references": [
     "https://www.greyhathacker.net/?p=796",
     "https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings",
@@ -76,5 +77,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

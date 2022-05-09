@@ -9,12 +9,12 @@
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { CoreTheme } from 'kibana/public';
-import { ExpressionRenderDefinition } from 'src/plugins/expressions/common';
+import { CoreTheme } from '@kbn/core/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '../../../../core/public';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { withSuspense, defaultTheme$ } from '../../../../../src/plugins/presentation_util/public';
+import { CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
 import { LazyDebugRenderComponent } from '../components';
 import { JSON } from '../../common';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { useWorkspaceLoader, UseWorkspaceLoaderProps } from './use_workspace_loader';
-import { coreMock } from 'src/core/public/mocks';
-import { spacesPluginMock } from '../../../spaces/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
-import { SavedObjectsClientCommon } from 'src/plugins/data/common';
+import { SavedObjectsClientCommon } from '@kbn/data-plugin/common';
 import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
 
 jest.mock('react-router-dom', () => {
@@ -68,6 +68,7 @@ describe('use_workspace_loader', () => {
           saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
           outcome: 'aliasMatch',
           alias_target_id: 'aliasTargetId',
+          alias_purpose: 'savedObjectConversion',
         }),
       },
     } as unknown as UseWorkspaceLoaderProps;
@@ -78,9 +79,10 @@ describe('use_workspace_loader', () => {
         props as RenderHookOptions<UseWorkspaceLoaderProps>
       );
     });
-    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '#/workspace/aliasTargetId?query={}',
-      'Graph'
-    );
+    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/workspace/aliasTargetId?query={}',
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'Graph',
+    });
   });
 });

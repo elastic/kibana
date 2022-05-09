@@ -147,7 +147,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     totalSearchResultsCount,
   }) => {
     const pagination = {
-      hidePerPageOptions: !showExtendedColumns,
+      showPerPageOptions: showExtendedColumns,
       pageIndex,
       pageSize,
       pageSizeOptions: [

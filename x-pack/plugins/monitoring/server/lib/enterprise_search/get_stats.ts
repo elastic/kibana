@@ -18,10 +18,10 @@ import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 export async function getStats(req: LegacyRequest, clusterUuid: string) {
-  const config = req.server.config();
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const maxBucketSize = config.ui.max_bucket_size;
 
   // just get the legacy pattern since no integration exists yet
   const indexPattern = getLegacyIndexPattern({
@@ -41,7 +41,7 @@ export async function getStats(req: LegacyRequest, clusterUuid: string) {
         end,
         uuid: clusterUuid,
       }),
-      aggs: entSearchUuidsAgg(maxBucketSize!),
+      aggs: entSearchUuidsAgg(maxBucketSize),
     },
   };
 

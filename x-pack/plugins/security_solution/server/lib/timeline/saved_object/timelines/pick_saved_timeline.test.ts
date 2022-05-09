@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '../../../../../../security/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 import { TimelineStatus, TimelineType, SavedTimeline } from '../../../../../common/types/timeline';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';

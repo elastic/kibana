@@ -804,7 +804,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; }"
+              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
@@ -1256,8 +1256,8 @@
             "description": [],
             "signature": [
               "({ rowIndex, columnId, setCellProps, }: { rowIndex: number; columnId: string; setCellProps: (props: ",
-              "CommonProps",
-              " & React.HTMLAttributes<HTMLDivElement>) => void; }) => any"
+              "EuiDataGridSetCellProps",
+              ") => void; }) => any"
             ],
             "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
             "deprecated": false,
@@ -1272,8 +1272,8 @@
                 "description": [],
                 "signature": [
                   "{ rowIndex: number; columnId: string; setCellProps: (props: ",
-                  "CommonProps",
-                  " & React.HTMLAttributes<HTMLDivElement>) => void; }"
+                  "EuiDataGridSetCellProps",
+                  ") => void; }"
                 ],
                 "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
                 "deprecated": false
@@ -1425,8 +1425,8 @@
         "description": [],
         "signature": [
           "({ rowIndex, columnId, setCellProps, }: { rowIndex: number; columnId: string; setCellProps: (props: ",
-          "CommonProps",
-          " & React.HTMLAttributes<HTMLDivElement>) => void; }) => any"
+          "EuiDataGridSetCellProps",
+          ") => void; }) => any"
         ],
         "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
@@ -1441,8 +1441,8 @@
             "description": [],
             "signature": [
               "{ rowIndex: number; columnId: string; setCellProps: (props: ",
-              "CommonProps",
-              " & React.HTMLAttributes<HTMLDivElement>) => void; }"
+              "EuiDataGridSetCellProps",
+              ") => void; }"
             ],
             "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
             "deprecated": false
@@ -1478,7 +1478,7 @@
         "label": "ML_PAGES",
         "description": [],
         "signature": [
-          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly TRAINED_MODELS_NODES: \"trained_models/nodes\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
+          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly TRAINED_MODELS_NODES: \"trained_models/nodes\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
         ],
         "path": "x-pack/plugins/ml/common/constants/locator.ts",
         "deprecated": false,
@@ -2868,7 +2868,9 @@
         "signature": [
           "{ [x: string]: ",
           "MappingRuntimeField",
-          "; }"
+          " | ",
+          "MappingRuntimeField",
+          "[]; }"
         ],
         "path": "x-pack/plugins/ml/common/types/fields.ts",
         "deprecated": false,

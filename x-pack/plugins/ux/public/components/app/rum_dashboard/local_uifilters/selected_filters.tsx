@@ -9,10 +9,10 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { FilterValueLabel } from '@kbn/observability-plugin/public';
+import { IndexPattern } from '@kbn/data-plugin/common';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FilterValueLabel } from '../../../../../../observability/public';
 import { FiltersUIHook } from '../hooks/use_local_uifilters';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { SelectedWildcards } from './selected_wildcards';
 import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 
@@ -53,7 +53,7 @@ export function SelectedFilters({
           {((uxUiFilters?.[name] ?? []) as string[]).map((value) => (
             <FilterItem key={name + value} grow={false}>
               <FilterValueLabel
-                indexPattern={indexPattern}
+                dataView={indexPattern}
                 removeFilter={() => {
                   onChange(
                     name,

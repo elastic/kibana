@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet
-import { Results, Paging, ResultsPerPage } from '@elastic/react-search-ui';
+import { Results } from '@elastic/react-search-ui';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../shared/loading';

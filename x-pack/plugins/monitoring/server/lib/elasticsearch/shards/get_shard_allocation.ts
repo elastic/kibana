@@ -97,7 +97,7 @@ export function getShardAllocation(
     });
   }
 
-  const config = req.server.config();
+  const config = req.server.config;
   const clusterUuid = req.params.clusterUuid;
   const metric = ElasticsearchMetric.getMetricFields();
 
@@ -113,7 +113,7 @@ export function getShardAllocation(
 
   const params = {
     index: indexPatterns,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     body: {
       query: createQuery({

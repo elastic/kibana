@@ -10,10 +10,10 @@ import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
-import { CoreStart } from 'src/core/public';
-import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { FetchResult } from 'src/plugins/newsfeed/public';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from 'src/plugins/home/public';
+import { CoreStart } from '@kbn/core/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { FetchResult } from '@kbn/newsfeed-plugin/public';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '@kbn/home-plugin/public';
 import { Overview } from './overview';
 
 interface KibanaOverviewAppDeps {

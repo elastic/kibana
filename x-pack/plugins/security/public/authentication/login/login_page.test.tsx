@@ -10,8 +10,8 @@ import { act } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';

@@ -8,32 +8,34 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import { toMountPoint, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityAppServices } from '../../../../application/types';
+import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   CasesDeepLinkId,
   generateCaseViewPath,
   GetAllCasesSelectorModalProps,
-} from '../../../../../../cases/public';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
+} from '@kbn/cases-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { ObservabilityAppServices } from '../../../../application/types';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { observabilityFeatureId, observabilityAppId } from '../../../../../common';
 import { parseRelativeDate } from '../components/date_range_picker';
 
 export interface AddToCaseProps {
+  appId?: 'securitySolutionUI' | 'observability';
   autoOpen?: boolean;
+  lensAttributes: TypedLensByValueInput['attributes'] | null;
+  owner?: string;
   setAutoOpen?: (val: boolean) => void;
   timeRange: { from: string; to: string };
-  appId?: 'security' | 'observability';
-  lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
 export function AddToCaseAction({
-  lensAttributes,
-  timeRange,
-  autoOpen,
-  setAutoOpen,
   appId,
+  autoOpen,
+  lensAttributes,
+  owner = observabilityFeatureId,
+  setAutoOpen,
+  timeRange,
 }: AddToCaseProps) {
   const kServices = useKibana<ObservabilityAppServices>().services;
 
@@ -47,14 +49,14 @@ export function AddToCaseAction({
     (theCase) =>
       toMountPoint(
         <CaseToastText
-          linkUrl={getUrlForApp(observabilityAppId, {
+          linkUrl={getUrlForApp(appId ?? observabilityAppId, {
             deepLinkId: CasesDeepLinkId.cases,
             path: generateCaseViewPath({ detailName: theCase.id }),
           })}
         />,
         { theme$: theme?.theme$ }
       ),
-    [getUrlForApp, theme?.theme$]
+    [appId, getUrlForApp, theme?.theme$]
   );
 
   const absoluteFromDate = parseRelativeDate(timeRange.from);
@@ -68,12 +70,13 @@ export function AddToCaseAction({
       to: absoluteToDate?.toISOString() ?? '',
     },
     appId,
+    owner,
   });
 
   const getAllCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
     onRowClick: onCaseClicked,
     userCanCrud: true,
-    owner: [observabilityFeatureId],
+    owner: [owner],
     onClose: () => {
       setIsCasesOpen(false);
     },
@@ -111,7 +114,7 @@ export function AddToCaseAction({
       )}
       {isCasesOpen &&
         lensAttributes &&
-        cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
+        cases.ui.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 }

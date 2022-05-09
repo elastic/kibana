@@ -30,6 +30,7 @@ interface FactoryOptions {
 interface RenderedOptions {
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
+  isAnonymousPage?: boolean;
 }
 
 interface RendererResult {
@@ -49,7 +50,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     return authStatus !== 'unauthenticated';
   };
 
-  return async function bootstrapRenderer({ uiSettingsClient, request }) {
+  return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode = false;
     const themeVersion: ThemeVersion = 'v8';
 
@@ -70,6 +71,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,
       regularBundlePath,
+      isAnonymousPage,
     });
 
     const jsDependencyPaths = getJsDependencyPaths(regularBundlePath, bundlePaths);

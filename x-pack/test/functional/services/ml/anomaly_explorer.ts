@@ -140,9 +140,15 @@ export function MachineLearningAnomalyExplorerProvider({
 
     async assertClearSelectionButtonVisible(expectVisible: boolean) {
       if (expectVisible) {
-        await testSubjects.existOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          true,
+          `Expected 'Clear selection' button to be displayed`
+        );
       } else {
-        await testSubjects.missingOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          false,
+          `Expected 'Clear selection' button to be hidden`
+        );
       }
     },
 

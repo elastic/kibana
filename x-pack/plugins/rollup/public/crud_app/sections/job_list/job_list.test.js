@@ -10,8 +10,8 @@ import { registerTestBed } from '@kbn/test-jest-helpers';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
 jest.mock('../../services', () => {
@@ -23,7 +23,7 @@ jest.mock('../../services', () => {
 });
 
 jest.mock('../../services/documentation_links', () => {
-  const coreMocks = jest.requireActual('../../../../../../../src/core/public/mocks');
+  const coreMocks = jest.requireActual('@kbn/core/public/mocks');
 
   return {
     init: jest.fn(),

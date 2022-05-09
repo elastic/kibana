@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { DomainDeprecationDetails, DeprecationsGetResponse } from 'src/core/server/types';
-import type { ResolveDeprecationResponse } from 'src/core/public';
+import type { DomainDeprecationDetails, DeprecationsGetResponse } from '@kbn/core/server/types';
+import type { ResolveDeprecationResponse } from '@kbn/core/public';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {

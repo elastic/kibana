@@ -16,7 +16,6 @@ import { mergeMap, reduce } from 'rxjs/operators';
 import { supportsColor } from 'chalk';
 import { run, createFailError } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
-import { lastValueFrom } from '@kbn/std';
 
 import { PROJECTS } from '../typescript/projects';
 import { Project } from '../typescript/project';
@@ -61,7 +60,7 @@ export function runEslintWithTypes() {
       const concurrency = Math.max(1, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
       log.info(`Linting ${projects.length} projects, ${concurrency} at a time`);
 
-      const failures = await lastValueFrom(
+      const failures = await Rx.lastValueFrom(
         Rx.from(projects).pipe(
           mergeMap(async (project) => {
             const configFilePath = Path.resolve(project.directory, 'types.eslint.config.js');
@@ -109,9 +108,9 @@ export function runEslintWithTypes() {
               return undefined;
             } else {
               log.error(`${project.name} failed`);
-              log.indent(4);
-              log.write(proc.all);
-              log.indent(-4);
+              log.indent(4, () => {
+                log.write(proc.all);
+              });
               return project;
             }
           }, concurrency),

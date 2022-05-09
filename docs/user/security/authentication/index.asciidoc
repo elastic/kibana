@@ -5,7 +5,7 @@
 <titleabbrev>Authentication</titleabbrev>
 ++++
 :keywords: administrator, concept, security, authentication
-:description: A list of the supported authentication mechanisms in {kib}. 
+:description: A list of the supported authentication mechanisms in {kib}.
 
 {kib} supports the following authentication mechanisms:
 
@@ -483,4 +483,4 @@ To make this iframe leverage anonymous access automatically, you will need to mo
 
 NOTE: `auth_provider_hint` query string parameter goes *before* the hash URL fragment.
 
-For more information on how to embed, refer to <<embedding, Embed {kib} content in a web page>>.
+For more information, refer to <<embed-code, Embed code>>.

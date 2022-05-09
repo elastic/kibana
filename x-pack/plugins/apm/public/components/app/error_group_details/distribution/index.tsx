@@ -7,27 +7,22 @@
 
 import {
   Axis,
-  Chart,
   BarSeries,
+  Chart,
   niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import React, { Suspense, useState } from 'react';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { useTheme } from '../../../../hooks/use_theme';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { AlertType } from '../../../../../common/alert_types';
-import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
-import { ChartContainer } from '../../../shared/charts/chart_container';
+import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { LazyAlertsFlyout } from '../../../../../../observability/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { ChartContainer } from '../../../shared/charts/chart_container';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 type ErrorDistributionAPIResponse =
@@ -74,12 +69,6 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const max = Math.max(...xValues);
 
   const xFormatter = niceTimeFormatter([min, max]);
-  const { observabilityRuleTypeRegistry } = useApmPluginContext();
-  const { alerts } = useApmServiceContext();
-  const { getFormatter } = observabilityRuleTypeRegistry;
-  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
-    undefined
-  );
 
   const timeZone = getTimeZone(core.uiSettings);
 
@@ -131,27 +120,6 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
               />
             );
           })}
-          {getAlertAnnotations({
-            alerts: alerts?.filter(
-              (alert) => alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.ErrorCount
-            ),
-            chartStartTime: xValues[0],
-            getFormatter,
-            selectedAlertId,
-            setSelectedAlertId,
-            theme,
-          })}
-          <Suspense fallback={null}>
-            <LazyAlertsFlyout
-              alerts={alerts}
-              isInApp={true}
-              observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-              onClose={() => {
-                setSelectedAlertId(undefined);
-              }}
-              selectedAlertId={selectedAlertId}
-            />
-          </Suspense>
         </Chart>
       </ChartContainer>
     </>

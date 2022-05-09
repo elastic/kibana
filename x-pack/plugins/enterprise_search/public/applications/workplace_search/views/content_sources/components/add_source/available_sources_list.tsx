@@ -24,8 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { EuiButtonEmptyTo, EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { ADD_CUSTOM_PATH, getSourcesPath } from '../../../../routes';
+import { ADD_CUSTOM_PATH, getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
+
+import { staticCustomSourceData } from '../../source_data';
 
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
@@ -41,7 +43,8 @@ interface AvailableSourcesListProps {
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }: SourceDataItem) => {
+  const getSourceCard = ({ name, serviceType, accountContextOnly }: SourceDataItem) => {
+    const addPath = getAddPath(serviceType);
     const disabled = !hasPlatinumLicense && accountContextOnly;
 
     const connectButton = () => {
@@ -105,6 +108,15 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             </EuiFlexGroup>
           </EuiFlexItem>
         ))}
+        <EuiFlexItem grow={false} data-test-subj="AvailableSourceListItem">
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="stretch"
+            data-test-subj="AvailableSourceCard"
+          >
+            <EuiFlexItem>{getSourceCard(staticCustomSourceData)}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGrid>
     </>
   );

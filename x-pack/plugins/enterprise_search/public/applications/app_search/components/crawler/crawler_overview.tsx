@@ -22,6 +22,7 @@ import { AddDomainForm } from './components/add_domain/add_domain_form';
 import { AddDomainFormErrors } from './components/add_domain/add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
 import { AddDomainLogic } from './components/add_domain/add_domain_logic';
+import { CrawlCustomSettingsFlyout } from './components/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlDetailsFlyout } from './components/crawl_details_flyout';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { CrawlSelectDomainsModal } from './components/crawl_select_domains_modal/crawl_select_domains_modal';
@@ -140,6 +141,7 @@ export const CrawlerOverview: React.FC = () => {
       )}
       <CrawlDetailsFlyout />
       <CrawlSelectDomainsModal />
+      <CrawlCustomSettingsFlyout />
     </AppSearchPageTemplate>
   );
 };

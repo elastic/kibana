@@ -41,6 +41,7 @@ export const createThreatSignal = async ({
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
+    entryKey: 'value',
   });
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
@@ -85,7 +86,6 @@ export const createThreatSignal = async ({
       logger,
       pageSize: searchAfterSize,
       services,
-      signalsIndex: outputIndex,
       sortOrder: 'desc',
       trackTotalHits: false,
       tuple,
