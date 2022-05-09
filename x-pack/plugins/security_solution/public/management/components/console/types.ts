@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ComponentType, ComponentProps } from 'react';
+import type { ComponentType } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
-export interface CommandDefinition {
+export interface CommandDefinition<TMeta extends object = object> {
   name: string;
   about: string;
   /**
@@ -28,7 +28,7 @@ export interface CommandDefinition {
    * The entire `CommandDefinition` is passed along to the component
    * that will handle it, so this data will be available there
    */
-  meta?: Record<string, unknown>;
+  meta?: TMeta;
 
   /** If all args are optional, but at least one must be defined, set to true */
   mustHaveArgs?: boolean;
@@ -54,21 +54,20 @@ export interface CommandDefinition {
 /**
  * A command to be executed (as entered by the user)
  */
-export interface Command {
+export interface Command<TDefinition extends CommandDefinition = CommandDefinition> {
   /** The raw input entered by the user */
   input: string;
   // FIXME:PT this should be a generic that allows for the arguments type to be used
   /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInput;
   /** The command defined associated with this user command */
-  commandDefinition: CommandDefinition;
+  commandDefinition: TDefinition;
 }
 
-/**
- * The component that will handle the Command execution and display the result.
- */
-export type CommandExecutionComponent = ComponentType<{
-  command: Command;
+export interface CommandExecutionComponentProps<
+  TDefinition extends CommandDefinition = CommandDefinition
+> {
+  command: Command<TDefinition>;
   /**
    * A data store for the command execution to store data in, if needed.
    * Because the Console could be closed/opened several times, which will cause this component
@@ -88,9 +87,13 @@ export type CommandExecutionComponent = ComponentType<{
   status: CommandExecutionState['status'];
   /** Set the status of the command execution  */
   setStatus: (status: CommandExecutionState['status']) => void;
-}>;
+}
 
-export type CommandExecutionComponentProps = ComponentProps<CommandExecutionComponent>;
+/**
+ * The component that will handle the Command execution and display the result.
+ */
+export type CommandExecutionComponent<TDefinition extends CommandDefinition = CommandDefinition> =
+  ComponentType<CommandExecutionComponentProps<TDefinition>>;
 
 export interface ConsoleProps extends CommonProps {
   /**

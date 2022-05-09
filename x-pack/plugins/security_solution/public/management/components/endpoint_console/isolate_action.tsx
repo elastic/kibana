@@ -9,10 +9,11 @@ import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
+import { IsolateCommandDefinition } from './types';
 import { useIsolateHost } from '../../hooks/endpoint/use_isolate_host';
 import { CommandExecutionComponentProps } from '../console/types';
 
-export const IsolateActionResult = memo<CommandExecutionComponentProps>(
+export const IsolateActionResult = memo<CommandExecutionComponentProps<IsolateCommandDefinition>>(
   ({ command, setStore, store, status, setStatus }) => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const actionId = store.actionId;
@@ -21,7 +22,7 @@ export const IsolateActionResult = memo<CommandExecutionComponentProps>(
     const isolateHost = useIsolateHost();
 
     useEffect(() => {
-      if (!actionRequestSent) {
+      if (!actionRequestSent && endpointId) {
         isolateHost.mutate({
           endpoint_ids: [endpointId],
           comment: command.args.args?.comment?.value,
