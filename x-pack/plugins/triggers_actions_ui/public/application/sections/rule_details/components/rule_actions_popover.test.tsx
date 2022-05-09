@@ -9,7 +9,6 @@ import * as React from 'react';
 import { RuleActionsPopover } from './rule_actions_popover';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Rule } from '../../../..';
-import { afterEach } from 'jest-circus';
 
 describe('rule_actions_popover', () => {
   const onDeleteMock = jest.fn();
@@ -42,10 +41,6 @@ describe('rule_actions_popover', () => {
       ...overloads,
     };
   }
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
 
   it('renders all the buttons', () => {
     const rule = mockRule();
