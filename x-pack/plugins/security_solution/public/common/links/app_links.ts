@@ -41,7 +41,7 @@ export const appLinks: Readonly<LinkItem[]> = Object.freeze([
 
 export const getAppLinks = async ({
   enableExperimental,
-  licenseType,
+  license,
   capabilities,
 }: UserPermissions) => {
   // OLM team, implement async behavior here
