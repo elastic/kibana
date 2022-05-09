@@ -16,8 +16,8 @@ export type ApplicationServiceFactory = ServiceFactory<SharedUxApplicationServic
  * A factory function for creating for creating a storybook implementation of `SharedUXApplicationService`.
  */
 export const applicationServiceFactory: ApplicationServiceFactory = () => ({
-  navigateToUrl: () => {
-    action('NavigateToUrl');
+  navigateToUrl: (url) => {
+    action('navigateToUrl')(url);
     return Promise.resolve();
   },
   currentAppId$: new BehaviorSubject('123'),

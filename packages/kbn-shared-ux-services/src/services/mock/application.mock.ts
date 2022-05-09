@@ -17,5 +17,7 @@ export type MockApplicationServiceFactory = ServiceFactory<SharedUxApplicationSe
  */
 export const applicationServiceFactory: MockApplicationServiceFactory = () => ({
   navigateToUrl: () => Promise.resolve(),
-  currentAppId$: new Observable(),
+  currentAppId$: new Observable((subscriber) => {
+    subscriber.next('abc123');
+  }),
 });

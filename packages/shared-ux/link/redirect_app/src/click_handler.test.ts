@@ -7,7 +7,7 @@
  */
 
 import { MouseEvent } from 'react';
-import { createNavigateToUrlClickHandler } from './click_handler';
+import { navigateToUrlClickHandler } from './click_handler';
 
 const createLink = ({
   href = '/base-path/app/targetApp',
@@ -43,27 +43,59 @@ const createEvent = ({
 
 type NavigateToURLFn = (url: string) => Promise<void>;
 
-describe('createNavigateToUrlClickHandler', () => {
+describe('navigateToUrlClickHandler', () => {
   let container: HTMLElement;
   let navigateToUrl: jest.MockedFunction<NavigateToURLFn>;
+  const currentAppId = 'abc123';
 
-  const createHandler = () =>
-    createNavigateToUrlClickHandler({
+  const handler = (event: MouseEvent<HTMLElement>): void => {
+    navigateToUrlClickHandler({
+      event,
+      currentAppId,
       container,
       navigateToUrl,
     });
+  };
 
   beforeEach(() => {
     container = document.createElement('div');
     navigateToUrl = jest.fn();
   });
 
-  it('calls `navigateToUrl` with the link url', () => {
-    const handler = createHandler();
-
+  it("doesn't call `navigateToUrl` without a container", () => {
     const event = createEvent({
       target: createLink({ href: '/base-path/app/targetApp' }),
     });
+
+    navigateToUrlClickHandler({
+      event,
+      currentAppId,
+      container: null,
+      navigateToUrl,
+    });
+
+    expect(event.preventDefault).toHaveBeenCalledTimes(0);
+  });
+
+  it("doesn't call `navigateToUrl` without a `currentAppId`", () => {
+    const event = createEvent({
+      target: createLink({ href: '/base-path/app/targetApp' }),
+    });
+
+    navigateToUrlClickHandler({
+      event,
+      container,
+      navigateToUrl,
+    });
+
+    expect(event.preventDefault).toHaveBeenCalledTimes(0);
+  });
+
+  it('calls `navigateToUrl` with the link url', () => {
+    const event = createEvent({
+      target: createLink({ href: '/base-path/app/targetApp' }),
+    });
+
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
@@ -71,13 +103,12 @@ describe('createNavigateToUrlClickHandler', () => {
   });
 
   it('is triggered if a non-link target has a parent link', () => {
-    const handler = createHandler();
-
     const link = createLink();
     const target = document.createElement('span');
     link.appendChild(target);
 
     const event = createEvent({ target });
+
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
@@ -85,13 +116,12 @@ describe('createNavigateToUrlClickHandler', () => {
   });
 
   it('is not triggered if a non-link target has no parent link', () => {
-    const handler = createHandler();
-
     const parent = document.createElement('div');
     const target = document.createElement('span');
     parent.appendChild(target);
 
     const event = createEvent({ target });
+
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
@@ -99,11 +129,10 @@ describe('createNavigateToUrlClickHandler', () => {
   });
 
   it('is not triggered when the link has no href', () => {
-    const handler = createHandler();
-
     const event = createEvent({
       target: createLink({ href: '' }),
     });
+
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
@@ -111,11 +140,10 @@ describe('createNavigateToUrlClickHandler', () => {
   });
 
   it('is only triggered when the link does not have an external target', () => {
-    const handler = createHandler();
-
     let event = createEvent({
       target: createLink({ target: '_blank' }),
     });
+
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
@@ -124,6 +152,7 @@ describe('createNavigateToUrlClickHandler', () => {
     event = createEvent({
       target: createLink({ target: 'some-target' }),
     });
+
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
@@ -132,6 +161,7 @@ describe('createNavigateToUrlClickHandler', () => {
     event = createEvent({
       target: createLink({ target: '_self' }),
     });
+
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
@@ -140,6 +170,7 @@ describe('createNavigateToUrlClickHandler', () => {
     event = createEvent({
       target: createLink({ target: '' }),
     });
+
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
@@ -147,11 +178,10 @@ describe('createNavigateToUrlClickHandler', () => {
   });
 
   it('is only triggered from left clicks', () => {
-    const handler = createHandler();
-
     let event = createEvent({
       button: 1,
     });
+
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
@@ -160,6 +190,7 @@ describe('createNavigateToUrlClickHandler', () => {
     event = createEvent({
       button: 12,
     });
+
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
@@ -168,6 +199,7 @@ describe('createNavigateToUrlClickHandler', () => {
     event = createEvent({
       button: 0,
     });
+
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
@@ -175,11 +207,10 @@ describe('createNavigateToUrlClickHandler', () => {
   });
 
   it('is not triggered if the event default is prevented', () => {
-    const handler = createHandler();
-
     let event = createEvent({
       defaultPrevented: true,
     });
+
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
@@ -188,6 +219,7 @@ describe('createNavigateToUrlClickHandler', () => {
     event = createEvent({
       defaultPrevented: false,
     });
+
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
@@ -195,15 +227,15 @@ describe('createNavigateToUrlClickHandler', () => {
   });
 
   it('is not triggered if any modifier key is pressed', () => {
-    const handler = createHandler();
-
     let event = createEvent({ modifierKey: true });
+
     handler(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
     expect(navigateToUrl).not.toHaveBeenCalled();
 
     event = createEvent({ modifierKey: false });
+
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalledTimes(1);
