@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
-  const queryBar = getService('queryBar');
   const security = getService('security');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -163,7 +162,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       await elasticChart.setNewChartUiDebugFlag();
-      await queryBar.submitQuery();
       await expectAllDataRenders();
     });
 

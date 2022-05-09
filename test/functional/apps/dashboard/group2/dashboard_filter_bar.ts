@@ -143,10 +143,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
-        await elasticChart.setNewChartUiDebugFlag(true);
         await pieChart.expectPieSliceCount(1);
       });
 
