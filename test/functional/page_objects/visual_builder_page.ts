@@ -374,11 +374,13 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getTopNLabel() {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const topNLabel = await this.find.byCssSelector('.tvbVisTopN__label');
     return await topNLabel.getVisibleText();
   }
 
   public async getTopNCount() {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const gaugeCount = await this.find.byCssSelector('.tvbVisTopN__value');
     return await gaugeCount.getVisibleText();
   }
