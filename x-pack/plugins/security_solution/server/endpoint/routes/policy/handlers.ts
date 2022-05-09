@@ -22,11 +22,8 @@ export const getHostPolicyResponseHandler = function (): RequestHandler<
   undefined
 > {
   return async (context, request, response) => {
-    const doc = await getPolicyResponseByAgentId(
-      policyIndexPattern,
-      request.query.agentId,
-      context.core.elasticsearch.client
-    );
+    const client = (await context.core).elasticsearch.client;
+    const doc = await getPolicyResponseByAgentId(policyIndexPattern, request.query.agentId, client);
 
     if (doc) {
       return response.ok({ body: doc });

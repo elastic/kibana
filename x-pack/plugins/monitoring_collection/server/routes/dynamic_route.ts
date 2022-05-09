@@ -47,9 +47,10 @@ export function registerDynamicRoute({
     },
     async (context, req, res) => {
       const type = req.params.type;
+      const esClient = (await context.core).elasticsearch.client;
       const [data, clusterUuid, kibana] = await Promise.all([
         getMetric(type),
-        getESClusterUuid(context.core.elasticsearch.client),
+        getESClusterUuid(esClient),
         getKibanaStats({ config, getStatus }),
       ]);
 

@@ -11,11 +11,11 @@ import { XYChartProps } from '../../common';
 import { getFilteredLayers } from './layers';
 import { isDataLayer } from './visualization';
 
-export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
-  const filteredLayers = getFilteredLayers(layers, data);
+export function calculateMinInterval({ args: { layers } }: XYChartProps) {
+  const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
   const isTimeViz = filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time');
-  const xColumn = data.tables[filteredLayers[0].layerId].columns.find(
+  const xColumn = filteredLayers[0].table.columns.find(
     (column) => isDataLayer(filteredLayers[0]) && column.id === filteredLayers[0].xAccessor
   );
 

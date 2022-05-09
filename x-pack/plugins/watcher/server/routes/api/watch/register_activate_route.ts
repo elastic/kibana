@@ -38,7 +38,8 @@ export function registerActivateRoute({
       const { watchId } = request.params;
 
       try {
-        const hit = await activateWatch(ctx.core.elasticsearch.client, watchId);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await activateWatch(esClient, watchId);
         const watchStatusJson = get(hit, 'status');
         const json = {
           id: watchId,

@@ -17,9 +17,9 @@ import {
   isPartialResponse,
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
+  EQL_SEARCH_STRATEGY,
 } from '@kbn/data-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { EQL_SEARCH_STRATEGY } from '@kbn/data-enhanced-plugin/public';
 import * as i18n from '../translations';
 import { useKibana } from '../../lib/kibana';
 import { formatInspect, getEqlAggsData } from './helpers';

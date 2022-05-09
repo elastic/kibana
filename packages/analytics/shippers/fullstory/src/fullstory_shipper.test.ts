@@ -62,13 +62,13 @@ describe('FullStoryShipper', () => {
         });
       });
 
-      test('calls `setUserVars` when esOrgId is provided', () => {
-        fullstoryShipper.extendContext({ esOrgId: 'test-es-org-id' });
+      test('calls `setUserVars` when cloudId is provided', () => {
+        fullstoryShipper.extendContext({ cloudId: 'test-es-org-id' });
         expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({ org_id_str: 'test-es-org-id' });
       });
 
-      test('merges both: version and esOrgId if both are provided', () => {
-        fullstoryShipper.extendContext({ version: '1.2.3', esOrgId: 'test-es-org-id' });
+      test('merges both: version and cloudId if both are provided', () => {
+        fullstoryShipper.extendContext({ version: '1.2.3', cloudId: 'test-es-org-id' });
         expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
           org_id_str: 'test-es-org-id',
           version_str: '1.2.3',
@@ -84,7 +84,7 @@ describe('FullStoryShipper', () => {
         const context = {
           userId: 'test-user-id',
           version: '1.2.3',
-          esOrgId: 'test-es-org-id',
+          cloudId: 'test-es-org-id',
           foo: 'bar',
         };
         fullstoryShipper.extendContext(context);
@@ -119,7 +119,7 @@ describe('FullStoryShipper', () => {
         {
           event_type: 'test-event-2',
           timestamp: '2020-01-01T00:00:00.000Z',
-          properties: { test: 'test-2' },
+          properties: { other_property: 'test-2' },
           context: { pageName: 'test-page-1' },
         },
       ]);
@@ -129,6 +129,49 @@ describe('FullStoryShipper', () => {
         test_str: 'test-1',
       });
       expect(fullStoryApiMock.event).toHaveBeenCalledWith('test-event-2', {
+        other_property_str: 'test-2',
+      });
+    });
+
+    test('filters the events by the allow-list', () => {
+      fullstoryShipper = new FullStoryShipper(
+        {
+          eventTypesAllowlist: ['valid-event-1', 'valid-event-2'],
+          debug: true,
+          fullStoryOrgId: 'test-org-id',
+        },
+        {
+          logger: loggerMock.create(),
+          sendTo: 'staging',
+          isDev: true,
+        }
+      );
+      fullstoryShipper.reportEvents([
+        {
+          event_type: 'test-event-1', // Should be filtered out.
+          timestamp: '2020-01-01T00:00:00.000Z',
+          properties: { test: 'test-1' },
+          context: { pageName: 'test-page-1' },
+        },
+        {
+          event_type: 'valid-event-1',
+          timestamp: '2020-01-01T00:00:00.000Z',
+          properties: { test: 'test-1' },
+          context: { pageName: 'test-page-1' },
+        },
+        {
+          event_type: 'valid-event-2',
+          timestamp: '2020-01-01T00:00:00.000Z',
+          properties: { test: 'test-2' },
+          context: { pageName: 'test-page-1' },
+        },
+      ]);
+
+      expect(fullStoryApiMock.event).toHaveBeenCalledTimes(2);
+      expect(fullStoryApiMock.event).toHaveBeenCalledWith('valid-event-1', {
+        test_str: 'test-1',
+      });
+      expect(fullStoryApiMock.event).toHaveBeenCalledWith('valid-event-2', {
         test_str: 'test-2',
       });
     });

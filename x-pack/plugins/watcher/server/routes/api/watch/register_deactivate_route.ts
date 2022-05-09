@@ -38,7 +38,8 @@ export function registerDeactivateRoute({
       const { watchId } = request.params;
 
       try {
-        const hit = await deactivateWatch(ctx.core.elasticsearch.client, watchId);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await deactivateWatch(esClient, watchId);
         const watchStatusJson = get(hit, 'status');
         const json = {
           id: watchId,

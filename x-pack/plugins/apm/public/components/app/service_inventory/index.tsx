@@ -19,6 +19,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { SearchBar } from '../../shared/search_bar';
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
+import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { orderServiceItems } from './service_list/order_service_items';
@@ -62,7 +63,7 @@ function useServicesFetcher() {
     [start, end, environment, kuery, serviceGroup]
   );
 
-  const mainStatisticsFetch = useFetcher(
+  const mainStatisticsFetch = useProgressiveFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi('GET /internal/apm/services', {
@@ -88,9 +89,14 @@ function useServicesFetcher() {
 
   const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
 
-  const comparisonFetch = useFetcher(
+  const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      if (start && end && mainStatisticsData.items.length) {
+      if (
+        start &&
+        end &&
+        mainStatisticsData.items.length &&
+        mainStatisticsFetch.status === FETCH_STATUS.SUCCESS
+      ) {
         return callApmApi('GET /internal/apm/services/detailed_statistics', {
           params: {
             query: {
@@ -141,14 +147,16 @@ export function ServiceInventory() {
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
-  const useOptimizedSorting = useKibana().services.uiSettings?.get<boolean>(
-    apmServiceInventoryOptimizedSorting
-  );
+  const useOptimizedSorting =
+    useKibana().services.uiSettings?.get<boolean>(
+      apmServiceInventoryOptimizedSorting
+    ) || false;
 
   let isLoading: boolean;
 
   if (useOptimizedSorting) {
     isLoading =
+      // ensures table is usable when sorted and filtered services have loaded
       sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
       (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
         sortedAndFilteredServicesFetch.data?.services.length === 0 &&

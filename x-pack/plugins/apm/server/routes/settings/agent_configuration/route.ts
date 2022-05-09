@@ -269,6 +269,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
+    const coreContext = await context.core;
 
     const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -278,7 +279,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
       start,
       end,
     });
-    const size = await context.core.uiSettings.client.get<number>(
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const environments = await getEnvironments({

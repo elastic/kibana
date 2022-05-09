@@ -32,19 +32,22 @@ export const readIndexRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const siemClient = context.securitySolution?.getAppClient();
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+
+        const siemClient = securitySolution?.getAppClient();
+        const esClient = core.elasticsearch.client.asCurrentUser;
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const spaceId = context.securitySolution.getSpaceId();
+        const spaceId = securitySolution.getSpaceId();
         const indexName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
         const index = siemClient.getSignalsIndex();
         const indexExists = await getBootstrapIndexExists(
-          context.core.elasticsearch.client.asInternalUser,
+          core.elasticsearch.client.asInternalUser,
           index
         );
 

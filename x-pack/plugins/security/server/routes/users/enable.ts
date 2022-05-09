@@ -21,7 +21,8 @@ export function defineEnableUserRoutes({ router }: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.enableUser({
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.enableUser({
           username: request.params.username,
         });
 

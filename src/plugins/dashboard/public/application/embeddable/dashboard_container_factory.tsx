@@ -16,6 +16,7 @@ import {
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '@kbn/controls-plugin/public';
+import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { DashboardContainerInput } from '../..';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
@@ -30,8 +31,6 @@ import {
   createExtract,
   createInject,
 } from '../../../common/embeddable/dashboard_container_persistable_state';
-
-import { getDefaultDashboardControlGroupInput } from '../../../common/embeddable/dashboard_control_group';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -74,6 +73,7 @@ export class DashboardContainerFactoryDefinition
       isFullScreenMode: false,
       useMargins: true,
       syncColors: true,
+      syncTooltips: true,
     };
   }
 
@@ -90,7 +90,7 @@ export class DashboardContainerFactoryDefinition
     const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
     const controlGroup = await controlsGroupFactory?.create({
       id: `control_group_${id ?? 'new_dashboard'}`,
-      ...getDefaultDashboardControlGroupInput(),
+      ...getDefaultControlGroupInput(),
       ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
       timeRange,
       viewMode,

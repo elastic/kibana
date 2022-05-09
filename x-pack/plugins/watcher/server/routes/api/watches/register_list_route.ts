@@ -36,7 +36,8 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
     },
     license.guardApiRoute(async (ctx, request, response) => {
       try {
-        const hits = await fetchWatches(ctx.core.elasticsearch.client);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hits = await fetchWatches(esClient);
         const watches = hits.map((hit: any) => {
           const id = get(hit, '_id');
           const watchJson = get(hit, '_source');

@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
@@ -39,8 +38,6 @@ export const useSignalIndex = (): ReturnSignalIndex => {
   });
   const { addError } = useAppToasts();
   const { hasIndexRead } = useAlertsPrivileges();
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   useEffect(() => {
     let isSubscribed = true;
@@ -118,7 +115,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [addError, hasIndexRead, ruleRegistryEnabled]);
+  }, [addError, hasIndexRead]);
 
   return { loading, ...signalIndex };
 };

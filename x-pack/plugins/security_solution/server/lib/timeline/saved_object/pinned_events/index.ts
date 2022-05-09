@@ -70,7 +70,7 @@ export const deletePinnedEventOnTimeline = async (
   request: FrameworkRequest,
   pinnedEventIds: string[]
 ) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   await Promise.all(
     pinnedEventIds.map((pinnedEventId) =>
@@ -83,7 +83,7 @@ export const deleteAllPinnedEventsOnTimeline = async (
   request: FrameworkRequest,
   timelineId: string
 ) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const options: SavedObjectsFindOptions = {
     type: pinnedEventSavedObjectType,
     search: timelineId,
@@ -186,7 +186,7 @@ const getValidTimelineIdAndVersion = async (
     };
   }
 
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   // create timeline because it didn't exist
   const { timeline: timelineResult } = await createTimeline({
@@ -224,7 +224,7 @@ const createPinnedEvent = async ({
   timelineId: string;
   timelineVersion?: string;
 }) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   const savedPinnedEvent: SavedPinnedEvent = {
     eventId,
@@ -252,7 +252,7 @@ const createPinnedEvent = async ({
 };
 
 const getSavedPinnedEvent = async (request: FrameworkRequest, pinnedEventId: string) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObject = await savedObjectsClient.get<PinnedEventWithoutExternalRefs>(
     pinnedEventSavedObjectType,
     pinnedEventId
@@ -267,7 +267,7 @@ const getAllSavedPinnedEvents = async (
   request: FrameworkRequest,
   options: SavedObjectsFindOptions
 ) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObjects = await savedObjectsClient.find<PinnedEventWithoutExternalRefs>(options);
 
   return savedObjects.saved_objects.map((savedObject) => {

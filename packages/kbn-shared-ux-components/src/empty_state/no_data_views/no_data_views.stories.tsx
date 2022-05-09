@@ -18,7 +18,7 @@ import mdx from './no_data_views.mdx';
 const services = servicesFactory({});
 
 export default {
-  title: 'No Data Views',
+  title: 'No Data/No Data Views',
   description: 'A component to display when there are no user-created data views available.',
   parameters: {
     docs: {

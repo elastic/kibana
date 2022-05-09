@@ -20,7 +20,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DataEnhancedSetup, DataEnhancedStart } from '@kbn/data-enhanced-plugin/public';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilityPublicSetup,
@@ -52,7 +51,6 @@ export interface InfraClientStartExports {
 }
 
 export interface InfraClientSetupDeps {
-  dataEnhanced: DataEnhancedSetup;
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -64,7 +62,6 @@ export interface InfraClientSetupDeps {
 
 export interface InfraClientStartDeps {
   data: DataPublicPluginStart;
-  dataEnhanced: DataEnhancedStart;
   dataViews: DataViewsPublicPluginStart;
   observability: ObservabilityPublicStart;
   spaces: SpacesPluginStart;

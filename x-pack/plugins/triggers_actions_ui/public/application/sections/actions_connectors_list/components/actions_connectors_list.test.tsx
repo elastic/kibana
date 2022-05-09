@@ -105,6 +105,7 @@ describe('actions_connectors_list component with items', () => {
           actionTypeId: 'test',
           description: 'My test',
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
           config: {},
         },
@@ -114,6 +115,7 @@ describe('actions_connectors_list component with items', () => {
           description: 'My test 2',
           referencedByCount: 1,
           isPreconfigured: false,
+          isDeprecated: false,
           config: {},
         },
         {
@@ -123,6 +125,7 @@ describe('actions_connectors_list component with items', () => {
           isMissingSecrets: true,
           referencedByCount: 1,
           isPreconfigured: true,
+          isDeprecated: false,
           config: {},
         },
         {
@@ -131,6 +134,7 @@ describe('actions_connectors_list component with items', () => {
           description: 'My invalid connector type',
           referencedByCount: 1,
           isPreconfigured: false,
+          isDeprecated: false,
           config: {},
         },
       ]
@@ -237,6 +241,7 @@ describe('actions_connectors_list component with items', () => {
         secrets: {},
         description: `My test ${index}`,
         isPreconfigured: false,
+        isDeprecated: false,
         referencedByCount: 1,
         config: {},
       }))
@@ -472,6 +477,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         description: 'My test',
         referencedByCount: 1,
         config: { usesTableApi: true },
+        isDeprecated: true,
       },
       {
         id: '2',
@@ -479,6 +485,7 @@ describe('actions_connectors_list component with deprecated connectors', () => {
         description: 'My test 2',
         referencedByCount: 1,
         config: { usesTableApi: true },
+        isDeprecated: true,
       },
     ]);
     loadActionTypes.mockResolvedValueOnce([

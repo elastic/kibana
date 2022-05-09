@@ -31,7 +31,7 @@ import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
 import { ControlGroupContainer } from '../control_group';
 import { pluginServices, registry } from '../services/storybook';
-import { replaceValueSuggestionMethod } from '../services/storybook/data';
+import { replaceValueSuggestionMethod } from '../services/storybook/unified_search';
 import { injectStorybookDataView } from '../services/storybook/data_views';
 import { populateStorybookControlFactories } from './storybook_control_factories';
 import { OptionsListRequest } from '../services/options_list';

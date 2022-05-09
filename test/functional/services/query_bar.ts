@@ -16,7 +16,6 @@ export class QueryBarService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly find = this.ctx.getService('find');
-  private readonly browser = this.ctx.getService('browser');
 
   async getQueryString(): Promise<string> {
     return await this.testSubjects.getAttribute('queryInput', 'value');
@@ -60,20 +59,19 @@ export class QueryBarService extends FtrService {
 
   public async switchQueryLanguage(lang: 'kql' | 'lucene'): Promise<void> {
     await this.testSubjects.click('switchQueryLanguageButton');
-    const kqlToggle = await this.testSubjects.find('languageToggle');
-    const currentLang =
-      (await kqlToggle.getAttribute('aria-checked')) === 'true' ? 'kql' : 'lucene';
-    if (lang !== currentLang) {
-      await kqlToggle.click();
+    await this.testSubjects.click(`${lang}LanguageMenuItem`);
+    const contextMenuPanelTitleButton = await this.testSubjects.exists(
+      'contextMenuPanelTitleButton'
+    );
+    if (contextMenuPanelTitleButton) {
+      await this.testSubjects.click('contextMenuPanelTitleButton');
     }
-
-    await this.browser.pressKeys(this.browser.keys.ESCAPE); // close popover
     await this.expectQueryLanguageOrFail(lang); // make sure lang is switched
   }
 
   public async expectQueryLanguageOrFail(lang: 'kql' | 'lucene'): Promise<void> {
     const queryLanguageButton = await this.testSubjects.find('switchQueryLanguageButton');
-    expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(lang);
+    expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(`language: ${lang}`);
   }
 
   /**

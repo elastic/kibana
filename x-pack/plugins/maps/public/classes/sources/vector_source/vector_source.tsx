@@ -42,6 +42,8 @@ export interface BoundsRequestMeta {
   sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
+  isFeatureEditorOpenForLayer: boolean;
+  joinKeyFilter?: Filter;
 }
 
 export interface IVectorSource extends ISource {

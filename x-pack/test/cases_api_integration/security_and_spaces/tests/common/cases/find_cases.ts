@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CaseResponse, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  CaseResponse,
+  CaseSeverity,
+  CaseStatuses,
+  CommentType,
+} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -114,6 +119,45 @@ export default ({ getService }: FtrProviderContext): void => {
           count_open_cases: 1,
           count_closed_cases: 1,
           count_in_progress_cases: 0,
+        });
+      });
+
+      it('filters by severity', async () => {
+        await createCase(supertest, postCaseReq);
+        const theCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: theCase.id,
+                version: theCase.version,
+                severity: CaseSeverity.HIGH,
+              },
+            ],
+          },
+        });
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.HIGH } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [patchedCase[0]],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by severity (none found)', async () => {
+        await createCase(supertest, postCaseReq);
+        await createCase(supertest, postCaseReq);
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.CRITICAL } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 0,
+          cases: [],
         });
       });
 
@@ -517,8 +561,15 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('returns a bad request on malformed parameter', async () => {
-        await findCases({ supertest, query: { from: '<' }, expectedHttpCode: 400 });
+      it('escapes correctly', async () => {
+        const cases = await findCases({
+          supertest,
+          query: { from: '2022-03-15T10:16:56.252Z', to: '2022-03-20T10:16:56.252' },
+        });
+
+        expect(cases.total).to.be(2);
+        expect(cases.count_open_cases).to.be(2);
+        expect(cases.cases.length).to.be(2);
       });
     });
 
@@ -793,6 +844,55 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // Only security solution cases are being returned
           ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+        });
+      });
+
+      describe('RBAC query filter', () => {
+        it('should return the correct cases when trying to query filter by severity', async () => {
+          await Promise.all([
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'observabilityFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsOnly,
+                space: 'space1',
+              }
+            ),
+          ]);
+
+          // User with permissions only to security solution should get only the security solution cases
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              severity: CaseSeverity.HIGH,
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 2, ['securitySolutionFixture']);
         });
       });
     });

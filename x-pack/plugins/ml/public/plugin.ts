@@ -16,6 +16,7 @@ import type {
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -50,6 +51,7 @@ import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
@@ -109,6 +111,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             charts: pluginsStart.charts,
             data: pluginsStart.data,
+            unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
             security: pluginsSetup.security,

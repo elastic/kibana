@@ -72,11 +72,14 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     // If Fleet is enabled, then get its Authz
     if (startPlugins.fleet) {
-      fleetAuthz = context.fleet?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
+      fleetAuthz =
+        (await context.fleet)?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
     }
 
+    const coreContext = await context.core;
+
     return {
-      core: context.core,
+      core: coreContext,
 
       get endpointAuthz(): Immutable<EndpointAuthz> {
         // Lazy getter of endpoint Authz. No point in defining it if it is never used.
@@ -105,7 +108,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getRuleExecutionLog: memoize(() =>
         ruleExecutionLogForRoutesFactory(
-          context.core.savedObjects.client,
+          coreContext.savedObjects.client,
           startPlugins.eventLog.getClient(request),
           logger
         )
@@ -117,7 +120,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         }
 
         const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return lists.getExceptionListClient(context.core.savedObjects.client, username);
+        return lists.getExceptionListClient(coreContext.savedObjects.client, username);
       },
     };
   }

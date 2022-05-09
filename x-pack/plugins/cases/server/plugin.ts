@@ -6,12 +6,12 @@
  */
 
 import {
-  CoreSetup,
-  CoreStart,
   IContextProvider,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
 } from '@kbn/core/server';
 
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -198,10 +198,11 @@ export class CasePlugin {
       return {
         getCasesClient: async () => {
           const [{ savedObjects }] = await core.getStartServices();
+          const coreContext = await context.core;
 
           return this.clientFactory.create({
             request,
-            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
+            scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
           });
         },

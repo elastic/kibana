@@ -23,7 +23,7 @@ export const buildFrameworkRequest = async (
   security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
-  const savedObjectsClient = context.core.savedObjects.client;
+  const savedObjectsClient = (await context.core).savedObjects.client;
   const user = await security?.authc.getCurrentUser(request);
 
   return set<FrameworkRequest>(

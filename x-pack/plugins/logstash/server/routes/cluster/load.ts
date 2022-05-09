@@ -18,7 +18,7 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
     },
     wrapRouteWithLicenseCheck(checkLicense, async (context, request, response) => {
       try {
-        const { client } = context.core.elasticsearch;
+        const { client } = (await context.core).elasticsearch;
         const info = await client.asCurrentUser.info();
         return response.ok({
           body: {

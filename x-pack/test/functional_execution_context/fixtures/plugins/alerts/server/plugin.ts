@@ -103,7 +103,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           }, 1_000);
         });
 
-        await ctx.core.elasticsearch.client.asInternalUser.ping();
+        const coreCtx = await ctx.core;
+        await coreCtx.elasticsearch.client.asInternalUser.ping();
 
         return res.ok({
           body: {

@@ -28,7 +28,7 @@ export const DATE_1969 = '1969-12-31T00:00:00.000Z';
 export const DATE_1970 = '1970-01-01T00:00:00.000Z';
 export const DATE_1970_5_MIN = '1969-12-31T23:55:00.000Z';
 export const DATE_9999 = '9999-12-31T12:34:56.789Z';
-export const MOCK_DURATION = 86400000000000;
+export const MOCK_DURATION = '86400000000000';
 
 export const SAVED_OBJECT = {
   id: '1',
@@ -108,11 +108,6 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
-  config: {
-    run: {
-      actions: { max: 1000 },
-    },
-  },
 };
 
 export const mockRunNowResponse = {
@@ -217,6 +212,9 @@ export const generateEventLog = ({
   status,
   numberOfTriggeredActions,
   numberOfGeneratedActions,
+  numberOfActiveAlerts,
+  numberOfRecoveredAlerts,
+  numberOfNewAlerts,
   savedObjects = [generateAlertSO('1')],
 }: GeneratorParams = {}) => ({
   ...(status === 'error' && {
@@ -244,6 +242,12 @@ export const generateEventLog = ({
             metrics: {
               number_of_triggered_actions: numberOfTriggeredActions,
               number_of_generated_actions: numberOfGeneratedActions,
+              number_of_active_alerts: numberOfActiveAlerts ?? 0,
+              number_of_new_alerts: numberOfNewAlerts ?? 0,
+              number_of_recovered_alerts: numberOfRecoveredAlerts ?? 0,
+              total_number_of_alerts:
+                ((numberOfActiveAlerts ?? 0) as number) +
+                ((numberOfRecoveredAlerts ?? 0) as number),
               number_of_searches: 3,
               es_search_duration_ms: 33,
               total_search_duration_ms: 23423,

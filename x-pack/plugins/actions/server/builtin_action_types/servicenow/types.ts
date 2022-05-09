@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import {
@@ -26,6 +26,9 @@ import {
   ExternalIncidentServiceConfigurationBaseSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
+import { SNProductsConfigValue } from '../../../common';
+
+export type { SNProductsConfigValue, SNProductsConfig } from '../../../common';
 
 export type ServiceNowPublicConfigurationBaseType = TypeOf<
   typeof ExternalIncidentServiceConfigurationBaseSchema
@@ -75,6 +78,7 @@ export interface ExternalServiceCredentials {
 export interface ExternalServiceValidation {
   config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
   secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
+  connector: (config: any, secrets: any) => string | null;
 }
 
 export interface ExternalServiceIncidentResponse {
@@ -247,17 +251,6 @@ export interface GetApplicationInfoResponse {
   version: string;
 }
 
-export interface SNProductsConfigValue {
-  table: string;
-  appScope: string;
-  useImportAPI: boolean;
-  importSetTable: string;
-  commentFieldKey: string;
-  appId?: string;
-}
-
-export type SNProductsConfig = Record<string, SNProductsConfigValue>;
-
 export enum ObservableTypes {
   ip4 = 'ipv4-addr',
   url = 'URL',
@@ -285,12 +278,21 @@ export interface ExternalServiceSIR extends ExternalService {
   ) => Promise<ObservableResponse[]>;
 }
 
-export type ServiceFactory<T = ExternalService> = (
-  credentials: ExternalServiceCredentials,
-  logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  serviceConfig: SNProductsConfigValue
-) => T;
+interface ServiceFactoryOpts {
+  credentials: ExternalServiceCredentials;
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+  serviceConfig: SNProductsConfigValue;
+  axiosInstance: AxiosInstance;
+}
+
+export type ServiceFactory<T = ExternalService> = ({
+  credentials,
+  logger,
+  configurationUtilities,
+  serviceConfig,
+  axiosInstance,
+}: ServiceFactoryOpts) => T;
 
 /**
  * ITOM

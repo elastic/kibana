@@ -7,9 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '@kbn/actions-plugin/server/builtin_action_types/servicenow/config';
-import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { ActionTypeExecutorResult, snExternalServiceConfig } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError } from './types';

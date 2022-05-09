@@ -33,6 +33,7 @@ const actionConnector = {
   },
   id: 'es index connector',
   isPreconfigured: false,
+  isDeprecated: false,
   name: 'test name',
   secrets: {},
 };
@@ -44,6 +45,7 @@ const preconfiguredActionConnector = {
   },
   id: AlertHistoryEsIndexConnectorId,
   isPreconfigured: true,
+  isDeprecated: false,
   name: 'Alert history Elasticsearch index',
   secrets: {},
 };

@@ -167,6 +167,7 @@ describe('migration actions', () => {
               Object {
                 "_tag": "Left",
                 "left": Object {
+                  "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
                   "type": "unsupported_cluster_routing_allocation",
                 },
               }
@@ -187,6 +188,7 @@ describe('migration actions', () => {
               Object {
                 "_tag": "Left",
                 "left": Object {
+                  "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
                   "type": "unsupported_cluster_routing_allocation",
                 },
               }
@@ -207,6 +209,7 @@ describe('migration actions', () => {
               Object {
                 "_tag": "Left",
                 "left": Object {
+                  "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
                   "type": "unsupported_cluster_routing_allocation",
                 },
               }
@@ -321,8 +324,13 @@ describe('migration actions', () => {
   });
 
   describe('waitForIndexStatusYellow', () => {
-    afterAll(async () => {
-      await client.indices.delete({ index: 'red_then_yellow_index' });
+    afterEach(async () => {
+      try {
+        await client.indices.delete({ index: 'red_then_yellow_index' });
+        await client.indices.delete({ index: 'red_index' });
+      } catch (e) {
+        /** ignore */
+      }
     });
     it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
       // Create a red index
@@ -366,6 +374,39 @@ describe('migration actions', () => {
       const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(yellowStatusResponse.status).toBe('yellow');
     });
+    it('resolves left with "index_not_yellow_timeout" after waiting for an index status to be yellow timeout', async () => {
+      // Create a red index
+      await client.indices
+        .create({
+          index: 'red_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate no replicas so that this index stays red
+              number_of_replicas: '0',
+              // Disable all shard allocation so that the index status is red
+              index: { routing: { allocation: { enable: 'none' } } },
+            },
+          },
+        })
+        .catch((e) => {});
+      // try to wait for index status yellow:
+      const task = waitForIndexStatusYellow({
+        client,
+        index: 'red_index',
+        timeout: '1s',
+      });
+      await expect(task()).resolves.toMatchInlineSnapshot(`
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [red_index] index to become 'yellow'",
+                          "type": "index_not_yellow_timeout",
+                        },
+                      }
+                  `);
+    });
   });
 
   describe('cloneIndex', () => {
@@ -384,14 +425,14 @@ describe('migration actions', () => {
       });
       expect.assertions(1);
       await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": Object {
-              "acknowledged": true,
-              "shardsAcknowledged": true,
-            },
-          }
-      `);
+                        Object {
+                          "_tag": "Right",
+                          "right": Object {
+                            "acknowledged": true,
+                            "shardsAcknowledged": true,
+                          },
+                        }
+                  `);
     });
     it('resolves right after waiting for index status to be yellow if clone target already existed', async () => {
       expect.assertions(2);
@@ -450,16 +491,16 @@ describe('migration actions', () => {
       expect.assertions(1);
       const task = cloneIndex({ client, source: 'no_such_index', target: 'clone_target_3' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Left",
-            "left": Object {
-              "index": "no_such_index",
-              "type": "index_not_found_exception",
-            },
-          }
-      `);
+                        Object {
+                          "_tag": "Left",
+                          "left": Object {
+                            "index": "no_such_index",
+                            "type": "index_not_found_exception",
+                          },
+                        }
+                  `);
     });
-    it('resolves left with a retryable_es_client_error if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
+    it('resolves left with a index_not_yellow_timeout if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
       // Create a red index
       await client.indices
         .create({
@@ -486,14 +527,14 @@ describe('migration actions', () => {
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "message": "Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
-            "type": "retryable_es_client_error",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
+                          "type": "index_not_yellow_timeout",
+                        },
+                      }
+                  `);
 
       // Now that we know timeouts work, make the index yellow again and call cloneIndex a second time to verify that it completes
 
@@ -514,14 +555,14 @@ describe('migration actions', () => {
       })();
 
       await expect(cloneIndexPromise2).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": Object {
-            "acknowledged": true,
-            "shardsAcknowledged": true,
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Right",
+                        "right": Object {
+                          "acknowledged": true,
+                          "shardsAcknowledged": true,
+                        },
+                      }
+                  `);
     });
   });
 
@@ -539,11 +580,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": "reindex_succeeded",
-        }
-      `);
+                      Object {
+                        "_tag": "Right",
+                        "right": "reindex_succeeded",
+                      }
+                  `);
 
       const results = (
         (await searchForOutdatedDocuments(client, {
@@ -579,11 +620,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": "reindex_succeeded",
-          }
-      `);
+                        Object {
+                          "_tag": "Right",
+                          "right": "reindex_succeeded",
+                        }
+                  `);
 
       const results = (
         (await searchForOutdatedDocuments(client, {
@@ -612,11 +653,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": "reindex_succeeded",
-        }
-      `);
+                      Object {
+                        "_tag": "Right",
+                        "right": "reindex_succeeded",
+                      }
+                  `);
       const results = (
         (await searchForOutdatedDocuments(client, {
           batchSize: 1000,
@@ -647,11 +688,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       let task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": "reindex_succeeded",
-          }
-      `);
+                        Object {
+                          "_tag": "Right",
+                          "right": "reindex_succeeded",
+                        }
+                  `);
 
       // reindex without a script
       res = (await reindex({
@@ -664,11 +705,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": "reindex_succeeded",
-          }
-      `);
+                        Object {
+                          "_tag": "Right",
+                          "right": "reindex_succeeded",
+                        }
+                  `);
 
       // Assert that documents weren't overridden by the second, unscripted reindex
       const results = (
@@ -723,11 +764,11 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": "reindex_succeeded",
-        }
-      `);
+                      Object {
+                        "_tag": "Right",
+                        "right": "reindex_succeeded",
+                      }
+                  `);
       // Assert that existing documents weren't overridden, but that missing
       // documents were added by the reindex
       const results = (
@@ -780,13 +821,13 @@ describe('migration actions', () => {
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Left",
-            "left": Object {
-              "type": "incompatible_mapping_exception",
-            },
-          }
-      `);
+                        Object {
+                          "_tag": "Left",
+                          "left": Object {
+                            "type": "incompatible_mapping_exception",
+                          },
+                        }
+                  `);
     });
     it('resolves left incompatible_mapping_exception if all reindex failures are due to a mapper_parsing_exception', async () => {
       expect.assertions(1);
@@ -819,13 +860,13 @@ describe('migration actions', () => {
       const task = waitForReindexTask({ client, taskId: reindexTaskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-            Object {
-              "_tag": "Left",
-              "left": Object {
-                "type": "incompatible_mapping_exception",
-              },
-            }
-      `);
+                          Object {
+                            "_tag": "Left",
+                            "left": Object {
+                              "type": "incompatible_mapping_exception",
+                            },
+                          }
+                  `);
     });
     it('resolves left index_not_found_exception if source index does not exist', async () => {
       expect.assertions(1);
@@ -841,14 +882,14 @@ describe('migration actions', () => {
       })()) as Either.Right<ReindexResponse>;
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "index": "no_such_index",
-            "type": "index_not_found_exception",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "index": "no_such_index",
+                          "type": "index_not_found_exception",
+                        },
+                      }
+                  `);
     });
     it('resolves left target_index_had_write_block if all failures are due to a write block', async () => {
       expect.assertions(1);
@@ -864,13 +905,13 @@ describe('migration actions', () => {
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "target_index_had_write_block",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "type": "target_index_had_write_block",
+                        },
+                      }
+                  `);
     });
     it('resolves left if requireAlias=true and the target is not an alias', async () => {
       expect.assertions(1);
@@ -886,14 +927,14 @@ describe('migration actions', () => {
       const task = waitForReindexTask({ client, taskId: res.right.taskId, timeout: '10s' });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "index": "existing_index_with_write_block",
-            "type": "index_not_found_exception",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "index": "existing_index_with_write_block",
+                          "type": "index_not_found_exception",
+                        },
+                      }
+                  `);
     });
 
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
@@ -945,11 +986,11 @@ describe('migration actions', () => {
         targetIndex: 'reindex_target_7',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": "verify_reindex_succeeded",
-        }
-      `);
+                      Object {
+                        "_tag": "Right",
+                        "right": "verify_reindex_succeeded",
+                      }
+                  `);
     });
     it('resolves left if source and target indices have different amount of documents', async () => {
       expect.assertions(1);
@@ -959,13 +1000,13 @@ describe('migration actions', () => {
         targetIndex: 'existing_index_2',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "verify_reindex_failed",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "type": "verify_reindex_failed",
+                        },
+                      }
+                  `);
     });
     it('rejects if source or target index does not exist', async () => {
       expect.assertions(2);
@@ -1592,11 +1633,11 @@ describe('migration actions', () => {
       });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": "bulk_index_succeeded",
-        }
-      `);
+                      Object {
+                        "_tag": "Right",
+                        "right": "bulk_index_succeeded",
+                      }
+                  `);
     });
     it('resolves right even if there were some version_conflict_engine_exception', async () => {
       const existingDocs = (
@@ -1637,13 +1678,13 @@ describe('migration actions', () => {
           refresh: 'wait_for',
         })()
       ).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "target_index_had_write_block",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "type": "target_index_had_write_block",
+                        },
+                      }
+                  `);
     });
 
     it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
@@ -1659,13 +1700,13 @@ describe('migration actions', () => {
         transformedDocs: newDocs,
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
-      `);
+                      Object {
+                        "_tag": "Left",
+                        "left": Object {
+                          "type": "request_entity_too_large_exception",
+                        },
+                      }
+                  `);
     });
   });
 });

@@ -33,7 +33,6 @@ import { Subject } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
-import type { SecuritySolutionRequestHandlerContext } from '../types';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -50,7 +49,7 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/ar
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
-  let ctx: SecuritySolutionRequestHandlerContext;
+  let ctx: ReturnType<typeof requestContextMock.create>;
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
@@ -99,7 +98,7 @@ describe('ingest_integration tests ', () => {
         exceptionListClient
       );
 
-      return callback(createNewPackagePolicyMock(), ctx, req);
+      return callback(createNewPackagePolicyMock(), requestContextMock.convertContext(ctx), req);
     };
 
     const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -265,9 +264,9 @@ describe('ingest_integration tests ', () => {
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
-        'Requires Platinum license'
-      );
+      await expect(() =>
+        callback(policyConfig, requestContextMock.convertContext(ctx), req)
+      ).rejects.toThrow('Requires Platinum license');
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactoryWithoutPaidFeatures();
@@ -281,7 +280,11 @@ describe('ingest_integration tests ', () => {
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      const updatedPolicyConfig = await callback(policyConfig, ctx, req);
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        requestContextMock.convertContext(ctx),
+        req
+      );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });
@@ -302,7 +305,11 @@ describe('ingest_integration tests ', () => {
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      const updatedPolicyConfig = await callback(policyConfig, ctx, req);
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        requestContextMock.convertContext(ctx),
+        req
+      );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });
