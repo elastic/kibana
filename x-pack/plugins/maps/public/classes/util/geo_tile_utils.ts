@@ -71,12 +71,13 @@ export function getTilesForExtent(
   const maxY = latitudeToTile(extent.minLat, tileCount);
 
   const tiles: Array<{ x: number; y: number; z: number }> = [];
-  for (let x = 0; minX + x <= maxX; x++) {
+  for (let x = 0; x < tileCount && minX + x <= maxX; x++) {
     const tileX = minX + x;
-    for (let y = 0; minY + y <= maxY; y++) {
+    for (let y = 0; y < tileCount && minY + y <= maxY; y++) {
+      const tileY = minY + y;
       tiles.push({
         x: tileX < 0 ? tileCount - Math.abs(tileX) : tileX,
-        y: minY + y,
+        y: tileY < 0 ? tileCount - Math.abs(tileY) : tileY,
         z: Math.floor(zoom),
       });
     }

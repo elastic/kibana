@@ -76,6 +76,17 @@ test('Should get tiles for extent that crosses dateline and not add tiles in bet
   ]);
 });
 
+test('Should return single tile for zoom level 0', () => {
+  const extent = {
+    minLon: -180.39426,
+    minLat: -85.05113,
+    maxLon: 270.66456,
+    maxLat: 85.05113,
+  };
+
+  expect(getTilesForExtent(0, extent)).toEqual([{ x: 0, y: 0, z: 0 }]);
+});
+
 test('Should get tile key', () => {
   expect(getTileKey(45, 120, 10)).toEqual('10/853/368');
 });
