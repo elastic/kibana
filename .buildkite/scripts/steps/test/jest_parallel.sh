@@ -29,7 +29,12 @@ while read -r config; do
 
   # prevent non-zero exit code from breaking the loop
   set +e;
-  NODE_OPTIONS="--max-old-space-size=14336" node ./scripts/jest --config="$config" "$parallelism" --coverage=false --passWithNoTests
+  NODE_OPTIONS="--max-old-space-size=14336 --preserve-symlinks --preserve-symlinks-main" \
+    node ./scripts/jest \
+    --config="$config" \
+    "$parallelism" \
+    --coverage=false \
+    --passWithNoTests
   lastCode=$?
   set -e;
 
