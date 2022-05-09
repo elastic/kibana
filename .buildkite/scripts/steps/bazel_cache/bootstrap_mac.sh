@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 export BAZEL_CACHE_MODE=populate-local-gcs
 export DISABLE_BOOTSTRAP_VALIDATION=true
 
