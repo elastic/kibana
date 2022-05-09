@@ -845,6 +845,22 @@ export default ({ getService }: FtrProviderContext): void => {
           // Only security solution cases are being returned
           ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
         });
+
+        it('should respect the owner filter when using range queries', async () => {
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              severity: CaseSeverity.LOW,
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 2, ['securitySolutionFixture']);
+        });
       });
     });
   });

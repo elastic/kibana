@@ -20,6 +20,7 @@
       "syncAlerts": false
     },
     "status": "open",
+    "severity": "low",
     "tags": [],
     "title": "stack",
     "updated_at": "2022-03-29T10:33:09.754Z",
@@ -62,6 +63,7 @@
       "syncAlerts": false
     },
     "status": "open",
+    "severity": "low",
     "tags": [],
     "title": "stack",
     "updated_at": "2022-03-29T10:33:09.754Z",
@@ -104,6 +106,7 @@
       "syncAlerts": false
     },
     "status": "open",
+    "severity": "low",
     "tags": [],
     "title": "stack",
     "updated_at": "2022-03-29T10:33:09.754Z",
