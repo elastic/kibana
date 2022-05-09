@@ -7,7 +7,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { isEmpty } from 'lodash';
-import { loadRules, loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import { loadRules, loadRuleTags } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
 import { FetchRulesProps, RuleState } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
@@ -36,16 +36,14 @@ export function useFetchRules({
   const [initialLoad, setInitialLoad] = useState<boolean>(true);
   const [tags, setTags] = useState<string[]>([]);
 
-  const loadRuleAggs = useCallback(async () => {
+  const loadRuleTagsAggs = useCallback(async () => {
     try {
-      const rulesAggs = await loadRuleAggregations({
+      const ruleTagsAggs = await loadRuleTags({
         http,
-        searchText,
-        typesFilter,
       });
 
-      if (rulesAggs?.ruleTags) {
-        setTags(rulesAggs.ruleTags);
+      if (ruleTagsAggs?.ruleTags) {
+        setTags(ruleTagsAggs.ruleTags);
       }
     } catch (e) {
       // toasts.addDanger({
@@ -54,7 +52,7 @@ export function useFetchRules({
       //   }),
       // });
     }
-  }, [http, typesFilter, searchText]);
+  }, [http]);
 
   const fetchRules = useCallback(async () => {
     setRulesState((oldState) => ({ ...oldState, isLoading: true }));
@@ -70,7 +68,7 @@ export function useFetchRules({
         ruleStatusesFilter,
         sort,
       });
-      await loadRuleAggs();
+      await loadRuleTagsAggs();
       setRulesState((oldState) => ({
         ...oldState,
         isLoading: false,
@@ -101,15 +99,15 @@ export function useFetchRules({
     searchText,
     ruleLastResponseFilter,
     tagsFilter,
-    loadRuleAggs,
+    loadRuleTagsAggs,
     ruleStatusesFilter,
     typesFilter,
     sort,
   ]);
   useEffect(() => {
     fetchRules();
-    loadRuleAggs();
-  }, [fetchRules, loadRuleAggs]);
+    loadRuleTagsAggs();
+  }, [fetchRules, loadRuleTagsAggs]);
 
   return {
     rulesState,
