@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { RenameColumnsExpressionFunction } from './types';
 
 export const renameColumns: RenameColumnsExpressionFunction = {
-  name: 'lens_rename_columns',
+  name: 'lens_restore_column_ids',
   type: 'datatable',
   help: i18n.translate('xpack.lens.functions.renameColumns.help', {
     defaultMessage: 'A helper to rename the columns of a datatable',

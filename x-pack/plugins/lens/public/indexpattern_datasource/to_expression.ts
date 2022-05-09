@@ -11,14 +11,16 @@ import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
+  METRIC_TYPES,
 } from '@kbn/data-plugin/public';
-import { queryToAst } from '@kbn/data-plugin/common';
+import { AggExpressionFunctionArgs, queryToAst } from '@kbn/data-plugin/common';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpression,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
+  ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
@@ -95,7 +97,7 @@ function getExpressionForLayer(
   );
 
   if (referenceEntries.length || esAggEntries.length) {
-    const aggs: ExpressionAstExpressionBuilder[] = [];
+    let aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
 
     sortedReferences(referenceEntries).forEach((colId) => {
@@ -177,6 +179,66 @@ function getExpressionForLayer(
         },
       };
     }, {} as Record<string, OriginalColumn>);
+
+    const percentileExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
+
+    aggs.forEach((expressionBuilder) => {
+      const {
+        functions: [fnBuilder],
+      } = expressionBuilder;
+      if (fnBuilder.name === 'aggSinglePercentile') {
+        const field = fnBuilder.getArgument('field')?.[0];
+        if (!(field in percentileExpressionsByArgs)) {
+          percentileExpressionsByArgs[field] = [];
+        }
+
+        percentileExpressionsByArgs[field].push(expressionBuilder);
+      }
+    });
+
+    Object.values(percentileExpressionsByArgs).forEach(([first, ...rest]) => {
+      if (!rest.length) {
+        // don't need to optimize if there's only one
+        return;
+      }
+
+      const {
+        functions: [firstFnBuilder],
+      } = first;
+
+      const aggPercentilesConfig: AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES> = {
+        id: 'foo-foo',
+        enabled: firstFnBuilder.getArgument('enabled')?.[0],
+        schema: firstFnBuilder.getArgument('schema')?.[0],
+        field: firstFnBuilder.getArgument('field')?.[0],
+        percents: firstFnBuilder.getArgument('percentile'),
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+      };
+
+      const siblingPercentiles = rest.map(
+        ({ functions: [fnBuilder] }) => fnBuilder.getArgument('percentile')?.[0]
+      ) as number[];
+
+      aggPercentilesConfig.percents = [
+        ...(aggPercentilesConfig.percents ?? []),
+        ...siblingPercentiles,
+      ];
+
+      const multiPercentilesAst = buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>(
+        'aggPercentiles',
+        aggPercentilesConfig
+      ).toAst();
+
+      aggs = [
+        ...aggs.filter((agg) => ![first, ...rest].includes(agg)),
+        buildExpression({
+          type: 'expression',
+          chain: [multiPercentilesAst],
+        }),
+      ];
+    });
+
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) =>
         (isColumnOfType<RangeIndexPatternColumn>('range', col) && col.params?.parentFormat) ||
@@ -291,7 +353,7 @@ function getExpressionForLayer(
         }).toAst(),
         {
           type: 'function',
-          function: 'lens_rename_columns',
+          function: 'lens_restore_column_ids',
           arguments: {
             idMap: [JSON.stringify(idMap)],
           },
