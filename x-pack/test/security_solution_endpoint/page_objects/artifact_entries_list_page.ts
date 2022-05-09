@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function HostIsolationExceptionsPageProvider({
+export function ArtifactEntriesListPageProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
@@ -15,27 +15,27 @@ export function HostIsolationExceptionsPageProvider({
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateToList(searchParams?: string) {
+    async navigateToList(artifactType: string, searchParams?: string) {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'securitySolutionManagement',
-        `/host_isolation_exceptions${searchParams ? `?${searchParams}` : ''}`
+        `/${artifactType}${searchParams ? `?${searchParams}` : ''}`
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
     // /**
-    //  * ensures that the host isolation exceptions page is the currently display view
+    //  * ensures that the blocklist page is the currently display view
     //  */
-    async ensureIsOnHostiIsolationExceptionsPage() {
-      await testSubjects.existOrFail('hostIsolationExceptionsListPage-container');
+    async ensureIsOnBlocklistPage(artifactTypePage: string) {
+      await testSubjects.existOrFail(`${artifactTypePage}-container`);
     },
 
     // /**
-    //  * Clicks on the actions menu icon in the (only one) host isolation exceptions card to show the popup with list of actions
+    //  * Clicks on the actions menu icon in the (only one) blocklist card to show the popup with list of actions
     //  */
-    async clickCardActionMenu() {
-      await testSubjects.existOrFail('hostIsolationExceptionsListPage-container');
-      await testSubjects.click('hostIsolationExceptionsListPage-card-header-actions');
+    async clickCardActionMenu(artifactTypePage: string) {
+      await testSubjects.existOrFail(`${artifactTypePage}-container`);
+      await testSubjects.click(`${artifactTypePage}-card-header-actions-button`);
     },
   };
 }
