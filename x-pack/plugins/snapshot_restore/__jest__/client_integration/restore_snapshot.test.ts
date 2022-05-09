@@ -7,7 +7,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../common';
-import { nextTick, pageHelpers, setupEnvironment } from './helpers';
+import { pageHelpers, setupEnvironment } from './helpers';
 import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
 import { REPOSITORY_NAME, SNAPSHOT_NAME } from './helpers/constant';
 import * as fixtures from '../../test/fixtures';
@@ -151,7 +151,6 @@ describe('<RestoreSnapshot />', () => {
 
       await act(async () => {
         form.toggleEuiSwitch('toggleIncludeNone');
-        await nextTick();
       });
       component.update();
 

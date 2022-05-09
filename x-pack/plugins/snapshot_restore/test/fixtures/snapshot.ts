@@ -13,7 +13,7 @@ export const getSnapshot = ({
   uuid = getRandomString(),
   state = 'SUCCESS',
   indexFailures = [],
-  includeGlobalState = 1,
+  includeGlobalState = true,
   featureStates = [],
   totalIndices = getRandomNumber(),
   totalDataStreams = getRandomNumber(),
@@ -24,7 +24,7 @@ export const getSnapshot = ({
   state: string;
   indexFailures: any[];
   featureStates: string[];
-  includeGlobalState: number;
+  includeGlobalState: boolean;
   totalIndices: number;
   totalDataStreams: number;
 }> = {}) => ({

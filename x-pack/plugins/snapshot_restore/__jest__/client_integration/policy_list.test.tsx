@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-
-import { setupEnvironment, nextTick } from './helpers';
+import { setupEnvironment } from './helpers';
 import { getPolicy } from '../../test/fixtures';
 import { setupPoliciesListPage, PoliciesListTestBed } from './helpers/policy_list.helpers';
 
@@ -35,10 +33,6 @@ describe('<PolicyList />', () => {
     });
 
     testBed = await setupPoliciesListPage(httpSetup);
-
-    await act(async () => {
-      await nextTick();
-    });
 
     testBed.component.update();
   });

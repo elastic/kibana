@@ -502,7 +502,7 @@ describe('<SnapshotRestoreHome />', () => {
       const snapshot2 = fixtures.getSnapshot({
         repository: REPOSITORY_NAME,
         snapshot: `b${getRandomString()}`,
-        includeGlobalState: 0,
+        includeGlobalState: false,
       });
       const snapshots = [snapshot1, snapshot2];
 
@@ -733,9 +733,7 @@ describe('<SnapshotRestoreHome />', () => {
             // Now we will assert against the second result of the table which shouldnt have includeGlobalState
             await testBed.actions.clickSnapshotAt(1);
 
-            expect(find('includeGlobalState.value').text()).toContain(
-              'Yes, without any feature states'
-            );
+            expect(find('includeGlobalState.value').text()).toContain('No');
           });
 
           describe('tabs', () => {

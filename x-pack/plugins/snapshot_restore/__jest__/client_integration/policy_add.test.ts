@@ -6,7 +6,7 @@
  */
 
 // import helpers first, this also sets up the mocks
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 import { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
@@ -53,7 +53,6 @@ describe('<PolicyAdd />', () => {
       });
 
       testBed = await setup(httpSetup);
-      await nextTick();
       testBed.component.update();
     });
 
@@ -142,9 +141,8 @@ describe('<PolicyAdd />', () => {
           await act(async () => {
             // Toggle "All indices" switch
             form.toggleEuiSwitch('allIndicesToggle');
-            await nextTick();
-            component.update();
           });
+          component.update();
 
           // Deselect all indices from list
           find('deselectIndicesLink').simulate('click');
@@ -160,7 +158,6 @@ describe('<PolicyAdd />', () => {
           await act(async () => {
             // Toggle "All indices" switch
             form.toggleEuiSwitch('allIndicesToggle');
-            await nextTick();
           });
           component.update();
 
@@ -224,10 +221,6 @@ describe('<PolicyAdd />', () => {
         form.setInputValue('snapshotNameInput', SNAPSHOT_NAME);
         actions.clickNextButton();
 
-        // Complete step 2
-        await act(async () => {
-          await nextTick();
-        });
         component.update();
       });
 
@@ -239,7 +232,6 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           form.toggleEuiSwitch('toggleIncludeNone');
-          await nextTick();
         });
         component.update();
 
@@ -254,7 +246,6 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           form.toggleEuiSwitch('globalStateToggle');
-          await nextTick();
         });
         component.update();
 
@@ -266,7 +257,6 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           form.toggleEuiSwitch('toggleIncludeNone');
-          await nextTick();
         });
         component.update();
 
@@ -277,7 +267,6 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
 
         const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
@@ -303,7 +292,6 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
 
         const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
@@ -327,7 +315,6 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
 
         const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
@@ -363,7 +350,6 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
         });
 
         expect(httpSetup.post).toHaveBeenLastCalledWith(
@@ -402,9 +388,8 @@ describe('<PolicyAdd />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick();
-          component.update();
         });
+        component.update();
 
         expect(exists('savePolicyApiError')).toBe(true);
         expect(find('savePolicyApiError').text()).toContain(error.message);
