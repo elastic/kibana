@@ -484,6 +484,9 @@ export const ModelsList: FC<Props> = ({
           isPrimary: true,
           available: isTestable,
           onClick: setShowTestFlyout,
+          enabled: (item) =>
+            isPopulatedObject(item.stats?.deployment_stats) &&
+            item.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED,
         },
       ] as Array<Action<ModelItem>>)
     );

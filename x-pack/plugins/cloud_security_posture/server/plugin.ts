@@ -33,7 +33,7 @@ import {
   onPackagePolicyPostCreateCallback,
   onPackagePolicyDeleteCallback,
 } from './fleet_integration/fleet_integration';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 
 export interface CspAppContext {
   logger: Logger;
@@ -84,7 +84,7 @@ export class CspPlugin
 
     plugins.fleet.fleetSetupCompleted().then(async () => {
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
-        CIS_KUBERNETES_PACKAGE_NAME
+        CLOUD_SECURITY_POSTURE_PACKAGE_NAME
       );
 
       // If package is installed we want to make sure all needed assets are installed
@@ -100,7 +100,7 @@ export class CspPlugin
           context: RequestHandlerContext,
           _: KibanaRequest
         ): Promise<PackagePolicy> => {
-          if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+          if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
             await this.initialize(core);
             const soClient = (await context.core).savedObjects.client;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
@@ -114,7 +114,7 @@ export class CspPlugin
         'postPackagePolicyDelete',
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
-            if (deletedPackagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+            if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
               await onPackagePolicyDeleteCallback(
                 this.logger,
                 deletedPackagePolicy,
