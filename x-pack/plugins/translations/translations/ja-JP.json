@@ -20403,7 +20403,7 @@
     "xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkLabel": "ノード：{nodesCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel": "Logstash の概要",
     "xpack.monitoring.cluster.overview.logstashPanel.overviewLinkLabel": "概要",
-    "xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel": "Logstash パイプライン（ベータ機能）：{pipelineCount}",
+    "xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel": "Logstash パイプライン：{pipelineCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.pipelinesCountLinkLabel": "パイプライン：{pipelineCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.uptimeLabel": "アップタイム",
     "xpack.monitoring.cluster.overview.logstashPanel.withMemoryQueuesLabel": "メモリーキューあり",

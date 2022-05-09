@@ -20380,7 +20380,7 @@
     "xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkLabel": "Nœuds : {nodesCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel": "Aperçu Logstash",
     "xpack.monitoring.cluster.overview.logstashPanel.overviewLinkLabel": "Aperçu",
-    "xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel": "Pipelines Logstash (fonctionnalité bêta) : {pipelineCount}",
+    "xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel": "Pipelines Logstash : {pipelineCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.pipelinesCountLinkLabel": "Pipelines : {pipelineCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.uptimeLabel": "Uptime",
     "xpack.monitoring.cluster.overview.logstashPanel.withMemoryQueuesLabel": "Avec files d'attente en mémoire",

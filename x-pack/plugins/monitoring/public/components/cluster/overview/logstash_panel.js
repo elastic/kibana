@@ -215,7 +215,7 @@ export function LogstashPanel(props) {
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
                         {
-                          defaultMessage: 'Logstash Pipelines (beta feature): {pipelineCount}',
+                          defaultMessage: 'Logstash Pipelines: {pipelineCount}',
                           values: { pipelineCount: props.pipeline_count },
                         }
                       )}

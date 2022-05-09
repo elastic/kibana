@@ -20435,7 +20435,7 @@
     "xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkLabel": "节点：{nodesCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel": "Logstash 概览",
     "xpack.monitoring.cluster.overview.logstashPanel.overviewLinkLabel": "概览",
-    "xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel": "Logstash 管道（公测版功能）：{pipelineCount}",
+    "xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel": "Logstash 管道：{pipelineCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.pipelinesCountLinkLabel": "管道：{pipelineCount}",
     "xpack.monitoring.cluster.overview.logstashPanel.uptimeLabel": "运行时间",
     "xpack.monitoring.cluster.overview.logstashPanel.withMemoryQueuesLabel": "内存队列",
