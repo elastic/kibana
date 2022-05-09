@@ -1,0 +1,9 @@
+.ruleActionsPopover {
+  .euiContextMenuItem:hover {
+    text-decoration: none;
+  }
+}
+
+button[data-test-subj='deleteRuleButton'] {
+  color: $euiColorDanger;
+}
