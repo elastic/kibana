@@ -149,9 +149,6 @@ export const thresholdExecutor = async ({
       buildRuleMessage,
     });
 
-    console.log('THRESHOLD LOGS');
-    console.log(thresholdResults.hits.total);
-
     // Build and index new alerts
     const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
       await bulkCreateThresholdSignals({

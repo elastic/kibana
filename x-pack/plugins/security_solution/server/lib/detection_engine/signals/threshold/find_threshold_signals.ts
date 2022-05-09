@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  AggregateName,
+  AggregationsStringTermsAggregate,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   AlertInstanceContext,
@@ -51,7 +55,7 @@ export const findThresholdSignals = async ({
   buildRuleMessage,
   timestampOverride,
 }: FindThresholdSignalsParams): Promise<{
-  searchResult: SignalSearchResponse;
+  searchResult: SignalSearchResponse<Record<AggregateName, AggregationsStringTermsAggregate>>;
   searchDuration: string;
   searchErrors: string[];
 }> => {

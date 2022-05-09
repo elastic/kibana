@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import {
+  AggregateName,
   AggregationsCardinalityAggregate,
+  AggregationsCompositeBucket,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
-  AggregationsMultiTermsAggregate,
-  AggregationsMultiTermsBucket,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
@@ -28,9 +29,10 @@ import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type { SignalSearchResponse, ThresholdSignalHistory, BulkCreate, WrapHits } from '../types';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
+import { ThresholdAggregate, ThresholdBucket } from './types';
 
 interface BulkCreateThresholdSignalsParams {
-  someResult: SignalSearchResponse;
+  someResult: SignalSearchResponse<Record<AggregateName, ThresholdAggregate>>;
   completeRule: CompleteRule<ThresholdRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
@@ -45,7 +47,7 @@ interface BulkCreateThresholdSignalsParams {
 }
 
 const getTransformedHits = (
-  results: SignalSearchResponse,
+  results: SignalSearchResponse<Record<AggregateName, ThresholdAggregate>>,
   inputIndex: string,
   startedAt: Date,
   from: Date,
@@ -56,10 +58,13 @@ const getTransformedHits = (
     return [];
   }
 
-  return (
-    (results.aggregations.thresholdTerms as AggregationsMultiTermsAggregate)
-      .buckets as AggregationsMultiTermsBucket[]
-  ).map((bucket, i) => ({
+  const buckets = results.aggregations.thresholdTerms.buckets as ThresholdBucket[];
+  const isCompositeBucket = (bucket: ThresholdBucket): bucket is AggregationsCompositeBucket =>
+    isPlainObject(bucket.key);
+
+  return buckets.map((bucket, i) => ({
+    // In case of `terms` aggregation, `bucket.key` will be an empty string. Note that `Object.keys('')` is `[]`,
+    // so the below logic works in either case (whether `terms` or `composite`).
     _index: inputIndex,
     _id: calculateThresholdSignalUuid(
       ruleId,
@@ -69,18 +74,22 @@ const getTransformedHits = (
     ),
     _source: {
       [TIMESTAMP]: (bucket.max_timestamp as AggregationsMaxAggregate).value_as_string,
-      ...Object.keys(bucket.key).reduce(
-        (acc, val) => ({
-          ...acc,
-          [val]: bucket.key[val],
-        }),
-        {}
-      ),
+      ...(isCompositeBucket(bucket)
+        ? Object.keys(bucket.key).reduce(
+            (acc, val) => ({
+              ...acc,
+              [val]: bucket.key[val],
+            }),
+            {}
+          )
+        : {}),
       threshold_result: {
-        terms: Object.keys(bucket.key).map((term, j) => ({
-          field: term,
-          value: bucket.key[term],
-        })),
+        terms: isCompositeBucket(bucket)
+          ? Object.keys(bucket.key).map((term, j) => ({
+              field: term,
+              value: bucket.key[term],
+            }))
+          : [],
         cardinality: {
           field: threshold.cardinality ? threshold.cardinality[0]?.field : undefined,
           value: (bucket.cardinality_count as AggregationsCardinalityAggregate)?.value,
@@ -95,7 +104,7 @@ const getTransformedHits = (
 };
 
 export const transformThresholdResultsToEcs = (
-  results: SignalSearchResponse,
+  results: SignalSearchResponse<Record<AggregateName, ThresholdAggregate>>,
   inputIndex: string,
   startedAt: Date,
   from: Date,

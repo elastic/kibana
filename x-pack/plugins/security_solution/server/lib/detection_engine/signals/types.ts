@@ -183,7 +183,9 @@ export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
 };
 export type WrappedEventHit = BaseHit<EventHit>;
 
-export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
+export type SignalSearchResponse<
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+> = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
