@@ -131,7 +131,7 @@ describe('get()', () => {
     expect(result).toEqual({ connectorToken: null, hasErrors: false });
   });
 
-  test('return null and log the error if unsecuredSavedObjectsClient thows an error', async () => {
+  test('return null and log the error if unsecuredSavedObjectsClient throws an error', async () => {
     unsecuredSavedObjectsClient.find.mockRejectedValueOnce(new Error('Fail'));
 
     const result = await connectorTokenClient.get({
@@ -145,7 +145,7 @@ describe('get()', () => {
     expect(result).toEqual({ connectorToken: null, hasErrors: true });
   });
 
-  test('return null and log the error if encryptedSavedObjectsClient decrypt method thows an error', async () => {
+  test('return null and log the error if encryptedSavedObjectsClient decrypt method throws an error', async () => {
     const expectedResult = {
       total: 1,
       per_page: 10,
@@ -175,6 +175,47 @@ describe('get()', () => {
 
     expect(logger.error.mock.calls[0]).toMatchObject([
       `Failed to decrypt connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
+    ]);
+    expect(result).toEqual({ connectorToken: null, hasErrors: true });
+  });
+
+  test('return null and log the error if expiresAt is NaN', async () => {
+    const expectedResult = {
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'connector_token',
+          attributes: {
+            connectorId: '123',
+            tokenType: 'access_token',
+            createdAt: new Date().toISOString(),
+            expiresAt: 'yo',
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      references: [],
+      attributes: {
+        token: 'testtokenvalue',
+      },
+    });
+
+    const result = await connectorTokenClient.get({
+      connectorId: '123',
+      tokenType: 'access_token',
+    });
+
+    expect(logger.error.mock.calls[0]).toMatchObject([
+      `Failed to get connector_token for connectorId "123" and tokenType: "access_token". Error: expiresAt is not a valid Date "yo"`,
     ]);
     expect(result).toEqual({ connectorToken: null, hasErrors: true });
   });
