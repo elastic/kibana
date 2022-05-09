@@ -11,9 +11,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('machine learning - data visualizer', function () {
-    this.tags(['skipFirefox', 'ml']);
-
+  describe('machine learning - stack management jobs', function () {
+    this.tags(['ml', 'skipFirefox']);
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
@@ -27,16 +26,16 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlRoles();
 
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_logs');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/bm_classification');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/egs_regression');
 
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./index_data_visualizer'));
-    loadTestFile(require.resolve('./index_data_visualizer_grid_in_discover'));
-    loadTestFile(require.resolve('./index_data_visualizer_grid_in_dashboard'));
-    loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
-    loadTestFile(require.resolve('./index_data_visualizer_index_pattern_management'));
-    loadTestFile(require.resolve('./file_data_visualizer'));
+    loadTestFile(require.resolve('./synchronize'));
+    loadTestFile(require.resolve('./manage_spaces'));
+    loadTestFile(require.resolve('./import_jobs'));
+    loadTestFile(require.resolve('./export_jobs'));
   });
 }
