@@ -25,7 +25,6 @@ interface SingleSearchAfterParams {
   index: string[];
   from: string;
   to: string;
-  runtimeMappings?: estypes.MappingRuntimeField;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
@@ -43,7 +42,6 @@ export const singleSearchAfter = async ({
   index,
   from,
   to,
-  runtimeMappings,
   services,
   filter,
   logger,
@@ -65,7 +63,6 @@ export const singleSearchAfter = async ({
         from,
         to,
         filter,
-        runtimeMappings,
         size: pageSize,
         sortOrder,
         searchAfterSortIds,

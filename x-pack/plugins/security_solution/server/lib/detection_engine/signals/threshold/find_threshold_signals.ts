@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   AlertInstanceContext,
@@ -17,6 +15,7 @@ import { Logger } from '@kbn/core/server';
 
 import {
   ThresholdNormalized,
+  ThresholdWithCardinality,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BuildRuleMessage } from '../rule_messages';
@@ -34,6 +33,12 @@ interface FindThresholdSignalsParams {
   buildRuleMessage: BuildRuleMessage;
   timestampOverride: TimestampOverrideOrUndefined;
 }
+
+const shouldFilterByCardinality = (
+  threshold: ThresholdNormalized
+): threshold is ThresholdWithCardinality => !!threshold.cardinality?.length;
+
+const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
 
 export const findThresholdSignals = async ({
   from,
@@ -62,7 +67,7 @@ export const findThresholdSignals = async ({
         field: timestampOverride != null ? timestampOverride : TIMESTAMP,
       },
     },
-    ...(threshold.cardinality?.length
+    ...(shouldFilterByCardinality(threshold)
       ? {
           cardinality_count: {
             cardinality: {
@@ -89,40 +94,34 @@ export const findThresholdSignals = async ({
     },
   };
 
-  const fakeFieldName = uuidv4();
-  const thresholdFields = [
-    ...threshold.field,
-    ...(threshold.field.length ? [] : fakeFieldName), // generate a field to group everything in one bucket
-  ];
-
-  const runtimeMappings = threshold.field.length
-    ? undefined
-    : {
-        [fakeFieldName]: {
-          type: 'keyword',
-          script: 'emit("")',
-        },
-      };
-
   // Generate a composite aggregation considering each threshold grouping field provided, appending leaf
   // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
   // 2) return the first and last hit for each bucket in order to eliminate dupes and reconstruct an accurate
   // timeline.
-
   const aggregations = {
-    thresholdTerms: {
-      composite: {
-        sources: thresholdFields.map((term, i) => ({
-          [term]: {
-            terms: {
-              field: term,
+    thresholdTerms: hasThresholdFields(threshold)
+      ? {
+          composite: {
+            sources: threshold.field.map((term, i) => ({
+              [term]: {
+                terms: {
+                  field: term,
+                },
+              },
+            })),
+            size: 10000,
+          },
+          aggs: leafAggs,
+        }
+      : {
+          terms: {
+            script: {
+              source: '""', // Group everything in the same bucket
+              lang: 'painless',
             },
           },
-        })),
-        size: 10000,
-      },
-      aggs: leafAggs,
-    },
+          aggs: leafAggs,
+        },
   };
 
   // TODO: loop as long as we have sort ids
@@ -133,13 +132,13 @@ export const findThresholdSignals = async ({
     index: inputIndexPattern,
     from,
     to,
-    ...(runtimeMappings ? runtimeMappings : {}),
     services,
     logger,
     // @ts-expect-error refactor to pass type explicitly instead of unknown
     filter,
     pageSize: 0,
     sortOrder: 'desc',
+    // trackTotalHits: !hasThresholdFields(threshold),
     buildRuleMessage,
   });
 };

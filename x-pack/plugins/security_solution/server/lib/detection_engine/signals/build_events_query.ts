@@ -15,7 +15,6 @@ interface BuildEventsSearchQuery {
   from: string;
   to: string;
   filter: estypes.QueryDslQueryContainer;
-  runtimeMappings?: estypes.MappingRuntimeField;
   size: number;
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
@@ -93,7 +92,6 @@ export const buildEventsSearchQuery = ({
   from,
   to,
   filter,
-  runtimeMappings,
   size,
   searchAfterSortIds,
   sortOrder,
@@ -155,7 +153,6 @@ export const buildEventsSearchQuery = ({
         ...docFields,
       ],
       ...(aggregations ? { aggregations } : {}),
-      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       sort,
     },
   };

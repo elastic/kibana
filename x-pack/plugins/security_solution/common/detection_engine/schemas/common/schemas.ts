@@ -312,6 +312,16 @@ export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
 export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
+export const thresholdWithCardinality = t.intersection([
+  thresholdFieldNormalized,
+  t.exact(
+    t.type({
+      cardinality: t.array(thresholdCardinalityField),
+    })
+  ),
+]);
+export type ThresholdWithCardinality = t.TypeOf<typeof thresholdWithCardinality>;
+
 export const created_at = IsoDateString;
 
 export const updated_at = IsoDateString;
