@@ -31,7 +31,7 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
   public async infer() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.value;
+      const inputText = this.inputText$.getValue();
       const payload = {
         docs: [{ [this.inputField]: inputText }],
       };

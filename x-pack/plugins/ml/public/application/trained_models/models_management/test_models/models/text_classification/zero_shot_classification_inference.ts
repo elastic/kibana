@@ -22,7 +22,7 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
   public async infer() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.value;
+      const inputText = this.inputText$.getValue();
       const labelsText = this.labelsText$.value;
       const inputLabels = labelsText?.split(',').map((l) => l.trim());
       const payload = {

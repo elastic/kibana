@@ -29,7 +29,7 @@ export class NerInference extends InferenceBase<NerResponse> {
   public async infer() {
     try {
       this.setRunning();
-      const inputText = this.inputText$.value;
+      const inputText = this.inputText$.getValue();
       const payload = { docs: [{ [this.inputField]: inputText }] };
       const resp = await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
