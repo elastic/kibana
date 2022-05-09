@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe.skip('Upgrade Assistant', () => {
+  describe.skip('Upgrade Assistant Accessibility', () => {
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
 

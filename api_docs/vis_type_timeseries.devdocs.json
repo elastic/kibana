@@ -145,7 +145,7 @@
             {
               "parentPluginId": "visTypeTimeseries",
               "id": "def-server.VisTypeTimeseriesSetup.getVisData.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "requestContext",
               "description": [],

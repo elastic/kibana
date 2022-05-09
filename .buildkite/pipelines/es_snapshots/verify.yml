@@ -27,49 +27,19 @@ steps:
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
 
-  - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
-    label: 'Default CI Group'
-    parallelism: 31
-    agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 150
-    key: default-cigroup
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
-    label: 'OSS CI Group'
-    parallelism: 12
-    agents:
-      queue: ci-group-4d
-    depends_on: build
-    timeout_in_minutes: 120
-    key: oss-cigroup
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/test/pick_jest_config_run_order.sh
-    label: 'Pick Jest Config Run Order'
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
     agents:
       queue: kibana-default
     env:
-      FILTER_JEST_CONFIG_TYPE: integration
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      LIMIT_CONFIG_TYPE: integration,functional
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
-
-  - command: .buildkite/scripts/steps/test/api_integration.sh
-    label: 'API Integration Tests'
-    agents:
-      queue: n2-2
-    timeout_in_minutes: 120
-    key: api-integration
 
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
     label: Trigger promotion
@@ -77,10 +47,8 @@ steps:
     agents:
       queue: kibana-default
     depends_on:
-      - default-cigroup
-      - oss-cigroup
+      - ftr-configs
       - jest-integration
-      - api-integration
 
   - wait: ~
     continue_on_failure: true

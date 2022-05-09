@@ -76,10 +76,9 @@ export const ColorPicker = ({
         frame.datasourceLayers[layer.layerId] ?? layer.accessors,
         layer
       );
-
       const colorAssignments = getColorAssignments(
         getDataLayers(state.layers),
-        { tables: frame.activeData },
+        { tables: frame.activeData ?? {} },
         formatFactory
       );
       const mappedAccessors = getAccessorColorConfig(
@@ -91,7 +90,6 @@ export const ColorPicker = ({
         },
         paletteService
       );
-
       return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
     }
   }, [
@@ -105,11 +103,11 @@ export const ColorPicker = ({
     defaultColor,
   ]);
 
+  const [color, setColor] = useState(currentColor);
+
   useEffect(() => {
     setColor(currentColor);
   }, [currentColor]);
-
-  const [color, setColor] = useState(currentColor);
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
