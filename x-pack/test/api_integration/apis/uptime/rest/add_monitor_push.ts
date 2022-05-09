@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/s/${space}${API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({
-            query: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId} AND ${syntheticsMonitorType}.attributes.suite_id: ${projectId} `,
+            query: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId} AND ${syntheticsMonitorType}.attributes.project_id: ${projectId} `,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);
