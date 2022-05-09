@@ -34,7 +34,6 @@ import {
 
 import { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -176,17 +175,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 }) => {
   const {
     application: { navigateToApp },
-    executionContext,
   } = useKibana().services;
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-  // Application ID and current URL are traced automatically.
-  useExecutionContext(executionContext, {
-    page: `${SecurityPageName.rules}_details`,
-    type: 'application',
-  });
 
   const graphEventId = useShallowEqualSelector(
     (state) =>

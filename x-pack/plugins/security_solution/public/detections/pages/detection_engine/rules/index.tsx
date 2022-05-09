@@ -8,7 +8,6 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -48,15 +47,8 @@ const RulesPageComponent: React.FC = () => {
   const [isValueListModalVisible, showValueListModal, hideValueListModal] = useBoolState();
   const {
     application: { navigateToApp },
-    executionContext,
   } = useKibana().services;
   const invalidateRules = useInvalidateRules();
-
-  // Application ID and current URL are traced automatically.
-  useExecutionContext(executionContext, {
-    page: `${SecurityPageName.rules}_management`,
-    type: 'application',
-  });
 
   const [
     {

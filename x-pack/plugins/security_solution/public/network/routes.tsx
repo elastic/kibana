@@ -7,28 +7,16 @@
 
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { NetworkContainer } from './pages';
 
 import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { NETWORK_PATH } from '../../common/constants';
-import { useKibana } from '../common/lib/kibana';
 
-export const NetworkRoutes = () => {
-  const { executionContext } = useKibana().services;
-
-  // Application ID and current URL are traced automatically.
-  useExecutionContext(executionContext, {
-    page: SecurityPageName.network,
-    type: 'application',
-  });
-
-  return (
-    <TrackApplicationView viewId={SecurityPageName.network}>
-      <NetworkContainer />
-    </TrackApplicationView>
-  );
-};
+export const NetworkRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.network}>
+    <NetworkContainer />
+  </TrackApplicationView>
+);
 
 export const routes: SecuritySubPluginRoutes = [
   {

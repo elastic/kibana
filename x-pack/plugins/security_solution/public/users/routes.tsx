@@ -7,28 +7,16 @@
 
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { UsersContainer } from './pages';
 
 import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { USERS_PATH } from '../../common/constants';
-import { useKibana } from '../common/lib/kibana';
 
-export const UsersRoutes = () => {
-  const { executionContext } = useKibana().services;
-
-  // Application ID and current URL are traced automatically.
-  useExecutionContext(executionContext, {
-    page: SecurityPageName.users,
-    type: 'application',
-  });
-
-  return (
-    <TrackApplicationView viewId={SecurityPageName.users}>
-      <UsersContainer />
-    </TrackApplicationView>
-  );
-};
+export const UsersRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.users}>
+    <UsersContainer />
+  </TrackApplicationView>
+);
 
 export const routes: SecuritySubPluginRoutes = [
   {

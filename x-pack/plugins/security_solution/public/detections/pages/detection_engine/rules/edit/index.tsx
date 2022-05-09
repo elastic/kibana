@@ -18,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -76,18 +75,11 @@ const EditRulePageComponent: FC = () => {
     useListsConfig();
   const {
     application: { navigateToApp },
-    executionContext,
   } = useKibana().services;
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
   const [ruleLoading, rule] = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
-
-  // Application ID and current URL are traced automatically.
-  useExecutionContext(executionContext, {
-    page: `${SecurityPageName.rules}_edit`,
-    type: 'application',
-  });
 
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,

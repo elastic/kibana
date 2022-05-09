@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { TimelineId } from '@kbn/timelines-plugin/common';
 import { AppLocation } from '../../../../common/endpoint/types';
 import { timelineActions } from '../../../timelines/store/timeline';
+import { useExecutionContextPropagation } from '../../hooks/use_execution_context_propagation';
 
 /**
  * This component should be used above all routes, but below the Provider.
@@ -27,6 +28,8 @@ export const RouteCapture = memo(({ children }) => {
   useEffect(() => {
     dispatch({ type: 'userChangedUrl', payload: location });
   });
+
+  useExecutionContextPropagation();
 
   return <>{children}</>;
 });

@@ -16,7 +16,6 @@ import {
 import React, { useCallback, useRef, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -92,14 +91,7 @@ const CreateRulePageComponent: React.FC = () => {
     useListsConfig();
   const {
     application: { navigateToApp },
-    executionContext,
   } = useKibana().services;
-
-  // Application ID and current URL are traced automatically.
-  useExecutionContext(executionContext, {
-    page: `${SecurityPageName.rules}_create`,
-    type: 'application',
-  });
 
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();

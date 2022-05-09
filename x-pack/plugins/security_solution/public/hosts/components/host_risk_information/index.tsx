@@ -30,9 +30,9 @@ import React from 'react';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 
 import * as i18n from './translations';
-import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
 import { RiskSeverity } from '../../../../common/search_strategy';
+import { useBoolState } from '../../../common/hooks/use_bool_state';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
@@ -66,7 +66,7 @@ const tableItems: TableItem[] = [
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 
 export const HostRiskInformationButtonIcon = () => {
-  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useBoolState();
 
   return (
     <>
@@ -85,7 +85,7 @@ export const HostRiskInformationButtonIcon = () => {
 };
 
 export const HostRiskInformationButtonEmpty = () => {
-  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useBoolState();
 
   return (
     <>

@@ -25,9 +25,9 @@ import {
 import React from 'react';
 
 import * as i18n from './translations';
-import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
 import { RiskSeverity } from '../../../../common/search_strategy';
+import { useBoolState } from '../../../common/hooks/use_bool_state';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
@@ -61,7 +61,7 @@ const tableItems: TableItem[] = [
 export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
 
 export const UserRiskInformationButtonEmpty = () => {
-  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useBoolState();
 
   return (
     <>
