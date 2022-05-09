@@ -221,7 +221,7 @@ export const DetailPanelHostTab = ({
         </EuiPanel>
       </DetailPanelAccordion>
 
-      {processOrchestrator && processContainer && (
+      {processContainer && (
         <>
           <DetailPanelAccordion
             id="metadataContainer"
@@ -294,6 +294,10 @@ export const DetailPanelHostTab = ({
               },
             ]}
           />
+        </>
+      )}
+      {processOrchestrator && (
+        <>
           <DetailPanelAccordion
             id="metadataOrchestrator"
             title="Orchestrator"
