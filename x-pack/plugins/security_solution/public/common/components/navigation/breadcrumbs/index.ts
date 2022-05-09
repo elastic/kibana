@@ -16,6 +16,7 @@ import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/p
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
 import { getBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
+import { getBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumb';
 import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import {
@@ -183,7 +184,22 @@ export const getBreadcrumbsForRoute = (
   }
 
   if (isKubernetesRoutes(spyState) && object.navTabs) {
-    return null;
+    const tempNav: SearchNavTab = { urlKey: SecurityPageName.kubernetes, isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
+    }
+
+    return [
+      siemRootBreadcrumb,
+      ...getKubernetesBreadcrumbs(
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        ),
+        getUrlForApp
+      ),
+    ];
   }
 
   if (isTimelinesRoutes(spyState) && object.navTabs) {
