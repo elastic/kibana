@@ -291,13 +291,6 @@ export const useInitSourcerer = (
   ]);
 };
 
-const LOGS_WILDCARD_INDEX = 'logs-*';
-export const EXCLUDE_ELASTIC_CLOUD_INDICES = [
-  '-*elastic-cloud-logs-*',
-  '-.ds-logs-elastic_agent*',
-  '-.ds-logs-system-*',
-];
-
 const sortWithExcludesAtEnd = (indices: string[]) => {
   const allSorted = indices.reduce(
     (acc: { includes: string[]; excludes: string[] }, index) =>
@@ -333,10 +326,7 @@ export const useSourcererDataView = (
     };
   });
   const selectedPatterns = useMemo(
-    () =>
-      scopeSelectedPatterns.some((index) => index === LOGS_WILDCARD_INDEX)
-        ? [...sortWithExcludesAtEnd(scopeSelectedPatterns), ...EXCLUDE_ELASTIC_CLOUD_INDICES]
-        : sortWithExcludesAtEnd(scopeSelectedPatterns),
+    () => sortWithExcludesAtEnd(scopeSelectedPatterns),
     [scopeSelectedPatterns]
   );
 
@@ -432,11 +422,5 @@ export const sourcererPaths = [
 export const showSourcererByPath = (pathname: string): boolean =>
   matchPath(pathname, {
     path: sourcererPaths,
-    strict: false,
-  }) != null;
-
-export const isAlertsOrRulesDetailsPage = (pathname: string): boolean =>
-  matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`],
     strict: false,
   }) != null;

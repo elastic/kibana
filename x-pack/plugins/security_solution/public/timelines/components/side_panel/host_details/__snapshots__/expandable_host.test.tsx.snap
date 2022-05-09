@@ -114,9 +114,6 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
           "packetbeat-*",
           "traces-apm*",
           "winlogbeat-*",
-          "-*elastic-cloud-logs-*",
-          "-.ds-logs-elastic_agent*",
-          "-.ds-logs-system-*",
         ]
       }
       isDraggable={false}

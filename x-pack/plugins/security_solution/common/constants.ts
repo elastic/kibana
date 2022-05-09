@@ -172,6 +172,12 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 
+export const EXCLUDE_ELASTIC_CLOUD_INDICES = [
+  '-*elastic-cloud-logs-*',
+  '-.ds-logs-elastic_agent*',
+  '-.ds-logs-system-*',
+];
+
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
@@ -182,6 +188,7 @@ export const DEFAULT_INDEX_PATTERN = [
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
+  // ...EXCLUDE_ELASTIC_CLOUD_INDICES,
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */

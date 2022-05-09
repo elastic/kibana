@@ -1016,9 +1016,6 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           "packetbeat-*",
           "traces-apm*",
           "winlogbeat-*",
-          "-*elastic-cloud-logs-*",
-          "-.ds-logs-elastic_agent*",
-          "-.ds-logs-system-*",
         ]
       }
       isDraggable={false}
