@@ -43,7 +43,7 @@ interface TourStepDefinition {
 const tourStepDefinitions: TourStepDefinition[] = [
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.addFields,
-    anchorPosition: 'upCenter',
+    anchorPosition: 'rightCenter',
     title: i18n.translate('discover.dscTour.stepAddFields.title', {
       defaultMessage: 'Add fields to the table',
     }),
@@ -280,7 +280,7 @@ export const DiscoverTourStepFooterAction: React.FC<{
             onClick={onNextTourStep}
             data-test-subj="discoverTourButtonEnd"
           >
-            {EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })}
+            {EuiI18n({ token: 'core.euiTourStep.nextStep', default: 'Next' })}
           </EuiButton>
         )}
       </EuiFlexItem>
