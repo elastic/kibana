@@ -39,7 +39,6 @@ export const useIsFirstTimeAgentUser = (): UseIsFirstTimeAgentUserResponse => {
         showInactive: true,
         ...(policyKuery.length ? { kuery: `not ${policyKuery}` } : {}),
       });
-
       setResult({ isLoading: false, isFirstTimeAgentUser: agentStatusData?.total === 0 });
     };
 
