@@ -39,7 +39,9 @@ describe('Users stats and tables', () => {
     it(`renders all users`, () => {
       const totalUsers = 1;
 
-      cy.get(HEADER_SUBTITLE).should('have.text', `Showing: ${totalUsers} user`);
+      cy.get(AUTHENTICATIONS_TABLE)
+        .find(HEADER_SUBTITLE)
+        .should('have.text', `Showing: ${totalUsers} user`);
     });
 
     it(`renders all authentications`, () => {
