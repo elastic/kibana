@@ -100,7 +100,7 @@ export class Field extends PureComponent<FieldProps> {
     if (type === 'image') {
       this.cancelChangeImage();
       return this.handleChange({
-        value: getEditableValue(type, defVal),
+        value: getEditableValue(type, defVal, defVal),
         changeImage: true,
       });
     }

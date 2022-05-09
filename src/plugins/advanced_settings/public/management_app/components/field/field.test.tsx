@@ -388,7 +388,7 @@ describe('Field', () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
           expect(handleChange).toBeCalledWith(setting.name, {
-            value: getEditableValue(setting.type, setting.defVal),
+            value: getEditableValue(setting.type, setting.defVal, setting.defVal),
             changeImage: true,
           });
         });
