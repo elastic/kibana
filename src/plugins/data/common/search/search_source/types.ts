@@ -217,3 +217,13 @@ export interface ShardFailure {
   };
   shard: number;
 }
+
+export function isSerializedSearchSource(
+  maybeSerializedSearchSource: unknown
+): maybeSerializedSearchSource is SerializedSearchSourceFields {
+  return (
+    typeof maybeSerializedSearchSource === 'object' &&
+    maybeSerializedSearchSource !== null &&
+    !Array.isArray(maybeSerializedSearchSource)
+  );
+}
