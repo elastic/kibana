@@ -81,7 +81,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             title = `${bucketValue} - ${title}`;
           }
 
-          const shouldBrush = stops.length > 1 && shouldApplyColor(color ?? '');
+          const shouldBrush = shouldApplyColor(color ?? '');
           return {
             label: title,
             value: formattedValue,

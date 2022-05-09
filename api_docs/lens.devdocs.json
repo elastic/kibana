@@ -335,13 +335,7 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }>"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
@@ -491,7 +485,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              "> | undefined) => Record<\"enabled\" | \"disabled\", { kuery: ",
+              "> | undefined) => Record<\"disabled\" | \"enabled\", { kuery: ",
               "Query",
               "[][]; lucene: ",
               "Query",
@@ -1958,13 +1952,7 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -2403,13 +2391,7 @@
             "label": "mainPalette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -2615,7 +2597,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ size: number; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: ",
+              "{ size: number; accuracyMode?: boolean | undefined; orderBy: { type: \"alphabetical\"; fallback?: boolean | undefined; } | { type: \"rare\"; maxDocCount: number; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; secondaryFields?: string[] | undefined; format?: ",
               "ValueFormatConfig",
               " | undefined; parentFormat?: { id: string; } | undefined; }"
             ],
@@ -2708,13 +2690,7 @@
             ],
             "signature": [
               "(addNewLayer: () => string, state?: T | undefined, mainPalette?: ",
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined) => T"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -2756,13 +2732,7 @@
                 "label": "mainPalette",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "charts",
-                    "scope": "common",
-                    "docId": "kibChartsPluginApi",
-                    "section": "def-common.PaletteOutput",
-                    "text": "PaletteOutput"
-                  },
+                  "PaletteOutput",
                   "<{ [key: string]: unknown; }> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
@@ -2781,13 +2751,7 @@
             "description": [],
             "signature": [
               "((state: T) => ",
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -3805,15 +3769,9 @@
             "label": "toExpression",
             "description": [],
             "signature": [
-              "(state: T, datasourceLayers: Record<string, ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.DatasourcePublicAPI",
-                "text": "DatasourcePublicAPI"
-              },
-              ">, attributes?: Partial<{ title: string; description: string; }> | undefined) => string | ",
+              "(state: T, datasourceLayers: ",
+              "DatasourceLayers",
+              ", attributes?: Partial<{ title: string; description: string; }> | undefined) => string | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -3848,15 +3806,7 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.DatasourcePublicAPI",
-                    "text": "DatasourcePublicAPI"
-                  },
-                  ">"
+                  "DatasourceLayers"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -3889,15 +3839,9 @@
               "\nExpression to render a preview version of the chart in very constrained space.\nIf there is no expression provided, the preview icon is used."
             ],
             "signature": [
-              "((state: T, datasourceLayers: Record<string, ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.DatasourcePublicAPI",
-                "text": "DatasourcePublicAPI"
-              },
-              ">) => string | ",
+              "((state: T, datasourceLayers: ",
+              "DatasourceLayers",
+              ") => string | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -3932,15 +3876,7 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.DatasourcePublicAPI",
-                    "text": "DatasourcePublicAPI"
-                  },
-                  ">"
+                  "DatasourceLayers"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -3959,15 +3895,9 @@
               "\nThe frame will call this function on all visualizations at few stages (pre-build/build error) in order\nto provide more context to the error and show it to the user"
             ],
             "signature": [
-              "(state: T, datasourceLayers?: Record<string, ",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.DatasourcePublicAPI",
-                "text": "DatasourcePublicAPI"
-              },
-              "> | undefined) => { shortMessage: string; longMessage: React.ReactNode; }[] | undefined"
+              "(state: T, datasourceLayers?: ",
+              "DatasourceLayers",
+              " | undefined) => { shortMessage: string; longMessage: React.ReactNode; }[] | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -3994,15 +3924,8 @@
                 "label": "datasourceLayers",
                 "description": [],
                 "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "lens",
-                    "scope": "public",
-                    "docId": "kibLensPluginApi",
-                    "section": "def-public.DatasourcePublicAPI",
-                    "text": "DatasourcePublicAPI"
-                  },
-                  "> | undefined"
+                  "DatasourceLayers",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -4822,13 +4745,7 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
@@ -7445,37 +7362,13 @@
         "description": [],
         "signature": [
           "{ columns: { palette?: ",
-          {
-            "pluginId": "charts",
-            "scope": "common",
-            "docId": "kibChartsPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
-          },
+          "PaletteOutput",
           "<",
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.CustomPaletteParams",
-            "text": "CustomPaletteParams"
-          },
+          "CustomPaletteParams",
           "> | undefined; colorMode?: \"none\" | \"text\" | \"cell\" | undefined; }[]; } | { palette?: ",
-          {
-            "pluginId": "charts",
-            "scope": "common",
-            "docId": "kibChartsPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
-          },
+          "PaletteOutput",
           "<",
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.CustomPaletteParams",
-            "text": "CustomPaletteParams"
-          },
+          "CustomPaletteParams",
           "> | undefined; }"
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
@@ -7764,203 +7657,6 @@
               "{ key: KeyType; count: number; }[]"
             ],
             "path": "x-pack/plugins/lens/common/api.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.ColorStop",
-        "type": "Interface",
-        "tags": [],
-        "label": "ColorStop",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.ColorStop.color",
-            "type": "string",
-            "tags": [],
-            "label": "color",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.ColorStop.stop",
-            "type": "number",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.CustomPaletteParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "CustomPaletteParams",
-        "description": [],
-        "path": "x-pack/plugins/lens/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.reverse",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "reverse",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.rangeType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "rangeType",
-            "description": [],
-            "signature": [
-              "\"number\" | \"percent\" | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.continuity",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "continuity",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteContinuity",
-                "text": "PaletteContinuity"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.progression",
-            "type": "string",
-            "tags": [],
-            "label": "progression",
-            "description": [],
-            "signature": [
-              "\"fixed\" | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.rangeMin",
-            "type": "number",
-            "tags": [],
-            "label": "rangeMin",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.rangeMax",
-            "type": "number",
-            "tags": [],
-            "label": "rangeMax",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.stops",
-            "type": "Array",
-            "tags": [],
-            "label": "stops",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.ColorStop",
-                "text": "ColorStop"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.colorStops",
-            "type": "Array",
-            "tags": [],
-            "label": "colorStops",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.ColorStop",
-                "text": "ColorStop"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-common.CustomPaletteParams.steps",
-            "type": "number",
-            "tags": [],
-            "label": "steps",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false
           }
         ],
@@ -8271,21 +7967,9 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<",
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.CustomPaletteParams",
-                "text": "CustomPaletteParams"
-              },
+              "CustomPaletteParams",
               "> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -8527,13 +8211,7 @@
             "label": "palette",
             "description": [],
             "signature": [
-              {
-                "pluginId": "charts",
-                "scope": "common",
-                "docId": "kibChartsPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
+              "PaletteOutput",
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
@@ -8833,13 +8511,7 @@
         "label": "CustomPaletteParamsConfig",
         "description": [],
         "signature": [
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.CustomPaletteParams",
-            "text": "CustomPaletteParams"
-          },
+          "CustomPaletteParams",
           " & { maxSteps?: number | undefined; }"
         ],
         "path": "x-pack/plugins/lens/common/types.ts",
@@ -9080,28 +8752,6 @@
           "\"lens\""
         ],
         "path": "x-pack/plugins/lens/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-common.RequiredPaletteParamTypes",
-        "type": "Type",
-        "tags": [],
-        "label": "RequiredPaletteParamTypes",
-        "description": [],
-        "signature": [
-          "Required<",
-          {
-            "pluginId": "lens",
-            "scope": "common",
-            "docId": "kibLensPluginApi",
-            "section": "def-common.CustomPaletteParams",
-            "text": "CustomPaletteParams"
-          },
-          "> & { maxSteps?: number | undefined; }"
-        ],
-        "path": "x-pack/plugins/lens/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

@@ -102,7 +102,7 @@ export const Page: FC = () => {
     <>
       <AnalyticsIdSelectorControls
         setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
-        selectedId={jobId || modelId}
+        selectedId={jobId ?? modelId}
       />
       {isIdSelectorFlyoutVisible ? (
         <AnalyticsIdSelector
@@ -120,7 +120,7 @@ export const Page: FC = () => {
         </MlPageHeader>
       ) : null}
       {jobId !== undefined ? (
-        <MlPageHeader>
+        <MlPageHeader key={`${jobId}-id`}>
           <FormattedMessage
             data-test-subj="mlPageDataFrameAnalyticsMapTitle"
             id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"
@@ -145,10 +145,11 @@ export const Page: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} />
       <UpgradeWarning />
 
-      {mapJobId || mapModelId || analyticsId ? (
+      {jobId ?? modelId ? (
         <JobMap
-          analyticsId={mapJobId || analyticsId?.job_id}
-          modelId={mapModelId || analyticsId?.model_id}
+          key={`${jobId ?? modelId}-id`}
+          analyticsId={jobId}
+          modelId={modelId}
           forceRefresh={isLoading}
         />
       ) : (

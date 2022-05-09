@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export { NoDataCard, ElasticAgentCard } from './no_data_page';
-export { NoDataPage } from './no_data_page';
+export { NoDataCard, ElasticAgentCard, NoDataPage, NoDataConfigPage } from './no_data_page';
 export { KibanaPageTemplate } from './page_template';
 export type { KibanaPageTemplateProps } from './types';
+export type { NoDataPageProps } from './no_data_page';

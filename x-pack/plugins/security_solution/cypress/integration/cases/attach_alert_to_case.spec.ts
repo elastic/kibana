@@ -10,10 +10,9 @@ import { ROLES } from '../../../common/test';
 
 import { expandFirstAlertActions } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, waitForPageToBeLoaded } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../screens/alerts';
@@ -27,19 +26,17 @@ describe('Alerts timeline', () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
-    login(ROLES.platform_engineer);
-    visit(ALERTS_URL);
+    login();
     createCustomRuleEnabled(getNewRule());
-    refreshPage();
+    visit(ALERTS_URL);
     waitForAlertsToPopulate();
-
-    // Then we login as read-only user to test.
-    login(ROLES.reader);
   });
 
   context('Privileges: read only', () => {
     beforeEach(() => {
+      login(ROLES.reader);
       loadDetectionsPage(ROLES.reader);
+      waitForPageToBeLoaded();
     });
 
     it('should not allow user with read only privileges to attach alerts to cases', () => {
@@ -50,7 +47,9 @@ describe('Alerts timeline', () => {
 
   context('Privileges: can crud', () => {
     beforeEach(() => {
+      login(ROLES.platform_engineer);
       loadDetectionsPage(ROLES.platform_engineer);
+      waitForPageToBeLoaded();
     });
 
     it('should allow a user with crud privileges to attach alerts to cases', () => {

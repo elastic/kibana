@@ -26,11 +26,13 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   actionTypeId,
   isPreconfigured,
   isMissingSecrets,
+  isDeprecated,
   ...res
 }) => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
 });
 

@@ -9,13 +9,14 @@ import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
 import { ResilientActionConnector } from './types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const ACTION_TYPE_ID = '.resilient';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -38,6 +39,7 @@ describe('resilient connector validation', () => {
       id: 'test',
       actionTypeId: '.resilient',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'resilient',
       config: {
         apiUrl: 'https://test/',

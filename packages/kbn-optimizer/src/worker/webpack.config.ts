@@ -94,7 +94,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     module: {
       // no parse rules for a few known large packages which have no require() statements
       // or which have require() statements that should be ignored because the file is
-      // already bundled with all its necessary depedencies
+      // already bundled with all its necessary dependencies
       noParse: [
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
         /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,

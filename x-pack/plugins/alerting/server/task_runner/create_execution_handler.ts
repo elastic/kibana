@@ -10,11 +10,17 @@ import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plu
 import { transformActionParams } from './transform_action_params';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
-import { AlertInstanceContext, AlertInstanceState, RuleTypeParams, RuleTypeState } from '../types';
+import {
+  ActionsCompletion,
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeParams,
+  RuleTypeState,
+} from '../types';
 
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
+import { CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
@@ -65,7 +71,7 @@ export function createExecutionHandler<
     actionSubgroup,
     context,
     state,
-    alertExecutionStore,
+    ruleRunMetricsStore,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!ruleTypeActionGroups.has(actionGroup)) {
@@ -109,7 +115,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.incrementNumberOfGeneratedActions(actions.length);
+    ruleRunMetricsStore.incrementNumberOfGeneratedActions(actions.length);
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -119,10 +125,10 @@ export function createExecutionHandler<
     for (const action of actions) {
       const { actionTypeId } = action;
 
-      alertExecutionStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 
-      if (alertExecutionStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
-        alertExecutionStore.setTriggeredActionsStatusByConnectorType({
+      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
           actionTypeId,
           status: ActionsCompletion.PARTIAL,
         });
@@ -133,17 +139,17 @@ export function createExecutionHandler<
       }
 
       if (
-        alertExecutionStore.hasReachedTheExecutableActionsLimitByConnectorType({
+        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
           actionTypeId,
           actionsConfigMap,
         })
       ) {
-        if (!alertExecutionStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
+        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
           logger.debug(
             `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
           );
         }
-        alertExecutionStore.setTriggeredActionsStatusByConnectorType({
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
           actionTypeId,
           status: ActionsCompletion.PARTIAL,
         });
@@ -157,8 +163,8 @@ export function createExecutionHandler<
         continue;
       }
 
-      alertExecutionStore.incrementNumberOfTriggeredActions();
-      alertExecutionStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
+      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 

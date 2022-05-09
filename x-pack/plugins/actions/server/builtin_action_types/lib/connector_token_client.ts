@@ -33,6 +33,13 @@ export interface UpdateOptions {
   tokenType?: string;
 }
 
+interface UpdateOrReplaceOptions {
+  connectorId: string;
+  token: ConnectorToken | null;
+  newToken: string;
+  expiresInSec: number;
+  deleteExisting: boolean;
+}
 export class ConnectorTokenClient {
   private readonly logger: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -243,6 +250,38 @@ export class ConnectorTokenClient {
         `Failed to delete connector_token records for connectorId "${connectorId}". Error: ${err.message}`
       );
       throw err;
+    }
+  }
+
+  public async updateOrReplace({
+    connectorId,
+    token,
+    newToken,
+    expiresInSec,
+    deleteExisting,
+  }: UpdateOrReplaceOptions) {
+    expiresInSec = expiresInSec ?? 3600;
+    if (token === null) {
+      if (deleteExisting) {
+        await this.deleteConnectorTokens({
+          connectorId,
+          tokenType: 'access_token',
+        });
+      }
+
+      await this.create({
+        connectorId,
+        token: newToken,
+        expiresAtMillis: new Date(Date.now() + expiresInSec * 1000).toISOString(),
+        tokenType: 'access_token',
+      });
+    } else {
+      await this.update({
+        id: token.id!.toString(),
+        token: newToken,
+        expiresAtMillis: new Date(Date.now() + expiresInSec * 1000).toISOString(),
+        tokenType: 'access_token',
+      });
     }
   }
 }

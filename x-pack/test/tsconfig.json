@@ -58,7 +58,6 @@
     { "path": "../plugins/global_search/tsconfig.json" },
     { "path": "../plugins/global_search_providers/tsconfig.json" },
     { "path": "../plugins/features/tsconfig.json" },
-    { "path": "../plugins/data_enhanced/tsconfig.json" },
     { "path": "../plugins/drilldowns/url_drilldown/tsconfig.json" },
     { "path": "../plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "../plugins/encrypted_saved_objects/tsconfig.json" },
