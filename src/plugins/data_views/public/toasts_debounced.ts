@@ -18,7 +18,7 @@ export const toastsAddDebounced = (
   return (toastInputFields, key) => {
     if (!debouncerCollector[key]) {
       debouncerCollector[key] = debounce(
-        notifications.toasts.add.bind(notifications.toasts.add),
+        notifications.toasts.add.bind(notifications.toasts),
         uiSettings.get('search:timeout') + 5000,
         {
           leading: true,
