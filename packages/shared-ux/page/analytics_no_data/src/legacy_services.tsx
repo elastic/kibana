@@ -12,6 +12,14 @@ export type { SharedUxServices as LegacyServices } from '@kbn/shared-ux-services
 import { SharedUxServices as LegacyServices } from '@kbn/shared-ux-services';
 import { Services } from './services';
 
+/**
+ * This list is temporary, a stop-gap as we migrate to a package-based architecture, where
+ * services are not collected in a single package.  In order to make the transition, this
+ * interface is intentionally "flat".
+ *
+ * Expect this list to dwindle to zero as `@kbn/shared-ux-components` are migrated to their
+ * own packages, (and `@kbn/shared-ux-services` is removed).
+ */
 export const getLegacyServices = (services: Services): LegacyServices => ({
   application: {
     currentAppId$: services.currentAppId$,

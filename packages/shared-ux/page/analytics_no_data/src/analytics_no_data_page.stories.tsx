@@ -10,13 +10,13 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { servicesFactory, DataServiceFactoryConfig } from '@kbn/shared-ux-storybook';
 
-import { AnalyticsNoDataPage } from './analytics_no_data_page';
-import { PageAnalyticsNoDataProvider, Services } from './services';
+import { AnalyticsNoDataPage as Component } from './analytics_no_data_page';
+import { AnalyticsNoDataPageProvider, Services } from './services';
 import mdx from '../README.mdx';
 
 export default {
   title: 'Analytics No Data Page',
-  description: 'An Analytics-specific version of KibanaNoDataPage',
+  description: 'An Analytics-specific version of KibanaNoDataPage.',
   parameters: {
     docs: {
       page: mdx,
@@ -26,7 +26,7 @@ export default {
 
 type Params = Pick<DataServiceFactoryConfig, 'hasESData' | 'hasUserDataView'>;
 
-export const PureComponent = (params: Params) => {
+export const AnalyticsNoDataPage = (params: Params) => {
   // Workaround to leverage the services package.
   const { application, data, docLinks, editors, http, permissions, platform } =
     servicesFactory(params);
@@ -43,13 +43,13 @@ export const PureComponent = (params: Params) => {
   };
 
   return (
-    <PageAnalyticsNoDataProvider {...services}>
-      <AnalyticsNoDataPage onDataViewCreated={action('onDataViewCreated')} />
-    </PageAnalyticsNoDataProvider>
+    <AnalyticsNoDataPageProvider {...services}>
+      <Component onDataViewCreated={action('onDataViewCreated')} />
+    </AnalyticsNoDataPageProvider>
   );
 };
 
-PureComponent.argTypes = {
+AnalyticsNoDataPage.argTypes = {
   hasESData: {
     control: 'boolean',
     defaultValue: false,

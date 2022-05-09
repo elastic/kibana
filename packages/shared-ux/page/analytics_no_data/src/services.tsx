@@ -54,16 +54,16 @@ export interface Services {
   setIsFullscreen: (isFullscreen: boolean) => void;
 }
 
-const PageAnalyticsNoDataContext = React.createContext<Services | null>(null);
+const AnalyticsNoDataPageContext = React.createContext<Services | null>(null);
 
 /**
  * A Context Provider that provides services to the component.
  */
-export const PageAnalyticsNoDataProvider: FC<Services> = ({ children, ...services }) => {
+export const AnalyticsNoDataPageProvider: FC<Services> = ({ children, ...services }) => {
   return (
-    <PageAnalyticsNoDataContext.Provider value={services}>
+    <AnalyticsNoDataPageContext.Provider value={services}>
       {children}
-    </PageAnalyticsNoDataContext.Provider>
+    </AnalyticsNoDataPageContext.Provider>
   );
 };
 
@@ -71,7 +71,7 @@ export const PageAnalyticsNoDataProvider: FC<Services> = ({ children, ...service
  * An interface containing a collection of Kibana plugins and services required to
  * render this component and its dependencies.
  */
-export interface KibanaDependencies {
+export interface AnalyticsNoDataPageKibanaDependencies {
   coreStart: {
     application: {
       capabilities: {
@@ -119,7 +119,7 @@ export interface KibanaDependencies {
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const PageAnalyticsNoDataKibanaProvider: FC<KibanaDependencies> = ({
+export const AnalyticsNoDataPageKibanaProvider: FC<AnalyticsNoDataPageKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
@@ -140,9 +140,9 @@ export const PageAnalyticsNoDataKibanaProvider: FC<KibanaDependencies> = ({
   };
 
   return (
-    <PageAnalyticsNoDataContext.Provider value={value}>
+    <AnalyticsNoDataPageContext.Provider value={value}>
       {children}
-    </PageAnalyticsNoDataContext.Provider>
+    </AnalyticsNoDataPageContext.Provider>
   );
 };
 
@@ -150,11 +150,11 @@ export const PageAnalyticsNoDataKibanaProvider: FC<KibanaDependencies> = ({
  * React hook for accessing pre-wired services.
  */
 export function useServices() {
-  const context = useContext(PageAnalyticsNoDataContext);
+  const context = useContext(AnalyticsNoDataPageContext);
 
   if (!context) {
     throw new Error(
-      'PageAnalyticsNoDataContext is missing.  Ensure your component or React root is wrapped with PageAnalyticsNoDataProvider.'
+      'AnalyticsNoDataPageContext is missing.  Ensure your component or React root is wrapped with AnalyticsNoDataPageContext.'
     );
   }
 

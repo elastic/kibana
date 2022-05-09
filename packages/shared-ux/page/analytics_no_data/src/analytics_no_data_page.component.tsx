@@ -9,6 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaNoDataPage } from '@kbn/shared-ux-components';
 
+/**
+ * Props for the pure component.
+ */
 export interface Props {
   kibanaGuideDocLink: string;
   onDataViewCreated: (dataView: unknown) => void;
@@ -33,6 +36,9 @@ const addIntegrationsDescription = i18n.translate(
   }
 );
 
+/**
+ * A pure component of an entire page that can be displayed when Kibana "has no data", specifically for Analytics.
+ */
 export const AnalyticsNoDataPage = ({ kibanaGuideDocLink, onDataViewCreated }: Props) => {
   const noDataConfig = {
     solution,

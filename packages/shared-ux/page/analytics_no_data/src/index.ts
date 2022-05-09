@@ -9,7 +9,7 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-export { PageAnalyticsNoDataProvider, PageAnalyticsNoDataKibanaProvider } from './services';
+export { AnalyticsNoDataPageProvider, AnalyticsNoDataPageKibanaProvider } from './services';
 
 /**
  * Lazy-loaded connected component.  Must be wrapped in `React.Suspense`.
@@ -21,7 +21,7 @@ export const LazyAnalyticsNoDataPage = React.lazy(() =>
 );
 
 /**
- * An entire page that can be displayed when Kibana "has no data", specifically for Analytics.\
+ * An entire page that can be displayed when Kibana "has no data", specifically for Analytics.
  * Requires a Provider for relevant services.
  */
 export const AnalyticsNoDataPage = withSuspense(LazyAnalyticsNoDataPage);
