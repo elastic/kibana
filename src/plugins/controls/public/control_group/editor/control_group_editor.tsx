@@ -41,7 +41,6 @@ import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from './editor_constant
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlStyle, ControlWidth } from '../../types';
 import { ParentIgnoreSettings } from '../..';
-import { ControlsPanels } from '../types';
 import { ControlGroupInput } from '..';
 import { DEFAULT_CONTROL_WIDTH, getDefaultControlGroupInput } from '../../../common';
 import { pluginServices } from '../../services';
@@ -50,7 +49,8 @@ interface EditControlGroupProps {
   initialInput: ControlGroupInput;
   controlCount: number;
   onDeleteAll: () => void;
-  onClose: (newInput?: ControlGroupInput) => void;
+  onCancel: () => void;
+  onSave: (newInput: ControlGroupInput) => void;
 }
 
 type EditorControlGroupInput = ControlGroupInput &
@@ -60,7 +60,8 @@ export const ControlGroupEditor = ({
   controlCount,
   initialInput,
   onDeleteAll,
-  onClose,
+  onCancel,
+  onSave,
 }: EditControlGroupProps) => {
   const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
 
@@ -299,7 +300,7 @@ export const ControlGroupEditor = ({
               aria-label={`cancel-editing-group`}
               iconType="cross"
               onClick={() => {
-                onClose();
+                onCancel();
               }}
             >
               {ControlGroupStrings.manageControl.getCancelTitle()}
@@ -312,7 +313,7 @@ export const ControlGroupEditor = ({
               color="primary"
               data-test-subj="control-group-editor-save"
               onClick={() => {
-                onClose({ ...controlGroupEditorState });
+                onSave({ ...controlGroupEditorState });
               }}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}

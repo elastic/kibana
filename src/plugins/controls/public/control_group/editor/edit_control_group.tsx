@@ -52,15 +52,18 @@ export const EditControlGroup = ({
       });
     };
 
-    const onClose = (ref: OverlayRef, newInput?: ControlGroupInput) => {
-      if (!newInput) {
-        ref.close();
-        return;
-      }
+    const onCancel = (ref: OverlayRef) => {
+      ref.close();
+    };
 
+    const onSave = (ref: OverlayRef, newInput: ControlGroupInput) => {
       const controlCount = Object.keys(controlGroupContainer.getInput().panels ?? {}).length;
       const initialInput = controlGroupContainer.getInput();
-      if (controlCount > 0 && newInput.defaultControlWidth !== initialInput.defaultControlWidth) {
+      if (
+        controlCount > 0 &&
+        (newInput.defaultControlWidth !== initialInput.defaultControlWidth ||
+          newInput.defaultControlGrow !== initialInput.defaultControlGrow)
+      ) {
         openConfirm(ControlGroupStrings.management.applyDefaultSize.getSubtitle(), {
           confirmButtonText: ControlGroupStrings.management.applyDefaultSize.getConfirm(),
           cancelButtonText: ControlGroupStrings.management.applyDefaultSize.getCancel(),
@@ -94,7 +97,8 @@ export const EditControlGroup = ({
             initialInput={controlGroupContainer.getInput()}
             controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
             onDeleteAll={() => onDeleteAll(flyoutInstance)}
-            onClose={(newInput?: ControlGroupInput) => onClose(flyoutInstance, newInput)}
+            onCancel={() => onCancel(flyoutInstance)}
+            onSave={(newInput: ControlGroupInput) => onSave(flyoutInstance, newInput)}
           />
         </PresentationUtilProvider>
       ),
