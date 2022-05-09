@@ -87,7 +87,7 @@ describe('Row renderers', () => {
   });
 
   describe('Suricata', () => {
-    it.skip('Signature tooltips do not overlap', () => {
+    it('Signature tooltips do not overlap', () => {
       // Hover the signature to show the tooltips
       cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE)
         .parents('.euiPopover__anchor')
