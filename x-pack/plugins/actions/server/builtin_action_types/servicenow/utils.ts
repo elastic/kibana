@@ -134,11 +134,14 @@ export const getAxiosInstance = ({
           tokenUrl: `${snServiceUrl}/oauth_token.do`,
           connectorTokenClient,
         });
+        if (!accessToken) {
+          throw new Error(`Unable to retrieve access token for connectorId: ${connectorId}`);
+        }
         axiosConfig.headers.Authorization = accessToken;
         return axiosConfig;
       },
       (error) => {
-        Promise.reject(error);
+        return Promise.reject(error);
       }
     );
   }

@@ -191,17 +191,6 @@ describe('utils', () => {
     });
 
     test('creates axios instance with interceptor when isOAuth is true and OAuth fields are defined', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: {
-          id: '1',
-          connectorId: '123',
-          tokenType: 'access_token',
-          token: 'testtokenvalue',
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 10000000000).toISOString(),
-        },
-      });
       getAxiosInstance({
         connectorId: '123',
         logger,
@@ -238,6 +227,67 @@ describe('utils', () => {
       expect(await mockRequestCallback({ headers: {} })).toEqual({
         headers: { Authorization: 'Bearer tokentokentoken' },
       });
+
+      expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+          },
+        },
+        tokenUrl: 'https://dev23432523.service-now.com/oauth_token.do',
+        connectorTokenClient,
+      });
+    });
+
+    test('throws expected error if getOAuthJwtAccessToken returns null access token', async () => {
+      getAxiosInstance({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: null,
+            username: null,
+            password: null,
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+      expect(createAxiosInstanceMock).toHaveBeenCalledTimes(1);
+      expect(createAxiosInstanceMock).toHaveBeenCalledWith();
+      expect(axiosInstanceMock.interceptors.request.use).toHaveBeenCalledTimes(1);
+
+      (getOAuthJwtAccessToken as jest.Mock).mockResolvedValueOnce(null);
+
+      const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+        .calls[0][0];
+
+      await expect(() =>
+        mockRequestCallback({ headers: {} })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to retrieve access token for connectorId: 123"`
+      );
 
       expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
         connectorId: '123',
