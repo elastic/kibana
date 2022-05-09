@@ -40,7 +40,7 @@ export const defaultEmbeddableFactoryProvider = <
     getDescription: def.getDescription ? def.getDescription.bind(def) : () => '',
     getIconType: def.getIconType ? def.getIconType.bind(def) : () => 'empty',
     savedObjectMetaData: def.savedObjectMetaData,
-    telemetry: def.telemetry || (() => ({})),
+    telemetry: def.telemetry || ((state, stats) => stats),
     inject: def.inject || ((state: EmbeddableStateWithType) => state),
     extract: def.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
     migrations: def.migrations || {},

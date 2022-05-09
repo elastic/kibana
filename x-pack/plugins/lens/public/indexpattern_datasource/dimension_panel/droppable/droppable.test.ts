@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IndexPatternDimensionEditorProps } from '../dimension_panel';
 import { onDrop } from './on_drop_handler';
@@ -322,6 +323,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           }),
         } as unknown as DataPublicPluginStart['fieldFormats'],
       } as unknown as DataPublicPluginStart,
+      unifiedSearch: {} as UnifiedSearchPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
       isFullscreen: false,

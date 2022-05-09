@@ -52,7 +52,8 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
     },
     async (context, req, response) => {
       try {
-        const alertsClient = await context.rac.getAlertsClient();
+        const racContext = await context.rac;
+        const alertsClient = await racContext.getAlertsClient();
         const { status, ids, index, query } = req.body;
 
         if (ids != null && ids.length > 1000) {

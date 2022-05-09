@@ -45,12 +45,8 @@ export function registerAddPolicyRoute({
       const { indexName, policyName, alias = '' } = body;
 
       try {
-        await addLifecyclePolicy(
-          context.core.elasticsearch.client.asCurrentUser,
-          indexName,
-          policyName,
-          alias
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        await addLifecyclePolicy(esClient.asCurrentUser, indexName, policyName, alias);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

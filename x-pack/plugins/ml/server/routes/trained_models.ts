@@ -381,7 +381,12 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const { modelId } = request.params;
         const body = await mlClient.inferTrainedModelDeployment({
           model_id: modelId,
-          docs: request.body.docs,
+          body: {
+            docs: request.body.docs,
+            ...(request.body.inference_config
+              ? { inference_config: request.body.inference_config }
+              : {}),
+          },
           ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
         });
         return response.ok({

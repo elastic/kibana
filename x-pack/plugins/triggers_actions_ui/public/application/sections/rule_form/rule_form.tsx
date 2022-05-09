@@ -488,7 +488,7 @@ export const RuleForm = ({
                 >
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleForm.documentationLabel"
-                    defaultMessage="Documentation"
+                    defaultMessage="Learn more"
                   />
                 </EuiLink>
               )}
@@ -560,7 +560,8 @@ export const RuleForm = ({
                     omitMessageVariables: selectedRuleType.doesSetRecoveryContext
                       ? 'keepContext'
                       : 'all',
-                    defaultActionMessage: recoveredActionGroupMessage,
+                    defaultActionMessage:
+                      ruleTypeModel?.defaultRecoveryMessage || recoveredActionGroupMessage,
                   }
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}

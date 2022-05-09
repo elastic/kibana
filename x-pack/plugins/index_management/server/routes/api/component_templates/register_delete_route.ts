@@ -26,7 +26,7 @@ export const registerDeleteRoute = ({
       },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { names } = request.params;
       const componentNames = names.split(',');
 

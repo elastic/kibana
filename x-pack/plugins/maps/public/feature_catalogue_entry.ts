@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { APP_ID, APP_ICON } from '../common/constants';
 import { getAppTitle } from '../common/i18n_getters';
 
@@ -22,7 +22,7 @@ export const featureCatalogueEntry = {
   icon: APP_ICON,
   path: '/app/maps',
   showOnHomePage: false,
-  category: FeatureCatalogueCategory.DATA,
+  category: 'data' as FeatureCatalogueCategory,
   solutionId: 'kibana',
   order: 400,
 };

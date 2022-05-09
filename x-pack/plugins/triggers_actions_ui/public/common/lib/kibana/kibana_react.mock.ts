@@ -13,7 +13,11 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
-import { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
+import {
+  RuleTypeRegistryContract,
+  ActionTypeRegistryContract,
+  AlertsTableConfigurationRegistryContract,
+} from '../../../types';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -43,6 +47,12 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       get: jest.fn(),
       list: jest.fn(),
     } as ActionTypeRegistryContract,
+    alertsTableConfigurationRegistry: {
+      has: jest.fn(),
+      register: jest.fn(),
+      get: jest.fn(),
+      list: jest.fn(),
+    } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
     kibanaFeatures: [],

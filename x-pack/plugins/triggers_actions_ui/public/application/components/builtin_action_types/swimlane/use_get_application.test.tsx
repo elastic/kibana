@@ -24,6 +24,7 @@ const action = {
   actionTypeId: '.swimlane',
   name: 'Swimlane',
   isPreconfigured: false,
+  isDeprecated: false,
   config: {
     apiUrl: 'https://test.swimlane.com/',
     appId: 'bcq16kdTbz5jlwM6h',

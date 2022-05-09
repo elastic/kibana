@@ -14,6 +14,7 @@ import {
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionAstFunction } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
@@ -163,6 +164,7 @@ export interface ParamEditorProps<C> {
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;
@@ -362,6 +364,14 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * are not pass the transferable checks
    */
   getNonTransferableFields?: (column: C, indexPattern: IndexPattern) => string[];
+  /**
+   * Component rendered as inline help
+   */
+  helpComponent?: React.ComponentType<{}>;
+  /**
+   * Title for the help component
+   */
+  helpComponentTitle?: string;
 }
 
 interface BaseBuildColumnArgs {

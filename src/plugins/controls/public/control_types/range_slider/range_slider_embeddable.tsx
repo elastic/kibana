@@ -311,7 +311,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.updateOutput({ filters: [rangeFilter], dataViews: [dataView], loading: false });
   };
 
-  reload = () => {
+  public reload = () => {
     this.fetchMinMax();
   };
 

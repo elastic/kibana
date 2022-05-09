@@ -9,11 +9,10 @@ import semverGt from 'semver/functions/gt';
 import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 import {
-  DashboardContainerControlGroupInput,
-  DashboardContainerStateWithType,
-  DashboardPanelState,
+  PersistableControlGroupInput,
   RawControlGroupAttributes,
-} from './types';
+} from '@kbn/controls-plugin/common';
+import { DashboardContainerStateWithType, DashboardPanelState } from './types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
@@ -41,7 +40,7 @@ function dashboardAttributesToState(attributes: SavedObjectAttributes): {
     inputPanels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
   }
 
-  let controlGroupInput: DashboardContainerControlGroupInput | undefined;
+  let controlGroupInput: PersistableControlGroupInput | undefined;
   if (attributes.controlGroupInput) {
     const rawControlGroupInput =
       attributes.controlGroupInput as unknown as RawControlGroupAttributes;

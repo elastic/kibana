@@ -7,7 +7,7 @@
  */
 
 import { RunWithCommands } from './run_with_commands';
-import { ToolingLog, ToolingLogCollectingWriter } from '../tooling_log';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ProcRunner } from '../proc_runner';
 
 const testLog = new ToolingLog();

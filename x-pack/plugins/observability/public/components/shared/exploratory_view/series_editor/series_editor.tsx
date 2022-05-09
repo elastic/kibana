@@ -63,7 +63,7 @@ export const SeriesEditor = React.memo(function () {
 
   const { loading, dataViews } = useAppDataViewContext();
 
-  const { reportConfigMap } = useExploratoryView();
+  const { reportConfigMap, setIsEditMode } = useExploratoryView();
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, true>>({});
 
@@ -73,6 +73,10 @@ export const SeriesEditor = React.memo(function () {
   }>({
     curCount: allSeries.length,
   });
+
+  useEffect(() => {
+    setIsEditMode?.(Object.keys(itemIdToExpandedRowMap).length > 0);
+  }, [itemIdToExpandedRowMap, setIsEditMode]);
 
   useEffect(() => {
     setSeriesCount((oldParams) => ({ prevCount: oldParams.curCount, curCount: allSeries.length }));
@@ -141,14 +145,14 @@ export const SeriesEditor = React.memo(function () {
       </StickyFlexGroup>
 
       <EditorRowsWrapper>
-        {editorItems.map((item) => (
+        {editorItems.map((item, index) => (
           <div key={item.id}>
             <Series
               item={item}
               toggleExpanded={() => toggleDetails(item)}
               isExpanded={itemIdToExpandedRowMap[item.id]}
             />
-            <EuiSpacer size="s" />
+            {index + 1 !== editorItems.length && <EuiSpacer size="s" />}
           </div>
         ))}
       </EditorRowsWrapper>

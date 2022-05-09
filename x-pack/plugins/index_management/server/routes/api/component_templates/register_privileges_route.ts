@@ -41,7 +41,7 @@ export const registerPrivilegesRoute = ({
         return response.ok({ body: privilegesResult });
       }
 
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
         const { has_all_requested: hasAllPrivileges, cluster } =

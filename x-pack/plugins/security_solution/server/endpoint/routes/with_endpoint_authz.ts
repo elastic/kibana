@@ -51,7 +51,7 @@ export const withEndpointAuthz = <T>(
     SecuritySolutionRequestHandlerContext
   > = async (context, request, response) => {
     if (enforceAuthz) {
-      const endpointAuthz = context.securitySolution.endpointAuthz;
+      const endpointAuthz = (await context.securitySolution).endpointAuthz;
       const permissionChecker = (permission: EndpointAuthzKeyList[0]) => endpointAuthz[permission];
 
       // has `all`?

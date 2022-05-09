@@ -57,12 +57,14 @@ const fieldCandidatesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ fieldCandidates: string[] }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     return withApmSpan(
       'get_correlations_field_candidates',
@@ -102,12 +104,14 @@ const fieldStatsRoute = createApmServerRoute({
     errors: any[];
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldsToSample, ...params } = resources.params.body;
 
@@ -151,12 +155,14 @@ const fieldValueStatsRoute = createApmServerRoute({
     import('./../../../common/correlations/field_stats_types').TopValuesStats
   > => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldName, fieldValue, ...params } = resources.params.query;
 
@@ -202,12 +208,14 @@ const fieldValuePairsRoute = createApmServerRoute({
     errors: any[];
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldCandidates, ...params } = resources.params.body;
 
@@ -260,12 +268,14 @@ const significantCorrelationsRoute = createApmServerRoute({
     fallbackResult?: import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation;
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldValuePairs, ...params } = resources.params.body;
 
@@ -318,12 +328,14 @@ const pValuesRoute = createApmServerRoute({
     fallbackResult?: import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation;
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const { fieldCandidates, ...params } = resources.params.body;
 

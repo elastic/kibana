@@ -34,7 +34,7 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
       },
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
-      const savedObjects = ctx.core.savedObjects.client;
+      const savedObjects = (await ctx.core).savedObjects.client;
       const shortUrls = url.shortUrls.get({ savedObjects });
       const { locatorId, params, slug, humanReadableSlug } = req.body;
       const locator = url.locators.get(locatorId);

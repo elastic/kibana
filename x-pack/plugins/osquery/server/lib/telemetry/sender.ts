@@ -59,6 +59,7 @@ export class TelemetryEventsSender {
         (config: OsqueryTelemetryTaskConfig) => {
           const task = new OsqueryTelemetryTask(config, this.logger, this, telemetryReceiver);
           task.register(taskManager);
+
           return task;
         }
       );
@@ -128,6 +129,7 @@ export class TelemetryEventsSender {
 
   public async isTelemetryOptedIn() {
     this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+
     return this.isOptedIn === true;
   }
 
@@ -148,6 +150,7 @@ export class TelemetryEventsSender {
         this.logger.debug(`Telemetry is not opted-in.`);
         this.queue = [];
         this.isSending = false;
+
         return;
       }
 
@@ -183,6 +186,7 @@ export class TelemetryEventsSender {
     } catch (err) {
       this.queue = [];
     }
+
     this.isSending = false;
   }
 
@@ -229,6 +233,7 @@ export class TelemetryEventsSender {
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
+
     return this.getV3UrlFromV2(telemetryUrl.toString(), channel);
   }
 
@@ -242,6 +247,7 @@ export class TelemetryEventsSender {
     } else {
       url.pathname = `/v3-dev/send/${channel}`;
     }
+
     return url.toString();
   }
 

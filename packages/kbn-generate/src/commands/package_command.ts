@@ -11,11 +11,13 @@ import Path from 'path';
 
 import normalizePath from 'normalize-path';
 import globby from 'globby';
+import { ESLint } from 'eslint';
 
 import micromatch from 'micromatch';
 import { REPO_ROOT } from '@kbn/utils';
 import { discoverBazelPackages, BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
-import { createFailError, createFlagError, isFailError, sortPackageJson } from '@kbn/dev-utils';
+import { createFailError, createFlagError, isFailError } from '@kbn/dev-utils';
+import { sortPackageJson } from '@kbn/sort-package-json';
 
 import { TEMPLATE_DIR, ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';
@@ -127,6 +129,15 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
     }
 
     log.info('Wrote plugin files to', packageDir);
+
+    log.info('Linting files');
+    const eslint = new ESLint({
+      cache: false,
+      cwd: REPO_ROOT,
+      fix: true,
+      extensions: ['.js', '.mjs', '.ts', '.tsx'],
+    });
+    await ESLint.outputFixes(await eslint.lintFiles([packageDir]));
 
     const packageJsonPath = Path.resolve(REPO_ROOT, 'package.json');
     const packageJson = JSON.parse(await Fsp.readFile(packageJsonPath, 'utf8'));

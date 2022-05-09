@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '@kbn/actions-plugin/server/builtin_action_types/servicenow/config';
+import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { ServiceNowActionConnector } from './types';
 import { CredentialsApiUrl } from './credentials_api_url';

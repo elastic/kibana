@@ -66,7 +66,7 @@ export const findAlertRoute = (
         ) as string[],
         usageCounter
       );
-      const rulesClient = context.alerting.getRulesClient();
+      const rulesClient = (await context.alerting).getRulesClient();
 
       const query = req.query;
       const renameMap = {

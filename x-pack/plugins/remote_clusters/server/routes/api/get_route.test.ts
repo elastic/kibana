@@ -101,7 +101,11 @@ describe('GET remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual([
@@ -128,7 +132,11 @@ describe('GET remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual([]);
@@ -152,7 +160,11 @@ describe('GET remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(406);
       expect(response.payload).toEqual({
@@ -191,7 +203,11 @@ describe('GET remote clusters', () => {
         headers: { authorization: 'foo' },
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(406);
 

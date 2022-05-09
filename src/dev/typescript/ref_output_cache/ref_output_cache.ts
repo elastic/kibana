@@ -9,7 +9,8 @@
 import Path from 'path';
 import Fs from 'fs/promises';
 
-import { ToolingLog, extract } from '@kbn/dev-utils';
+import { extract } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/utils';
 import del from 'del';
 import tempy from 'tempy';

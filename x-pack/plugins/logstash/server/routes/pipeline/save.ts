@@ -42,7 +42,7 @@ export function registerPipelineSaveRoute(
             username = user?.username;
           }
 
-          const { client } = context.core.elasticsearch;
+          const { client } = (await context.core).elasticsearch;
           const pipeline = Pipeline.fromDownstreamJSON(request.body, request.params.id, username);
 
           await client.asCurrentUser.logstash.putPipeline({

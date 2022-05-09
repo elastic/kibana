@@ -7,7 +7,7 @@
 
 import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { QuerySuggestion } from '@kbn/data-plugin/public';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';

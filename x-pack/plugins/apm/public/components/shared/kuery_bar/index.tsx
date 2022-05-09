@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { DataView } from '@kbn/data-plugin/common';
-import { esKuery, QuerySuggestion } from '@kbn/data-plugin/public';
+import { esKuery } from '@kbn/data-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -55,7 +56,7 @@ export function KueryBar(props: {
   });
   const { urlParams } = useLegacyUrlParams();
   const location = useLocation();
-  const { data } = useApmPluginContext().plugins;
+  const { unifiedSearch } = useApmPluginContext().plugins;
 
   let currentRequestCheck;
 
@@ -103,7 +104,7 @@ export function KueryBar(props: {
 
     try {
       const suggestions = (
-        (await data.autocomplete.getQuerySuggestions({
+        (await unifiedSearch.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [dataView],
           boolFilter:

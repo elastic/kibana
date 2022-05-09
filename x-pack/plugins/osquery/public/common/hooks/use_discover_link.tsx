@@ -43,6 +43,7 @@ export const useDiscoverLink = ({ filters }: UseDiscoverLink) => {
       });
       setDiscoverUrl(newUrl);
     };
+
     getDiscoverUrl();
   }, [filters, locator]);
 

@@ -8,7 +8,7 @@
 
 /* eslint-disable no-bitwise */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Node, TypeFormatFlags } from 'ts-morph';
 import { isNamedNode } from '../tsmorph_utils';
 import { PluginOrPackage, Reference } from '../types';

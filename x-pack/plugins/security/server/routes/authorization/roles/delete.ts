@@ -21,7 +21,8 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.deleteRole({
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.deleteRole({
           name: request.params.name,
         });
 

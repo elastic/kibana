@@ -9,7 +9,7 @@ import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTabProps } from '../../types';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
-import { getDetailPanelProcess, getSelectedTabContent } from './helpers';
+import { getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';
 import { DetailPanelHostTab } from '../detail_panel_host_tab';
 import { useStyles } from './styles';
@@ -17,7 +17,7 @@ import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
-  selectedProcess: Process | undefined;
+  selectedProcess: Process | null;
   alerts?: ProcessEvent[];
   investigatedAlertId?: string;
   onJumpToEvent: (event: ProcessEvent) => void;
@@ -35,7 +35,6 @@ export const SessionViewDetailPanel = ({
   onShowAlertDetails,
 }: SessionViewDetailPanelDeps) => {
   const [selectedTabId, setSelectedTabId] = useState('process');
-  const processDetail = useMemo(() => getDetailPanelProcess(selectedProcess), [selectedProcess]);
 
   const alertsCount = useMemo(() => {
     if (!alerts) {
@@ -54,7 +53,7 @@ export const SessionViewDetailPanel = ({
         name: i18n.translate('xpack.sessionView.detailsPanel.process', {
           defaultMessage: 'Process',
         }),
-        content: <DetailPanelProcessTab processDetail={processDetail} />,
+        content: <DetailPanelProcessTab selectedProcess={selectedProcess} />,
       },
       {
         id: 'host',
@@ -85,12 +84,11 @@ export const SessionViewDetailPanel = ({
     ];
   }, [
     alerts,
+    selectedProcess,
     alertsCount,
-    processDetail,
-    selectedProcess?.events,
+    onJumpToEvent,
     onShowAlertDetails,
     investigatedAlertId,
-    onJumpToEvent,
   ]);
 
   const onSelectedTabChanged = useCallback((id: string) => {

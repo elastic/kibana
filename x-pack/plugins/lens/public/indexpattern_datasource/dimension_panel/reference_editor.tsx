@@ -15,6 +15,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -65,6 +66,7 @@ export interface ReferenceEditorProps {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   paramEditorCustomProps?: ParamEditorCustomProps;
 }
 

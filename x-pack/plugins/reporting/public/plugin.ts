@@ -21,11 +21,7 @@ import {
 } from '@kbn/core/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { durationToNumber } from '../common/schema_utils';
@@ -170,7 +166,7 @@ export class ReportingPublicPlugin
       icon: 'reportingApp',
       path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     management.sections.section.insightsAndAlerting.registerApp({
@@ -258,9 +254,9 @@ export class ReportingPublicPlugin
   }
 
   public start(core: CoreStart) {
-    const { notifications } = core;
+    const { notifications, docLinks } = core;
     const apiClient = this.getApiClient(core.http, core.uiSettings);
-    const streamHandler = new StreamHandler(notifications, apiClient, core.theme);
+    const streamHandler = new StreamHandler(notifications, apiClient, core.theme, docLinks);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
       .pipe(

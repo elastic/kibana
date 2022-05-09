@@ -60,9 +60,12 @@ export interface KibanaDataView {
  */
 export interface SourcererDataView extends KibanaDataView {
   id: string;
-  /** we need this for @timestamp data */
+  /** determines how we can use the field in the app
+   * aggregatable, searchable, type, example
+   * category, description, format
+   * indices the field is included in etc*/
   browserFields: BrowserFields;
-  /** we need this for @timestamp data */
+  /** query DSL field and format */
   docValueFields: DocValueFields[];
   /** comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];

@@ -65,6 +65,12 @@ export const translations = {
         defaultMessage: 'View rule details',
       }
     ),
+    viewAlertDetailsButtonText: i18n.translate(
+      'xpack.observability.alertsTable.viewAlertDetailsButtonText',
+      {
+        defaultMessage: 'View alert details',
+      }
+    ),
   },
   alertsFlyout: {
     statusLabel: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {

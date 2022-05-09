@@ -214,6 +214,7 @@ export const AvailablePackages: React.FC = memo(() => {
     error: eprPackageLoadingError,
   } = useGetPackages({
     category: '',
+    excludeInstallStatus: true,
   });
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),

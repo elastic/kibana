@@ -19,12 +19,12 @@ export const createLicensedRouteHandler = <
 >(
   handler: RequestHandler<P, Q, B, Context, M, R>
 ) => {
-  const licensedRouteHandler: RequestHandler<P, Q, B, Context, M, R> = (
+  const licensedRouteHandler: RequestHandler<P, Q, B, Context, M, R> = async (
     context,
     request,
     responseToolkit
   ) => {
-    const { license } = context.licensing;
+    const { license } = await context.licensing;
     const licenseCheck = license.check('security', 'basic');
     if (licenseCheck.state === 'unavailable' || licenseCheck.state === 'invalid') {
       return responseToolkit.forbidden({ body: { message: licenseCheck.message! } });

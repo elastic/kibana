@@ -11,7 +11,7 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';

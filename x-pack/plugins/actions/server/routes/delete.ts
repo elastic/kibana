@@ -29,7 +29,7 @@ export const deleteActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const { id } = req.params;
         await actionsClient.delete({ id });
         return res.noContent();

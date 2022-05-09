@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { HttpFetchOptions, HttpResponse, HttpSetup } from '@kbn/core/public';
-import { API_BASE_PATH } from '../../../common/constants';
+import type { HttpResponse, HttpSetup } from '@kbn/core/public';
+import { trimStart, trimEnd } from 'lodash';
+import { API_BASE_PATH, KIBANA_API_PREFIX } from '../../../common/constants';
 
 const esVersion: string[] = [];
 
@@ -20,7 +21,7 @@ export function getContentType(body: unknown) {
   return 'application/json';
 }
 
-interface SendProps {
+interface SendConfig {
   http: HttpSetup;
   method: string;
   path: string;
@@ -30,6 +31,8 @@ interface SendProps {
   asResponse?: boolean;
 }
 
+type Method = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'head';
+
 export async function send({
   http,
   method,
@@ -38,19 +41,61 @@ export async function send({
   asSystemRequest = false,
   withProductOrigin = false,
   asResponse = false,
-}: SendProps) {
-  const options: HttpFetchOptions = {
+}: SendConfig) {
+  const kibanaRequestUrl = getKibanaRequestUrl(path);
+
+  if (kibanaRequestUrl) {
+    const httpMethod = method.toLowerCase() as Method;
+    const url = new URL(kibanaRequestUrl);
+    const { pathname, searchParams } = url;
+    const query = Object.fromEntries(searchParams.entries());
+    const body = ['post', 'put', 'patch'].includes(httpMethod) ? data : null;
+
+    return await http[httpMethod]<HttpResponse>(pathname, {
+      body,
+      query,
+      asResponse,
+      asSystemRequest,
+    });
+  }
+
+  return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, {
     query: { path, method, ...(withProductOrigin && { withProductOrigin }) },
     body: data,
     asResponse,
     asSystemRequest,
-  };
-
-  return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, options);
+  });
 }
 
-export function constructESUrl(baseUri: string, path: string) {
-  baseUri = baseUri.replace(/\/+$/, '');
-  path = path.replace(/^\/+/, '');
-  return baseUri + '/' + path;
+function getKibanaRequestUrl(path: string) {
+  const isKibanaApiRequest = path.startsWith(KIBANA_API_PREFIX);
+  const kibanaBasePath = window.location.origin;
+
+  if (isKibanaApiRequest) {
+    // window.location.origin is used as a Kibana public base path for sending requests in cURL commands. E.g. "Copy as cURL".
+    return `${kibanaBasePath}/${trimStart(path.replace(KIBANA_API_PREFIX, ''), '/')}`;
+  }
 }
+
+export function constructUrl(baseUri: string, path: string) {
+  const kibanaRequestUrl = getKibanaRequestUrl(path);
+  let url = `${trimEnd(baseUri, '/')}/${trimStart(path, '/')}`;
+
+  if (kibanaRequestUrl) {
+    url = kibanaRequestUrl;
+  }
+
+  const { origin, pathname, search } = new URL(url);
+  return `${origin}${encodePathname(pathname)}${search ?? ''}`;
+}
+
+const encodePathname = (path: string) => {
+  const decodedPath = new URLSearchParams(`path=${path}`).get('path') ?? '';
+
+  // Skip if it is valid
+  if (path === decodedPath) {
+    return path;
+  }
+
+  return `/${encodeURIComponent(trimStart(decodedPath, '/'))}`;
+};

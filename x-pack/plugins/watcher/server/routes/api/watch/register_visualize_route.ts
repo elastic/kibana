@@ -52,7 +52,8 @@ export function registerVisualizeRoute({
       const body = watch.getVisualizeQuery(options, kibanaVersion);
 
       try {
-        const hits = await fetchVisualizeData(ctx.core.elasticsearch.client, watch.index, body);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hits = await fetchVisualizeData(esClient, watch.index, body);
         const visualizeData = watch.formatVisualizeData(hits);
 
         return response.ok({

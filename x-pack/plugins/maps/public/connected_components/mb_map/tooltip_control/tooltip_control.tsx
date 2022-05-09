@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 import {
   LngLat,
   Map as MbMap,
-  MapboxGeoJSONFeature,
+  MapGeoJSONFeature,
   MapMouseEvent,
-  Point as MbPoint,
+  Point2D,
+  PointLike,
 } from '@kbn/mapbox-gl';
 import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
@@ -34,7 +35,7 @@ import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property
 
 function justifyAnchorLocation(
   mbLngLat: LngLat,
-  targetFeature: MapboxGeoJSONFeature
+  targetFeature: MapGeoJSONFeature
 ): [number, number] {
   let popupAnchorLocation: [number, number] = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
   if (targetFeature.geometry.type === 'Point') {
@@ -197,7 +198,7 @@ export class TooltipControl extends Component<Props, {}> {
   }
 
   _getTooltipFeatures(
-    mbFeatures: MapboxGeoJSONFeature[],
+    mbFeatures: MapGeoJSONFeature[],
     isLocked: boolean,
     tooltipId: string
   ): TooltipFeature[] {
@@ -223,13 +224,10 @@ export class TooltipControl extends Component<Props, {}> {
         }
       }
       if (!match) {
-        // "tags" (aka properties) are optional in .mvt tiles.
-        // It's not entirely clear how mapbox-gl handles those.
-        // - As null value (as defined in https://tools.ietf.org/html/rfc7946#section-3.2)
-        // - As undefined value
-        // - As empty object literal
-        // To avoid ambiguity, normalize properties to empty object literal.
-        const mbProperties = mbFeature.properties ? mbFeature.properties : {};
+        const mbProperties = {
+          ...(mbFeature.properties ? mbFeature.properties : {}),
+          ...(mbFeature.state ? mbFeature.state : {}),
+        };
         const actions: TooltipFeatureAction[] = isLocked
           ? this._getFeatureActions({ layerId, featureId, tooltipId })
           : [];
@@ -343,7 +341,7 @@ export class TooltipControl extends Component<Props, {}> {
     });
   }
 
-  _getMbFeaturesUnderPointer(mbLngLatPoint: MbPoint) {
+  _getMbFeaturesUnderPointer(mbLngLatPoint: Point2D) {
     if (!this.props.mbMap) {
       return [];
     }
@@ -359,7 +357,7 @@ export class TooltipControl extends Component<Props, {}> {
         x: mbLngLatPoint.x + PADDING,
         y: mbLngLatPoint.y + PADDING,
       },
-    ] as [MbPoint, MbPoint];
+    ] as [PointLike, PointLike];
     return this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbLayerIds,
     });

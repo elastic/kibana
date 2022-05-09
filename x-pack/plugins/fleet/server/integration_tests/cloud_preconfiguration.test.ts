@@ -142,7 +142,14 @@ describe('Fleet preconfiguration reset', () => {
           sort: 'revision_idx:desc',
         });
 
-        expect((res.hits.hits[0]._source as any)!.data).toMatchSnapshot();
+        const data = (res.hits.hits[0]._source as any)!.data;
+
+        // Remove package version to avoid upgrading this test for each new package dev version
+        data.inputs.forEach((input: any) => {
+          delete input.meta.package.version;
+        });
+
+        expect(data).toMatchSnapshot();
       });
 
       it('Create correct package policies', async () => {

@@ -41,6 +41,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         params: {
           query: {
             ...commonQuery,
+            probability: 1,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
           },
         },

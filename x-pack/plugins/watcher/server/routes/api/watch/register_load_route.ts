@@ -34,7 +34,8 @@ export function registerLoadRoute({ router, license, lib: { handleEsError } }: R
       const id = request.params.id;
 
       try {
-        const hit = await fetchWatch(ctx.core.elasticsearch.client, id);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await fetchWatch(esClient, id);
         const watchJson = get(hit, 'watch');
         const watchStatusJson = get(hit, 'status');
         const json = {

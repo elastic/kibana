@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CiStatsReporter, CiStatsTiming } from '@kbn/dev-utils/ci_stats_reporter';
+import { CiStatsReporter, CiStatsTiming } from '@kbn/ci-stats-reporter';
 
 import { simpleKibanaPlatformPluginDiscovery, getPluginSearchPaths } from '@kbn/plugin-discovery';
 import { ICommand, ICommandConfig } from './commands';

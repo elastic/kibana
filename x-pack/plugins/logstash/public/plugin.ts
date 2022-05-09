@@ -11,7 +11,7 @@ import { map } from 'rxjs/operators';
 import { once } from 'lodash';
 
 import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
@@ -75,7 +75,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
               icon: 'pipelineApp',
               path: '/app/management/ingest/pipelines',
               showOnHomePage: false,
-              category: FeatureCatalogueCategory.ADMIN,
+              category: 'admin',
             });
           });
         }

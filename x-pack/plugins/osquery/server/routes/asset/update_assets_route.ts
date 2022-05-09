@@ -30,7 +30,7 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const savedObjectsClient = (await context.core).savedObjects.client;
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       let installation;

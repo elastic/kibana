@@ -19,7 +19,7 @@ export const sessionEntryLeadersRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { id } = request.query;
 
       const result = await client.get({

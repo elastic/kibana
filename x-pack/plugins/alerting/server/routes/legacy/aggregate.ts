@@ -53,7 +53,7 @@ export const aggregateAlertRoute = (
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const rulesClient = context.alerting.getRulesClient();
+      const rulesClient = (await context.alerting).getRulesClient();
 
       trackLegacyRouteUsage('aggregate', usageCounter);
       trackLegacyTerminology(

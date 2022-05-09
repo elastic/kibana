@@ -41,7 +41,7 @@ export async function getEsGridTile({
   renderAs: RENDER_AS;
   gridPrecision: number;
   abortController: AbortController;
-}): Promise<{ stream: Stream | null; headers?: IncomingHttpHeaders }> {
+}): Promise<{ stream: Stream | null; headers: IncomingHttpHeaders; statusCode: number }> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
     const body = {
@@ -57,13 +57,14 @@ export async function getEsGridTile({
       runtime_mappings: requestBody.runtime_mappings,
     };
 
+    const esClient = (await context.core).elasticsearch.client;
     const tile = await core.executionContext.withContext(
       makeExecutionContext({
         description: 'mvt:get_grid_tile',
         url,
       }),
       async () => {
-        return await context.core.elasticsearch.client.asCurrentUser.transport.request(
+        return await esClient.asCurrentUser.transport.request(
           {
             method: 'GET',
             path,
@@ -81,13 +82,15 @@ export async function getEsGridTile({
       }
     );
 
-    return { stream: tile.body as Stream, headers: tile.headers };
+    return { stream: tile.body as Stream, headers: tile.headers, statusCode: tile.statusCode };
   } catch (e) {
-    if (!isAbortError(e)) {
-      // These are often circuit breaking exceptions
-      // Should return a tile with some error message
-      logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    if (isAbortError(e)) {
+      return { stream: null, headers: {}, statusCode: 200 };
     }
-    return { stream: null };
+
+    // These are often circuit breaking exceptions
+    // Should return a tile with some error message
+    logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    return { stream: null, headers: {}, statusCode: 500 };
   }
 }

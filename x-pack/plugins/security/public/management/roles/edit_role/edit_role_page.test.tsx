@@ -11,7 +11,7 @@ import React from 'react';
 
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -139,7 +139,7 @@ function getProps({
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRole.mockResolvedValue(role);
 
-  const dataViews = dataPluginMock.createStartContract().dataViews;
+  const dataViews = dataViewPluginMocks.createStartContract();
   // `undefined` titles can technically happen via import/export or other manual manipulation
   dataViews.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
 
@@ -352,7 +352,7 @@ describe('<EditRolePage />', () => {
   });
 
   it('can render if index patterns are not available', async () => {
-    const dataViews = dataPluginMock.createStartContract().dataViews;
+    const dataViews = dataViewPluginMocks.createStartContract();
     dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
     const wrapper = mountWithIntl(
