@@ -664,7 +664,10 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               defaultMessage="Restores persistent settings and all system indices from features. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotFeatureStates}>
+                  <EuiLink
+                    target="_blank"
+                    href={docLinks.links.snapshotRestore.restoreSnapshotFeatureStates}
+                  >
                     {i18n.translate(
                       'xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesDocLink',
                       { defaultMessage: 'Learn more.' }
