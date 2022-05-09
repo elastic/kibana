@@ -567,10 +567,19 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 );
 
 const getFirstStep = (sourceConfigData: SourceConfigData, initialStep?: string): AddSourceSteps => {
-  const { configured } = sourceConfigData;
+  const {
+    serviceType,
+    configured,
+    configuredFields: { clientId, clientSecret },
+  } = sourceConfigData;
   if (initialStep === 'connect') return AddSourceSteps.ConnectInstanceStep;
   if (initialStep === 'configure') return AddSourceSteps.ConfigureOauthStep;
   if (initialStep === 'reauthenticate') return AddSourceSteps.ReauthenticateStep;
-  if (configured) return AddSourceSteps.ConnectInstanceStep;
+  if (serviceType !== 'external' && configured) return AddSourceSteps.ConnectInstanceStep;
+
+  // TODO remove this once external/BYO connectors track `configured` properly
+  if (serviceType === 'external' && clientId && clientSecret)
+    return AddSourceSteps.ConnectInstanceStep;
+
   return AddSourceSteps.SaveConfigStep;
 };

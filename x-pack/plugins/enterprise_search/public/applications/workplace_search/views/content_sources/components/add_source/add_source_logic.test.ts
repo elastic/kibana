@@ -255,7 +255,16 @@ describe('AddSourceLogic', () => {
 
   describe('listeners', () => {
     describe('setFirstStep', () => {
-      it('sets save config as first step', () => {
+      it('sets save config as first step if unconfigured', () => {
+        mount(
+          {
+            sourceConfigData: {
+              ...sourceConfigData,
+              configured: false,
+            },
+          },
+          { serviceType: DEFAULT_SERVICE_TYPE }
+        );
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
 
         AddSourceLogic.actions.setFirstStep();
@@ -264,7 +273,7 @@ describe('AddSourceLogic', () => {
       });
 
       it('sets connect as first step', () => {
-        mount({}, { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'connect' });
+        mount({ sourceConfigData }, { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'connect' });
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
 
         AddSourceLogic.actions.setFirstStep();
@@ -273,7 +282,10 @@ describe('AddSourceLogic', () => {
       });
 
       it('sets configure as first step', () => {
-        mount({}, { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'configure' });
+        mount(
+          { sourceConfigData },
+          { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'configure' }
+        );
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
 
         AddSourceLogic.actions.setFirstStep();
@@ -282,7 +294,10 @@ describe('AddSourceLogic', () => {
       });
 
       it('sets reauthenticate as first step', () => {
-        mount({}, { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'reauthenticate' });
+        mount(
+          { sourceConfigData },
+          { serviceType: DEFAULT_SERVICE_TYPE, initialStep: 'reauthenticate' }
+        );
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
 
         AddSourceLogic.actions.setFirstStep();
@@ -291,11 +306,37 @@ describe('AddSourceLogic', () => {
       });
 
       it('sets connect step if configured', () => {
+        mount(
+          {
+            sourceConfigData: {
+              ...sourceConfigData,
+              configured: true,
+            },
+          },
+          { serviceType: DEFAULT_SERVICE_TYPE }
+        );
         const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
-        AddSourceLogic.actions.setSourceConfigData({
-          ...sourceConfigData,
-          configured: true,
-        });
+        AddSourceLogic.actions.setFirstStep();
+
+        expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
+      });
+
+      it('sets connect step if external connector has client id and secret', () => {
+        mount(
+          {
+            sourceConfigData: {
+              ...sourceConfigData,
+              serviceType: 'external',
+              configuredFields: {
+                clientId: 'test-client-id',
+                clientSecret: 'test-client-secret',
+              },
+            },
+          },
+          { serviceType: DEFAULT_SERVICE_TYPE }
+        );
+        const setAddSourceStepSpy = jest.spyOn(AddSourceLogic.actions, 'setAddSourceStep');
+
         AddSourceLogic.actions.setFirstStep();
 
         expect(setAddSourceStepSpy).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
