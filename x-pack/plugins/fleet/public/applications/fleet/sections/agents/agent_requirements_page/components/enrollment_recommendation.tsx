@@ -17,14 +17,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices } from '../../../../hooks';
-
-import { agentFlyoutContext } from '../..';
+import { useFlyoutContext, useStartServices } from '../../../../hooks';
 
 export const EnrollmentRecommendation: React.FunctionComponent<{
   showStandaloneTab: () => void;
 }> = ({ showStandaloneTab }) => {
-  const flyoutContext = useContext(agentFlyoutContext);
+  const flyoutContext = useFlyoutContext();
 
   const { docLinks } = useStartServices();
 

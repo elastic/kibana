@@ -38,6 +38,7 @@ import {
   useBreadcrumbs,
   useStartServices,
   UIExtensionsContext,
+  FlyoutContextProvider,
 } from './hooks';
 import { Error, Loading, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
@@ -251,7 +252,7 @@ export const FleetAppContext: React.FC<{
                               notifications={startServices.notifications}
                               theme$={theme$}
                             >
-                              {children}
+                              <FlyoutContextProvider>{children}</FlyoutContextProvider>
                             </PackageInstallProvider>
                           </Router>
                         </FleetStatusProvider>
