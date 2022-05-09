@@ -40,8 +40,6 @@ export const DraggableScoreComponent = ({
         value: score.entityValue,
         operator: IS_OPERATOR as QueryOperator,
       },
-      isAggregatable: true,
-      fieldType: 'number',
     }),
     [id, score.entityName, score.entityValue]
   );
@@ -71,6 +69,8 @@ export const DraggableScoreComponent = ({
       key={`draggable-score-draggable-wrapper-${id}`}
       dataProvider={dataProviderProp}
       render={render}
+      isAggregatable={true}
+      fieldType={'keyword'}
     />
   );
 };
