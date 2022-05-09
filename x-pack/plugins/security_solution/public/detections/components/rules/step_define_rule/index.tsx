@@ -667,7 +667,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             fullWidth
           >
             <>
-              {/* <UseMultiFields
+              <UseMultiFields
                 fields={{
                   threatMapping: {
                     path: 'threatMapping',
@@ -675,7 +675,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }}
               >
                 {ThreatMatchInputChildren}
-              </UseMultiFields> */}
+              </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
           <UseField

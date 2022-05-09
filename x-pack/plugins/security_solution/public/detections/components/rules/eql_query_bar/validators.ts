@@ -57,7 +57,7 @@ export const eqlValidator = async (
   const [{ value, formData }] = args;
   const { query: queryValue } = value as FieldValueQueryBar;
   const query = queryValue.query as string;
-  const { index, ruleType } = formData as DefineStepRule;
+  const { dataViewId, index, ruleType } = formData as DefineStepRule;
 
   const needsValidation =
     (ruleType === undefined && !isEmpty(query)) || (isEqlRule(ruleType) && !isEmpty(query));
@@ -67,8 +67,17 @@ export const eqlValidator = async (
 
   try {
     const { data } = KibanaServices.get();
+    let dataViewTitle = index?.join();
+    let runtimeMappings = {};
+    if (dataViewId != null) {
+      const dataView = await data.dataViews.get(dataViewId);
+
+      dataViewTitle = dataView.title;
+      runtimeMappings = dataView.getRuntimeMappings();
+    }
+
     const signal = new AbortController().signal;
-    const response = await validateEql({ data, query, signal, index });
+    const response = await validateEql({ data, query, signal, dataViewTitle, runtimeMappings });
 
     if (response?.valid === false) {
       return {

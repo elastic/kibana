@@ -13,6 +13,9 @@ import {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
+
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { getInputIndex } from '../get_input_output_index';
@@ -76,6 +79,18 @@ export const eqlExecutor = async ({
       index: ruleParams.index,
     });
 
+    let runtimeMappings: estypes.MappingRuntimeFields = {};
+    if (ruleParams.dataViewId != null) {
+      const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
+        'index-pattern',
+        ruleParams.dataViewId
+      );
+      if (dataView?.attributes.runtimeFieldMap != null) {
+        runtimeMappings = JSON.parse(dataView.attributes.runtimeFieldMap);
+        logger.debug(`runtime mappings ${runtimeMappings}`);
+      }
+    }
+
     const request = buildEqlSearchRequest(
       ruleParams.query,
       inputIndex,
@@ -84,7 +99,9 @@ export const eqlExecutor = async ({
       completeRule.ruleParams.maxSignals,
       ruleParams.timestampOverride,
       exceptionItems,
-      ruleParams.eventCategoryOverride
+      ruleParams.eventCategoryOverride,
+      // TODO: assert non-null or allow undefined
+      runtimeMappings
     );
 
     const eqlSignalSearchStart = performance.now();

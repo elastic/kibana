@@ -179,7 +179,8 @@ export const buildEqlSearchRequest = (
   size: number,
   timestampOverride: TimestampOverrideOrUndefined,
   exceptionLists: ExceptionListItemSchema[],
-  eventCategoryOverride: string | undefined
+  eventCategoryOverride: string | undefined,
+  runtimeMappings?: estypes.MappingRuntimeFields | null
 ): estypes.EqlSearchRequest => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -229,6 +230,8 @@ export const buildEqlSearchRequest = (
           filter: requestFilter,
         },
       },
+      // TODO: ensure null / undefined runtimeMappings doesn't blow anything up
+      runtime_mappings: runtimeMappings,
       event_category_field: eventCategoryOverride,
       fields,
     },

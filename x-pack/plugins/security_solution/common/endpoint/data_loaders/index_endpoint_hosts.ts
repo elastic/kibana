@@ -124,8 +124,9 @@ export async function indexEndpointHostDocs({
     generator.updateHostData();
     generator.updateHostPolicyData();
 
+    // timestamp - timeBetweenDocs * (numDocs - j - 1),
     hostMetadata = generator.generateHostMetadata(
-      timestamp - timeBetweenDocs * (numDocs - j - 1),
+      timestamp,
       EndpointDocGenerator.createDataStreamFromIndex(metadataIndex)
     );
 
@@ -198,7 +199,8 @@ export async function indexEndpointHostDocs({
       // there is an extra delay and fleet-agents gets populated much sooner.
       // we manually add a delay to the time sync field so that the united transform
       // will pick up the latest metadata doc.
-      '@timestamp': hostMetadata['@timestamp'] + 60000,
+      // hostMetadata['@timestamp'] + 60000,
+      '@timestamp': hostMetadata['@timestamp'],
     };
     await client
       .index({
