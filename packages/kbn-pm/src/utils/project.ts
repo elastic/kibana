@@ -88,48 +88,6 @@ export class Project {
     return this.json.name;
   }
 
-  public ensureValidProjectDependency(project: Project) {
-    const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(
-      Path.relative(
-        this.path,
-        `${__dirname}/../../../bazel-bin/packages/${Path.basename(project.path)}`
-      )
-    );
-
-    const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
-    const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`;
-
-    // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
-    //  do not allow child projects to hold dependencies, unless they are meant to be published externally
-    if (
-      versionInPackageJson === expectedVersionInPackageJson ||
-      versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg
-    ) {
-      return;
-    }
-
-    const updateMsg = 'Update its package.json to the expected value below.';
-    const meta = {
-      actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}" or "${project.name}": "${expectedVersionInPackageJsonIfBazelPkg}"`,
-      package: `${this.name} (${this.packageJsonLocation})`,
-    };
-
-    if (isLinkDependency(versionInPackageJson)) {
-      throw new CliError(
-        `[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`,
-        meta
-      );
-    }
-
-    throw new CliError(
-      `[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`,
-      meta
-    );
-  }
-
   public getBuildConfig(): BuildConfig {
     return (this.json.kibana && this.json.kibana.build) || {};
   }
@@ -205,9 +163,4 @@ export class Project {
   public isEveryDependencyLocal() {
     return Object.values(this.allDependencies).every((dep) => isLinkDependency(dep));
   }
-}
-
-// We normalize all path separators to `/` in generated files
-function normalizePath(path: string) {
-  return path.replace(/[\\\/]+/g, '/');
 }
