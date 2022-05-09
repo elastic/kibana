@@ -31,7 +31,11 @@ import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_ke
 import { updateAPIKey, deleteRules } from '../../../lib/rule_api';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import {
+  hasAllPrivilege,
+  hasExecuteActionsCapability,
+  hasManageApiKeysCapability,
+} from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import {
@@ -352,6 +356,27 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+            {hasManageApiKeysCapability(capabilities) ? (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.apiKeyOwnerTitle"
+                          defaultMessage="API key owner"
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
+                      <b>{rule.apiKeyOwner}</b>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               {uniqueActions && uniqueActions.length ? (
                 <EuiFlexGroup responsive={false} gutterSize="xs">

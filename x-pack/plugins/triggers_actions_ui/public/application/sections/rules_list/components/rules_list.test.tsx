@@ -36,6 +36,7 @@ jest.mock('../../../lib/rule_api', () => ({
   loadRuleTypes: jest.fn(),
   loadRuleAggregations: jest.fn(),
   updateAPIKey: jest.fn(),
+  loadRuleTags: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -66,7 +67,10 @@ jest.mock('../../../lib/capabilities', () => ({
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
-const { loadRules, loadRuleTypes, loadRuleAggregations, updateAPIKey } =
+
+const ruleTags = ['a', 'b', 'c', 'd'];
+
+const { loadRules, loadRuleTypes, loadRuleAggregations, updateAPIKey, loadRuleTags } =
   jest.requireMock('../../../lib/rule_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 
@@ -481,6 +485,10 @@ describe('rules_list component with items', () => {
       ruleEnabledStatus: { enabled: 2, disabled: 0 },
       ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
       ruleMutedStatus: { muted: 0, unmuted: 2 },
+      ruleTags,
+    });
+    loadRuleTags.mockResolvedValue({
+      ruleTags,
     });
 
     const ruleTypeMock: RuleTypeModel = {
@@ -927,6 +935,40 @@ describe('rules_list component with items', () => {
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
     expect(loadRules.mock.calls[3][0].ruleStatusesFilter).toEqual(['enabled']);
+  });
+
+  it('does not render the tag filter is the feature flag is off', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleTagFilter"]').exists()).toBeFalsy();
+  });
+
+  it('renders the tag filter if the experiment is on', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleTagFilter"]').exists()).toBeTruthy();
+  });
+
+  it('can filter by tags', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    loadRules.mockReset();
+    await setup();
+
+    expect(loadRules.mock.calls[0][0].tagsFilter).toEqual([]);
+
+    wrapper.find('[data-test-subj="ruleTagFilterButton"] button').simulate('click');
+
+    const tagFilterListItems = wrapper.find(
+      '[data-test-subj="ruleTagFilterSelectable"] .euiSelectableListItem'
+    );
+    expect(tagFilterListItems.length).toEqual(ruleTags.length);
+
+    tagFilterListItems.at(0).simulate('click');
+
+    expect(loadRules.mock.calls[1][0].tagsFilter).toEqual(['a']);
+
+    tagFilterListItems.at(1).simulate('click');
+
+    expect(loadRules.mock.calls[2][0].tagsFilter).toEqual(['a', 'b']);
   });
 });
 

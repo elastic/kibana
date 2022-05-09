@@ -73,6 +73,7 @@ import { RuleExecutionStatusFilter, getHealthColor } from './rule_execution_stat
 import {
   loadRules,
   loadRuleAggregations,
+  loadRuleTags,
   loadRuleTypes,
   disableRule,
   enableRule,
@@ -100,6 +101,7 @@ import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
@@ -160,6 +162,8 @@ export const RulesList: React.FunctionComponent = () => {
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
@@ -169,6 +173,7 @@ export const RulesList: React.FunctionComponent = () => {
   );
   const [showErrors, setShowErrors] = useState(false);
 
+  const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
   useEffect(() => {
@@ -236,6 +241,7 @@ export const RulesList: React.FunctionComponent = () => {
     JSON.stringify(actionTypesFilter),
     JSON.stringify(ruleExecutionStatusesFilter),
     JSON.stringify(ruleStatusesFilter),
+    JSON.stringify(tagsFilter),
   ]);
 
   useEffect(() => {
@@ -296,8 +302,10 @@ export const RulesList: React.FunctionComponent = () => {
           actionTypesFilter,
           ruleExecutionStatusesFilter,
           ruleStatusesFilter,
+          tagsFilter,
           sort,
         });
+        await loadRuleTagsAggs();
         await loadRuleAggs();
         setRulesState({
           isLoading: false,
@@ -314,7 +322,8 @@ export const RulesList: React.FunctionComponent = () => {
           isEmpty(typesFilter) &&
           isEmpty(actionTypesFilter) &&
           isEmpty(ruleExecutionStatusesFilter) &&
-          isEmpty(ruleStatusesFilter)
+          isEmpty(ruleStatusesFilter) &&
+          isEmpty(tagsFilter)
         );
 
         setNoData(rulesResponse.data.length === 0 && !isFilterApplied);
@@ -342,6 +351,7 @@ export const RulesList: React.FunctionComponent = () => {
         actionTypesFilter,
         ruleExecutionStatusesFilter,
         ruleStatusesFilter,
+        tagsFilter,
       });
       if (rulesAggs?.ruleExecutionStatus) {
         setRulesStatusesTotal(rulesAggs.ruleExecutionStatus);
@@ -354,6 +364,24 @@ export const RulesList: React.FunctionComponent = () => {
             defaultMessage: 'Unable to load rule status info',
           }
         ),
+      });
+    }
+  }
+
+  async function loadRuleTagsAggs() {
+    if (!isRuleTagFilterEnabled) {
+      return;
+    }
+    try {
+      const ruleTagsAggs = await loadRuleTags({ http });
+      if (ruleTagsAggs?.ruleTags) {
+        setTags(ruleTagsAggs.ruleTags);
+      }
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTags', {
+          defaultMessage: 'Unable to load rule tags',
+        }),
       });
     }
   }
@@ -599,11 +627,11 @@ export const RulesList: React.FunctionComponent = () => {
         sortable: false,
         width: '50px',
         'data-test-subj': 'rulesTableCell-tagsPopover',
-        render: (tags: string[], item: RuleTableItem) => {
-          return tags.length > 0 ? (
+        render: (ruleTags: string[], item: RuleTableItem) => {
+          return ruleTags.length > 0 ? (
             <RuleTagBadge
               isOpen={tagPopoverOpenIndex === item.index}
-              tags={tags}
+              tags={ruleTags}
               onClick={() => setTagPopoverOpenIndex(item.index)}
               onClose={() => setTagPopoverOpenIndex(-1)}
             />
@@ -944,6 +972,13 @@ export const RulesList: React.FunctionComponent = () => {
     );
   };
 
+  const getRuleTagFilter = () => {
+    if (isRuleTagFilterEnabled) {
+      return [<RuleTagFilter tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />];
+    }
+    return [];
+  };
+
   const getRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
       return [
@@ -964,6 +999,7 @@ export const RulesList: React.FunctionComponent = () => {
         })
       )}
     />,
+    ...getRuleTagFilter(),
     ...getRuleStatusFilter(),
     <ActionTypeFilter
       key="action-type-filter"
