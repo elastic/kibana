@@ -30,9 +30,9 @@ export const severities = {
 };
 
 export const severitiesWithAll = {
-  ...severities,
   [SeverityAll]: {
     color: 'transparent',
     label: ALL_SEVERITIES,
   },
+  ...severities,
 };
