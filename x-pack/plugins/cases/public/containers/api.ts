@@ -166,7 +166,6 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
-    // severity: filterOptions.severity,
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
