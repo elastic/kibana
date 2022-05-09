@@ -83,6 +83,7 @@ describe('open in discover action', () => {
 
     const embeddable = {
       getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      type: 'lens',
     };
 
     const discoverUrl = 'https://discover-redirect-url';
