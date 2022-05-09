@@ -846,7 +846,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
         });
 
-        it('should respect the owner filter when using range queries', async () => {
+        it('should respect the owner filter when filtering severities', async () => {
           const res = await findCases({
             supertest: supertestWithoutAuth,
             query: {
