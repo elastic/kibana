@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import Path from 'path';
 import { inspect } from 'util';
 
 import { run, createFlagError, Flags } from '@kbn/dev-utils';
@@ -16,7 +16,7 @@ import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';
 
-const makeAbsolutePath = (v: string) => resolve(process.cwd(), v);
+const makeAbsolutePath = (v: string) => Path.resolve(process.cwd(), v);
 const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
 const parseInstallDir = (flags: Flags) => {
   const flag = flags['kibana-install-dir'];
@@ -42,9 +42,14 @@ export function runFtrCli() {
         throw createFlagError('expected --es-version to be a string');
       }
 
+      const configRel = flags.config;
+      if (typeof configRel !== 'string') {
+        throw createFlagError('--config is required');
+      }
+
       const functionalTestRunner = new FunctionalTestRunner(
         log,
-        makeAbsolutePath(flags.config as string),
+        makeAbsolutePath(configRel),
         {
           mochaOpts: {
             bail: flags.bail,
@@ -149,9 +154,6 @@ export function runFtrCli() {
           'headless',
           'dry-run',
         ],
-        default: {
-          config: 'test/functional/config.js',
-        },
         help: `
           --config=path      path to a config file
           --bail             stop tests after the first failure
