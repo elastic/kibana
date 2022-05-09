@@ -67,3 +67,8 @@ export interface RuleState {
   error: string | null;
   totalItemCount: number;
 }
+
+export interface TagsState {
+  data: string[];
+  error: string | null;
+}

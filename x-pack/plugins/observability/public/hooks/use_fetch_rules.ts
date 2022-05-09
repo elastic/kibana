@@ -8,8 +8,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { loadRules, loadRuleTags } from '@kbn/triggers-actions-ui-plugin/public';
-import { RULES_LOAD_ERROR } from '../pages/rules/translations';
-import { FetchRulesProps, RuleState } from '../pages/rules/types';
+import { RULES_LOAD_ERROR, RULE_TAGS_LOAD_ERROR } from '../pages/rules/translations';
+import { FetchRulesProps, RuleState, TagsState } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
 import { useKibana } from '../utils/kibana_react';
 
@@ -34,8 +34,10 @@ export function useFetchRules({
 
   const [noData, setNoData] = useState<boolean>(true);
   const [initialLoad, setInitialLoad] = useState<boolean>(true);
-  const [tags, setTags] = useState<string[]>([]);
-
+  const [tagsState, setTagsState] = useState<TagsState>({
+    data: [],
+    error: null,
+  });
   const loadRuleTagsAggs = useCallback(async () => {
     try {
       const ruleTagsAggs = await loadRuleTags({
@@ -43,14 +45,10 @@ export function useFetchRules({
       });
 
       if (ruleTagsAggs?.ruleTags) {
-        setTags(ruleTagsAggs.ruleTags);
+        setTagsState({ data: ruleTagsAggs.ruleTags, error: null });
       }
     } catch (e) {
-      // toasts.addDanger({
-      //   title: i18n.translate('xpack.observability.rulesList.unableToLoadRuleStatusInfoMessage', {
-      //     defaultMessage: 'Unable to load rule status info',
-      //   }),
-      // });
+      setTagsState((oldState) => ({ ...oldState, error: RULE_TAGS_LOAD_ERROR }));
     }
   }, [http]);
 
@@ -115,6 +113,6 @@ export function useFetchRules({
     setRulesState,
     noData,
     initialLoad,
-    tags,
+    tagsState,
   };
 }

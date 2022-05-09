@@ -109,7 +109,7 @@ function RulesPage() {
     setCurrentRuleToEdit(ruleItem);
   };
 
-  const { rulesState, setRulesState, reload, noData, initialLoad, tags } = useFetchRules({
+  const { rulesState, setRulesState, reload, noData, initialLoad, tagsState } = useFetchRules({
     searchText,
     ruleLastResponseFilter: lastResponse,
     ruleStatusesFilter: status,
@@ -120,6 +120,8 @@ function RulesPage() {
     sort,
   });
   const { data: rules, totalItemCount, error } = rulesState;
+  const { data: tags, error: tagsError } = tagsState;
+
   const { ruleTypeIndex, ruleTypes } = useLoadRuleTypes({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
@@ -490,6 +492,10 @@ function RulesPage() {
       {error &&
         toasts.addDanger({
           title: error,
+        })}
+      {tagsError &&
+        toasts.addDanger({
+          title: tagsError,
         })}
       {currentRuleToEdit && <EditRuleFlyout onSave={reload} currentRule={currentRuleToEdit} />}
       {createRuleFlyoutVisibility && CreateRuleFlyout}
