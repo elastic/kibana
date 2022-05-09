@@ -34,7 +34,7 @@ export class FilesPlugin implements Plugin {
         core.savedObjects,
         coreStart.savedObjects,
         blobStorageService,
-        this.logger.get('files')
+        this.logger.get('files-service')
       );
     });
 

@@ -13,9 +13,9 @@ export const fileObjectType: SavedObjectsType<FileSavedObjectAttributes> = {
   name: FILE_SO_TYPE,
   hidden: true,
   namespaceType: 'multiple', // TODO: Review this decision, the assumption for now is that file saved objects can exist across namespaces
-  management: {
-    visibleInManagement: false,
-  },
+  // management: {
+  //   visibleInManagement: false,
+  // },
   mappings: {
     dynamic: false,
     properties: {
