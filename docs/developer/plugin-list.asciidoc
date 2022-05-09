@@ -412,10 +412,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
-|The data_enhanced plugin is the x-pack counterpart to the src/plguins/data plugin.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
 |The data_visualizer plugin enables you to explore the fields in your data.
 

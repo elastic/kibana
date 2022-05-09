@@ -647,7 +647,6 @@ export class AlertsClient {
         [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
         AlertingAuthorizationEntity.Alert
       );
-
       // As long as the user can read a minimum of one type of rule type produced by the provided feature,
       // the user should be provided that features' alerts index.
       // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
@@ -655,19 +654,16 @@ export class AlertsClient {
       for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
         authorizedFeatures.add(ruleType.producer);
       }
-
       const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
         (feature): feature is ValidFeatureId =>
           featureIds.includes(feature) && isValidFeatureId(feature)
       );
-
-      const toReturn = validAuthorizedFeatures.flatMap((feature) => {
-        const indices = this.ruleDataService.findIndicesByFeature(feature, Dataset.alerts);
-        if (feature === 'siem') {
-          return indices.map((i) => `${i.baseName}-${this.spaceId}`);
-        } else {
-          return indices.map((i) => i.baseName);
+      const toReturn = validAuthorizedFeatures.map((feature) => {
+        const index = this.ruleDataService.findIndexByFeature(feature, Dataset.alerts);
+        if (index == null) {
+          throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
+        return index?.getPrimaryAlias(this.spaceId ?? '*') ?? '';
       });
 
       return toReturn;
