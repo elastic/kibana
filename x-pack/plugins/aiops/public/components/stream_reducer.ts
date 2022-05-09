@@ -5,57 +5,38 @@
  * 2.0.
  */
 
-import { ApiAction, API_ACTION_NAME } from '../../common/api';
+import { ApiAction, API_ACTION_NAME } from '../../common/api/example_stream';
 
 export const UI_ACTION_NAME = {
-  CANCEL_STREAM: 'cancel_stream',
-  RESET_STREAM: 'reset_stream',
-  SET_STREAM_IS_RUNNING: 'set_stream_is_running',
+  ERROR: 'error',
+  RESET: 'reset',
 } as const;
 export type UiActionName = typeof UI_ACTION_NAME[keyof typeof UI_ACTION_NAME];
 
 export interface StreamState {
-  isCancelled: boolean;
-  isRunning: boolean;
+  errors: string[];
   progress: number;
   entities: Record<string, number>;
 }
 export const initialState: StreamState = {
-  isCancelled: false,
-  isRunning: false,
+  errors: [],
   progress: 0,
   entities: {},
 };
 
-interface UiActionSetIsRunning {
-  type: typeof UI_ACTION_NAME.SET_STREAM_IS_RUNNING;
-  payload: boolean;
+interface UiActionError {
+  type: typeof UI_ACTION_NAME.ERROR;
+  payload: string;
 }
-
-export function setIsRunning(payload: boolean): UiActionSetIsRunning {
-  return {
-    type: UI_ACTION_NAME.SET_STREAM_IS_RUNNING,
-    payload,
-  };
-}
-
 interface UiActionResetStream {
-  type: typeof UI_ACTION_NAME.RESET_STREAM;
+  type: typeof UI_ACTION_NAME.RESET;
 }
 
 export function resetStream(): UiActionResetStream {
-  return { type: UI_ACTION_NAME.RESET_STREAM };
+  return { type: UI_ACTION_NAME.RESET };
 }
 
-interface UiActionCancelStream {
-  type: typeof UI_ACTION_NAME.CANCEL_STREAM;
-}
-
-export function cancelStream(): UiActionCancelStream {
-  return { type: UI_ACTION_NAME.CANCEL_STREAM };
-}
-
-type UiAction = UiActionSetIsRunning | UiActionResetStream | UiActionCancelStream;
+type UiAction = UiActionResetStream | UiActionError;
 export type ReducerAction = ApiAction | UiAction;
 export function streamReducer(
   state: StreamState,
@@ -89,20 +70,17 @@ export function streamReducer(
         ...state,
         entities: addToEntities,
       };
-    case UI_ACTION_NAME.SET_STREAM_IS_RUNNING:
-      return {
-        ...state,
-        isRunning: action.payload,
-      };
-    case UI_ACTION_NAME.CANCEL_STREAM:
-      return {
-        ...state,
-        isCancelled: true,
-        isRunning: false,
-      };
-    case UI_ACTION_NAME.RESET_STREAM:
+    case UI_ACTION_NAME.RESET:
       return initialState;
+    case UI_ACTION_NAME.ERROR:
+      return {
+        ...state,
+        errors: [...state.errors, action.payload],
+      };
     default:
-      throw new Error();
+      return {
+        ...state,
+        errors: [...state.errors, 'UNKNOWN_ACTION_ERRROR'],
+      };
   }
 }

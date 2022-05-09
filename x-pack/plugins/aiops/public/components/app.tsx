@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 
@@ -13,7 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiBadge,
   EuiButton,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -29,49 +31,40 @@ import {
 
 import { CoreStart } from '@kbn/core/public';
 
-import { streamFetch } from './stream_fetch';
-import {
-  initialState,
-  cancelStream,
-  resetStream,
-  setIsRunning,
-  streamReducer,
-} from './stream_reducer';
+import { getStatusMessage } from './get_status_message';
+import { initialState, resetStream, streamReducer } from './stream_reducer';
+import { useStreamFetchReducer } from './use_stream_fetch_reducer';
 
 interface AiopsAppDeps {
   notifications: CoreStart['notifications'];
 }
 
 export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
-  const [state, dispatch] = useReducer(streamReducer, initialState);
+  const [simulateErrors, setSimulateErrors] = useState(false);
 
-  const abortCtrl = useRef(new AbortController());
+  const { dispatch, start, cancel, data, isCancelled, isRunning } = useStreamFetchReducer(
+    '/internal/aiops/example_stream',
+    streamReducer,
+    initialState,
+    { simulateErrors }
+  );
+
+  const { errors, progress, entities } = data;
 
   const onClickHandler = async () => {
-    abortCtrl.current.abort();
-
-    if (state.isRunning) {
-      dispatch(cancelStream());
-      return;
+    if (isRunning) {
+      cancel();
+    } else {
+      dispatch(resetStream());
+      start();
     }
-
-    dispatch(resetStream());
-    dispatch(setIsRunning(true));
-
-    abortCtrl.current = new AbortController();
-    await streamFetch(dispatch, abortCtrl, notifications);
-
-    dispatch(setIsRunning(false));
   };
 
-  const chartData = Object.entries(state.entities)
-    .map(([x, y]) => {
-      return {
-        x,
-        y,
-      };
-    })
-    .sort((a, b) => b.y - a.y);
+  useEffect(() => {
+    if (errors.length > 0) {
+      notifications.toasts.addDanger(errors[errors.length - 1]);
+    }
+  }, [errors, notifications.toasts]);
 
   return (
     <EuiPage restrictWidth="1000px">
@@ -92,13 +85,13 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                    {!state.isRunning && (
+                    {!isRunning && (
                       <FormattedMessage
                         id="xpack.aiops.startbuttonText"
                         defaultMessage="Start development"
                       />
                     )}
-                    {state.isRunning && (
+                    {isRunning && (
                       <FormattedMessage
                         id="xpack.aiops.cancelbuttonText"
                         defaultMessage="Stop development"
@@ -108,11 +101,11 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText>
-                    <p>{state.progress}</p>
+                    <EuiBadge>{progress}%</EuiBadge>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiProgress value={state.progress} max={100} size="xs" />
+                  <EuiProgress value={progress} max={100} size="xs" />
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
@@ -141,10 +134,30 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
                     yScaleType={ScaleType.Linear}
                     xAccessor="x"
                     yAccessors={['y']}
-                    data={chartData}
+                    data={Object.entries(entities)
+                      .map(([x, y]) => {
+                        return {
+                          x,
+                          y,
+                        };
+                      })
+                      .sort((a, b) => b.y - a.y)}
                   />
                 </Chart>
               </div>
+              <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
+              <EuiCheckbox
+                id="aiopSimulateErrorsCheckbox"
+                label={i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.simulateErrorsCheckboxLabel',
+                  {
+                    defaultMessage: 'Simulate errors.',
+                  }
+                )}
+                checked={simulateErrors}
+                onChange={(e) => setSimulateErrors(!simulateErrors)}
+                compressed
+              />
             </EuiText>
           </EuiPageContentBody>
         </EuiPageContent>

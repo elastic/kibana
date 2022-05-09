@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const aiopsExampleStreamSchema = schema.object({
+  /** Boolean flag to enable/disabling simulation of response errors. */
+  simulateErrors: schema.maybe(schema.boolean()),
+  /** Maximum timeout between streaming messages. */
+  timeout: schema.maybe(schema.number()),
+});
+
+export type AiopsExampleStreamSchema = TypeOf<typeof aiopsExampleStreamSchema>;
+
 export const API_ACTION_NAME = {
   UPDATE_PROGRESS: 'update_progress',
   ADD_TO_ENTITY: 'add_to_entity',

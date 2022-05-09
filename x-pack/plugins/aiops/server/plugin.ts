@@ -22,7 +22,7 @@ export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router);
+    defineRoutes(router, this.logger);
 
     return {};
   }

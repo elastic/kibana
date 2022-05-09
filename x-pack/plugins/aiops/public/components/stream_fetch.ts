@@ -7,22 +7,23 @@
 
 import type React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import type { ApiEndpoint, ApiEndpointOptions } from '../../common/api';
 
-export const streamFetch = async <T = unknown>(
-  dispatch: React.Dispatch<T | T[]>,
+export async function* streamFetch<A = unknown, E = ApiEndpoint>(
+  endpoint: E,
   abortCtrl: React.MutableRefObject<AbortController>,
-  notifications: CoreStart['notifications']
-) => {
-  const stream = await fetch('/internal/aiops/example_stream', {
+  options: ApiEndpointOptions[ApiEndpoint]
+) {
+  const stream = await fetch(endpoint as unknown as string, {
     signal: abortCtrl.current.signal,
     method: 'POST',
     headers: {
+      // This refers to the format of the request body,
+      // not the response, which will be a uint8array Buffer.
       'Content-Type': 'application/json',
       'kbn-xsrf': 'stream',
     },
-    body: JSON.stringify({ timeout: 250 }),
+    body: JSON.stringify(options),
   });
 
   if (stream.body !== null) {
@@ -31,9 +32,10 @@ export const streamFetch = async <T = unknown>(
     // Once Firefox supports it, we can use the following alternative:
     // const reader = stream.body.pipeThrough(new TextDecoderStream()).getReader();
     const reader = stream.body.getReader();
+
     const bufferBounce = 100;
     let partial = '';
-    let actionBuffer: T[] = [];
+    let actionBuffer: A[] = [];
     let lastCall = 0;
 
     while (true) {
@@ -55,25 +57,21 @@ export const streamFetch = async <T = unknown>(
         const now = Date.now();
 
         if (now - lastCall >= bufferBounce && actionBuffer.length > 0) {
-          dispatch(actionBuffer);
+          yield actionBuffer;
           actionBuffer = [];
           lastCall = now;
         }
       } catch (error) {
         if (error.name !== 'AbortError') {
-          notifications.toasts.addDanger(
-            i18n.translate('xpack.aiops.streamFetch.errorMessage', {
-              defaultMessage: 'An error occurred.',
-            })
-          );
+          yield { type: 'error', payload: error.toString() };
         }
         break;
       }
     }
 
     if (actionBuffer.length > 0) {
-      dispatch(actionBuffer);
+      yield actionBuffer;
       actionBuffer.length = 0;
     }
   }
-};
+}

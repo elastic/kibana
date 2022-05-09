@@ -7,23 +7,25 @@
 
 import { Readable } from 'stream';
 
-import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 
 import { AIOPS_ENABLED } from '../../common';
-import type { ApiAction } from '../../common/api';
-import { updateProgressAction, addToEntityAction, deleteEntityAction } from '../../common/api';
+import type { ApiAction } from '../../common/api/example_stream';
+import {
+  aiopsExampleStreamSchema,
+  updateProgressAction,
+  addToEntityAction,
+  deleteEntityAction,
+} from '../../common/api/example_stream';
 
+// We need this otherwise Kibana server will crash with a 'ERR_METHOD_NOT_IMPLEMENTED' error.
 class ResponseStream extends Readable {
   _read(): void {}
 }
 
-export const aiopsExampleStreamSchema = schema.object({
-  /** Maximum timeout between streaming messages. */
-  timeout: schema.number(),
-});
+const delimiter = '\n';
 
-export function defineRoutes(router: IRouter) {
+export function defineRoutes(router: IRouter, logger: Logger) {
   if (AIOPS_ENABLED) {
     router.post(
       {
@@ -34,8 +36,9 @@ export function defineRoutes(router: IRouter) {
       },
       async (context, request, response) => {
         const maxTimeoutMs = request.body.timeout ?? 250;
-        let shouldStop = false;
+        const simulateError = request.body.simulateErrors ?? false;
 
+        let shouldStop = false;
         request.events.aborted$.subscribe(() => {
           shouldStop = true;
         });
@@ -46,7 +49,13 @@ export function defineRoutes(router: IRouter) {
         const stream = new ResponseStream();
 
         function streamPush(d: ApiAction) {
-          stream.push(JSON.stringify(d) + '\n');
+          try {
+            const line = JSON.stringify(d);
+            stream.push(`${line}${delimiter}`);
+          } catch (error) {
+            logger.error('Could not serialize or stream a message.');
+            logger.error(error);
+          }
         }
 
         const entities = [
@@ -59,19 +68,26 @@ export function defineRoutes(router: IRouter) {
           'rjernst',
           'jrodewig',
         ];
+
         const actions = [...Array(19).fill('add'), 'delete'];
 
-        async function runStream() {
-          let progress = 0;
+        if (simulateError) {
+          actions.push('server-only-error');
+          actions.push('server-to-client-error');
+          actions.push('client-error');
+        }
 
-          function pushStreamUpdate() {
-            if (shouldStop) {
-              stream.push(null);
-              return;
-            }
+        let progress = 0;
 
-            setTimeout(() => {
+        async function pushStreamUpdate() {
+          setTimeout(() => {
+            try {
               progress++;
+
+              if (progress > 100 || shouldStop) {
+                stream.push(null);
+                return;
+              }
 
               streamPush(updateProgressAction(progress));
 
@@ -83,22 +99,26 @@ export function defineRoutes(router: IRouter) {
                 streamPush(addToEntityAction(randomEntity, randomCommits));
               } else if (randomAction === 'delete') {
                 streamPush(deleteEntityAction(randomEntity));
-              }
-
-              if (progress === 100) {
-                stream.push(null);
-                return;
+              } else if (randomAction === 'server-to-client-error') {
+                // Throw an error. It should not crash Kibana!
+                throw new Error('There was a (simulated) server side error!');
+              } else if (randomAction === 'client-error') {
+                // Return not properly encoded JSON to the client.
+                stream.push(`{body:'Not valid JSON${delimiter}`);
               }
 
               pushStreamUpdate();
-            }, Math.floor(Math.random() * maxTimeoutMs));
-          }
-
-          pushStreamUpdate();
+            } catch (error) {
+              stream.push(
+                `${JSON.stringify({ type: 'error', payload: error.toString() })}${delimiter}`
+              );
+              stream.push(null);
+            }
+          }, Math.floor(Math.random() * maxTimeoutMs));
         }
 
         // do call this using `await` so it will run asynchronously while we return the stream already.
-        runStream();
+        pushStreamUpdate();
 
         return response.ok({
           body: stream,
