@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('Machine Learning', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();
