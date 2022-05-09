@@ -21,13 +21,7 @@ import {
 export const isLogsEndpointAction = (
   item: LogsEndpointAction | EndpointAction
 ): item is LogsEndpointAction => {
-  return (
-    'EndpointActions' in item &&
-    'error' in item &&
-    'user' in item &&
-    'agent' in item &&
-    '@timestamp' in item
-  );
+  return 'EndpointActions' in item && 'user' in item && 'agent' in item && '@timestamp' in item;
 };
 
 /**
