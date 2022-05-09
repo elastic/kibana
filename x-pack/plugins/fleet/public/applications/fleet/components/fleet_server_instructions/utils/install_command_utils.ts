@@ -67,12 +67,12 @@ export function getInstallCommandForPlatform(
           `wget ${artifact.fullUrl} -OutFile ${artifact.filename}`,
           `Expand-Archive .\\${artifact.filename}`,
           `cd ${artifact.unpackedDir}`,
-        ].join(` ${newLineSeparator}`)
+        ].join(`\n`)
       : [
           `curl -L -O ${artifact.fullUrl}`,
           `tar xzvf ${artifact.filename}`,
           `cd ${artifact.unpackedDir}`,
-        ].join(` ${newLineSeparator}`);
+        ].join(`\n`);
 
   const commandArguments = [];
 
@@ -108,11 +108,11 @@ export function getInstallCommandForPlatform(
   }, '');
 
   const commands = {
-    linux: `${downloadCommand} ${newLineSeparator}sudo ./elastic-agent install${commandArgumentsStr}`,
-    mac: `${downloadCommand} ${newLineSeparator}sudo ./elastic-agent install ${commandArgumentsStr}`,
-    windows: `${downloadCommand}${newLineSeparator}.\\elastic-agent.exe install ${commandArgumentsStr}`,
-    deb: `${downloadCommand} ${newLineSeparator}sudo elastic-agent enroll ${commandArgumentsStr}`,
-    rpm: `${downloadCommand} ${newLineSeparator}sudo elastic-agent enroll ${commandArgumentsStr}`,
+    linux: `${downloadCommand}\nsudo ./elastic-agent install${commandArgumentsStr}`,
+    mac: `${downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
+    windows: `${downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
+    deb: `${downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}`,
+    rpm: `${downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}`,
   };
 
   return commands[platform];
