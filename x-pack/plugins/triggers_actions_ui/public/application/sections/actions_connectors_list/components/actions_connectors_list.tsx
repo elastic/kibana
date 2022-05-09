@@ -459,7 +459,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           onClose={() => {
             setAddFlyoutVisibility(false);
           }}
-          // onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
+          onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
           // reloadConnectors={loadActions}
           actionTypeRegistry={actionTypeRegistry}
         />
