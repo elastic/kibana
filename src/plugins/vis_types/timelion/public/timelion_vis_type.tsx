@@ -57,7 +57,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
         );
 
         if (indexArg?.value.text) {
-          return getIndexPatterns().find(indexArg.value.text);
+          return getIndexPatterns().find(indexArg.value.text, 1);
         }
       } catch {
         // timelion expression is invalid
@@ -66,8 +66,9 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     },
     options: {
       showIndexSelection: false,
-      showQueryBar: false,
+      showQueryBar: true,
       showFilterBar: false,
+      showQueryInput: false,
     },
     requiresSearch: true,
   };

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import type {
   ResolvedCase,
-  CaseMetrics,
-  CaseMetricsFeature,
+  SingleCaseMetrics,
+  SingleCaseMetricsFeature,
   AlertComment,
 } from '../../common/ui/types';
 import {
@@ -31,6 +31,7 @@ import {
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
+  CaseSeverity,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -154,6 +155,8 @@ export const basicCase: Case = {
     fields: null,
   },
   description: 'Security banana Issue',
+  severity: CaseSeverity.LOW,
+  duration: null,
   externalService: null,
   status: CaseStatuses.open,
   tags,
@@ -188,7 +191,7 @@ export const basicResolvedCase: ResolvedCase = {
   aliasTargetId: `${basicCase.id}_2`,
 };
 
-export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
+export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
   'alerts.count',
   'alerts.users',
   'alerts.hosts',
@@ -196,9 +199,9 @@ export const basicCaseNumericValueFeatures: CaseMetricsFeature[] = [
   'connectors',
 ];
 
-export const basicCaseStatusFeatures: CaseMetricsFeature[] = ['lifespan'];
+export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = ['lifespan'];
 
-export const basicCaseMetrics: CaseMetrics = {
+export const basicCaseMetrics: SingleCaseMetrics = {
   alerts: {
     count: 12,
     hosts: {
@@ -245,6 +248,8 @@ export const mockCase: Case = {
     type: ConnectorTypes.none,
     fields: null,
   },
+  duration: null,
+  severity: CaseSeverity.LOW,
   description: 'Security banana Issue',
   externalService: null,
   status: CaseStatuses.open,
@@ -328,7 +333,7 @@ export const cases: Case[] = [
   caseWithAlertsSyncOff,
 ];
 
-export const allCases: AllCases = {
+export const allCases: Cases = {
   cases,
   page: 1,
   perPage: 5,
@@ -383,6 +388,7 @@ export const basicCaseSnake: CaseResponse = {
   connector: { id: 'none', name: 'My Connector', type: ConnectorTypes.none, fields: null },
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
+  duration: null,
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
@@ -509,6 +515,7 @@ export const getUserAction = (
           description: 'a desc',
           connector: { ...getJiraConnector() },
           status: CaseStatuses.open,
+          severity: CaseSeverity.LOW,
           title: 'a title',
           tags: ['a tag'],
           settings: { syncAlerts: true },

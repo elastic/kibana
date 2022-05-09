@@ -48,6 +48,7 @@ jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
+  hasManageApiKeysCapability: jest.fn(() => true),
 }));
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -98,6 +99,26 @@ describe('rule_details', () => {
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
       ).find(<EuiBadge>{ruleType.name}</EuiBadge>)
     ).toBeTruthy();
+  });
+
+  it('renders the API key owner badge when user can manage API keys', () => {
+    const rule = mockRule();
+    expect(
+      shallow(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+      ).find(<EuiBadge>{rule.apiKeyOwner}</EuiBadge>)
+    ).toBeTruthy();
+  });
+
+  it(`doesn't render the API key owner badge when user can't manage API keys`, () => {
+    const { hasManageApiKeysCapability } = jest.requireMock('../../../lib/capabilities');
+    hasManageApiKeysCapability.mockReturnValueOnce(false);
+    const rule = mockRule();
+    expect(
+      shallow(<RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />)
+        .find(<EuiBadge>{rule.apiKeyOwner}</EuiBadge>)
+        .exists()
+    ).toBeFalsy();
   });
 
   it('renders the rule error banner with error message, when rule has a license error', () => {
@@ -685,6 +706,7 @@ describe('broken connector indicator', () => {
       name: 'Test connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -694,6 +716,7 @@ describe('broken connector indicator', () => {
       name: 'Test connector 2',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
   ]);
 
@@ -869,7 +892,7 @@ function mockRule(overloads: Partial<Rule> = {}): Rule {
     updatedBy: null,
     createdAt: new Date(),
     updatedAt: new Date(),
-    apiKeyOwner: null,
+    apiKeyOwner: 'bob',
     throttle: null,
     notifyWhen: null,
     muteAll: false,
