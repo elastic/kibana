@@ -298,7 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
         const pushResponse = await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PUSH)
           .set('kbn-xsrf', 'true')
-          .send({ ...pushMonitors, keep_stale: false, projectId: testprojectId })
+          .send({ ...pushMonitors, keep_stale: false, project: testprojectId })
           .expect(200);
 
         // expect monitor not to have been deleted
