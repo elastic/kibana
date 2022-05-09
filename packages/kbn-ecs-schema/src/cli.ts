@@ -36,13 +36,10 @@ function execute(spec: string,  outDir: string) {
 }
 
 function emptyGeneratedFolder(outPath: string) {
-  fs.readdir(outPath, (err, files) => {
-    if (err) throw err;
-  
-    for (const file of files) {
-      fs.unlinkSync(path.join(outPath, file));
-    }
-  });
+  const files = fs.readdirSync(outPath);
+  for (const file of files) {
+    fs.unlinkSync(path.join(outPath, file));
+  }
 }
 
 export function runCli() {
