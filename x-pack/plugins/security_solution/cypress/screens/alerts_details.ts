@@ -74,4 +74,8 @@ export const TITLE = '.euiTitle';
 
 export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-button"]';
 
+export const OVERVIEW_TAB = '[data-test-subj="overviewTab"]';
+
+export const SUMMARY_VIEW_PREVALENCE_CELL = `${SUMMARY_VIEW} [data-test-subj='alert-prevalence']`;
+
 export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;

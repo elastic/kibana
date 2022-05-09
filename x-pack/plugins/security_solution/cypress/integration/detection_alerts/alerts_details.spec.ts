@@ -11,12 +11,13 @@ import {
   JSON_TEXT,
   TABLE_CONTAINER,
   TABLE_ROWS,
+  SUMMARY_VIEW_PREVALENCE_CELL,
   SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON,
 } from '../../screens/alerts_details';
-import { TIMELINE_TITLE } from '../../screens/timeline';
+import { QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../screens/timeline';
 
 import { expandFirstAlert } from '../../tasks/alerts';
-import { openJsonView, openTable } from '../../tasks/alerts_details';
+import { openJsonView, openOverview, openTable } from '../../tasks/alerts_details';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -84,10 +85,19 @@ describe('Alert details with unmapped fields', () => {
   });
 
   it('Opens a new timeline investigation', () => {
-    // Click on the first button that lets us investigate in timeline
-    cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).click();
+    openOverview();
 
-    // Make sure a new timeline is created and opened
-    cy.get(TIMELINE_TITLE).should('contain', 'Untitled timeline');
+    cy.get(SUMMARY_VIEW_PREVALENCE_CELL)
+      .invoke('text')
+      .then((alertCount) => {
+        // Click on the first button that lets us investigate in timeline
+        cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).click();
+
+        // Make sure a new timeline is created and opened
+        cy.get(TIMELINE_TITLE).should('contain.text', 'Untitled timeline');
+
+        // The alert count in this timeline should match the count shown on the alert flyout
+        cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
+      });
   });
 });
