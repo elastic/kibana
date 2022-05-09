@@ -35,6 +35,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import { DataViewBase } from '@kbn/es-query';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -66,7 +67,6 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { DataViewBase } from '@kbn/es-query';
 
 export interface AddExceptionFlyoutProps {
   ruleName: string;
