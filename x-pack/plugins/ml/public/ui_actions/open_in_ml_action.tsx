@@ -37,10 +37,7 @@ export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServi
       }
     },
     async isCompatible(context: { embeddable: Embeddable }) {
-      if (
-        context.embeddable.type !== 'lens' ||
-        (await context.embeddable.canViewUnderlyingData()) === false
-      ) {
+      if (context.embeddable.type !== 'lens') {
         return false;
       }
 

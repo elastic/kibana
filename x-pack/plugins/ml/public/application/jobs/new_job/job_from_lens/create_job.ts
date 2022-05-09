@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { Query } from '@kbn/data-plugin/public';
@@ -31,6 +31,8 @@ const COMPATIBLE_SERIES_TYPES = [
   'bar',
   'bar_stacked',
   'bar_percentage_stacked',
+  'bar_horizontal',
+  'bar_horizontal_stacked',
   'area',
   'area_stacked',
   'area_percentage_stacked',
@@ -105,16 +107,7 @@ async function createADJobFromLensSavedObject(
   dataViewClient: DataViewsContract,
   kibanaConfig: IUiSettingsClient
 ) {
-  const dataView = await getDataViewFromLens(vis, dataViewClient);
-  if (dataView === null) {
-    throw Error('No data views can be found in the visualization.');
-  }
-
-  const { fields, timeField, splitField } = getFields(vis.state);
-
-  if (timeField.sourceField !== dataView.timeFieldName) {
-    throw Error('Selected time field must be the default time field configured for data view.');
-  }
+  const { fields, timeField, splitField, dataView } = await extractFields(vis, dataViewClient);
 
   const jobConfig = createEmptyJob();
   const datafeedConfig = createEmptyDatafeed(dataView.title);
@@ -148,25 +141,28 @@ async function createADJobFromLensSavedObject(
   };
 }
 
-function getFields(state: LensSavedObjectAttributes['state']) {
-  const visualization = state.visualization as { layers: XYDataLayerConfig[] };
-  const indexpattern = state.datasourceStates.indexpattern as IndexPatternPersistedState;
+async function extractFields(vis: LensSavedObjectAttributes, dataViewClient: DataViewsContract) {
+  const visualization = vis.state.visualization as { layers: XYDataLayerConfig[] };
+  const indexpattern = vis.state.datasourceStates.indexpattern as IndexPatternPersistedState;
 
   const compatibleLayers = visualization.layers.filter(
-    (l) => l.layerType === COMPATIBLE_LAYER_TYPE && COMPATIBLE_SERIES_TYPES.includes(l.seriesType)
+    ({ layerType, seriesType }) =>
+      layerType === COMPATIBLE_LAYER_TYPE && COMPATIBLE_SERIES_TYPES.includes(seriesType)
   );
 
-  const compatibleLayerIds = compatibleLayers.map((l) => l.layerId);
+  const [firstCompatibleLayer] = compatibleLayers;
 
-  const [layer] = Object.entries(indexpattern.layers)
-    .filter(([id]) => compatibleLayerIds.includes(id))
-    .map(([, l]) => l);
-
-  if (layer === undefined) {
+  const compatibleIndexPatternLayer = Object.entries(indexpattern.layers).find(
+    ([id]) => firstCompatibleLayer.layerId === id
+  );
+  if (compatibleIndexPatternLayer === undefined) {
     throw Error(
       'Visualization does not contain any layers which can be used for creating an anomaly detection job.'
     );
   }
+
+  const [layerId, layer] = compatibleIndexPatternLayer;
+
   const { columns } = layer as { columns: Record<string, FieldBasedIndexPatternColumn> };
   const cols = Object.entries(columns);
   const timeFieldCol = cols.find(([, c]) => c.dataType === 'date');
@@ -176,14 +172,22 @@ function getFields(state: LensSavedObjectAttributes['state']) {
 
   const [, timeField] = timeFieldCol;
 
-  const [firstCompatibleLayer] = compatibleLayers;
   const fields = firstCompatibleLayer.accessors.map((a) => columns[a]);
 
   const splitField = firstCompatibleLayer.splitAccessor
     ? columns[firstCompatibleLayer.splitAccessor]
     : null;
 
-  return { fields, timeField, splitField };
+  const dataView = await getDataViewFromLens(vis.references, layerId, dataViewClient);
+  if (dataView === null) {
+    throw Error('No data views can be found in the visualization.');
+  }
+
+  if (timeField.sourceField !== dataView.timeFieldName) {
+    throw Error('Selected time field must be the default time field configured for data view.');
+  }
+
+  return { fields, timeField, splitField, dataView };
 }
 
 function createDetectors(
@@ -206,10 +210,13 @@ function createDetectors(
 }
 
 async function getDataViewFromLens(
-  so: LensSavedObjectAttributes,
+  references: SavedObjectReference[],
+  layerId: string,
   dataViewClient: DataViewsContract
 ) {
-  const dv = so.references.find((r) => r.type === 'index-pattern');
+  const dv = references.find(
+    (r) => r.type === 'index-pattern' && r.name === `indexpattern-datasource-layer-${layerId}`
+  );
   if (!dv) {
     return null;
   }
