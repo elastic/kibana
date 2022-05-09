@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { KibanaSolutionAvatar } from './solution_avatar';
-
-describe('KibanaSolutionAvatar', () => {
-  test('renders', () => {
-    const component = shallow(<KibanaSolutionAvatar name="Solution" iconType="logoElastic" />);
-    expect(component).toMatchSnapshot();
-  });
-});
+export type NavigateToUrl = (url: string) => Promise<void> | void;
