@@ -43,13 +43,14 @@ export function runFtrCli() {
       }
 
       const configRel = flags.config;
-      if (typeof configRel !== 'string') {
+      if (typeof configRel !== 'string' || !configRel) {
         throw createFlagError('--config is required');
       }
+      const configPath = makeAbsolutePath(configRel);
 
       const functionalTestRunner = new FunctionalTestRunner(
         log,
-        makeAbsolutePath(configRel),
+        configPath,
         {
           mochaOpts: {
             bail: flags.bail,
@@ -73,6 +74,8 @@ export function runFtrCli() {
         },
         esVersion
       );
+
+      await functionalTestRunner.readConfigFile();
 
       if (flags.throttle) {
         process.env.TEST_THROTTLE_NETWORK = '1';
