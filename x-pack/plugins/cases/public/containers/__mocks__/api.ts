@@ -29,7 +29,7 @@ import {
   respReporters,
   tags,
 } from '../mock';
-import { ResolvedCase } from '../../../common/ui/types';
+import { ResolvedCase, SeverityAll } from '../../../common/ui/types';
 import {
   CasePatchRequest,
   CasePostRequest,
@@ -71,6 +71,7 @@ export const getCaseUserActions = async (
 
 export const getCases = async ({
   filterOptions = {
+    severity: SeverityAll,
     search: '',
     reporters: [],
     status: CaseStatuses.open,

@@ -218,6 +218,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             tags: filterOptions.tags,
             status: filterOptions.status,
             owner: filterOptions.owner,
+            severity: filterOptions.severity,
           }}
           setFilterRefetch={setFilterRefetch}
           hiddenStatuses={hiddenStatuses}
