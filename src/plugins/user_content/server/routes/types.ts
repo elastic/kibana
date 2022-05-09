@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DepsFromPluginStart } from '../types';
-import type { MetadataEventsService } from '../services';
+import type { MetadataEventsService, UserContentService } from '../services';
 
 export interface RouteDependencies {
-  depsFromPluginStartPromise: Promise<DepsFromPluginStart>;
+  userContentService: UserContentService;
   metadataEventsService: MetadataEventsService;
 }

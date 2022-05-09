@@ -42,6 +42,7 @@ import {
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { SavedObjectsHooksRegistry } from './saved_objects_hooks_registry';
 import { SavedObjectsSerializer } from './serialization';
 import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
 import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
@@ -163,6 +164,11 @@ export interface SavedObjectsServiceSetup {
    * Returns the default index used for saved objects.
    */
   getKibanaIndex: () => string;
+
+  /** Register a "pre" hook to execute before a SavedObject clients Crud method */
+  pre: SavedObjectsHooksRegistry['pre'];
+  /** Register a "post" hook to execute before a SavedObject clients Crud method */
+  post: SavedObjectsHooksRegistry['post'];
 }
 
 /**
@@ -301,6 +307,7 @@ export class SavedObjectsService
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
+  private hooksRegistry = new SavedObjectsHooksRegistry();
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -379,6 +386,8 @@ export class SavedObjectsService
       },
       getTypeRegistry: () => this.typeRegistry,
       getKibanaIndex: () => kibanaIndex,
+      pre: this.hooksRegistry.pre.bind(this.hooksRegistry),
+      post: this.hooksRegistry.post.bind(this.hooksRegistry),
     };
   }
 
@@ -453,9 +462,11 @@ export class SavedObjectsService
       esClient: ElasticsearchClient,
       includedHiddenTypes: string[] = []
     ) => {
+      const { preHooks, postHooks } = this.hooksRegistry;
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
+        { preHooks, postHooks },
         kibanaIndex,
         esClient,
         this.logger.get('repository'),

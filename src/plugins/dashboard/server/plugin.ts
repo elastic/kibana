@@ -10,6 +10,8 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UserContentPluginSetup } from '@kbn/user-content-plugin/server';
+
 import { createDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
@@ -21,6 +23,7 @@ import { getUISettings } from './ui_settings';
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection: UsageCollectionSetup;
+  userContent: UserContentPluginSetup;
 }
 
 export class DashboardPlugin
@@ -43,6 +46,8 @@ export class DashboardPlugin
       })
     );
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    plugins.userContent.registerContent('dashboard');
 
     registerDashboardUsageCollector(plugins.usageCollection, plugins.embeddable);
 

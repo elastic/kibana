@@ -6,42 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
 import { withApiBaseBath } from '../../common';
-import { streamEvent } from './schemas';
-
 import type { RouteDependencies } from './types';
 
-export const registerBulkEventsRoute = (
+export const registerFetchUserContentTypes = (
   router: IRouter,
-  { metadataEventsService }: RouteDependencies
+  { userContentService }: RouteDependencies
 ) => {
-  router.post(
+  router.get(
     {
-      path: withApiBaseBath('/event/_bulk'),
-      validate: {
-        body: schema.arrayOf(streamEvent),
-      },
+      path: withApiBaseBath('/user_content_types'),
+      validate: false,
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { body } = req;
-
-      const events = body.map(({ type, soId, soType }) => {
-        return {
-          type,
-          data: {
-            so_id: soId,
-            so_type: soType,
-          },
-        };
-      });
-
-      metadataEventsService.bulkRegisterEvents(events);
-
       return res.ok({
-        body: 'ok',
+        body: userContentService.userContentTypes,
       });
     })
   );

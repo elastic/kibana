@@ -10,14 +10,13 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
 import { withApiBaseBath } from '../../common';
-import { incrementViewsCounters } from '../lib';
 import { eventTypeSchema } from './schemas';
 
 import type { RouteDependencies } from './types';
 
 export const registerRegisterEventRoute = (
   router: IRouter,
-  { depsFromPluginStartPromise }: RouteDependencies
+  { metadataEventsService }: RouteDependencies
 ) => {
   router.post(
     {
@@ -35,13 +34,7 @@ export const registerRegisterEventRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const { body, params } = req;
 
-      const { userContentEventsStream, savedObjectRepository } = await depsFromPluginStartPromise;
-
-      if (params.eventType.startsWith('viewed')) {
-        incrementViewsCounters(body.soType, body.soId, savedObjectRepository);
-      }
-
-      userContentEventsStream.registerEvent({
+      metadataEventsService.registerEvent({
         type: params.eventType,
         data: {
           so_id: body.soId,

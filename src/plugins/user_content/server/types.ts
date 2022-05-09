@@ -12,9 +12,11 @@ import {
 } from '@kbn/metadata-events-streams-plugin/server';
 
 import { UserContentMetadataEvent } from '../common';
+import { UserContentService } from './services';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UserContentPluginSetup {}
+export interface UserContentPluginSetup {
+  registerContent: UserContentService['registerContent'];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserContentPluginStart {}

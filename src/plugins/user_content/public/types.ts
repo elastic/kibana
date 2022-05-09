@@ -7,17 +7,20 @@
  */
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { MetadataEventType, ViewsCountRangeField } from '../common';
-import { UserContentService } from './services';
+import { MetadataEventsService } from './services';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserContentPluginSetup {}
 
 export interface UserContentPluginStart {
-  registerContent: UserContentService['register'];
   ui: {
     getUserContentTableColumnsDefinitions: (
       options: GetUserContentTableColumnsDefinitionsOptions
-    ) => Array<EuiBasicTableColumn<Record<string, unknown>>>;
+    ) => Promise<Array<EuiBasicTableColumn<Record<string, unknown>>>>;
+  };
+  events: {
+    register: MetadataEventsService['registerEvent'];
+    bulkRegister: MetadataEventsService['bulkRegisterEvents'];
   };
 }
 

@@ -151,26 +151,6 @@ interface ObjectTypeAndId {
   type: string;
 }
 
-type PreGetHook = (...args: Parameters<SavedObjectsClient['bulkGet']>) => Promise<void>;
-type PostGetHook = (objects: SavedObject[]) => Promise<void>;
-
-type PreCreateHook = (
-  ...args: Parameters<SavedObjectsClient['bulkCreate']>
-) => Promise<SavedObjectsBulkCreateObject[] | undefined>;
-type PostCreateHook = (
-  objects: Array<Awaited<ReturnType<SavedObjectsClient['create']>>>
-) => Promise<void>;
-
-interface PreHooks {
-  get: PreGetHook[];
-  create: PreCreateHook[];
-}
-
-interface PostHooks {
-  get: PostGetHook[];
-  create: PostCreateHook[];
-}
-
 const getObjectsToFetch = (queue: BatchGetQueueEntry[]): ObjectTypeAndId[] => {
   const objects: ObjectTypeAndId[] = [];
   const inserted = new Set<string>();
@@ -213,14 +193,6 @@ export class SavedObjectsClient {
   private http: HttpSetup;
   private batchGetQueue: BatchGetQueueEntry[];
   private batchResolveQueue: BatchResolveQueueEntry[];
-  private preHooks: PreHooks = {
-    get: [],
-    create: [],
-  };
-  private postHooks: PostHooks = {
-    get: [],
-    create: [],
-  };
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
@@ -315,17 +287,6 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('requires type and attributes'));
     }
 
-    const updatedObjects = await this.runPreCreateHooks(
-      [...this.preHooks.create],
-      [
-        {
-          ...options,
-          type,
-          attributes,
-        },
-      ]
-    );
-
     const path = this.getPath([type, options.id]);
     const query = {
       overwrite: options.overwrite,
@@ -335,18 +296,13 @@ export class SavedObjectsClient {
       method: 'POST',
       query,
       body: JSON.stringify({
-        attributes: updatedObjects[0].attributes, // Use the updated attributes from the hooks
+        attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
       }),
     });
 
-    return createRequest
-      .then((resp) => this.createSavedObject(resp))
-      .then(async (resp) => {
-        await this.runPostCreateHooks([resp]);
-        return resp;
-      });
+    return createRequest.then((resp) => this.createSavedObject(resp));
   };
 
   /**
@@ -361,51 +317,21 @@ export class SavedObjectsClient {
     objects: SavedObjectsBulkCreateObject[] = [],
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
-    const updatedObjects = await this.runPreCreateHooks([...this.preHooks.create], objects);
-
     const path = this.getPath(['_bulk_create']);
     const query = { overwrite: options.overwrite };
 
     const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.savedObjectsFetch(path, {
       method: 'POST',
       query,
-      body: JSON.stringify(updatedObjects),
+      body: JSON.stringify(objects),
     });
-    return request
-      .then((resp) => {
-        resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
-        return renameKeys<
-          PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
-          SavedObjectsBatchResponse
-        >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
-      })
-      .then(async (resp) => {
-        await this.runPostCreateHooks(resp.savedObjects);
-        return resp;
-      });
-  };
-
-  private runPreCreateHooks = async (
-    hooks: PreHooks['create'],
-    updatedObjects: SavedObjectsBulkCreateObject[]
-  ): Promise<SavedObjectsBulkCreateObject[]> => {
-    if (hooks.length === 0) {
-      return updatedObjects;
-    }
-    // Recursively call the the "pre" create hooks passing the
-    // updated saved objects
-    const [preCreateHook, ...rest] = hooks;
-    const result = await preCreateHook(updatedObjects);
-    if (rest.length) {
-      return await this.runPreCreateHooks(rest, result!);
-    }
-    return result!;
-  };
-
-  private runPostCreateHooks = async (objects: SimpleSavedObject[]) => {
-    for (const postCreateHook of this.postHooks.create) {
-      await postCreateHook(objects);
-    }
+    return request.then((resp) => {
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
+      return renameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
+        SavedObjectsBatchResponse
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
+    });
   };
 
   /**
@@ -547,23 +473,13 @@ export class SavedObjectsClient {
   };
 
   private async performBulkGet(objects: ObjectTypeAndId[]) {
-    for (const preGetHook of this.preHooks.get) {
-      await preGetHook(objects);
-    }
-
     const path = this.getPath(['_bulk_get']);
     const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
       method: 'POST',
       body: JSON.stringify(objects),
     });
 
-    return request.then(async (result) => {
-      for (const postGetHook of this.postHooks.get) {
-        await postGetHook(result.saved_objects);
-      }
-
-      return result;
-    });
+    return request;
   }
 
   /**
@@ -619,25 +535,13 @@ export class SavedObjectsClient {
   };
 
   private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
-    for (const preGetHook of this.preHooks.get) {
-      await preGetHook(objects);
-    }
-
     const path = this.getPath(['_bulk_resolve']);
     const request: Promise<SavedObjectsBulkResolveResponse<T>> = this.savedObjectsFetch(path, {
       method: 'POST',
       body: JSON.stringify(objects),
     });
 
-    return request.then(async (result) => {
-      for (const postGetHook of this.postHooks.get) {
-        await postGetHook(
-          result.resolved_objects.map(({ saved_object: savedObject }) => savedObject)
-        );
-      }
-
-      return result;
-    });
+    return request;
   }
 
   /**
@@ -696,22 +600,6 @@ export class SavedObjectsClient {
         SavedObjectsBatchResponse
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse<T>;
     });
-  }
-
-  public pre<K extends keyof PreHooks, H extends PreHooks[K][number]>(method: K, handler: H) {
-    const hooksArray: PreHooks[K] = this.preHooks[method];
-    if (hooksArray) {
-      // @ts-expect-error "H" is correctly typed but for some reason it fails when used on this line
-      hooksArray.push(handler);
-    }
-  }
-
-  public post<K extends keyof PostHooks, H extends PostHooks[K][number]>(method: K, handler: H) {
-    const hooksArray: PostHooks[K] = this.postHooks[method];
-    if (hooksArray) {
-      // @ts-expect-error "H" is correctly typed but for some reason it fails when used on this line
-      hooksArray.push(handler);
-    }
   }
 
   private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {
