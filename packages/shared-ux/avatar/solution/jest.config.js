@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { KibanaSolutionAvatar } from './solution_avatar';
-
-describe('KibanaSolutionAvatar', () => {
-  test('renders', () => {
-    const component = shallow(<KibanaSolutionAvatar name="Solution" iconType="logoElastic" />);
-    expect(component).toMatchSnapshot();
-  });
-});
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/avatar/solution'],
+};
