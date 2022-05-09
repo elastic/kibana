@@ -83,23 +83,25 @@ export const checkPackages: IHealthCheck = async ({
   const usedPackages = installedPackages.saved_objects.filter(
     ({ attributes: { name } }) => !!packagePoliciesByPackage[name]
   );
-  updateReport(``);
-  updateReport(`Integrations in use:`, 2);
-  usedPackages.forEach(({ attributes: { name, version } }) => {
-    updateReport(`${name} v${version}, policies:`, 3);
-    packagePoliciesByPackage[name].forEach((packagePolicy) => {
-      updateReport(`${packagePolicy.name} (id: ${packagePolicy.id})`, 4);
-      if (packagePolicy.package?.version !== version) {
-        updateReport(
-          `This policy is using an outdated version: ${packagePolicy.package?.version}`,
-          5
-        );
-      }
-      if (!agentPoliciesById[packagePolicy.policy_id]) {
-        orphanedPackagePolicies.push(packagePolicy.id);
-      }
+  if (usedPackages.length > 0) {
+    updateReport(``);
+    updateReport(`Integrations in use:`, 2);
+    usedPackages.forEach(({ attributes: { name, version } }) => {
+      updateReport(`${name} v${version}, policies:`, 3);
+      packagePoliciesByPackage[name].forEach((packagePolicy) => {
+        updateReport(`${packagePolicy.name} (id: ${packagePolicy.id})`, 4);
+        if (packagePolicy.package?.version !== version) {
+          updateReport(
+            `This policy is using an outdated version: ${packagePolicy.package?.version}`,
+            5
+          );
+        }
+        if (!agentPoliciesById[packagePolicy.policy_id]) {
+          orphanedPackagePolicies.push(packagePolicy.id);
+        }
+      });
     });
-  });
+  }
 
   // Report orphaned package policies
   if (orphanedPackagePolicies.length > 0) {
@@ -122,12 +124,14 @@ export const checkPackages: IHealthCheck = async ({
   const unusedPackages = installedPackages.saved_objects.filter(
     ({ attributes }) => !packagePoliciesByPackage[attributes.name]
   );
-  updateReport(``);
-  updateReport(`Integrations not in use:`, 2);
-  updateReport(
-    unusedPackages.map(({ attributes: { name, version } }) => `${name} v${version}`),
-    3
-  );
+  if (unusedPackages.length > 0) {
+    updateReport(``);
+    updateReport(`Integrations not in use:`, 2);
+    updateReport(
+      unusedPackages.map(({ attributes: { name, version } }) => `${name} v${version}`),
+      3
+    );
+  }
 
   // Finish and report overall status for this check
   updateReport(``);
