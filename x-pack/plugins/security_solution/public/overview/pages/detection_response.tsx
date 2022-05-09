@@ -15,14 +15,16 @@ import { useSignalIndex } from '../../detections/containers/detection_engine/ale
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
 import { useKibana, useGetUserCasesPermissions } from '../../common/lib/kibana';
-import { HostAlertsTable, UserAlertsTable } from '../components/detection_response';
 
-import { LandingPageComponent } from '../../common/components/landing_page';
-import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
-import * as i18n from './translations';
 import { EmptyPage } from '../../common/components/empty_page';
-import { CasesByStatus } from '../components/detection_response/cases_by_status';
+import { LandingPageComponent } from '../../common/components/landing_page';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
+import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
+import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
+import { UserAlertsTable } from '../components/detection_response/user_alerts_table';
+import * as i18n from './translations';
+import { CasesTable } from '../components/detection_response/cases_table';
+import { CasesByStatus } from '../components/detection_response/cases_by_status';
 
 const NoPrivilegePage: React.FC = () => {
   const { docLinks } = useKibana().services;
@@ -92,7 +94,11 @@ const DetectionResponseComponent = () => {
                   </EuiFlexItem>
                 )}
 
-                {canReadCases && <EuiFlexItem>{'[cases table]'}</EuiFlexItem>}
+                {canReadCases && (
+                  <EuiFlexItem>
+                    <CasesTable />
+                  </EuiFlexItem>
+                )}
 
                 {canReadAlerts && (
                   <EuiFlexItem>

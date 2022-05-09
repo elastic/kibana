@@ -7,38 +7,9 @@
 import { Dispatch, SetStateAction } from 'react';
 import { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
 import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
-import { RuleTableItem, Rule } from '@kbn/triggers-actions-ui-plugin/public';
-export interface StatusProps {
-  type: RuleStatus;
-  disabled: boolean;
-  onClick: () => void;
-}
+import { RuleTableItem, Rule, RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 
-export enum RuleStatus {
-  enabled = 'enabled',
-  disabled = 'disabled',
-  snoozed = 'snoozed',
-}
-
-export type Status = Record<
-  RuleStatus,
-  {
-    color: string;
-    label: string;
-  }
->;
-
-export interface StatusContextProps {
-  item: RuleTableItem;
-  disabled: boolean;
-  onStatusChanged: (status: RuleStatus) => void;
-  enableRule: (rule: Rule) => Promise<void>;
-  disableRule: (rule: Rule) => Promise<void>;
-  muteRule: (rule: Rule) => Promise<void>;
-  unMuteRule: (rule: Rule) => Promise<void>;
-}
-
-export interface StatusFilterProps {
+export interface LastResponseFilterProps {
   selectedStatuses: string[];
   onChange?: (selectedRuleStatusesIds: string[]) => void;
 }
@@ -71,6 +42,7 @@ export interface Pagination {
 export interface FetchRulesProps {
   searchText: string | undefined;
   ruleLastResponseFilter: string[];
+  ruleStatusesFilter: RuleStatus[];
   typesFilter: string[];
   page: Pagination;
   setPage: Dispatch<SetStateAction<Pagination>>;

@@ -19,6 +19,7 @@ import {
   CommentResponseAlertsType,
   CasesFindResponse,
   CasesStatusResponse,
+  CasesMetricsResponse,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -65,6 +66,7 @@ export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
+export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 
 export interface ResolvedCase {
   case: Case;
@@ -142,7 +144,7 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity'
 >;
 
 export interface UpdateByKey {

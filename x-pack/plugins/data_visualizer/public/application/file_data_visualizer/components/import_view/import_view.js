@@ -585,7 +585,7 @@ export class ImportView extends Component {
                       timeFieldName={timeFieldName}
                       createDataView={createDataView}
                       showFilebeatFlyout={this.showFilebeatFlyout}
-                      additionalLinks={this.props.resultsLinks ?? []}
+                      getAdditionalLinks={this.props.getAdditionalLinks ?? []}
                     />
 
                     {isFilebeatFlyoutVisible && (
