@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { Actions, EventLogger } from './event_logger';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { Screenshot } from './types';
 
 export async function getPdf(
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  logger: EventLogger,
   title: string,
   logo?: string
 ): Promise<Screenshot[]> {
-  logger.info('printing PDF');
+  logger.kbnLogger.info('printing PDF');
 
-  return [
+  const spanEnd = logger.logPdfEvent('printing A4 PDF', Actions.PRINT_A4_PDF, 'output');
+
+  const result = [
     {
       data: await browser.printA4Pdf({ title, logo }),
       title: null,
       description: null,
     },
   ];
+
+  spanEnd();
+
+  return result;
 }

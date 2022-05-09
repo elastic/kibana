@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from 
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
-import { useBreakpoints } from '../../../../../../apps/synthetics/hooks/use_breakpoints';
+import { useBreakpoints } from '../../../../../../hooks/use_breakpoints';
 
 import { nextAriaLabel, prevAriaLabel } from './translations';
 

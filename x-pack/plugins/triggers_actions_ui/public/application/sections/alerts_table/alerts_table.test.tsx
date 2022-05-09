@@ -132,16 +132,16 @@ describe('AlertsTable', () => {
         const result = await wrapper.findAllByTestId('alertsFlyout');
         expect(result.length).toBe(1);
 
-        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('one');
+        expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
         expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
 
         // Should paginate too
-        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginateNext')[0]);
-        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('three');
+        userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+        expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
         expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
 
-        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginatePrevious')[0]);
-        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('one');
+        userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+        expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
         expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
       });
 
@@ -152,10 +152,10 @@ describe('AlertsTable', () => {
         const result = await wrapper.findAllByTestId('alertsFlyout');
         expect(result.length).toBe(1);
 
-        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginateNext')[0]);
+        userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
         expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
 
-        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginatePrevious')[0]);
+        userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
         expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 0, pageSize: 1 });
       });
     });
