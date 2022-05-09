@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import {
-  ExpressionFunctionDefinition,
-  ExpressionValueFilter,
-} from '@kbn/expressions-plugin/common';
+import { map, zipObject } from 'lodash';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { lastValueFrom } from 'rxjs';
+import { buildEsQuery } from '@kbn/es-query';
+import {
+  getEsQueryConfig,
+  KibanaContext,
+  SqlRequestParams,
+  SqlSearchStrategyRequest,
+  SqlSearchStrategyResponse,
+  SQL_SEARCH_STRATEGY,
+} from '@kbn/data-plugin/common';
 import { searchService } from '../../../public/services';
-import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';
-import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { sanitizeName } from '@kbn/canvas-plugin/common/lib/request/sanitize_name';
+import { normalizeType } from '@kbn/canvas-plugin/common/lib/request/normalize_type';
 
 interface Arguments {
   query: string;
@@ -22,19 +29,14 @@ interface Arguments {
   timezone: string;
 }
 
-export function essql(): ExpressionFunctionDefinition<
-  'essql',
-  ExpressionValueFilter,
-  Arguments,
-  any
-> {
+export function essql(): ExpressionFunctionDefinition<'essql', KibanaContext, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().essql;
 
   return {
     name: 'essql',
     type: 'datatable',
     context: {
-      types: ['filter'],
+      types: ['kibana_context'],
     },
     help,
     args: {
@@ -63,25 +65,49 @@ export function essql(): ExpressionFunctionDefinition<
     },
     fn: (input, args, handlers) => {
       const search = searchService.getService().search;
-      const { parameter, ...restOfArgs } = args;
+      const { parameter, timezone, count, query } = args;
       const req = {
-        ...restOfArgs,
-        params: parameter,
-        filter: input.and,
+        query,
+        fetch_size: count,
+        time_zone: timezone,
+        params: parameter as SqlRequestParams,
+        filter: buildEsQuery(
+          undefined,
+          input.query || [],
+          // we need to convert timeRange to filter and add it here
+          input.filters || []
+          /*, getEsQueryConfig({ get: getConfig })*/
+        ),
+        field_multi_value_leniency: true,
       };
 
       return lastValueFrom(
-        search.search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
-          strategy: ESSQL_SEARCH_STRATEGY,
+        search.search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(req, {
+          strategy: SQL_SEARCH_STRATEGY,
         })
       )
-        .then((resp: EssqlSearchStrategyResponse) => {
+        .then((resp: SqlSearchStrategyResponse) => {
+          debugger;
+
+          let body = resp.rawResponse;
+
+          const columns = body.columns!.map(({ name, type }) => {
+            return {
+              id: sanitizeName(name),
+              name: sanitizeName(name),
+              meta: { type: normalizeType(type) },
+            };
+          });
+          const columnNames = map(columns, 'name');
+          const rows = body.rows.map((row) => zipObject(columnNames, row));
+
           return {
             type: 'datatable',
             meta: {
               type: 'essql',
             },
-            ...resp,
+            columns,
+            rows,
           };
         })
         .catch((e) => {
