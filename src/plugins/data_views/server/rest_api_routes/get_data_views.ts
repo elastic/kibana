@@ -7,33 +7,28 @@
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   SERVICE_PATH,
-  SERVICE_PATH_LEGACY,
   SERVICE_KEY_MULTIPLE,
-  SERVICE_KEY_MULTIPLE_LEGACY,
 } from '../constants';
 
 interface GetDataViewsArgs {
   dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
   counterName: string;
-  size: number;
 }
 
 export const getDataViews = async ({
   dataViewsService,
   usageCollection,
   counterName,
-  size,
 }: GetDataViewsArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.find('' ,size);
+  return dataViewsService.getIdsWithTitle();
 };
 
 const getDataViewsRouteFactory =
@@ -49,16 +44,7 @@ const getDataViewsRouteFactory =
     router.get(
       {
         path,
-        validate: {
-          query: schema.object(
-            {
-              size: schema.number({
-                defaultValue: 10,
-                max: 10000
-              }),
-            }
-          ),
-        },
+        validate: {},
       },
       router.handleLegacyErrors(
         handleErrors(async (ctx, req, res) => {
@@ -71,13 +57,11 @@ const getDataViewsRouteFactory =
             elasticsearchClient,
             req
           );
-          const { size } = req.query;
 
           const dataViews = await getDataViews({
             dataViewsService,
             usageCollection,
-            counterName: `${req.route.method} ${path}`,
-            size
+            counterName: `${req.route.method} ${path}`
           });
 
           return res.ok({
@@ -85,7 +69,7 @@ const getDataViewsRouteFactory =
               'content-type': 'application/json',
             },
             body: {
-              [serviceKey]: dataViews.map(dataView => dataView.toSpec()),
+              [serviceKey]: dataViews,
             },
           });
         })
@@ -96,9 +80,4 @@ const getDataViewsRouteFactory =
 export const registerGetDataViewsRoute = getDataViewsRouteFactory(
   SERVICE_PATH,
   SERVICE_KEY_MULTIPLE
-);
-
-export const registerGetDataViewsRouteLegacy = getDataViewsRouteFactory(
-  SERVICE_PATH_LEGACY,
-  SERVICE_KEY_MULTIPLE_LEGACY
 );
