@@ -7,18 +7,10 @@
 
 import React, { memo } from 'react';
 
-import {
-  useForm,
-  Form,
-  FormConfig,
-  FieldConfig,
-  UseField,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
-
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { useKibana } from '../../../common/lib/kibana';
 
 interface ConnectorFormData {
   name: string;
@@ -44,23 +36,7 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
 };
 
 const CreateConnectorFormComponent: React.FC = () => {
-  const {
-    docLinks,
-    application: { capabilities },
-  } = useKibana().services;
-  const canSave = hasSaveActionsCapability(capabilities);
-
-  const onFormSubmit: FormConfig<ConnectorFormData>['onSubmit'] = async (data, isValid) => {
-    console.log('Form data:', data);
-  };
-
-  const { form } = useForm({ onSubmit: onFormSubmit });
-
-  return (
-    <Form form={form}>
-      <UseField path="name" config={nameConfig} />
-    </Form>
-  );
+  return <UseField path="name" config={nameConfig} component={Field} />;
 };
 
 export const CreateConnectorForm = memo(CreateConnectorFormComponent);

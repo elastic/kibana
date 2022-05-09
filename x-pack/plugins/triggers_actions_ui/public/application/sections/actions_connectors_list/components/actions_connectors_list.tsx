@@ -51,6 +51,7 @@ import {
   connectorDeprecatedMessage,
   deprecatedMessage,
 } from '../../../../common/connectors_selection';
+import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -454,12 +455,12 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         )}
       {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
       {addFlyoutVisible ? (
-        <ConnectorAddFlyout
+        <CreateConnectorFlyout
           onClose={() => {
             setAddFlyoutVisibility(false);
           }}
-          onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
-          reloadConnectors={loadActions}
+          // onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
+          // reloadConnectors={loadActions}
           actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}
