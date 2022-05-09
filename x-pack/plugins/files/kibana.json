@@ -1,0 +1,14 @@
+{
+  "id": "files",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "@elastic/kibana-app-services",
+    "githubTeam": "team:AppServicesUx"
+  },
+  "description": "Bringing blob storage to Kibana",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}
