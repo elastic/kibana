@@ -15,35 +15,25 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 [[general-fleet-settings-kb]]
 ==== General {fleet} settings
 
-[cols="2*<"]
-|===
-| `xpack.fleet.enabled` {ess-icon}
-  | Set to `true` (default) to enable {fleet}. 
-| `xpack.fleet.agents.enabled` {ess-icon}
-  | Set to `true` (default) to enable {fleet}. 
-|===
+`xpack.fleet.enabled` {ess-icon}::
+Set to `true` (default) to enable {fleet}. 
+
+`xpack.fleet.agents.enabled` {ess-icon}::
+Set to `true` (default) to enable {fleet}.
 
 [[fleet-data-visualizer-settings]]
 
 ==== {package-manager} settings
 
-[cols="2*<"]
-|===
-| `xpack.fleet.registryUrl`
-  | The address to use to reach {package-manager} registry.
-|===
+`xpack.fleet.registryUrl`::
+The address to use to reach the {package-manager} registry.
 
 ==== {fleet} settings
 
-[cols="2*<"]
-|===
-| `xpack.fleet.agents.fleet_server.hosts`
-  | Hostnames used by {agent} for accessing {fleet-server}.
-| `xpack.fleet.agents.elasticsearch.host`
-  | The hostname used by {agent} for accessing {es}.
-|===
+`xpack.fleet.agents.fleet_server.hosts`::
+Hostnames used by {agent} for accessing {fleet-server}.
 
-[NOTE]
-====
-In {ecloud}, {fleet} flags are already configured.
-====
+`xpack.fleet.agents.elasticsearch.hosts`::
+Hostnames used by {agent} for accessing {es}.
+
+NOTE: In {ecloud}, {fleet} flags are already configured.
