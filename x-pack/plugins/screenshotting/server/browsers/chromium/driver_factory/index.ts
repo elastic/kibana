@@ -114,10 +114,6 @@ export class HeadlessChromiumDriverFactory {
     const dataDir = getDataPath();
     fs.mkdirSync(dataDir, { recursive: true });
     this.userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
-
-    if (this.config.browser.chromium.disableSandbox) {
-      logger.warn(`Enabling the Chromium sandbox provides an additional layer of protection.`);
-    }
   }
 
   private getChromiumArgs() {
