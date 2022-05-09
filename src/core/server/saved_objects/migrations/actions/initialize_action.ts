@@ -44,16 +44,15 @@ export const checkClusterRoutingAllocationEnabledTask =
         flat_settings: true,
       })
       .then((settings) => {
-        const clusterRoutingAllocations: string[] =
+        // transient settings take preference over persistent settings
+        const clusterRoutingAllocation =
           settings?.transient?.[routingAllocationEnable] ??
-          settings?.persistent?.[routingAllocationEnable] ??
-          [];
+          settings?.persistent?.[routingAllocationEnable];
 
-        const clusterRoutingAllocationEnabled =
-          [...clusterRoutingAllocations].length === 0 ||
-          [...clusterRoutingAllocations].every((s: string) => s === 'all'); // if set, only allow 'all'
+        const clusterRoutingAllocationEnabledIsAll =
+          clusterRoutingAllocation === undefined || clusterRoutingAllocation === 'all';
 
-        if (!clusterRoutingAllocationEnabled) {
+        if (!clusterRoutingAllocationEnabledIsAll) {
           return Either.left({
             type: 'unsupported_cluster_routing_allocation' as const,
             message:
