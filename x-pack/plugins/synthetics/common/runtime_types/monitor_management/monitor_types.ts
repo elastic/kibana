@@ -200,7 +200,7 @@ export const ThrottlingConfigKeyCodec = t.union([
 export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
 
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
-  t.union([
+  t.intersection([
     t.interface({
       [ConfigKey.METADATA]: MetadataCodec,
       [ConfigKey.SOURCE_ZIP_URL]: t.string,
