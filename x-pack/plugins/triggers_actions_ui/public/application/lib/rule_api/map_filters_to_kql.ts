@@ -25,9 +25,11 @@ export const mapFiltersToKql = ({
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
+  tagsFilter,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
+  tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
 }): string[] => {
@@ -67,6 +69,9 @@ export const mapFiltersToKql = ({
     } else {
       filters.push(`${enablementFilter} or ${snoozedFilter}`);
     }
+  }
+  if (tagsFilter && tagsFilter.length) {
+    filters.push(`alert.attributes.tags:(${tagsFilter.join(' or ')})`);
   }
 
   return filters;
