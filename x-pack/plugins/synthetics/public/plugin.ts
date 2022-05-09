@@ -30,6 +30,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import {
+  enableNewSyntheticsView,
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -192,22 +193,26 @@ export class UptimePlugin
       },
     });
 
-    // Register the Synthetics UI plugin
-    core.application.register({
-      id: 'synthetics',
-      euiIconType: 'logoObservability',
-      order: 8400,
-      title: PLUGIN.SYNTHETICS,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      keywords: appKeywords,
-      deepLinks: [],
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, corePlugins] = await core.getStartServices();
+    const isSyntheticsViewEnabled = core.uiSettings.get<boolean>(enableNewSyntheticsView);
 
-        const { renderApp } = await import('./apps/synthetics/render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
-      },
-    });
+    if (isSyntheticsViewEnabled) {
+      // Register the Synthetics UI plugin
+      core.application.register({
+        id: 'synthetics',
+        euiIconType: 'logoObservability',
+        order: 8400,
+        title: PLUGIN.SYNTHETICS,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        keywords: appKeywords,
+        deepLinks: [],
+        mount: async (params: AppMountParameters) => {
+          const [coreStart, corePlugins] = await core.getStartServices();
+
+          const { renderApp } = await import('./apps/synthetics/render_app');
+          return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
+        },
+      });
+    }
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
