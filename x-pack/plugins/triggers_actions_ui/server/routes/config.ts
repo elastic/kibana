@@ -19,6 +19,8 @@ export function createConfigRoute(
   logger: Logger,
   router: IRouter,
   baseRoute: string,
+  // config is a function because "isUsingSecurity" is pulled from the license
+  // state which gets populated after plugin setup().
   config: () => AlertingRulesConfig
 ) {
   const path = `${baseRoute}/_config`;
