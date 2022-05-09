@@ -13,7 +13,7 @@ export type OriginalColumn = { id: string; label: string } & (
 );
 
 export type RenameColumnsExpressionFunction = ExpressionFunctionDefinition<
-  'lens_restore_column_ids',
+  'lens_restore_original_column_ids',
   Datatable,
   {
     idMap: string;

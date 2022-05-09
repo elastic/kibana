@@ -109,6 +109,7 @@ function getExpressionForLayer(
     });
 
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
+    const esAggsToOriginalColumnIdMap: Record<string, OriginalColumn> = {};
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -147,6 +148,15 @@ function getExpressionForLayer(
             chain: [aggAst],
           })
         );
+
+        const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+          ? `col-${index + (col.isBucketed ? 0 : 1)}-${index}`
+          : `col-${index}-${index}`;
+
+        esAggsToOriginalColumnIdMap[esAggsId] = {
+          ...col,
+          id: colId,
+        };
       }
     });
 
@@ -165,20 +175,6 @@ function getExpressionForLayer(
         })
       );
     }
-
-    const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-        ? `col-${index + (column.isBucketed ? 0 : 1)}-${index}`
-        : `col-${index}-${index}`;
-
-      return {
-        ...currentIdMap,
-        [esAggsId]: {
-          ...column,
-          id: colId,
-        },
-      };
-    }, {} as Record<string, OriginalColumn>);
 
     const percentileExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
 
@@ -217,7 +213,7 @@ function getExpressionForLayer(
       };
 
       const siblingPercentiles = rest.map(
-        ({ functions: [fnBuilder] }) => fnBuilder.getArgument('percentile')?.[0]
+        ({ functions: [fnBuilder] }) => fnBuilder.getArgument('percentile')![0]
       ) as number[];
 
       aggPercentilesConfig.percents = [
@@ -353,9 +349,9 @@ function getExpressionForLayer(
         }).toAst(),
         {
           type: 'function',
-          function: 'lens_restore_column_ids',
+          function: 'lens_restore_original_column_ids',
           arguments: {
-            idMap: [JSON.stringify(idMap)],
+            idMap: [JSON.stringify(esAggsToOriginalColumnIdMap)],
           },
         },
         ...expressions,
