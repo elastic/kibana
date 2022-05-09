@@ -20,14 +20,14 @@ export const Tags: React.FunctionComponent<Props> = ({ tags }) => {
     <>
       {tags.length > MAX_TAGS_TO_DISPLAY ? (
         <>
-          <EuiToolTip content={tags.join(', ')}>
-            <>
+          <EuiToolTip content={<span data-test-subj="agentTagsTooltip">{tags.join(', ')}</span>}>
+            <span data-test-subj="agentTags">
               {take(tags, 3).join(', ')} + {tags.length - MAX_TAGS_TO_DISPLAY} more
-            </>
+            </span>
           </EuiToolTip>
         </>
       ) : (
-        tags.join(', ')
+        <span data-test-subj="agentTags">{tags.join(', ')}</span>
       )}
     </>
   );
