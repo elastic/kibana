@@ -29,7 +29,7 @@ export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig>
         <EuiDescriptionListTitle>
           <FormattedMessage
             id="xpack.snapshotRestore.summary.policyFeatureStatesLabel"
-            defaultMessage="Include feature states"
+            defaultMessage="Include feature state"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>

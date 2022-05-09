@@ -8,7 +8,6 @@
 import React, { Fragment, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverGt from 'semver/functions/gt';
-import { sortBy } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -602,18 +601,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
-            defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-            templates with the same name. {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
-                  {i18n.translate(
-                    'xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDocLink',
-                    { defaultMessage: 'Learn more.' }
-                  )}
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Restores the global cluster state as part of the snapshot."
           />
         }
         fullWidth
@@ -652,7 +640,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesTitle"
-                defaultMessage="Restore feature states"
+                defaultMessage="Restore feature state"
               />
             </h3>
           </EuiTitle>
@@ -661,20 +649,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <>
             <FormattedMessage
               id="xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesDescription"
-              defaultMessage="Restores persistent settings and all system indices from features. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink
-                    target="_blank"
-                    href={docLinks.links.snapshotRestore.restoreSnapshotFeatureStates}
-                  >
-                    {i18n.translate(
-                      'xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesDocLink',
-                      { defaultMessage: 'Learn more.' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
+              defaultMessage="Restores the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
             />
 
             {semverGt(version, '7.12.0') &&
@@ -706,7 +681,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.restoreFeatureStatesLabel"
-                defaultMessage="Restore feature states"
+                defaultMessage="Restore feature state from"
               />
             }
             checked={isFeatureStatesToggleEnabled}

@@ -71,7 +71,7 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
           <h3>
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.includeFeatureStatesDescriptionTitle"
-              defaultMessage="Include feature states"
+              defaultMessage="Include feature state"
             />
           </h3>
         </EuiTitle>
@@ -79,7 +79,7 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.includeFeatureStatesDescription"
-          defaultMessage="Stores the state for all the features as part of the snapshot. This will capture all system indices and other required indices and data streams in addition to any specific indices that have been selected for capture."
+          defaultMessage="Stores the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
         />
       }
       fullWidth
@@ -90,7 +90,7 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.policyIncludeFeatureStatesLabel"
-              defaultMessage="Include feature states"
+              defaultMessage="Include feature state from"
             />
           }
           checked={isFeatureStatesToggleEnabled}

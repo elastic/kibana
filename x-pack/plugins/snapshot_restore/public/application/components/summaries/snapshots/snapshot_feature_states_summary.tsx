@@ -34,7 +34,7 @@ export const SnapshotFeatureStatesSummary: React.FunctionComponent<SnapshotConfi
         <EuiDescriptionListTitle>
           <FormattedMessage
             id="xpack.snapshotRestore.summary.snapshotFeatureStatesLabel"
-            defaultMessage="Include feature states"
+            defaultMessage="Include feature state"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>

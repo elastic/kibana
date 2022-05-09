@@ -274,29 +274,6 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
         </EuiFlexGroup>
 
         <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="partial">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.partialLabel"
-                defaultMessage="Allow partial shards"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {partial ? (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.partialTrueLabel"
-                  defaultMessage="Yes"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.partialFalseLabel"
-                  defaultMessage="No"
-                />
-              )}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
           <EuiFlexItem data-test-subj="includeGlobalState">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
@@ -321,10 +298,33 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               )}
             </EuiDescriptionListDescription>
           </EuiFlexItem>
+
+          <PolicyFeatureStatesSummary featureStates={featureStates} />
         </EuiFlexGroup>
 
         <EuiFlexGroup>
-          <PolicyFeatureStatesSummary featureStates={featureStates} />
+          <EuiFlexItem data-test-subj="partial">
+            <EuiDescriptionListTitle data-test-subj="title">
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyDetails.partialLabel"
+                defaultMessage="Allow partial shards"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+              {partial ? (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyDetails.partialTrueLabel"
+                  defaultMessage="Yes"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyDetails.partialFalseLabel"
+                  defaultMessage="No"
+                />
+              )}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiDescriptionList>
 
