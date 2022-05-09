@@ -110,7 +110,7 @@ const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
     ES_SNAPSHOT_MANIFEST:
-      'https://storage.googleapis.com/ci-artifacts.kibana.dev/test_es_snapshots/pr131531_v8.3.0/manifest.json',
+      'https://storage.googleapis.com/ci-artifacts.kibana.dev/test_es_snapshots/pr131531_v8.3.0_take2/manifest.json',
   },
   steps,
 };
