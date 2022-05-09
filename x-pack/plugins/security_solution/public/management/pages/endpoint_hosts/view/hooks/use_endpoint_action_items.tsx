@@ -32,13 +32,10 @@ export const useEndpointActionItems = (
   const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
-
+  const showEndpointResponseActionsConsole = useShowEndpointResponseActionsConsole();
   const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsConsoleEnabled'
   );
-
-  // FIXME:PT DO NOT COMMIT THIS. Will cause errors if feature is not enabled
-  const showEndpointResponseActionsConsole = useShowEndpointResponseActionsConsole();
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -116,14 +113,14 @@ export const useEndpointActionItems = (
                 'data-test-subj': 'console',
                 icon: 'console',
                 key: 'consoleLink',
-                onClick: (ev) => {
+                onClick: (ev: React.MouseEvent) => {
                   ev.preventDefault();
                   showEndpointResponseActionsConsole(endpointMetadata);
                 },
                 children: (
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.actions.hostDetails"
-                    defaultMessage="Response actions"
+                    defaultMessage="Launch responder"
                   />
                 ),
               },

@@ -20,8 +20,6 @@ export const IsolateActionResult = memo<CommandExecutionComponentProps>(
     const actionRequestSent = Boolean(store.actionRequestSent);
     const isolateHost = useIsolateHost();
 
-    // FIXME:PT implement checking of action response
-
     useEffect(() => {
       if (!actionRequestSent) {
         isolateHost.mutate({
@@ -54,7 +52,7 @@ export const IsolateActionResult = memo<CommandExecutionComponentProps>(
 
     useEffect(() => {
       if (actionId) {
-        // Start waiting for an action response
+        // FIXME:PT Start waiting for an action response
       }
     }, [actionId]);
 

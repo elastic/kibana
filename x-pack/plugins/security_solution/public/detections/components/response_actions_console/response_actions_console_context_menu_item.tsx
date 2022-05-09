@@ -59,7 +59,7 @@ export const ResponseActionsConsoleContextMenuItem =
     }, [endpointHostInfo?.host_status, endpointId, error, isFetching]);
 
     const handleResponseActionsClick = useCallback(() => {
-      if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo);
+      if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);
       if (onClick) onClick();
     }, [endpointHostInfo, onClick, showEndpointResponseActionsConsole]);
 
@@ -74,7 +74,7 @@ export const ResponseActionsConsoleContextMenuItem =
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.buttonLabel"
-          defaultMessage="Response actions"
+          defaultMessage="Launch responder"
         />
       </EuiContextMenuItem>
     );
