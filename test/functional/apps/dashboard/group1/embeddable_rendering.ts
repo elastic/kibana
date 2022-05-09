@@ -181,6 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await alert?.accept();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await elasticChart.setNewChartUiDebugFlag();
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });

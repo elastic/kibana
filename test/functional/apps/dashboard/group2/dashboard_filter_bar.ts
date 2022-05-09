@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const queryBar = getService('queryBar');
   const security = getService('security');
   const PageObjects = getPageObjects([
     'common',
@@ -144,6 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
+        await queryBar.submitQuery();
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
@@ -157,6 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await elasticChart.setNewChartUiDebugFlag(true);
+        await queryBar.submitQuery();
         await pieChart.expectPieSliceCount(1);
       });
 

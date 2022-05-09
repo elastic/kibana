@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
-
+        await queryBar.submitQuery();
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
@@ -151,7 +151,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
-
+        await elasticChart.setNewChartUiDebugFlag(true);
+        await queryBar.submitQuery();
         await dashboardExpect.selectedLegendColorCount('#000000', 5);
       });
 
@@ -173,6 +174,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const newId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         expect(newId).to.be.equal(oldId);
         await PageObjects.dashboard.waitForRenderComplete();
+        await elasticChart.setNewChartUiDebugFlag(true);
+        await queryBar.submitQuery();
         await dashboardExpect.selectedLegendColorCount('#000000', 5);
       });
     });
