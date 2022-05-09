@@ -13,6 +13,8 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { fileObjectType } from './saved_objects';
+
 export class FilesPlugin implements Plugin {
   private readonly logger: Logger;
 
@@ -20,8 +22,9 @@ export class FilesPlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup({ savedObjects }: CoreSetup) {
     this.logger.debug('files: Setup');
+    savedObjects.registerType(fileObjectType);
     return {};
   }
 
