@@ -262,7 +262,7 @@ const isFields = (path: string) => {
  */
 
 export const loadFieldsFromYaml = async (
-  pkg: PackageInfo,
+  pkg: Pick<PackageInfo, 'version' | 'name'>,
   datasetName?: string
 ): Promise<Field[]> => {
   // Fetch all field definition files

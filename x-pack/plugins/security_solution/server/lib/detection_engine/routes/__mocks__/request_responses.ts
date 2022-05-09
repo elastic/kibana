@@ -577,7 +577,7 @@ export const getAggregateExecutionEvents = (): GetAggregateRuleExecutionEventsRe
       timed_out: false,
       indexing_duration_ms: 7,
       search_duration_ms: 551,
-      gap_duration_ms: 0,
+      gap_duration_s: 0,
       security_status: 'succeeded',
       security_message: 'succeeded',
     },
@@ -600,7 +600,7 @@ export const getAggregateExecutionEvents = (): GetAggregateRuleExecutionEventsRe
       timed_out: false,
       indexing_duration_ms: 0,
       search_duration_ms: 0,
-      gap_duration_ms: 0,
+      gap_duration_s: 0,
       security_status: 'partial failure',
       security_message:
         'Check privileges failed to execute ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [broken-index] name: "This Rule Makes Alerts, Actions, AND Moar!" id: "f78f3550-a186-11ec-89a1-0bce95157aba" rule id: "b64b4540-d035-4826-a1e7-f505bf4b9653" execution id: "254d8400-9dc7-43c5-ad4b-227273d1a44b" space ID: "default"',

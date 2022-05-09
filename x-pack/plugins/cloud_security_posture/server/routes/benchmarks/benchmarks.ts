@@ -19,10 +19,11 @@ import type {
   AgentPolicy,
   ListResult,
 } from '@kbn/fleet-plugin/common';
-import { cspRuleAssetSavedObjectType, CspRuleSchema } from '../../../common/schemas/csp_rule';
+import { CspRuleSchema } from '../../../common/schemas/csp_rule';
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  cspRuleAssetSavedObjectType,
 } from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
