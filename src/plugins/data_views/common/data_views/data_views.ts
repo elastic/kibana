@@ -339,12 +339,16 @@ export class DataViewsService {
         );
       }
 
-      this.onError(err, {
-        title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-          values: { id: indexPattern.id, title: indexPattern.title },
-        }),
-      });
+      this.onError(
+        err,
+        {
+          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+            values: { id: indexPattern.id, title: indexPattern.title },
+          }),
+        },
+        indexPattern.title
+      );
     }
   };
 
@@ -388,12 +392,16 @@ export class DataViewsService {
         return {};
       }
 
-      this.onError(err, {
-        title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-          values: { id, title },
-        }),
-      });
+      this.onError(
+        err,
+        {
+          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+            values: { id, title },
+          }),
+        },
+        title
+      );
       throw err;
     }
   };
@@ -545,12 +553,16 @@ export class DataViewsService {
           `initFromSavedObject:${title}`
         );
       } else {
-        this.onError(err, {
-          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: savedObject.id, title },
-          }),
-        });
+        this.onError(
+          err,
+          {
+            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+              values: { id: savedObject.id, title },
+            }),
+          },
+          title || ''
+        );
       }
     }
 

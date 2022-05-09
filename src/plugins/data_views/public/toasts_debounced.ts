@@ -8,7 +8,7 @@
 
 import { debounce } from 'lodash';
 import { CoreStart } from 'src/core/public';
-import type { OnNotification } from '../common/types';
+import type { OnNotification, OnError } from '../common/types';
 
 export const toastsAddDebounced = (
   notifications: CoreStart['notifications'],
@@ -18,7 +18,7 @@ export const toastsAddDebounced = (
   return (toastInputFields, key) => {
     if (!debouncerCollector[key]) {
       debouncerCollector[key] = debounce(
-        notifications.toasts.add,
+        notifications.toasts.add.bind(notifications.toasts.add),
         uiSettings.get('search:timeout') + 5000,
         {
           leading: true,
@@ -26,5 +26,24 @@ export const toastsAddDebounced = (
       );
     }
     return debouncerCollector[key](toastInputFields);
+  };
+};
+
+export const toastsErrorDebounced = (
+  notifications: CoreStart['notifications'],
+  uiSettings: CoreStart['uiSettings']
+): OnError => {
+  const debouncerCollector: Record<string, typeof notifications.toasts.addError> = {};
+  return (error, toastInputFields, key) => {
+    if (!debouncerCollector[key]) {
+      debouncerCollector[key] = debounce(
+        notifications.toasts.addError.bind(notifications.toasts),
+        uiSettings.get('search:timeout') + 5000,
+        {
+          leading: true,
+        }
+      );
+    }
+    return debouncerCollector[key](error, toastInputFields);
   };
 };
