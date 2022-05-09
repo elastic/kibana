@@ -879,7 +879,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ),
           ]);
 
-          // User with permissions only to security solution request cases from observability
+          // User with permissions only to security solution should get only the security solution cases
           const res = await findCases({
             supertest: supertestWithoutAuth,
             query: {
