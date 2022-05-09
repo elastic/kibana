@@ -20,10 +20,8 @@ import { setFlyoutRef } from '../embeddable/control_group_container';
 
 export type CreateControlButtonTypes = 'toolbar' | 'callout';
 export interface CreateControlButtonProps {
-  defaultControlWidth?: ControlWidth;
+  defaultControlWidth: ControlWidth;
   defaultControlGrow: boolean;
-  updateDefaultWidth: (defaultControlWidth: ControlWidth) => void;
-  updateDefaultGrow: (defaultControlGrow: boolean) => void;
   addNewEmbeddable: (type: string, input: Omit<ControlInput, 'id'>) => void;
   setLastUsedDataViewId?: (newDataViewId: string) => void;
   getRelevantDataViewId?: () => string | undefined;
@@ -44,8 +42,6 @@ export const CreateControlButton = ({
   closePopover,
   getRelevantDataViewId,
   setLastUsedDataViewId,
-  updateDefaultWidth,
-  updateDefaultGrow,
 }: CreateControlButtonProps) => {
   // Controls Services Context
   const { overlays, controls } = pluginServices.getServices();
@@ -84,11 +80,11 @@ export const CreateControlButton = ({
               setLastUsedDataViewId={setLastUsedDataViewId}
               getRelevantDataViewId={getRelevantDataViewId}
               isCreate={true}
-              width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-              grow={defaultControlGrow ?? true}
+              width={defaultControlWidth}
+              grow={defaultControlGrow}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
-              updateWidth={updateDefaultWidth}
-              updateGrow={updateDefaultGrow}
+              updateWidth={(newWidth) => (inputToReturn.width = newWidth)}
+              updateGrow={(newGrow) => (inputToReturn.grow = newGrow)}
               onSave={(type: string) => {
                 const factory = getControlFactory(type) as IEditableControlFactory;
                 if (factory.presaveTransformFunction) {

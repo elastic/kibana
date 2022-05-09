@@ -75,8 +75,11 @@ export const EditControlGroup = ({
               ([id, panel]) =>
                 (newPanels[id] = {
                   ...panel,
-                  width: newInput.defaultControlWidth,
-                  grow: newInput.defaultControlGrow,
+                  explicitInput: {
+                    ...panel.explicitInput,
+                    width: newInput.defaultControlWidth,
+                    grow: newInput.defaultControlGrow,
+                  },
                 } as ControlPanelState)
             );
             newInput.panels = newPanels;

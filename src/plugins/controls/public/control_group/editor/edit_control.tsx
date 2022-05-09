@@ -35,14 +35,13 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   >();
   const {
     containerActions: { untilEmbeddableLoaded, removeEmbeddable, updateInputForChild },
-    actions: { setControlWidth, setControlGrow },
     useEmbeddableSelector,
-    useEmbeddableDispatch,
   } = reduxContainerContext;
-  const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels, defaultControlGrow } = useEmbeddableSelector((state) => state);
+  const { panels, defaultControlGrow, defaultControlWidth } = useEmbeddableSelector(
+    (state) => state
+  );
 
   // keep up to date ref of latest panel state for comparison when closing editor.
   const latestPanelState = useRef(panels[embeddableId]);
@@ -64,11 +63,10 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     const onCancel = (ref: OverlayRef) => {
       if (
         removed ||
-        (isEqual(latestPanelState.current.explicitInput, {
+        isEqual(latestPanelState.current.explicitInput, {
           ...panel.explicitInput,
           ...inputToReturn,
-        }) &&
-          isEqual(latestPanelState.current.width, panel.width))
+        })
       ) {
         ref.close();
         return;
@@ -80,7 +78,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         buttonColor: 'danger',
       }).then((confirmed) => {
         if (confirmed) {
-          dispatch(setControlWidth({ width: panel.width, embeddableId }));
           ref.close();
         }
       });
@@ -90,15 +87,15 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       forwardAllContext(
         <ControlEditor
           isCreate={false}
-          width={panel.width}
-          grow={defaultControlGrow ?? true}
+          width={panel.explicitInput.width ?? defaultControlWidth}
+          grow={panel.explicitInput.grow ?? defaultControlGrow}
           embeddable={embeddable}
           title={embeddable.getTitle()}
           onCancel={() => onCancel(flyoutInstance)}
           updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+          updateWidth={(newWidth) => (inputToReturn.width = newWidth)}
+          updateGrow={(newGrow) => (inputToReturn.grow = newGrow)}
           setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
-          updateWidth={(newWidth) => dispatch(setControlWidth({ width: newWidth, embeddableId }))}
-          updateGrow={(grow) => dispatch(setControlGrow({ grow, embeddableId }))}
           onTypeEditorChange={(partialInput) =>
             (inputToReturn = { ...inputToReturn, ...partialInput })
           }

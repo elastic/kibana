@@ -24,8 +24,9 @@ export type ControlInput = EmbeddableInput & {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
+  width?: ControlWidth;
+  grow?: boolean;
 };
 
 export type DataControlInput = ControlInput & {

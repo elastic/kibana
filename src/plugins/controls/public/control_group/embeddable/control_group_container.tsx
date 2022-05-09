@@ -123,10 +123,6 @@ export class ControlGroupContainer extends Container<
         buttonType={buttonType}
         defaultControlWidth={this.getInput().defaultControlWidth}
         defaultControlGrow={this.getInput().defaultControlGrow}
-        updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-        updateDefaultGrow={(defaultControlGrow: boolean) =>
-          this.updateInput({ defaultControlGrow })
-        }
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
         closePopover={closePopover}
         getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
@@ -306,8 +302,6 @@ export class ControlGroupContainer extends Container<
     }
     return {
       order: nextOrder,
-      width: this.getInput().defaultControlWidth,
-      grow: this.getInput().defaultControlGrow,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }

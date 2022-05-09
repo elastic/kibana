@@ -14,8 +14,6 @@ export const CONTROL_GROUP_TYPE = 'control_group';
 export interface ControlPanelState<TEmbeddableInput extends ControlInput = ControlInput>
   extends PanelState<TEmbeddableInput> {
   order: number;
-  width: ControlWidth;
-  grow: boolean;
 }
 
 export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';

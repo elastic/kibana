@@ -65,8 +65,8 @@ const SortableControlInner = forwardRef<
   const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
   const { panels } = useEmbeddableSelector((state) => state);
 
-  const width = panels[embeddableId].width;
-  const grow = panels[embeddableId].grow;
+  const width = panels[embeddableId].explicitInput.width;
+  const grow = panels[embeddableId].explicitInput.grow;
 
   const dragHandle = (
     <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame__dragHandle">
@@ -109,7 +109,7 @@ export const ControlClone = ({ draggingId }: { draggingId: string }) => {
   const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
   const { panels, controlStyle } = useEmbeddableSelector((state) => state);
 
-  const width = panels[draggingId].width;
+  const width = panels[draggingId].explicitInput.width;
   const title = panels[draggingId].explicitInput.title;
   return (
     <EuiFlexItem
