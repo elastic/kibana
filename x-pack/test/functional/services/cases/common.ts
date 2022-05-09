@@ -7,12 +7,14 @@
 
 import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function CasesCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const header = getPageObject('header');
+  const common = getPageObject('common');
 
   return {
     /**
@@ -57,6 +59,14 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
       await label.click();
       await this.assertRadioGroupValue(testSubject, value);
+    },
+
+    async selectSeverity(severity: CaseSeverity) {
+      await common.clickAndValidate(
+        'case-severity-selection',
+        `case-severity-selection-${severity}`
+      );
+      await testSubjects.click(`case-severity-selection-${severity}`);
     },
   };
 }
