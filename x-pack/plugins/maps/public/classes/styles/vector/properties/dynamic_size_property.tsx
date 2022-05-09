@@ -55,28 +55,13 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   syncIconSizeWithMb(symbolLayerId: string, mbMap: MbMap) {
-    const rangeFieldMeta = this.getRangeFieldMeta();
-    if (this._isSizeDynamicConfigComplete() && rangeFieldMeta) {
-      const targetName = this.getMbFieldName();
-      // Using property state instead of feature-state because layout properties do not support feature-state
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
-        'interpolate',
-        ['linear'],
-        makeMbClampedNumberExpression({
-          minValue: rangeFieldMeta.min,
-          maxValue: rangeFieldMeta.max,
-          fallback: 0,
-          lookupFunction: MB_LOOKUP_FUNCTION.GET,
-          fieldName: targetName,
-        }),
-        rangeFieldMeta.min,
-        this._options.minSize / HALF_MAKI_ICON_SIZE,
-        rangeFieldMeta.max,
-        this._options.maxSize / HALF_MAKI_ICON_SIZE,
-      ]);
-    } else {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-size', null);
-    }
+    const iconSizeExpression = this.getMbSizeExpression(
+      true,
+      function(rangeValue) {
+        return rangeValue / HALF_MAKI_ICON_SIZE
+      }
+    );
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSizeExpression);
   }
 
   syncCircleStrokeWidthWithMb(mbLayerId: string, mbMap: MbMap) {
@@ -85,7 +70,6 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   syncCircleRadiusWithMb(mbLayerId: string, mbMap: MbMap) {
-    const rangeFieldMeta = this.getRangeFieldMeta();
     const circleRadius = this.getMbSizeExpression(true);
     console.log(JSON.stringify(circleRadius, null, 2));
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
@@ -104,8 +88,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   /*
    * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [minSize, maxSize]
    * @param {boolean} isArea When true, translate square root of domain value to display range.
+   * @param {undefined | function} scaleRange
    */
-  getMbSizeExpression(isArea: boolean) {
+  getMbSizeExpression(isArea: boolean, scaleRange?: (rangeValue: number) => number) {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (!this._isSizeDynamicConfigComplete() || !rangeFieldMeta) {
       // return min of size to avoid flashing
@@ -129,12 +114,14 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       ? rangeFieldMeta.min <= 0 ? Math.abs(rangeFieldMeta.min) + 2 : 2 - rangeFieldMeta.min
       : 0;
 
-    const maxValueStop = isArea ? Math.sqrt(rangeFieldMeta.max + valueShift) : rangeFieldMeta.max;
-    const minValueStop = isArea ? Math.sqrt(rangeFieldMeta.min + valueShift) : rangeFieldMeta.min;
+    const maxValueStopInput = isArea ? Math.sqrt(rangeFieldMeta.max + valueShift) : rangeFieldMeta.max;
+    const minValueStopInput = isArea ? Math.sqrt(rangeFieldMeta.min + valueShift) : rangeFieldMeta.min;
+    const maxRangeStopOutput = scaleRange ? scaleRange(this._options.maxSize) : this._options.maxSize;
+    const minRangeStopOutput = scaleRange ? scaleRange(this._options.minSize) : this._options.minSize;
     const stops =
       rangeFieldMeta.min === rangeFieldMeta.max 
-        ? [maxValueStop, this._options.maxSize] 
-        : [minValueStop, this._options.minSize, maxValueStop, this._options.maxSize];
+        ? [maxValueStopInput, maxRangeStopOutput] 
+        : [minValueStopInput, minRangeStopOutput, maxValueStopInput, maxRangeStopOutput];
 
     const valueExpression = makeMbClampedNumberExpression({
       lookupFunction: this.getMbLookupFunction(),
