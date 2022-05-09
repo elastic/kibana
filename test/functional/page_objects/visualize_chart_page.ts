@@ -32,6 +32,10 @@ export class VisualizeChartPageObject extends FtrService {
     return await this.elasticChart.getChartDebugData(chartSelector);
   }
 
+  public async getAllESChartsDebugDataByTestSubj(chartSelector: string) {
+    return await this.elasticChart.getAllChartsDebugDataByTestSubj(chartSelector);
+  }
+
   /**
    * Is new charts library advanced setting enabled
    */

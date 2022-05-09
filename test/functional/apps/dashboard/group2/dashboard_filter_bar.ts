@@ -131,6 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are preserved after saving a dashboard', async () => {
         await PageObjects.dashboard.saveDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

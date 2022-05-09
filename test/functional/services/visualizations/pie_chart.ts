@@ -101,6 +101,17 @@ export class PieChartService extends FtrService {
     return await pieSlice.getAttribute('style');
   }
 
+  async getAllPieSlicesColors() {
+    const slicesColors = [];
+    const slices =
+      (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+        ?.partitions ?? [];
+    for (const slice of slices) {
+      slicesColors.push(slice.color);
+    }
+    return slicesColors;
+  }
+
   async getAllPieSliceColor(name: string) {
     this.log.debug(`VisualizePage.getAllPieSliceColor(${name})`);
     if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
@@ -181,10 +192,18 @@ export class PieChartService extends FtrService {
 
   async getSliceCountForAllPies() {
     let pieSlices = 0;
-    const partitions =
-      (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition ?? [];
-    for (const partition of partitions) {
-      pieSlices += partition.partitions.length;
+    const charts =
+      (await this.visChart.getAllESChartsDebugDataByTestSubj(partitionVisChartSelector)) ?? [];
+    for (const chart of charts) {
+      const visContainer = await chart.findByCssSelector('.echChartStatus');
+      const debugDataString: string | undefined = await visContainer.getAttribute(
+        'data-ech-debug-state'
+      );
+      if (debugDataString) {
+        const parsedData = JSON.parse(debugDataString);
+        const partition = parsedData?.partition ?? [];
+        pieSlices += partition.partitions.length;
+      }
     }
     return pieSlices;
   }

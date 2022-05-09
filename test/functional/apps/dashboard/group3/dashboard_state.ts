@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  describe('dashboard state-miaou', function describeIndexTests() {
+  describe('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
     let isNewChartsLibraryEnabled = true;
 

@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        await pieChart.expectPieSliceCount(0);
+        await pieChart.expectEmptyPieChart();
         await dashboardExpect.panelCount(2);
         await PageObjects.dashboard.waitForRenderComplete();
       });

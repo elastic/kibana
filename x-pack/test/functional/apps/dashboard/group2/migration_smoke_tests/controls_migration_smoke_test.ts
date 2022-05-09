@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const queryBar = getService('queryBar');
 
   const { common, settings, savedObjects, dashboard, dashboardControls } = getPageObjects([
     'common',
@@ -41,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await savedObjects.importFile(
         path.join(__dirname, 'exports', 'controls_dashboard_migration_test_8_0_0.ndjson')
       );
-      await elasticChart.setNewChartUiDebugFlag(true);
     });
 
     after(async () => {
@@ -97,6 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('applies default selected options list options to dashboard', async () => {
       // because 4 selections are made on the control, the pie chart should only show 4 slices.
+      await elasticChart.setNewChartUiDebugFlag();
+      await queryBar.submitQuery();
       await pieChart.expectPieSliceCountEsCharts(4);
     });
   });
