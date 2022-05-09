@@ -25,7 +25,9 @@ const testsFolder = '../apps';
 const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../../functional/config'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../../functional/config.base.js')
+  );
   const externalConf = consumeState(resolve(__dirname, stateFilePath));
   process.env.stack_functional_integration = true;
   logAll(log);
