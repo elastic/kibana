@@ -78,9 +78,12 @@ export const getReindexJobRoute = (
 ) =>
   getSourcesPath(generatePath(REINDEX_JOB_PATH, { sourceId, activeReindexJobId }), isOrganization);
 
-export const getAddPath = (serviceType: string, baseServiceType?: string): string =>
-  `${SOURCES_PATH}/add/` +
-  (baseServiceType ? `${baseServiceType}/${serviceType}` : `${serviceType}`);
+export const getAddPath = (serviceType: string, baseServiceType?: string): string => {
+  const baseServiceTypePath = baseServiceType
+    ? `${baseServiceType}/${serviceType}`
+    : `${serviceType}`;
+  return `${SOURCES_PATH}/add/${baseServiceTypePath}`;
+};
 
 // TODO this should handle base service type once we are getting it back from registered external connectors
 export const getEditPath = (serviceType: string): string =>

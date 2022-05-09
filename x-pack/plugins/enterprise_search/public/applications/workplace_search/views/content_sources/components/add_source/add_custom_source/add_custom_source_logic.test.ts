@@ -32,8 +32,6 @@ const DEFAULT_VALUES = {
   newCustomSource: {} as CustomSource,
 };
 
-const MOCK_PROPS = {};
-
 const MOCK_NAME = 'name';
 
 describe('AddCustomSourceLogic', () => {
@@ -43,7 +41,7 @@ describe('AddCustomSourceLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mount({}, MOCK_PROPS);
+    mount({});
   });
 
   it('has expected default values', () => {
@@ -95,12 +93,9 @@ describe('AddCustomSourceLogic', () => {
 
   describe('listeners', () => {
     beforeEach(() => {
-      mount(
-        {
-          customSourceNameValue: MOCK_NAME,
-        },
-        MOCK_PROPS
-      );
+      mount({
+        customSourceNameValue: MOCK_NAME,
+      });
     });
 
     describe('organization context', () => {
@@ -178,7 +173,6 @@ describe('AddCustomSourceLogic', () => {
               customSourceNameValue: MOCK_NAME,
             },
             {
-              ...MOCK_PROPS,
               baseServiceType: 'share_point_server',
             }
           );

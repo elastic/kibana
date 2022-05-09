@@ -67,7 +67,14 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
               }
             )}
           >
-            <EuiButtonEmpty disabled>Connect</EuiButtonEmpty>
+            <EuiButtonEmpty disabled>
+              {i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.connectButtonLabel',
+                {
+                  defaultMessage: 'Connect',
+                }
+              )}
+            </EuiButtonEmpty>
           </EuiToolTip>
         );
       } else {
@@ -78,7 +85,12 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
               (serviceType === 'custom' || serviceType === 'external' ? '' : '/intro')
             }
           >
-            Connect
+            {i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.connectButtonLabel',
+              {
+                defaultMessage: 'Connect',
+              }
+            )}
           </EuiButtonEmptyTo>
         );
       }

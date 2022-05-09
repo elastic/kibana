@@ -110,7 +110,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                     >
                       <EuiFlexItem>
                         <SourceIcon
-                          serviceType={baseServiceType || serviceType}
+                          serviceType={baseServiceType ?? serviceType}
                           name={name}
                           size="xxl"
                         />
