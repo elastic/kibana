@@ -359,7 +359,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
         defaultMessage: 'Tags',
       }),
-      render: (tags: string[], agent: any) => <Tags tags={tags} />,
+      render: (tags: string[] = [], agent: any) => <Tags tags={tags} />,
     },
     {
       field: 'policy_id',
