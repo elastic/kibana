@@ -82,7 +82,7 @@ export function essql(): ExpressionFunctionDefinition<'essql', KibanaContext, Ar
       };
 
       return lastValueFrom(
-        search.search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(req, {
+        search.search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>({ params: req }, {
           strategy: SQL_SEARCH_STRATEGY,
         })
       )
