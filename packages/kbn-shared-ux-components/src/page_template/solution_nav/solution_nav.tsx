@@ -8,8 +8,7 @@
 import './solution_nav.scss';
 
 import React, { FunctionComponent, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-
+import classNames from 'classnames';
 import {
   EuiAvatarProps,
   EuiFlyout,
@@ -19,8 +18,9 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 
-import classNames from 'classnames';
-import { KibanaSolutionAvatar } from '../../solution_avatar';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
+
 import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
 export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
