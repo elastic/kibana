@@ -40,6 +40,8 @@ export const EntityDraggableComponent: React.FC<Props> = ({
         value: entityValue,
         operator: IS_OPERATOR as QueryOperator,
       },
+      isAggregatable: true,
+      fieldType: 'keyword',
     }),
     [entityName, entityValue, id]
   );

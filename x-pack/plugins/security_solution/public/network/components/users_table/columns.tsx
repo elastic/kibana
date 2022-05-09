@@ -50,6 +50,8 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
         rowItems: userIds,
         attrName: 'user.id',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
