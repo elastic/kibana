@@ -80,7 +80,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
     legendSize: {
       types: ['string'],
       default: DEFAULT_LEGEND_SIZE,
-      help: i18n.translate('visTypeXy.function.args.legendSize.help', {
+      help: i18n.translate('visTypeXy.function.args.args.legendSize.help', {
         defaultMessage: 'Specifies the legend size.',
       }),
       options: [
