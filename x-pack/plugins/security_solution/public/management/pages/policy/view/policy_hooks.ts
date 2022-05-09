@@ -26,6 +26,7 @@ import {
   getPolicyHostIsolationExceptionsPath,
 } from '../../../common/routing';
 import { getCurrentArtifactsLocation, policyIdFromParams } from '../store/policy_details/selectors';
+import { POLICIES_PATH } from '../../../../../common/constants';
 
 /**
  * Narrows global state down to the PolicyDetailsState before calling the provided Policy Details Selector
@@ -103,15 +104,8 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
 }
 
 export const useIsPolicySettingsBarVisible = () => {
-  const policyTabs = [
-    '/settings',
-    '/trustedApps',
-    '/eventFilters',
-    '/hostIsolationExceptions',
-    '/blocklists',
-  ];
   return (
-    window.location.pathname.includes('administration/policy') &&
-    policyTabs.includes(window.location.pathname)
+    window.location.pathname.includes(POLICIES_PATH) &&
+    window.location.pathname.includes('/settings')
   );
 };
