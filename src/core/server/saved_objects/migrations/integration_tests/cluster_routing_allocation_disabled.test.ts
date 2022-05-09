@@ -15,7 +15,7 @@ import { ElasticsearchClient } from '../../../elasticsearch';
 import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '../test_helpers/retry_async';
 
-const logFilePath = Path.join(__dirname, 'unsupported_cluster_routing_allocation.log');
+const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist
@@ -84,7 +84,7 @@ async function updateRoutingAllocations(
   });
 }
 
-describe('unsupported_cluster_routing_allocation', () => {
+describe('incompatible_cluster_routing_allocation', () => {
   let client: ElasticsearchClient;
   let root: Root;
 
@@ -114,7 +114,7 @@ describe('unsupported_cluster_routing_allocation', () => {
     await root.setup();
 
     await expect(root.start()).rejects.toThrowError(
-      /Unable to complete saved object migrations for the \[\.kibana.*\] index: \[unsupported_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {\"transient\": {\"cluster\.routing\.allocation\.enable\": null}, \"persistent\": {\"cluster\.routing\.allocation\.enable\": null}}\. Refer to https:\/\/www.elastic.co\/guide\/en\/kibana\/master\/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue\./
+      /Unable to complete saved object migrations for the \[\.kibana.*\] index: \[incompatible_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {\"transient\": {\"cluster\.routing\.allocation\.enable\": null}, \"persistent\": {\"cluster\.routing\.allocation\.enable\": null}}\. Refer to https:\/\/www.elastic.co\/guide\/en\/kibana\/master\/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue\./
     );
 
     await retryAsync(
@@ -126,7 +126,7 @@ describe('unsupported_cluster_routing_allocation', () => {
           .map((str) => JSON5.parse(str)) as LogRecord[];
         expect(
           records.find((rec) =>
-            /^Unable to complete saved object migrations for the \[\.kibana.*\] index: \[unsupported_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\./.test(
+            /^Unable to complete saved object migrations for the \[\.kibana.*\] index: \[incompatible_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\./.test(
               rec.message
             )
           )
@@ -149,7 +149,7 @@ describe('unsupported_cluster_routing_allocation', () => {
     await root.setup();
 
     await expect(root.start()).rejects.toThrowError(
-      /Unable to complete saved object migrations for the \[\.kibana.*\] index: \[unsupported_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {\"transient\": {\"cluster\.routing\.allocation\.enable\": null}, \"persistent\": {\"cluster\.routing\.allocation\.enable\": null}}\. Refer to https:\/\/www.elastic.co\/guide\/en\/kibana\/master\/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue\./
+      /Unable to complete saved object migrations for the \[\.kibana.*\] index: \[incompatible_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {\"transient\": {\"cluster\.routing\.allocation\.enable\": null}, \"persistent\": {\"cluster\.routing\.allocation\.enable\": null}}\. Refer to https:\/\/www.elastic.co\/guide\/en\/kibana\/master\/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue\./
     );
   });
 });

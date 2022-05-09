@@ -151,7 +151,7 @@ export interface ActionErrorTypeMap {
   documents_transform_failed: DocumentsTransformFailed;
   request_entity_too_large_exception: RequestEntityTooLargeException;
   unknown_docs_found: UnknownDocsFound;
-  unsupported_cluster_routing_allocation: UnsupportedClusterRoutingAllocation;
+  incompatible_cluster_routing_allocation: UnsupportedClusterRoutingAllocation;
   index_not_yellow_timeout: IndexNotYellowTimeout;
 }
 

@@ -28,7 +28,7 @@ export interface InitActionParams {
 }
 
 export interface UnsupportedClusterRoutingAllocation {
-  type: 'unsupported_cluster_routing_allocation';
+  type: 'incompatible_cluster_routing_allocation';
   message: string;
 }
 
@@ -54,9 +54,9 @@ export const checkClusterRoutingAllocationEnabledTask =
 
         if (!clusterRoutingAllocationEnabledIsAll) {
           return Either.left({
-            type: 'unsupported_cluster_routing_allocation' as const,
+            type: 'incompatible_cluster_routing_allocation' as const,
             message:
-              '[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.',
+              '[incompatible_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.',
           });
         } else {
           return Either.right({});
