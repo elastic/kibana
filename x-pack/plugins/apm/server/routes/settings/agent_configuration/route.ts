@@ -25,6 +25,7 @@ import {
 } from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
+import { getConfigAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
@@ -38,7 +39,26 @@ const agentConfigurationRoute = createApmServerRoute({
     >;
   }> => {
     const setup = await setupRequest(resources);
-    const configurations = await listConfigurations({ setup });
+
+    const [agentConfigAppliedByEtag, configList] = await Promise.all([
+      getConfigAppliedToAgentsThroughFleet({ setup }),
+      listConfigurations({ setup }),
+    ]);
+
+    const configurations = configList.map(
+      (
+        agentConfig
+      ): import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration => {
+        return {
+          ...agentConfig,
+          applied_by_agent:
+            agentConfig.applied_by_agent ||
+            (agentConfig.etag !== undefined &&
+              agentConfigAppliedByEtag.hasOwnProperty(agentConfig.etag)),
+        };
+      }
+    );
+
     return { configurations };
   },
 });
