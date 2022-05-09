@@ -73,3 +73,5 @@ export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
 export const TITLE = '.euiTitle';
 
 export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-button"]';
+
+export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;

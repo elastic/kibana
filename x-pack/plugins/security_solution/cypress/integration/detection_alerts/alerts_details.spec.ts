@@ -11,7 +11,9 @@ import {
   JSON_TEXT,
   TABLE_CONTAINER,
   TABLE_ROWS,
+  SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON,
 } from '../../screens/alerts_details';
+import { TIMELINE_TITLE } from '../../screens/timeline';
 
 import { expandFirstAlert } from '../../tasks/alerts';
 import { openJsonView, openTable } from '../../tasks/alerts_details';
@@ -79,5 +81,13 @@ describe('Alert details with unmapped fields', () => {
 
         expect($tableContainer[0].scrollLeft).to.equal(0);
       });
+  });
+
+  it('Opens a new timeline investigation', () => {
+    // Click on the first button that lets us investigate in timeline
+    cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).click();
+
+    // Make sure a new timeline is created and opened
+    cy.get(TIMELINE_TITLE).should('contain', 'Untitled timeline');
   });
 });
