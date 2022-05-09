@@ -15,8 +15,7 @@ export default function enterSpaceFunctonalTests({
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
   describe('Enter Space', function () {
-    // These tests fail very intermittently in Firefox. Skip Firefox testing until resolved.
-    // this.tags('includeFirefox');
+    this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/spaces/enter_space');
       await PageObjects.security.forceLogout();
