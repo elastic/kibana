@@ -95,6 +95,13 @@ describe('BasicConnector', () => {
       );
     });
 
+    it('throws an error if the url starts with backslashes', async () => {
+      expect.assertions(1);
+      await expect(async () => service.testUrl({ url: '//example.com/foo' })).rejects.toThrow(
+        'URL Error: Invalid URL: //example.com/foo'
+      );
+    });
+
     it('throws an error if the protocol is not supported', async () => {
       expect.assertions(1);
       await expect(async () => service.testUrl({ url: 'ftp://example.com' })).rejects.toThrow(

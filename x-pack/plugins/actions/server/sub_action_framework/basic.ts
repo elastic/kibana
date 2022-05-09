@@ -64,9 +64,13 @@ export abstract class BasicConnector<Config, Secrets> {
 
   private assertURL(url: string) {
     try {
-      const validURL = new URL(url);
+      const parsedUrl = new URL(url);
 
-      if (!this.validProtocols.includes(validURL.protocol)) {
+      if (!parsedUrl.hostname) {
+        throw new Error('URL must contain hostname');
+      }
+
+      if (!this.validProtocols.includes(parsedUrl.protocol)) {
         throw new Error('Invalid protocol');
       }
     } catch (error) {
