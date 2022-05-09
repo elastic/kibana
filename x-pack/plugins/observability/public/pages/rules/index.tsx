@@ -175,7 +175,11 @@ function RulesPage() {
         title: tagsError,
       });
     }
-  }, [tagsError, toasts]);
+    if (error)
+      toasts.addDanger({
+        title: error,
+      });
+  }, [tagsError, error, toasts]);
 
   const getRulesTableColumns = () => {
     return [
@@ -496,10 +500,6 @@ function RulesPage() {
       />
 
       {getRulesTable()}
-      {error &&
-        toasts.addDanger({
-          title: error,
-        })}
       {currentRuleToEdit && <EditRuleFlyout onSave={reload} currentRule={currentRuleToEdit} />}
       {createRuleFlyoutVisibility && CreateRuleFlyout}
     </ObservabilityPageTemplate>
