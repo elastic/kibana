@@ -23,7 +23,7 @@ export const KubernetesContainer = React.memo(() => {
           </div>
         </Route>
       </Switch>
-      <SpyRoute pageName={SecurityPageName.case} />
+      <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>
   );
 });

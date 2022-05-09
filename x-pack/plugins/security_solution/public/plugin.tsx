@@ -343,7 +343,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       users: subPlugins.users.start(storage),
       network: subPlugins.network.start(storage),
       timelines: subPlugins.timelines.start(),
-      kubernetes: subPlugins.timelines.start(),
+      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
     };

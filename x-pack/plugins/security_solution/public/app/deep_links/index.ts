@@ -382,7 +382,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.kubernetes,
         title: KUBERNETES,
         path: KUBERNETES_PATH,
-        navLinkStatus: AppNavLinkStatus.visible,
+        navLinkStatus: AppNavLinkStatus.hidden,
         experimentalKey: 'kubernetesEnabled',
         keywords: [
           i18n.translate('xpack.securitySolution.search.kubernetes', {
