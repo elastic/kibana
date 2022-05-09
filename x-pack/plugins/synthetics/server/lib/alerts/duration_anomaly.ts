@@ -109,6 +109,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   },
   isExportable: true,
   minimumLicenseRequired: 'platinum',
+  doesSetRecoveryContext: true,
   async executor({
     params,
     services: {
