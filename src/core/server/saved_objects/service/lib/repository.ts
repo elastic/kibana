@@ -66,6 +66,7 @@ import {
 } from '../../types';
 import { SavedObjectsTypeValidator } from '../../validation';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { ISavedObjectsHooks, PreHooks } from '../../saved_objects_hooks_registry';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
@@ -112,6 +113,7 @@ export interface SavedObjectsRepositoryOptions {
   mappings: IndexMapping;
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
+  hooks: ISavedObjectsHooks;
   serializer: SavedObjectsSerializer;
   migrator: IKibanaMigrator;
   allowedTypes: string[];
@@ -211,6 +213,7 @@ export class SavedObjectsRepository {
   private _index: string;
   private _mappings: IndexMapping;
   private _registry: ISavedObjectTypeRegistry;
+  private _hooks: ISavedObjectsHooks;
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
   private _serializer: SavedObjectsSerializer;
@@ -227,6 +230,7 @@ export class SavedObjectsRepository {
   public static createRepository(
     migrator: IKibanaMigrator,
     typeRegistry: ISavedObjectTypeRegistry,
+    hooks: ISavedObjectsHooks,
     indexName: string,
     client: ElasticsearchClient,
     logger: Logger,
@@ -252,6 +256,7 @@ export class SavedObjectsRepository {
       migrator,
       mappings,
       typeRegistry,
+      hooks,
       serializer,
       allowedTypes,
       client,
@@ -265,6 +270,7 @@ export class SavedObjectsRepository {
       mappings,
       client,
       typeRegistry,
+      hooks,
       serializer,
       migrator,
       allowedTypes = [],
@@ -282,6 +288,7 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._registry = typeRegistry;
+    this._hooks = hooks;
     this.client = createRepositoryEsClient(client);
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
@@ -328,6 +335,21 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
+    // Run all the "Pre" create hooks which might update the attributes
+    const [{ attributes: updatedAttribues }] = await this.runPreCreateHooks<T>(
+      [...this._hooks.preHooks.create],
+      [
+        {
+          ...options,
+          type,
+          attributes,
+        },
+      ]
+    ).catch((e) => {
+      this._logger.error(e);
+      return [{ attributes }];
+    });
+
     const time = getCurrentTime();
     let savedObjectNamespace: string | undefined;
     let savedObjectNamespaces: string[] | undefined;
@@ -365,7 +387,7 @@ export class SavedObjectsRepository {
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       originId,
-      attributes,
+      attributes: updatedAttribues,
       migrationVersion,
       coreMigrationVersion,
       updated_at: time,
@@ -401,10 +423,16 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
     }
 
-    return this._rawToSavedObject<T>({
+    const result = this._rawToSavedObject<T>({
       ...raw,
       ...body,
     });
+
+    await this.runPostCreateHooks([result]).catch((e) => {
+      this._logger.error(e);
+    });
+
+    return result;
   }
 
   /**
@@ -420,12 +448,19 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
+    const updatedObjects = await this.runPreCreateHooks(
+      [...this._hooks.preHooks.create],
+      objects
+    ).catch((e) => {
+      this._logger.error(e);
+      return objects;
+    });
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
     const time = getCurrentTime();
 
     let preflightCheckIndexCounter = 0;
-    const expectedResults = objects.map<
+    const expectedResults = updatedObjects.map<
       Either<
         { type: string; id?: string; error: Payload },
         {
@@ -1073,10 +1108,29 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
+    for (const preGetHook of this._hooks.preHooks.get) {
+      try {
+        await preGetHook(objects, options);
+      } catch (e) {
+        this._logger.error(e);
+      }
+    }
     const namespace = normalizeNamespace(options.namespace);
 
+    const onResponse = async (result: Array<SavedObject<T>>) => {
+      for (const postGetHook of this._hooks.postHooks.get) {
+        try {
+          await postGetHook(result);
+        } catch (e) {
+          this._logger.error(e);
+        }
+      }
+
+      return { saved_objects: result };
+    };
+
     if (objects.length === 0) {
-      return { saved_objects: [] };
+      return await onResponse([]);
     }
 
     let bulkGetRequestIndexCounter = 0;
@@ -1144,33 +1198,33 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
 
-    return {
-      saved_objects: expectedBulkGetResults.map((expectedResult) => {
-        if (isLeft(expectedResult)) {
-          return expectedResult.value as any;
-        }
+    const savedObjects = expectedBulkGetResults.map((expectedResult) => {
+      if (isLeft(expectedResult)) {
+        return expectedResult.value as any;
+      }
 
-        const {
-          type,
+      const {
+        type,
+        id,
+        namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)],
+        esRequestIndex,
+      } = expectedResult.value;
+      const doc = bulkGetResponse?.body.docs[esRequestIndex];
+
+      // @ts-expect-error MultiGetHit._source is optional
+      if (!doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces)) {
+        return {
           id,
-          namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)],
-          esRequestIndex,
-        } = expectedResult.value;
-        const doc = bulkGetResponse?.body.docs[esRequestIndex];
+          type,
+          error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+        } as any as SavedObject<T>;
+      }
 
-        // @ts-expect-error MultiGetHit._source is optional
-        if (!doc?.found || !this.rawDocExistsInNamespaces(doc, namespaces)) {
-          return {
-            id,
-            type,
-            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          } as any as SavedObject<T>;
-        }
+      // @ts-expect-error MultiGetHit._source is optional
+      return getSavedObjectFromSource(this._registry, type, id, doc);
+    });
 
-        // @ts-expect-error MultiGetHit._source is optional
-        return getSavedObjectFromSource(this._registry, type, id, doc);
-      }),
-    };
+    return await onResponse(savedObjects);
   }
 
   /**
@@ -1191,6 +1245,14 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
+    for (const preGetHook of this._hooks.preHooks.get) {
+      try {
+        await preGetHook(objects, options);
+      } catch (e) {
+        this._logger.error(e);
+      }
+    }
+
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
       registry: this._registry,
       allowedTypes: this._allowedTypes,
@@ -1213,6 +1275,14 @@ export class SavedObjectsRepository {
       }
       return result as SavedObjectsResolveResponse<T>;
     });
+
+    for (const postGetHook of this._hooks.postHooks.get) {
+      try {
+        await postGetHook(resolvedObjects.map(({ saved_object: savedObject }) => savedObject));
+      } catch (e) {
+        this._logger.error(e);
+      }
+    }
     return { resolved_objects: resolvedObjects };
   }
 
@@ -1233,6 +1303,15 @@ export class SavedObjectsRepository {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
+
+    for (const preGetHook of this._hooks.preHooks.get) {
+      try {
+        await preGetHook([{ id, type }], options);
+      } catch (e) {
+        this._logger.error(e);
+      }
+    }
+
     const namespace = normalizeNamespace(options.namespace);
     const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
       {
@@ -1255,7 +1334,18 @@ export class SavedObjectsRepository {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-    return getSavedObjectFromSource(this._registry, type, id, body);
+
+    const result = getSavedObjectFromSource<T>(this._registry, type, id, body);
+
+    for (const postGetHook of this._hooks.postHooks.get) {
+      try {
+        await postGetHook([result]);
+      } catch (e) {
+        this._logger.error(e);
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -1272,6 +1362,14 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
+    for (const preGetHook of this._hooks.preHooks.get) {
+      try {
+        await preGetHook([{ id, type }], options);
+      } catch (e) {
+        this._logger.error(e);
+      }
+    }
+
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
       registry: this._registry,
       allowedTypes: this._allowedTypes,
@@ -1286,6 +1384,15 @@ export class SavedObjectsRepository {
     if ((result as InternalBulkResolveError).error) {
       throw (result as InternalBulkResolveError).error;
     }
+
+    for (const postGetHook of this._hooks.postHooks.get) {
+      try {
+        await postGetHook([(result as SavedObjectsResolveResponse<T>).saved_object]);
+      } catch (e) {
+        this._logger.error(e);
+      }
+    }
+
     return result as SavedObjectsResolveResponse<T>;
   }
 
@@ -2335,6 +2442,29 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
   }
+
+  private runPreCreateHooks = async <T>(
+    hooks: PreHooks['create'],
+    updatedObjects: Array<SavedObjectsBulkCreateObject<T>>
+  ): Promise<Array<SavedObjectsBulkCreateObject<T>>> => {
+    if (hooks.length === 0) {
+      return updatedObjects;
+    }
+    // Recursively call the the "pre" create hooks passing the
+    // updated saved objects
+    const [preCreateHook, ...restOfHooks] = hooks;
+    const result = (await preCreateHook(updatedObjects)) as Array<SavedObjectsBulkCreateObject<T>>;
+    if (restOfHooks.length) {
+      return await this.runPreCreateHooks<T>(restOfHooks, result!);
+    }
+    return result!;
+  };
+
+  private runPostCreateHooks = async (objects: SavedObject[]) => {
+    for (const postCreateHook of this._hooks.postHooks.create) {
+      await postCreateHook(objects);
+    }
+  };
 }
 
 /**

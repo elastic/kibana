@@ -26,21 +26,24 @@ export class UserContentPlugin implements Plugin<UserContentPluginSetup, UserCon
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
-    const { http, savedObjects } = core;
+    const { http } = core;
 
     const metadataEventService = new MetadataEventsService();
     metadataEventService.init({ http });
+    this.userContentService.init({ http });
 
-    this.userContentService.init({ metadataEventService, savedObjectClient: savedObjects.client });
-
-    const { register, getUserContentTableColumnsDefinitions } = this.userContentService;
+    const { getUserContentTableColumnsDefinitions } = this.userContentService;
+    const { registerEvent, bulkRegisterEvents } = metadataEventService;
 
     return {
-      registerContent: register.bind(this.userContentService),
       ui: {
         getUserContentTableColumnsDefinitions: getUserContentTableColumnsDefinitions.bind(
           this.userContentService
         ),
+      },
+      events: {
+        register: registerEvent.bind(metadataEventService),
+        bulkRegister: bulkRegisterEvents.bind(metadataEventService),
       },
     };
   }

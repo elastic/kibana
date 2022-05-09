@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 
 import { UserContentEventsStream, DepsFromPluginStart } from '../types';
 import { EVENTS_COUNT_GRANULARITY, UserContentMetadataEvent } from '../../common';
-import { bucketsAggregationToContentEventCount } from '../lib';
+import { bucketsAggregationToContentEventCount, incrementViewsCounters } from '../lib';
 
 export class MetadataEventsService {
   private logger: Logger;
@@ -26,6 +26,36 @@ export class MetadataEventsService {
     depsFromPluginStartPromise: Promise<DepsFromPluginStart>;
   }) {
     this.depsFromPluginStartPromise = depsFromPluginStartPromise;
+  }
+
+  async registerEvent(event: UserContentMetadataEvent) {
+    if (!this.depsFromPluginStartPromise) {
+      return;
+    }
+
+    const { userContentEventsStream, savedObjectRepository } = await this
+      .depsFromPluginStartPromise;
+
+    if (isViewedEvent(event)) {
+      incrementViewsCounters(event.data.so_type, event.data.so_id, savedObjectRepository);
+    }
+
+    return userContentEventsStream.registerEvent(event);
+  }
+
+  async bulkRegisterEvents(events: UserContentMetadataEvent[]) {
+    if (!this.depsFromPluginStartPromise) {
+      return;
+    }
+
+    const { userContentEventsStream, savedObjectRepository } = await this
+      .depsFromPluginStartPromise;
+
+    events.filter(isViewedEvent).forEach(({ data: { so_type: soType, so_id: soId } }) => {
+      incrementViewsCounters(soType, soId, savedObjectRepository);
+    });
+
+    return userContentEventsStream.bulkRegisterEvents(events);
   }
 
   async updateViewCounts() {
@@ -116,3 +146,5 @@ export class MetadataEventsService {
     return { buckets: buckets as estypes.AggregationsStringTermsBucket[], hits: result.hits.hits };
   }
 }
+
+const isViewedEvent = ({ type }: UserContentMetadataEvent) => type.startsWith('viewed');

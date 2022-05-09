@@ -15,7 +15,7 @@ import {
   DepsFromPluginStart,
 } from './types';
 import { registerRoutes } from './routes';
-import { MetadataEventsService } from './services';
+import { UserContentService, MetadataEventsService } from './services';
 
 export class UserContentPlugin
   implements
@@ -23,34 +23,41 @@ export class UserContentPlugin
 {
   private readonly logger: Logger;
   private depsFromPluginStart$ = new Subject<DepsFromPluginStart>();
+  private userContentService: UserContentService;
   private metadataEventsService: MetadataEventsService;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
+    this.userContentService = new UserContentService({ logger: this.logger });
     this.metadataEventsService = new MetadataEventsService({ logger: this.logger });
   }
 
-  public setup({ http }: CoreSetup) {
+  public setup({ http, savedObjects }: CoreSetup) {
     this.logger.debug('Setting up UserContent plugin');
-
     const depsFromPluginStartPromise = firstValueFrom(this.depsFromPluginStart$);
-
-    registerRoutes({
-      http,
-      depsFromPluginStartPromise,
-      metadataEventsService: this.metadataEventsService,
-    });
 
     this.metadataEventsService.init({
       depsFromPluginStartPromise,
     });
 
-    return {};
+    this.userContentService.init({
+      metadataEventService: this.metadataEventsService,
+      savedObjects,
+    });
+
+    registerRoutes({
+      http,
+      userContentService: this.userContentService,
+      metadataEventsService: this.metadataEventsService,
+    });
+
+    return {
+      registerContent: this.userContentService.registerContent.bind(this.userContentService),
+    };
   }
 
   public start(core: CoreStart, { metadataEventsStreams }: UserContentStartDependencies) {
     this.logger.debug('Starting up UserContent plugin');
-
     const savedObjectRepository = core.savedObjects.createInternalRepository();
 
     const userContentEventsStream = metadataEventsStreams.registerEventStream('userContent');

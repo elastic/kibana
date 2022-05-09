@@ -6,50 +6,42 @@
  * Side Public License, v 1.
  */
 import React, { ReactNode } from 'react';
-import { cloneDeep, isObjectLike } from 'lodash';
+import { BehaviorSubject, first, firstValueFrom } from 'rxjs';
 import { EuiBasicTableColumn } from '@elastic/eui';
-import { SavedObjectsClientContract } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
-import { defaultUserContentAttributes } from '../../common';
+import { withApiBaseBath } from '../../common';
 import { GetUserContentTableColumnsDefinitionsOptions } from '../types';
-import { MetadataEventsService } from './metadata_events_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserContent {}
 
 interface Dependencies {
-  metadataEventService: MetadataEventsService;
-  savedObjectClient: SavedObjectsClientContract;
+  http: HttpSetup;
 }
 
 export class UserContentService {
-  private contents: Map<string, UserContent>;
-  private savedObjectClient: SavedObjectsClientContract | undefined;
-  private metadataEventsService: MetadataEventsService | undefined;
+  private http: HttpSetup | undefined;
+  private contents = new BehaviorSubject({
+    isLoaded: false,
+    map: new Map<string, UserContent>(),
+  });
 
-  constructor() {
-    this.contents = new Map<string, UserContent>();
-  }
+  init({ http }: Dependencies) {
+    this.http = http;
 
-  init({ metadataEventService, savedObjectClient }: Dependencies) {
-    this.savedObjectClient = savedObjectClient;
-    this.metadataEventsService = metadataEventService;
-
-    this.registerSavedObjectsHooks();
-  }
-
-  /**
-   * Register a new "User generated content". It corresponds to a saved object "type" which
-   * adds common functionalities to those object (like adding a "Views count" each time a SO is accessed).
-   * @param contentType The Saved object "type" that correspond to a user generated content
-   * @param content Optionally an object to configure the user content
-   */
-  register(contentType: string, content: UserContent = {}): void {
-    if (this.contents.has(contentType)) {
-      throw new Error(`User content type [${contentType}] is already registered`);
-    }
-
-    this.contents.set(contentType, content);
+    // Fetch "user generated contents" types declared on the server
+    this.fetchUserContentTypes()
+      .then((contentTypes) => {
+        const userContent = new Map<string, UserContent>();
+        contentTypes.forEach((type) => {
+          userContent.set(type, {});
+        });
+        this.contents.next({ isLoaded: true, map: userContent });
+      })
+      .catch((e) => {
+        // TODO: error handling when types could not be fetched
+      });
   }
 
   /**
@@ -58,15 +50,20 @@ export class UserContentService {
    * @param options Options to return the column
    * @returns EuiBasicTableColumn definition to be used in EuiMemoryTable
    */
-  getUserContentTableColumnsDefinitions({
+  async getUserContentTableColumnsDefinitions({
     contentType,
     selectedViewsRange,
-  }: GetUserContentTableColumnsDefinitionsOptions): Array<
-    EuiBasicTableColumn<Record<string, unknown>>
+  }: GetUserContentTableColumnsDefinitionsOptions): Promise<
+    Array<EuiBasicTableColumn<Record<string, unknown>>>
   > {
-    if (!this.contents.has(contentType)) {
+    const { map: userContent } = await firstValueFrom(
+      this.contents.pipe(first(({ isLoaded }) => isLoaded))
+    );
+
+    if (!userContent.has(contentType)) {
       return [];
     }
+
     const viewsCountColumn: EuiBasicTableColumn<Record<string, unknown>> = {
       field: selectedViewsRange,
       name: 'Views',
@@ -79,72 +76,10 @@ export class UserContentService {
     return [viewsCountColumn];
   }
 
-  private registerSavedObjectsHooks() {
-    // Hook whenever user generated saved object(s) are accessed
-    this.savedObjectClient?.post('get', async (objects) => {
-      const registeredContents = [...this.contents.keys()];
-
-      const filteredToContentType = objects.filter(({ type }) => registeredContents.includes(type));
-
-      if (filteredToContentType.length > 0) {
-        this.metadataEventsService?.bulkRegisterEvents(
-          filteredToContentType.map(({ id: soId, type }) => ({
-            type: 'viewed:kibana',
-            soId,
-            soType: type,
-          }))
-        );
-      }
-    });
-
-    // Hook before saving a user generated saved object
-    this.savedObjectClient?.pre('create', async (objects) => {
-      if (!objects) {
-        return;
-      }
-
-      const updatedObject = objects.map((object) => {
-        const { type, attributes } = object;
-
-        if (!this.contents.has(type)) {
-          return object;
-        }
-
-        // Add common attributes to all user generated saved objects
-        const updatedAttributes = this.addDefaultUserContentAttributes(attributes as object);
-
-        return { ...object, attributes: updatedAttributes };
-      });
-
-      return updatedObject;
-    });
-  }
-
-  private addInitialViewCountsToAttributes(attributes: object): object {
-    if (typeof attributes !== 'object' || attributes === null || Array.isArray(attributes)) {
-      return attributes;
+  private async fetchUserContentTypes(): Promise<string[]> {
+    if (!this.http) {
+      throw new Error(`UserContentService not initialized.`);
     }
-
-    const userContentAttributes: { [key: string]: unknown } = { ...attributes };
-
-    Object.entries(defaultUserContentAttributes).forEach(([attr, value]) => {
-      if (attributes.hasOwnProperty(attr)) {
-        // Already declared, we don't override it
-        return;
-      }
-
-      userContentAttributes[attr] = isObjectLike(value) ? cloneDeep(value) : value;
-    });
-
-    // Initiate the views counters
-    return {
-      ...attributes,
-      views_counters: EVENTS_COUNT_GRANULARITY.reduce((agg, days) => {
-        return {
-          ...agg,
-          [`${days}_days`]: 0,
-        };
-      }, {} as ViewsCounters),
-    };
+    return this.http.get<string[]>(withApiBaseBath(`/user_content_types`));
   }
 }

@@ -14,6 +14,8 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { UserContentPluginSetup } from '@kbn/user-content-plugin/server';
+
 import { createDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
@@ -32,6 +34,7 @@ interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
+  userContent: UserContentPluginSetup;
 }
 
 interface StartDeps {
@@ -69,6 +72,8 @@ export class DashboardPlugin
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
     }
+
+    plugins.userContent.registerContent('dashboard');
 
     plugins.embeddable.registerEmbeddableFactory(
       dashboardPersistableStateServiceFactory(plugins.embeddable)
