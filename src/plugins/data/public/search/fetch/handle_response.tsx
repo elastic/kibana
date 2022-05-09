@@ -25,16 +25,11 @@ export function handleResponse(
   response: IKibanaSearchResponse,
   theme: ThemeServiceStart
 ) {
-  let timeout: number;
-
-  try {
-    timeout = getUiSettings()?.get<number>(UI_SETTINGS.SEARCH_TIMEOUT);
-  } catch (e) {
-    timeout = 600000;
-  }
+  const timeout = getUiSettings()?.get<number>(UI_SETTINGS.SEARCH_TIMEOUT);
+  const toasts = getNotifications().toasts;
 
   if (!debouncedShardsToast) {
-    debouncedShardsToast = debounce(getNotifications().toasts.addWarning, timeout + 5000, {
+    debouncedShardsToast = debounce(toasts.addWarning.bind(toasts), timeout + 5000, {
       leading: true,
     });
   }
