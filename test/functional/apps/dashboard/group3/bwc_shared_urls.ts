@@ -119,6 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await elasticChart.setNewChartUiDebugFlag(true);
 
         const query = await queryBar.getQueryString();
+        await queryBar.submitQuery();
         expect(query).to.equal('memory:>220000');
 
         await pieChart.expectPieSliceCount(5);
@@ -137,6 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
+        await queryBar.submitQuery();
         expect(query).to.equal('boop');
 
         await dashboardExpect.panelCount(2);
