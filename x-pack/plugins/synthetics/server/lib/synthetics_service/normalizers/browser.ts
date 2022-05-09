@@ -58,7 +58,7 @@ export const normalizePushedMonitor = ({
     [ConfigKey.IS_PUSH_MONITOR]: true,
     [ConfigKey.NAME]: monitor.name || '',
     [ConfigKey.SCHEDULE]: {
-      number: `${new RegExp(/\d+/, 'g').exec(monitor.schedule)}` || '',
+      number: `${monitor.schedule}`,
       unit: ScheduleUnit.MINUTES,
     },
     [ConfigKey.PROJECT_ID]: projectId || defaultFields[ConfigKey.PROJECT_ID],
@@ -66,9 +66,7 @@ export const normalizePushedMonitor = ({
     [ConfigKey.SOURCE_PUSH]: monitor.content || defaultFields[ConfigKey.SOURCE_PUSH],
     [ConfigKey.LOCATIONS]: monitor.locations
       ?.map((key) => {
-        return locations.find(
-          (location) => location.id.replace('_', ' ').toLowerCase() === key.toLowerCase()
-        );
+        return locations.find((location) => location.id === key);
       })
       .filter((location) => location !== undefined) as BrowserFields[ConfigKey.LOCATIONS],
     [ConfigKey.THROTTLING_CONFIG]: monitor.throttling
@@ -89,9 +87,12 @@ export const normalizePushedMonitor = ({
       monitor.ignoreHTTPSErrors || defaultFields[ConfigKey.IGNORE_HTTPS_ERRORS],
     [ConfigKey.SCREENSHOTS]: monitor.screenshots || defaultFields[ConfigKey.SCREENSHOTS],
     [ConfigKey.TAGS]: monitor.tags || defaultFields[ConfigKey.TAGS],
-    [ConfigKey.PLAYWRIGHT_OPTIONS]:
-      JSON.stringify(monitor.playwrightOptions) || defaultFields[ConfigKey.PLAYWRIGHT_OPTIONS],
-    [ConfigKey.PARAMS]: JSON.stringify(monitor.params) || defaultFields[ConfigKey.PARAMS],
+    [ConfigKey.PLAYWRIGHT_OPTIONS]: Object.keys(monitor.playwrightOptions || {}).length
+      ? JSON.stringify(monitor.playwrightOptions)
+      : defaultFields[ConfigKey.PLAYWRIGHT_OPTIONS],
+    [ConfigKey.PARAMS]: Object.keys(monitor.params || {}).length
+      ? JSON.stringify(monitor.params)
+      : defaultFields[ConfigKey.PARAMS],
     [ConfigKey.JOURNEY_FILTERS_MATCH]:
       monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
   };

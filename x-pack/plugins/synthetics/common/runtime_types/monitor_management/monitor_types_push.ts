@@ -15,7 +15,7 @@ export const PushMonitorThrottlingConfigCodec = t.interface({
 });
 
 export const PushBrowserMonitorCodec = t.intersection([
-  t.interface({ id: t.string, name: t.string, schedule: t.string, content: t.string }),
+  t.interface({ id: t.string, name: t.string, schedule: t.number, content: t.string }),
   t.partial({
     locations: t.array(t.string),
     throttling: PushMonitorThrottlingConfigCodec,

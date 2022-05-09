@@ -16,6 +16,13 @@ import { normalizePushedMonitors } from './browser';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {
+    const playwrightOptions = {
+      headless: true,
+    };
+    const params = {
+      url: 'test-url',
+    };
+    const projectId = 'test-project-id';
     const locations: Locations = [
       {
         id: 'us_central',
@@ -38,13 +45,13 @@ describe('browser normalizers', () => {
         screenshots: ScreenshotOption.OFF,
         name: 'test-name-1',
         content: 'test content 1',
-        schedule: '3m',
+        schedule: 3,
         throttling: {
           latency: 20,
           upload: 10,
           download: 5,
         },
-        locations: ['US Central'],
+        locations: ['us_central'],
         tags: ['tag1', 'tag2'],
         ignoreHTTPSErrors: true,
         apmServiceName: 'cart-service',
@@ -54,13 +61,33 @@ describe('browser normalizers', () => {
         screenshots: ScreenshotOption.ON,
         name: 'test-name-2',
         content: 'test content 2',
-        schedule: '10m',
+        schedule: 10,
         throttling: {
           latency: 18,
           upload: 15,
           download: 10,
         },
-        locations: ['US Central', 'US East'],
+        params: {},
+        playwrightOptions: {},
+        locations: ['us_central', 'us_east'],
+        tags: ['tag3', 'tag4'],
+        ignoreHTTPSErrors: false,
+        apmServiceName: 'bean-service',
+      },
+      {
+        id: 'test-id-3',
+        screenshots: ScreenshotOption.ON,
+        name: 'test-name-3',
+        content: 'test content 3',
+        schedule: 10,
+        throttling: {
+          latency: 18,
+          upload: 15,
+          download: 10,
+        },
+        params,
+        playwrightOptions,
+        locations: ['us_central', 'us_east'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
         apmServiceName: 'bean-service',
@@ -68,7 +95,7 @@ describe('browser normalizers', () => {
     ];
 
     it('properly normalizes browser monitor', () => {
-      const actual = normalizePushedMonitors({ locations, monitors });
+      const actual = normalizePushedMonitors({ locations, monitors, projectId });
       expect(actual).toEqual([
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -101,11 +128,13 @@ describe('browser normalizers', () => {
           'throttling.is_enabled': true,
           'throttling.latency': '20',
           'throttling.upload_speed': '10',
+          params: '',
           type: 'browser',
+          project_id: projectId,
         },
         {
           ...DEFAULT_FIELDS[DataStream.BROWSER],
-          JOURNEY_ID: 'test-id-2',
+          journey_id: 'test-id-2',
           ignore_https_errors: false,
           is_push_monitor: true,
           locations: [
@@ -132,6 +161,7 @@ describe('browser normalizers', () => {
           ],
           name: 'test-name-2',
           params: '',
+          playwright_options: '',
           schedule: {
             number: '10',
             unit: 'm',
@@ -146,6 +176,53 @@ describe('browser normalizers', () => {
           'throttling.latency': '18',
           'throttling.upload_speed': '15',
           type: 'browser',
+          project_id: projectId,
+        },
+        {
+          ...DEFAULT_FIELDS[DataStream.BROWSER],
+          journey_id: 'test-id-3',
+          ignore_https_errors: false,
+          is_push_monitor: true,
+          locations: [
+            {
+              geo: {
+                lat: 33.333,
+                lon: 73.333,
+              },
+              id: 'us_central',
+              isServiceManaged: true,
+              label: 'Test Location',
+              url: 'test-url',
+            },
+            {
+              geo: {
+                lat: 33.333,
+                lon: 73.333,
+              },
+              id: 'us_east',
+              isServiceManaged: true,
+              label: 'Test Location',
+              url: 'test-url',
+            },
+          ],
+          name: 'test-name-3',
+          params: JSON.stringify(params),
+          playwright_options: JSON.stringify(playwrightOptions),
+          schedule: {
+            number: '10',
+            unit: 'm',
+          },
+          screenshots: 'on',
+          'service.name': 'bean-service',
+          'source.push.content': 'test content 3',
+          tags: ['tag3', 'tag4'],
+          'throttling.config': '10d/15u/18l',
+          'throttling.download_speed': '10',
+          'throttling.is_enabled': true,
+          'throttling.latency': '18',
+          'throttling.upload_speed': '15',
+          type: 'browser',
+          project_id: projectId,
         },
       ]);
     });
