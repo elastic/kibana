@@ -219,12 +219,7 @@ export class FunctionalTestRunner {
     const lifecycle = new Lifecycle(this.log);
 
     try {
-      const config = await readConfigFile(
-        this.log,
-        this.esVersion,
-        this.configFile,
-        this.configOverrides
-      );
+      const config = await this.readConfigFile();
       this.log.debug('Config loaded');
 
       if (
@@ -266,6 +261,10 @@ export class FunctionalTestRunner {
         }
       }
     }
+  }
+
+  public async readConfigFile() {
+    return await readConfigFile(this.log, this.esVersion, this.configFile, this.configOverrides);
   }
 
   simulateMochaDryRun(mocha: any) {
