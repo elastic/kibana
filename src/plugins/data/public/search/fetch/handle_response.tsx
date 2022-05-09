@@ -25,7 +25,7 @@ export function handleResponse(
   response: IKibanaSearchResponse,
   theme: ThemeServiceStart
 ) {
-  const searchTimeout = getUiSettings().get<number>(UI_SETTINGS.SEARCH_TIMEOUT);
+  const searchTimeout = getUiSettings()?.get<number>(UI_SETTINGS.SEARCH_TIMEOUT) || 600000;
 
   if (!debouncedShardsToast) {
     debouncedShardsToast = debounce(getNotifications().toasts.addWarning, searchTimeout + 5000, {
