@@ -23,11 +23,6 @@ const MyFlexItem = styled(EuiFlexItem)`
   }
 `;
 
-const MyExceptionsContainer = styled(EuiFlexGroup)`
-  height: 600px;
-  overflow: hidden;
-`;
-
 const MyExceptionItemContainer = styled(EuiFlexGroup)`
   margin: ${({ theme }) => `0 ${theme.eui.euiSize} ${theme.eui.euiSize} 0`};
 `;
@@ -55,7 +50,7 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   onEditExceptionItem,
   disableActions,
 }): JSX.Element => (
-  <MyExceptionsContainer direction="column" className="eui-yScrollWithShadows">
+  <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
     {showEmpty || showNoResults || isInitLoading ? (
       <EuiFlexItem grow={1}>
         <EuiEmptyPrompt
@@ -107,7 +102,7 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
         </MyExceptionItemContainer>
       </EuiFlexItem>
     )}
-  </MyExceptionsContainer>
+  </EuiFlexGroup>
 );
 
 ExceptionsViewerItemsComponent.displayName = 'ExceptionsViewerItemsComponent';

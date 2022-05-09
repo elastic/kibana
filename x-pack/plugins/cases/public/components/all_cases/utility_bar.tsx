@@ -15,14 +15,14 @@ import {
   UtilityBarText,
 } from '../utility_bar';
 import * as i18n from './translations';
-import { AllCases, Case, DeleteCase, FilterOptions } from '../../../common/ui/types';
+import { Cases, Case, DeleteCase, FilterOptions } from '../../../common/ui/types';
 import { getBulkItems } from '../bulk_actions';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 
 interface OwnProps {
-  data: AllCases;
+  data: Cases;
   enableBulkActions: boolean;
   filterOptions: FilterOptions;
   handleIsLoading: (a: boolean) => void;

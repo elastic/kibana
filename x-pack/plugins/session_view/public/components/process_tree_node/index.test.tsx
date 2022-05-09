@@ -57,7 +57,9 @@ describe('ProcessTreeNode component', () => {
     it('should have an alternate rendering for a session leader', async () => {
       renderResult = mockedContext.render(<ProcessTreeNode {...props} isSessionLeader />);
 
-      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
+      expect(renderResult.container.textContent?.replace(/\s+/g, ' ')).toEqual(
+        ' bash started by vagrant'
+      );
     });
 
     // commented out until we get new UX for orphans treatment aka disjointed tree
