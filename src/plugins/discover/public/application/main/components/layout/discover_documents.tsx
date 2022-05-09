@@ -156,9 +156,9 @@ function DiscoverDocumentsComponent({
         </>
       )}
       {!isLegacy && (
-        <div className="dscDiscoverGrid">
-          <>
-            <DocumentExplorerUpdateCallout />
+        <>
+          <DocumentExplorerUpdateCallout />
+          <div className="dscDiscoverGrid">
             <DataGridMemoized
               ariaLabelledBy="documentsAriaLabel"
               columns={columns}
@@ -183,8 +183,8 @@ function DiscoverDocumentsComponent({
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
             />
-          </>
-        </div>
+          </div>
+        </>
       )}
     </EuiFlexItem>
   );
