@@ -185,7 +185,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
         await common.clickAndValidate('property-actions-trash', 'confirmModalConfirmButton');
         await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.existOrFail('cases-all-title', { timeout: 2000 });
+        await header.waitUntilLoadingHasFinished();
         await cases.casesTable.validateCasesTableHasNthRows(0);
       });
     });
