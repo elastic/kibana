@@ -9,6 +9,7 @@ import type { AlertConsumers } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -223,22 +224,25 @@ export const useTimelineEvents = ({
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
-                  setTimelineResponse((prevResponse) => {
-                    const newTimelineResponse = {
-                      ...prevResponse,
-                      consumers: response.consumers,
-                      events: getTimelineEvents(response.edges),
-                      inspect: getInspectResponse(response, prevResponse.inspect),
-                      pageInfo: response.pageInfo,
-                      totalCount: response.totalCount,
-                      updatedAt: Date.now(),
-                    };
-                    setUpdated(newTimelineResponse.updatedAt);
-                    return newTimelineResponse;
+                  Promise.resolve().then(() => {
+                    ReactDOM.unstable_batchedUpdates(() => {
+                      setTimelineResponse((prevResponse) => {
+                        const newTimelineResponse = {
+                          ...prevResponse,
+                          consumers: response.consumers,
+                          events: getTimelineEvents(response.edges),
+                          inspect: getInspectResponse(response, prevResponse.inspect),
+                          pageInfo: response.pageInfo,
+                          totalCount: response.totalCount,
+                          updatedAt: Date.now(),
+                        };
+                        setUpdated(newTimelineResponse.updatedAt);
+                        return newTimelineResponse;
+                      });
+                      setLoading(false);
+                      searchSubscription$.current.unsubscribe();
+                    });
                   });
-                  setLoading(false);
-
-                  searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
                   setLoading(false);
                   addWarning(i18n.ERROR_TIMELINE_EVENTS);
