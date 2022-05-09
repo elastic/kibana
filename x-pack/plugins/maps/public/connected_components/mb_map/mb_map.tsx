@@ -202,7 +202,6 @@ export class MbMap extends Component<Props, State> {
       const mbMap = new maplibregl.Map(options);
       mbMap.dragRotate.disable();
       mbMap.touchZoomRotate.disableRotation();
-      mbMap.showTileBoundaries = true;
 
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
