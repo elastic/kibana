@@ -51,8 +51,6 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
     `;
   }, [PageTemplateComponent]);
 
-  const noDataConfig = useNoDataConfig();
-
   const { loading, error, data } = useHasData();
   const { inspectorAdapters } = useInspectorContext();
 
@@ -71,17 +69,11 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
       <StyledPageTemplateComponent
         isMobile={isMobile}
         pageHeader={pageHeader}
-        data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        noDataConfig={!loading ? noDataConfig : undefined}
+        data-test-subj={'synthetics-page-template'}
         {...pageTemplateProps}
       >
         {showLoading && <EmptyStateLoading />}
-        <div
-          style={{ visibility: showLoading ? 'hidden' : 'initial' }}
-          data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        >
-          {children}
-        </div>
+        <div style={{ visibility: showLoading ? 'hidden' : 'initial' }}>{children}</div>
       </StyledPageTemplateComponent>
     </>
   );

@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import { MonitorAddEditPage } from './components/monitor_add_edit/monitor_add_edit_page';
 import { OverviewPage } from './components/overview/overview_page';
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
@@ -57,7 +58,7 @@ const getRoutes = (): RouteProps[] => {
         values: { baseTitle },
       }),
       path: GETTING_STARTED_ROUTE,
-      component: () => <OverviewPage />,
+      component: () => <GettingStartedPage />,
       dataTestSubj: 'syntheticsGettingStartedPage',
       pageHeader: {
         pageTitle: (
@@ -80,7 +81,7 @@ const getRoutes = (): RouteProps[] => {
         defaultMessage: 'Synthetics Overview | {baseTitle}',
         values: { baseTitle },
       }),
-      path: OVERVIEW_ROUTE,
+      path: MONITOR_MANAGEMENT_ROUTE,
       component: () => <OverviewPage />,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {

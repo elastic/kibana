@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export { store, storage } from './store';
-
-export type { SyntheticsAppState as AppState } from './root_reducer';
-
-export * from './ui';
-export * from './index_status';
+export * from './getting_started.journey';
