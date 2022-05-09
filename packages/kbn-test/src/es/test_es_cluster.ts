@@ -142,6 +142,11 @@ export interface CreateTestEsClusterOptions {
    */
   port?: number;
   ssl?: boolean;
+  /**
+   * Report to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing
+   * this caller to react appropriately. If this is not passed then an uncatchable exception will be thrown
+   */
+  onEarlyExit?: (msg: string) => void;
 }
 
 export function createTestEsCluster<
@@ -161,6 +166,7 @@ export function createTestEsCluster<
     esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
+    onEarlyExit,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -254,6 +260,7 @@ export function createTestEsCluster<
             // right away, or ES will complain as the cluster isn't ready. So we only
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            onEarlyExit,
           });
         });
       }
