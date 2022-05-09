@@ -14,12 +14,9 @@ import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
-import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers/toggle_alert_flyout_button';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
-// import { monitorStatusSelector } from '../../../state/selectors';
-// import { ManageMonitorsBtn } from './manage_monitors_btn';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.synthetics.addDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -92,8 +89,6 @@ export function ActionMenuContent(): React.ReactElement {
           defaultMessage="Settings"
         />
       </EuiHeaderLink>
-
-      <ToggleAlertFlyoutButton />
 
       <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
         <EuiHeaderLink
