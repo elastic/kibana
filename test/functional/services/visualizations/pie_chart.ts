@@ -201,7 +201,7 @@ export class PieChartService extends FtrService {
       );
       if (debugDataString) {
         const parsedData = JSON.parse(debugDataString);
-        const partition = parsedData?.partition ?? [];
+        const partition = parsedData?.partition?.[0] ?? [];
         pieSlices += partition.partitions.length;
       }
     }
