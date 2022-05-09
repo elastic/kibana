@@ -1446,12 +1446,22 @@ export class RulesClient {
       async ({ key: [ruleType, consumer] }) => {
         this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
 
-        await this.authorization.ensureAuthorized({
-          ruleTypeId: ruleType,
-          consumer,
-          operation: WriteOperations.BulkEdit,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
+        try {
+          await this.authorization.ensureAuthorized({
+            ruleTypeId: ruleType,
+            consumer,
+            operation: WriteOperations.BulkEdit,
+            entity: AlertingAuthorizationEntity.Rule,
+          });
+        } catch (error) {
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.BULK_EDIT,
+              error,
+            })
+          );
+          throw error;
+        }
       },
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
