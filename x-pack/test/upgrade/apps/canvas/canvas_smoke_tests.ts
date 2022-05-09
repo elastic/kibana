@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('canvas smoke tests', function describeIndexTests() {
+  describe('upgrade canvas smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
@@ -28,17 +28,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ];
 
     spaces.forEach(({ space, basePath }) => {
-      describe('space ' + space, () => {
-        beforeEach(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
-            basePath,
-          });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-        });
-        canvasTests.forEach(({ name, numElements, page }) => {
-          it('renders elements on workpad ' + name + ' page ' + page, async () => {
+      canvasTests.forEach(({ name, numElements, page }) => {
+        describe('space: ' + space, () => {
+          before(async () => {
+            await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
+              basePath,
+            });
+            await PageObjects.header.waitUntilLoadingHasFinished();
             await PageObjects.home.launchSampleCanvas(name);
             await PageObjects.header.waitUntilLoadingHasFinished();
+          });
+          it('renders elements on workpad ' + name + ' page ' + page, async () => {
             const currentUrl = await browser.getCurrentUrl();
             const [, hash] = currentUrl.split('#/');
             if (hash.length === 0) {

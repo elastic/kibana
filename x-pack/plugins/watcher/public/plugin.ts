@@ -10,7 +10,7 @@ import { CoreSetup, Plugin, CoreStart, Capabilities } from '@kbn/core/public';
 import { first, map, skip } from 'rxjs/operators';
 import { Subject, combineLatest } from 'rxjs';
 
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { LicenseStatus } from '../common/types/license_status';
 import { PLUGIN } from '../common/constants';
@@ -89,10 +89,10 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     // Because the home feature catalogue does not have enable/disable functionality we pass
     // the config in but keep a reference for enabling and disabling showing on home based on
     // license updates.
-    const watcherHome = {
+    const watcherHome: FeatureCatalogueEntry = {
       id: 'watcher',
       title: 'Watcher', // This is a product name so we don't translate it.
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
       description: i18n.translate('xpack.watcher.watcherDescription', {
         defaultMessage: 'Detect changes in your data by creating, managing, and monitoring alerts.',
       }),

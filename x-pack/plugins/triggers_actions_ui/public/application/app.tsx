@@ -24,10 +24,14 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
-import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
+import {
+  ActionTypeRegistryContract,
+  AlertsTableConfigurationRegistryContract,
+  RuleTypeRegistryContract,
+} from '../types';
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 
-import { setSavedObjectsClient } from '../common/lib/data_apis';
+import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
@@ -46,6 +50,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
@@ -62,12 +67,12 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { savedObjects, uiSettings, theme$ } = deps;
-  const sections: Section[] = ['rules', 'connectors', 'alerts'];
+  const { dataViews, uiSettings, theme$ } = deps;
+  const sections: Section[] = ['rules', 'connectors', 'alerts', '__components_sandbox'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
-  setSavedObjectsClient(savedObjects.client);
+  setDataViewsService(dataViews);
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>

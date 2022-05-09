@@ -22,6 +22,7 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
+
     return buildActionResultsQuery(options);
   },
   parse: async (

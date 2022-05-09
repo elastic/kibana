@@ -23,7 +23,8 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const casesContext = await context.cases;
+      const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
       const attachments = request.body as BulkCreateCommentRequest;
 

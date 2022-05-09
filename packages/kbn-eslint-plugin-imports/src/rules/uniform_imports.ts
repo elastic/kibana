@@ -26,6 +26,9 @@ const KBN_PM_SCRIPT = Path.resolve(REPO_ROOT, 'packages/kbn-pm/dist/index.js');
 export const UniformImportsRule: Eslint.Rule.RuleModule = {
   meta: {
     fixable: 'code',
+    docs: {
+      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.md#kbnimportsuniform_imports',
+    },
   },
 
   create(context) {
@@ -38,7 +41,7 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
 
     const ownPackageId = resolver.getPackageIdForPath(sourceFilename);
 
-    return visitAllImportStatements((req, importer, type) => {
+    return visitAllImportStatements((req, { node, type }) => {
       if (!req) {
         return;
       }
@@ -67,7 +70,7 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
 
         if (resolver.isBazelPackage(ownPackageId)) {
           report(context, {
-            node: importer,
+            node,
             message: `Package [${ownPackageId}] can only import other packages`,
           });
           return;
@@ -84,7 +87,7 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
 
         if (req !== correct) {
           report(context, {
-            node: importer,
+            node,
             message: `Use import request [${correct}]`,
             correctImport: correct,
           });
@@ -95,7 +98,7 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
       const packageDir = resolver.getAbsolutePackageDir(packageId);
       if (!packageDir) {
         report(context, {
-          node: importer,
+          node,
           message: `Unable to determine location of package [${packageId}]`,
         });
         return;
@@ -109,7 +112,7 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
       });
       if (req !== correct) {
         report(context, {
-          node: importer,
+          node,
           message: `Use import request [${correct}]`,
           correctImport: correct,
         });

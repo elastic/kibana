@@ -1457,6 +1457,8 @@ describe('#collectMultiNamespaceReferences', () => {
     const reqObj1 = { type: 'a', id: '1' };
     const reqObj2 = { type: 'b', id: '2' };
     const spaces = [spaceX, spaceY, spaceZ];
+    const spacesWithMatchingAliases = [spaceX, spaceY, spaceZ];
+    const spacesWithMatchingOrigins = [spaceX, spaceY, spaceZ];
 
     // Actual object graph:
     //   ─► obj1 (a:1) ─┬─► obj3 (c:3) ───► obj5 (c:5) ─► obj8 (c:8) ─┐
@@ -1471,9 +1473,24 @@ describe('#collectMultiNamespaceReferences', () => {
     //                  │                       └───────────────────────────────────┘
     //                  └─► obj4 (d:4)
     //   ─► obj2 (b:2)
-    const obj1 = { ...reqObj1, spaces, inboundReferences: [] };
+    const obj1 = {
+      ...reqObj1,
+      spaces,
+      inboundReferences: [],
+      // We include spacesWithMatchingAliases and spacesWithMatchingOrigins on this object of type 'a' (which the user is authorized to access globally) to assert that they are not redacted
+      spacesWithMatchingAliases,
+      spacesWithMatchingOrigins,
+    };
     const obj2 = { ...reqObj2, spaces: [], inboundReferences: [] }; // non-multi-namespace types and hidden types will be returned with an empty spaces array
-    const obj3 = { type: 'c', id: '3', spaces, ...getInboundRefsFrom(obj1) };
+    const obj3 = {
+      type: 'c',
+      id: '3',
+      spaces,
+      ...getInboundRefsFrom(obj1),
+      // We include spacesWithMatchingAliases and spacesWithMatchingOrigins on this object of type 'c' (which the user is partially authorized for) to assert that they are redacted
+      spacesWithMatchingAliases,
+      spacesWithMatchingOrigins,
+    };
     const obj4 = { type: 'd', id: '4', spaces, ...getInboundRefsFrom(obj1) };
     const obj5 = {
       type: 'c',
@@ -1510,9 +1527,14 @@ describe('#collectMultiNamespaceReferences', () => {
       const result = await client.collectMultiNamespaceReferences([reqObj1, reqObj2], options);
       expect(result).toEqual({
         objects: [
-          obj1, // obj1's spaces array is not redacted because the user is globally authorized to access it
+          obj1, // obj1's spaces, spacesWithMatchingAliases, and spacesWithMatchingOrigins arrays are not redacted because the user is globally authorized to access it
           obj2, // obj2 has an empty spaces array (see above)
-          { ...obj3, spaces: [spaceX, '?', '?'] },
+          {
+            ...obj3,
+            spaces: [spaceX, '?', '?'],
+            spacesWithMatchingAliases: [spaceX, '?', '?'],
+            spacesWithMatchingOrigins: [spaceX, '?', '?'],
+          },
           { ...obj4, spaces: [], isMissing: true }, // obj4 is marked as Missing because the user was not authorized to access it
           obj5, // obj5's spaces array is not redacted, because it exists in All Spaces
           // obj7 is not included at all because the user was not authorized to access its inbound reference (obj4)
@@ -1567,9 +1589,14 @@ describe('#collectMultiNamespaceReferences', () => {
       const result = await client.collectMultiNamespaceReferences([reqObj1, reqObj2], options);
       expect(result).toEqual({
         objects: [
-          obj1, // obj1's spaces array is not redacted because the user is globally authorized to access it
+          obj1, // obj1's spaces, spacesWithMatchingAliases, and spacesWithMatchingOrigins arrays are not redacted because the user is globally authorized to access it
           obj2, // obj2 has an empty spaces array (see above)
-          { ...obj3, spaces: [spaceX, spaceY, '?'] },
+          {
+            ...obj3,
+            spaces: [spaceX, spaceY, '?'],
+            spacesWithMatchingAliases: [spaceX, spaceY, '?'],
+            spacesWithMatchingOrigins: [spaceX, spaceY, '?'],
+          },
           { ...obj4, spaces: [], isMissing: true }, // obj4 is marked as Missing because the user was not authorized to access it
           obj5, // obj5's spaces array is not redacted, because it exists in All Spaces
           // obj7 is not included at all because the user was not authorized to access its inbound reference (obj4)

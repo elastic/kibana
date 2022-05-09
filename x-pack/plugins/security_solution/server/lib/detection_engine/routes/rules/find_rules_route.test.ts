@@ -10,7 +10,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
-  getAlertMock,
+  getRuleMock,
   getFindRequest,
   getFindResultWithSingleHit,
   getEmptySavedObjectsResponse,
@@ -18,10 +18,7 @@ import {
 } from '../__mocks__/request_responses';
 import { findRulesRoute } from './find_rules_route';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('find_rules - %s', (_, isRuleRegistryEnabled) => {
+describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -31,21 +28,22 @@ describe.each([
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    clients.rulesClient.get.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
     clients.ruleExecutionLog.getExecutionSummariesBulk.mockResolvedValue(
       getRuleExecutionSummaries()
     );
 
-    findRulesRoute(server.router, logger, isRuleRegistryEnabled);
+    findRulesRoute(server.router, logger);
   });
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getFindRequest(), context);
+      const response = await server.inject(
+        getFindRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -53,7 +51,10 @@ describe.each([
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getFindRequest(), context);
+      const response = await server.inject(
+        getFindRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',

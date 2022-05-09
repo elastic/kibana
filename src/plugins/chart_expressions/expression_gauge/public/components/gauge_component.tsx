@@ -399,6 +399,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
             bands={bands}
             ticks={ticks}
+            domain={{ min, max }}
             bandFillColor={
               colorMode === GaugeColorModes.PALETTE
                 ? (val) => {

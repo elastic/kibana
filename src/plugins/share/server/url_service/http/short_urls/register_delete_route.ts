@@ -25,7 +25,7 @@ export const registerDeleteRoute = (router: IRouter, url: ServerUrlService) => {
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       const id = req.params.id;
-      const savedObjects = ctx.core.savedObjects.client;
+      const savedObjects = (await ctx.core).savedObjects.client;
       const shortUrls = url.shortUrls.get({ savedObjects });
 
       await shortUrls.delete(id);

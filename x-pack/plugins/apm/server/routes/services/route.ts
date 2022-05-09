@@ -36,7 +36,12 @@ import { getServiceProfilingTimeline } from './profiling/get_service_profiling_t
 import { getServiceInfrastructure } from './get_service_infrastructure';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import {
+  environmentRt,
+  kueryRt,
+  rangeRt,
+  probabilityRt,
+} from '../default_api_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
@@ -57,6 +62,7 @@ const servicesRoute = createApmServerRoute({
       kueryRt,
       rangeRt,
       t.partial({ serviceGroup: t.string }),
+      probabilityRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -105,8 +111,9 @@ const servicesRoute = createApmServerRoute({
       start,
       end,
       serviceGroup: serviceGroupId,
+      probability,
     } = params.query;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
 
     const [setup, serviceGroup] = await Promise.all([
       setupRequest(resources),
@@ -123,6 +130,7 @@ const servicesRoute = createApmServerRoute({
     return getServices({
       environment,
       kuery,
+      probability,
       setup,
       searchAggregatedTransactions,
       logger,
@@ -137,10 +145,14 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/detailed_statistics',
   params: t.type({
     query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
+      // t.intersection seemingly only supports 5 arguments so let's wrap them in another intersection
+      t.intersection([
+        environmentRt,
+        kueryRt,
+        rangeRt,
+        offsetRt,
+        probabilityRt,
+      ]),
       t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
     ]),
   }),
@@ -181,8 +193,15 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { environment, kuery, offset, serviceNames, start, end } =
-      params.query;
+    const {
+      environment,
+      kuery,
+      offset,
+      serviceNames,
+      start,
+      end,
+      probability,
+    } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       start,
@@ -203,6 +222,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       serviceNames,
       start,
       end,
+      probability,
     });
   },
 });
@@ -383,6 +403,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
     const { params, plugins, context, request, logger } = resources;
     const { serviceName } = params.path;
     const { environment, start, end } = params.query;
+    const esClient = (await context.core).elasticsearch.client;
 
     const { observability } = plugins;
 
@@ -411,7 +432,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
       searchAggregatedTransactions,
       serviceName,
       annotationsClient,
-      client: context.core.elasticsearch.client.asCurrentUser,
+      client: esClient.asCurrentUser,
       logger,
       start,
       end,
@@ -1218,7 +1239,8 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
       };
     }
 
-    const savedObjectsClient = resources.context.core.savedObjects.client;
+    const savedObjectsClient = (await resources.context.core).savedObjects
+      .client;
 
     const [setup, serviceGroup] = await Promise.all([
       setupRequest(resources),

@@ -143,10 +143,10 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async clickUnsavedChangesDiscard(title: string, confirmDiscard = true) {
-    this.log.debug(`Click Unsaved Changes Discard for `, title);
-    await this.testSubjects.existOrFail(`discard-unsaved-${title.split(' ').join('-')}`);
-    await this.testSubjects.click(`discard-unsaved-${title.split(' ').join('-')}`);
+  public async clickUnsavedChangesDiscard(testSubject: string, confirmDiscard = true) {
+    this.log.debug(`Click Unsaved Changes Discard for `, testSubject);
+    await this.testSubjects.existOrFail(testSubject);
+    await this.testSubjects.click(testSubject);
     if (confirmDiscard) {
       await this.common.clickConfirmOnModal();
     } else {

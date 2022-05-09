@@ -11,8 +11,11 @@ import { latestFindingsTransform } from './latest_findings_transform';
 import { benchmarkScoreTransform } from './benchmark_score_transform';
 
 // TODO: Move transforms to integration package
-export const initializeCspTransforms = async (esClient: ElasticsearchClient, logger: Logger) => {
-  return Promise.all([
+export const initializeCspTransforms = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  await Promise.all([
     initializeTransform(esClient, latestFindingsTransform, logger),
     initializeTransform(esClient, benchmarkScoreTransform, logger),
   ]);

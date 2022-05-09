@@ -6,6 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../../helpers';
 import {
   GeneralNodeAllocationTestBed,
@@ -16,10 +17,11 @@ import {
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
   POLICY_WITH_NODE_ROLE_ALLOCATION,
 } from '../../constants';
+import { API_BASE_PATH } from '../../../../../common/constants';
 
 describe('<EditPolicy /> node allocation general behavior', () => {
   let testBed: GeneralNodeAllocationTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -27,12 +29,11 @@ describe('<EditPolicy /> node allocation general behavior', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   const setup = async () => {
     await act(async () => {
-      testBed = await setupGeneralNodeAllocation();
+      testBed = await setupGeneralNodeAllocation(httpSetup);
     });
   };
 
@@ -53,10 +54,13 @@ describe('<EditPolicy /> node allocation general behavior', () => {
 
       await actions.setDataAllocation('node_attrs');
       await actions.savePolicy();
-      const latestRequest = server.requests[server.requests.length - 1];
-      const warmPhase = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm;
 
-      expect(warmPhase.actions.migrate).toEqual({ enabled: false });
+      const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+      const [requestUrl, requestBody] = lastReq;
+      const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+      expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+      expect(parsedReqBody.phases.warm.actions.migrate).toEqual({ enabled: false });
     });
 
     describe('node roles', () => {
@@ -84,12 +88,16 @@ describe('<EditPolicy /> node allocation general behavior', () => {
 
       test('setting replicas serialization', async () => {
         const { actions } = testBed;
+
         await actions.setReplicas('123');
         await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        const warmPhaseActions = JSON.parse(JSON.parse(latestRequest.requestBody).body).phases.warm
-          .actions;
-        expect(warmPhaseActions).toMatchInlineSnapshot(`
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+        expect(parsedReqBody.phases.warm.actions).toMatchInlineSnapshot(`
           Object {
             "allocate": Object {
               "number_of_replicas": 123,

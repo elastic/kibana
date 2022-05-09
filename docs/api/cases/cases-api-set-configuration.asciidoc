@@ -99,7 +99,7 @@ An object that contains the case settings.
 `200`::
    Indicates a successful call.
 
-=== {api-example-title}
+=== {api-examples-title}
 
 Sets the closure type and default connector for cases in **{stack-manage-app}**:
 

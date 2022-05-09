@@ -12,4 +12,4 @@ require('@babel/register')({
   presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
 });
 
-require('./run');
+require('./run_synthtrace');

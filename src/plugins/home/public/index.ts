@@ -16,10 +16,9 @@ export type {
   HomePublicPluginStart,
 } from './plugin';
 
-export { FeatureCatalogueCategory } from './services';
-
 export type {
   AddDataTab,
+  FeatureCatalogueCategory,
   FeatureCatalogueEntry,
   FeatureCatalogueRegistry,
   FeatureCatalogueSolution,

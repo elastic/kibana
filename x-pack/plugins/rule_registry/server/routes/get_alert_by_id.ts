@@ -40,7 +40,8 @@ export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => 
     },
     async (context, request, response) => {
       try {
-        const alertsClient = await context.rac.getAlertsClient();
+        const racContext = await context.rac;
+        const alertsClient = await racContext.getAlertsClient();
         const { id, index } = request.query;
         const alert = await alertsClient.get({ id, index });
         if (alert == null) {

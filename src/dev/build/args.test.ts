@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, createAnyInstanceSerializer } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
 import { readCliArgs } from './args';
 

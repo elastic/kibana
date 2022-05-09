@@ -71,14 +71,20 @@ describe('export timelines', () => {
 
   describe('status codes', () => {
     test('returns 200 when finding selected timelines', async () => {
-      const response = await server.inject(getExportTimelinesRequest(), context);
+      const response = await server.inject(
+        getExportTimelinesRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('catch error when status search throws error', async () => {
       clients.savedObjectsClient.bulkGet.mockReset();
       clients.savedObjectsClient.bulkGet.mockRejectedValue(new Error('Test error'));
-      const response = await server.inject(getExportTimelinesRequest(), context);
+      const response = await server.inject(
+        getExportTimelinesRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',

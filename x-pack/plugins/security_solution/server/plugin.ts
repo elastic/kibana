@@ -8,7 +8,6 @@
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
 import {
-  SIGNALS_ID,
   QUERY_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
@@ -177,9 +176,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
-    // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
-    const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
-
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
     let previewRuleDataClient: IRuleDataClient | null = null;
@@ -271,18 +267,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerPolicyRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
-    const racRuleTypes = [
+    const ruleTypes = [
+      LEGACY_NOTIFICATIONS_ID,
       EQL_RULE_TYPE_ID,
       INDICATOR_RULE_TYPE_ID,
       ML_RULE_TYPE_ID,
       QUERY_RULE_TYPE_ID,
       SAVED_QUERY_RULE_TYPE_ID,
       THRESHOLD_RULE_TYPE_ID,
-    ];
-    const ruleTypes = [
-      SIGNALS_ID,
-      LEGACY_NOTIFICATIONS_ID,
-      ...(isRuleRegistryEnabled ? racRuleTypes : []),
     ];
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));

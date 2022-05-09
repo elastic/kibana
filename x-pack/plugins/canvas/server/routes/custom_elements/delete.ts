@@ -23,7 +23,8 @@ export function initializeDeleteCustomElementRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      await context.core.savedObjects.client.delete(CUSTOM_ELEMENT_TYPE, request.params.id);
+      const soClient = (await context.core).savedObjects.client;
+      await soClient.delete(CUSTOM_ELEMENT_TYPE, request.params.id);
       return response.ok({ body: okResponse });
     })
   );

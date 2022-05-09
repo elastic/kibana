@@ -181,7 +181,11 @@ and the migration source index is the index the `.kibana` alias points to.
 Create the target index. This operation is idempotent, if the index already exist, we wait until its status turns yellow
 
 ### New control state
- → `MARK_VERSION_INDEX_READY`
+1. If the action succeeds
+  → `MARK_VERSION_INDEX_READY`
+2. If the action fails with a `index_not_yellow_timeout`
+  → `CREATE_NEW_TARGET`
+
 
 ## LEGACY_SET_WRITE_BLOCK
 ### Next action
@@ -209,8 +213,10 @@ Create a new `.kibana_pre6.5.0_001` index into which we can reindex the legacy
 index. (Since the task manager index was converted from a data index into a
 saved objects index in 7.4 it will be reindexed into `.kibana_pre7.4.0_001`)
 ### New control state
+1. If the index creation succeeds
   → `LEGACY_REINDEX`
-
+2. If the index creation task failed with a `index_not_yellow_timeout`
+  → `LEGACY_REINDEX_WAIT_FOR_TASK`
 ## LEGACY_REINDEX
 ### Next action
 `reindex`
@@ -257,7 +263,10 @@ Wait for the Elasticsearch cluster to be in "yellow" state. It means the index's
 We don't have as much data redundancy as we could have, but it's enough to start the migration.
 
 ### New control state
+1. If the action succeeds
   → `SET_SOURCE_WRITE_BLOCK`
+2. If the action fails with a `index_not_yellow_timeout`
+  → `WAIT_FOR_YELLOW_SOURCE`
   
 ## SET_SOURCE_WRITE_BLOCK
 ### Next action
@@ -278,7 +287,10 @@ This operation is idempotent, if the index already exist, we wait until its stat
 - (Since we never query the temporary index we can potentially disable refresh to speed up indexing performance. Profile to see if gains justify complexity)
 
 ### New control state
+1. If the action succeeds
   → `REINDEX_SOURCE_TO_TEMP_OPEN_PIT`
+2. If the action fails with a `index_not_yellow_timeout`
+  → `CREATE_REINDEX_TEMP`
 
 ## REINDEX_SOURCE_TO_TEMP_OPEN_PIT
 ### Next action
@@ -357,7 +369,10 @@ Ask elasticsearch to clone the temporary index into the target index. If the tar
 We can’t use the temporary index as our target index because one instance can complete the migration, delete a document, and then a second instance starts the reindex operation and re-creates the deleted document. By cloning the temporary index and only accepting writes/deletes from the cloned target index, we prevent lost acknowledged deletes.
 
 ### New control state
+1. If the action succeeds
   → `OUTDATED_DOCUMENTS_SEARCH`
+2. If the action fails with a `index_not_yellow_timeout`
+  → `CLONE_TEMP_TO_TARGET`
 
 ## OUTDATED_DOCUMENTS_SEARCH
 ### Next action

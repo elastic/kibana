@@ -87,6 +87,7 @@ describe('Event filter form', () => {
       services: {
         http: {},
         data: {},
+        unifiedSearch: {},
         notifications: {},
       },
     });

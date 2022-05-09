@@ -19,16 +19,22 @@ export const getCaseMetricRoute = createCasesRoute({
       case_id: schema.string({ minLength: 1 }),
     }),
     query: schema.object({
-      features: schema.arrayOf(schema.string({ minLength: 1 })),
+      features: schema.oneOf([
+        schema.arrayOf(schema.string({ minLength: 1 })),
+        schema.string({ minLength: 1 }),
+      ]),
     }),
   },
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
+      const { features } = request.query;
+
       return response.ok({
         body: await client.metrics.getCaseMetrics({
           caseId: request.params.case_id,
-          features: request.query.features,
+          features: Array.isArray(features) ? features : [features],
         }),
       });
     } catch (error) {

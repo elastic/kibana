@@ -20,6 +20,7 @@ export function defineCheckPrivilegesRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        const esClient = (await context.core).elasticsearch.client;
         const [
           {
             cluster: {
@@ -30,7 +31,7 @@ export function defineCheckPrivilegesRoutes({
           },
           areApiKeysEnabled,
         ] = await Promise.all([
-          context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+          esClient.asCurrentUser.security.hasPrivileges({
             body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
           }),
           getAuthenticationService().apiKeys.areAPIKeysEnabled(),

@@ -82,7 +82,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -251,7 +251,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -420,7 +420,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div

@@ -40,7 +40,8 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      await context.canvas.workpad.update(request.params.id, request.body as CanvasWorkpad);
+      const canvasContext = await context.canvas;
+      await canvasContext.workpad.update(request.params.id, request.body as CanvasWorkpad);
 
       return response.ok({
         body: okResponse,
@@ -65,7 +66,8 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      await context.canvas.workpad.update(request.params.id, request.body as CanvasWorkpad);
+      const canvasContext = await context.canvas;
+      await canvasContext.workpad.update(request.params.id, request.body as CanvasWorkpad);
 
       return response.ok({
         body: okResponse,
@@ -101,7 +103,8 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
         assets: AssetsRecordSchema.validate(request.body),
       };
 
-      await context.canvas.workpad.update(request.params.id, workpadAssets as CanvasWorkpad);
+      const canvasContext = await context.canvas;
+      await canvasContext.workpad.update(request.params.id, workpadAssets as CanvasWorkpad);
 
       return response.ok({
         body: okResponse,

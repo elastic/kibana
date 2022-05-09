@@ -12,7 +12,7 @@ export const executionLogSortableColumns = [
   'es_search_duration',
   'schedule_delay',
   'num_triggered_actions',
-  'num_scheduled_actions',
+  'num_generated_actions',
 ] as const;
 
 export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
@@ -27,7 +27,7 @@ export interface IExecutionLog {
   num_new_alerts: number;
   num_recovered_alerts: number;
   num_triggered_actions: number;
-  num_scheduled_actions: number;
+  num_generated_actions: number;
   num_succeeded_actions: number;
   num_errored_actions: number;
   total_search_duration_ms: number;

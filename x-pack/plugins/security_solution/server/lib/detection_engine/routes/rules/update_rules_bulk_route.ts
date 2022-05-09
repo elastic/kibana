@@ -30,7 +30,6 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './ut
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean,
   logger: Logger
 ) => {
   router.put(
@@ -48,13 +47,15 @@ export const updateRulesBulkRoute = (
 
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting.getRulesClient();
-      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution.getAppClient();
+      const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
+
+      const rulesClient = ctx.alerting.getRulesClient();
+      const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+      const savedObjectsClient = ctx.core.savedObjects.client;
+      const siemClient = ctx.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: ctx.licensing.license,
         ml,
         request,
         savedObjectsClient,
@@ -76,7 +77,6 @@ export const updateRulesBulkRoute = (
             throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
             const existingRule = await readRules({
-              isRuleRegistryEnabled,
               rulesClient,
               ruleId: payloadRule.rule_id,
               id: payloadRule.id,
@@ -96,12 +96,7 @@ export const updateRulesBulkRoute = (
             });
             if (rule != null) {
               const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleExecutionSummary,
-                isRuleRegistryEnabled
-              );
+              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

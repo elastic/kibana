@@ -69,7 +69,11 @@ describe('createTimelines', () => {
     const { context } = requestContextMock.createTools();
     const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
 
-    frameworkRequest = await buildFrameworkRequest(context, securitySetup, mockRequest);
+    frameworkRequest = await buildFrameworkRequest(
+      requestContextMock.convertContext(context),
+      securitySetup,
+      mockRequest
+    );
     Date.now = jest.fn().mockReturnValue(new Date('2020-11-04T11:37:31.655Z'));
   });
 

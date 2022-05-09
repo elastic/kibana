@@ -117,7 +117,11 @@ describe('DELETE remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
@@ -163,7 +167,11 @@ describe('DELETE remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
@@ -240,7 +248,11 @@ describe('DELETE remote clusters', () => {
 
       const mockRequest = createMockRequest();
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({

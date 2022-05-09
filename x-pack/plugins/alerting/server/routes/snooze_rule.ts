@@ -44,7 +44,7 @@ export const snoozeRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const params = req.params;
         const body = rewriteBodyReq(req.body);
         try {

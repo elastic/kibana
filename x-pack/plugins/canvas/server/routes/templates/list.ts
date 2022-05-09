@@ -21,7 +21,7 @@ export function initializeListTemplates(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const savedObjectsClient = (await context.core).savedObjects.client;
 
       const templates = await savedObjectsClient.find<CanvasTemplate>({
         type: TEMPLATE_TYPE,

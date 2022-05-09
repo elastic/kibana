@@ -17,7 +17,7 @@ import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
 import { getUISettings } from '../../services';
-import { SplitChartWarning } from './split_chart_warning';
+import { VizChartWarning } from './viz_chart_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -28,6 +28,7 @@ import {
 import {
   CHARTS_CONFIG_TOKENS,
   CHARTS_WITHOUT_SMALL_MULTIPLES,
+  CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
 
@@ -121,8 +122,10 @@ export const VisualizeEditorCommon = ({
 
   const chartsWithoutSmallMultiples: string[] = Object.values(CHARTS_WITHOUT_SMALL_MULTIPLES);
   const chartNeedsWarning = chartName ? chartsWithoutSmallMultiples.includes(chartName) : false;
+  const deprecatedCharts: string[] = Object.values(CHARTS_TO_BE_DEPRECATED);
+  const deprecatedChartsNeedWarning = chartName ? deprecatedCharts.includes(chartName) : false;
   const chartToken =
-    chartName && chartNeedsWarning
+    chartName && (chartNeedsWarning || deprecatedChartsNeedWarning)
       ? CHARTS_CONFIG_TOKENS[chartName as CHARTS_WITHOUT_SMALL_MULTIPLES]
       : undefined;
 
@@ -150,9 +153,16 @@ export const VisualizeEditorCommon = ({
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
       {!hasLegacyChartsEnabled && isSplitChart && chartNeedsWarning && chartToken && chartName && (
-        <SplitChartWarning
+        <VizChartWarning
           chartType={chartName as CHARTS_WITHOUT_SMALL_MULTIPLES}
           chartConfigToken={chartToken}
+        />
+      )}
+      {hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName && (
+        <VizChartWarning
+          chartType={chartName as CHARTS_TO_BE_DEPRECATED}
+          chartConfigToken={chartToken}
+          mode="new"
         />
       )}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}

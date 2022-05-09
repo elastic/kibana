@@ -17,6 +17,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ControlInput } from '../common/types';
 import { ControlsService } from './services/controls';
 
@@ -70,9 +71,10 @@ export interface ControlsPluginSetupDeps {
 }
 export interface ControlsPluginStartDeps {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;
   dataViews: DataViewsPublicPluginStart;
 }
 
 // re-export from common
-export type { ControlWidth, ControlInput, ControlStyle } from '../common/types';
+export type { ControlWidth, ControlInput, DataControlInput, ControlStyle } from '../common/types';

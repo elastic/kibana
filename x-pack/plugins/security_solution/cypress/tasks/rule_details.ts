@@ -70,12 +70,7 @@ export const openExceptionFlyoutFromRuleSettings = () => {
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
+  openExceptionFlyoutFromRuleSettings();
   cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {

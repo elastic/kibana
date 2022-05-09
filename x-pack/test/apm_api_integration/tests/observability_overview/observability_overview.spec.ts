@@ -29,6 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         params: {
           query: {
             ...commonQuery,
+            probability: 1,
             environment: 'ENVIRONMENT_ALL',
             kuery: '',
           },

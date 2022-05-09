@@ -24,7 +24,6 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 
 import type {
   PluginInitializerContext,
@@ -323,7 +322,7 @@ export class VisualizationsPlugin
         icon: 'visualizeApp',
         path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
       });
     }
 

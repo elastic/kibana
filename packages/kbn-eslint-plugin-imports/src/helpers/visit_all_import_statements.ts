@@ -22,9 +22,27 @@ const JEST_MODULE_METHODS = [
   'jest.requireMock',
 ];
 
+export type Importer =
+  | TSESTree.ImportDeclaration
+  | T.ImportDeclaration
+  | TSESTree.ExportNamedDeclaration
+  | T.ExportNamedDeclaration
+  | TSESTree.ExportAllDeclaration
+  | T.ExportAllDeclaration
+  | TSESTree.CallExpression
+  | T.CallExpression
+  | TSESTree.ImportExpression
+  | TSESTree.CallExpression
+  | T.CallExpression;
+
 export type SomeNode = TSESTree.Node | T.Node;
 
-type Visitor = (req: string | null, node: SomeNode, type: ImportType) => void;
+interface VisitorContext {
+  node: SomeNode;
+  type: ImportType;
+  importer: Importer;
+}
+type Visitor = (req: string | null, context: VisitorContext) => void;
 
 const isIdent = (node: SomeNode): node is TSESTree.Identifier | T.Identifier =>
   T.isIdentifier(node) || node.type === AST_NODE_TYPES.Identifier;
@@ -36,28 +54,38 @@ const isStringLiteral = (node: SomeNode): node is TSESTree.StringLiteral | T.Str
 const isTemplateLiteral = (node: SomeNode): node is TSESTree.TemplateLiteral | T.TemplateLiteral =>
   T.isTemplateLiteral(node) || node.type === AST_NODE_TYPES.TemplateLiteral;
 
-function passSourceAsString(source: SomeNode | null | undefined, type: ImportType, fn: Visitor) {
-  if (!source) {
+function passSourceAsString(
+  fn: Visitor,
+  node: SomeNode | null | undefined,
+  importer: Importer,
+  type: ImportType
+) {
+  if (!node) {
     return;
   }
 
-  if (isStringLiteral(source)) {
-    return fn(source.value, source, type);
+  const ctx = {
+    node,
+    importer,
+    type,
+  };
+
+  if (isStringLiteral(node)) {
+    return fn(node.value, ctx);
   }
 
-  if (isTemplateLiteral(source)) {
-    if (source.expressions.length) {
+  if (isTemplateLiteral(node)) {
+    if (node.expressions.length) {
       return null;
     }
 
     return fn(
-      [...source.quasis].reduce((acc, q) => acc + q.value.raw, ''),
-      source,
-      type
+      [...node.quasis].reduce((acc, q) => acc + q.value.raw, ''),
+      ctx
     );
   }
 
-  return fn(null, source, type);
+  return fn(null, ctx);
 }
 
 /**
@@ -68,27 +96,28 @@ function passSourceAsString(source: SomeNode | null | undefined, type: ImportTyp
 export function visitAllImportStatements(fn: Visitor) {
   const visitor = {
     ImportDeclaration(node: TSESTree.ImportDeclaration | T.ImportDeclaration) {
-      passSourceAsString(node.source, 'esm', fn);
+      passSourceAsString(fn, node.source, node, 'esm');
     },
     ExportNamedDeclaration(node: TSESTree.ExportNamedDeclaration | T.ExportNamedDeclaration) {
-      passSourceAsString(node.source, 'esm', fn);
+      passSourceAsString(fn, node.source, node, 'esm');
     },
     ExportAllDeclaration(node: TSESTree.ExportAllDeclaration | T.ExportAllDeclaration) {
-      passSourceAsString(node.source, 'esm', fn);
+      passSourceAsString(fn, node.source, node, 'esm');
     },
     ImportExpression(node: TSESTree.ImportExpression) {
-      passSourceAsString(node.source, 'esm', fn);
+      passSourceAsString(fn, node.source, node, 'esm');
     },
-    CallExpression({ callee, arguments: args }: TSESTree.CallExpression | T.CallExpression) {
+    CallExpression(node: TSESTree.CallExpression | T.CallExpression) {
+      const { callee, arguments: args } = node;
       // babel parser used for .js files treats import() calls as CallExpressions with callees of type "Import"
       if (T.isImport(callee)) {
-        passSourceAsString(args[0], 'esm', fn);
+        passSourceAsString(fn, args[0], node, 'esm');
         return;
       }
 
       // is this a `require()` call?
       if (isIdent(callee) && callee.name === 'require') {
-        passSourceAsString(args[0], 'require', fn);
+        passSourceAsString(fn, args[0], node, 'require');
         return;
       }
 
@@ -103,12 +132,12 @@ export function visitAllImportStatements(fn: Visitor) {
 
         // is it "require.resolve()"?
         if (name === 'require.resolve') {
-          passSourceAsString(args[0], 'require-resolve', fn);
+          passSourceAsString(fn, args[0], node, 'require-resolve');
         }
 
         // is it one of jest's mock methods?
         if (left.name === 'jest' && JEST_MODULE_METHODS.includes(name)) {
-          passSourceAsString(args[0], 'jest', fn);
+          passSourceAsString(fn, args[0], node, 'jest');
         }
       }
     },

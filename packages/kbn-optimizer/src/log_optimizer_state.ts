@@ -8,7 +8,7 @@
 
 import { inspect } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { tap } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer';

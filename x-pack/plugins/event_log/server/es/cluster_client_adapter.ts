@@ -123,7 +123,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     for (const doc of docs) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: { _index: doc.index } });
+      bulkBody.push({ create: { _index: doc.index, require_alias: true } });
       bulkBody.push(doc.body);
     }
 

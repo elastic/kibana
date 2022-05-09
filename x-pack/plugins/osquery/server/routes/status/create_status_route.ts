@@ -27,7 +27,8 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
@@ -78,6 +79,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                           const { id: queryId, ...query } = stream.compiled_stream;
                           queries[queryId] = query;
                         }
+
                         return queries;
                       },
                       {} as Record<string, unknown>

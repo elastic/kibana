@@ -12,7 +12,7 @@ import {
   getReadBulkRequest,
   getFindResultWithSingleHit,
   getEmptyFindResult,
-  getAlertMock,
+  getRuleMock,
   createBulkMlRuleRequest,
   getBasicEmptySearchResponse,
   getBasicNoShardsSearchResponse,
@@ -27,10 +27,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('create_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
+describe('create_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -42,19 +39,20 @@ describe.each([
     const logger = loggingSystemMock.createLogger();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
-    clients.rulesClient.create.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    ); // successful creation
+    clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful creation
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled, logger);
+    createRulesBulkRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
   });
@@ -67,7 +65,10 @@ describe.each([
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
 
-      const response = await server.inject(createBulkMlRuleRequest(), context);
+      const response = await server.inject(
+        createBulkMlRuleRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
@@ -86,27 +87,20 @@ describe.each([
           getBasicNoShardsSearchResponse()
         )
       );
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
-
-      if (!isRuleRegistryEnabled) {
-        expect(response.body).toEqual([
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index undefined does not exist',
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
-          },
-        ]);
-      }
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-      const response = await server.inject(getReadBulkRequest(), context);
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -123,7 +117,10 @@ describe.each([
       clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -142,7 +139,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_CREATE,
         body: [getCreateRulesSchemaMock(), getCreateRulesSchemaMock()],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([

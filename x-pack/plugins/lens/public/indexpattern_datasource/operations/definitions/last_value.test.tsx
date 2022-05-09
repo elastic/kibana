@@ -8,6 +8,7 @@
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -25,6 +26,7 @@ const defaultProps = {
   uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: {

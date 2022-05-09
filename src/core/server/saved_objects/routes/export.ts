@@ -165,7 +165,7 @@ export const registerExportRoute = (
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
       const cleaned = cleanOptions(req.body);
-      const { typeRegistry, getExporter, getClient } = context.core.savedObjects;
+      const { typeRegistry, getExporter, getClient } = (await context.core).savedObjects;
       const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
 
       let options: EitherExportOptions;

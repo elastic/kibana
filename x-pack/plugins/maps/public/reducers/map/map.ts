@@ -251,13 +251,11 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
       return updateLayerSourceDescriptorProp(state, action.layerId, action.propName, action.value);
     case SET_JOINS:
       const layerDescriptor = state.layerList.find(
-        (descriptor) => descriptor.id === action.layer.getId()
+        (descriptor) => descriptor.id === action.layerId
       );
       if (layerDescriptor) {
         const newLayerDescriptor = { ...layerDescriptor, joins: action.joins.slice() };
-        const index = state.layerList.findIndex(
-          (descriptor) => descriptor.id === action.layer.getId()
-        );
+        const index = state.layerList.findIndex((descriptor) => descriptor.id === action.layerId);
         const newLayerList = state.layerList.slice();
         newLayerList[index] = newLayerDescriptor;
         return { ...state, layerList: newLayerList };

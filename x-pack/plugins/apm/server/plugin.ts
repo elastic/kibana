@@ -218,12 +218,13 @@ export class APMPlugin
         request: KibanaRequest;
         context: ApmPluginRequestHandlerContext;
       }) => {
+        const coreContext = await context.core;
         const [indices, includeFrozen] = await Promise.all([
           boundGetApmIndices(),
-          context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+          coreContext.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
         ]);
 
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         return new APMEventClient({
           debug: debug ?? false,

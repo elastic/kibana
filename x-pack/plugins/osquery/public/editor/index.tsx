@@ -40,6 +40,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   ]);
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
+
   return (
     <EuiCodeEditor
       value={editorValue}

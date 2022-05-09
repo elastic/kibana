@@ -77,11 +77,7 @@ describe('<UseArray />', () => {
                 <>
                   {items.map(({ id, path }) => {
                     return (
-                      <UseField
-                        key={id}
-                        path={`${path}.name`}
-                        data-test-subj={`nameField__${id}`}
-                      />
+                      <UseField key={id} path={`${path}.name`} data-test-subj={`${path}Name`} />
                     );
                   })}
                 </>
@@ -102,7 +98,7 @@ describe('<UseArray />', () => {
     } = setup();
 
     await act(async () => {
-      setInputValue('nameField__0', 'John');
+      setInputValue('users[0]Name', 'John');
     });
 
     const formData = onFormData.mock.calls[onFormData.mock.calls.length - 1][0];

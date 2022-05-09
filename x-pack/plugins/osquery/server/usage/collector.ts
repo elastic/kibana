@@ -15,6 +15,7 @@ export const getInternalSavedObjectsClient = async (
   getStartServices: CoreSetup['getStartServices']
 ) => {
   const [coreStart] = await getStartServices();
+
   return new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 };
 
@@ -22,6 +23,7 @@ export const registerCollector: RegisterCollector = ({ core, osqueryContext, usa
   if (!usageCollection) {
     return;
   }
+
   const collector = usageCollection.makeUsageCollector<UsageData>({
     type: 'osquery',
     schema: usageSchema,

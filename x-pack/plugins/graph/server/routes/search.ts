@@ -27,40 +27,33 @@ export function registerSearchRoute({
         }),
       },
     },
-    router.handleLegacyErrors(
-      async (
-        {
-          core: {
-            uiSettings: { client: uiSettings },
-            elasticsearch: { client: esClient },
+    router.handleLegacyErrors(async ({ core }, request, response) => {
+      verifyApiAccess(licenseState);
+      licenseState.notifyUsage('Graph');
+      const {
+        uiSettings: { client: uiSettings },
+        elasticsearch: { client: esClient },
+      } = await core;
+      const includeFrozen = await uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+      try {
+        return response.ok({
+          body: {
+            resp: await esClient.asCurrentUser.search({
+              index: request.body.index,
+              body: request.body.body,
+              track_total_hits: true,
+              ...(includeFrozen ? { ignore_throttled: false } : {}),
+            }),
           },
-        },
-        request,
-        response
-      ) => {
-        verifyApiAccess(licenseState);
-        licenseState.notifyUsage('Graph');
-        const includeFrozen = await uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-        try {
-          return response.ok({
-            body: {
-              resp: await esClient.asCurrentUser.search({
-                index: request.body.index,
-                body: request.body.body,
-                track_total_hits: true,
-                ...(includeFrozen ? { ignore_throttled: false } : {}),
-              }),
-            },
-          });
-        } catch (error) {
-          return response.customError({
-            statusCode: error.statusCode || 500,
-            body: {
-              message: error.message,
-            },
-          });
-        }
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: error.statusCode || 500,
+          body: {
+            message: error.message,
+          },
+        });
       }
-    )
+    })
   );
 }

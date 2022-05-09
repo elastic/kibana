@@ -9,11 +9,10 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 
 const mockFeatures = [
   {
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as const,
     description: 'Ingest data from popular apps and services.',
     showOnHomePage: true,
     icon: 'indexOpen',
@@ -23,7 +22,7 @@ const mockFeatures = [
     title: 'Ingest data',
   },
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin' as const,
     description: 'Add and manage your fleet of Elastic Agents and integrations.',
     showOnHomePage: true,
     icon: 'indexManagementApp',
@@ -33,7 +32,7 @@ const mockFeatures = [
     title: 'Add Elastic Agent',
   },
   {
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as const,
     description: 'Import your own CSV, NDJSON, or log file',
     showOnHomePage: true,
     icon: 'document',

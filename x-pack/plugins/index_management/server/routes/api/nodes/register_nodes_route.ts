@@ -13,7 +13,7 @@ export function registerNodesRoute({ router, lib: { handleEsError } }: RouteDepe
   router.get(
     { path: addBasePath('/nodes/plugins'), validate: {} },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
         const body = await client.asCurrentUser.nodes.info();

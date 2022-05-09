@@ -22,7 +22,7 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest
   ) {
-    const uiSettings = requestContext.core.uiSettings.client;
+    const uiSettings = (await requestContext.core).uiSettings.client;
 
     return {
       isViable: true,

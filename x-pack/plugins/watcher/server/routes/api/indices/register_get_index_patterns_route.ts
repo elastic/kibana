@@ -18,8 +18,9 @@ export function registerGetIndexPatternsRoute({
       path: '/api/watcher/indices/index_patterns',
       validate: false,
     },
-    license.guardApiRoute(async ({ core: { savedObjects } }, request, response) => {
+    license.guardApiRoute(async ({ core }, request, response) => {
       try {
+        const { savedObjects } = await core;
         const finder = savedObjects.client.createPointInTimeFinder({
           type: 'index-pattern',
           fields: ['title'],

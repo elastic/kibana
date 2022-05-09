@@ -41,13 +41,10 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param mlAuthz {object}
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
- * @param isRuleRegistryEnabled {boolean} - feature flag that should be
- * removed as this is now on and no going back
  * @param rulesClient {object}
  * @param savedObjectsClient {object}
  * @param exceptionsClient {object}
  * @param spaceId {string} - space being used during import
- * @param signalsIndex {string} - the signals index name
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -57,24 +54,20 @@ export const importRules = async ({
   rulesResponseAcc,
   mlAuthz,
   overwriteRules,
-  isRuleRegistryEnabled,
   rulesClient,
   savedObjectsClient,
   exceptionsClient,
   spaceId,
-  signalsIndex,
   existingLists,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
-  signalsIndex: string;
   existingLists: Record<string, ExceptionListSchema>;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
@@ -167,7 +160,6 @@ export const importRules = async ({
                 const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
                 throwAuthzError(await mlAuthz.validateRuleType(type));
                 const rule = await readRules({
-                  isRuleRegistryEnabled,
                   rulesClient,
                   ruleId,
                   id: undefined,
@@ -175,7 +167,6 @@ export const importRules = async ({
 
                 if (rule == null) {
                   await createRules({
-                    isRuleRegistryEnabled,
                     rulesClient,
                     anomalyThreshold,
                     author,
@@ -190,7 +181,7 @@ export const importRules = async ({
                     language,
                     license,
                     machineLearningJobId,
-                    outputIndex: signalsIndex,
+                    outputIndex: '',
                     savedId,
                     timelineId,
                     timelineTitle,

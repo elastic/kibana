@@ -85,7 +85,7 @@ jest.mock(
 jest.mock('../../services/epm/packages', () => {
   return {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
-    getPackageInfoFromRegistry: jest.fn(() => Promise.resolve()),
+    getPackageInfo: jest.fn(() => Promise.resolve()),
   };
 });
 
@@ -93,7 +93,7 @@ describe('When calling package policy', () => {
   let routerMock: jest.Mocked<FleetAuthzRouter>;
   let routeHandler: FleetRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let context: jest.Mocked<FleetRequestHandlerContext>;
+  let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   beforeEach(() => {

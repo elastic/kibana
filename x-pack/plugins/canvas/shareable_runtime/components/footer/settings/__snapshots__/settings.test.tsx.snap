@@ -43,54 +43,52 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
               </span>
             </div>
             <div>
-              <div>
-                <button
-                  class="euiContextMenuItem"
-                  type="button"
+              <button
+                class="euiContextMenuItem"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
                 >
                   <span
-                    class="euiContextMenu__itemLayout"
+                    class="euiContextMenu__icon"
+                    color="inherit"
+                    data-euiicon-type="play"
+                  />
+                  <span
+                    class="euiContextMenuItem__text"
                   >
-                    <span
-                      class="euiContextMenu__icon"
-                      color="inherit"
-                      data-euiicon-type="play"
-                    />
-                    <span
-                      class="euiContextMenuItem__text"
-                    >
-                      Auto Play
-                    </span>
-                    <span
-                      class="euiContextMenu__arrow"
-                      data-euiicon-type="arrowRight"
-                    />
+                    Auto Play
                   </span>
-                </button>
-                <button
-                  class="euiContextMenuItem"
-                  type="button"
+                  <span
+                    class="euiContextMenu__arrow"
+                    data-euiicon-type="arrowRight"
+                  />
+                </span>
+              </button>
+              <button
+                class="euiContextMenuItem"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
                 >
                   <span
-                    class="euiContextMenu__itemLayout"
+                    class="euiContextMenu__icon"
+                    color="inherit"
+                    data-euiicon-type="boxesHorizontal"
+                  />
+                  <span
+                    class="euiContextMenuItem__text"
                   >
-                    <span
-                      class="euiContextMenu__icon"
-                      color="inherit"
-                      data-euiicon-type="boxesHorizontal"
-                    />
-                    <span
-                      class="euiContextMenuItem__text"
-                    >
-                      Toolbar
-                    </span>
-                    <span
-                      class="euiContextMenu__arrow"
-                      data-euiicon-type="arrowRight"
-                    />
+                    Toolbar
                   </span>
-                </button>
-              </div>
+                  <span
+                    class="euiContextMenu__arrow"
+                    data-euiicon-type="arrowRight"
+                  />
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -143,54 +141,52 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
               </span>
             </div>
             <div>
-              <div>
-                <button
-                  class="euiContextMenuItem"
-                  type="button"
+              <button
+                class="euiContextMenuItem"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
                 >
                   <span
-                    class="euiContextMenu__itemLayout"
+                    class="euiContextMenu__icon"
+                    color="inherit"
+                    data-euiicon-type="play"
+                  />
+                  <span
+                    class="euiContextMenuItem__text"
                   >
-                    <span
-                      class="euiContextMenu__icon"
-                      color="inherit"
-                      data-euiicon-type="play"
-                    />
-                    <span
-                      class="euiContextMenuItem__text"
-                    >
-                      Auto Play
-                    </span>
-                    <span
-                      class="euiContextMenu__arrow"
-                      data-euiicon-type="arrowRight"
-                    />
+                    Auto Play
                   </span>
-                </button>
-                <button
-                  class="euiContextMenuItem"
-                  type="button"
+                  <span
+                    class="euiContextMenu__arrow"
+                    data-euiicon-type="arrowRight"
+                  />
+                </span>
+              </button>
+              <button
+                class="euiContextMenuItem"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
                 >
                   <span
-                    class="euiContextMenu__itemLayout"
+                    class="euiContextMenu__icon"
+                    color="inherit"
+                    data-euiicon-type="boxesHorizontal"
+                  />
+                  <span
+                    class="euiContextMenuItem__text"
                   >
-                    <span
-                      class="euiContextMenu__icon"
-                      color="inherit"
-                      data-euiicon-type="boxesHorizontal"
-                    />
-                    <span
-                      class="euiContextMenuItem__text"
-                    >
-                      Toolbar
-                    </span>
-                    <span
-                      class="euiContextMenu__arrow"
-                      data-euiicon-type="arrowRight"
-                    />
+                    Toolbar
                   </span>
-                </button>
-              </div>
+                  <span
+                    class="euiContextMenu__arrow"
+                    data-euiicon-type="arrowRight"
+                  />
+                </span>
+              </button>
             </div>
           </div>
           <div
@@ -217,134 +213,132 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
               </span>
             </button>
             <div>
-              <div>
+              <div
+                style="padding: 16px;"
+              >
                 <div
-                  style="padding: 16px;"
+                  class="euiSwitch"
                 >
-                  <div
-                    class="euiSwitch"
+                  <button
+                    aria-checked="false"
+                    aria-labelledby="generated-id"
+                    class="euiSwitch__button"
+                    id="cycle"
+                    name="cycle"
+                    role="switch"
+                    type="button"
                   >
-                    <button
-                      aria-checked="false"
-                      aria-labelledby="generated-id"
-                      class="euiSwitch__button"
-                      id="cycle"
-                      name="cycle"
-                      role="switch"
-                      type="button"
+                    <span
+                      class="euiSwitch__body"
                     >
                       <span
-                        class="euiSwitch__body"
+                        class="euiSwitch__thumb"
+                      />
+                      <span
+                        class="euiSwitch__track"
                       >
                         <span
-                          class="euiSwitch__thumb"
+                          class="euiSwitch__icon"
+                          data-euiicon-type="cross"
                         />
                         <span
-                          class="euiSwitch__track"
-                        >
-                          <span
-                            class="euiSwitch__icon"
-                            data-euiicon-type="cross"
-                          />
-                          <span
-                            class="euiSwitch__icon euiSwitch__icon--checked"
-                            data-euiicon-type="check"
-                          />
-                        </span>
+                          class="euiSwitch__icon euiSwitch__icon--checked"
+                          data-euiicon-type="check"
+                        />
                       </span>
-                    </button>
-                    <span
-                      class="euiSwitch__label"
-                      id="generated-id"
-                    >
-                      Cycle Slides
                     </span>
-                  </div>
-                  <hr
-                    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
-                  />
-                  <form>
+                  </button>
+                  <span
+                    class="euiSwitch__label"
+                    id="generated-id"
+                  >
+                    Cycle Slides
+                  </span>
+                </div>
+                <hr
+                  class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+                />
+                <form>
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexItem"
                     >
                       <div
-                        class="euiFlexItem"
+                        class="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
+                        id="generated-id-row"
                       >
                         <div
-                          class="euiFormRow euiFormRow--compressed"
-                          id="generated-id-row"
+                          class="euiFormRow__labelWrapper"
                         >
-                          <div
-                            class="euiFormRow__labelWrapper"
+                          <label
+                            class="euiFormLabel euiFormRow__label"
+                            for="generated-id"
+                            id="generated-id-label"
                           >
-                            <label
-                              class="euiFormLabel euiFormRow__label"
-                              for="generated-id"
-                              id="generated-id-label"
-                            >
-                              Set a custom interval
-                            </label>
-                          </div>
-                          <div
-                            class="euiFormRow__fieldWrapper"
-                          >
-                            <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed"
-                            >
-                              <div
-                                class="euiFormControlLayout__childrenWrapper"
-                              >
-                                <input
-                                  aria-describedby="generated-id-help-0"
-                                  aria-invalid="false"
-                                  class="euiFieldText euiFieldText--compressed"
-                                  id="generated-id"
-                                  type="text"
-                                  value="5s"
-                                />
-                              </div>
-                            </div>
-                            <div
-                              class="euiFormHelpText euiFormRow__text"
-                              id="generated-id-help-0"
-                            >
-                              Use shorthand notation, like 30s, 10m, or 1h
-                            </div>
-                          </div>
+                            Set a custom interval
+                          </label>
                         </div>
-                      </div>
-                      <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
-                      >
                         <div
-                          class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
-                          id="generated-id-row"
+                          class="euiFormRow__fieldWrapper"
                         >
                           <div
-                            class="euiFormRow__fieldWrapper"
+                            class="euiFormControlLayout euiFormControlLayout--compressed"
                           >
-                            <button
-                              class="euiButton euiButton--primary euiButton--small"
-                              id="generated-id"
-                              style="min-width: auto;"
-                              type="submit"
+                            <div
+                              class="euiFormControlLayout__childrenWrapper"
                             >
-                              <span
-                                class="euiButtonContent euiButton__content"
-                              >
-                                <span
-                                  class="euiButton__text"
-                                >
-                                  Set
-                                </span>
-                              </span>
-                            </button>
+                              <input
+                                aria-describedby="generated-id-help-0"
+                                aria-invalid="false"
+                                class="euiFieldText euiFieldText--compressed"
+                                id="generated-id"
+                                type="text"
+                                value="5s"
+                              />
+                            </div>
+                          </div>
+                          <div
+                            class="euiFormHelpText euiFormRow__text"
+                            id="generated-id-help-0"
+                          >
+                            Use shorthand notation, like 30s, 10m, or 1h
                           </div>
                         </div>
                       </div>
                     </div>
-                  </form>
-                </div>
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <div
+                        class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+                        id="generated-id-row"
+                      >
+                        <div
+                          class="euiFormRow__fieldWrapper"
+                        >
+                          <button
+                            class="euiButton euiButton--primary euiButton--small"
+                            id="generated-id"
+                            style="min-width: auto;"
+                            type="submit"
+                          >
+                            <span
+                              class="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                class="euiButton__text"
+                              >
+                                Set
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -398,54 +392,52 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
               </span>
             </div>
             <div>
-              <div>
-                <button
-                  class="euiContextMenuItem"
-                  type="button"
+              <button
+                class="euiContextMenuItem"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
                 >
                   <span
-                    class="euiContextMenu__itemLayout"
+                    class="euiContextMenu__icon"
+                    color="inherit"
+                    data-euiicon-type="play"
+                  />
+                  <span
+                    class="euiContextMenuItem__text"
                   >
-                    <span
-                      class="euiContextMenu__icon"
-                      color="inherit"
-                      data-euiicon-type="play"
-                    />
-                    <span
-                      class="euiContextMenuItem__text"
-                    >
-                      Auto Play
-                    </span>
-                    <span
-                      class="euiContextMenu__arrow"
-                      data-euiicon-type="arrowRight"
-                    />
+                    Auto Play
                   </span>
-                </button>
-                <button
-                  class="euiContextMenuItem"
-                  type="button"
+                  <span
+                    class="euiContextMenu__arrow"
+                    data-euiicon-type="arrowRight"
+                  />
+                </span>
+              </button>
+              <button
+                class="euiContextMenuItem"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
                 >
                   <span
-                    class="euiContextMenu__itemLayout"
+                    class="euiContextMenu__icon"
+                    color="inherit"
+                    data-euiicon-type="boxesHorizontal"
+                  />
+                  <span
+                    class="euiContextMenuItem__text"
                   >
-                    <span
-                      class="euiContextMenu__icon"
-                      color="inherit"
-                      data-euiicon-type="boxesHorizontal"
-                    />
-                    <span
-                      class="euiContextMenuItem__text"
-                    >
-                      Toolbar
-                    </span>
-                    <span
-                      class="euiContextMenu__arrow"
-                      data-euiicon-type="arrowRight"
-                    />
+                    Toolbar
                   </span>
-                </button>
-              </div>
+                  <span
+                    class="euiContextMenu__arrow"
+                    data-euiicon-type="arrowRight"
+                  />
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -498,54 +490,52 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
               </span>
             </div>
             <div>
-              <div>
-                <button
-                  class="euiContextMenuItem"
-                  type="button"
+              <button
+                class="euiContextMenuItem"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
                 >
                   <span
-                    class="euiContextMenu__itemLayout"
+                    class="euiContextMenu__icon"
+                    color="inherit"
+                    data-euiicon-type="play"
+                  />
+                  <span
+                    class="euiContextMenuItem__text"
                   >
-                    <span
-                      class="euiContextMenu__icon"
-                      color="inherit"
-                      data-euiicon-type="play"
-                    />
-                    <span
-                      class="euiContextMenuItem__text"
-                    >
-                      Auto Play
-                    </span>
-                    <span
-                      class="euiContextMenu__arrow"
-                      data-euiicon-type="arrowRight"
-                    />
+                    Auto Play
                   </span>
-                </button>
-                <button
-                  class="euiContextMenuItem"
-                  type="button"
+                  <span
+                    class="euiContextMenu__arrow"
+                    data-euiicon-type="arrowRight"
+                  />
+                </span>
+              </button>
+              <button
+                class="euiContextMenuItem"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
                 >
                   <span
-                    class="euiContextMenu__itemLayout"
+                    class="euiContextMenu__icon"
+                    color="inherit"
+                    data-euiicon-type="boxesHorizontal"
+                  />
+                  <span
+                    class="euiContextMenuItem__text"
                   >
-                    <span
-                      class="euiContextMenu__icon"
-                      color="inherit"
-                      data-euiicon-type="boxesHorizontal"
-                    />
-                    <span
-                      class="euiContextMenuItem__text"
-                    >
-                      Toolbar
-                    </span>
-                    <span
-                      class="euiContextMenu__arrow"
-                      data-euiicon-type="arrowRight"
-                    />
+                    Toolbar
                   </span>
-                </button>
-              </div>
+                  <span
+                    class="euiContextMenu__arrow"
+                    data-euiicon-type="arrowRight"
+                  />
+                </span>
+              </button>
             </div>
           </div>
           <div
@@ -572,64 +562,62 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
               </span>
             </button>
             <div>
-              <div>
+              <div
+                style="padding: 16px;"
+              >
                 <div
-                  style="padding: 16px;"
+                  class="euiFormRow"
+                  id="generated-id-row"
                 >
                   <div
-                    class="euiFormRow"
-                    id="generated-id-row"
+                    class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormRow__fieldWrapper"
+                      class="euiSwitch"
                     >
-                      <div
-                        class="euiSwitch"
+                      <button
+                        aria-checked="false"
+                        aria-describedby="generated-id-help-0"
+                        aria-labelledby="generated-id"
+                        class="euiSwitch__button"
+                        data-test-subj="hideToolbarSwitch"
+                        id="generated-id"
+                        name="toolbarHide"
+                        role="switch"
+                        type="button"
                       >
-                        <button
-                          aria-checked="false"
-                          aria-describedby="generated-id-help-0"
-                          aria-labelledby="generated-id"
-                          class="euiSwitch__button"
-                          data-test-subj="hideToolbarSwitch"
-                          id="generated-id"
-                          name="toolbarHide"
-                          role="switch"
-                          type="button"
+                        <span
+                          class="euiSwitch__body"
                         >
                           <span
-                            class="euiSwitch__body"
+                            class="euiSwitch__thumb"
+                          />
+                          <span
+                            class="euiSwitch__track"
                           >
                             <span
-                              class="euiSwitch__thumb"
+                              class="euiSwitch__icon"
+                              data-euiicon-type="cross"
                             />
                             <span
-                              class="euiSwitch__track"
-                            >
-                              <span
-                                class="euiSwitch__icon"
-                                data-euiicon-type="cross"
-                              />
-                              <span
-                                class="euiSwitch__icon euiSwitch__icon--checked"
-                                data-euiicon-type="check"
-                              />
-                            </span>
+                              class="euiSwitch__icon euiSwitch__icon--checked"
+                              data-euiicon-type="check"
+                            />
                           </span>
-                        </button>
-                        <span
-                          class="euiSwitch__label"
-                          id="generated-id"
-                        >
-                          Hide Toolbar
                         </span>
-                      </div>
-                      <div
-                        class="euiFormHelpText euiFormRow__text"
-                        id="generated-id-help-0"
+                      </button>
+                      <span
+                        class="euiSwitch__label"
+                        id="generated-id"
                       >
-                        Hide the toolbar when the mouse is not within the Canvas?
-                      </div>
+                        Hide Toolbar
+                      </span>
+                    </div>
+                    <div
+                      class="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help-0"
+                    >
+                      Hide the toolbar when the mouse is not within the Canvas?
                     </div>
                   </div>
                 </div>
@@ -643,4 +631,4 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
 </div>
 `;
 
-exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] = `"<div><div data-eui=\\"EuiFocusTrap\\"><div class=\\"euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--top\\" tabindex=\\"0\\" aria-live=\\"off\\" role=\\"dialog\\" aria-modal=\\"true\\" aria-describedby=\\"generated-id\\" style=\\"top: -16px; left: -22px; z-index: 2000;\\"><div class=\\"euiPopover__panelArrow euiPopover__panelArrow--top\\" style=\\"left: 10px; top: 0px;\\"></div><p id=\\"generated-id\\" class=\\"euiScreenReaderOnly\\">You are in a dialog. To close this dialog, hit escape.</p><div><div class=\\"euiContextMenu\\" style=\\"height: 0px;\\"><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft\\" tabindex=\\"-1\\"><div class=\\"euiContextMenuPanelTitle\\"><span class=\\"euiContextMenu__itemLayout\\">Settings</span></div><div><div><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"play\\" class=\\"euiContextMenu__icon\\" color=\\"inherit\\"></span><span class=\\"euiContextMenuItem__text\\">Auto Play</span><span data-euiicon-type=\\"arrowRight\\" class=\\"euiContextMenu__arrow\\"></span></span></button><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiContextMenu__icon\\" color=\\"inherit\\"></span><span class=\\"euiContextMenuItem__text\\">Toolbar</span><span data-euiicon-type=\\"arrowRight\\" class=\\"euiContextMenu__arrow\\"></span></span></button></div></div></div><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft\\" tabindex=\\"-1\\"><button class=\\"euiContextMenuPanelTitle\\" type=\\"button\\" data-test-subj=\\"contextMenuPanelTitleButton\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"arrowLeft\\" class=\\"euiContextMenu__icon\\"></span><span class=\\"euiContextMenu__text\\">Toolbar</span></span></button><div><div><div style=\\"padding: 16px;\\"><div class=\\"euiFormRow\\" id=\\"generated-id-row\\"><div class=\\"euiFormRow__fieldWrapper\\"><div class=\\"euiSwitch\\"><button id=\\"generated-id\\" aria-checked=\\"true\\" class=\\"euiSwitch__button\\" role=\\"switch\\" type=\\"button\\" aria-labelledby=\\"generated-id\\" data-test-subj=\\"hideToolbarSwitch\\" name=\\"toolbarHide\\" aria-describedby=\\"generated-id-help-0\\"><span class=\\"euiSwitch__body\\"><span class=\\"euiSwitch__thumb\\"></span><span class=\\"euiSwitch__track\\"><span data-euiicon-type=\\"cross\\" class=\\"euiSwitch__icon\\"></span><span data-euiicon-type=\\"check\\" class=\\"euiSwitch__icon euiSwitch__icon--checked\\"></span></span></span></button><span class=\\"euiSwitch__label\\" id=\\"generated-id\\">Hide Toolbar</span></div><div class=\\"euiFormHelpText euiFormRow__text\\" id=\\"generated-id-help-0\\">Hide the toolbar when the mouse is not within the Canvas?</div></div></div></div></div></div></div></div></div></div></div></div>"`;
+exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] = `"<div><div data-eui=\\"EuiFocusTrap\\"><div class=\\"euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--top\\" tabindex=\\"0\\" aria-live=\\"off\\" role=\\"dialog\\" aria-modal=\\"true\\" aria-describedby=\\"generated-id\\" style=\\"top: -16px; left: -22px; z-index: 2000;\\"><div class=\\"euiPopover__panelArrow euiPopover__panelArrow--top\\" style=\\"left: 10px; top: 0px;\\"></div><p id=\\"generated-id\\" class=\\"euiScreenReaderOnly\\">You are in a dialog. To close this dialog, hit escape.</p><div><div class=\\"euiContextMenu\\" style=\\"height: 0px;\\"><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft\\" tabindex=\\"-1\\"><div class=\\"euiContextMenuPanelTitle\\"><span class=\\"euiContextMenu__itemLayout\\">Settings</span></div><div><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"play\\" class=\\"euiContextMenu__icon\\" color=\\"inherit\\"></span><span class=\\"euiContextMenuItem__text\\">Auto Play</span><span data-euiicon-type=\\"arrowRight\\" class=\\"euiContextMenu__arrow\\"></span></span></button><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiContextMenu__icon\\" color=\\"inherit\\"></span><span class=\\"euiContextMenuItem__text\\">Toolbar</span><span data-euiicon-type=\\"arrowRight\\" class=\\"euiContextMenu__arrow\\"></span></span></button></div></div><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft\\" tabindex=\\"-1\\"><button class=\\"euiContextMenuPanelTitle\\" type=\\"button\\" data-test-subj=\\"contextMenuPanelTitleButton\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"arrowLeft\\" class=\\"euiContextMenu__icon\\"></span><span class=\\"euiContextMenu__text\\">Toolbar</span></span></button><div><div style=\\"padding: 16px;\\"><div class=\\"euiFormRow\\" id=\\"generated-id-row\\"><div class=\\"euiFormRow__fieldWrapper\\"><div class=\\"euiSwitch\\"><button id=\\"generated-id\\" aria-checked=\\"true\\" class=\\"euiSwitch__button\\" role=\\"switch\\" type=\\"button\\" aria-labelledby=\\"generated-id\\" data-test-subj=\\"hideToolbarSwitch\\" name=\\"toolbarHide\\" aria-describedby=\\"generated-id-help-0\\"><span class=\\"euiSwitch__body\\"><span class=\\"euiSwitch__thumb\\"></span><span class=\\"euiSwitch__track\\"><span data-euiicon-type=\\"cross\\" class=\\"euiSwitch__icon\\"></span><span data-euiicon-type=\\"check\\" class=\\"euiSwitch__icon euiSwitch__icon--checked\\"></span></span></span></button><span class=\\"euiSwitch__label\\" id=\\"generated-id\\">Hide Toolbar</span></div><div class=\\"euiFormHelpText euiFormRow__text\\" id=\\"generated-id-help-0\\">Hide the toolbar when the mouse is not within the Canvas?</div></div></div></div></div></div></div></div></div></div></div>"`;

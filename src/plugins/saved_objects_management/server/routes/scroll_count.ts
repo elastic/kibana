@@ -31,7 +31,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { getClient, typeRegistry } = context.core.savedObjects;
+      const { getClient, typeRegistry } = (await context.core).savedObjects;
       const { typesToInclude, searchString, references } = req.body;
 
       const includedHiddenTypes = chain(typesToInclude)

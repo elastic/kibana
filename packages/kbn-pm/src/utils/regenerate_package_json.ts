@@ -9,7 +9,7 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { sortPackageJson } from '@kbn/dev-utils/sort_package_json';
+import { sortPackageJson } from '@kbn/sort-package-json';
 
 export async function regeneratePackageJson(rootPath: string) {
   const path = Path.resolve(rootPath, 'package.json');

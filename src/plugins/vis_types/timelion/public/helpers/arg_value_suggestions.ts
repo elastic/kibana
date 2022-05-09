@@ -24,7 +24,7 @@ export function getArgValueSuggestions() {
     }
     const indexPatternTitle = get(indexPatternArg, 'value.text');
 
-    return (await indexPatterns.find(indexPatternTitle)).find(
+    return (await indexPatterns.find(indexPatternTitle, 1)).find(
       (index) => index.title === indexPatternTitle
     );
   }

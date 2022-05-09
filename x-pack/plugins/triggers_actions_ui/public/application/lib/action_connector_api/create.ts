@@ -15,10 +15,11 @@ import type {
 
 const rewriteBodyRequest: RewriteResponseCase<
   Omit<ActionConnectorWithoutId, 'referencedByCount' | 'isMissingSecrets'>
-> = ({ actionTypeId, isPreconfigured, ...res }) => ({
+> = ({ actionTypeId, isPreconfigured, isDeprecated, ...res }) => ({
   ...res,
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_deprecated: isDeprecated,
 });
 
 const rewriteBodyRes: RewriteRequestCase<
@@ -26,12 +27,14 @@ const rewriteBodyRes: RewriteRequestCase<
 > = ({
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
   ...res
 }) => ({
   ...res,
   actionTypeId,
   isPreconfigured,
+  isDeprecated,
   isMissingSecrets,
 });
 
