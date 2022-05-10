@@ -56,3 +56,13 @@ export interface UnifiedSearchPublicPluginStart {
    */
   ui: UnifiedSearchPublicPluginStartUi;
 }
+
+/**
+ * Filter options which will be available in menu panels
+ */
+export type FilterPanelOption =
+  | 'pinFilter'
+  | 'editFilter'
+  | 'negateFilter'
+  | 'disableFilter'
+  | 'deleteFilter';
