@@ -25,7 +25,7 @@ export function PageTitle({ rule }: PageHeaderProps) {
       {rule.name} <ExperimentalBadge />
       <EuiFlexGroup alignItems="baseline">
         <EuiFlexItem component="span" grow={false}>
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" size="xs">
             <b>{LAST_UPDATED_MESSAGE}</b> {BY_WORD} {rule.updatedBy} {ON_WORD}{' '}
             {moment(rule.updatedAt).format('ll')} &emsp;
             <b>{CREATED_WORD}</b> {BY_WORD} {rule.createdBy} {ON_WORD}{' '}
