@@ -33,9 +33,7 @@ export const useGetAppInfo = ({ actionTypeId }: UseGetAppInfoProps): UseGetAppIn
 
         const res = await getAppInfo({
           signal: abortCtrl.current.signal,
-          apiUrl: connector.config.apiUrl,
-          username: connector.secrets.username,
-          password: connector.secrets.password,
+          connector,
           actionTypeId,
         });
 

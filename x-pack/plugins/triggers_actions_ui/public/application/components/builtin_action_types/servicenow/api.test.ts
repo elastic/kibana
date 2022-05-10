@@ -7,6 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getChoices, getAppInfo } from './api';
+import { ServiceNowActionConnector } from './types';
 
 const choicesResponse = {
   status: 'ok',
@@ -54,6 +55,31 @@ const applicationInfoResponse = {
   json: async () => applicationInfoData,
 };
 
+const token = 'token';
+
+const oAuthResponse = {
+  ok: true,
+  status: 200,
+  json: async () => ({ accessToken: token }),
+};
+
+const basicAuthConnector: ServiceNowActionConnector = {
+  secrets: { username: 'test', password: 'test' },
+  config: { isOAuth: false, apiUrl: 'https://example.com', usesTableApi: false },
+} as ServiceNowActionConnector;
+
+const oAuthConnector: ServiceNowActionConnector = {
+  secrets: { clientSecret: 'test', privateKey: 'test' },
+  config: {
+    isOAuth: true,
+    apiUrl: 'https://example.com',
+    usesTableApi: false,
+    clientId: 'clientId',
+    userIdentifierValue: 'userIdentifierValue',
+    jwtKeyId: 'jwtKeyId',
+  },
+} as ServiceNowActionConnector;
+
 describe('ServiceNow API', () => {
   const http = httpServiceMock.createStartContract();
   let fetchMock: jest.SpyInstance<Promise<unknown>>;
@@ -88,42 +114,94 @@ describe('ServiceNow API', () => {
   describe('getAppInfo', () => {
     test('should call getAppInfo API for ITSM', async () => {
       const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce(oAuthResponse);
       fetchMock.mockResolvedValueOnce(applicationInfoResponse);
 
       const res = await getAppInfo({
         signal: abortCtrl.signal,
-        apiUrl: 'https://example.com',
-        username: 'test',
-        password: 'test',
+        connector: oAuthConnector,
         actionTypeId: '.servicenow',
       });
 
       expect(res).toEqual(applicationInfoData.result);
+
+      expect(fetchMock).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
+        signal: abortCtrl.signal,
+        body: JSON.stringify({
+          type: 'jwt',
+          options: {
+            tokenUrl: 'https://example.com/oauth_token.do',
+            config: {
+              clientId: 'clientId',
+              userIdentifierValue: 'userIdentifierValue',
+              jwtKeyId: 'jwtKeyId',
+            },
+            secrets: { clientSecret: 'test', privateKey: 'test' },
+          },
+        }),
+        method: 'POST',
+      });
       expect(fetchMock).toHaveBeenCalledWith(
         'https://example.com/api/x_elas2_inc_int/elastic_api/health',
         {
           signal: abortCtrl.signal,
           method: 'GET',
-          headers: { Authorization: 'Basic dGVzdDp0ZXN0' },
+          headers: { Authorization: 'Bearer token' },
         }
       );
     });
 
     test('should call getAppInfo API correctly for SIR', async () => {
       const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce(oAuthResponse);
       fetchMock.mockResolvedValueOnce(applicationInfoResponse);
 
       const res = await getAppInfo({
         signal: abortCtrl.signal,
-        apiUrl: 'https://example.com',
-        username: 'test',
-        password: 'test',
+        connector: oAuthConnector,
         actionTypeId: '.servicenow-sir',
       });
 
       expect(res).toEqual(applicationInfoData.result);
+      expect(fetchMock).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
+        signal: abortCtrl.signal,
+        body: JSON.stringify({
+          type: 'jwt',
+          options: {
+            tokenUrl: 'https://example.com/oauth_token.do',
+            config: {
+              clientId: 'clientId',
+              userIdentifierValue: 'userIdentifierValue',
+              jwtKeyId: 'jwtKeyId',
+            },
+            secrets: { clientSecret: 'test', privateKey: 'test' },
+          },
+        }),
+        method: 'POST',
+      });
       expect(fetchMock).toHaveBeenCalledWith(
         'https://example.com/api/x_elas2_sir_int/elastic_api/health',
+        {
+          signal: abortCtrl.signal,
+          method: 'GET',
+          headers: { Authorization: 'Bearer token' },
+        }
+      );
+    });
+
+    test('should call getAppInfo API correctly for ITOM', async () => {
+      const abortCtrl = new AbortController();
+      fetchMock.mockResolvedValueOnce(applicationInfoResponse);
+
+      const res = await getAppInfo({
+        signal: abortCtrl.signal,
+        connector: basicAuthConnector,
+        actionTypeId: '.servicenow-itom',
+      });
+
+      expect(res).toEqual(applicationInfoData.result);
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://example.com/api/x_elas2_inc_int/elastic_api/health',
         {
           signal: abortCtrl.signal,
           method: 'GET',
@@ -145,9 +223,7 @@ describe('ServiceNow API', () => {
       await expect(() =>
         getAppInfo({
           signal: abortCtrl.signal,
-          apiUrl: 'https://example.com',
-          username: 'test',
-          password: 'test',
+          connector: basicAuthConnector,
           actionTypeId: '.servicenow',
         })
       ).rejects.toThrow('Received status:');
@@ -168,9 +244,7 @@ describe('ServiceNow API', () => {
       await expect(() =>
         getAppInfo({
           signal: abortCtrl.signal,
-          apiUrl: 'https://example.com',
-          username: 'test',
-          password: 'test',
+          connector: basicAuthConnector,
           actionTypeId: '.servicenow',
         })
       ).rejects.toThrow('bad');
