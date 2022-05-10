@@ -258,7 +258,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
         <EuiPanel hasBorder>
           <EuiFlexGroup gutterSize={'none'}>
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize={'none'}>
+              <EuiFlexGroup gutterSize={'none'} responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
