@@ -54,7 +54,12 @@ import {
   RuleSnooze,
   RawAlertInstance as RawAlert,
 } from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
+import {
+  validateRuleTypeParams,
+  ruleExecutionStatusFromRaw,
+  getRuleNotifyWhenType,
+  getRuleSnoozeEndTime,
+} from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
@@ -232,6 +237,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'actions'
     | 'executionStatus'
     | 'snoozeSchedule'
+    | 'isSnoozedUntil'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -421,6 +427,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
+      isSnoozedUntil: null,
       snoozeSchedule: [],
       params: updatedParams as RawRule['params'],
       muteAll: false,
@@ -1739,7 +1746,7 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    );
+    ).then(() => this.updateSnoozedUntilTime({ id }));
   }
 
   public async unsnooze({ id }: { id: string }): Promise<void> {
@@ -1791,6 +1798,30 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       snoozeSchedule: clearUnscheduledSnooze(attributes),
       muteAll: false,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    );
+  }
+
+  public async updateSnoozedUntilTime({ id }: { id: string }): Promise<void> {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    const isSnoozedUntil = getRuleSnoozeEndTime(attributes);
+    if (!isSnoozedUntil) return;
+
+    const updateAttributes = this.updateMeta({
+      isSnoozedUntil: isSnoozedUntil.toISOString(),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2165,6 +2196,7 @@ export class RulesClient {
       schedule,
       actions,
       snoozeSchedule,
+      isSnoozedUntil,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
@@ -2188,6 +2220,7 @@ export class RulesClient {
       ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
+      ...(isSnoozedUntil ? { isSnoozedUntil: new Date(isSnoozedUntil) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }

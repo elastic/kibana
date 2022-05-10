@@ -172,7 +172,8 @@ export const RulesList: React.FunctionComponent = () => {
   const [showErrors, setShowErrors] = useState(false);
 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
-  const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
+  const isRuleStatusFilterEnabled = true;
+  getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
   useEffect(() => {
     (async () => {

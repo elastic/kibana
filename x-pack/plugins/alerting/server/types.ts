@@ -250,6 +250,7 @@ export interface RawRule extends SavedObjectAttributes {
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  isSnoozedUntil?: string | null;
 }
 
 export interface AlertingPlugin {

@@ -85,6 +85,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
         actions,
         scheduledTaskId,
         snoozeSchedule,
+        isSnoozedUntil,
         ...rest
       }) => ({
         ...rest,
@@ -100,6 +101,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
         mute_all: muteAll,
         // Remove this object spread boolean check after snoozeSchedule is added to the public API
         ...(snoozeSchedule !== undefined ? { snooze_schedule: snoozeSchedule } : {}),
+        ...(isSnoozedUntil != null ? { is_snoozed_until: isSnoozedUntil } : {}),
         execution_status: executionStatus && {
           ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
           last_execution_date: executionStatus.lastExecutionDate,
@@ -111,9 +113,6 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
           params,
           connector_type_id: actionTypeId,
         })),
-        ...(snoozeSchedule != null
-          ? { is_snoozed_until: getRuleSnoozeEndTime({ snoozeSchedule, muteAll })?.toISOString() }
-          : {}),
       })
     ),
   };
