@@ -140,6 +140,12 @@ export interface RuleAggregation {
       doc_count: number;
     }>;
   };
+  tags: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
 }
 
 export interface ConstructorOptions {
@@ -207,6 +213,7 @@ export interface AggregateResult {
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
   ruleSnoozedStatus?: { snoozed: number };
+  ruleTags?: string[];
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -928,6 +935,9 @@ export class RulesClient {
         muted: {
           terms: { field: 'alert.attributes.muteAll' },
         },
+        tags: {
+          terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+        },
         snoozed: {
           date_range: {
             field: 'alert.attributes.snoozeEndTime',
@@ -996,6 +1006,9 @@ export class RulesClient {
     ret.ruleSnoozedStatus = {
       snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
     };
+
+    const tagsBuckets = resp.aggregations.tags?.buckets || [];
+    ret.ruleTags = tagsBuckets.map((bucket) => bucket.key);
 
     return ret;
   }

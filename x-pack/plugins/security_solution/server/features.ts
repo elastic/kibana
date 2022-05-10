@@ -133,6 +133,9 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
         rule: {
           all: ruleTypes,
         },
+        alert: {
+          all: ruleTypes,
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -155,6 +158,9 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
       alerting: {
         rule: {
           read: ruleTypes,
+        },
+        alert: {
+          all: ruleTypes,
         },
       },
       management: {

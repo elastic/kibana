@@ -30,15 +30,14 @@ const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
-  const { activePage, alerts, alertsCount, onPageChange, onSortChange, sortingFields } =
+  const { activePage, alerts, alertsCount, isLoading, onPageChange, onSortChange, sortingFields } =
     props.useFetchAlertsData();
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
   const {
     pagination,
     onChangePageSize,
     onChangePageIndex,
-    onPaginateFlyoutNext,
-    onPaginateFlyoutPrevious,
+    onPaginateFlyout,
     flyoutAlertIndex,
     setFlyoutAlertIndex,
   } = usePagination({
@@ -119,9 +118,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         <Suspense fallback={null}>
           <AlertsFlyout
             alert={alerts[flyoutAlertIndex]}
+            alertsCount={alertsCount}
             onClose={handleFlyoutClose}
-            onPaginateNext={onPaginateFlyoutNext}
-            onPaginatePrevious={onPaginateFlyoutPrevious}
+            flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+            onPaginate={onPaginateFlyout}
+            isLoading={isLoading}
           />
         </Suspense>
       )}

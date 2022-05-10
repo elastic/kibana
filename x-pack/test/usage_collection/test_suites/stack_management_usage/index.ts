@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/119038
   describe.skip('Stack Management', function () {
-    this.tags('ciGroup1');
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
 
