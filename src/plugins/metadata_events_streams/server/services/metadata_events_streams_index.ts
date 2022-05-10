@@ -86,6 +86,7 @@ export class MetadataEventsStreamsIndex {
       });
   }
 
+  /** Search the provided stream */
   search(stream: string, searchRequest?: estypes.SearchRequest) {
     if (!this.esClient) {
       throw new Error(
@@ -93,12 +94,12 @@ export class MetadataEventsStreamsIndex {
       );
     }
 
-    // Add a boolean query to match the stream
     const query: estypes.QueryDslQueryContainer = {
       // @ts-expect-error
       ...(searchRequest?.query ?? searchRequest?.body?.query),
     };
 
+    // Add a boolean query to match the stream
     const matchStreamTerm: estypes.QueryDslQueryContainer = {
       term: { stream },
     };

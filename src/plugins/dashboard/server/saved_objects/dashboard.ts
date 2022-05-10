@@ -7,7 +7,6 @@
  */
 
 import { SavedObjectsType } from '@kbn/core/server';
-
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,
