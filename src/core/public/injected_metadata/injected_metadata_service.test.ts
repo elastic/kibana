@@ -9,6 +9,36 @@
 import { DiscoveredPlugin } from '../../server';
 import { InjectedMetadataService } from './injected_metadata_service';
 
+describe('setup.getElasticsearchInfo()', () => {
+  it('returns elasticsearch info from injectedMetadata', () => {
+    const setup = new InjectedMetadataService({
+      injectedMetadata: {
+        clusterInfo: {
+          cluster_uuid: 'foo',
+          cluster_name: 'cluster_name',
+          cluster_version: 'version',
+        },
+      },
+    } as any).setup();
+
+    expect(setup.getElasticsearchInfo()).toEqual({
+      cluster_uuid: 'foo',
+      cluster_name: 'cluster_name',
+      cluster_version: 'version',
+    });
+  });
+
+  it('returns elasticsearch info as undefined if not present in the injectedMetadata', () => {
+    const setup = new InjectedMetadataService({
+      injectedMetadata: {
+        clusterInfo: {},
+      },
+    } as any).setup();
+
+    expect(setup.getElasticsearchInfo()).toEqual({});
+  });
+});
+
 describe('setup.getKibanaBuildNumber()', () => {
   it('returns buildNumber from injectedMetadata', () => {
     const setup = new InjectedMetadataService({

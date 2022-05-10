@@ -19,6 +19,8 @@ import {
   CommentResponseAlertsType,
   CasesFindResponse,
   CasesStatusResponse,
+  CasesMetricsResponse,
+  CaseSeverity,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -44,6 +46,9 @@ export type StatusAllType = typeof StatusAll;
 
 export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
 
+export const SeverityAll = 'all' as const;
+export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
+
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
  *
@@ -65,6 +70,7 @@ export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
+export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 
 export interface ResolvedCase {
   case: Case;
@@ -82,6 +88,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
@@ -142,7 +149,7 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity'
 >;
 
 export interface UpdateByKey {

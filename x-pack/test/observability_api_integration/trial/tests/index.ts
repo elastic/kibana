@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('Observability specs (trial)', function () {
-    this.tags('ciGroup1');
     loadTestFile(require.resolve('./annotations'));
   });
 }
