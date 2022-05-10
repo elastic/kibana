@@ -182,7 +182,7 @@ export interface LabelsOrientationConfig {
 }
 
 // Arguments to XY chart expression, with computed properties
-export interface XYArgs {
+export interface XYArgs extends DataLayerArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -192,7 +192,6 @@ export interface XYArgs {
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
-  dataLayers: DataLayerConfigResult[];
   referenceLineLayers: ReferenceLineLayerConfigResult[];
   annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
@@ -391,12 +390,6 @@ export type LayeredXyVisFn = ExpressionFunctionDefinition<
   Promise<XYRender>
 >;
 
-export type DataLayerFn = ExpressionFunctionDefinition<
-  typeof DATA_LAYER,
-  Datatable,
-  DataLayerArgs,
-  DataLayerConfigResult
->;
 export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
   Datatable,
