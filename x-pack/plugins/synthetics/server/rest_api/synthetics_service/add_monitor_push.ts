@@ -290,7 +290,6 @@ const configurePushMonitor = async ({
     }
   } catch (e) {
     server.logger.error(e);
-    // determine failed monitors reason
     failedMonitors.push({
       id: monitor.id,
       reason: 'Failed to create or update monitor',
