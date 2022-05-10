@@ -11,7 +11,6 @@ import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { QuerySuggestion } from '../autocomplete';
 import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
-import './suggestion.scss';
 
 function getEuiIconType(type: string) {
   switch (type) {
