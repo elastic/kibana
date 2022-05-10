@@ -209,7 +209,14 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
     {
       type: 'function',
       function: 'mosaicVis',
-      arguments: generateCommonArguments(...rest),
+      arguments: {
+        ...generateCommonArguments(...rest),
+        // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
+        buckets: rest[2]
+          .reverse()
+          .map((o) => o.columnId)
+          .map(prepareDimension),
+      },
     },
   ],
 });
