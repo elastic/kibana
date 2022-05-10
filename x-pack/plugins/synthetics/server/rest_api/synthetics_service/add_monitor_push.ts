@@ -47,7 +47,7 @@ type StaleMonitorMap = Record<string, StaleMonitor>;
 type FailedMonitors = Array<{ id: string; reason: string; details: string; payload?: object }>;
 
 const getSuiteFilter = (projectId: string) => {
-  return `${syntheticsMonitorType}.attributes.${ConfigKey.IS_PUSH_MONITOR}: true AND ${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: ${projectId}`;
+  return `${syntheticsMonitorType}.attributes.${ConfigKey.IS_PUSH_MONITOR}: true AND ${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${projectId}"`;
 };
 
 export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
@@ -118,13 +118,14 @@ const getExistingMonitor = async (
   journeyId: string,
   projectId: string
 ): Promise<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> => {
+  const filter = `${getSuiteFilter(projectId)} AND ${syntheticsMonitorType}.attributes.${
+    ConfigKey.JOURNEY_ID
+  }: "${journeyId}"`;
   const { saved_objects: savedObjects } = await savedObjectsClient.find<EncryptedSyntheticsMonitor>(
     {
       type: syntheticsMonitorType,
       perPage: 1,
-      filter: `${getSuiteFilter(projectId)} AND ${syntheticsMonitorType}.attributes.${
-        ConfigKey.JOURNEY_ID
-      }: ${journeyId}`,
+      filter,
     }
   );
   return savedObjects[0];
