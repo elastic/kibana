@@ -82,6 +82,9 @@ export async function canCreateAndStashADJob(
       end = undefined;
     }
 
+    // add job config and start and end dates to the
+    // job cloning stash, so they can be used
+    // by the new job wizards
     stashJobForCloning(
       {
         jobConfig,

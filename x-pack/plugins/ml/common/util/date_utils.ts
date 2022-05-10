@@ -36,11 +36,9 @@ export function createAbsoluteTimeRange(time: TimeRange) {
     return null;
   }
 
-  const momentDateFrom = dateMath.parse(time.from);
-  const momentDateTo = dateMath.parse(time.to);
   return {
-    to: momentDateTo?.valueOf(),
-    from: momentDateFrom?.valueOf(),
+    to: dateMath.parse(time.to)?.valueOf(),
+    from: dateMath.parse(time.from)?.valueOf(),
   };
 }
 
