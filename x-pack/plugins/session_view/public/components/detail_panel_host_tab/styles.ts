@@ -13,24 +13,13 @@ export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const descriptionSemibold: CSSObject = {
-      fontWeight: euiTheme.font.weight.medium,
-    };
-
-    const executableAction: CSSObject = {
-      fontWeight: euiTheme.font.weight.semiBold,
-      paddingLeft: euiTheme.size.xs,
-    };
-
-    const ellipsis: CSSObject = {
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
+    const metadataHostOS: CSSObject = {
+      margin: `${euiTheme.size.m} ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}`,
+      paddingBottom: euiTheme.size.base,
     };
 
     return {
-      descriptionSemibold,
-      executableAction,
-      ellipsis,
+      metadataHostOS,
     };
   }, [euiTheme]);
 

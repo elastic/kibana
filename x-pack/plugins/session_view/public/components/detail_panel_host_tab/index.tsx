@@ -15,6 +15,7 @@ import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelListItem } from '../detail_panel_list_item';
 import { useStyles } from '../detail_panel_process_tab/styles';
+import { useStyles as useStylesChild } from './styles';
 import { getHostData, getContainerData, getOrchestratorData } from './helpers';
 
 interface DetailPanelHostTabDeps {
@@ -32,6 +33,7 @@ export const DetailPanelHostTab = ({
   processOrchestrator,
 }: DetailPanelHostTabDeps) => {
   const styles = useStyles();
+  const stylesChild = useStylesChild();
   const hostData = useMemo(() => getHostData(processHost), [processHost]);
   const containerData = useMemo(() => getContainerData(processContainer), [processContainer]);
   const orchestratorData = useMemo(
@@ -44,7 +46,7 @@ export const DetailPanelHostTab = ({
       <DetailPanelAccordion
         id="metadataHost"
         title="Host"
-        isOpen={true}
+        isInitialOpen={true}
         listItems={[
           {
             title: <DetailPanelListItem>hostname</DetailPanelListItem>,
@@ -119,7 +121,7 @@ export const DetailPanelHostTab = ({
           hasBorder={true}
           borderRadius="m"
           paddingSize="none"
-          css={styles.metadataHostOS}
+          css={stylesChild.metadataHostOS}
         >
           <DetailPanelAccordion
             id="hostOS"
