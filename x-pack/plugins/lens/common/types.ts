@@ -11,6 +11,7 @@ import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 import {
   CategoryDisplay,
   layerTypes,
@@ -73,7 +74,7 @@ export interface SharedPieLayerState {
   percentDecimals?: number;
   emptySizeRatio?: number;
   legendMaxLines?: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   truncateLegend?: boolean;
 }
 

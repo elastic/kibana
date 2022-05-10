@@ -310,6 +310,7 @@ export const getHeatmapVisualization = ({
     if (!originalOrder || !state.valueAccessor) {
       return null;
     }
+
     return {
       type: 'expression',
       chain: [

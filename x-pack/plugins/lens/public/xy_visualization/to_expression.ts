@@ -10,7 +10,8 @@ import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { AxisExtentConfig, ExtendedYConfig, YConfig } from '@kbn/expression-xy-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import type { AxisExtentConfig, YConfig, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import {
   State,
   XYDataLayerConfig,
@@ -213,10 +214,11 @@ export const buildExpression = (
                       : [],
                     position: !state.legend.isInside ? [state.legend.position] : [],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize:
-                      !state.legend.isInside && state.legend.legendSize
-                        ? [state.legend.legendSize]
-                        : [],
+                    legendSize: state.legend.isInside
+                      ? [LegendSize.AUTO]
+                      : state.legend.legendSize
+                      ? [state.legend.legendSize]
+                      : [],
                     horizontalAlignment:
                       state.legend.horizontalAlignment && state.legend.isInside
                         ? [state.legend.horizontalAlignment]

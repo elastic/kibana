@@ -57,6 +57,7 @@ import {
 } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { Annotations } from './annotations';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -2375,6 +2376,37 @@ describe('XYChart component', () => {
     );
 
     expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+  });
+
+  it('computes correct legend sizes', () => {
+    const { args } = sampleArgs();
+
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          legend: { ...args.legend, legendSize: LegendSize.SMALL },
+        }}
+      />
+    );
+    expect(component.find(Settings).prop('legendSize')).toEqual(80);
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: { ...args.legend, legendSize: LegendSize.AUTO },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toBeUndefined();
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: { ...args.legend, legendSize: undefined },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toEqual(130);
   });
 
   test('it should apply the fitting function to all non-bar series', () => {
