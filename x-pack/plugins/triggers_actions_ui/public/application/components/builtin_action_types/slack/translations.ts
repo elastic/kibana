@@ -34,3 +34,15 @@ export const MESSAGE_REQUIRED = i18n.translate(
     defaultMessage: 'Message is required.',
   }
 );
+
+export const WEBHOOK_URL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlTextFieldLabel',
+  {
+    defaultMessage: 'Webhook URL',
+  }
+);
+
+export const WEBHOOK_URL_ENC_MSG = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.reenterValueLabel',
+  { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
+);
