@@ -13,6 +13,9 @@ export const fileObjectType: SavedObjectsType<FileSavedObjectAttributes> = {
   name: FILE_SO_TYPE,
   hidden: true,
   namespaceType: 'multiple-isolated',
+  management: {
+    importableAndExportable: false,
+  },
   mappings: {
     dynamic: false,
     properties: {
