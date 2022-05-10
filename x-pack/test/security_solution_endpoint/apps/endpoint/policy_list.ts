@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('admin searchbar contains the selected policy id', async () => {
           const expectedPolicyId = indexedData.integrationPolicies[0].id;
           await pageObjects.endpoint.ensureIsOnEndpointListPage();
-          const searchBar = (await testSubjects.findAll('adminSearchBar'))[0];
+          const searchBar = await testSubjects.find('adminSearchBar');
           expect(await searchBar.getVisibleText()).to.equal(
             `united.endpoint.Endpoint.policy.applied.id : "${expectedPolicyId}"`
           );
