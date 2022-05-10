@@ -7,6 +7,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SerializableRecord } from '@kbn/utility-types';
 
 /**
  * A field's sub type
@@ -14,7 +15,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
  */
 export type IFieldSubType = IFieldSubTypeMultiOptional | IFieldSubTypeNestedOptional;
 
-export interface IFieldSubTypeMultiOptional {
+export interface IFieldSubTypeMultiOptional extends SerializableRecord {
   multi?: { parent: string };
 }
 
@@ -22,7 +23,7 @@ export interface IFieldSubTypeMulti {
   multi: { parent: string };
 }
 
-export interface IFieldSubTypeNestedOptional {
+export interface IFieldSubTypeNestedOptional extends SerializableRecord {
   nested?: { path: string };
 }
 
@@ -34,7 +35,7 @@ export interface IFieldSubTypeNested {
  * A base interface for an index pattern field
  * @public
  */
-export interface DataViewFieldBase {
+export interface DataViewFieldBase extends SerializableRecord {
   name: string;
   /**
    * Kibana field type
@@ -57,7 +58,7 @@ export interface DataViewFieldBase {
  * A base interface for an index pattern
  * @public
  */
-export interface DataViewBase {
+export interface DataViewBase extends SerializableRecord {
   fields: DataViewFieldBase[];
   id?: string;
   title: string;
