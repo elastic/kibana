@@ -336,7 +336,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await pieChart.expectSliceCountForAllPies(5);
+        await pieChart.expectPieSliceCount(5);
       });
     });
   });
