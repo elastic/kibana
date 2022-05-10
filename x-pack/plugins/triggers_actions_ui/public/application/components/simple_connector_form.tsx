@@ -6,33 +6,78 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFieldPassword,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  getFieldValidityAndErrorMessage,
+  getUseField,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
 import { getEncryptedFieldNotifyLabel } from './get_encrypted_field_notify_label';
 
-interface FieldSchema {
+export interface ConfigFieldSchema {
   id: string;
   label: string;
+}
+
+export interface SecretsFieldSchema extends ConfigFieldSchema {
+  password?: boolean;
 }
 
 interface SimpleConnectorFormProps {
   isEdit: boolean;
   readOnly: boolean;
-  configFormSchema: FieldSchema[];
-  secretsFormSchema: FieldSchema[];
+  configFormSchema: ConfigFieldSchema[];
+  secretsFormSchema: SecretsFieldSchema[];
 }
 
 interface FormRowProps {
   id: string;
   label: string;
   readOnly: boolean;
+  password?: boolean;
 }
 
 const UseField = getUseField({ component: Field });
 const { emptyField } = fieldValidators;
+
+const PasswordField: React.FC<FormRowProps> = ({ id, label, readOnly }) => {
+  return (
+    <UseField<string> path={id} config={getFieldConfig({ label })}>
+      {(field) => {
+        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+        return (
+          <EuiFormRow
+            label={field.label}
+            labelAppend={field.labelAppend}
+            helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+            error={errorMessage}
+            isInvalid={isInvalid}
+            fullWidth
+          >
+            <EuiFieldPassword
+              isInvalid={isInvalid}
+              value={field.value as string}
+              onChange={field.onChange}
+              isLoading={field.isValidating}
+              fullWidth
+              readOnly={readOnly}
+            />
+          </EuiFormRow>
+        );
+      }}
+    </UseField>
+  );
+};
 
 const getFieldConfig = ({ label }: { label: string }) => ({
   label,
@@ -50,18 +95,22 @@ const getFieldConfig = ({ label }: { label: string }) => ({
   ],
 });
 
-const FormRow = ({ id, label, readOnly }: FormRowProps) => {
+const FormRow: React.FC<FormRowProps> = ({ id, label, readOnly, password }) => {
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <UseField
-            path={id}
-            config={getFieldConfig({ label })}
-            componentProps={{
-              euiFieldProps: { readOnly, fullWidth: true },
-            }}
-          />
+          {!password ? (
+            <UseField
+              path={id}
+              config={getFieldConfig({ label })}
+              componentProps={{
+                euiFieldProps: { readOnly, fullWidth: true },
+              }}
+            />
+          ) : (
+            <PasswordField id={id} label={label} readOnly={readOnly} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
@@ -116,9 +165,9 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {secretsFormSchema.map(({ id, label }, index) => (
+      {secretsFormSchema.map(({ id, label, password }, index) => (
         <>
-          <FormRow id={`secrets.${id}`} label={label} readOnly={readOnly} />
+          <FormRow id={`secrets.${id}`} label={label} readOnly={readOnly} password={password} />
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
         </>
       ))}

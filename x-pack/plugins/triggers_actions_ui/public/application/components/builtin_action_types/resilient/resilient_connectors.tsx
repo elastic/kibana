@@ -10,19 +10,23 @@ import React from 'react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ResilientActionConnector } from './types';
-import { SimpleConnectorForm } from '../../simple_connector_form';
+import {
+  ConfigFieldSchema,
+  SecretsFieldSchema,
+  SimpleConnectorForm,
+} from '../../simple_connector_form';
 
 const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientActionConnector>> = ({
   readOnly,
   isEdit,
 }) => {
-  const configFormSchema = [
+  const configFormSchema: ConfigFieldSchema[] = [
     { id: 'apiUrl', label: i18n.API_URL_LABEL },
     { id: 'orgId', label: i18n.ORG_ID_LABEL },
   ];
-  const secretsFormSchema = [
+  const secretsFormSchema: SecretsFieldSchema[] = [
     { id: 'apiKeyId', label: i18n.API_KEY_ID_LABEL },
-    { id: 'apiKeySecret', label: i18n.API_KEY_SECRET_LABEL },
+    { id: 'apiKeySecret', label: i18n.API_KEY_SECRET_LABEL, password: true },
   ];
 
   return (
