@@ -5,103 +5,95 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
-import { ActionConnectorFieldsProps, IErrorObject } from '../../types';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { i18n } from '@kbn/i18n';
 
 interface FieldSchema {
   id: string;
   label: string;
 }
 
-interface FormSchema {
+interface SimpleConnectorFormProps {
+  isEdit: boolean;
+  readOnly: boolean;
   configFormSchema: FieldSchema[];
   secretsFormSchema: FieldSchema[];
 }
 
 interface FormRowProps {
   id: string;
-  value: string;
-  error: string | string[] | IErrorObject;
-  isInvalid: boolean;
   label: string;
   readOnly: boolean;
-  action: (property: string, value: unknown) => void;
 }
 
-const isInvalidField = (key: string, field: string, errors: IErrorObject) =>
-  field !== undefined && errors[key] !== undefined && errors[key].length > 0;
+const UseField = getUseField({ component: Field });
+const { emptyField } = fieldValidators;
 
-const FormRow = ({ id, value, error, isInvalid, label, readOnly, action }: FormRowProps) => {
+const getFieldConfig = ({ label }: { label: string }) => ({
+  label,
+  validations: [
+    {
+      validator: emptyField(
+        i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText',
+          {
+            defaultMessage: `${label} is required.`,
+          }
+        )
+      ),
+    },
+  ],
+});
+
+const FormRow = ({ id, label, readOnly }: FormRowProps) => {
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow id={id} fullWidth error={error} isInvalid={isInvalid} label={label}>
-            <EuiFieldText
-              fullWidth
-              isInvalid={isInvalid}
-              name={id}
-              readOnly={readOnly}
-              value={value} // Needed to prevent uncontrolled input error when value is undefined
-              data-test-subj={`${id}FromInput`}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                action(id, e.target.value);
-              }}
-              onBlur={() => {
-                if (!value) {
-                  action(id, '');
-                }
-              }}
-            />
-          </EuiFormRow>
+          <UseField
+            path={id}
+            config={getFieldConfig({ label })}
+            componentProps={{
+              euiFieldProps: { readOnly, fullWidth: true },
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
 };
 
-const SimpleConnectorFormComponent = <Connector,>({
-  action,
-  editActionSecrets,
-  editActionConfig,
-  errors,
+const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
+  isEdit,
   readOnly,
   configFormSchema,
   secretsFormSchema,
-}: ActionConnectorFieldsProps<Connector> & FormSchema) => {
-  const { config, secrets } = action as unknown as {
-    config: Record<string, string>;
-    secrets: Record<string, string>;
-  };
-
+}) => {
   return (
     <>
       {configFormSchema.map(({ id, label }, index) => (
         <>
-          <FormRow
-            id={id}
-            error={errors[id]}
-            isInvalid={isInvalidField(config[id], id, errors)}
-            label={label}
-            action={editActionConfig}
-            value={config[id] || ''} // Needed to prevent uncontrolled input error when value is undefined
-            readOnly={readOnly}
-          />
+          <FormRow id={`config.${id}`} label={label} readOnly={readOnly} />
           {index !== configFormSchema.length ? <EuiSpacer size="m" /> : null}
         </>
       ))}
+      <EuiTitle size="xxs">
+        <h4>
+          {i18n.translate(
+            'xpack.triggersActionsUI.components.simpleConnectorForm.secrets.authenticationLabel',
+            {
+              defaultMessage: 'Authentication',
+            }
+          )}
+        </h4>
+      </EuiTitle>
       {secretsFormSchema.map(({ id, label }, index) => (
         <>
-          <FormRow
-            id={id}
-            error={errors[id]}
-            isInvalid={isInvalidField(secrets[id], id, errors)}
-            label={label}
-            action={editActionSecrets}
-            value={secrets[id] || ''} // Needed to prevent uncontrolled input error when value is undefined
-            readOnly={readOnly}
-          />
+          <FormRow id={`secrets.${id}`} label={label} readOnly={readOnly} />
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
         </>
       ))}

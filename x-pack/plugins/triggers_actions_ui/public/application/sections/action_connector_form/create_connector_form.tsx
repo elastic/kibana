@@ -5,16 +5,31 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, Suspense } from 'react';
 
-import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
+import {
+  FieldConfig,
+  UseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { ActionTypeRegistryContract } from '../../../types';
+import { SectionLoading } from '../../components/section_loading';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface ConnectorFormData {
   name: string;
   [key: string]: unknown;
+}
+
+interface CreateConnectorFormProps {
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 const { emptyField } = fieldValidators;
@@ -35,8 +50,57 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   ],
 };
 
-const CreateConnectorFormComponent: React.FC = () => {
-  return <UseField path="name" config={nameConfig} component={Field} />;
+const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
+  actionTypeRegistry,
+}) => {
+  const {
+    docLinks,
+    application: { capabilities },
+  } = useKibana().services;
+  const canSave = hasSaveActionsCapability(capabilities);
+  const [{ actionType }] = useFormData({ watch: ['actionType'] });
+  const actionTypeRegistered = actionType != null ? actionTypeRegistry.get(actionType.id) : null;
+  const FieldsComponent = actionTypeRegistered?.actionConnectorFields ?? null;
+  return (
+    <>
+      <UseField
+        path="name"
+        config={nameConfig}
+        component={Field}
+        componentProps={{
+          euiFieldProps: { readOnly: !canSave, 'data-test-subj': 'nameInput', fullWidth: true },
+        }}
+      />
+      <EuiSpacer size="m" />
+      {FieldsComponent !== null ? (
+        <>
+          <EuiTitle size="xxs">
+            <h4>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.connectorSettingsLabel"
+                defaultMessage="Connector settings"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiErrorBoundary>
+            <Suspense
+              fallback={
+                <SectionLoading>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
+                    defaultMessage="Loading connector settings…"
+                  />
+                </SectionLoading>
+              }
+            >
+              <FieldsComponent />
+            </Suspense>
+          </EuiErrorBoundary>
+        </>
+      ) : null}
+    </>
+  );
 };
 
 export const CreateConnectorForm = memo(CreateConnectorFormComponent);
