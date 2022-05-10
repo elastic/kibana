@@ -25,6 +25,7 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   createdItemsCount: number;
   createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
+  truncatedAlertsArray: boolean;
 }
 
 export const bulkCreateFactory =
@@ -35,7 +36,8 @@ export const bulkCreateFactory =
     refreshForBulkCreate: RefreshTypes
   ) =>
   async <T extends BaseFieldsLatest>(
-    wrappedDocs: Array<WrappedFieldsLatest<T>>
+    wrappedDocs: Array<WrappedFieldsLatest<T>>,
+    maxAlerts?: number
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {
@@ -44,18 +46,20 @@ export const bulkCreateFactory =
         bulkCreateDuration: '0',
         createdItemsCount: 0,
         createdItems: [],
+        truncatedAlertsArray: false,
       };
     }
 
     const start = performance.now();
 
-    const { createdAlerts, errors } = await alertWithPersistence(
+    const { createdAlerts, errors, truncatedAlertsArray } = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         _id: doc._id,
         // `fields` should have already been merged into `doc._source`
         _source: doc._source,
       })),
-      refreshForBulkCreate
+      refreshForBulkCreate,
+      maxAlerts
     );
 
     const end = performance.now();
@@ -76,6 +80,7 @@ export const bulkCreateFactory =
         bulkCreateDuration: makeFloatString(end - start),
         createdItemsCount: createdAlerts.length,
         createdItems: createdAlerts,
+        truncatedAlertsArray,
       };
     } else {
       return {
@@ -84,6 +89,7 @@ export const bulkCreateFactory =
         bulkCreateDuration: makeFloatString(end - start),
         createdItemsCount: createdAlerts.length,
         createdItems: createdAlerts,
+        truncatedAlertsArray,
       };
     }
   };

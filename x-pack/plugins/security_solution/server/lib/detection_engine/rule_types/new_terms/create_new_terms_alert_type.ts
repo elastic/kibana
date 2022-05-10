@@ -6,6 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { performance } from 'perf_hooks';
 import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
@@ -16,16 +17,16 @@ import { CreateRuleOptions, SecurityAlertType } from '../types';
 import { getInputIndex } from '../../signals/get_input_output_index';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
-import { SignalSource } from '../../signals/types';
 import { buildReasonMessageForNewTermsAlert } from '../../signals/reason_formatters';
 import { GenericBulkCreateResponse } from '../factories';
 import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
-import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
-import { buildNewTermsAggregation, NewTermsAggregationResult } from './build_new_terms_aggregation';
+import { EventsAndTerms, wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
 import {
-  buildTimestampRuntimeMapping,
-  TIMESTAMP_RUNTIME_FIELD,
-} from './build_timestamp_runtime_mapping';
+  buildInitialNewTermsAggregation,
+  InitialNewTermsAggregationResult,
+} from './build_new_terms_aggregation';
+import { buildTimeRangeFilter } from '../../signals/build_events_query';
+import { makeFloatString } from '../../signals/utils';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -33,6 +34,7 @@ interface BulkCreateResults {
   createdSignals: unknown[];
   success: boolean;
   errors: string[];
+  truncatedAlertsArray: boolean;
 }
 
 interface SearchAfterResults {
@@ -50,6 +52,7 @@ const addBulkCreateResults = (
     createdSignals: [...results.createdSignals, ...newResults.createdItems],
     success: results.success && newResults.success,
     errors: [...results.errors, ...newResults.errors],
+    truncatedAlertsArray: results.truncatedAlertsArray || newResults.truncatedAlertsArray,
   };
 };
 
@@ -127,83 +130,256 @@ export const createNewTermsAlertType = (
         throw Error(`Failed to parse 'historyWindowStart'`);
       }
 
-      // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
-      // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
-      // runtime field, so we just use @timestamp directly.
-      const { timestampField, runtimeMappings } = params.timestampOverride
-        ? {
-            timestampField: TIMESTAMP_RUNTIME_FIELD,
-            runtimeMappings: buildTimestampRuntimeMapping({
-              timestampOverride: params.timestampOverride,
-            }),
-          }
-        : { timestampField: '@timestamp', runtimeMappings: undefined };
-
-      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
-        aggregations: buildNewTermsAggregation({
-          newValueWindowStart: tuple.from,
-          field: params.newTermsFields[0],
-          maxSignals: params.maxSignals,
-          timestampField,
-        }),
-        runtimeMappings,
-        searchAfterSortIds: undefined,
-        index: inputIndex,
-        from: parsedHistoryWindowSize.toISOString(),
-        to: tuple.to.toISOString(),
-        services,
-        filter,
-        logger,
-        pageSize: 0,
-        timestampOverride: params.timestampOverride,
-        buildRuleMessage,
-      });
-      const searchResultWithAggs = searchResult as NewTermsAggregationResult;
-      if (!searchResultWithAggs.aggregations) {
-        throw new Error('expected to find aggregations on search result');
-      }
-
-      const bulkCreateResults: BulkCreateResults = {
+      let afterKey;
+      let bulkCreateResults: BulkCreateResults = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
         createdSignals: [],
         success: true,
         errors: [],
+        truncatedAlertsArray: false,
       };
 
       const searchAfterResults: SearchAfterResults = {
-        searchDurations: [searchDuration],
-        searchErrors,
+        searchDurations: [],
+        searchErrors: [],
       };
 
-      const eventsAndTerms: Array<{
-        event: estypes.SearchHit<SignalSource>;
-        newTerms: Array<string | number>;
-      }> = [];
-      const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-      bucketsForField.forEach((bucket) => {
-        eventsAndTerms.push({
-          event: bucket.docs.hits.hits[0],
-          newTerms: [bucket.key],
+      while (
+        !bulkCreateResults.truncatedAlertsArray &&
+        bulkCreateResults.createdSignalsCount < params.maxSignals
+      ) {
+        const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+          aggregations: buildInitialNewTermsAggregation({
+            field: params.newTermsFields[0],
+            after: afterKey,
+          }),
+          searchAfterSortIds: undefined,
+          index: inputIndex,
+          from: tuple.from.toISOString(),
+          to: tuple.to.toISOString(),
+          services,
+          filter,
+          logger,
+          pageSize: 0,
+          timestampOverride: params.timestampOverride,
+          buildRuleMessage,
         });
-      });
+        const searchResultWithAggs = searchResult as InitialNewTermsAggregationResult;
+        if (!searchResultWithAggs.aggregations) {
+          throw new Error('expected to find aggregations on search result');
+        }
+        logger.debug(`Time spent on composite agg: ${searchDuration}`);
 
-      const wrappedAlerts = wrapNewTermsAlerts({
-        eventsAndTerms,
-        spaceId,
-        completeRule,
-        mergeStrategy,
-        buildReasonMessage: buildReasonMessageForNewTermsAlert,
-      });
+        searchAfterResults.searchDurations.push(searchDuration);
+        searchAfterResults.searchErrors.push(...searchErrors);
 
-      addBulkCreateResults(bulkCreateResults, await bulkCreate(wrappedAlerts));
+        afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
+
+        // If the aggregation returns no after_key it signals that we've paged through all results
+        // and the current page is empty so we can immediately break.
+        if (afterKey == null) {
+          break;
+        }
+        const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
+
+        // For each bucket in the composite agg response, make a query that will find only docs in that bucket
+        // *older* than the current rule interval
+        const msearchRequest = bucketsForField.flatMap((bucket) => {
+          return [
+            {},
+            {
+              size: 0,
+              query: {
+                bool: {
+                  filter: [
+                    ...Object.entries(bucket.key).map(([key, value]) => {
+                      if (value != null) {
+                        return {
+                          term: {
+                            [key]: value,
+                          },
+                        };
+                      } else {
+                        return {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: key,
+                              },
+                            },
+                          },
+                        };
+                      }
+                    }),
+                    filter,
+                    buildTimeRangeFilter({
+                      // Looks weird, but is correct: the `from` date of the rule interval becomes the `to` date
+                      // when searching the history
+                      to: tuple.from.toISOString(),
+                      from: parsedHistoryWindowSize.toISOString(),
+                      timestampOverride: params.timestampOverride,
+                    }),
+                  ],
+                },
+              },
+            },
+          ];
+        });
+
+        const msearchStart = performance.now();
+        const msearchResponse = await services.scopedClusterClient.asCurrentUser.msearch({
+          index: inputIndex,
+          searches: msearchRequest,
+        });
+        const msearchEnd = performance.now();
+
+        logger.debug(
+          `Time spent on history msearch: ${makeFloatString(msearchEnd - msearchStart)}`
+        );
+
+        // Filter the buckets down to the set of buckets that can't be found in historical data, i.e.
+        // the msearch returned no results
+        // TODO: log an error if at least one response has no hits property
+        const filteredBuckets = bucketsForField.filter((_, i) => {
+          const response = msearchResponse.responses[i];
+          if ('hits' in response) {
+            return (
+              (typeof response.hits.total === 'number' && response.hits.total === 0) ||
+              (typeof response.hits.total === 'object' && response.hits.total.value === 0)
+            );
+          } else {
+            return false;
+          }
+        });
+
+        if (filteredBuckets.length > 0) {
+          const sort: estypes.Sort = [];
+          if (params.timestampOverride) {
+            sort.push({
+              [params.timestampOverride]: {
+                order: 'asc',
+                unmapped_type: 'date',
+              },
+            });
+          }
+          sort.push({
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          });
+          const docFields = [
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ];
+          if (params.timestampOverride) {
+            docFields.push({
+              field: params.timestampOverride,
+              format: 'strict_date_optional_time',
+            });
+          }
+          const documentFetchMsearch = filteredBuckets.flatMap((bucket) => {
+            return [
+              {},
+              {
+                size: 1,
+                sort,
+                fields: [
+                  {
+                    field: '*',
+                    include_unmapped: true,
+                  },
+                  ...docFields,
+                ],
+                query: {
+                  bool: {
+                    filter: [
+                      ...Object.entries(bucket.key).map(([key, value]) => {
+                        if (value != null) {
+                          return {
+                            term: {
+                              [key]: value,
+                            },
+                          };
+                        } else {
+                          return {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: key,
+                                },
+                              },
+                            },
+                          };
+                        }
+                      }),
+                      filter,
+                      buildTimeRangeFilter({
+                        to: tuple.to.toISOString(),
+                        from: tuple.from.toISOString(),
+                        timestampOverride: params.timestampOverride,
+                      }),
+                    ],
+                  },
+                },
+              },
+            ];
+          });
+          const docmsearchStart = performance.now();
+          const documentsMsearchResponse = await services.scopedClusterClient.asCurrentUser.msearch(
+            {
+              index: inputIndex,
+              searches: documentFetchMsearch,
+            }
+          );
+          const docmsearchEnd = performance.now();
+          logger.debug(
+            `Time spent on doc fetch msearch: ${makeFloatString(docmsearchEnd - docmsearchStart)}`
+          );
+
+          const eventsAndTerms = filteredBuckets
+            .map((bucket, i) => {
+              const response = documentsMsearchResponse.responses[i];
+              if ('hits' in response) {
+                return {
+                  newTerms: Object.values(bucket.key),
+                  event: response.hits.hits[0],
+                };
+              } else {
+                // TODO: log an error if at least one response has no hits property
+                return undefined;
+              }
+            })
+            .filter((eventAndTerms): eventAndTerms is EventsAndTerms => eventAndTerms != null);
+
+          // Wrap all candidate alerts - potentially up to a full page from the initial composite agg -
+          // and hand them off to bulkCreate to write the docs
+          const wrappedAlerts = wrapNewTermsAlerts({
+            eventsAndTerms,
+            spaceId,
+            completeRule,
+            mergeStrategy,
+            buildReasonMessage: buildReasonMessageForNewTermsAlert,
+          });
+
+          const bulkCreateResult = await bulkCreate(
+            wrappedAlerts,
+            params.maxSignals - bulkCreateResults.createdSignalsCount
+          );
+
+          bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);
+        }
+      }
 
       return {
         // If an error occurs but doesn't cause us to throw then we still count the execution as a success.
         // Should be refactored for better clarity, but that's how it is for now.
         success: true,
         warning: false,
-        searchAfterTimes: [searchDuration],
+        searchAfterTimes: searchAfterResults.searchDurations,
         bulkCreateTimes: bulkCreateResults.bulkCreateTimes,
         lastLookBackDate: undefined,
         createdSignalsCount: bulkCreateResults.createdSignalsCount,

@@ -22,7 +22,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
           ...options,
           services: {
             ...options.services,
-            alertWithPersistence: async (alerts, refresh) => {
+            alertWithPersistence: async (alerts, refresh, maxAlerts = undefined) => {
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
 
@@ -78,7 +78,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 if (filteredAlerts.length === 0) {
-                  return { createdAlerts: [], errors: {} };
+                  return { createdAlerts: [], errors: {}, truncatedAlertsArray: false };
+                }
+
+                let truncatedAlertsArray = false;
+                if (maxAlerts && filteredAlerts.length > maxAlerts) {
+                  filteredAlerts.length = maxAlerts;
+                  truncatedAlertsArray = true;
                 }
 
                 const augmentedAlerts = filteredAlerts.map((alert) => {
@@ -103,7 +109,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   });
 
                 if (response == null) {
-                  return { createdAlerts: [], errors: {} };
+                  return { createdAlerts: [], errors: {}, truncatedAlertsArray };
                 }
 
                 return {
@@ -118,10 +124,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     })
                     .filter((_, idx) => response.body.items[idx].create?.status === 201),
                   errors: errorAggregator(response.body, [409]),
+                  truncatedAlertsArray,
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {} };
+                return { createdAlerts: [], errors: {}, truncatedAlertsArray: false };
               }
             },
           },

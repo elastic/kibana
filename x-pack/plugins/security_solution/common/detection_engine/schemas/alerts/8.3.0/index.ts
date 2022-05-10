@@ -35,7 +35,7 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 */
 
 export interface NewTermsFields830 extends BaseFields800 {
-  [ALERT_NEW_TERMS]: Array<string | number>;
+  [ALERT_NEW_TERMS]: Array<string | number | null>;
 }
 
 export type NewTermsAlert830 = AlertWithCommonFields800<NewTermsFields830>;

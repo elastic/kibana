@@ -14,25 +14,38 @@ export type NewTermsAggregationResult = ESSearchResponse<
   { body: { aggregations: ReturnType<typeof buildNewTermsAggregation> } }
 >;
 
+export type InitialNewTermsAggregationResult = ESSearchResponse<
+  SignalSource,
+  { body: { aggregations: ReturnType<typeof buildInitialNewTermsAggregation> } }
+>;
+
 export const buildNewTermsAggregation = ({
   newValueWindowStart,
   field,
   maxSignals,
   timestampField,
+  after,
 }: {
   newValueWindowStart: Moment;
   field: string;
   maxSignals: number;
   timestampField: string;
+  after: Record<string, string | number | null>;
 }) => {
   return {
     new_terms: {
-      terms: {
-        field,
-        size: maxSignals,
-        order: {
-          first_seen: 'desc' as const,
-        },
+      composite: {
+        sources: [
+          {
+            [field]: {
+              terms: {
+                field,
+              },
+            },
+          },
+        ],
+        size: 1000,
+        after,
       },
       aggs: {
         docs: {
@@ -45,6 +58,91 @@ export const buildNewTermsAggregation = ({
             ],
           },
         },
+        first_seen: {
+          min: {
+            field: timestampField,
+          },
+        },
+        filtering_agg: {
+          bucket_selector: {
+            buckets_path: {
+              first_seen_value: 'first_seen',
+            },
+            script: {
+              params: {
+                start_time: newValueWindowStart.valueOf(),
+              },
+              source: 'params.first_seen_value > params.start_time',
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
+/**
+ * Creates an aggregation that pages through all terms. Used to find the terms that have appeared recently,
+ * without regard to whether or not they're actually new.
+ */
+export const buildInitialNewTermsAggregation = ({
+  field,
+  after,
+}: {
+  field: string;
+  after: Record<string, string | number | null> | undefined;
+}) => {
+  return {
+    new_terms: {
+      composite: {
+        sources: [
+          {
+            [field]: {
+              terms: {
+                field,
+              },
+            },
+          },
+        ],
+        size: 5000,
+        after,
+      },
+    },
+  };
+};
+
+/**
+ *
+ */
+export const buildHistoryTermsAggregation = ({
+  newValueWindowStart,
+  field,
+  maxSignals,
+  timestampField,
+  after,
+}: {
+  newValueWindowStart: Moment;
+  field: string;
+  maxSignals: number;
+  timestampField: string;
+  after: Record<string, string | number | null>;
+}) => {
+  return {
+    new_terms: {
+      composite: {
+        sources: [
+          {
+            [field]: {
+              terms: {
+                field,
+              },
+            },
+          },
+        ],
+        size: 1000,
+        after,
+      },
+      aggs: {
         first_seen: {
           min: {
             field: timestampField,

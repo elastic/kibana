@@ -20,6 +20,11 @@ import { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';
 
+export interface EventsAndTerms {
+  event: estypes.SearchHit<SignalSource>;
+  newTerms: Array<string | number | null>;
+}
+
 export const wrapNewTermsAlerts = ({
   eventsAndTerms,
   spaceId,
@@ -27,10 +32,7 @@ export const wrapNewTermsAlerts = ({
   mergeStrategy,
   buildReasonMessage,
 }: {
-  eventsAndTerms: Array<{
-    event: estypes.SearchHit<SignalSource>;
-    newTerms: Array<string | number>;
-  }>;
+  eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
