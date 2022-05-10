@@ -68,6 +68,7 @@ export interface CommandExecutionComponentProps<
   TDefinition extends CommandDefinition = CommandDefinition
 > {
   command: Command<TDefinition>;
+
   /**
    * A data store for the command execution to store data in, if needed.
    * Because the Console could be closed/opened several times, which will cause this component
@@ -76,8 +77,14 @@ export interface CommandExecutionComponentProps<
    * if the command has already been executed or if it's a new instance.
    */
   store: Immutable<CommandExecutionState['store']>;
-  /** Sets the `store` data above */
-  setStore: (state: CommandExecutionState['store']) => void;
+
+  /**
+   * Sets the `store` data above. Function will be called the latest (prevState) store data
+   */
+  setStore: (
+    updateStoreFn: (prevState: CommandExecutionState['store']) => CommandExecutionState['store']
+  ) => void;
+
   /**
    * The status of the command execution.
    * Note that the console's UI will show the command as "busy" while the status here is
@@ -85,6 +92,7 @@ export interface CommandExecutionComponentProps<
    * either `success` or `error`.
    */
   status: CommandExecutionState['status'];
+
   /** Set the status of the command execution  */
   setStatus: (status: CommandExecutionState['status']) => void;
 }

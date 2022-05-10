@@ -28,28 +28,19 @@ export const IsolateActionResult = memo<CommandExecutionComponentProps<EndpointC
           comment: command.args.args?.comment?.value,
         });
 
-        setStore({
-          ...store,
-          actionRequestSent: true,
+        setStore((prevState) => {
+          return { ...prevState, actionRequestSent: true };
         });
       }
-    }, [
-      actionRequestSent,
-      command.args.args?.comment?.value,
-      endpointId,
-      isolateHost,
-      setStore,
-      store,
-    ]);
+    }, [actionRequestSent, command.args.args?.comment?.value, endpointId, isolateHost, setStore]);
 
     useEffect(() => {
       if (isolateHost.isSuccess && actionId !== isolateHost.data.action) {
-        setStore({
-          ...store,
-          actionId: isolateHost.data.action,
+        setStore((prevState) => {
+          return { ...prevState, actionId: isolateHost.data.action };
         });
       }
-    }, [actionId, isolateHost?.data?.action, isolateHost.isSuccess, setStore, store]);
+    }, [actionId, isolateHost?.data?.action, isolateHost.isSuccess, setStore]);
 
     useEffect(() => {
       if (actionId) {
