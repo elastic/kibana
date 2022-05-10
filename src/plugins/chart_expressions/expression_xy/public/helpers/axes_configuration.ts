@@ -55,7 +55,7 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
       const mode =
         yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode || 'auto';
       const col = table.columns?.find((column) => column.id === accessor);
-      let formatter: SerializedFieldFormat = col?.meta ? getFormat(col?.meta) : { id: 'number' };
+      let formatter: SerializedFieldFormat = col?.meta ? getFormat(col.meta) : { id: 'number' };
       if (
         isDataLayer(layer) &&
         layer.seriesType.includes('percentage') &&
