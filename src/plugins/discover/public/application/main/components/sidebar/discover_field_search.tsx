@@ -409,7 +409,7 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
                     defaultMessage: 'Learn more about',
                   })}
                   &nbsp;
-                  <EuiLink href={docLinks.links.discover.fieldTypeHelp}>
+                  <EuiLink href={docLinks.links.discover.fieldTypeHelp} target="_blank" external>
                     <FormattedMessage
                       id="discover.fieldTypesPopover.learnMoreLink"
                       defaultMessage="field types."
