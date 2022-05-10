@@ -37,6 +37,7 @@ import { ThresholdAggregate, ThresholdAggregationContainer } from './types';
 interface FindThresholdSignalsParams {
   from: string;
   to: string;
+  maxSignals: number;
   inputIndexPattern: string[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
@@ -59,6 +60,7 @@ const isCompositeAggregate = (
 export const findThresholdSignals = async ({
   from,
   to,
+  maxSignals,
   inputIndexPattern,
   services,
   logger,
@@ -169,8 +171,22 @@ export const findThresholdSignals = async ({
       buildRuleMessage,
     });
     const thresholdTerms = searchResult.aggregations?.thresholdTerms;
+    const prevThresholdTerms = mergedSearchResults.aggregations?.thresholdTerms;
+
     sortKeys = isCompositeAggregate(thresholdTerms) ? thresholdTerms.after_key : undefined;
     mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
+
+    if (prevThresholdTerms) {
+      const prevBuckets = prevThresholdTerms?.buckets ?? [];
+      const nextBuckets = thresholdTerms?.buckets ?? [];
+      mergedSearchResults.aggregations = {
+        thresholdTerms: {
+          buckets: [...prevBuckets, ...nextBuckets],
+        },
+      };
+      mergedSearchResults.hits.total = prevBuckets.length + nextBuckets.length;
+    }
+
     result = mergeReturns([
       result,
       createSearchAfterReturnTypeFromResponse({
@@ -182,9 +198,22 @@ export const findThresholdSignals = async ({
         errors: searchErrors,
       }),
     ]);
-  } while (sortKeys);
+  } while (sortKeys); // we have to iterate over everything in order to sort
 
   // TODO: sort by max_timestamp? sort by cardinality?
+
+  // and then truncate to `maxSignals`
+  if ((mergedSearchResults.hits.total ?? 0) > maxSignals) {
+    mergedSearchResults.aggregations = {
+      thresholdTerms: {
+        buckets: (mergedSearchResults.aggregations?.thresholdTerms.buckets ?? []).slice(
+          0,
+          maxSignals
+        ),
+      },
+    };
+    mergedSearchResults.hits.total = maxSignals;
+  }
 
   return {
     searchResult: mergedSearchResults,

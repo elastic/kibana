@@ -6,8 +6,8 @@
  */
 
 import { isPlainObject } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  AggregateName,
   AggregationsCardinalityAggregate,
   AggregationsCompositeBucket,
   AggregationsMaxAggregate,
@@ -15,7 +15,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
-import set from 'set-value';
 import { Logger } from '@kbn/core/server';
 import {
   AlertInstanceContext,
@@ -26,13 +25,13 @@ import { ThresholdNormalized } from '../../../../../common/detection_engine/sche
 import { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
-import type { SignalSearchResponse, ThresholdSignalHistory, BulkCreate, WrapHits } from '../types';
+import type { ThresholdSignalHistory, BulkCreate, WrapHits, SignalSource } from '../types';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
-import { ThresholdAggregate, ThresholdBucket } from './types';
+import { ThresholdBucket } from './types';
 
 interface BulkCreateThresholdSignalsParams {
-  someResult: SignalSearchResponse<Record<AggregateName, ThresholdAggregate>>;
+  buckets: ThresholdBucket[];
   completeRule: CompleteRule<ThresholdRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
@@ -47,18 +46,13 @@ interface BulkCreateThresholdSignalsParams {
 }
 
 const getTransformedHits = (
-  results: SignalSearchResponse<Record<AggregateName, ThresholdAggregate>>,
+  buckets: ThresholdBucket[],
   inputIndex: string,
   startedAt: Date,
   from: Date,
   threshold: ThresholdNormalized,
   ruleId: string
 ) => {
-  if (results.aggregations == null) {
-    return [];
-  }
-
-  const buckets = results.aggregations.thresholdTerms.buckets as ThresholdBucket[];
   const isCompositeBucket = (bucket: ThresholdBucket): bucket is AggregationsCompositeBucket =>
     isPlainObject(bucket.key);
 
@@ -104,43 +98,31 @@ const getTransformedHits = (
 };
 
 export const transformThresholdResultsToEcs = (
-  results: SignalSearchResponse<Record<AggregateName, ThresholdAggregate>>,
+  buckets: ThresholdBucket[],
   inputIndex: string,
   startedAt: Date,
   from: Date,
   threshold: ThresholdNormalized,
   ruleId: string
-): SignalSearchResponse => {
+): Array<estypes.SearchHit<SignalSource>> => {
   const transformedHits = getTransformedHits(
-    results,
+    buckets,
     inputIndex,
     startedAt,
     from,
     threshold,
     ruleId
   );
-  const thresholdResults = {
-    ...results,
-    hits: {
-      ...results.hits,
-      hits: transformedHits,
-    },
-  };
 
-  delete thresholdResults.aggregations; // delete because no longer needed
-
-  set(thresholdResults, 'results.hits.total', transformedHits.length);
-
-  return thresholdResults;
+  return transformedHits;
 };
 
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
   const ruleParams = params.completeRule.ruleParams;
-  const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
-    thresholdResults,
+    params.buckets,
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.from,
@@ -148,7 +130,5 @@ export const bulkCreateThresholdSignals = async (
     ruleParams.ruleId
   );
 
-  return params.bulkCreate(
-    params.wrapHits(ecsResults.hits.hits, buildReasonMessageForThresholdAlert)
-  );
+  return params.bulkCreate(params.wrapHits(ecsResults, buildReasonMessageForThresholdAlert));
 };

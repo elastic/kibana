@@ -42,6 +42,7 @@ import { BuildRuleMessage } from '../rule_messages';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
+import { ThresholdBucket } from '../threshold/types';
 
 export const thresholdExecutor = async ({
   completeRule,
@@ -141,6 +142,7 @@ export const thresholdExecutor = async ({
       inputIndexPattern: inputIndex,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
+      maxSignals: tuple.maxSignals,
       services,
       logger,
       filter: esFilter,
@@ -152,7 +154,7 @@ export const thresholdExecutor = async ({
     // Build and index new alerts
     const { success, bulkCreateDuration, createdItemsCount, createdItems, errors } =
       await bulkCreateThresholdSignals({
-        someResult: thresholdResults,
+        buckets: (thresholdResults.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [],
         completeRule,
         filter: esFilter,
         services,
