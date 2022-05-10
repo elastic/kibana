@@ -112,7 +112,7 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
               iconType="alert"
               title={
                 <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryWarningTitle"
+                  id="xpack.snapshotRestore.errorLoadingFeatureStatesLabel"
                   defaultMessage="There was an error loading the list of feature states"
                 />
               }
