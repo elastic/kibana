@@ -202,8 +202,7 @@ export const DiscoverTourProvider: React.FC = ({ children }) => {
   const prependToBasePath = services.core.http.basePath.prepend;
   const getAssetPath = useCallback(
     (imageName: string) => {
-      // TODO: update dir name
-      return prependToBasePath(`/plugins/${PLUGIN_ID}/assets/dsc_tour/${imageName}`);
+      return prependToBasePath(`/plugins/${PLUGIN_ID}/assets/discover_tour/${imageName}`);
     },
     [prependToBasePath]
   );
