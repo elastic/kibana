@@ -56,18 +56,17 @@ export const getElementPositionAndAttributes = async (
           const results: ElementsPositionAndAttribute[] = [];
 
           for (const element of elements) {
+            // scroll to the element: screenshotting can not capture items outside of the viewport
             element.scrollIntoView();
-            const boundingClientRect = element.getBoundingClientRect() as DOMRect;
 
-            // scroll to the element: screenshot can not capture items outside of the viewport
-            window.scrollTo({ top: boundingClientRect.y, left: boundingClientRect.x });
+            // find the coords of the element on the screen
+            const boundingClientRect = element.getBoundingClientRect() as DOMRect;
 
             results.push({
               position: {
                 boundingClientRect: {
-                  // modern browsers support x/y, but older ones don't
-                  top: boundingClientRect.y || boundingClientRect.top,
-                  left: boundingClientRect.x || boundingClientRect.left,
+                  top: boundingClientRect.y,
+                  left: boundingClientRect.x,
                   width: boundingClientRect.width,
                   height: boundingClientRect.height,
                 },

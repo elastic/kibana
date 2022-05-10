@@ -40,7 +40,6 @@ function getElementsPositionAndAttributes(title: string, description: string) {
 export function createMockBrowserDriver(): jest.Mocked<HeadlessChromiumDriver> {
   const evaluate = jest.fn(async (_, { context }) => {
     switch (context) {
-      case 'DEBUG':
       case CONTEXT_SKIPTELEMETRY:
       case CONTEXT_INJECTCSS:
       case CONTEXT_WAITFORRENDER:

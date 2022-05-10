@@ -234,18 +234,22 @@ export class HeadlessChromiumDriver {
     await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
+  /**
+   * Setting the viewport is required to ensure that all capture elements are visible: anything not in the
+   * viewport can not be captured.
+   */
   async setViewport(
     { width: _width, height: _height, zoom }: Viewport,
     logger: Logger
   ): Promise<void> {
-    const width = Math.floor(_width);
-    const height = Math.floor(_height);
+    const width = Math.ceil(_width);
+    const height = Math.ceil(_height);
 
     logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
 
     await this.page.setViewport({
-      width: Math.ceil(width * 1.2),
-      height: height * 2,
+      width,
+      height,
       deviceScaleFactor: zoom,
       isMobile: false,
     });

@@ -109,6 +109,13 @@ export class Screenshots {
     this.semaphore = new Semaphore(config.poolSize);
   }
 
+  private createLayout(options: CaptureOptions): Layout {
+    const layout = createLayout(options.layout ?? {});
+    this.logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
+
+    return layout;
+  }
+
   private captureScreenshots(
     eventLogger: EventLogger,
     layout: Layout,
@@ -121,7 +128,7 @@ export class Screenshots {
         {
           browserTimezone,
           openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
-          viewport: { height: layout.height, width: layout.width },
+          defaultViewport: { height: layout.height, width: layout.width },
         },
         this.logger
       )
@@ -226,7 +233,7 @@ export class Screenshots {
     const eventLogger = new EventLogger(this.logger, this.config);
     const transactionEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
 
-    const layout = createLayout(options.layout ?? {});
+    const layout = this.createLayout(options);
     const captureOptions = this.getCaptureOptions(options);
 
     return this.captureScreenshots(eventLogger, layout, captureOptions).pipe(
