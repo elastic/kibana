@@ -10,6 +10,7 @@ import { BlobStorage } from './types';
 import { ElasticsearchBlobStorage } from './adapters';
 
 export class BlobStorageService {
+  // @ts-ignore
   private readonly adapters: { es: BlobStorage };
 
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {
@@ -19,11 +20,5 @@ export class BlobStorageService {
         this.logger.get('elasticsearch-blob-storage')
       ),
     };
-  }
-
-  async setup(): Promise<void> {
-    for (const adapter of Object.values(this.adapters)) {
-      await adapter.setup();
-    }
   }
 }

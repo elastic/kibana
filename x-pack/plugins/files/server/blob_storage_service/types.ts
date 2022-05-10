@@ -13,11 +13,6 @@ import type { ReadStream } from 'fs';
  * @internal
  */
 export interface BlobStorage {
-  /**
-   * Set up the blob store. E.g., establish connections.
-   */
-  setup(): Promise<void>;
-
   upload(fileName: string, content: ReadStream): Promise<{ uri: string }>;
 
   download(uri: string): Promise<ReadStream>;
