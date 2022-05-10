@@ -118,7 +118,7 @@ export const ALERTS_HEADERS_RISK_SCORE = i18n.translate(
 export const ALERTS_HEADERS_THRESHOLD_COUNT = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCount',
   {
-    defaultMessage: 'Threshold Count',
+    defaultMessage: 'Event Count',
   }
 );
 
