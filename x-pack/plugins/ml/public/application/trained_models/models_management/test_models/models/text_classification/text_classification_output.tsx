@@ -9,14 +9,27 @@ import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiProgress } from '@elastic/eui';
 
-import type { TextClassificationInference, ZeroShotClassificationInference } from '.';
+import type {
+  TextClassificationInference,
+  ZeroShotClassificationInference,
+  FillMaskInference,
+  LangIdentInference,
+} from '.';
 
 export const getTextClassificationOutputComponent = (
-  inferrer: TextClassificationInference | ZeroShotClassificationInference
+  inferrer:
+    | TextClassificationInference
+    | ZeroShotClassificationInference
+    | FillMaskInference
+    | LangIdentInference
 ) => <TextClassificationOutput inferrer={inferrer} />;
 
-const TextClassificationOutput: FC<{
-  inferrer: TextClassificationInference | ZeroShotClassificationInference;
+export const TextClassificationOutput: FC<{
+  inferrer:
+    | TextClassificationInference
+    | ZeroShotClassificationInference
+    | FillMaskInference
+    | LangIdentInference;
 }> = ({ inferrer }) => {
   const result = useObservable(inferrer.inferenceResult$);
   if (!result) {
