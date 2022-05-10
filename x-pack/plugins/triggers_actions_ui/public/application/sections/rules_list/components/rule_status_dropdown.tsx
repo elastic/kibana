@@ -33,7 +33,7 @@ import { parseInterval } from '../../../../../common';
 
 import { Rule } from '../../../../types';
 
-type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
+export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
 type DropdownRuleRecord = Pick<Rule, 'enabled' | 'snoozeEndTime' | 'muteAll'>;
@@ -58,9 +58,9 @@ const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
 ];
 
 const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';
-const usePreviousSnoozeInterval: (p?: string | null) => [string | null, (n: string) => void] = (
-  propsInterval
-) => {
+export const usePreviousSnoozeInterval: (
+  p?: string | null
+) => [string | null, (n: string) => void] = (propsInterval) => {
   const intervalFromStorage = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
   const usePropsInterval = typeof propsInterval !== 'undefined';
   const interval = usePropsInterval ? propsInterval : intervalFromStorage;
@@ -312,12 +312,14 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
       width: 360,
       title: SNOOZE,
       content: (
-        <SnoozePanel
-          applySnooze={onApplySnooze}
-          interval={futureTimeToInterval(snoozeEndTime)}
-          showCancel={isSnoozed}
-          previousSnoozeInterval={previousSnoozeInterval}
-        />
+        <EuiPanel paddingSize="none">
+          <SnoozePanel
+            applySnooze={onApplySnooze}
+            interval={futureTimeToInterval(snoozeEndTime)}
+            showCancel={isSnoozed}
+            previousSnoozeInterval={previousSnoozeInterval}
+          />
+        </EuiPanel>
       ),
     },
   ];
@@ -332,7 +334,7 @@ interface SnoozePanelProps {
   previousSnoozeInterval: string | null;
 }
 
-const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
+export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   interval = '3d',
   applySnooze,
   showCancel,
@@ -385,7 +387,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
     </>
   );
   return (
-    <EuiPanel paddingSize="none">
+    <>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
@@ -470,11 +472,11 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
         </>
       )}
       <EuiSpacer size="s" />
-    </EuiPanel>
+    </>
   );
 };
 
-const isRuleSnoozed = (rule: DropdownRuleRecord) => {
+export const isRuleSnoozed = (rule: DropdownRuleRecord) => {
   const { snoozeEndTime, muteAll } = rule;
   if (muteAll) return true;
   if (!snoozeEndTime) {
@@ -483,7 +485,7 @@ const isRuleSnoozed = (rule: DropdownRuleRecord) => {
   return moment(Date.now()).isBefore(snoozeEndTime);
 };
 
-const futureTimeToInterval = (time?: Date | null) => {
+export const futureTimeToInterval = (time?: Date | null) => {
   if (!time) return;
   const relativeTime = moment(time).locale('en').fromNow(true);
   const [valueStr, unitStr] = relativeTime.split(' ');

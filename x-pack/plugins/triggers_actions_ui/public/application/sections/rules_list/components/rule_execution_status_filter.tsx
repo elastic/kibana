@@ -7,13 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFilterGroup,
-  EuiPopover,
-  EuiFilterButton,
-  EuiFilterSelectItem,
-  EuiHealth,
-} from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiHealth } from '@elastic/eui';
 import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
 
@@ -41,51 +35,49 @@ export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionSta
   }, [selectedStatuses]);
 
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        button={
-          <EuiFilterButton
-            iconType="arrowDown"
-            hasActiveFilters={selectedValues.length > 0}
-            numActiveFilters={selectedValues.length}
-            numFilters={selectedValues.length}
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            data-test-subj="ruleExecutionStatusFilterButton"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.ruleExecutionStatusFilterLabel"
-              defaultMessage="Last response"
-            />
-          </EuiFilterButton>
-        }
-      >
-        <div className="euiFilterSelect__items">
-          {[...RuleExecutionStatusValues].sort().map((item: RuleExecutionStatuses) => {
-            const healthColor = getHealthColor(item);
-            return (
-              <EuiFilterSelectItem
-                key={item}
-                style={{ textTransform: 'capitalize' }}
-                onClick={() => {
-                  const isPreviouslyChecked = selectedValues.includes(item);
-                  if (isPreviouslyChecked) {
-                    setSelectedValues(selectedValues.filter((val) => val !== item));
-                  } else {
-                    setSelectedValues(selectedValues.concat(item));
-                  }
-                }}
-                checked={selectedValues.includes(item) ? 'on' : undefined}
-                data-test-subj={`ruleExecutionStatus${item}FilterOption`}
-              >
-                <EuiHealth color={healthColor}>{rulesStatusesTranslationsMapping[item]}</EuiHealth>
-              </EuiFilterSelectItem>
-            );
-          })}
-        </div>
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      button={
+        <EuiFilterButton
+          iconType="arrowDown"
+          hasActiveFilters={selectedValues.length > 0}
+          numActiveFilters={selectedValues.length}
+          numFilters={selectedValues.length}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          data-test-subj="ruleExecutionStatusFilterButton"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.ruleExecutionStatusFilterLabel"
+            defaultMessage="Last response"
+          />
+        </EuiFilterButton>
+      }
+    >
+      <div className="euiFilterSelect__items">
+        {[...RuleExecutionStatusValues].sort().map((item: RuleExecutionStatuses) => {
+          const healthColor = getHealthColor(item);
+          return (
+            <EuiFilterSelectItem
+              key={item}
+              style={{ textTransform: 'capitalize' }}
+              onClick={() => {
+                const isPreviouslyChecked = selectedValues.includes(item);
+                if (isPreviouslyChecked) {
+                  setSelectedValues(selectedValues.filter((val) => val !== item));
+                } else {
+                  setSelectedValues(selectedValues.concat(item));
+                }
+              }}
+              checked={selectedValues.includes(item) ? 'on' : undefined}
+              data-test-subj={`ruleExecutionStatus${item}FilterOption`}
+            >
+              <EuiHealth color={healthColor}>{rulesStatusesTranslationsMapping[item]}</EuiHealth>
+            </EuiFilterSelectItem>
+          );
+        })}
+      </div>
+    </EuiPopover>
   );
 };
 

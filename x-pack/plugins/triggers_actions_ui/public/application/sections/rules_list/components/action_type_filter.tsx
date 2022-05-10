@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { ActionType } from '../../../../types';
 
 interface ActionTypeFilterProps {
@@ -30,46 +30,44 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
   }, [selectedValues]);
 
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        button={
-          <EuiFilterButton
-            iconType="arrowDown"
-            hasActiveFilters={selectedValues.length > 0}
-            numActiveFilters={selectedValues.length}
-            numFilters={selectedValues.length}
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            data-test-subj="actionTypeFilterButton"
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      button={
+        <EuiFilterButton
+          iconType="arrowDown"
+          hasActiveFilters={selectedValues.length > 0}
+          numActiveFilters={selectedValues.length}
+          numFilters={selectedValues.length}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          data-test-subj="actionTypeFilterButton"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.rulesList.actionTypeFilterLabel"
+            defaultMessage="Action type"
+          />
+        </EuiFilterButton>
+      }
+    >
+      <div className="euiFilterSelect__items">
+        {actionTypes.map((item) => (
+          <EuiFilterSelectItem
+            key={item.id}
+            onClick={() => {
+              const isPreviouslyChecked = selectedValues.includes(item.id);
+              if (isPreviouslyChecked) {
+                setSelectedValues(selectedValues.filter((val) => val !== item.id));
+              } else {
+                setSelectedValues(selectedValues.concat(item.id));
+              }
+            }}
+            checked={selectedValues.includes(item.id) ? 'on' : undefined}
+            data-test-subj={`actionType${item.id}FilterOption`}
           >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.actionTypeFilterLabel"
-              defaultMessage="Action type"
-            />
-          </EuiFilterButton>
-        }
-      >
-        <div className="euiFilterSelect__items">
-          {actionTypes.map((item) => (
-            <EuiFilterSelectItem
-              key={item.id}
-              onClick={() => {
-                const isPreviouslyChecked = selectedValues.includes(item.id);
-                if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter((val) => val !== item.id));
-                } else {
-                  setSelectedValues(selectedValues.concat(item.id));
-                }
-              }}
-              checked={selectedValues.includes(item.id) ? 'on' : undefined}
-              data-test-subj={`actionType${item.id}FilterOption`}
-            >
-              {item.name}
-            </EuiFilterSelectItem>
-          ))}
-        </div>
-      </EuiPopover>
-    </EuiFilterGroup>
+            {item.name}
+          </EuiFilterSelectItem>
+        ))}
+      </div>
+    </EuiPopover>
   );
 };

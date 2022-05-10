@@ -30,6 +30,7 @@ import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
+import { getRulesListLazy } from './common/get_rules_list';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -79,6 +80,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRuleEventLogList: (props) => {
       return getRuleEventLogListLazy(props);
+    },
+    getRulesList: () => {
+      return getRulesListLazy();
     },
   };
 }
