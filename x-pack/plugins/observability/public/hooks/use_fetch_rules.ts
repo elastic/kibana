@@ -104,8 +104,7 @@ export function useFetchRules({
   ]);
   useEffect(() => {
     fetchRules();
-    loadRuleTagsAggs();
-  }, [fetchRules, loadRuleTagsAggs]);
+  }, [fetchRules]);
 
   return {
     rulesState,
