@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
+import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query';
 import type { HttpFetchError } from '@kbn/core/public';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { useHttp } from '../../../common/lib/kibana';
@@ -20,7 +20,7 @@ import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
 export const useGetEndpointDetails = (
   endpointId: string,
   options: UseQueryOptions<HostInfo, HttpFetchError> = {}
-): QueryObserverResult<HostInfo, HttpFetchError> => {
+): UseQueryResult<HostInfo, HttpFetchError> => {
   const http = useHttp();
 
   return useQuery<HostInfo, HttpFetchError>(
@@ -30,11 +30,6 @@ export const useGetEndpointDetails = (
         resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId ?? 'undefined' })
       );
     },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      ...options,
-    }
+    { ...options }
   );
 };

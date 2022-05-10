@@ -22,11 +22,6 @@ export const useGetEndpointPendingActionsSummary = (
   return useQuery<PendingActionsResponse, HttpFetchError>(
     ['fetch-endpoint-pending-actions-summary', ...endpointAgentIds],
     () => fetchPendingActionsByAgentId(endpointAgentIds),
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      ...options,
-    }
+    { ...options }
   );
 };

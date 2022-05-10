@@ -9,6 +9,7 @@ import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
+import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinition } from './types';
 import { useSendIsolateEndpointRequest } from '../../hooks/endpoint/use_send_isolate_endpoint_request';
 import { CommandExecutionComponentProps } from '../console/types';
@@ -16,10 +17,16 @@ import { CommandExecutionComponentProps } from '../console/types';
 export const IsolateActionResult = memo<CommandExecutionComponentProps<EndpointCommandDefinition>>(
   ({ command, setStore, store, status, setStatus }) => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
-    const actionId = store.actionId;
-
+    const actionId = store.actionId as string | undefined;
+    const isPending = status === 'pending';
     const actionRequestSent = Boolean(store.actionRequestSent);
+
     const isolateHost = useSendIsolateEndpointRequest();
+
+    const { data } = useGetActionDetails(actionId ?? '-', {
+      enabled: Boolean(actionId) && isPending,
+      refetchInterval: isPending ? 3000 : false,
+    });
 
     useEffect(() => {
       if (!actionRequestSent && endpointId) {
@@ -43,13 +50,13 @@ export const IsolateActionResult = memo<CommandExecutionComponentProps<EndpointC
     }, [actionId, isolateHost?.data?.action, isolateHost.isSuccess, setStore]);
 
     useEffect(() => {
-      if (actionId) {
-        // FIXME:PT Start waiting for an action response
+      if (data?.data.isCompleted) {
+        setStatus('success');
       }
-    }, [actionId]);
+    }, [data?.data.isCompleted, setStatus]);
 
     // Show nothing if still pending
-    if (status === 'pending') {
+    if (isPending) {
       return null;
     }
 
