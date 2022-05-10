@@ -44,12 +44,6 @@ export const commonDataLayerArgs: CommonDataLayerFnArgs = {
     default: false,
     help: strings.getIsHistogramHelp(),
   },
-  yScaleType: {
-    options: [...Object.values(YScaleTypes)],
-    help: strings.getYScaleTypeHelp(),
-    default: YScaleTypes.LINEAR,
-    strict: true,
-  },
   splitAccessor: {
     types: ['string'],
     help: strings.getSplitAccessorHelp(),

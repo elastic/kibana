@@ -147,6 +147,8 @@ export function XYChart({
     yLeftExtent,
     yRightExtent,
     valuesInLegend,
+    yLeftScale,
+    yRightScale,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -192,7 +194,13 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(dataLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(dataLayers, shouldRotate, formatFactory);
+  const yAxesConfiguration = getAxesConfiguration(
+    dataLayers,
+    shouldRotate,
+    formatFactory,
+    yLeftScale,
+    yRightScale
+  );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
   const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {

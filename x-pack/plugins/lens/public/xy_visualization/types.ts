@@ -46,7 +46,6 @@ export interface XYDataLayerConfig {
   yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
-  yScaleType?: YScaleType;
   xScaleType?: XScaleType;
   isHistogram?: boolean;
   columnToLabel?: string;
@@ -92,6 +91,8 @@ export interface XYState {
   xTitle?: string;
   yTitle?: string;
   yRightTitle?: string;
+  yLeftScale?: YScaleType;
+  yRightScale?: YScaleType;
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;

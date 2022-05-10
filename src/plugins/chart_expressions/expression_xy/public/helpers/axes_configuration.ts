@@ -8,7 +8,13 @@
 
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
-import { AxisExtentConfig, CommonXYDataLayerConfig, ExtendedYConfig, YConfig } from '../../common';
+import {
+  AxisExtentConfig,
+  CommonXYDataLayerConfig,
+  ExtendedYConfig,
+  YConfig,
+  YScaleType,
+} from '../../common';
 import { isDataLayer } from './visualization';
 
 export interface Series {
@@ -25,6 +31,7 @@ export type GroupsConfiguration = Array<{
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Series[];
+  scale?: YScaleType;
 }>;
 
 export function isFormatterCompatible(
@@ -106,7 +113,9 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
 export function getAxesConfiguration(
   layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
-  formatFactory?: FormatFactory
+  formatFactory?: FormatFactory,
+  yLeftScale?: YScaleType,
+  yRightScale?: YScaleType
 ): GroupsConfiguration {
   const series = groupAxesByType(layers);
 
@@ -118,6 +127,7 @@ export function getAxesConfiguration(
       position: shouldRotate ? 'bottom' : 'left',
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      scale: yLeftScale,
     });
   }
 
@@ -127,6 +137,7 @@ export function getAxesConfiguration(
       position: shouldRotate ? 'top' : 'right',
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      scale: yRightScale,
     });
   }
 
