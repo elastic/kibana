@@ -107,28 +107,18 @@ function getExpressionForLayer(
       }
     });
 
-    function makeid(length = 10) {
-      let result = '';
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      const charactersLength = characters.length;
-      for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      }
-      return result;
-    }
-
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
-    const esAggsToOriginalColumnIdMap: Record<string, OriginalColumn> = {};
+    const esAggsIdToOriginalColumn: Record<string, OriginalColumn> = {};
     const expressionBuilderToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
-        const esAggsId = makeid();
+        const aggId = String(index);
 
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${esAggsId}-metric` : esAggsId,
+          wrapInFilter ? `${aggId}-metric` : aggId,
           indexPattern,
           layer,
           uiSettings,
@@ -161,7 +151,11 @@ function getExpressionForLayer(
         });
         aggs.push(expressionBuilder);
 
-        esAggsToOriginalColumnIdMap[esAggsId] = {
+        const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+          ? `col-${index + (col.isBucketed ? 0 : 1)}-${aggId}`
+          : `col-${index}-${aggId}`;
+
+        esAggsIdToOriginalColumn[esAggsId] = {
           ...col,
           id: colId,
         };
@@ -214,8 +208,7 @@ function getExpressionForLayer(
         functions: [firstFnBuilder],
       } = first;
 
-      const esAggsColumnId = makeid();
-
+      const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
       const aggPercentilesConfig: AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES> = {
         id: esAggsColumnId,
         enabled: firstFnBuilder.getArgument('enabled')?.[0],
@@ -253,14 +246,64 @@ function getExpressionForLayer(
         if (currentEsAggsId === undefined) {
           throw new Error('Could not find current column ID for percentile agg expression builder');
         }
-        // esAggs appends the percent number to the agg id. We're anticipating that here.
-        const newEsAggsId = `${esAggsColumnId}.${
+        // esAggs appends the percent number to the agg id to make distinct column IDs in the resulting datatable.
+        // We're anticipating that here by adding the `.<percentile>`.
+        // The agg index ('?') will be assigned when we update all the indices in the ID map based on the agg order.
+        const newEsAggsId = `col-?-${esAggsColumnId}.${
           expressionBuilder.functions[0].getArgument('percentile')![0]
         }`;
 
-        esAggsToOriginalColumnIdMap[newEsAggsId] = esAggsToOriginalColumnIdMap[currentEsAggsId];
+        esAggsIdToOriginalColumn[newEsAggsId] = esAggsIdToOriginalColumn[currentEsAggsId];
 
-        delete esAggsToOriginalColumnIdMap[currentEsAggsId];
+        delete esAggsIdToOriginalColumn[currentEsAggsId];
+      });
+    });
+
+    /*
+      Update ID mappings. 
+
+      Given this esAggs-ID-to-original-column map after percentile optimization:
+      col-0-0:    column1
+      col-?-1.34: column2 (34th percentile)
+      col-2-2:    column3
+      col-?-1.98: column4 (98th percentile)
+
+      and this array of aggs
+      0: { id: 0 }
+      1: { id: 2 }
+      2: { id: 1 }
+
+      We need to update the anticipated agg indicies to match the aggs array:
+      col-0-0:    column1
+      col-1-2:    column3
+      col-2-1.34: column2 (34th percentile)
+      col-3-3.98: column4 (98th percentile)
+    */
+    const newEsAggsIdToOriginalColumn: Record<string, OriginalColumn> = {};
+    let counter = 0;
+    aggs.forEach((builder) => {
+      const extractEsAggId = (id: string) => id.split('.')[0].split('-')[2];
+      const updatePositionIndex = (currentId: string, newIndex: number) => {
+        const [fullId, percentile] = currentId.split('.');
+        const idParts = fullId.split('-');
+        idParts[1] = String(newIndex);
+        return idParts.join('-') + (percentile ? `.${percentile}` : '');
+      };
+
+      const esAggId = builder.functions[0].getArgument('id')?.[0];
+      const matchingEsAggColumnIds = Object.keys(esAggsIdToOriginalColumn).filter(
+        (id) => extractEsAggId(id) === esAggId
+      );
+
+      matchingEsAggColumnIds.forEach((currentId) => {
+        const currentColumn = esAggsIdToOriginalColumn[currentId];
+        const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS
+          ? counter + (currentColumn.isBucketed ? 0 : 1)
+          : counter;
+        const newId = updatePositionIndex(currentId, aggIndex);
+        newEsAggsIdToOriginalColumn[newId] = esAggsIdToOriginalColumn[currentId];
+
+        counter++;
       });
     });
 
@@ -380,7 +423,7 @@ function getExpressionForLayer(
           type: 'function',
           function: 'lens_restore_original_column_ids',
           arguments: {
-            idMap: [JSON.stringify(esAggsToOriginalColumnIdMap)],
+            idMap: [JSON.stringify(newEsAggsIdToOriginalColumn)],
           },
         },
         ...expressions,
