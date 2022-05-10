@@ -9,9 +9,9 @@ import {
   createEndpointMetadataServiceTestContextMock,
   EndpointMetadataServiceTestContextMock,
 } from './mocks';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+import { ElasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import {
   legacyMetadataSearchResponseMock,
   unitedMetadataSearchResponseMock,
@@ -22,8 +22,8 @@ import {
   buildUnitedIndexQuery,
 } from '../../routes/metadata/query_builders';
 import { HostMetadata } from '../../../../common/endpoint/types';
-import { Agent, PackagePolicy } from '../../../../../fleet/common';
-import { AgentPolicyServiceInterface } from '../../../../../fleet/server/services';
+import { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server/services';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
 describe('EndpointMetadataService', () => {

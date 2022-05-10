@@ -19,8 +19,21 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
-} from '../../../../../src/core/server';
-import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
+} from '@kbn/core/server';
+import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
+import {
+  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
+  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
+} from '@kbn/security-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  IEvent,
+  IEventLogClient,
+  IEventLogger,
+  SAVED_OBJECT_REL_PRIMARY,
+} from '@kbn/event-log-plugin/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
 import {
   Rule,
   PartialRule,
@@ -41,12 +54,6 @@ import {
   RawAlertInstance as RawAlert,
 } from '../types';
 import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
-import {
-  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
-  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../../security/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
@@ -57,15 +64,8 @@ import {
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
-import {
-  IEvent,
-  IEventLogClient,
-  IEventLogger,
-  SAVED_OBJECT_REL_PRIMARY,
-} from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
-import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -133,6 +133,12 @@ export interface RuleAggregation {
       doc_count: number;
     }>;
   };
+  tags: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
 }
 
 export interface ConstructorOptions {
@@ -144,7 +150,7 @@ export interface ConstructorOptions {
   ruleTypeRegistry: RuleTypeRegistry;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  spaceId?: string;
+  spaceId: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
@@ -200,6 +206,7 @@ export interface AggregateResult {
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
   ruleSnoozedStatus?: { snoozed: number };
+  ruleTags?: string[];
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -281,7 +288,7 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
 export class RulesClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
-  private readonly spaceId?: string;
+  private readonly spaceId: string;
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -921,6 +928,9 @@ export class RulesClient {
         muted: {
           terms: { field: 'alert.attributes.muteAll' },
         },
+        tags: {
+          terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+        },
         snoozed: {
           date_range: {
             field: 'alert.attributes.snoozeEndTime',
@@ -989,6 +999,9 @@ export class RulesClient {
     ret.ruleSnoozedStatus = {
       snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
     };
+
+    const tagsBuckets = resp.aggregations.tags?.buckets || [];
+    ret.ruleTags = tagsBuckets.map((bucket) => bucket.key);
 
     return ret;
   }

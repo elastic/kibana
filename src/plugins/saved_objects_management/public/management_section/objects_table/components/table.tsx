@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart, IBasePath } from 'src/core/public';
+import { ApplicationStart, IBasePath } from '@kbn/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import {
   EuiSearchBar,
@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';

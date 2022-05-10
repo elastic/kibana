@@ -9,7 +9,7 @@ import { scaleLog } from 'd3-scale';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import type { CorrelationsParams } from '../../../../common/correlations/types';

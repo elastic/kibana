@@ -10,6 +10,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import { getDescriptor, TelemetryKinds } from './serializer';
 import { traverseNodes } from './ts_parser';
+import { compilerHost } from './compiler_host';
 
 export function loadFixtureProgram(fixtureName: string) {
   const fixturePath = path.resolve(
@@ -23,7 +24,7 @@ export function loadFixtureProgram(fixtureName: string) {
   if (!tsConfig) {
     throw new Error('Could not find a valid tsconfig.json.');
   }
-  const program = ts.createProgram([fixturePath], tsConfig as any);
+  const program = ts.createProgram([fixturePath], tsConfig as any, compilerHost);
   const checker = program.getTypeChecker();
   const sourceFile = program.getSourceFile(fixturePath);
   if (!sourceFile) {

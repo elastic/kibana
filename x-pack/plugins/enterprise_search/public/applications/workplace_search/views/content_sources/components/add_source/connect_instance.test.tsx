@@ -33,16 +33,16 @@ describe('ConnectInstance', () => {
   const setSourcePasswordValue = jest.fn();
   const setSourceSubdomainValue = jest.fn();
   const setSourceIndexPermissionsValue = jest.fn();
-  const getSourceConnectData = jest.fn((_, redirectOauth) => {
+  const getSourceConnectData = jest.fn((redirectOauth) => {
     redirectOauth();
   });
-  const createContentSource = jest.fn((_, redirectFormCreated) => {
+  const createContentSource = jest.fn((redirectFormCreated) => {
     redirectFormCreated();
   });
 
-  const credentialsSourceData = staticSourceData[13];
-  const oauthSourceData = staticSourceData[0];
-  const subdomainSourceData = staticSourceData[18];
+  const credentialsSourceData = staticSourceData[15]; // salesforce_sandbox
+  const oauthSourceData = staticSourceData[0]; // box
+  const subdomainSourceData = staticSourceData[21]; // zendesk
 
   const props = {
     ...credentialsSourceData,

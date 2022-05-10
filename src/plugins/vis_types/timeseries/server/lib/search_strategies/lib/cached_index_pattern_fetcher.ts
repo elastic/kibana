@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getIndexPatternKey, fetchIndexPattern } from '../../../../common/index_patterns_utils';
 
-import type { DataViewsService } from '../../../../../../data_views/common';
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../common/types';
 
 export const getCachedIndexPatternFetcher = (

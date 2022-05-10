@@ -9,7 +9,7 @@ jest.mock('../../../shared/layout', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 
-import { useEnterpriseSearchOverviewNav } from './';
+import { useEnterpriseSearchOverviewNav } from '.';
 
 describe('useEnterpriseSearchOverviewNav', () => {
   it('returns an array of top-level Enterprise Search nav items', () => {

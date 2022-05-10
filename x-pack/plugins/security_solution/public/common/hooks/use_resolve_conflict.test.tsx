@@ -21,7 +21,7 @@ jest.mock('react-router-dom', () => {
 });
 jest.mock('../lib/kibana');
 jest.mock('./use_selector');
-jest.mock('../../timelines/store/timeline/', () => ({
+jest.mock('../../timelines/store/timeline', () => ({
   timelineSelectors: {
     getTimelineByIdSelector: () => jest.fn(),
   },

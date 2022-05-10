@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { dataViewsServiceFactory } from './data_views_service_factory';
 import { registerRoutes } from './routes';
 import { dataViewSavedObjectType } from './saved_objects';

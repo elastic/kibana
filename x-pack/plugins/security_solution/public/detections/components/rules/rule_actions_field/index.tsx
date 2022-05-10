@@ -12,15 +12,15 @@ import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
-import { FieldHook, useFormContext } from '../../../../shared_imports';
 import {
   ActionForm,
   ActionType,
   loadActionTypes,
   ActionVariables,
-} from '../../../../../../triggers_actions_ui/public';
-import { RuleAction } from '../../../../../../alerting/common';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleAction } from '@kbn/alerting-plugin/common';
+import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
+import { FieldHook, useFormContext } from '../../../../shared_imports';
 import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 

@@ -10,7 +10,7 @@ import {
   basicValidJobMessages,
   basicInvalidJobMessages,
   nonBasicIssuesMessages,
-} from '../../../../../../x-pack/plugins/ml/common/constants/messages.test.mock';
+} from '@kbn/ml-plugin/common/constants/messages.test.mock';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';

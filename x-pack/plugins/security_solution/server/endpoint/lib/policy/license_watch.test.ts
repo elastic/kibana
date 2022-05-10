@@ -10,15 +10,15 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsServiceMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { LicenseService } from '../../../../common/license';
-import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import { PolicyWatcher } from './license_watch';
-import { ILicense } from '../../../../../licensing/common/types';
-import { licenseMock } from '../../../../../licensing/common/licensing.mock';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
-import { PackagePolicy } from '../../../../../fleet/common';
-import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import { PolicyConfig } from '../../../../common/endpoint/types';
 

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ContactCardEmbeddable } from 'src/plugins/embeddable/public/lib/test_samples';
+import { ContactCardEmbeddable } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
 import { ViewSavedSearchAction } from './view_saved_search_action';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { createStartContractMock } from '../__mocks__/start_contract';
 import { savedSearchMock } from '../__mocks__/saved_search';
 import { discoverServiceMock } from '../__mocks__/services';
-import { DataView } from 'src/plugins/data_views/public';
-import { createFilterManagerMock } from 'src/plugins/data/public/query/filter_manager/filter_manager.mock';
-import { ViewMode } from 'src/plugins/embeddable/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const applicationMock = createStartContractMock();
 const savedSearch = savedSearchMock;

@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import { createRuleRoute } from './create_rule';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -16,12 +16,12 @@ import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib';
 import { AsApiContract } from './lib';
 import { SanitizedRule } from '../types';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

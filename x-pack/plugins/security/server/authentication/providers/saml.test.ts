@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,

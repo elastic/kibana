@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
-import type { ManagementSection } from 'src/plugins/management/public';
-import { managementPluginMock } from 'src/plugins/management/public/mocks';
+import type { CoreSetup } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ManagementSection } from '@kbn/management-plugin/public';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';

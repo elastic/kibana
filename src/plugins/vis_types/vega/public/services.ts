@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, NotificationsStart, IUiSettingsClient, DocLinksStart } from 'src/core/public';
+import { CoreStart, NotificationsStart, IUiSettingsClient, DocLinksStart } from '@kbn/core/public';
 
-import { DataPublicPluginStart } from '../../../data/public';
-import { DataViewsPublicPluginStart } from '../../../data_views/public';
-import { createGetterSetter } from '../../../kibana_utils/public';
-import type { MapsEmsPluginPublicStart } from '../../../maps_ems/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 

@@ -14,7 +14,7 @@ import { TestProviders } from '../../common/mock';
 import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { Users } from './users';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { mockCasesContext } from '../../../../cases/public/mocks/mock_cases_context';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { LandingPageComponent } from '../../common/components/landing_page';
 
 jest.mock('../../common/containers/sourcerer');

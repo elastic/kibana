@@ -11,10 +11,10 @@ import type {
   AsDuration,
   AsPercent,
   TimeUnitChar,
-} from '../../observability/common';
-import type { ActionGroup } from '../../alerting/common';
+} from '@kbn/observability-plugin/common';
+import type { ActionGroup } from '@kbn/alerting-plugin/common';
+import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
-import { formatDurationFromTimeUnitChar } from '../../observability/common';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
 

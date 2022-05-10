@@ -9,11 +9,11 @@ import { chunk } from 'lodash';
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type {
   LatencyCorrelation,
   LatencyCorrelationsResponse,
-} from '../../../../plugins/apm/common/correlations/latency_correlations/types';
+} from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.

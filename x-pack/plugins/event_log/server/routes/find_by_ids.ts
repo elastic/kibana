@@ -11,7 +11,7 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import type { EventLogRouter, EventLogRequestHandlerContext } from '../types';
 
 import { BASE_EVENT_LOG_API_PATH } from '../../common';
@@ -44,7 +44,7 @@ export const findByIdsRoute = (router: EventLogRouter, systemLogger: Logger) => 
       if (!context.eventLog) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for eventLog' });
       }
-      const eventLogClient = context.eventLog.getEventLogClient();
+      const eventLogClient = (await context.eventLog).getEventLogClient();
       const {
         params: { type },
         body: { ids, legacyIds },

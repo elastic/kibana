@@ -7,9 +7,9 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { TRANSFORM_RULE_TYPE } from '../../../common';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
-import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import { getResultTestConfig } from '../../../common/utils/alerts';
 
 export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleParams> {

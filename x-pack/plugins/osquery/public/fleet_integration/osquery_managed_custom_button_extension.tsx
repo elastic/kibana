@@ -8,7 +8,7 @@
 import { EuiLoadingContent } from '@elastic/eui';
 import React from 'react';
 
-import { PackageCustomExtensionComponentProps } from '../../../fleet/public';
+import { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
 import { MissingPrivileges } from '../routes/components/missing_privileges';

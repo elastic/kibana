@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { AnomalyResultType } from '../../common/types/anomalies';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';

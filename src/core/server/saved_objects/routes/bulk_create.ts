@@ -51,7 +51,8 @@ export const registerBulkCreateRoute = (router: IRouter, { coreUsageData }: Rout
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkCreate({ request: req }).catch(() => {});
 
-      const result = await context.core.savedObjects.client.bulkCreate(req.body, { overwrite });
+      const { savedObjects } = await context.core;
+      const result = await savedObjects.client.bulkCreate(req.body, { overwrite });
       return res.ok({ body: result });
     })
   );

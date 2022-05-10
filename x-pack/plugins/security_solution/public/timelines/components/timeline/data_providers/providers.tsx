@@ -11,7 +11,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
@@ -357,14 +356,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         </Draggable>
       </div>
     );
-  },
-  (prevProps, nextProps) =>
-    prevProps.groupIndex === nextProps.groupIndex &&
-    prevProps.index === nextProps.index &&
-    prevProps.timelineId === nextProps.timelineId &&
-    deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    deepEqual(prevProps.group, nextProps.group) &&
-    deepEqual(prevProps.dataProvider, nextProps.dataProvider)
+  }
 );
 
 DataProvidersGroupItem.displayName = 'DataProvidersGroupItem';

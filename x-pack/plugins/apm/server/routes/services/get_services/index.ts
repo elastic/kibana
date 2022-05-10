@@ -14,6 +14,7 @@ import { ServiceGroup } from '../../../../common/service_groups';
 export async function getServices({
   environment,
   kuery,
+  probability,
   setup,
   searchAggregatedTransactions,
   logger,
@@ -23,6 +24,7 @@ export async function getServices({
 }: {
   environment: string;
   kuery: string;
+  probability: number;
   setup: Setup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -34,6 +36,7 @@ export async function getServices({
     const items = await getServicesItems({
       environment,
       kuery,
+      probability,
       setup,
       searchAggregatedTransactions,
       logger,

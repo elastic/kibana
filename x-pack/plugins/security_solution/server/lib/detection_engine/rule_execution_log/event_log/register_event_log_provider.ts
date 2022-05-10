@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEventLogService } from '../../../../../../event_log/server';
+import { IEventLogService } from '@kbn/event-log-plugin/server';
 import { RuleExecutionLogAction, RULE_EXECUTION_LOG_PROVIDER } from './constants';
 
 export const registerEventLogProvider = (eventLogService: IEventLogService) => {

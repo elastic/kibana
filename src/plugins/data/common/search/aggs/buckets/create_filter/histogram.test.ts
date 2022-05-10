@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../../field_formats/common';
+import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';

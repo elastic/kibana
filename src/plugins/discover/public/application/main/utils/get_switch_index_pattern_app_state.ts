@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get_sort';
 
 /**

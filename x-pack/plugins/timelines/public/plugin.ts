@@ -8,8 +8,8 @@
 import { Store, Unsubscribe } from 'redux';
 import { throttle } from 'lodash';
 
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { CoreSetup, Plugin, CoreStart } from '../../../../src/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
 import {
   getLastUpdatedLazy,

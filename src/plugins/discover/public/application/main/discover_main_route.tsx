@@ -7,12 +7,14 @@
  */
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { SavedObject } from 'src/plugins/data/public';
-import { ISearchSource } from 'src/plugins/data/public';
+import { SavedObject } from '@kbn/data-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import {
   DataViewAttributes,
   DataViewSavedObjectConflictError,
-} from '../../../../data_views/public';
+} from '@kbn/data-views-plugin/public';
+import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   SavedSearch,
   getSavedSearch,
@@ -22,12 +24,10 @@ import { getState } from './services/discover_state';
 import { loadIndexPattern, resolveIndexPattern } from './utils/resolve_index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
-import { redirectWhenMissing } from '../../../../kibana_utils/public';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
-import { useExecutionContext } from '../../../../kibana_react/public';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 

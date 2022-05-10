@@ -10,7 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
 
-import { throwErrors } from '../../../../cases/common';
+import { throwErrors } from '@kbn/cases-plugin/common';
 import {
   TimelineResponse,
   TimelineResponseType,

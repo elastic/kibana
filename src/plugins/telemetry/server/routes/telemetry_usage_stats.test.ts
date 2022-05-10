@@ -7,10 +7,10 @@
  */
 
 import { registerTelemetryUsageStatsRoutes } from './telemetry_usage_stats';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
-import type { RequestHandlerContext, IRouter } from 'src/core/server';
-import { securityMock } from '../../../../../x-pack/plugins/security/server/mocks';
-import { telemetryCollectionManagerPluginMock } from '../../../telemetry_collection_manager/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { RequestHandlerContext, IRouter } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 
 async function runRequest(
   mockRouter: IRouter<RequestHandlerContext>,

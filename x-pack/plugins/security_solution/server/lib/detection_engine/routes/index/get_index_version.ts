@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { readIndex } from '@kbn/securitysolution-es-utils';
-import { ElasticsearchClient } from '../../../../../../../../src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export const getIndexVersion = async (
   esClient: ElasticsearchClient,

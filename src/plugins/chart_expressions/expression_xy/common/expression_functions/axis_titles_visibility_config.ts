@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { AXIS_TITLES_VISIBILITY_CONFIG } from '../constants';
 import { AxesSettingsConfig, AxisTitlesVisibilityConfigResult } from '../types';
 

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { RuleType } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteResponseRes = (results: Array<AsApiContract<RuleType>>): RuleType[] => {
   return results.map((item) => rewriteBodyReq(item));

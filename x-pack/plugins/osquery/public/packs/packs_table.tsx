@@ -104,6 +104,7 @@ const PacksTableComponent = () => {
       item.attributes.updated_by !== item.attributes.created_by
         ? ` @ ${item.attributes.updated_by}`
         : '';
+
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
         <UpdatedBy>{`${moment(updatedAt).fromNow()}${updatedBy}`}</UpdatedBy>

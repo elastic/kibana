@@ -8,7 +8,7 @@
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
-import { httpServiceMock, httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
+import { httpServiceMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';

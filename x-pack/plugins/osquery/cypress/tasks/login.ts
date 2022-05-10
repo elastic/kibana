@@ -64,6 +64,7 @@ export const getUrlWithRoute = (role: ROLES, route: string) => {
     port: kibana.port,
   } as UrlObject)}${route.startsWith('/') ? '' : '/'}${route}`;
   cy.log(`origin: ${theUrl}`);
+
   return theUrl;
 };
 
@@ -92,6 +93,7 @@ export const constructUrlWithUser = (user: User, route: string) => {
   const builtUrl = new URL(strUrl);
 
   cy.log(`origin: ${builtUrl.href}`);
+
   return builtUrl.href;
 };
 

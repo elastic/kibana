@@ -8,23 +8,23 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 
-import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
-import { HttpSetup } from 'src/core/public';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { HttpSetup } from '@kbn/core/public';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 
 /* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
-import '../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { uiMetricService, apiService } from '../../../services';
-import { Props } from '../';
+import { Props } from '..';
 import { initHttpRequests } from './http_requests.helpers';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
 stubWebWorker();
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,

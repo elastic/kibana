@@ -5,14 +5,17 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import {
   ALERT_STATUS_ROUTE,
   ALERT_UUID_PROPERTY,
   PREVIEW_ALERTS_INDEX,
 } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
-import type { AlertsClient, RuleRegistryPluginStartContract } from '../../../rule_registry/server';
 
 export const registerAlertStatusRoute = (
   router: IRouter,

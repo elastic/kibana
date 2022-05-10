@@ -7,13 +7,13 @@
 
 import { ActionExecutor, TaskRunnerFactory } from '../lib';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
-import { registerBuiltInActionTypes } from './index';
-import { Logger } from '../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { registerBuiltInActionTypes } from '.';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { licensingMock } from '../../../licensing/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
 const ACTION_TYPE_IDS = [

@@ -8,7 +8,7 @@
 import {
   PluginServiceProviders,
   PluginServiceProvider,
-} from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 
 import { CanvasPluginServices } from '..';
 import { pluginServiceProviders as stubProviders } from '../stubs';

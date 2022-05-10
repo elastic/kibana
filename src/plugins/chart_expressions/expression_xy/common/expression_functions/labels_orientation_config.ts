@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LABELS_ORIENTATION_CONFIG } from '../constants';
 import { LabelsOrientationConfig, LabelsOrientationConfigResult } from '../types';
 

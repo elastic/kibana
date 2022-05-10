@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { mockTimelineData } from '../../../../../../common/mock';
 import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
@@ -33,24 +32,14 @@ describe('SuricataDetails', () => {
 
   describe('rendering', () => {
     test('it renders the default SuricataDetails', () => {
-      const wrapper = shallow(
-        <SuricataDetails
-          data={mockTimelineData[2].ecs}
-          browserFields={mockBrowserFields}
-          timelineId="test"
-        />
-      );
+      const wrapper = shallow(<SuricataDetails data={mockTimelineData[2].ecs} timelineId="test" />);
       expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns text if the data does contain suricata data', () => {
       const wrapper = mount(
         <TestProviders>
-          <SuricataDetails
-            data={mockTimelineData[2].ecs}
-            browserFields={mockBrowserFields}
-            timelineId="test"
-          />
+          <SuricataDetails data={mockTimelineData[2].ecs} timelineId="test" />
         </TestProviders>
       );
       const removeEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
@@ -63,13 +52,7 @@ describe('SuricataDetails', () => {
     });
 
     test('it returns null for text if the data contains no suricata data', () => {
-      const wrapper = shallow(
-        <SuricataDetails
-          data={mockTimelineData[0].ecs}
-          browserFields={mockBrowserFields}
-          timelineId="test"
-        />
-      );
+      const wrapper = shallow(<SuricataDetails data={mockTimelineData[0].ecs} timelineId="test" />);
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
   });

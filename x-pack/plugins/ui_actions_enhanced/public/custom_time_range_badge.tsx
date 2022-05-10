@@ -8,9 +8,9 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { PrettyDuration } from '@elastic/eui';
-import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
-import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
-import { TimeRange } from '../../../../src/plugins/data/public';
+import { IEmbeddable, Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { OpenModal, CommonlyUsedRange } from './types';
 

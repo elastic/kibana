@@ -7,7 +7,8 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   Comparator,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -39,7 +40,6 @@ import {
   FIRED_ACTIONS_ID,
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
-import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),

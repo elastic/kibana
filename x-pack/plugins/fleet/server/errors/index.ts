@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import type { ElasticsearchErrorDetails } from 'src/core/server';
+import type { ElasticsearchErrorDetails } from '@kbn/core/server';
 
 import { isESClientError } from './utils';
 

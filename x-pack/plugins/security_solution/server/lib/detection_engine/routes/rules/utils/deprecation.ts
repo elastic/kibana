@@ -6,7 +6,7 @@
  */
 
 import { getDocLinks } from '@kbn/doc-links';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../common/constants';
 
 /**

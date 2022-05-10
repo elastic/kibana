@@ -7,7 +7,7 @@
 
 import { isObjectLike, isEmpty } from 'lodash';
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 

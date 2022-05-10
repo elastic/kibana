@@ -13,9 +13,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';

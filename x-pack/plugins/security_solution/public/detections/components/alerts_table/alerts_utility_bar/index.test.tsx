@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import { AlertsUtilityBar, AlertsUtilityBarProps } from './index';
+import { AlertsUtilityBar, AlertsUtilityBarProps } from '.';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 jest.useFakeTimers();

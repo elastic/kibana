@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Embeddable, EmbeddableInput, IContainer } from '../../';
+import { Embeddable, EmbeddableInput, IContainer } from '../..';
 
 export const HELLO_WORLD_EMBEDDABLE = 'HELLO_WORLD_EMBEDDABLE';
 

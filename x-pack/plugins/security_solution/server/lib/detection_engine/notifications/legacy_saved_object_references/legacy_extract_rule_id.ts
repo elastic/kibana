@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
+import { Logger, SavedObjectReference } from '@kbn/core/server';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleReference } from '../../rule_actions/legacy_utils';

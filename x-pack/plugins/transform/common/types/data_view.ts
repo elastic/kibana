@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataView } from '../../../../../src/plugins/data_views/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { isPopulatedObject } from '../shared_imports';
 

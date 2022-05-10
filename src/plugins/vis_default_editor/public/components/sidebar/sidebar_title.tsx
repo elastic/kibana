@@ -24,10 +24,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis } from 'src/plugins/visualizations/public';
-import { SavedSearch, getSavedSearchUrl } from '../../../../discover/public';
-import { ApplicationStart } from '../../../../../core/public';
-import { useKibana } from '../../../../kibana_react/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { SavedSearch, getSavedSearchUrl } from '@kbn/discover-plugin/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface LinkedSearchProps {
   savedSearch: SavedSearch;

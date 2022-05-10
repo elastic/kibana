@@ -7,16 +7,16 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 import {
   IExecutionLog,
   ExecutionLogSortFields,
   IExecutionLogWithErrorsResult,
-} from '../../../../../alerting/common';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+} from '@kbn/alerting-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 const getRenamedLog = (data: IExecutionLog) => {
   const {

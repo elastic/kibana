@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataViewsContract, fieldList } from 'src/plugins/data_views/common';
-import { createStubDataView } from 'src/plugins/data_views/common/stubs';
+import { DataViewsContract, fieldList } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { defaultLogViewsStaticConfig } from './defaults';
 import { ResolvedLogView, resolveLogView } from './resolved_log_view';
 import { LogViewAttributes } from './types';

@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { ActionsConfig } from '../config';
 import { ensureScheduled } from './ensure_scheduled';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('ensureScheduled', () => {
   const logger = loggingSystemMock.create().get();

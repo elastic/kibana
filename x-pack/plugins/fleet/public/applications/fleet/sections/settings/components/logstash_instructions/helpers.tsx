@@ -6,7 +6,7 @@
  */
 
 export const LOGSTASH_CONFIG_PIPELINES = `- pipeline.id: elastic-agent-pipeline
-  path.config: "/etc/path/to/elastic-agent-pipeline.config"
+  path.config: "/etc/path/to/elastic-agent-pipeline.conf"
 `;
 
 export function getLogstashPipeline(apiKey?: string) {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { deleteActions } from './index';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { deleteActions } from '.';
 
 const http = httpServiceMock.createStartContract();
 

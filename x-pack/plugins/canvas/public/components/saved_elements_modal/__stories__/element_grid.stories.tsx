@@ -8,7 +8,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { waitFor } from '../../../../../../../src/plugins/presentation_util/public/__stories__';
+import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { ElementGrid } from '../element_grid';
 import { getTestCustomElements } from './fixtures/test_elements';
 

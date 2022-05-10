@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { CASE_STATUS_URL } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CaseStatuses } from '../../../../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCaseReq } from '../../../../../common/lib/mock';
 import {
   createCase,
@@ -27,7 +28,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../../common/lib/authentication/users';
-import { CASE_STATUS_URL } from '../../../../../../../plugins/cases/common/constants';
 import { assertWarningHeader } from '../../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
@@ -113,8 +113,17 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('returns a bad request on malformed parameter', async () => {
-        await getAllCasesStatuses({ supertest, query: { from: '<' }, expectedHttpCode: 400 });
+      it('escapes correctly', async () => {
+        const statuses = await getAllCasesStatuses({
+          supertest,
+          query: { from: '2022-03-15T10:16:56.252Z', to: '2022-03-20T10:16:56.252' },
+        });
+
+        expect(statuses).to.eql({
+          count_open_cases: 2,
+          count_closed_cases: 0,
+          count_in_progress_cases: 0,
+        });
       });
     });
 

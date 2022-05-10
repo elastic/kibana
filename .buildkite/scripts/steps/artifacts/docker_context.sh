@@ -4,17 +4,11 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
-if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
-  VERSION="$(jq -r '.version' package.json)"
-  RELEASE_ARG="--release"
-else
-  VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
-  RELEASE_ARG=""
-fi
+source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Create contexts"
 mkdir -p target
-node scripts/build "$RELEASE_ARG" --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact
+node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact $(echo "$BUILD_ARGS")
 
 echo "--- Setup default context"
 DOCKER_BUILD_FOLDER=$(mktemp -d)
@@ -22,7 +16,7 @@ DOCKER_BUILD_FOLDER=$(mktemp -d)
 tar -xf target/kibana-[0-9]*-docker-build-context.tar.gz -C "$DOCKER_BUILD_FOLDER"
 cd $DOCKER_BUILD_FOLDER
 
-buildkite-agent artifact download "kibana-$VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+buildkite-agent artifact download "kibana-$FULL_VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build context"
 docker build .

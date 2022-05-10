@@ -8,7 +8,7 @@
 import { getOr, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
-import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { APP_NAME, APP_UI_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
@@ -27,7 +27,7 @@ import {
   UsersRouteSpyState,
 } from '../../../utils/route/types';
 import { getAppLandingUrl } from '../../link_to/redirect_to_landing';
-import { timelineActions } from '../../../../../public/timelines/store/timeline';
+import { timelineActions } from '../../../../timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { Query, SavedQuery } from '../../../../../src/plugins/data/public';
+import { Query, SavedQuery } from '@kbn/data-plugin/public';
 import { Document } from '../persistence';
 
 import { TableInspectorAdapter } from '../editor_frame_service/types';

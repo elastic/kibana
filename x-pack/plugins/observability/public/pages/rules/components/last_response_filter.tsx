@@ -16,14 +16,14 @@ import {
   EuiFilterSelectItem,
   EuiHealth,
 } from '@elastic/eui';
-import { RuleExecutionStatuses, RuleExecutionStatusValues } from '../../../../../alerting/common';
+import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { getHealthColor, rulesStatusesTranslationsMapping } from '../config';
-import { StatusFilterProps } from '../types';
+import { LastResponseFilterProps } from '../types';
 
-export const LastResponseFilter: React.FunctionComponent<StatusFilterProps> = ({
+export const LastResponseFilter: React.FunctionComponent<LastResponseFilterProps> = ({
   selectedStatuses,
   onChange,
-}: StatusFilterProps) => {
+}: LastResponseFilterProps) => {
   const [selectedValues, setSelectedValues] = useState<string[]>(selectedStatuses);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

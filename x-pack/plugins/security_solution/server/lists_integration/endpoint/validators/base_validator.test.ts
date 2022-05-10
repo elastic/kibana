@@ -12,15 +12,15 @@ import {
 } from '../../../endpoint/mocks';
 import { BaseValidatorMock, createExceptionItemLikeOptionsMock } from './mocks';
 import { EndpointArtifactExceptionValidationError } from './errors';
-import { httpServerMock } from '../../../../../../../src/core/server/mocks';
-import { createFleetAuthzMock, PackagePolicy } from '../../../../../fleet/common';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { createFleetAuthzMock, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { ExceptionItemLikeOptions } from '../types';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts';
-import { securityMock } from '../../../../../security/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  PersistableState,
-  PersistableStateDefinition,
-} from '../../../../src/plugins/kibana_utils/common';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 
 import { SerializedAction, SerializedEvent, DynamicActionsState } from '../common/types';
 

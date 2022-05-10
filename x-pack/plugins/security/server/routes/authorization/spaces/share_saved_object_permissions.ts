@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
 export function defineShareSavedObjectPermissionRoutes({ router, authz }: RouteDefinitionParams) {

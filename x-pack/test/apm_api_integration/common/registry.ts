@@ -8,8 +8,8 @@
 import Path from 'path';
 import { castArray, groupBy } from 'lodash';
 import callsites from 'callsites';
-import { maybe } from '../../../plugins/apm/common/utils/maybe';
-import { joinByKey } from '../../../plugins/apm/common/utils/join_by_key';
+import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
+import { joinByKey } from '@kbn/apm-plugin/common/utils/join_by_key';
 import { APMFtrConfigName } from '../configs';
 import { FtrProviderContext } from './ftr_provider_context';
 

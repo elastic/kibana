@@ -11,8 +11,10 @@ import { writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import gulp from 'gulp';
 import del from 'del';
 import fancyLog from 'fancy-log';
@@ -48,6 +50,11 @@ async function reportTask() {
 }
 
 async function copySourceAndBabelify() {
+  // get bazel packages inside x-pack
+  const xpackBazelPackages = (await discoverBazelPackages())
+    .filter((pkg) => pkg.normalizedRepoRelativeDir.startsWith('x-pack/'))
+    .map((pkg) => `${pkg.normalizedRepoRelativeDir.replace('x-pack/', '')}/**`);
+
   // copy source files and apply some babel transformations in the process
   await asyncPipeline(
     vfs.src(
@@ -86,6 +93,7 @@ async function copySourceAndBabelify() {
           'plugins/apm/ftr_e2e/**',
           'plugins/apm/scripts/**',
           'plugins/lists/server/scripts/**',
+          ...xpackBazelPackages,
         ],
         allowEmpty: true,
       }

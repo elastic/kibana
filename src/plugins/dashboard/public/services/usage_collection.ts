@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { UsageCollectionSetup } from '../../../usage_collection/public';
+export type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getStats, VegaUsage } from './get_usage_collector';
-import type { UsageCollectionSetup } from '../../../../usage_collection/server';
 import type { ConfigObservable, VisTypeVegaPluginSetupDependencies } from '../types';
 
 export function registerVegaUsageCollector(

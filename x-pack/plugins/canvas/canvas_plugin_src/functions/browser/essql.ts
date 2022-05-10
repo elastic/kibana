@@ -8,7 +8,7 @@
 import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { searchService } from '../../../public/services';
 import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';

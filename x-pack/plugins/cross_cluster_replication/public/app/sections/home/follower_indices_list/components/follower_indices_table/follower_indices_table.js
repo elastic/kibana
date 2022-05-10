@@ -23,7 +23,7 @@ import { FollowerIndexActionsProvider } from '../../../../../components';
 import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
-import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 const actionI18nTexts = {
   pause: i18n.translate(

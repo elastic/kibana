@@ -6,7 +6,9 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { RuleExecutorOptions, Alert } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -20,11 +22,9 @@ import {
   AlertLicense,
   AlertLicenseState,
 } from '../../common/types/alerts';
-import { RuleExecutorOptions, Alert } from '../../../alerting/server';
 import { RULE_LICENSE_EXPIRATION, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedRule } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 

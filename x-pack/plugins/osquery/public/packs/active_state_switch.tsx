@@ -11,7 +11,7 @@ import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { PackagePolicy } from '../../../fleet/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from '../agent_policies/use_agent_policies';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';

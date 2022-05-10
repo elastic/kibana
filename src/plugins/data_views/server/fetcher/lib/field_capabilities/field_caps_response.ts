@@ -10,7 +10,7 @@ import { uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
-import { FieldDescriptor } from '../../../fetcher';
+import { FieldDescriptor } from '../..';
 
 /**
  *  Read the response from the _field_caps API to determine the type and

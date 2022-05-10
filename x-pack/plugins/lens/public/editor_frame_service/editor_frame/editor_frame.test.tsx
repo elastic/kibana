@@ -31,7 +31,7 @@ import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { EditorFrame, EditorFrameProps } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { fromExpression } from '@kbn/interpreter';
 import {
   createMockVisualization,
@@ -40,12 +40,12 @@ import {
   createExpressionRendererMock,
   mockStoreDeps,
 } from '../../mocks';
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { DragDrop } from '../../drag_drop';
-import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
-import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
-import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';

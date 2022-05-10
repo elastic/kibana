@@ -6,7 +6,7 @@
  */
 
 import { getDocValueAndSourceFields } from './get_docvalue_source_fields';
-import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from '@kbn/data-plugin/public';
 
 function createMockIndexPattern(fields: IndexPatternField[]): IndexPattern {
   const indexPattern = {

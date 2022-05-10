@@ -47,8 +47,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
               ...layout,
               // TODO: We do not do a runtime check for supported layout id types for now. But technically
               // we should.
-              id: layout?.id as PdfScreenshotOptions['layout']['id'],
-            },
+              id: layout?.id,
+            } as PdfScreenshotOptions['layout'],
           });
         }),
         tap(({ buffer }) => {

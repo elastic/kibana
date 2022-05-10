@@ -23,10 +23,10 @@ import {
   Vis,
   PersistedState,
   VisualizeEmbeddableContract,
-} from 'src/plugins/visualizations/public';
-import type { Schema } from 'src/plugins/visualizations/public';
-import { TimeRange } from 'src/plugins/data/public';
-import { SavedSearch } from 'src/plugins/discover/public';
+} from '@kbn/visualizations-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/public';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';

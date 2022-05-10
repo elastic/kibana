@@ -8,8 +8,8 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { Filter } from '@kbn/es-query';
-import type { Query, RefreshInterval, TimeRange } from 'src/plugins/data/common';
-import type { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
+import type { Query, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { SavedVisState } from './types';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

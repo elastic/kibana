@@ -7,7 +7,7 @@
  */
 
 import { shareReplay } from 'rxjs/operators';
-import type { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from '..';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import {
@@ -185,7 +185,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
-        ContextName extends keyof Context
+        ContextName extends keyof Omit<Context, 'resolve'>
       >(
         contextName: ContextName,
         provider: RequestHandlerContextProvider<Context, ContextName>

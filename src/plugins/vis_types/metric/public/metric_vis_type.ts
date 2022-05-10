@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ColorSchemas, ColorMode } from '@kbn/charts-plugin/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 import { MetricVisOptions } from './components';
-import { ColorSchemas, ColorMode } from '../../../charts/public';
-import { VisTypeDefinition } from '../../../visualizations/public';
-import { AggGroupNames } from '../../../data/public';
 import { toExpressionAst } from './to_ast';
 import { VisParams } from './types';
 

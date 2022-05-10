@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Sha256 } from '../../utils/';
+import { Sha256 } from '../../utils';
 export async function createLogKey(type: string, optionalIdentifier?: string) {
   const baseKey = `kibana.history.${type}`;
 

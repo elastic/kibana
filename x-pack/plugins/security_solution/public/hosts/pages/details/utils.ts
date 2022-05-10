@@ -7,7 +7,7 @@
 
 import { get, isEmpty } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { getHostDetailsUrl } from '../../../common/components/link_to/redirect_to_hosts';

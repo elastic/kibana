@@ -57,14 +57,25 @@ export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewE
 export const DETECTION_RESPONSE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.pageTitle',
   {
-    defaultMessage: 'Detection & Response - SOC',
+    defaultMessage: 'Detection & Response',
   }
 );
-
-export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
-  defaultMessage: 'Updating...',
-});
-
-export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
-  defaultMessage: 'Updated',
-});
+export const NO_PERMISSIONS_MSG = i18n.translate(
+  'xpack.securitySolution.detectionResponse.noPagePermissionsMessage',
+  {
+    defaultMessage:
+      'To view this page you must update privileges. For more information, contact your Kibana administrator.',
+  }
+);
+export const NO_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.noPermissionsTitle',
+  {
+    defaultMessage: 'Privileges required',
+  }
+);
+export const GO_TO_DOCUMENTATION = i18n.translate(
+  'xpack.securitySolution.detectionResponse.goToDocumentationButton',
+  {
+    defaultMessage: 'View documentation',
+  }
+);

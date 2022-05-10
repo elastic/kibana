@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useNetworkDns } from './index';
+import { useNetworkDns } from '.';
 import { NetworkType } from '../../store/model';
 
 describe('useNetworkDns', () => {

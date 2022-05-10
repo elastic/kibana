@@ -9,11 +9,8 @@ import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
-import {
-  buildExpression,
-  buildExpressionFunction,
-} from '../../../../../src/plugins/expressions/public';
-import type { Operation, DatasourcePublicAPI } from '../types';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
 import {
@@ -43,7 +40,7 @@ type GenerateExpressionAstFunction = (
   attributes: Attributes,
   operations: OperationColumnId[],
   layer: PieLayerState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) => Ast | null;
 
@@ -52,7 +49,7 @@ type GenerateExpressionAstArguments = (
   attributes: Attributes,
   operations: OperationColumnId[],
   layer: PieLayerState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) => Ast['chain'][number]['arguments'];
 
@@ -137,20 +134,22 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   layer,
   datasourceLayers,
   paletteService
-) => ({
-  labels: generateCommonLabelsAstArgs(state, attributes, layer),
-  buckets: operations.map((o) => o.columnId).map(prepareDimension),
-  metric: layer.metric ? [prepareDimension(layer.metric)] : [],
-  legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
-  legendPosition: [layer.legendPosition || Position.Right],
-  maxLegendLines: [layer.legendMaxLines ?? 1],
-  legendSize: layer.legendSize ? [layer.legendSize] : [],
-  nestedLegend: [!!layer.nestedLegend],
-  truncateLegend: [
-    layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
-  ],
-  palette: generatePaletteAstArguments(paletteService, state.palette),
-});
+) => {
+  return {
+    labels: generateCommonLabelsAstArgs(state, attributes, layer),
+    buckets: operations.map((o) => o.columnId).map(prepareDimension),
+    metric: layer.metric ? [prepareDimension(layer.metric)] : [],
+    legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
+    legendPosition: [layer.legendPosition || Position.Right],
+    maxLegendLines: [layer.legendMaxLines ?? 1],
+    legendSize: layer.legendSize ? [layer.legendSize] : [],
+    nestedLegend: [!!layer.nestedLegend],
+    truncateLegend: [
+      layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
+    ],
+    palette: generatePaletteAstArguments(paletteService, state.palette),
+  };
+};
 
 const generatePieVisAst: GenerateExpressionAstFunction = (...rest) => ({
   type: 'expression',
@@ -246,7 +245,7 @@ const generateExprAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
 
 function expressionHelper(
   state: PieVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Attributes = { isPreview: false }
 ): Ast | null {
@@ -270,7 +269,7 @@ function expressionHelper(
 
 export function toExpression(
   state: PieVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {}
 ) {
@@ -282,7 +281,7 @@ export function toExpression(
 
 export function toPreviewExpression(
   state: PieVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) {
   return expressionHelper(state, datasourceLayers, paletteService, { isPreview: true });

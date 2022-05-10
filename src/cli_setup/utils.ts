@@ -12,12 +12,12 @@ import { duration } from 'moment';
 import { merge } from 'lodash';
 import { kibanaPackageJson } from '@kbn/utils';
 
-import { Logger } from '../core/server';
-import { ClusterClient } from '../core/server/elasticsearch/client';
-import { configSchema } from '../core/server/elasticsearch';
-import { ElasticsearchService } from '../plugins/interactive_setup/server/elasticsearch_service';
-import { KibanaConfigWriter } from '../plugins/interactive_setup/server/kibana_config_writer';
-import type { EnrollmentToken } from '../plugins/interactive_setup/common';
+import { Logger } from '@kbn/core/server';
+import { ClusterClient } from '@kbn/core/server/elasticsearch/client';
+import { configSchema } from '@kbn/core/server/elasticsearch';
+import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
+import { KibanaConfigWriter } from '@kbn/interactive-setup-plugin/server/kibana_config_writer';
+import type { EnrollmentToken } from '@kbn/interactive-setup-plugin/common';
 
 const noop = () => {};
 const logger: Logger = {

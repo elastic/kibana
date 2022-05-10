@@ -12,7 +12,7 @@ import {
   fetchIndexPattern,
 } from './index_patterns_utils';
 import { Panel } from './types';
-import type { DataView, DataViewsService } from '../../../data_views/public';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/public';
 
 describe('isStringTypeIndexPattern', () => {
   test('should returns true on string-based index', () => {

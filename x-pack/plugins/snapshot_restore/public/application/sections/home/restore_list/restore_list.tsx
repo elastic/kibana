@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
 import {
   WithPrivileges,
@@ -34,8 +35,6 @@ import { useLoadRestores } from '../../../services/http';
 import { linkToSnapshots } from '../../../services/navigation';
 import { useAppContext, useServices } from '../../../app_context';
 import { RestoreTable } from './restore_table';
-
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;

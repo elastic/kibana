@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { SpacesService } from '../plugin';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';

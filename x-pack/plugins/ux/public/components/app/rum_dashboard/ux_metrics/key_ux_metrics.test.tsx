@@ -9,7 +9,7 @@ import React from 'react';
 import { render, Matcher } from '@testing-library/react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { KeyUXMetrics } from './key_ux_metrics';
-import { FETCH_STATUS } from '../../../../../../observability/public';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
 describe('KeyUXMetrics', () => {
   it('renders metrics with correct formats', () => {

@@ -12,8 +12,13 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   Render,
-} from '../../../../expressions/common';
-import { prepareLogTable, Dimension } from '../../../../visualizations/public';
+} from '@kbn/expressions-plugin/common';
+import {
+  prepareLogTable,
+  Dimension,
+  DEFAULT_LEGEND_SIZE,
+  LegendSize,
+} from '@kbn/visualizations-plugin/public';
 import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
 
@@ -23,6 +28,7 @@ export interface RenderValue {
   visType: ChartType;
   visConfig: VisParams;
   syncColors: boolean;
+  syncTooltips: boolean;
 }
 
 export type VisTypeXyExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -72,10 +78,19 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       }),
     },
     legendSize: {
-      types: ['number'],
+      types: ['string'],
+      default: DEFAULT_LEGEND_SIZE,
       help: i18n.translate('visTypeXy.function.args.args.legendSize.help', {
-        defaultMessage: 'Specifies the legend size in pixels.',
+        defaultMessage: 'Specifies the legend size.',
       }),
+      options: [
+        LegendSize.AUTO,
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+      ],
+      strict: true,
     },
     addLegend: {
       types: ['boolean'],
@@ -348,6 +363,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         visConfig,
         visData: context,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+        syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       },
     };
   },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';

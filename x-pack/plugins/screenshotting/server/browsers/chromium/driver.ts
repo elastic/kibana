@@ -9,14 +9,15 @@ import { truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { Headers, Logger } from 'src/core/server';
+import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
-} from '../../../../../../src/plugins/screenshot_mode/server';
+} from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
+import { getFooterTemplate, getHeaderTemplate } from './templates';
 
 export type Context = Record<string, unknown>;
 
@@ -153,6 +154,18 @@ export class HeadlessChromiumDriver {
    */
   isPageOpen() {
     return !this.page.isClosed();
+  }
+
+  async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+    return this.page.pdf({
+      format: 'a4',
+      preferCSSPageSize: true,
+      scale: 1,
+      landscape: false,
+      displayHeaderFooter: true,
+      headerTemplate: await getHeaderTemplate({ title }),
+      footerTemplate: await getFooterTemplate({ logo }),
+    });
   }
 
   /*
@@ -359,7 +372,7 @@ export class HeadlessChromiumDriver {
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
-    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    // IE: https://feeds.elastic.co/kibana/v8.0.0.json
     const derivedPort = (protocol: string | null, port: string | null, url: string) => {
       if (port) {
         return port;

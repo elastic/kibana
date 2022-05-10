@@ -260,7 +260,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               label={i18n.translate(
                 'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
                 {
-                  defaultMessage: 'Server SSL certificate authorities',
+                  defaultMessage: 'Server SSL certificate authorities (optional)',
                 }
               )}
               multiline={true}

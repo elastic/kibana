@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
@@ -14,7 +15,6 @@ import {
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
@@ -154,7 +154,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   }
 
   describe('index based', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');

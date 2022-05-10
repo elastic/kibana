@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import { JOB_STATE } from '../../../../../plugins/ml/common/constants/states';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');

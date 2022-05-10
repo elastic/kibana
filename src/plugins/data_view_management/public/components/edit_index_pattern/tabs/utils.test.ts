@@ -7,7 +7,7 @@
  */
 
 import { getPath } from './utils';
-import { DataViewField, DataView } from '../../../../../data_views/public';
+import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
 test('getPath() should encode "fieldName"', () => {
   expect(

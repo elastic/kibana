@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '../../index';
+import { apm, timerange } from '../..';
+import { ApmFields } from '../../lib/apm/apm_fields';
 import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';
-import { getCommonServices } from '../utils/get_common_services';
+import { getLogger } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
 
-const scenario: Scenario = async (runOptions: RunOptions) => {
-  const { logger } = getCommonServices(runOptions);
+const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
+  const logger = getLogger(runOptions);
 
   const { numServices = 3 } = runOptions.scenarioOpts || {};
 
@@ -31,7 +32,7 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
         apm.service(`opbeans-go-${index}`, 'production', 'go').instance('instance')
       );
       const instanceSpans = (instance: Instance) => {
-        const successfulTraceEvents = successfulTimestamps.spans((timestamp) =>
+        const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
           instance
             .transaction(transactionName)
             .timestamp(timestamp)
@@ -50,10 +51,9 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
                 .success()
                 .timestamp(timestamp)
             )
-            .serialize()
         );
 
-        const failedTraceEvents = failedTimestamps.spans((timestamp) =>
+        const failedTraceEvents = failedTimestamps.generator((timestamp) =>
           instance
             .transaction(transactionName)
             .timestamp(timestamp)
@@ -62,13 +62,12 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
             .errors(
               instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
             )
-            .serialize()
         );
 
         const metricsets = range
           .interval('30s')
           .rate(1)
-          .spans((timestamp) =>
+          .generator((timestamp) =>
             instance
               .appMetrics({
                 'system.memory.actual.free': 800,
@@ -77,15 +76,14 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
                 'system.process.cpu.total.norm.pct': 0.7,
               })
               .timestamp(timestamp)
-              .serialize()
           );
 
-        return successfulTraceEvents.concat(failedTraceEvents, metricsets);
+        return successfulTraceEvents.merge(failedTraceEvents, metricsets);
       };
 
       return instances
         .map((instance) => logger.perf('generating_apm_events', () => instanceSpans(instance)))
-        .reduce((p, c) => p.concat(c));
+        .reduce((p, c) => p.merge(c));
     },
   };
 };

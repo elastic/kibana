@@ -10,7 +10,7 @@ import { encode, RisonValue } from 'rison-node';
 import dateMath from '@kbn/datemath';
 import moment, { Moment } from 'moment';
 import numeral from '@elastic/numeral';
-import { url } from '../../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 const handlebars = createHandlebars();
 

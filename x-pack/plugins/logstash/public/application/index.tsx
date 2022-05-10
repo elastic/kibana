@@ -11,9 +11,9 @@ import { Router, Route, Switch, Redirect } from 'react-router-dom';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { CoreStart } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ClusterService,
   MonitoringService,

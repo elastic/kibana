@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogViewContext } from '../../../hooks/use_log_view';

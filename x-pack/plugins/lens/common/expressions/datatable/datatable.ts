@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExecutionContext } from '../../../../../../src/plugins/expressions/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { FormatFactory } from '../../types';
 import type { ColumnConfigArg } from './datatable_column';
 import type { DatatableExpressionFunction } from './types';

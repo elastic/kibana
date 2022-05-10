@@ -15,7 +15,7 @@ import {
   createMockFramePublicAPI,
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';

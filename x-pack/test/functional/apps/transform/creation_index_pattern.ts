@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -14,7 +14,7 @@ import {
   isPivotTransformTestData,
   LatestTransformTestData,
   PivotTransformTestData,
-} from './index';
+} from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');

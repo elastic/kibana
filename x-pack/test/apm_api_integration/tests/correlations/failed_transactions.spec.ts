@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import type { FailedTransactionsCorrelationsResponse } from '@kbn/apm-plugin/common/correlations/failed_transactions_correlations/types';
+import { EVENT_OUTCOME } from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
+import { EventOutcome } from '@kbn/apm-plugin/common/event_outcome';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import type { FailedTransactionsCorrelationsResponse } from '../../../../plugins/apm/common/correlations/failed_transactions_correlations/types';
-import { EVENT_OUTCOME } from '../../../../plugins/apm/common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../../plugins/apm/common/event_outcome';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a failed transactions correlation analysis.

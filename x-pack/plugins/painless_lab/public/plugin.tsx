@@ -7,15 +7,13 @@
 
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup } from 'src/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN } from '../common/constants';
 
 import { PluginDependencies } from './types';
 import { getLinks } from './links';
-import { ILicense } from '../../licensing/common/types';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
@@ -38,7 +36,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       icon: 'empty',
       path: '/app/dev_tools#/painless_lab',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     const devTool = devTools.register({

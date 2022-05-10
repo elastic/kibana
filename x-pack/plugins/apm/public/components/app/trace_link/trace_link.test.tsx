@@ -9,7 +9,7 @@ import { act, render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { TraceLink } from './';
+import { TraceLink } from '.';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,

@@ -12,7 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
-import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../../../common';
+import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../..';
 import { IBucketAggConfig } from '../buckets';
 
 /**

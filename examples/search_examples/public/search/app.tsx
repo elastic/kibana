@@ -33,22 +33,21 @@ import {
 } from '@elastic/eui';
 
 import { lastValueFrom } from 'rxjs';
-import { CoreStart } from '../../../../src/core/public';
-import { mountReactNode } from '../../../../src/core/public/utils';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-
-import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
+import { CoreStart } from '@kbn/core/public';
+import { mountReactNode } from '@kbn/core/public/utils';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../src/plugins/data/public';
-import { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
-import type { DataViewField, DataView } from '../../../../src/plugins/data_views/public';
+} from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IMyStrategyResponse } from '../../common/types';
-import { AbortError } from '../../../../src/plugins/kibana_utils/common';
+import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];

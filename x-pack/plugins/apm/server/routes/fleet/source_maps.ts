@@ -9,10 +9,10 @@ import {
   CoreStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { promisify } from 'util';
 import { unzip } from 'zlib';
-import { Artifact } from '../../../../fleet/server';
+import { Artifact } from '@kbn/fleet-plugin/server';
 import { SourceMap } from '../source_maps/route';
 import { APMPluginStartDependencies } from '../../types';
 import { getApmPackgePolicies } from './get_apm_package_policies';

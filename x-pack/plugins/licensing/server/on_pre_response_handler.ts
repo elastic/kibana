@@ -6,7 +6,7 @@
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
-import { OnPreResponseHandler } from '../../../../src/core/server';
+import { OnPreResponseHandler } from '@kbn/core/server';
 import { ILicense } from '../common/types';
 
 export function createOnPreResponseHandler(

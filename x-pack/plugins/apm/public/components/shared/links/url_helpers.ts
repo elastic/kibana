@@ -7,7 +7,7 @@
 
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? parse(search.slice(1), { sort: false }) : {};

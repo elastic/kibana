@@ -15,7 +15,8 @@ export const postCaseRoute = createCasesRoute({
   path: CASES_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const theCase = request.body as CasePostRequest;
 
       return response.ok({

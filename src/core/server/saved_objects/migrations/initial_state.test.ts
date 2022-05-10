@@ -8,15 +8,19 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
+import { DocLinksServiceSetup } from '../../doc_links';
+import { docLinksServiceMock } from '../../mocks';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
 
 describe('createInitialState', () => {
   let typeRegistry: SavedObjectTypeRegistry;
+  let docLinks: DocLinksServiceSetup;
 
   beforeEach(() => {
     typeRegistry = new SavedObjectTypeRegistry();
+    docLinks = docLinksServiceMock.createSetupContract();
   });
 
   const migrationsConfig = {
@@ -36,6 +40,7 @@ describe('createInitialState', () => {
         indexPrefix: '.kibana_task_manager',
         migrationsConfig,
         typeRegistry,
+        docLinks,
       })
     ).toEqual({
       batchSize: 1000,
@@ -108,6 +113,14 @@ describe('createInitialState', () => {
       },
       versionAlias: '.kibana_task_manager_8.1.0',
       versionIndex: '.kibana_task_manager_8.1.0_001',
+      migrationDocLinks: {
+        resolveMigrationFailures:
+          'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html',
+        repeatedTimeoutRequests:
+          'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail',
+        routingAllocationDisabled:
+          'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled',
+      },
     });
   });
 
@@ -135,6 +148,7 @@ describe('createInitialState', () => {
       indexPrefix: '.kibana_task_manager',
       migrationsConfig,
       typeRegistry,
+      docLinks,
     });
 
     expect(initialState.knownTypes).toEqual(['foo', 'bar']);
@@ -160,6 +174,7 @@ describe('createInitialState', () => {
       indexPrefix: '.kibana_task_manager',
       migrationsConfig,
       typeRegistry,
+      docLinks,
     });
 
     expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
@@ -178,6 +193,7 @@ describe('createInitialState', () => {
       indexPrefix: '.kibana_task_manager',
       migrationsConfig,
       typeRegistry,
+      docLinks,
     });
 
     expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
@@ -199,6 +215,7 @@ describe('createInitialState', () => {
           indexPrefix: '.kibana_task_manager',
           migrationsConfig,
           typeRegistry,
+          docLinks,
         }).preMigrationScript
       )
     ).toEqual(true);
@@ -216,6 +233,7 @@ describe('createInitialState', () => {
         indexPrefix: '.kibana_task_manager',
         migrationsConfig,
         typeRegistry,
+        docLinks,
       }).outdatedDocumentsQuery
     ).toMatchInlineSnapshot(`
         Object {

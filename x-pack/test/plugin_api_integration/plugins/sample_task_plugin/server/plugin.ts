@@ -6,17 +6,17 @@
  */
 
 import _ from 'lodash';
-import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
-import { initRoutes } from './init_routes';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
   EphemeralTask,
-} from '../../../../../plugins/task_manager/server';
-import { DEFAULT_MAX_WORKERS } from '../../../../../plugins/task_manager/server/config';
+} from '@kbn/task-manager-plugin/server';
+import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
+import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
 export interface SampleTaskManagerFixtureSetupDeps {

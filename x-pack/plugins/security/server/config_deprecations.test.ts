@@ -8,8 +8,8 @@
 import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
-import { configDeprecationsMock } from '../../../../src/core/server/mocks';
 import { securityConfigDeprecationProvider } from './config_deprecations';
 
 const deprecationContext = configDeprecationsMock.createContext();

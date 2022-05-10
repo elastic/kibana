@@ -11,8 +11,8 @@ import {
   ActionGroupIdsOf,
   AlertInstanceState as AlertState,
   AlertInstanceContext as AlertContext,
-} from '../../../plugins/alerting/common';
-import { RuleTypeState } from '../../../plugins/alerting/server';
+} from '@kbn/alerting-plugin/common';
+import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { services } from './services';
 
 export type GetService = GenericFtrProviderContext<typeof services, {}>['getService'];

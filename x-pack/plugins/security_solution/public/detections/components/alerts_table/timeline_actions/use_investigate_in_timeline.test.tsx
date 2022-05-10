@@ -11,7 +11,7 @@ import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
 import { Ecs } from '../../../../../common/ecs';
 import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 import * as actions from '../actions';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { SendAlertToTimelineActionProps } from '../types';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 

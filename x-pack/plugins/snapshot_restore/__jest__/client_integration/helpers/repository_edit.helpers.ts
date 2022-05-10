@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { RepositoryEdit } from '../../../public/application/sections/repository_edit';
 import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME } from './constant';

@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { DataPublicPluginStart, Filter } from '../../../../data/public';
+import { DataPublicPluginStart, Filter } from '@kbn/data-plugin/public';
 
 interface UseFilterManagerProps {
   filters?: Filter[];

@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import type { Datatable } from 'src/plugins/expressions';
+import type { Datatable } from '@kbn/expressions-plugin';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
 import type { TabbedResponseWriterOptions } from './types';

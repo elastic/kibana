@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import { getPluginSearchPaths } from '@kbn/config';
+import { getPluginSearchPaths } from '@kbn/plugin-discovery';
 import { KibanaPlatformPlugin, simpleKibanaPlatformPluginDiscovery } from '@kbn/plugin-discovery';
 
 import { REPO_ROOT } from '@kbn/utils';

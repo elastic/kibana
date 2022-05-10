@@ -6,11 +6,11 @@
  */
 
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LensStoreDeps } from '..';
 import { loadInitial as loadInitialAction } from '..';
 import { loadInitial } from './load_initial';
 import { readFromStorage } from '../../settings_storage';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
 
 const autoApplyDisabled = () => {
