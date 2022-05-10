@@ -336,7 +336,11 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   public getAllMigrations() {
     const uniqueVersions = new Set(
       Object.values(this.container.get().functions)
-        .map((fn) => Object.keys(fn.migrations))
+        .map((fn) => {
+          const migrations =
+            typeof fn.migrations === 'function' ? fn.migrations() : fn.migrations || {};
+          return Object.keys(migrations);
+        })
         .flat(1)
     );
 

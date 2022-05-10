@@ -32,7 +32,7 @@ export const customElementType = (deps: CanvasSavedObjectTypeMigrationsDeps): Sa
       '@created': { type: 'date' },
     },
   },
-  migrations: customElementMigrationsFactory(deps),
+  migrations: () => customElementMigrationsFactory(deps),
   management: {
     icon: 'canvasApp',
     defaultSearchField: 'name',

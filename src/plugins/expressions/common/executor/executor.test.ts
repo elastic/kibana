@@ -141,13 +141,15 @@ describe('Executor', () => {
       inject: (state: ExpressionAstFunction['arguments']) => {
         return injectFn(state);
       },
-      migrations: {
-        '7.10.0': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
-          return migrateFn(state, version);
-        }) as unknown as MigrateFunction,
-        '7.10.1': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
-          return migrateFn(state, version);
-        }) as unknown as MigrateFunction,
+      migrations: () => {
+        return {
+          '7.10.0': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+            return migrateFn(state, version);
+          }) as unknown as MigrateFunction,
+          '7.10.1': ((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+            return migrateFn(state, version);
+          }) as unknown as MigrateFunction,
+        };
       },
       fn: jest.fn(),
     };
