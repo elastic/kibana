@@ -29,8 +29,8 @@ for i in "${journeys[@]}"; do
 
     checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: WARMUP)" \
       node scripts/functional_tests \
-      --config x-pack/test/performance/config.playwright.ts \
-      --include "x-pack/test/performance/tests/playwright/${i}.ts" \
+      --config "x-pack/test/performance/journeys/${i}/${i}.config.ts" \
+      --include "x-pack/test/performance/journeys/${i}/${i}.ts" \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug \
       --bail
@@ -40,8 +40,8 @@ for i in "${journeys[@]}"; do
 
     checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: TEST)" \
       node scripts/functional_tests \
-      --config x-pack/test/performance/config.playwright.ts \
-      --include "x-pack/test/performance/tests/playwright/${i}.ts" \
+      --config "x-pack/test/performance/journeys/${i}/${i}.config.ts" \
+      --include "x-pack/test/performance/journeys/${i}/${i}.ts" \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug \
       --bail
