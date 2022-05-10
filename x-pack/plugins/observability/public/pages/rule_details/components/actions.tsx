@@ -28,13 +28,13 @@ export function Actions({ actions }: ActionsProps) {
     <EuiFlexGroup direction="column">
       {uniqueActions.map((actionTypeId) => (
         <>
-          <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexGroup alignItems="baseline">
             <EuiFlexItem grow={false}>
-              <EuiIcon size="l" type={mapActionTypeIcon[actionTypeId] ?? 'apps'} />
+              <EuiIcon size="m" type={mapActionTypeIcon[actionTypeId] ?? 'apps'} />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem style={{ margin: '0px' }}>
               {/* TODO: Get the user-typed connector name?  */}
-              <EuiText size="m">{actionTypeId}</EuiText>
+              <EuiText size="s">{actionTypeId}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
