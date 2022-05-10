@@ -24,17 +24,6 @@ describe('Discover tour', () => {
     );
   };
 
-  it('should prepare steps', () => {
-    const component = mountComponent();
-    expect(component.find(DiscoverTourProvider).exists()).toBeTruthy();
-    expect(component.find(EuiTourStep)).toHaveLength(5);
-    expect(component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.addFields })).toHaveLength(1);
-    expect(component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns })).toHaveLength(1);
-    expect(component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.sort })).toHaveLength(1);
-    expect(component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.changeRowHeight })).toHaveLength(1);
-    expect(component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.expandDocument })).toHaveLength(1);
-  });
-
   it('should start successfully', () => {
     const buttonSubjToTestStart = 'discoverTourButtonTestStart';
     const InnerComponent = () => {
@@ -49,13 +38,26 @@ describe('Discover tour', () => {
 
     const component = mountComponent(<InnerComponent />);
     // all steps are hidden by default
-    expect(component.find({ isStepOpen: false })).toHaveLength(5);
+    expect(component.find(EuiTourStep)).toHaveLength(0);
 
     // one step should become visible after the tour is triggered
     component.find(`[data-test-subj="${buttonSubjToTestStart}"]`).at(0).simulate('click');
+
+    expect(component.find(EuiTourStep)).toHaveLength(5);
     expect(
       component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.addFields, isStepOpen: true })
     ).toHaveLength(1);
-    expect(component.find({ isStepOpen: false })).toHaveLength(4);
+    expect(
+      component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns, isStepOpen: false })
+    ).toHaveLength(1);
+    expect(
+      component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.sort, isStepOpen: false })
+    ).toHaveLength(1);
+    expect(
+      component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.changeRowHeight, isStepOpen: false })
+    ).toHaveLength(1);
+    expect(
+      component.find({ anchor: DISCOVER_TOUR_STEP_ANCHORS.expandDocument, isStepOpen: false })
+    ).toHaveLength(1);
   });
 });

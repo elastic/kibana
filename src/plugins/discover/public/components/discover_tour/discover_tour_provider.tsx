@@ -66,7 +66,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepReorderColumns.title', {
-      defaultMessage: 'Reorder columns',
+      defaultMessage: 'Order columns',
     }),
     content: (
       <FormattedMessage
@@ -119,19 +119,19 @@ const tourStepDefinitions: TourStepDefinition[] = [
     anchor: DISCOVER_TOUR_STEP_ANCHORS.expandDocument,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepExpand.title', {
-      defaultMessage: 'Compare and expand',
+      defaultMessage: 'Expand documents',
     }),
     content: (
       <FormattedMessage
         id="discover.dscTour.stepExpand.description"
-        defaultMessage="Narrow your view by selecting specific documents. View details by clicking {expandIcon}."
+        defaultMessage="Click {expandIcon} to inspect fields, set filters, and view the documents that came before and after it."
         values={{
           expandIcon: (
             <EuiIcon
               size="s"
               type="expand"
               color="text"
-              aria-label={i18n.translate('discover.dscTour.stepExpand.expandIconLabel', {
+              aria-label={i18n.translate('discover.dscTour.stepExpand.expandIconAriaLabel', {
                 defaultMessage: 'Expand icon',
               })}
             />
