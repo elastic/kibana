@@ -13,7 +13,7 @@ import type { BlobStorage } from '../../types';
 
 import { mappings } from './mappings';
 
-const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana-blob-storage';
+const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 
 export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
