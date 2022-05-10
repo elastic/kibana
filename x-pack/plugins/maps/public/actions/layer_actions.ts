@@ -451,6 +451,11 @@ function updateLayerType(layerId: string, newLayerType: string) {
       return;
     }
     dispatch(clearDataRequests(layer));
+    if (layer.getSource().isESSource()) {
+      const adapters = getInspectorAdapters(getState());
+      adapters.vectorTiles.removeLayer(layerId);
+      adapters.requests.resetRequest(layerId);
+    }
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
