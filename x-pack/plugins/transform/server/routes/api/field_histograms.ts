@@ -32,8 +32,9 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
         const { query, fields, runtimeMappings, samplerShardSize } = req.body;
 
         try {
+          const esClient = (await ctx.core).elasticsearch.client;
           const resp = await getHistogramsForFields(
-            ctx.core.elasticsearch.client,
+            esClient,
             dataViewTitle,
             query,
             fields,

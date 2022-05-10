@@ -82,7 +82,10 @@ describe('clean draft timelines', () => {
       timeline: [],
     });
 
-    const response = await server.inject(cleanDraftTimelinesRequest(TimelineType.default), context);
+    const response = await server.inject(
+      cleanDraftTimelinesRequest(TimelineType.default),
+      requestContextMock.convertContext(context)
+    );
     const req = cleanDraftTimelinesRequest(TimelineType.default);
     expect(mockPersistTimeline).toHaveBeenCalled();
     expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
@@ -106,7 +109,10 @@ describe('clean draft timelines', () => {
     mockResetTimeline.mockResolvedValue({});
     mockGetTimeline.mockResolvedValue({ ...mockGetDraftTimelineValue });
 
-    const response = await server.inject(cleanDraftTimelinesRequest(TimelineType.default), context);
+    const response = await server.inject(
+      cleanDraftTimelinesRequest(TimelineType.default),
+      requestContextMock.convertContext(context)
+    );
     const req = cleanDraftTimelinesRequest(TimelineType.default);
 
     expect(mockPersistTimeline).not.toHaveBeenCalled();

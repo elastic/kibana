@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`prepareDescriptionList create description lists accordingly 1`] = `
+Array [
+  Object {
+    "description": <EuiText
+      size="s"
+    >
+      string
+    </EuiText>,
+    "title": <EuiText
+      size="s"
+    >
+      <strong>
+        a
+      </strong>
+    </EuiText>,
+  },
+  Object {
+    "description": <EuiText
+      size="s"
+    >
+      123
+    </EuiText>,
+    "title": <EuiText
+      size="s"
+    >
+      <strong>
+        b
+      </strong>
+    </EuiText>,
+  },
+  Object {
+    "description": "undefined",
+    "title": <EuiText
+      size="s"
+    >
+      <strong>
+        c
+      </strong>
+    </EuiText>,
+  },
+  Object {
+    "description": <EuiCode>
+      null
+    </EuiCode>,
+    "title": <EuiText
+      size="s"
+    >
+      <strong>
+        d
+      </strong>
+    </EuiText>,
+  },
+  Object {
+    "description": <EuiCode>
+      true
+    </EuiCode>,
+    "title": <EuiText
+      size="s"
+    >
+      <strong>
+        e
+      </strong>
+    </EuiText>,
+  },
+  Object {
+    "description": <EuiCode>
+      false
+    </EuiCode>,
+    "title": <EuiText
+      size="s"
+    >
+      <strong>
+        f
+      </strong>
+    </EuiText>,
+  },
+  Object {
+    "description": <EuiCodeBlock
+      isCopyable={true}
+      overflowHeight={300}
+    >
+      [
+  {
+    "a": "another string",
+    "b": 123
+  }
+]
+    </EuiCodeBlock>,
+    "title": <EuiText
+      size="s"
+    >
+      <strong>
+        g
+      </strong>
+    </EuiText>,
+  },
+]
+`;

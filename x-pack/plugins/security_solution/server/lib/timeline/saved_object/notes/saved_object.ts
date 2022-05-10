@@ -34,7 +34,7 @@ import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
 
 export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   await Promise.all(
     noteIds.map((noteId) => savedObjectsClient.delete(noteSavedObjectType, noteId))
@@ -47,7 +47,7 @@ export const deleteNoteByTimelineId = async (request: FrameworkRequest, timeline
     hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   const notesToBeDeleted = await getAllSavedNote(request, options);
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   await Promise.all(
     notesToBeDeleted.notes.map((note) =>
@@ -159,7 +159,7 @@ const createNote = async ({
   note: SavedNote;
   overrideOwner?: boolean;
 }) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
   const shallowCopyOfNote = { ...note };
@@ -217,7 +217,7 @@ const updateNote = async ({
   note: SavedNote;
   overrideOwner?: boolean;
 }) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
   const existingNote = await savedObjectsClient.get<NoteWithoutExternalRefs>(
@@ -258,7 +258,7 @@ const updateNote = async ({
 };
 
 const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObject = await savedObjectsClient.get<NoteWithoutExternalRefs>(
     noteSavedObjectType,
     NoteId
@@ -270,7 +270,7 @@ const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
 };
 
 const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObjects = await savedObjectsClient.find<NoteWithoutExternalRefs>(options);
 
   return {

@@ -18,6 +18,7 @@ export async function getServicesDetailedStatistics({
   offset,
   start,
   end,
+  probability,
 }: {
   serviceNames: string[];
   environment: string;
@@ -27,6 +28,7 @@ export async function getServicesDetailedStatistics({
   offset?: string;
   start: number;
   end: number;
+  probability: number;
 }) {
   return withApmSpan('get_service_detailed_statistics', async () => {
     const commonProps = {
@@ -37,6 +39,7 @@ export async function getServicesDetailedStatistics({
       searchAggregatedTransactions,
       start,
       end,
+      probability,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([

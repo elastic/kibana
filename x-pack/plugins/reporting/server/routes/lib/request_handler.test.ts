@@ -76,7 +76,7 @@ describe('Handle request to generate', () => {
     (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
 
     mockContext = getMockContext();
-    mockContext.reporting = {} as ReportingSetup;
+    mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
     requestHandler = new RequestHandler(
       reportingCore,

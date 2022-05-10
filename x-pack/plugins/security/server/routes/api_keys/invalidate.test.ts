@@ -29,13 +29,17 @@ describe('Invalidate API keys', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-      };
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+      } as any;
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext,
+      });
 
       for (const apiResponse of apiResponses) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.invalidateApiKey.mockImplementationOnce(
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.invalidateApiKey.mockImplementationOnce(
           (async () => ({ body: await apiResponse() })) as any
         );
       }
@@ -58,11 +62,11 @@ describe('Invalidate API keys', () => {
       if (Array.isArray(asserts.apiArguments)) {
         for (const apiArguments of asserts.apiArguments) {
           expect(
-            mockContext.core.elasticsearch.client.asCurrentUser.security.invalidateApiKey
+            mockCoreContext.elasticsearch.client.asCurrentUser.security.invalidateApiKey
           ).toHaveBeenCalledWith(apiArguments);
         }
       }
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 

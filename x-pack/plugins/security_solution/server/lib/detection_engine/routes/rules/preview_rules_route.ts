@@ -80,14 +80,15 @@ export const previewRulesRoute = async (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = createRuleValidateTypeDependents(request.body);
+      const coreContext = await context.core;
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
         const [, { data, security: securityService }] = await getStartServices();
         const searchSourceClient = data.search.searchSource.asScoped(request);
-        const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution.getAppClient();
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const siemClient = (await context.securitySolution).getAppClient();
 
         let invocationCount = request.body.invocationCount;
         if (
@@ -103,17 +104,19 @@ export const previewRulesRoute = async (
           });
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
+        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
         const previewRuleParams = internalRule.params;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: (await context.licensing).license,
           ml,
           request,
           savedObjectsClient,
         });
         throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
-        await context.lists?.getExceptionListClient().createEndpointList();
+
+        const listsContext = await context.lists;
+        await listsContext?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
         const previewId = uuid.v4();
@@ -234,13 +237,13 @@ export const previewRulesRoute = async (
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
                 alertFactory,
-                savedObjectsClient: context.core.savedObjects.client,
+                savedObjectsClient: coreContext.savedObjects.client,
                 scopedClusterClient: wrapScopedClusterClient({
                   abortController,
-                  scopedClusterClient: context.core.elasticsearch.client,
+                  scopedClusterClient: coreContext.elasticsearch.client,
                 }),
                 searchSourceClient,
-                uiSettingsClient: context.core.uiSettings.client,
+                uiSettingsClient: coreContext.uiSettings.client,
               },
               spaceId,
               startedAt: startedAt.toDate(),
@@ -339,7 +342,7 @@ export const previewRulesRoute = async (
         }
 
         // Refreshes alias to ensure index is able to be read before returning
-        await context.core.elasticsearch.client.asInternalUser.indices.refresh(
+        await coreContext.elasticsearch.client.asInternalUser.indices.refresh(
           {
             index: previewRuleDataClient.indexNameWithNamespace(spaceId),
           },

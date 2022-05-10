@@ -12,7 +12,6 @@ import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
 import { useSavedQueries } from './use_saved_queries';
 import { useFormData } from '../shared_imports';
@@ -47,10 +46,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const [{ query, ecs_mapping, savedQueryId }] = useFormData({
-    watch: ['ecs_mapping', 'query', 'savedQueryId'],
-  });
+  const [{ savedQueryId }] = useFormData();
 
   const { data } = useSavedQueries({});
 
@@ -122,15 +118,11 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
     if (
       selectedOptions.length &&
       // @ts-expect-error update types
-      (selectedOptions[0].value.savedQueryId !== savedQueryId ||
-        // @ts-expect-error update types
-        selectedOptions[0].value.query !== query ||
-        // @ts-expect-error update types
-        !deepEqual(selectedOptions[0].value.ecs_mapping, ecs_mapping))
+      selectedOptions[0].value.savedQueryId !== savedQueryId
     ) {
       setSelectedOptions([]);
     }
-  }, [ecs_mapping, query, savedQueryId, selectedOptions]);
+  }, [savedQueryId, selectedOptions]);
 
   return (
     <EuiFormRow

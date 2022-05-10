@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
 import { getSignalsByIds } from './get_signals_by_ids';

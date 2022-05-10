@@ -9,8 +9,6 @@ import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringConfig } from '../../../config';
-// @ts-ignore
-import { prefixIndexPattern } from '../../../../common/ccs_utils';
 import { StackProductUsage } from '../types';
 
 interface ESResponse {

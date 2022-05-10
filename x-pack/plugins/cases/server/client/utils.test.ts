@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { CaseConnector, ConnectorTypes } from '../../common/api';
-import { newCase } from '../routes/api/__mocks__/request_responses';
-import { transformNewCase } from '../common/utils';
 import { buildRangeFilter, sortToSnake } from './utils';
 import { toElasticsearchQuery } from '@kbn/es-query';
 
@@ -38,73 +35,6 @@ describe('utils', () => {
     });
   });
 
-  describe('transformNewCase', () => {
-    beforeAll(() => {
-      jest.useFakeTimers('modern');
-      jest.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
-    });
-
-    afterAll(() => {
-      jest.useRealTimers();
-    });
-
-    const connector: CaseConnector = {
-      id: '123',
-      name: 'My connector',
-      type: ConnectorTypes.jira,
-      fields: { issueType: 'Task', priority: 'High', parent: null },
-    };
-    it('transform correctly', () => {
-      const myCase = {
-        newCase: { ...newCase, connector },
-        user: {
-          email: 'elastic@elastic.co',
-          full_name: 'Elastic',
-          username: 'elastic',
-        },
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Object {
-              "issueType": "Task",
-              "parent": null,
-              "priority": "High",
-            },
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
-          },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": "elastic@elastic.co",
-            "full_name": "Elastic",
-            "username": "elastic",
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "updated_at": null,
-          "updated_by": null,
-        }
-      `);
-    });
-  });
-
   describe('buildRangeFilter', () => {
     it('returns undefined if both the from and or are undefined', () => {
       const node = buildRangeFilter({});
@@ -115,18 +45,6 @@ describe('utils', () => {
       // @ts-expect-error
       const node = buildRangeFilter({ from: null, to: null });
       expect(node).toBeFalsy();
-    });
-
-    it('returns undefined if the from is malformed', () => {
-      expect(() => buildRangeFilter({ from: '<' })).toThrowError(
-        'Invalid "from" and/or "to" query parameters'
-      );
-    });
-
-    it('returns undefined if the to is malformed', () => {
-      expect(() => buildRangeFilter({ to: '<' })).toThrowError(
-        'Invalid "from" and/or "to" query parameters'
-      );
     });
 
     it('creates a range filter with only the from correctly', () => {
@@ -216,6 +134,7 @@ describe('utils', () => {
         field: 'test',
         savedObjectType: 'test-type',
       });
+
       expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
@@ -242,6 +161,52 @@ describe('utils', () => {
                       "range": Object {
                         "test-type.attributes.test": Object {
                           "lte": "now",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        }
+      `);
+    });
+
+    it('escapes the query correctly', () => {
+      const node = buildRangeFilter({
+        from: '2022-04-27T12:55:47.576Z',
+        to: '2022-04-27T12:56:47.576Z',
+        field: '<weird field)',
+        savedObjectType: '.weird SO)',
+      });
+
+      expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        ".weird SO).attributes.<weird field)": Object {
+                          "gte": "2022-04-27T12:55:47.576Z",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        ".weird SO).attributes.<weird field)": Object {
+                          "lte": "2022-04-27T12:56:47.576Z",
                         },
                       },
                     },

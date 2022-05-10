@@ -25,7 +25,7 @@ import {
 } from '../../../../contexts';
 
 // Mocked functions
-import { sendRequestToES } from '../../../../hooks/use_send_current_request_to_es/send_request_to_es';
+import { sendRequest } from '../../../../hooks/use_send_current_request/send_request';
 import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
 import type { DevToolsSettings } from '../../../../../services';
 import * as consoleMenuActions from '../console_menu_actions';
@@ -58,15 +58,15 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
     sandbox.restore();
   });
 
-  it('calls send current request to ES', async () => {
+  it('calls send current request', async () => {
     (getEndpointFromPosition as jest.Mock).mockReturnValue({ patterns: [] });
-    (sendRequestToES as jest.Mock).mockRejectedValue({});
+    (sendRequest as jest.Mock).mockRejectedValue({});
     const editor = doMount();
     act(() => {
       editor.find('button[data-test-subj~="sendRequestButton"]').simulate('click');
     });
     await nextTick();
-    expect(sendRequestToES).toBeCalledTimes(1);
+    expect(sendRequest).toBeCalledTimes(1);
   });
 
   it('opens docs', () => {

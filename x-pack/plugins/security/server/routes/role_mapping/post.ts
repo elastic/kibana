@@ -44,11 +44,11 @@ export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const saveResponse =
-          await context.core.elasticsearch.client.asCurrentUser.security.putRoleMapping({
-            name: request.params.name,
-            body: request.body,
-          });
+        const esClient = (await context.core).elasticsearch.client;
+        const saveResponse = await esClient.asCurrentUser.security.putRoleMapping({
+          name: request.params.name,
+          body: request.body,
+        });
         return response.ok({ body: saveResponse });
       } catch (error) {
         const wrappedError = wrapError(error);

@@ -68,7 +68,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     .get('MANAGEMENT_APP_LOCATOR')
     ?.useUrl({ sectionId: '' });
 
-  const getFeaturesByCategory = (category: string) =>
+  const getFeaturesByCategory = (category: FeatureCatalogueCategory) =>
     features
       .filter((feature) => feature.showOnHomePage && feature.category === category)
       .sort(sortByOrder);
@@ -78,8 +78,8 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
   const kibanaApps = features.filter(({ solutionId }) => solutionId === 'kibana').sort(sortByOrder);
-  const addDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.DATA);
-  const manageDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
+  const addDataFeatures = getFeaturesByCategory('data');
+  const manageDataFeatures = getFeaturesByCategory('admin');
   const devTools = findFeatureById('console');
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
     solution: i18n.translate('kibanaOverview.noDataConfig.solutionName', {

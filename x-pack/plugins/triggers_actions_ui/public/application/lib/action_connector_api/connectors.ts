@@ -22,12 +22,14 @@ const transformConnector: RewriteRequestCase<
 > = ({
   connector_type_id: actionTypeId,
   is_preconfigured: isPreconfigured,
+  is_deprecated: isDeprecated,
   referenced_by_count: referencedByCount,
   is_missing_secrets: isMissingSecrets,
   ...res
 }) => ({
   actionTypeId,
   isPreconfigured,
+  isDeprecated,
   referencedByCount,
   isMissingSecrets,
   ...res,

@@ -23,59 +23,52 @@ export function registerClusterSettingsRoute({
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const { settings } = request.body;
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const { settings } = request.body;
 
-          // We need to fetch the current cluster settings in order to determine
-          // if the settings to delete were set as transient or persistent settings
-          const currentClusterSettings = await client.asCurrentUser.cluster.getSettings({
-            flat_settings: true,
-          });
+        // We need to fetch the current cluster settings in order to determine
+        // if the settings to delete were set as transient or persistent settings
+        const currentClusterSettings = await client.asCurrentUser.cluster.getSettings({
+          flat_settings: true,
+        });
 
-          const settingsToDelete = settings.reduce(
-            (settingsBody, currentSetting) => {
-              if (
-                Object.keys(currentClusterSettings.persistent).find((key) => key === currentSetting)
-              ) {
-                settingsBody.persistent[currentSetting] = null;
-              }
-
-              if (
-                Object.keys(currentClusterSettings.transient).find((key) => key === currentSetting)
-              ) {
-                settingsBody.transient[currentSetting] = null;
-              }
-
-              return settingsBody;
-            },
-            { persistent: {}, transient: {} } as {
-              persistent: { [key: string]: null };
-              transient: { [key: string]: null };
+        const settingsToDelete = settings.reduce(
+          (settingsBody, currentSetting) => {
+            if (
+              Object.keys(currentClusterSettings.persistent).find((key) => key === currentSetting)
+            ) {
+              settingsBody.persistent[currentSetting] = null;
             }
-          );
 
-          const settingsResponse = await client.asCurrentUser.cluster.putSettings({
-            body: settingsToDelete,
-            flat_settings: true,
-          });
+            if (
+              Object.keys(currentClusterSettings.transient).find((key) => key === currentSetting)
+            ) {
+              settingsBody.transient[currentSetting] = null;
+            }
 
-          return response.ok({
-            body: settingsResponse,
-          });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+            return settingsBody;
+          },
+          { persistent: {}, transient: {} } as {
+            persistent: { [key: string]: null };
+            transient: { [key: string]: null };
+          }
+        );
+
+        const settingsResponse = await client.asCurrentUser.cluster.putSettings({
+          body: settingsToDelete,
+          flat_settings: true,
+        });
+
+        return response.ok({
+          body: settingsResponse,
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 }

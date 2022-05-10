@@ -25,7 +25,7 @@ const sortFieldSchema = schema.oneOf([
   schema.object({ es_search_duration: schema.object({ order: sortOrderSchema }) }),
   schema.object({ schedule_delay: schema.object({ order: sortOrderSchema }) }),
   schema.object({ num_triggered_actions: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ num_scheduled_actions: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ num_generated_actions: schema.object({ order: sortOrderSchema }) }),
 ]);
 
 const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
@@ -67,7 +67,7 @@ export const getRuleExecutionLogRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         return res.ok({
           body: await rulesClient.getExecutionLogForRule(rewriteReq({ id, ...req.query })),

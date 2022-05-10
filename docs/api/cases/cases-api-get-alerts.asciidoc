@@ -36,7 +36,7 @@ default space is used.
 `200`::
    Indicates a successful call.
 
-=== {api-example-title}
+=== {api-examples-title}
 
 Return all alerts attached to case `293f1bc0-74f6-11ea-b83a-553aecdb28b6`:
 

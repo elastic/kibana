@@ -48,18 +48,23 @@ describe('GET role mappings feature check', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-      };
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: {
+          check: jest.fn().mockReturnValue(licenseCheckResult),
+        },
+      } as any;
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext,
+      });
 
-      mockContext.core.elasticsearch.client.asInternalUser.nodes.info.mockImplementation(
-        (async () => nodeSettingsResponse()) as any
-      );
-      mockContext.core.elasticsearch.client.asInternalUser.transport.request.mockImplementation(
+      mockCoreContext.elasticsearch.client.asInternalUser.nodes.info.mockImplementation((async () =>
+        nodeSettingsResponse()) as any);
+      mockCoreContext.elasticsearch.client.asInternalUser.transport.request.mockImplementation(
         (async () => xpackUsageResponse()) as any
       );
-      mockContext.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: canManageRoleMappings,
       } as any);
 
@@ -77,7 +82,7 @@ describe('GET role mappings feature check', () => {
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 

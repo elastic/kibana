@@ -23,7 +23,8 @@ export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      context.core.savedObjects.client.delete(CANVAS_TYPE, request.params.id);
+      const soClient = (await context.core).savedObjects.client;
+      await soClient.delete(CANVAS_TYPE, request.params.id);
       return response.ok({ body: okResponse });
     })
   );

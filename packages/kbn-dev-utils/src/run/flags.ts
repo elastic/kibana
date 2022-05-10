@@ -8,8 +8,8 @@
 
 import getopts from 'getopts';
 
+import { LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
 import { RunOptions } from './run';
-import { LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '../tooling_log/log_levels';
 
 export interface Flags {
   verbose: boolean;

@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { KibanaPluginServiceFactory } from '../types';
 
 import type { CustomIntegrationsPlatformService } from '../platform';
 import type { CustomIntegrationsStartDependencies } from '../../types';
 
 /**
  * A type definition for a factory to produce the `CustomIntegrationsPlatformService` for use in Kibana.
- * @see /src/plugins/presentation_util/public/services/create/factory.ts
  */
 export type CustomIntegrationsPlatformServiceFactory = KibanaPluginServiceFactory<
   CustomIntegrationsPlatformService,

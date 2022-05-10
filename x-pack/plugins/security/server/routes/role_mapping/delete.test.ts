@@ -14,11 +14,16 @@ import { defineRoleMappingDeleteRoutes } from './delete';
 describe('DELETE role mappings', () => {
   it('allows a role mapping to be deleted', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-    const mockContext = {
-      core: coreMock.createRequestHandlerContext(),
-      licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } } as any,
-    };
-    mockContext.core.elasticsearch.client.asCurrentUser.security.deleteRoleMapping.mockResponse({
+    const mockCoreContext = coreMock.createRequestHandlerContext();
+    const mockLicensingContext = {
+      license: { check: jest.fn().mockReturnValue({ state: 'valid' }) },
+    } as any;
+    const mockContext = coreMock.createCustomRequestHandlerContext({
+      core: mockCoreContext,
+      licensing: mockLicensingContext,
+    });
+
+    mockCoreContext.elasticsearch.client.asCurrentUser.security.deleteRoleMapping.mockResponse({
       acknowledged: true,
     } as any);
 
@@ -39,24 +44,27 @@ describe('DELETE role mappings', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ acknowledged: true });
     expect(
-      mockContext.core.elasticsearch.client.asCurrentUser.security.deleteRoleMapping
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.deleteRoleMapping
     ).toHaveBeenCalledWith({ name });
   });
 
   describe('failure', () => {
     it('returns result of license check', async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: {
-          license: {
-            check: jest.fn().mockReturnValue({
-              state: 'invalid',
-              message: 'test forbidden message',
-            }),
-          },
-        } as any,
-      };
+
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: {
+          check: jest.fn().mockReturnValue({
+            state: 'invalid',
+            message: 'test forbidden message',
+          }),
+        },
+      } as any;
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext,
+      });
 
       defineRoleMappingDeleteRoutes(mockRouteDefinitionParams);
 
@@ -75,7 +83,7 @@ describe('DELETE role mappings', () => {
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
       expect(
-        mockContext.core.elasticsearch.client.asCurrentUser.security.deleteRoleMapping
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.deleteRoleMapping
       ).not.toHaveBeenCalled();
     });
   });

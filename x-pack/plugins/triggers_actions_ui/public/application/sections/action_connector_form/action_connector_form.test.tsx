@@ -41,6 +41,7 @@ describe('action_connector_form', () => {
       config: {},
       secrets: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
     const wrapper = mountWithIntl(
       <ActionConnectorForm

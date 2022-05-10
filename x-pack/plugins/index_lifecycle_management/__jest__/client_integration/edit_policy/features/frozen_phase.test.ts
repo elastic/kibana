@@ -14,7 +14,7 @@ import { initTestBed } from '../init_test_bed';
 
 describe('<EditPolicy /> frozen phase', () => {
   let testBed: TestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -22,14 +22,13 @@ describe('<EditPolicy /> frozen phase', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
 
     const { component } = testBed;
@@ -41,7 +40,7 @@ describe('<EditPolicy /> frozen phase', () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
-        testBed = await initTestBed({
+        testBed = await initTestBed(httpSetup, {
           appServicesContext: {
             license: licensingMock.createLicense({ license: { type: 'basic' } }),
           },

@@ -43,7 +43,7 @@ const minMaxAgg = (field?: DataViewField) => {
 
 export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
   const {
-    data: { query: queryPlugin, search, autocomplete },
+    data: { query: queryPlugin, search },
   } = startPlugins;
   const { data } = startPlugins;
 
@@ -95,7 +95,6 @@ export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
       from(fetchFieldRange(dataView, fieldName, input)),
     getDataView: data.dataViews.get,
     getDataView$: (id: string) => from(data.dataViews.get(id)),
-    autocomplete,
     query: queryPlugin,
     searchSource: search.searchSource,
     timefilter: queryPlugin.timefilter.timefilter,

@@ -18,7 +18,7 @@ export function registerUnfreezeRoute({ router, lib: { handleEsError } }: RouteD
   router.post(
     { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { indices = [] } = request.body as typeof bodySchema.type;
 
       try {

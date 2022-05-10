@@ -35,13 +35,14 @@ export function defineInvalidateApiKeysRoutes({ router }: RouteDefinitionParams)
           await Promise.all(
             request.body.apiKeys.map(async (key) => {
               try {
+                const esClient = (await context.core).elasticsearch.client;
                 const body: { ids: string[]; owner?: boolean } = { ids: [key.id] };
                 if (!request.body.isAdmin) {
                   body.owner = true;
                 }
 
                 // Send the request to invalidate the API key and return an error if it could not be deleted.
-                await context.core.elasticsearch.client.asCurrentUser.security.invalidateApiKey({
+                await esClient.asCurrentUser.security.invalidateApiKey({
                   body,
                 });
                 return { key, error: undefined };

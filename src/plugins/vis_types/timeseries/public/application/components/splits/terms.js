@@ -95,6 +95,8 @@ export const SplitByTermsUI = ({
     (selectedOptions) => {
       onChange({
         terms_field: selectedOptions.length === 1 ? selectedOptions[0] : selectedOptions,
+        terms_include: undefined,
+        terms_exclude: undefined,
       });
     },
     [onChange]
@@ -174,7 +176,7 @@ export const SplitByTermsUI = ({
               }
             >
               <EuiFieldText
-                value={model.terms_include}
+                value={model.terms_include ?? ''}
                 onChange={handleTextChange('terms_include')}
                 data-test-subj="groupByInclude"
               />
@@ -191,7 +193,7 @@ export const SplitByTermsUI = ({
               }
             >
               <EuiFieldText
-                value={model.terms_exclude}
+                value={model.terms_exclude ?? ''}
                 onChange={handleTextChange('terms_exclude')}
                 data-test-subj="groupByExclude"
               />

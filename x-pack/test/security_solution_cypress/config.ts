@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
+    require.resolve('../functional/config.base.js')
   );
 
   return {
@@ -50,9 +50,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'riskyHostsEnabled',
-          'usersEnabled',
           'riskyUsersEnabled',
-          'ruleRegistryEnabled',
         ])}`,
         `--home.disableWelcomeScreen=true`,
       ],

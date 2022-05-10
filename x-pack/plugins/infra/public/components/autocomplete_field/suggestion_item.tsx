@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import { transparentize } from 'polished';
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/data-plugin/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
+import { transparentize } from 'polished';
 
 interface Props {
   isSelected?: boolean;

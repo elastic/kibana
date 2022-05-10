@@ -30,7 +30,8 @@ export function defineCreateOrUpdateUserRoutes({ router }: RouteDefinitionParams
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.putUser({
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.putUser({
           username: request.params.username,
           body: request.body,
         });

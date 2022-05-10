@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
-import { getSourcererDataview } from '../../containers/sourcerer/api';
+import { getSourcererDataView } from '../../containers/sourcerer/api';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
@@ -192,7 +192,7 @@ export const usePickIndexPatterns = ({
           setSelectedOptions([]);
           // TODO We will need to figure out how to pass an abortController, but as right now this hook is
           // constantly getting destroy and re-init
-          const pickedDataViewData = await getSourcererDataview(newSelectedDataViewId);
+          const pickedDataViewData = await getSourcererDataView(newSelectedDataViewId);
           if (isHookAlive.current) {
             dispatch(
               sourcererActions.updateSourcererDataViews({

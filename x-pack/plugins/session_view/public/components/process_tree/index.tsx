@@ -160,7 +160,7 @@ export const ProcessTree = ({
     <>
       <div
         ref={scrollerRef}
-        css={styles.scroller}
+        css={styles.sessionViewProcessTree}
         data-test-subj="sessionView:sessionViewProcessTree"
       >
         {sessionLeader && (

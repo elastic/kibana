@@ -14,8 +14,7 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { Overview } from './overview';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-
+import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 const mockNewsFetchResult = {
   error: null,
   feedItems: [
@@ -103,7 +102,7 @@ const mockFeatures = [
     icon: 'dashboardApp',
     path: 'dashboard_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
   {
     id: 'discover',
@@ -112,7 +111,7 @@ const mockFeatures = [
     icon: 'discoverApp',
     path: 'discover_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
   {
     id: 'canvas',
@@ -121,7 +120,7 @@ const mockFeatures = [
     icon: 'canvasApp',
     path: 'canvas_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
 ];
 

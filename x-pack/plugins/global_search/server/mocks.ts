@@ -52,7 +52,10 @@ const createRequestHandlerContextMock = (): jest.Mocked<GlobalSearchRequestHandl
 
   handlerContextMock.find.mockReturnValue(of([]));
 
-  return { core: coreMock.createRequestHandlerContext(), globalSearch: handlerContextMock };
+  return coreMock.createCustomRequestHandlerContext({
+    core: coreMock.createRequestHandlerContext(),
+    globalSearch: handlerContextMock,
+  });
 };
 
 export const globalSearchPluginMock = {

@@ -20,6 +20,7 @@ export function NoPermissionPrompt() {
       }}
     >
       <EuiEmptyPrompt
+        data-test-subj="noPermissionPrompt"
         color="plain"
         hasBorder={true}
         iconType="securityApp"

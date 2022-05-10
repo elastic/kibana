@@ -28,13 +28,17 @@ describe('Get API keys', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
       };
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext as any,
+      });
 
       if (apiResponse) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.getApiKey.mockResponse(
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.getApiKey.mockResponse(
           // @ts-expect-error unknown type
           apiResponse()
         );
@@ -57,10 +61,10 @@ describe('Get API keys', () => {
 
       if (apiResponse) {
         expect(
-          mockContext.core.elasticsearch.client.asCurrentUser.security.getApiKey
+          mockCoreContext.elasticsearch.client.asCurrentUser.security.getApiKey
         ).toHaveBeenCalledWith({ owner: !isAdmin });
       }
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 

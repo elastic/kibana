@@ -9,13 +9,14 @@ import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
 import { XmattersActionConnector } from '../types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const ACTION_TYPE_ID = '.xmatters';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -40,6 +41,7 @@ describe('xmatters connector validation', () => {
       actionTypeId: '.xmatters',
       name: 'xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         configUrl: 'http://test.com',
         usesBasic: true,
@@ -73,6 +75,7 @@ describe('xmatters connector validation', () => {
       actionTypeId: '.xmatters',
       name: 'xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         usesBasic: false,
       },
@@ -105,6 +108,8 @@ describe('xmatters connector validation', () => {
       config: {
         usesBasic: true,
       },
+      isPreconfigured: false,
+      isDeprecated: false,
     } as XmattersActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -136,6 +141,8 @@ describe('xmatters connector validation', () => {
         configUrl: 'invalid.url',
         usesBasic: true,
       },
+      isPreconfigured: false,
+      isDeprecated: false,
     } as XmattersActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type {
+  IRouter,
+  CustomRequestHandlerContext,
+  CoreRequestHandlerContext,
+} from '@kbn/core/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
@@ -21,7 +25,8 @@ import { EndpointAuthz } from '../common/endpoint/types/authz';
 
 export { AppClient };
 
-export interface SecuritySolutionApiRequestHandlerContext extends RequestHandlerContext {
+export interface SecuritySolutionApiRequestHandlerContext {
+  core: CoreRequestHandlerContext;
   endpointAuthz: EndpointAuthz;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;
@@ -32,13 +37,13 @@ export interface SecuritySolutionApiRequestHandlerContext extends RequestHandler
   getExceptionListClient: () => ExceptionListClient | null;
 }
 
-export interface SecuritySolutionRequestHandlerContext extends RequestHandlerContext {
+export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
   securitySolution: SecuritySolutionApiRequestHandlerContext;
   actions: ActionsApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
   lists?: ListsApiRequestHandlerContext;
   fleet?: FleetRequestHandlerContext['fleet'];
-}
+}>;
 
 export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandlerContext>;

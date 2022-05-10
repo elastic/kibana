@@ -17,6 +17,8 @@ import {
   TickFormatter,
   Position,
   BrushEndListener,
+  AxisStyle,
+  BarSeriesStyle,
 } from '@elastic/charts';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -45,11 +47,20 @@ export interface ChartSeriesConfigs {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
     stackAccessors?: string[] | undefined;
+    barSeriesStyle?: Partial<BarSeriesStyle>;
   };
   axis?: {
     xTickFormatter?: TickFormatter | undefined;
     yTickFormatter?: TickFormatter | undefined;
     tickSize?: number | undefined;
+    left?: {
+      style?: Partial<AxisStyle>;
+      labelFormat?: (d: unknown) => string;
+    };
+    bottom?: {
+      style?: Partial<AxisStyle>;
+      labelFormat?: (d: unknown) => string;
+    };
   };
   yAxisTitle?: string | undefined;
   settings?: SettingsProps;

@@ -88,10 +88,8 @@ export function registerFetchRoute({ router, license, lib: { handleEsError } }: 
     license.guardApiRoute(async (context, request, response) => {
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
       try {
-        const templates = await fetchTemplates(
-          context.core.elasticsearch.client.asCurrentUser,
-          isLegacy
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const templates = await fetchTemplates(esClient.asCurrentUser, isLegacy);
         const okResponse = { body: filterTemplates(templates, isLegacy) };
         return response.ok(okResponse);
       } catch (error) {

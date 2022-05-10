@@ -43,8 +43,9 @@ export function defineRoleMappingFeatureCheckRoute({ router, logger }: RouteDefi
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
+      const esClient = (await context.core).elasticsearch.client;
       const { has_all_requested: canManageRoleMappings } =
-        await context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        await esClient.asCurrentUser.security.hasPrivileges({
           body: { cluster: ['manage_security'] },
         });
 
@@ -56,10 +57,7 @@ export function defineRoleMappingFeatureCheckRoute({ router, logger }: RouteDefi
         });
       }
 
-      const enabledFeatures = await getEnabledRoleMappingsFeatures(
-        context.core.elasticsearch.client.asInternalUser,
-        logger
-      );
+      const enabledFeatures = await getEnabledRoleMappingsFeatures(esClient.asInternalUser, logger);
 
       return response.ok({
         body: {

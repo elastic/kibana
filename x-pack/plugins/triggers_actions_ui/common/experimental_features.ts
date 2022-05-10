@@ -14,6 +14,9 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 export const allowedExperimentalValues = Object.freeze({
   rulesListDatagrid: true,
   internalAlertsTable: false,
+  internalShareableComponentsSandbox: false,
+  ruleTagFilter: false,
+  ruleStatusFilter: false,
   rulesDetailLogs: true,
 });
 
