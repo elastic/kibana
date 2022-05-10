@@ -1628,6 +1628,13 @@ export class RulesClient {
               updatedAt: new Date().toISOString(),
             });
 
+            // add mapped_params
+            const mappedParams = getMappedParams(updatedParams);
+
+            if (Object.keys(mappedParams).length) {
+              updatedAttributes.mapped_params = mappedParams;
+            }
+
             rules.push({
               ...rule,
               references,
