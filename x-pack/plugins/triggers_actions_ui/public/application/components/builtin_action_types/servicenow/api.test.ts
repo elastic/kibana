@@ -57,11 +57,7 @@ const applicationInfoResponse = {
 
 const token = 'token';
 
-const oAuthResponse = {
-  ok: true,
-  status: 200,
-  json: async () => ({ accessToken: token }),
-};
+const oAuthResponse = { accessToken: token };
 
 const basicAuthConnector: ServiceNowActionConnector = {
   secrets: { username: 'test', password: 'test' },
@@ -114,19 +110,19 @@ describe('ServiceNow API', () => {
   describe('getAppInfo', () => {
     test('should call getAppInfo API for ITSM', async () => {
       const abortCtrl = new AbortController();
-      fetchMock.mockResolvedValueOnce(oAuthResponse);
+      http.post.mockResolvedValueOnce(oAuthResponse);
       fetchMock.mockResolvedValueOnce(applicationInfoResponse);
 
       const res = await getAppInfo({
         signal: abortCtrl.signal,
         connector: oAuthConnector,
         actionTypeId: '.servicenow',
+        http,
       });
 
       expect(res).toEqual(applicationInfoData.result);
 
-      expect(fetchMock).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
-        signal: abortCtrl.signal,
+      expect(http.post).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
         body: JSON.stringify({
           type: 'jwt',
           options: {
@@ -139,32 +135,31 @@ describe('ServiceNow API', () => {
             secrets: { clientSecret: 'test', privateKey: 'test' },
           },
         }),
-        method: 'POST',
       });
       expect(fetchMock).toHaveBeenCalledWith(
         'https://example.com/api/x_elas2_inc_int/elastic_api/health',
         {
           signal: abortCtrl.signal,
           method: 'GET',
-          headers: { Authorization: 'Bearer token' },
+          headers: { Authorization: 'token' },
         }
       );
     });
 
     test('should call getAppInfo API correctly for SIR', async () => {
       const abortCtrl = new AbortController();
-      fetchMock.mockResolvedValueOnce(oAuthResponse);
+      http.post.mockResolvedValueOnce(oAuthResponse);
       fetchMock.mockResolvedValueOnce(applicationInfoResponse);
 
       const res = await getAppInfo({
         signal: abortCtrl.signal,
         connector: oAuthConnector,
         actionTypeId: '.servicenow-sir',
+        http,
       });
 
       expect(res).toEqual(applicationInfoData.result);
-      expect(fetchMock).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
-        signal: abortCtrl.signal,
+      expect(http.post).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
         body: JSON.stringify({
           type: 'jwt',
           options: {
@@ -177,14 +172,13 @@ describe('ServiceNow API', () => {
             secrets: { clientSecret: 'test', privateKey: 'test' },
           },
         }),
-        method: 'POST',
       });
       expect(fetchMock).toHaveBeenCalledWith(
         'https://example.com/api/x_elas2_sir_int/elastic_api/health',
         {
           signal: abortCtrl.signal,
           method: 'GET',
-          headers: { Authorization: 'Bearer token' },
+          headers: { Authorization: 'token' },
         }
       );
     });
@@ -197,6 +191,7 @@ describe('ServiceNow API', () => {
         signal: abortCtrl.signal,
         connector: basicAuthConnector,
         actionTypeId: '.servicenow-itom',
+        http,
       });
 
       expect(res).toEqual(applicationInfoData.result);
@@ -225,6 +220,7 @@ describe('ServiceNow API', () => {
           signal: abortCtrl.signal,
           connector: basicAuthConnector,
           actionTypeId: '.servicenow',
+          http,
         })
       ).rejects.toThrow('Received status:');
     });
@@ -246,6 +242,7 @@ describe('ServiceNow API', () => {
           signal: abortCtrl.signal,
           connector: basicAuthConnector,
           actionTypeId: '.servicenow',
+          http,
         })
       ).rejects.toThrow('bad');
     });

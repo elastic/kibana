@@ -67,7 +67,12 @@ export const SERVICENOW_SIR_TITLE = i18n.translate(
 
 const validateConnector = async (
   action: ServiceNowActionConnector
-): Promise<ConnectorValidationResult<Omit<ServiceNowConfig, 'isOAuth'>, ServiceNowSecrets>> => {
+): Promise<
+  ConnectorValidationResult<
+    Omit<ServiceNowConfig, 'isOAuth'>,
+    Omit<ServiceNowSecrets, 'privateKeyPassword'>
+  >
+> => {
   const translations = await import('./translations');
 
   const configErrors = {
@@ -83,7 +88,6 @@ const validateConnector = async (
     password: new Array<string>(),
     clientSecret: new Array<string>(),
     privateKey: new Array<string>(),
-    privateKeyPassword: new Array<string>(),
   };
 
   if (!action.config.apiUrl) {
@@ -123,13 +127,6 @@ const validateConnector = async (
 
     if (!action.secrets.privateKey) {
       secretsErrors.privateKey = [...secretsErrors.privateKey, translations.PRIVATE_KEY_REQUIRED];
-    }
-
-    if (!action.secrets.privateKeyPassword) {
-      secretsErrors.privateKeyPassword = [
-        ...secretsErrors.privateKeyPassword,
-        translations.PRIVATE_KEY_PASSWORD_REQUIRED,
-      ];
     }
   } else {
     if (!action.secrets.username) {

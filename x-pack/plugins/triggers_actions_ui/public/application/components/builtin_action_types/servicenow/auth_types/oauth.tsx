@@ -40,7 +40,6 @@ const OAuthComponent: React.FC<Props> = ({
   const isKeyIdInvalid = isFieldInvalid(jwtKeyId, errors.jwtKeyId);
   const isClientSecretInvalid = isFieldInvalid(clientSecret, errors.clientSecret);
   const isPrivateKeyInvalid = isFieldInvalid(privateKey, errors.privateKey);
-  const isPrivateKeyPasswordInvalid = isFieldInvalid(privateKeyPassword, errors.privateKeyPassword);
 
   const onChangeClientIdEvent = useCallback(
     (event?: React.ChangeEvent<HTMLInputElement>) =>
@@ -205,12 +204,10 @@ const OAuthComponent: React.FC<Props> = ({
         id="connector-servicenow-private-key-password"
         fullWidth
         error={errors.privateKeyPassword}
-        isInvalid={isPrivateKeyPasswordInvalid}
         label={i18n.PRIVATE_KEY_PASSWORD_LABEL}
       >
         <EuiFieldPassword
           fullWidth
-          isInvalid={isPrivateKeyPasswordInvalid}
           readOnly={readOnly}
           name="connector-servicenow-private-key-password"
           value={privateKeyPassword || ''}

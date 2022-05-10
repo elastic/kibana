@@ -6,11 +6,13 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { HttpStart } from '@kbn/core/public';
 import { getAppInfo } from './api';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 
 export interface UseGetAppInfoProps {
   actionTypeId: string;
+  http: HttpStart;
 }
 
 export interface UseGetAppInfo {
@@ -18,7 +20,7 @@ export interface UseGetAppInfo {
   isLoading: boolean;
 }
 
-export const useGetAppInfo = ({ actionTypeId }: UseGetAppInfoProps): UseGetAppInfo => {
+export const useGetAppInfo = ({ actionTypeId, http }: UseGetAppInfoProps): UseGetAppInfo => {
   const [isLoading, setIsLoading] = useState(false);
   const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
@@ -35,6 +37,7 @@ export const useGetAppInfo = ({ actionTypeId }: UseGetAppInfoProps): UseGetAppIn
           signal: abortCtrl.current.signal,
           connector,
           actionTypeId,
+          http,
         });
 
         if (!didCancel.current) {
@@ -49,7 +52,7 @@ export const useGetAppInfo = ({ actionTypeId }: UseGetAppInfoProps): UseGetAppIn
         throw error;
       }
     },
-    [actionTypeId]
+    [actionTypeId, http]
   );
 
   useEffect(() => {

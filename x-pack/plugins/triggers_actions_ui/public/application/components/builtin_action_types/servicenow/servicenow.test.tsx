@@ -75,7 +75,6 @@ describe('servicenow connector validation', () => {
             password: [],
             clientSecret: [],
             privateKey: [],
-            privateKeyPassword: [],
           },
         },
       });
@@ -109,7 +108,6 @@ describe('servicenow connector validation', () => {
             password: ['Password is required.'],
             clientSecret: [],
             privateKey: [],
-            privateKeyPassword: [],
           },
         },
       });
@@ -185,7 +183,6 @@ describe('servicenow connector validation for OAuth', () => {
             password: [],
             clientSecret: [],
             privateKey: [],
-            privateKeyPassword: [],
           },
         },
       });
@@ -220,7 +217,6 @@ describe('servicenow connector validation for OAuth', () => {
             password: [],
             clientSecret: ['Client Secret is required.'],
             privateKey: ['Private Key is required.'],
-            privateKeyPassword: ['Private Key Password is required.'],
           },
         },
       });

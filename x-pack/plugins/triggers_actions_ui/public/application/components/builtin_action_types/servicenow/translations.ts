@@ -385,13 +385,6 @@ export const PRIVATE_KEY_REQUIRED = i18n.translate(
   }
 );
 
-export const PRIVATE_KEY_PASSWORD_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyPasswordTextField',
-  {
-    defaultMessage: 'Private Key Password is required.',
-  }
-);
-
 export const CLIENTSECRET_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientSecretTextField',
   {

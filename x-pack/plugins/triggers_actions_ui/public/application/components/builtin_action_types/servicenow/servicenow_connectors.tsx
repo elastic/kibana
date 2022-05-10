@@ -40,6 +40,7 @@ const ServiceNowConnectorFields: React.FC<
 
   const { fetchAppInfo, isLoading } = useGetAppInfo({
     actionTypeId: action.actionTypeId,
+    http,
   });
 
   const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =

@@ -7,7 +7,11 @@
 
 import { HttpSetup } from '@kbn/core/public';
 
-import { ActionTypeExecutorResult, snExternalServiceConfig } from '@kbn/actions-plugin/common';
+import {
+  ActionTypeExecutorResult,
+  INTERNAL_BASE_ACTION_API_PATH,
+  snExternalServiceConfig,
+} from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
@@ -44,16 +48,18 @@ export async function getChoices({
 const getAppInfoUrl = (url: string, scope: string) => `${url}/api/${scope}/elastic_api/health`;
 
 export async function getAppInfo({
+  http,
   signal,
   connector,
   actionTypeId,
 }: {
+  http: HttpSetup;
   signal: AbortSignal;
   connector: ServiceNowActionConnector;
   actionTypeId: string;
 }): Promise<AppInfo | RESTApiError> {
   const {
-    secrets: { username, password, clientSecret, privateKey },
+    secrets: { username, password, clientSecret, privateKey, privateKeyPassword },
     config: { isOAuth, apiUrl, clientId, userIdentifierValue, jwtKeyId },
   } = connector;
 
@@ -61,32 +67,30 @@ export async function getAppInfo({
   let authHeader = 'Basic ' + btoa(username + ':' + password);
 
   if (isOAuth) {
-    const tokenResponse = await fetch('/internal/actions/connector/_oauth_access_token', {
-      method: 'POST',
-      signal,
-      body: JSON.stringify({
-        type: 'jwt',
-        options: {
-          tokenUrl: `${urlWithoutTrailingSlash}/oauth_token.do`,
-          config: {
-            clientId,
-            userIdentifierValue,
-            jwtKeyId,
+    const tokenResponse = await http.post<{ accessToken: string }>(
+      `${INTERNAL_BASE_ACTION_API_PATH}/connector/_oauth_access_token`,
+      {
+        body: JSON.stringify({
+          type: 'jwt',
+          options: {
+            tokenUrl: `${urlWithoutTrailingSlash}/oauth_token.do`,
+            config: {
+              clientId,
+              userIdentifierValue,
+              jwtKeyId,
+            },
+            secrets: {
+              clientSecret,
+              privateKey,
+              ...(privateKeyPassword && { privateKeyPassword }),
+            },
           },
-          secrets: {
-            clientSecret,
-            privateKey,
-          },
-        },
-      }),
-    });
+        }),
+      }
+    );
 
-    if (!tokenResponse.ok) {
-      throw new Error(API_INFO_ERROR(tokenResponse.status));
-    }
-
-    const { accessToken } = await tokenResponse.json();
-    authHeader = 'Bearer ' + accessToken;
+    const { accessToken } = tokenResponse;
+    authHeader = accessToken;
   }
 
   const config = snExternalServiceConfig[actionTypeId];
