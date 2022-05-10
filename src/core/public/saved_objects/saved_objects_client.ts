@@ -539,7 +539,6 @@ export class SavedObjectsClient {
       method: 'POST',
       body: JSON.stringify(objects),
     });
-
     return request;
   }
 
