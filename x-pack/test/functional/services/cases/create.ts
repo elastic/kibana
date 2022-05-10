@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function CasesCreateViewServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+  const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
@@ -39,10 +41,12 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
       title = 'test-' + uuid.v4(),
       description = 'desc' + uuid.v4(),
       tag = 'tagme',
+      severity = CaseSeverity.LOW,
     }: {
       title: string;
       description: string;
       tag: string;
+      severity: CaseSeverity;
     }) {
       // case name
       await testSubjects.setValue('input', title);
@@ -54,6 +58,11 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
       const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
       await descriptionArea.focus();
       await descriptionArea.type(description);
+      await common.clickAndValidate(
+        'case-severity-selection',
+        `case-severity-selection-${severity}`
+      );
+      await testSubjects.click(`case-severity-selection-${severity}`);
 
       // save
       await testSubjects.click('create-case-submit');

@@ -21,7 +21,7 @@ import {
   GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
 import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../common/constants/alerts';
-import { updateState, getViewInAppUrl } from './common';
+import { updateState, getViewInAppUrl, setRecoveredAlertsContext } from './common';
 import {
   commonMonitorStateI18,
   commonStateTranslations,
@@ -47,6 +47,7 @@ import {
 import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
+
 /**
  * Returns the appropriate range for filtering the documents by `@timestamp`.
  *
@@ -74,22 +75,6 @@ export function getTimestampRange({
     from,
   };
 }
-
-const getMonIdByLoc = (monitorId: string, location: string) => {
-  return monitorId + '-' + location;
-};
-
-const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce(
-    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
-    new Set<string>()
-  );
-
-const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
-  items.reduce(
-    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
-    new Set<string>()
-  );
 
 export const getUniqueIdsByLoc = (
   downMonitorsByLocation: GetMonitorStatusResult[],
@@ -161,7 +146,7 @@ export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
 
   return {
     ...summary,
-    reason: `${monitorName} from ${observerLocation} ${statusMessage}`,
+    [ALERT_REASON_MSG]: `${monitorName} from ${observerLocation} ${statusMessage}`,
   };
 };
 
@@ -222,6 +207,22 @@ export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   return `${urlText}_${monIdByLoc}`;
 };
 
+const getMonIdByLoc = (monitorId: string, location: string) => {
+  return monitorId + '-' + location;
+};
+
+const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
+
+const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
+
 export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (server, libs) => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   producer: 'uptime',
@@ -281,15 +282,23 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       ACTION_VARIABLES[MONITOR_WITH_GEO],
       ACTION_VARIABLES[ALERT_REASON_MSG],
       ACTION_VARIABLES[VIEW_IN_APP_URL],
+      ...commonMonitorStateI18,
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
+  doesSetRecoveryContext: true,
   async executor({
     params: rawParams,
     state,
-    services: { savedObjectsClient, scopedClusterClient, alertWithLifecycle, getAlertStartedDate },
+    services: {
+      savedObjectsClient,
+      scopedClusterClient,
+      alertWithLifecycle,
+      getAlertStartedDate,
+      alertFactory,
+    },
     rule: {
       schedule: { interval },
     },
@@ -314,14 +323,12 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     });
 
     const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
-
     const timespanInterval = `${String(timerangeCount)}${timerangeUnit}`;
     // Range filter for `monitor.timespan`, the range of time the ping is valid
     const timespanRange = oldVersionTimeRange || {
       from: `now-${timespanInterval}`,
       to: 'now',
     };
-
     // Range filter for `@timestamp`, the time the document was indexed
     const timestampRange = getTimestampRange({
       ruleScheduleLookback: `now-${interval}`,
@@ -364,10 +371,14 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           fields: getMonitorAlertDocument(monitorSummary),
         });
 
-        alert.replaceState({
-          ...state,
+        const context = {
           ...monitorSummary,
           statusMessage,
+        };
+
+        alert.replaceState({
+          ...state,
+          ...context,
           ...updateState(state, true),
         });
 
@@ -381,10 +392,11 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         });
 
         alert.scheduleActions(MONITOR_STATUS.id, {
-          [ALERT_REASON_MSG]: monitorSummary.reason,
           [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+          ...context,
         });
       }
+      setRecoveredAlertsContext(alertFactory);
       return updateState(state, downMonitorsByLocation.length > 0);
     }
 
@@ -436,11 +448,16 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         fields: getMonitorAlertDocument(monitorSummary),
       });
 
-      alert.replaceState({
-        ...updateState(state, true),
+      const context = {
         ...monitorSummary,
         statusMessage,
+      };
+
+      alert.replaceState({
+        ...updateState(state, true),
+        ...context,
       });
+
       const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
         monitorId: monitorSummary.monitorId,
         dateRangeEnd: 'now',
@@ -451,10 +468,11 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       });
 
       alert.scheduleActions(MONITOR_STATUS.id, {
-        [ALERT_REASON_MSG]: monitorSummary.reason,
         [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+        ...context,
       });
     });
+    setRecoveredAlertsContext(alertFactory);
     return updateState(state, downMonitorsByLocation.length > 0);
   },
 });
