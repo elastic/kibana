@@ -96,7 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
-        await queryBar.submitQuery();
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
@@ -119,7 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await elasticChart.setNewChartUiDebugFlag(true);
 
         const query = await queryBar.getQueryString();
-        await queryBar.submitQuery();
         expect(query).to.equal('memory:>220000');
 
         await pieChart.expectPieSliceCount(5);
@@ -138,7 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await queryBar.getQueryString();
-        await queryBar.submitQuery();
         expect(query).to.equal('boop');
 
         await dashboardExpect.panelCount(2);
@@ -154,7 +151,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.get(url, true);
         await elasticChart.setNewChartUiDebugFlag(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await queryBar.submitQuery();
         await dashboardExpect.selectedLegendColorCount('#000000', 5);
       });
 
@@ -167,6 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url);
+        await elasticChart.setNewChartUiDebugFlag(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
