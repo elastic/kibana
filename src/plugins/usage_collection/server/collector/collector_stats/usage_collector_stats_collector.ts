@@ -8,7 +8,7 @@
 
 import { sumBy } from 'lodash';
 import type { UsageCollectorOptions } from '../usage_collector';
-import { schema } from './schema'
+import { schema } from './schema';
 
 export interface CollectorsStats {
   not_ready: { count: number; names: string[] };
@@ -16,9 +16,9 @@ export interface CollectorsStats {
   succeeded: { count: number; names: string[] };
   failed: { count: number; names: string[] };
 
-  total_duration: number,
-  total_is_ready_duration: number,
-  total_fetch_duration: number,
+  total_duration: number;
+  total_is_ready_duration: number;
+  total_fetch_duration: number;
   is_ready_duration_breakdown: Record<string, number>;
   fetch_duration_breakdown: Record<string, number>;
 }
@@ -26,9 +26,9 @@ export interface CollectorsStats {
 export interface CollectorsStatsCollectorParams {
   nonReadyCollectorTypes: string[];
   timedOutCollectorsTypes: string[];
-  isReadyExecutionDurationByType: {duration: number, type: string }[];
+  isReadyExecutionDurationByType: Array<{ duration: number; type: string }>;
 
-  fetchExecutions: {duration: number, type: string, status: 'failed' | 'success'}[];
+  fetchExecutions: Array<{ duration: number; type: string; status: 'failed' | 'success' }>;
 }
 
 export const usageCollectorsStatsCollector = ({
@@ -48,14 +48,20 @@ export const usageCollectorsStatsCollector = ({
       const totalIsReadyDuration = sumBy(isReadyExecutionDurationByType, 'duration');
       const totalFetchDuration = sumBy(fetchExecutions, 'duration');
 
-      const succeededCollectorTypes = fetchExecutions.filter(({ status }) => status === 'success').map(({ type }) => type);
-      const failedCollectorTypes = fetchExecutions.filter(({ status }) => status === 'failed').map(({ type }) => type);
-
+      const succeededCollectorTypes = fetchExecutions
+        .filter(({ status }) => status === 'success')
+        .map(({ type }) => type);
+      const failedCollectorTypes = fetchExecutions
+        .filter(({ status }) => status === 'failed')
+        .map(({ type }) => type);
 
       const collectorsStats: CollectorsStats = {
         // isReady and fetch stats
         not_ready: { count: nonReadyCollectorTypes.length, names: nonReadyCollectorTypes },
-        not_ready_timeout: { count: timedOutCollectorsTypes.length, names: timedOutCollectorsTypes },
+        not_ready_timeout: {
+          count: timedOutCollectorsTypes.length,
+          names: timedOutCollectorsTypes,
+        },
         succeeded: { count: succeededCollectorTypes.length, names: succeededCollectorTypes },
         failed: { count: failedCollectorTypes.length, names: failedCollectorTypes },
 
@@ -65,18 +71,21 @@ export const usageCollectorsStatsCollector = ({
         total_duration: totalIsReadyDuration + totalFetchDuration,
 
         // durations breakdown
-        is_ready_duration_breakdown: isReadyExecutionDurationByType.reduce((acc, {type, duration}) => {
-          acc[type] = duration;
-          return acc;
-        }, {} as Record<string, number>),
+        is_ready_duration_breakdown: isReadyExecutionDurationByType.reduce(
+          (acc, { type, duration }) => {
+            acc[type] = duration;
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
 
-        fetch_duration_breakdown: fetchExecutions.reduce((acc, {type, duration}) => {
-          acc[type] = duration
+        fetch_duration_breakdown: fetchExecutions.reduce((acc, { type, duration }) => {
+          acc[type] = duration;
           return acc;
         }, {} as Record<string, number>),
       };
 
       return collectorsStats;
-    }
-  }
-}
+    },
+  };
+};
