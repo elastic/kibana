@@ -23,13 +23,17 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
 import { getEncryptedFieldNotifyLabel } from './get_encrypted_field_notify_label';
 
-export interface ConfigFieldSchema {
+export interface CommonFieldSchema {
   id: string;
   label: string;
 }
 
-export interface SecretsFieldSchema extends ConfigFieldSchema {
-  password?: boolean;
+export interface ConfigFieldSchema extends CommonFieldSchema {
+  isUrlField?: boolean;
+}
+
+export interface SecretsFieldSchema extends CommonFieldSchema {
+  isPasswordField?: boolean;
 }
 
 interface SimpleConnectorFormProps {
@@ -39,15 +43,10 @@ interface SimpleConnectorFormProps {
   secretsFormSchema: SecretsFieldSchema[];
 }
 
-interface FormRowProps {
-  id: string;
-  label: string;
-  readOnly: boolean;
-  password?: boolean;
-}
+type FormRowProps = ConfigFieldSchema & SecretsFieldSchema & { readOnly: boolean };
 
 const UseField = getUseField({ component: Field });
-const { emptyField } = fieldValidators;
+const { emptyField, urlField } = fieldValidators;
 
 const PasswordField: React.FC<FormRowProps> = ({ id, label, readOnly }) => {
   return (
@@ -79,7 +78,13 @@ const PasswordField: React.FC<FormRowProps> = ({ id, label, readOnly }) => {
   );
 };
 
-const getFieldConfig = ({ label }: { label: string }) => ({
+const getFieldConfig = ({
+  label,
+  isUrlField = false,
+}: {
+  label: string;
+  isUrlField?: boolean;
+}) => ({
   label,
   validations: [
     {
@@ -92,18 +97,32 @@ const getFieldConfig = ({ label }: { label: string }) => ({
         )
       ),
     },
+    ...(isUrlField
+      ? [
+          {
+            validator: urlField(
+              i18n.translate(
+                'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
+                {
+                  defaultMessage: 'Invalid URL',
+                }
+              )
+            ),
+          },
+        ]
+      : []),
   ],
 });
 
-const FormRow: React.FC<FormRowProps> = ({ id, label, readOnly, password }) => {
+const FormRow: React.FC<FormRowProps> = ({ id, label, readOnly, isPasswordField, isUrlField }) => {
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          {!password ? (
+          {!isPasswordField ? (
             <UseField
               path={id}
-              config={getFieldConfig({ label })}
+              config={getFieldConfig({ label, isUrlField })}
               componentProps={{
                 euiFieldProps: { readOnly, fullWidth: true },
               }}
@@ -125,9 +144,9 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
 }) => {
   return (
     <>
-      {configFormSchema.map(({ id, label }, index) => (
+      {configFormSchema.map(({ id, label, isUrlField }, index) => (
         <>
-          <FormRow id={`config.${id}`} label={label} readOnly={readOnly} />
+          <FormRow id={`config.${id}`} label={label} readOnly={readOnly} isUrlField={isUrlField} />
           {index !== configFormSchema.length ? <EuiSpacer size="m" /> : null}
         </>
       ))}
@@ -165,9 +184,14 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {secretsFormSchema.map(({ id, label, password }, index) => (
+      {secretsFormSchema.map(({ id, label, isPasswordField }, index) => (
         <>
-          <FormRow id={`secrets.${id}`} label={label} readOnly={readOnly} password={password} />
+          <FormRow
+            id={`secrets.${id}`}
+            label={label}
+            readOnly={readOnly}
+            isPasswordField={isPasswordField}
+          />
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
         </>
       ))}
