@@ -119,7 +119,7 @@ export const useEndpointActionItems = (
                 },
                 children: (
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.actions.hostDetails"
+                    id="xpack.securitySolution.endpoint.actions.console"
                     defaultMessage="Launch responder"
                   />
                 ),
