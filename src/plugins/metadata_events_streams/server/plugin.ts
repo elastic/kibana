@@ -8,7 +8,6 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import type { MetadataEventsStreamsPluginSetup, MetadataEventsStreamsPluginStart } from './types';
-import { registerRoutes } from './routes';
 import { MetadataEventsStreams, MetadataEventsStreamsIndex } from './services';
 
 export class MetadataEventsStreamsPlugin
@@ -27,18 +26,13 @@ export class MetadataEventsStreamsPlugin
   }
 
   public setup({ http }: CoreSetup) {
-    this.logger.debug('Setting up UserContent plugin');
-
-    registerRoutes({
-      http,
-      metadataEventsStreams: this.metadataEventsStreams,
-    });
+    this.logger.debug('Setting up MetadataEventsStream plugin');
 
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('Starting up UserContent plugin');
+    this.logger.debug('Starting up MetadataEventsStream plugin');
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
