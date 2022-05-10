@@ -25,7 +25,7 @@ import { SummaryValueCell } from './table/summary_value_cell';
 import { PrevalenceCellRenderer } from './table/prevalence_cell';
 import { AddToTimelineCellRenderer } from './table/add_to_timeline_cell';
 
-const summaryColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
+const baseColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
   {
     field: 'title',
     truncateText: false,
@@ -38,6 +38,10 @@ const summaryColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
     render: SummaryValueCell,
     name: i18n.HIGHLIGHTED_FIELDS_VALUE,
   },
+];
+
+const allColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
+  ...baseColumns,
   {
     field: 'description',
     truncateText: true,
@@ -74,7 +78,10 @@ const SummaryViewComponent: React.FC<{
   goToTable: () => void;
   title: string;
   rows: AlertSummaryRow[];
-}> = ({ goToTable, rows, title }) => {
+  isReadOnly?: boolean;
+}> = ({ goToTable, rows, title, isReadOnly }) => {
+  const columns = isReadOnly ? baseColumns : allColumns;
+
   return (
     <div>
       <EuiFlexGroup>
@@ -93,7 +100,7 @@ const SummaryViewComponent: React.FC<{
       <SummaryTable
         data-test-subj="summary-view"
         items={rows}
-        columns={summaryColumns}
+        columns={columns}
         rowProps={rowProps}
         compressed
       />
