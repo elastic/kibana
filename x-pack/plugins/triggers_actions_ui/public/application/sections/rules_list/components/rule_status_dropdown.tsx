@@ -74,6 +74,9 @@ const usePreviousSnoozeInterval: (p?: string | null) => [string | null, (n: stri
   return [previousSnoozeInterval, storeAndSetPreviousSnoozeInterval];
 };
 
+const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean }) =>
+  Boolean((rule.isSnoozedUntil && rule.isSnoozedUntil.getTime() > Date.now()) || rule.muteAll);
+
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   rule,
   onRuleChanged,
@@ -86,7 +89,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   direction = 'column',
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
-  const [isSnoozed, setIsSnoozed] = useState<boolean>(Boolean(rule.isSnoozedUntil || rule.muteAll));
+  const [isSnoozed, setIsSnoozed] = useState<boolean>(isRuleSnoozed(rule));
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval(
     propsPreviousSnoozeInterval
   );
@@ -95,7 +98,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     setIsEnabled(rule.enabled);
   }, [rule.enabled]);
   useEffect(() => {
-    setIsSnoozed(Boolean(rule.isSnoozedUntil || rule.muteAll));
+    setIsSnoozed(isRuleSnoozed(rule));
   }, [rule]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -238,7 +241,7 @@ interface RuleStatusMenuProps {
   onClosePopover: () => void;
   isEnabled: boolean;
   isSnoozed: boolean;
-  snoozeEndTime?: string | null;
+  snoozeEndTime?: Date | null;
   previousSnoozeInterval: string | null;
 }
 
@@ -476,7 +479,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   );
 };
 
-const futureTimeToInterval = (time?: string | null) => {
+const futureTimeToInterval = (time?: Date | null) => {
   if (!time) return;
   const relativeTime = moment(time).locale('en').fromNow(true);
   const [valueStr, unitStr] = relativeTime.split(' ');
