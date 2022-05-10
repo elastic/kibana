@@ -7,6 +7,4 @@ set -euo pipefail
 .buildkite/scripts/build_kibana_plugins.sh
 .buildkite/scripts/post_build_kibana_plugins.sh
 .buildkite/scripts/post_build_kibana.sh
-
-source ".buildkite/scripts/steps/test/test_group_env.sh"
 .buildkite/scripts/saved_object_field_metrics.sh

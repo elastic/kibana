@@ -10,6 +10,7 @@ import { createConnectorUserActionBuilder } from './connector';
 import { createDescriptionUserActionBuilder } from './description';
 import { createPushedUserActionBuilder } from './pushed';
 import { createSettingsUserActionBuilder } from './settings';
+import { createSeverityUserActionBuilder } from './severity';
 import { createStatusUserActionBuilder } from './status';
 import { createTagsUserActionBuilder } from './tags';
 import { createTitleUserActionBuilder } from './title';
@@ -20,10 +21,7 @@ export const builderMap: UserActionBuilderMap = {
   tags: createTagsUserActionBuilder,
   title: createTitleUserActionBuilder,
   status: createStatusUserActionBuilder,
-  // TODO: Build severity user action
-  severity: () => ({
-    build: () => [],
-  }),
+  severity: createSeverityUserActionBuilder,
   pushed: createPushedUserActionBuilder,
   comment: createCommentUserActionBuilder,
   description: createDescriptionUserActionBuilder,
