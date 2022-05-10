@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.reporting.clickGenerateReportButton();
       const url = await PageObjects.reporting.getReportURL(60000);
-      const captureData = await PageObjects.reporting.getRawPdfReportData(url);
+      const captureData = await PageObjects.reporting.getRawScreenshotReportData(url);
 
       const pngSessionFilePath = await compareImages.writeToSessionFile(
         'capture_test_baseline_a',
