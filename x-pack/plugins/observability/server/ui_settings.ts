@@ -197,6 +197,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     description: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingDescription', {
       defaultMessage: 'Limit the number of services in a given service group',
     }),
-    schema: schema.number(),
+    schema: schema.number({ min: 1 }),
   },
 };
