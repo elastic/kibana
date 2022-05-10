@@ -9,6 +9,7 @@
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
 import { of } from 'rxjs';
+import { trackClicks } from './track_clicks';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { CoreContext } from '../core_system';
 import { getSessionId } from './get_session_id';
@@ -53,6 +54,7 @@ export class AnalyticsService {
     // and can benefit other consumers of the client.
     this.registerSessionIdContext();
     this.registerBrowserInfoAnalyticsContext();
+    trackClicks(this.analyticsClient, core.env.mode.dev);
   }
 
   public setup({ injectedMetadata }: AnalyticsServiceSetupDeps): AnalyticsServiceSetup {
