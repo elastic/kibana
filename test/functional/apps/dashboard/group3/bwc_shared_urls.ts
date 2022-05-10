@@ -42,6 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     `legendOpen:!t))),` +
     `viewMode:edit)`;
 
+  const enableNewChartLibraryDebug = async () => {
+    await elasticChart.setNewChartUiDebugFlag();
+    await queryBar.submitQuery();
+  };
+
   describe('bwc shared urls', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
@@ -94,8 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
+        enableNewChartLibraryDebug();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await elasticChart.setNewChartUiDebugFlag(true);
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
@@ -115,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await elasticChart.setNewChartUiDebugFlag(true);
+        enableNewChartLibraryDebug();
 
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
