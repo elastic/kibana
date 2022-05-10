@@ -217,7 +217,7 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-type BulkEditFields = keyof Pick<Rule, 'actions' | 'schedule' | 'tags' | 'throttle' | 'notifyWhen'>;
+type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags'>;
 
 export type BulkEditOperation =
   | {
@@ -1560,6 +1560,22 @@ export class RulesClient {
               }
             }
 
+            // validate schedule interval
+            if (attributes.schedule.interval) {
+              const isIntervalInvalid =
+                parseDuration(attributes.schedule.interval as string) <
+                this.minimumScheduleIntervalInMs;
+              if (isIntervalInvalid && this.minimumScheduleInterval.enforce) {
+                throw Error(
+                  `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
+                );
+              } else if (isIntervalInvalid && !this.minimumScheduleInterval.enforce) {
+                this.logger.warn(
+                  `Rule schedule interval (${attributes.schedule.interval}) for "${ruleType.id}" rule type with ID "${attributes.id}" is less than the minimum value (${this.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+                );
+              }
+            }
+
             const ruleParams = paramsModifier
               ? await paramsModifier(attributes.params as Params)
               : attributes.params;
@@ -1574,16 +1590,6 @@ export class RulesClient {
               rule.attributes.params,
               ruleType.validate?.params
             );
-
-            // validate schedule interval
-            if (attributes.schedule.interval) {
-              const intervalInMs = parseDuration(attributes.schedule.interval as string);
-              if (intervalInMs < this.minimumScheduleIntervalInMs) {
-                throw Boom.badRequest(
-                  `Error updating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval}`
-                );
-              }
-            }
 
             const {
               actions: rawAlertActions,

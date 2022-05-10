@@ -725,6 +725,35 @@ describe('bulkEdit()', () => {
     });
   });
 
+  describe('attributes validation', () => {
+    test('should not update saved object and return error if SO has interval less than minimum configured one when enforce = true', async () => {
+      rulesClient = new RulesClient({
+        ...rulesClientParams,
+        minimumScheduleInterval: { value: '3m', enforce: true },
+      });
+
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [],
+        paramsModifier: async (params) => {
+          params.index = ['test-index-*'];
+
+          return params;
+        },
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.rules).toHaveLength(0);
+      expect(result.errors[0].message).toBe(
+        'Error updating rule: the interval is less than the allowed minimum interval of 3m'
+      );
+    });
+  });
+
   describe('paramsModifier', () => {
     test('should update index pattern params', async () => {
       unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
