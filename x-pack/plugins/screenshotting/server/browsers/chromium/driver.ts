@@ -156,7 +156,39 @@ export class HeadlessChromiumDriver {
     return !this.page.isClosed();
   }
 
+  /**
+   * Despite having "preserveDrawingBuffer": "true" for WebGL driven canvas elements
+   * we may still get a blank canvas in PDFs. As a further mitigation
+   * we convert WebGL backed canvases to images and inline replace the canvas element.
+   * The visual result is identical.
+   *
+   * The drawback is that we are mutating the page and so if anything were to interact
+   * with it after we ran this function it may lead to issues. Ideally, once Chromium
+   * fixes how PDFs are generated we can remove this code. See:
+   *
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=809065
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=137576
+   */
+  private async workaroundWebGLDrivenCanvases() {
+    const canvases = await this.page.$$('canvas');
+    for (const canvas of canvases) {
+      await canvas.evaluate((thisCanvas: Element) => {
+        if (
+          (thisCanvas as HTMLCanvasElement).getContext('webgl') ||
+          (thisCanvas as HTMLCanvasElement).getContext('webgl2')
+        ) {
+          const newDiv = document.createElement('div');
+          const img = document.createElement('img');
+          img.src = (thisCanvas as HTMLCanvasElement).toDataURL('image/png');
+          newDiv.appendChild(img);
+          thisCanvas.parentNode!.replaceChild(newDiv, thisCanvas);
+        }
+      });
+    }
+  }
+
   async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+    await this.workaroundWebGLDrivenCanvases();
     return this.page.pdf({
       format: 'a4',
       preferCSSPageSize: true,
