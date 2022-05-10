@@ -128,7 +128,7 @@ export class HeadlessChromiumDriverFactory {
       logger.info(`Creating browser page driver`);
 
       const chromiumArgs = this.getChromiumArgs(viewport);
-      logger.warn(`Chromium launch args set to: ${chromiumArgs}`);
+      logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
       (async () => {
         let browser: Browser | undefined;
         try {
