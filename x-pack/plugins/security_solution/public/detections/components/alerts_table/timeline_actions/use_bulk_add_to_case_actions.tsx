@@ -23,12 +23,10 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
   const hasWritePermissions = casePermissions?.crud ?? false;
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
-    attachments: [],
     onClose,
     onSuccess,
   });
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
-    attachments: [],
     onClose,
     onRowClick: onSuccess,
   });
@@ -44,7 +42,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items, APP_ID) : [];
-              createCaseFlyout.open(caseAttachments);
+              createCaseFlyout.open({ attachments: caseAttachments });
             },
           },
           {
@@ -55,7 +53,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items, APP_ID) : [];
-              selectCaseModal.open(caseAttachments);
+              selectCaseModal.open({ attachments: caseAttachments });
             },
           },
         ]

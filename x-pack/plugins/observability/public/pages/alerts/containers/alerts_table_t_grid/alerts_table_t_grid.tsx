@@ -184,23 +184,19 @@ function ObservabilityActions({
       : [];
   }, [ecsData, cases.helpers, data]);
 
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
-    attachments: caseAttachments,
-  });
+  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout();
 
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
-    attachments: caseAttachments,
-  });
+  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal();
 
   const handleAddToNewCaseClick = useCallback(() => {
-    createCaseFlyout.open();
+    createCaseFlyout.open({ attachments: caseAttachments });
     closeActionsPopover();
-  }, [createCaseFlyout, closeActionsPopover]);
+  }, [createCaseFlyout, caseAttachments, closeActionsPopover]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
-    selectCaseModal.open();
+    selectCaseModal.open({ attachments: caseAttachments });
     closeActionsPopover();
-  }, [closeActionsPopover, selectCaseModal]);
+  }, [caseAttachments, closeActionsPopover, selectCaseModal]);
 
   const actionsMenuItems = useMemo(() => {
     return [
