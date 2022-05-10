@@ -38,16 +38,15 @@ export class DashboardPlugin
   public setup(core: CoreSetup, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
 
-    core.savedObjects.registerType(
-      createDashboardSavedObjectType({
+    plugins.userContent.registerContent({
+      soType: createDashboardSavedObjectType({
         migrationDeps: {
           embeddable: plugins.embeddable,
         },
-      })
-    );
-    core.capabilities.registerProvider(capabilitiesProvider);
+      }),
+    });
 
-    plugins.userContent.registerContent('dashboard');
+    core.capabilities.registerProvider(capabilitiesProvider);
 
     registerDashboardUsageCollector(plugins.usageCollection, plugins.embeddable);
 

@@ -6,13 +6,22 @@
  * Side Public License, v 1.
  */
 import { cloneDeep, isObjectLike } from 'lodash';
-import { Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
+import {
+  Logger,
+  SavedObjectsServiceSetup,
+  SavedObjectsType,
+  SavedObjectsTypeMappingDefinition,
+} from '@kbn/core/server';
 
-import { defaultUserContentAttributes } from '../../common';
+import { defaultUserContentAttributes, userContentCommonMappings } from '../../common';
 import { MetadataEventsService } from './metadata_events_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserContent {}
+
+export interface ContentConfig {
+  soType: SavedObjectsType;
+}
 
 interface Dependencies {
   metadataEventService: MetadataEventsService;
@@ -43,14 +52,21 @@ export class UserContentService {
    * @param contentType The Saved object "type" that correspond to a user generated content
    * @param content Optionally an object to configure the user content
    */
-  registerContent(contentType: string, content: UserContent = {}): void {
-    if (this.contents.has(contentType)) {
-      throw new Error(`User content type [${contentType}] is already registered`);
+  registerContent({ soType }: ContentConfig, content: UserContent = {}): void {
+    if (!this.savedObjects) {
+      throw new Error(`Can't register content. [savedObjects] dependency missing.`);
+    }
+    if (this.contents.has(soType.name)) {
+      throw new Error(`User content type [${soType.name}] is already registered`);
     }
 
-    this.contents.set(contentType, content);
+    validateMappings(soType.name, soType.mappings);
+    const updatedMappings = mergeUserContentCommonMappings(soType.mappings);
 
-    this.logger.debug(`New user generated content [${contentType}] registerd.`);
+    this.contents.set(soType.name, content);
+    this.savedObjects.registerType({ ...soType, mappings: updatedMappings });
+
+    this.logger.debug(`New user generated content [${soType.name}] registerd.`);
   }
 
   public get userContentTypes() {
@@ -59,7 +75,7 @@ export class UserContentService {
 
   private registerSavedObjectsHooks() {
     // Hook whenever user generated saved object(s) are accessed
-    this.savedObjects?.post('get', async (objects) => {
+    this.savedObjects!.post('get', async (objects) => {
       const registeredContents = this.userContentTypes;
       const filteredToContentType = objects.filter(({ type }) => registeredContents.includes(type));
 
@@ -77,7 +93,7 @@ export class UserContentService {
     });
 
     // Hook before saving a user generated saved object
-    this.savedObjects?.pre('create', async (objects) => {
+    this.savedObjects!.pre('create', async (objects) => {
       if (!objects) {
         return;
       }
@@ -124,3 +140,36 @@ export class UserContentService {
     };
   }
 }
+
+/**
+ * Validate that the provided mappings don't collide with the user generated
+ * common mappings.
+ *
+ * @param soType The saved object type to register
+ * @param mappings The saved object mappings to register
+ */
+const validateMappings = (soType: string, mappings: SavedObjectsTypeMappingDefinition) => {
+  Object.keys(mappings.properties).forEach((key) => {
+    if (userContentCommonMappings.hasOwnProperty(key)) {
+      throw new Error(`Mapping definition [${key}] for saved object type [${soType}] is reserved`);
+    }
+  });
+};
+
+/**
+ * Merge common mappings for user generated content.
+ *
+ * @param mappings The saved object mappings to register
+ * @returns The updated mappings with the common mappings for all user generated content
+ */
+const mergeUserContentCommonMappings = (
+  mappings: SavedObjectsTypeMappingDefinition
+): SavedObjectsTypeMappingDefinition => {
+  return {
+    ...mappings,
+    properties: {
+      ...mappings.properties,
+      ...userContentCommonMappings,
+    },
+  };
+};
