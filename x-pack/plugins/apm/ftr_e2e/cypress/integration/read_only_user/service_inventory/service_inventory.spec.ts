@@ -82,7 +82,7 @@ describe('When navigating to the service inventory', () => {
     cy.contains('h1', 'opbeans-node');
   });
 
-  describe.skip('Calls APIs', () => {
+  describe('Calls APIs', () => {
     beforeEach(() => {
       [...mainApiRequestsToIntercept, ...secondaryApiRequestsToIntercept].map(
         ({ endpoint, aliasName }) => {
