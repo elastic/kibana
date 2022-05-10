@@ -48,7 +48,10 @@ export class SpaceSelectorPageObject extends FtrService {
 
   async openSpacesNav() {
     this.log.debug('openSpacesNav()');
-    return await this.testSubjects.click('spacesNavSelector');
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('spacesNavSelector');
+      await this.find.byCssSelector('#headerSpacesMenuContent');
+    });
   }
 
   async clickManageSpaces() {
