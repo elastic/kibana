@@ -7,6 +7,7 @@
 import { omit, pick } from 'lodash';
 
 import { KibanaFeature } from '@kbn/features-plugin/server';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { transformElasticsearchRoleToRole } from './elasticsearch_role';
 import type { ElasticsearchRole } from './elasticsearch_role';
@@ -195,7 +196,8 @@ function testRoles(
       features,
       omit(role, 'name'),
       role.name,
-      'kibana-.kibana'
+      'kibana-.kibana',
+      loggerMock.create()
     );
     return pick(transformedRole, ['name', '_transform_error']);
   });
