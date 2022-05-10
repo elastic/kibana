@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
 import { attemptLoadDashboardByTitle } from '../lib';
@@ -32,6 +32,7 @@ import {
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
+import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
@@ -119,38 +120,16 @@ export const DashboardListing = ({
   const initialPageSize = core.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';
 
-  const tableColumns = useMemo(() => {
-    return [
-      {
-        field: 'title',
-        name: dashboardListingTable.getTitleColumnName(),
-        sortable: true,
-        render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
-          <EuiLink
-            href={getDashboardListItemLink(
-              core.application,
-              kbnUrlStateStorage,
-              core.uiSettings.get('state:storeInSessionStorage'),
-              record.id,
-              record.timeRestore
-            )}
-            data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
-          >
-            {field}
-          </EuiLink>
-        ),
-      },
-      {
-        field: 'description',
-        name: dashboardListingTable.getDescriptionColumnName(),
-        render: (field: string, record: { description: string }) => (
-          <span>{record.description}</span>
-        ),
-        sortable: true,
-      },
-      ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
-    ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
-  }, [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]);
+  const tableColumns = useMemo(
+    () =>
+      getTableColumns(
+        core.application,
+        kbnUrlStateStorage,
+        core.uiSettings.get('state:storeInSessionStorage'),
+        savedObjectsTagging
+      ),
+    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
+  );
 
   const createItem = useCallback(() => {
     if (!dashboardSessionStorage.dashboardHasUnsavedEdits()) {
@@ -357,4 +336,40 @@ export const DashboardListing = ({
       )}
     </>
   );
+};
+
+const getTableColumns = (
+  application: ApplicationStart,
+  kbnUrlStateStorage: IKbnUrlStateStorage,
+  useHash: boolean,
+  savedObjectsTagging?: SavedObjectsTaggingApi
+) => {
+  return [
+    {
+      field: 'title',
+      name: dashboardListingTable.getTitleColumnName(),
+      sortable: true,
+      render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
+        <EuiLink
+          href={getDashboardListItemLink(
+            application,
+            kbnUrlStateStorage,
+            useHash,
+            record.id,
+            record.timeRestore
+          )}
+          data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
+        >
+          {field}
+        </EuiLink>
+      ),
+    },
+    {
+      field: 'description',
+      name: dashboardListingTable.getDescriptionColumnName(),
+      render: (field: string, record: { description: string }) => <span>{record.description}</span>,
+      sortable: true,
+    },
+    ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
+  ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };
