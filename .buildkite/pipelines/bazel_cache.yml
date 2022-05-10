@@ -33,12 +33,3 @@ steps:
           queue: macos-arm
         timeout_in_minutes: 60
       YAML
-  - label: 'Bootstrap (Linux)'
-    agents:
-      queue: n2-4-spot
-    command: .buildkite/scripts/steps/bazel_cache/bootstrap_linux.sh
-    timeout_in_minutes: 15
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
