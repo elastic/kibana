@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { InferenceBase } from '../inference_base';
+import { InferenceBase, InferenceType } from '../inference_base';
 import { processResponse } from './common';
-import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
-import { getTextClassificationOutputComponent } from './text_classification_output';
-import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
+import { getLangIdentOutputComponent } from './lang_ident_output';
+import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
-export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
-  protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
+export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
+  protected inferenceType: InferenceType = 'classification';
 
   public async infer() {
     try {
@@ -49,6 +48,6 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   }
 
   public getOutputComponent(): JSX.Element {
-    return getTextClassificationOutputComponent(this);
+    return getLangIdentOutputComponent(this);
   }
 }
