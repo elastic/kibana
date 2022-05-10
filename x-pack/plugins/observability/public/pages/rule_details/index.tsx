@@ -318,21 +318,21 @@ export function RuleDetailsPage() {
 
                   <EuiSpacer size="l" />
 
-                  <EuiFlexGroup alignItems="center">
+                  <EuiFlexGroup>
                     <ItemTitleRuleSummary
                       translationKey="xpack.observability.ruleDetails.conditions"
                       defaultMessage="Conditions"
                     />
                     <EuiFlexItem grow={3}>
-                      <EuiText size="m">
+                      <EuiFlexGroup alignItems="center">
                         {hasEditButton ? (
                           <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
-                            <EuiText>{getRuleConditionsWording()}</EuiText>
+                            <EuiText size="s">{getRuleConditionsWording()}</EuiText>
                           </EuiButtonEmpty>
                         ) : (
-                          <EuiText>{getRuleConditionsWording()}</EuiText>
+                          <EuiText size="s">{getRuleConditionsWording()}</EuiText>
                         )}
-                      </EuiText>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
 
