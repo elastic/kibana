@@ -12,7 +12,7 @@ import { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
 import { ConfigType } from '../../config';
 import { ElementPosition } from '../get_element_position_data';
-import { Screenshot } from '../get_screenshots';
+import type { Screenshot } from '../types';
 
 export enum Actions {
   OPEN_URL = 'open-url',
@@ -25,6 +25,7 @@ export enum Actions {
   WAIT_RENDER = 'wait-for-render',
   WAIT_VISUALIZATIONS = 'wait-for-visualizations',
   GET_SCREENSHOT = 'get-screenshots',
+  PRINT_A4_PDF = 'print-a4-pdf',
   ADD_IMAGE = 'add-pdf-image',
   COMPILE = 'compile-pdf',
 }

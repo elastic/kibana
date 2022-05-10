@@ -87,6 +87,7 @@ export interface SearchBarOwnProps {
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
   showSubmitButton?: boolean;
+  isScreenshotMode?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -341,13 +342,16 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
   public render() {
     const { theme } = this.props;
+    const isScreenshotMode = this.props.isScreenshotMode === true;
     const styles = searchBarStyles(theme);
     const cssStyles = [
       styles.uniSearchBar,
       this.props.displayStyle && styles[this.props.displayStyle],
+      isScreenshotMode && styles.hidden,
     ];
 
     const classes = classNames('uniSearchBar', {
+      [`uniSearchBar--hidden`]: isScreenshotMode,
       [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
     });
 
@@ -470,6 +474,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
+          isScreenshotMode={this.props.isScreenshotMode}
         />
       </div>
     );

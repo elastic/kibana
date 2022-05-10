@@ -17,6 +17,7 @@ import {
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
+import { getFooterTemplate, getHeaderTemplate } from './templates';
 
 export type Context = Record<string, unknown>;
 
@@ -153,6 +154,18 @@ export class HeadlessChromiumDriver {
    */
   isPageOpen() {
     return !this.page.isClosed();
+  }
+
+  async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+    return this.page.pdf({
+      format: 'a4',
+      preferCSSPageSize: true,
+      scale: 1,
+      landscape: false,
+      displayHeaderFooter: true,
+      headerTemplate: await getHeaderTemplate({ title }),
+      footerTemplate: await getFooterTemplate({ logo }),
+    });
   }
 
   /*
