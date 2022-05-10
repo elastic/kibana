@@ -36,8 +36,8 @@ interface TourStepDefinition {
   anchorPosition: EuiTourStepProps['anchorPosition'];
   title: EuiTourStepProps['title'];
   content: EuiTourStepProps['content'];
-  imageName?: string;
-  isOptional?: boolean;
+  imageName: string;
+  imageAltText: string;
 }
 
 const tourStepDefinitions: TourStepDefinition[] = [
@@ -57,6 +57,10 @@ const tourStepDefinitions: TourStepDefinition[] = [
       />
     ),
     imageName: 'add_fields.gif',
+    imageAltText: i18n.translate('discover.dscTour.stepAddFields.imageAltText', {
+      defaultMessage:
+        'In the Available fields list, click the plus icon to toggle a field into the document table.',
+    }),
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns,
@@ -71,6 +75,9 @@ const tourStepDefinitions: TourStepDefinition[] = [
       />
     ),
     imageName: 'reorder_columns.gif',
+    imageAltText: i18n.translate('discover.dscTour.stepReorderColumns.imageAltText', {
+      defaultMessage: 'Use the Columns pop-up to drag the columns to the order you prefer.',
+    }),
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.sort,
@@ -85,6 +92,10 @@ const tourStepDefinitions: TourStepDefinition[] = [
       />
     ),
     imageName: 'sort.gif',
+    imageAltText: i18n.translate('discover.dscTour.stepSort.imageAltText', {
+      defaultMessage:
+        'Click a column header and select the desired sort order. Adjust a multi-field sort using the fields sorted pop-up.',
+    }),
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.changeRowHeight,
@@ -99,6 +110,10 @@ const tourStepDefinitions: TourStepDefinition[] = [
       />
     ),
     imageName: 'rows_per_line.gif',
+    imageAltText: i18n.translate('discover.dscTour.stepChangeRowHeight.imageAltText', {
+      defaultMessage:
+        'Click the display options icon to adjust the row height to fit the contents.',
+    }),
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.expandDocument,
@@ -125,6 +140,10 @@ const tourStepDefinitions: TourStepDefinition[] = [
       />
     ),
     imageName: 'expand.gif',
+    imageAltText: i18n.translate('discover.dscTour.stepExpand.imageAltText', {
+      defaultMessage:
+        'Click the expand icon to inspect and filter the fields in the document and view the document in context.',
+    }),
   },
 ];
 
@@ -146,7 +165,11 @@ const prepareTourSteps = (
         {stepDefinition.imageName && (
           <>
             <EuiSpacer size="s" />
-            <EuiImage alt="TODO" src={getAssetPath(stepDefinition.imageName)} size={300} />
+            <EuiImage
+              alt={stepDefinition.imageAltText}
+              src={getAssetPath(stepDefinition.imageName)}
+              size={300}
+            />
           </>
         )}
       </>
