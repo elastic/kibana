@@ -58,6 +58,10 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
   return action.type === 'filter' || action.type === 'index' || action.type === 'query';
 };
 
+/**
+ * Improve user input experience, temporal solution.
+ * Should be further fixed properly.
+ */
 const withDebounce = debounce((execute: () => void) => execute(), 0, {
   leading: false,
   trailing: true,
@@ -73,9 +77,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   useEffect(() => setSavedQuery(initialSavedQuery), [initialSavedQuery]);
 
-  /**
-   *  Local state needed to optimize user inputs responsiveness
-   */
   const [{ index: dataView, query, filter: filters, threshold, timeWindowSize, size }, dispatch] =
     useReducer<LocalStateReducer>(
       (currentState, action) => {
@@ -83,6 +84,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
           searchSource.setParent(undefined).setField(action.type, action.payload);
           setParam('searchConfiguration', searchSource.getSerializedFields());
         } else {
+          // debounce applied only to input params
           withDebounce(() => setParam(action.type, action.payload));
         }
         return { ...currentState, [action.type]: action.payload };
