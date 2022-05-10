@@ -9,6 +9,7 @@
   &--disabled {
     width: $euiSize;
     height: $euiSize;
+    margin: $euiSizeS 0;
   }
   &--delete {
     background-color: $euiColorLightShade;

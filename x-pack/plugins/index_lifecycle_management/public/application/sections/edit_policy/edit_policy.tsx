@@ -12,6 +12,8 @@ import { get } from 'lodash';
 
 import { useHistory } from 'react-router-dom';
 
+import './edit_policy.scss';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -236,18 +238,14 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         <EuiSpacer size="l" />
 
-        <EuiTimeline>
+        <EuiTimeline className="ilm-phases-timeline">
           <HotPhase />
 
           <WarmPhase />
 
           <ColdPhase />
 
-          {isAllowedByLicense && (
-            <>
-              <FrozenPhase />
-            </>
-          )}
+          {isAllowedByLicense && <FrozenPhase />}
 
           <DeletePhase />
         </EuiTimeline>
