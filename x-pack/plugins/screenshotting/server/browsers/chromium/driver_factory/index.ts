@@ -138,6 +138,12 @@ export class HeadlessChromiumDriverFactory {
 
       const chromiumArgs = this.getChromiumArgs();
       logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
+
+      // NOTE: _.defaults assigns to the target object, so we copy it.
+      // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
+      const viewport = _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT);
+      logger.debug(`Viewport is: width=${viewport.width} height=${viewport.height}`);
+
       (async () => {
         let browser: Browser | undefined;
         try {
@@ -148,16 +154,8 @@ export class HeadlessChromiumDriverFactory {
             ignoreHTTPSErrors: true,
             handleSIGHUP: false,
             args: chromiumArgs,
-
-            // We optionally set this at page creation to reduce the chances of
-            // browser reflow. In most cases only the height needs to be adjusted
-            // before taking a screenshot.
-            // NOTE: _.defaults assigns to the target object, so we copy it.
-            // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
-            defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
-            env: {
-              TZ: browserTimezone,
-            },
+            defaultViewport: viewport,
+            env: { TZ: browserTimezone },
           });
         } catch (err) {
           observer.error(
