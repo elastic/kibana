@@ -23,13 +23,13 @@ type PostCreateHook = (
   objects: Array<Awaited<ReturnType<SavedObjectsClient['create']>>>
 ) => Promise<void>;
 
-/** Map of hooks to execute **before** CRUD methods of the SavedObjectsClient */
+/** Map of hooks to execute **before** API methods of the SavedObjectsClient */
 export interface PreHooks {
   get: PreGetHook[];
   create: PreCreateHook[];
 }
 
-/** Map of hooks to execute **after** CRUD methods of the SavedObjectsClient */
+/** Map of hooks to execute **after** API methods of the SavedObjectsClient */
 export interface PostHooks {
   get: PostGetHook[];
   create: PostCreateHook[];
@@ -72,6 +72,7 @@ export class SavedObjectsHooksRegistry {
       ...this._preHooks,
     };
   }
+
   public get postHooks() {
     return {
       ...this._postHooks,
