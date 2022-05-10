@@ -48,9 +48,10 @@ import {
   ConnectorMappings,
   CasesByAlertId,
   CaseResolveResponse,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
   BulkCreateCommentRequest,
   CommentType,
+  CasesMetricsResponse,
 } from '@kbn/cases-plugin/common/api';
 import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
@@ -1009,13 +1010,13 @@ export const getCaseMetrics = async ({
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
-  features: string[];
+  features: string[] | string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CaseMetricsResponse> => {
+}): Promise<SingleCaseMetricsResponse> => {
   const { body: metricsResponse } = await supertest
     .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics/${caseId}`)
-    .query({ features: JSON.stringify(features) })
+    .query({ features })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 
@@ -1266,4 +1267,26 @@ export const calculateDuration = (closedAt: string | null, createdAt: string | n
   }
 
   return Math.floor(Math.abs((closedAtMillis - createdAtMillis) / 1000));
+};
+
+export const getCasesMetrics = async ({
+  supertest,
+  features,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  features: string[] | string;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesMetricsResponse> => {
+  const { body: metricsResponse } = await supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics`)
+    .query({ features, ...query })
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return metricsResponse;
 };

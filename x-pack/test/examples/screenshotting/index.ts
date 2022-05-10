@@ -22,8 +22,6 @@ export default function ({
 
   // FAILING: https://github.com/elastic/kibana/issues/131190
   describe.skip('Screenshotting Example', function () {
-    this.tags('ciGroup13');
-
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
