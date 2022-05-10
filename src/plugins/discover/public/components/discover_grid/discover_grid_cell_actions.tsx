@@ -7,11 +7,12 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { copyToClipboard, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
+import { useDiscoverServices } from '../../utils/use_discover_services';
+import { formatFieldValue } from '../../utils/format_value';
 
 function onFilterCell(
   context: GridContext,
@@ -19,12 +20,12 @@ function onFilterCell(
   columnId: EuiDataGridColumnCellActionProps['columnId'],
   mode: '+' | '-'
 ) {
-  const row = context.rows[rowIndex];
-  const flattened = flattenHit(row, context.indexPattern);
+  const row = context.rowsFlattened[rowIndex];
+  const value = String(row[columnId]);
   const field = context.indexPattern.fields.getByName(columnId);
 
-  if (flattened && field) {
-    context.onFilter(field, flattened[columnId], mode);
+  if (value && field) {
+    context.onFilter(field, value, mode);
   }
 }
 
@@ -84,10 +85,44 @@ export const FilterOutBtn = ({
   );
 };
 
+export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) => {
+  const { indexPattern: dataView, rowsFlattened, rows } = useContext(DiscoverGridContext);
+  const { fieldFormats } = useDiscoverServices();
+
+  const buttonTitle = i18n.translate('discover.grid.filterOutAria', {
+    defaultMessage: 'Copy value of column {column}',
+    values: { column: columnId },
+  });
+
+  return (
+    <Component
+      onClick={() => {
+        const rowFlattened = rowsFlattened[rowIndex];
+        const field = dataView.fields.getByName(columnId);
+        const value = rowFlattened[columnId];
+
+        const valueFormatted =
+          field?.type === '_source'
+            ? JSON.stringify(rowFlattened, null, 2)
+            : formatFieldValue(value, rows[rowIndex], fieldFormats, dataView, field, 'text');
+        copyToClipboard(valueFormatted);
+      }}
+      iconType="copyClipboard"
+      aria-label={buttonTitle}
+      title={buttonTitle}
+      data-test-subj="copyClipboardButton"
+    >
+      {i18n.translate('discover.grid.copyClipboardButton', {
+        defaultMessage: 'Copy to clipboard',
+      })}
+    </Component>
+  );
+};
+
 export function buildCellActions(field: DataViewField) {
   if (!field.filterable) {
-    return undefined;
+    return [CopyBtn];
   }
 
-  return [FilterInBtn, FilterOutBtn];
+  return [FilterInBtn, FilterOutBtn, CopyBtn];
 }

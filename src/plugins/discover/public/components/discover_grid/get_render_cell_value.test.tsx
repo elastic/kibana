@@ -79,7 +79,8 @@ describe('Discover grid cell rendering', function () {
       rowsSource.map(flatten),
       false,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -104,7 +105,8 @@ describe('Discover grid cell rendering', function () {
       rowsSource.map(flatten),
       false,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -118,7 +120,7 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span>"`
+      `"<div class=\\"euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive\\"><div class=\\"euiFlexItem\\"><span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Close popover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -129,7 +131,8 @@ describe('Discover grid cell rendering', function () {
       rowsFields.map(flatten),
       false,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -143,7 +146,7 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span>"`
+      `"<div class=\\"euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive\\"><div class=\\"euiFlexItem\\"><span class=\\"dscDiscoverGrid__cellPopoverValue\\">100</span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Close popover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -154,7 +157,8 @@ describe('Discover grid cell rendering', function () {
       rowsSource.map(flatten),
       false,
       ['extension', 'bytes'],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -228,7 +232,8 @@ describe('Discover grid cell rendering', function () {
       rowsSource.map(flatten),
       false,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -271,7 +276,8 @@ describe('Discover grid cell rendering', function () {
       rowsFields.map(flatten),
       true,
       ['extension', 'bytes'],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -350,7 +356,8 @@ describe('Discover grid cell rendering', function () {
       true,
       ['extension', 'bytes'],
       // this is the number of rendered items
-      1
+      1,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -428,7 +435,8 @@ describe('Discover grid cell rendering', function () {
       rowsFields.map(flatten),
       true,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -476,7 +484,8 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
       ['object.value', 'extension', 'bytes'],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -518,7 +527,8 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
       ['extension', 'bytes', 'object.value'],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -559,7 +569,8 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -594,7 +605,8 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -628,7 +640,8 @@ describe('Discover grid cell rendering', function () {
       rowsSource.map(flatten),
       false,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -653,7 +666,8 @@ describe('Discover grid cell rendering', function () {
       rowsSource.map(flatten),
       false,
       [],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
@@ -691,7 +705,8 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsUnmapped.map(flatten),
       true,
       ['unmapped'],
-      100
+      100,
+      jest.fn()
     );
     const component = shallow(
       <DiscoverGridCellValue
