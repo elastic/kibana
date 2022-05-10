@@ -14,6 +14,7 @@ rm -rf ~/.bazel-cache
 # use a temporary HOME directory that gets cleaned out between builds
 TMP_HOME="$WORKSPACE/tmp_home"
 rm -rf "$TMP_HOME"
+mkdir -p "$TMP_HOME"
 export HOME="$TMP_HOME"
 
 .buildkite/scripts/bootstrap.sh
