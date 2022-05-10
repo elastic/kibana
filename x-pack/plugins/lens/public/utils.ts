@@ -12,15 +12,9 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { search } from '@kbn/data-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type { Document } from './persistence/saved_object_store';
-import type {
-  Datasource,
-  DatasourceMap,
-  LensBrushEvent,
-  LensFilterEvent,
-  Visualization,
-  StateSetter,
-} from './types';
+import type { Datasource, DatasourceMap, Visualization, StateSetter } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
@@ -153,7 +147,7 @@ export function getRemoveOperation(
   return layerCount === 1 ? 'clear' : 'remove';
 }
 
-export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent['data']) {
+export function inferTimeField(context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']) {
   const tablesAndColumns =
     'table' in context
       ? [{ table: context.table, column: context.column }]
