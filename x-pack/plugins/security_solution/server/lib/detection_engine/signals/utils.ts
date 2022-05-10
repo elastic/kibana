@@ -704,7 +704,9 @@ export const createPreviewReturnType = (): PreviewReturnType => ({
   warningMessages: [],
 });
 
-export const createSearchAfterReturnType = ({
+export const createSearchAfterReturnType = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
   success,
   warning,
   searchAfterTimes,
@@ -738,7 +740,9 @@ export const createSearchAfterReturnType = ({
   };
 };
 
-export const createSearchResultReturnType = (): SignalSearchResponse => {
+export const createSearchResultReturnType = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>(): SignalSearchResponse<TAggregations> => {
   const hits: SignalSourceHit[] = [];
   return {
     took: 0,
@@ -800,7 +804,11 @@ export const mergeReturns = (
   });
 };
 
-export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
+export const mergeSearchResults = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>(
+  searchResults: Array<SignalSearchResponse<TAggregations>>
+) => {
   return searchResults.reduce((prev, next) => {
     const {
       took: existingTook,

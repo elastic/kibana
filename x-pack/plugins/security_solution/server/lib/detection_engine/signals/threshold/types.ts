@@ -6,11 +6,26 @@
  */
 
 import {
+  AggregationsAggregationContainer,
   AggregationsCompositeAggregate,
+  AggregationsCompositeAggregation,
   AggregationsCompositeBucket,
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
+  AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type ThresholdAggregate = AggregationsStringTermsAggregate | AggregationsCompositeAggregate;
 export type ThresholdBucket = AggregationsStringTermsBucket | AggregationsCompositeBucket;
+
+export type ThresholdAggregationContainer = Record<
+  string,
+  | {
+      composite: AggregationsCompositeAggregation;
+      aggs?: Record<string, AggregationsAggregationContainer>;
+    }
+  | {
+      terms: AggregationsTermsAggregation;
+      aggs?: Record<string, AggregationsAggregationContainer>;
+    }
+>;

@@ -7,7 +7,7 @@
 
 import {
   AggregateName,
-  AggregationsStringTermsAggregate,
+  AggregationsCompositeAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import {
@@ -25,6 +25,14 @@ import {
 import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import type { SignalSearchResponse } from '../types';
+import {
+  createSearchAfterReturnType,
+  createSearchAfterReturnTypeFromResponse,
+  createSearchResultReturnType,
+  mergeReturns,
+  mergeSearchResults,
+} from '../utils';
+import { ThresholdAggregate, ThresholdAggregationContainer } from './types';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -44,6 +52,10 @@ const shouldFilterByCardinality = (
 
 const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
 
+const isCompositeAggregate = (
+  aggregate: ThresholdAggregate | undefined
+): aggregate is AggregationsCompositeAggregate => aggregate != null && 'after_key' in aggregate;
+
 export const findThresholdSignals = async ({
   from,
   to,
@@ -55,7 +67,7 @@ export const findThresholdSignals = async ({
   buildRuleMessage,
   timestampOverride,
 }: FindThresholdSignalsParams): Promise<{
-  searchResult: SignalSearchResponse<Record<AggregateName, AggregationsStringTermsAggregate>>;
+  searchResult: SignalSearchResponse<Record<AggregateName, ThresholdAggregate>>;
   searchDuration: string;
   searchErrors: string[];
 }> => {
@@ -98,51 +110,78 @@ export const findThresholdSignals = async ({
     },
   };
 
-  // Generate a composite aggregation considering each threshold grouping field provided, appending leaf
-  // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
-  // 2) return the first and last hit for each bucket in order to eliminate dupes and reconstruct an accurate
-  // timeline.
-  const aggregations = {
-    thresholdTerms: hasThresholdFields(threshold)
-      ? {
-          composite: {
-            sources: threshold.field.map((term, i) => ({
-              [term]: {
-                terms: {
-                  field: term,
-                },
-              },
-            })),
-            size: 10000,
-          },
-          aggs: leafAggs,
-        }
-      : {
-          terms: {
-            script: {
-              source: '""', // Group everything in the same bucket
-              lang: 'painless',
-            },
-          },
-          aggs: leafAggs,
-        },
-  };
+  let sortKeys;
+  let result = createSearchAfterReturnType<Record<AggregateName, ThresholdAggregate>>();
+  let mergedSearchResults =
+    createSearchResultReturnType<Record<AggregateName, ThresholdAggregate>>();
 
-  // TODO: loop as long as we have sort ids
-  return singleSearchAfter({
-    aggregations,
-    searchAfterSortId: undefined,
-    timestampOverride,
-    index: inputIndexPattern,
-    from,
-    to,
-    services,
-    logger,
-    // @ts-expect-error refactor to pass type explicitly instead of unknown
-    filter,
-    pageSize: 0,
-    sortOrder: 'desc',
-    // trackTotalHits: !hasThresholdFields(threshold),
-    buildRuleMessage,
-  });
+  do {
+    // Generate a composite aggregation considering each threshold grouping field provided, appending leaf
+    // aggregations to 1) filter out buckets that don't meet the cardinality threshold, if provided, and
+    // 2) return the first and last hit for each bucket in order to eliminate dupes and reconstruct an accurate
+    // timeline.
+    const aggregations: ThresholdAggregationContainer = {
+      thresholdTerms: hasThresholdFields(threshold)
+        ? {
+            composite: {
+              sources: threshold.field.map((term, i) => ({
+                [term]: {
+                  terms: {
+                    field: term,
+                  },
+                },
+              })),
+              after: sortKeys,
+              size: 10000,
+            },
+            aggs: leafAggs,
+          }
+        : {
+            terms: {
+              script: {
+                source: '""', // Group everything in the same bucket
+                lang: 'painless',
+              },
+            },
+            aggs: leafAggs,
+          },
+    };
+
+    const { searchResult, searchDuration, searchErrors } = await singleSearchAfter<
+      Record<string, ThresholdAggregate>
+    >({
+      aggregations,
+      searchAfterSortId: undefined,
+      timestampOverride,
+      index: inputIndexPattern,
+      from,
+      to,
+      services,
+      logger,
+      // @ts-expect-error refactor to pass type explicitly instead of unknown
+      filter,
+      pageSize: 0,
+      sortOrder: 'desc',
+      buildRuleMessage,
+    });
+    const thresholdTerms = searchResult.aggregations?.thresholdTerms;
+    sortKeys = isCompositeAggregate(thresholdTerms) ? thresholdTerms.after_key : undefined;
+    mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
+    result = mergeReturns([
+      result,
+      createSearchAfterReturnTypeFromResponse({
+        searchResult: mergedSearchResults,
+        timestampOverride,
+      }),
+      createSearchAfterReturnType({
+        searchAfterTimes: [searchDuration],
+        errors: searchErrors,
+      }),
+    ]);
+  } while (sortKeys);
+  return {
+    searchResult: mergedSearchResults,
+    searchDuration: result.searchAfterTimes.reduce((a, b) => Number(a) + Number(b), 0).toFixed(2),
+    searchErrors: result.errors,
+  };
 };
