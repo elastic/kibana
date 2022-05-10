@@ -11,7 +11,7 @@ import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
-export interface CommandDefinition<TMeta = unknown> {
+export interface CommandDefinition<TMeta = any> {
   name: string;
   about: string;
   /**
@@ -64,7 +64,7 @@ export interface Command<TDefinition extends CommandDefinition = CommandDefiniti
   commandDefinition: TDefinition;
 }
 
-export interface CommandExecutionComponentProps<TStore = Record<string, unknown>, TMeta = unknown> {
+export interface CommandExecutionComponentProps<TStore = Record<string, unknown>, TMeta = any> {
   command: Command<CommandDefinition<TMeta>>;
 
   /**
@@ -100,7 +100,7 @@ export interface CommandExecutionComponentProps<TStore = Record<string, unknown>
  */
 export type CommandExecutionComponent<
   TStore = Record<string, unknown>,
-  TMeta = unknown
+  TMeta = any
 > = ComponentType<CommandExecutionComponentProps<TStore, TMeta>>;
 
 export interface ConsoleProps extends CommonProps {
