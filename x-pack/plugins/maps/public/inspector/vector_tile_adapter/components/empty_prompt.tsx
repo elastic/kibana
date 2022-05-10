@@ -16,7 +16,7 @@ export function EmptyPrompt() {
         <h2>
           <FormattedMessage
             id="xpack.maps.inspector.vectorTile.noRequestsLoggedTitle"
-            defaultMessage="No vector tile requests logged"
+            defaultMessage="No requests logged for vector tiles"
           />
         </h2>
       }
@@ -25,13 +25,7 @@ export function EmptyPrompt() {
           <p>
             <FormattedMessage
               id="xpack.maps.inspector.vectorTile.noRequestsLoggedDescription.mapHasNotLoggedAnyRequestsText"
-              defaultMessage="The map hasn't logged any vector tile requests (yet)."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.maps.inspector.vectorTile.noRequestsLoggedDescription.whatDoesItUsuallyMeanText"
-              defaultMessage="This usually means that there are no visible layers that request data from vector tile search API."
+              defaultMessage="This map did not request any data using the vector tile search API."
             />
           </p>
         </React.Fragment>
