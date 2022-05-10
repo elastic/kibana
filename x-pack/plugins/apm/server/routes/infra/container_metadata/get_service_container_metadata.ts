@@ -5,43 +5,63 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-
-import { CONTAINER_ID } from '../../../../common/elasticsearch_fieldnames';
-import { SearchResponse } from '@kbn/core/server';
+import { ElasticsearchClient, SearchResponse } from '@kbn/core/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  CONTAINER_ID,
+  KUBERNETES,
+} from '../../../../common/elasticsearch_fieldnames';
 
 type ESResponse = SearchResponse;
 
 export const getServiceContainerMetadata = async ({
   esClient,
-  containerId,
   index,
+  containerId,
+  start,
+  end,
 }: {
   esClient: ElasticsearchClient;
-  containerId: string;
   index?: string;
+  containerId: string;
+  start: number;
+  end: number;
 }) => {
+  // includeFrozen ?
+
   if (index) {
+    const should = [
+      { exists: { field: CONTAINER_ID } },
+      { exists: { field: KUBERNETES } },
+    ];
+    const filter = [
+      { term: { [CONTAINER_ID]: containerId } },
+      ...rangeQuery(start, end),
+    ];
+
     const response = await esClient.search<ESResponse>({
       index: [index],
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    match_phrase: {
-                      [CONTAINER_ID]: containerId,
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
+      _source: [KUBERNETES],
+      query: { bool: { filter, should } },
+      // query: {
+      //   bool: {
+      //     filter: [
+      //       {
+      //         bool: {
+      //           should: [
+      //             {
+      //               match_phrase: {
+      //                 [CONTAINER_ID]: containerId,
+      //               },
+      //             },
+      //           ],
+      //           minimum_should_match: 1,
+      //         },
+      //       },
+      //       ...rangeQuery(start, end),
+      //     ],
+      //   },
+      // },
     });
 
     return { response };
