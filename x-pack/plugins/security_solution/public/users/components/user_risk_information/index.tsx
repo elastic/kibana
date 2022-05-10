@@ -20,14 +20,16 @@ import {
   EuiSpacer,
   EuiBasicTableColumn,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScore } from '../../../common/components/severity/common';
 import { RiskSeverity } from '../../../../common/search_strategy';
+import { RISKY_USERS_DOC_LINK } from '../constants';
 
 const tableColumns: Array<EuiBasicTableColumn<TableItem>> = [
   {
@@ -102,22 +104,21 @@ const UserRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
           items={tableItems}
           data-test-subj="risk-information-table"
         />
-        {/* TODO PENDING ON USER RISK DOCUMENTATION
         <EuiSpacer size="l" />
         <FormattedMessage
-          id="xpack.securitySolution.hosts.hostRiskInformation.learnMore"
-          defaultMessage="You can learn more about host risk {hostsRiskScoreDocumentationLink}"
+          id="xpack.securitySolution.users.userRiskInformation.learnMore"
+          defaultMessage="You can learn more about user risk {usersRiskScoreDocumentationLink}"
           values={{
-            hostsRiskScoreDocumentationLink: (
-              <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
+            usersRiskScoreDocumentationLink: (
+              <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
                 <FormattedMessage
-                  id="xpack.securitySolution.hosts.hostRiskInformation.link"
+                  id="xpack.securitySolution.users.userRiskInformation.link"
                   defaultMessage="here"
                 />
               </EuiLink>
             ),
           }}
-        /> */}
+        />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

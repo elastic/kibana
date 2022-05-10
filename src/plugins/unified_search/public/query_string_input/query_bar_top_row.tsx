@@ -89,6 +89,7 @@ export interface QueryBarTopRowProps {
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
   suggestionsSize?: SuggestionsListSize;
+  isScreenshotMode?: boolean;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -477,6 +478,8 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
+    const isScreenshotMode = props.isScreenshotMode === true;
+
     return (
       <>
         <SharingMetaFields
@@ -484,25 +487,29 @@ export const QueryBarTopRow = React.memo(
           to={currentDateRange.to}
           dateFormat={uiSettings.get('dateFormat')}
         />
-        <EuiFlexGroup
-          className="kbnQueryBar"
-          direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
-          responsive={false}
-          gutterSize="s"
-          justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
-          wrap
-        >
-          {renderDataViewsPicker()}
-          <EuiFlexItem
-            grow={!shouldShowDatePickerAsBadge()}
-            style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320 }}
-          >
-            {renderQueryInput()}
-          </EuiFlexItem>
-          {shouldShowDatePickerAsBadge() && props.filterBar}
-          {renderUpdateButton()}
-        </EuiFlexGroup>
-        {!shouldShowDatePickerAsBadge() && props.filterBar}
+        {!isScreenshotMode && (
+          <>
+            <EuiFlexGroup
+              className="kbnQueryBar"
+              direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
+              responsive={false}
+              gutterSize="s"
+              justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
+              wrap
+            >
+              {renderDataViewsPicker()}
+              <EuiFlexItem
+                grow={!shouldShowDatePickerAsBadge()}
+                style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320 }}
+              >
+                {renderQueryInput()}
+              </EuiFlexItem>
+              {shouldShowDatePickerAsBadge() && props.filterBar}
+              {renderUpdateButton()}
+            </EuiFlexGroup>
+            {!shouldShowDatePickerAsBadge() && props.filterBar}
+          </>
+        )}
       </>
     );
   },

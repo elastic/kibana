@@ -32,8 +32,6 @@ import { FilterBar, FilterItems } from '../filter_bar';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
-import '../index.scss';
-
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
@@ -92,6 +90,7 @@ export interface SearchBarOwnProps {
   showSubmitButton?: boolean;
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
+  isScreenshotMode?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -346,13 +345,16 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
   public render() {
     const { theme } = this.props;
+    const isScreenshotMode = this.props.isScreenshotMode === true;
     const styles = searchBarStyles(theme);
     const cssStyles = [
       styles.uniSearchBar,
       this.props.displayStyle && styles[this.props.displayStyle],
+      isScreenshotMode && styles.hidden,
     ];
 
     const classes = classNames('uniSearchBar', {
+      [`uniSearchBar--hidden`]: isScreenshotMode,
       [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
     });
 
@@ -476,6 +478,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
           suggestionsSize={this.props.suggestionsSize}
+          isScreenshotMode={this.props.isScreenshotMode}
         />
       </div>
     );

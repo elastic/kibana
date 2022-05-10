@@ -36,7 +36,7 @@ import {
   SyntheticsRefreshContextProvider,
   SyntheticsStartupPluginsContextProvider,
 } from '../../contexts';
-import { kibanaService } from '../kibana_service';
+import { kibanaService } from '../../../../utils/kibana_service';
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
