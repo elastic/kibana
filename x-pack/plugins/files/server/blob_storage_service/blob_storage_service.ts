@@ -6,10 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { BlobStorage } from './types';
 import { ElasticsearchBlobStorage } from './adapters';
 
 export class BlobStorageService {
-  private adapters: { es: ElasticsearchBlobStorage };
+  private readonly adapters: { es: BlobStorage };
 
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {
     this.adapters = {
