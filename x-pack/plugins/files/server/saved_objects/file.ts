@@ -40,7 +40,10 @@ export const fileObjectType: SavedObjectsType<FileSavedObjectAttributes> = {
       content_ref: {
         type: 'keyword',
       },
-      content_type: {
+      mime: {
+        type: 'keyword',
+      },
+      extension: {
         type: 'keyword',
       },
       size: {

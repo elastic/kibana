@@ -43,9 +43,15 @@ export interface FileSavedObjectAttributes extends SavedObjectAttributes {
   content_ref?: string;
 
   /**
-   * MIME type of the file content
+   * MIME type of the file content, e.g.: image/png.
    */
-  content_type?: string;
+  mime?: string;
+
+  /**
+   * A file extension like .png or .jpeg which can be used to filter for specific
+   * file types when uploading to this target or when filtering across all files.
+   */
+  extension?: string;
 
   /**
    * Size of the contents in bytes.
