@@ -50,19 +50,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
-  const getCommandByPlatform = (plat: PLATFORM_TYPE) => {
-    switch (plat) {
-      case 'linux':
-        return linuxCommand;
-      case 'mac':
-        return macCommand;
-      case 'windows':
-        return windowsCommand;
-      case 'deb':
-        return linuxDebCommand;
-      case 'rpm':
-        return linuxRpmCommand;
-    }
+  const commandsByPlatform: Record<PLATFORM_TYPE, string> = {
+    linux: linuxCommand,
+    mac: macCommand,
+    windows: windowsCommand,
+    deb: linuxDebCommand,
+    rpm: linuxRpmCommand,
   };
 
   return (
@@ -96,7 +89,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               max-width: 1100px;
             `}
           >
-            <CommandCode>{getCommandByPlatform(platform)}</CommandCode>
+            <CommandCode>{commandsByPlatform[platform]}</CommandCode>
           </EuiCodeBlock>
         </>
       )}
