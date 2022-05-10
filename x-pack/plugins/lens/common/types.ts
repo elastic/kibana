@@ -12,6 +12,7 @@ import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 import {
   CategoryDisplay,
   layerTypes,
@@ -57,8 +58,7 @@ export type CustomPaletteParamsConfig = CustomPaletteParams & {
 
 export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
-// Shared by XY Chart and Heatmap as for now
-export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
+export type ValueLabelConfig = 'hide' | 'show';
 
 export type PieChartType = $Values<typeof PieChartTypes>;
 export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
@@ -84,7 +84,7 @@ export interface SharedPieLayerState {
   percentDecimals?: number;
   emptySizeRatio?: number;
   legendMaxLines?: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   truncateLegend?: boolean;
 }
 

@@ -54,9 +54,10 @@ export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
 export const ISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/isolate`;
 export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 
-/** Endpoint Actions Log Routes */
+/** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
+export const ACTION_DETAILS_ROUTE = `/api/endpoint/action/{action_id}`;
 
 export const failedFleetActionErrorCode = '424';
 

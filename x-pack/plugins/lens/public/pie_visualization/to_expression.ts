@@ -134,20 +134,22 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   layer,
   datasourceLayers,
   paletteService
-) => ({
-  labels: generateCommonLabelsAstArgs(state, attributes, layer),
-  buckets: operations.map((o) => o.columnId).map(prepareDimension),
-  metric: layer.metric ? [prepareDimension(layer.metric)] : [],
-  legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
-  legendPosition: [layer.legendPosition || Position.Right],
-  maxLegendLines: [layer.legendMaxLines ?? 1],
-  legendSize: layer.legendSize ? [layer.legendSize] : [],
-  nestedLegend: [!!layer.nestedLegend],
-  truncateLegend: [
-    layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
-  ],
-  palette: generatePaletteAstArguments(paletteService, state.palette),
-});
+) => {
+  return {
+    labels: generateCommonLabelsAstArgs(state, attributes, layer),
+    buckets: operations.map((o) => o.columnId).map(prepareDimension),
+    metric: layer.metric ? [prepareDimension(layer.metric)] : [],
+    legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
+    legendPosition: [layer.legendPosition || Position.Right],
+    maxLegendLines: [layer.legendMaxLines ?? 1],
+    legendSize: layer.legendSize ? [layer.legendSize] : [],
+    nestedLegend: [!!layer.nestedLegend],
+    truncateLegend: [
+      layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
+    ],
+    palette: generatePaletteAstArguments(paletteService, state.palette),
+  };
+};
 
 const generatePieVisAst: GenerateExpressionAstFunction = (...rest) => ({
   type: 'expression',
