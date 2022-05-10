@@ -44,23 +44,32 @@ export class UserContentService {
       });
   }
 
+  public async getUserContents() {
+    const contents = await firstValueFrom(this.contents.pipe(first(({ isLoaded }) => isLoaded)));
+    return contents.map;
+  }
+
+  public async getUserContentTypes(): Promise<string[]> {
+    const userContents = await this.getUserContents();
+
+    return [...userContents.keys()];
+  }
+
   /**
    * Get the table column for user generated content
    *
    * @param options Options to return the column
    * @returns EuiBasicTableColumn definition to be used in EuiMemoryTable
    */
-  async getUserContentTableColumnsDefinitions({
+  public async getUserContentTableColumnsDefinitions({
     contentType,
     selectedViewsRange,
   }: GetUserContentTableColumnsDefinitionsOptions): Promise<
     Array<EuiBasicTableColumn<Record<string, unknown>>>
   > {
-    const { map: userContent } = await firstValueFrom(
-      this.contents.pipe(first(({ isLoaded }) => isLoaded))
-    );
+    const userContents = await this.getUserContents();
 
-    if (!userContent.has(contentType)) {
+    if (!userContents.has(contentType)) {
       return [];
     }
 

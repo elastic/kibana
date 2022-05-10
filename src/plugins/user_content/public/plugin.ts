@@ -32,10 +32,11 @@ export class UserContentPlugin implements Plugin<UserContentPluginSetup, UserCon
     metadataEventService.init({ http });
     this.userContentService.init({ http });
 
-    const { getUserContentTableColumnsDefinitions } = this.userContentService;
+    const { getUserContentTypes, getUserContentTableColumnsDefinitions } = this.userContentService;
     const { registerEvent, bulkRegisterEvents } = metadataEventService;
 
     return {
+      getUserContentTypes: getUserContentTypes.bind(this.userContentService),
       ui: {
         getUserContentTableColumnsDefinitions: getUserContentTableColumnsDefinitions.bind(
           this.userContentService
