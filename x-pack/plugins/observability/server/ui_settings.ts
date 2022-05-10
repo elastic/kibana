@@ -191,11 +191,11 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [serviceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingName', {
-      defaultMessage: 'Service group services limit',
+      defaultMessage: 'Maximum services in a service group',
     }),
     value: 500,
     description: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingDescription', {
-      defaultMessage: 'Maximum number of services in a service group',
+      defaultMessage: 'Limit the number of services in a given service group',
     }),
     schema: schema.number(),
   },
