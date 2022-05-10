@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 
 import {
@@ -12,6 +13,7 @@ import {
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
 } from '../../../common/constants';
 import type { Role, RoleKibanaPrivilege } from '../../../common/model';
+import { getDetailedErrorMessage } from '../../errors';
 import { PrivilegeSerializer } from '../privilege_serializer';
 import { ResourceSerializer } from '../resource_serializer';
 
@@ -30,12 +32,14 @@ export function transformElasticsearchRoleToRole(
   features: KibanaFeature[],
   elasticsearchRole: Omit<ElasticsearchRole, 'name'>,
   name: string,
-  application: string
+  application: string,
+  logger: Logger
 ): Role {
   const kibanaTransformResult = transformRoleApplicationsToKibanaPrivileges(
     features,
     elasticsearchRole.applications,
-    application
+    application,
+    logger
   );
   return {
     name,
@@ -58,7 +62,8 @@ export function transformElasticsearchRoleToRole(
 function transformRoleApplicationsToKibanaPrivileges(
   features: KibanaFeature[],
   roleApplications: ElasticsearchRole['applications'],
-  application: string
+  application: string,
+  logger: Logger
 ) {
   const roleKibanaApplications = roleApplications.filter(
     (roleApplication) =>
@@ -294,7 +299,8 @@ function transformRoleApplicationsToKibanaPrivileges(
       success: true,
       value: transformResult,
     };
-  } catch {
+  } catch (e) {
+    logger.error(`Error transforming Elasticsearch role: ${getDetailedErrorMessage(e)}`);
     return {
       success: false,
     };
