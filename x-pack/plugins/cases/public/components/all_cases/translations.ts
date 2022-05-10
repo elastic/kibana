@@ -54,6 +54,10 @@ export const EXTERNAL_INCIDENT = i18n.translate('xpack.cases.caseTable.snInciden
   defaultMessage: 'External Incident',
 });
 
+export const SEVERITY = i18n.translate('xpack.cases.caseTable.severity', {
+  defaultMessage: 'Severity',
+});
+
 export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.incidentSystem', {
   defaultMessage: 'Incident Management System',
 });
