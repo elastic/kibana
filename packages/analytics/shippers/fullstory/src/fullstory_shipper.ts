@@ -128,4 +128,8 @@ export class FullStoryShipper implements IShipper {
         this.fullStoryApi.event(event.event_type, formatPayload(event.properties));
       });
   }
+
+  public shutdown() {
+    // No need to do anything here for now.
+  }
 }

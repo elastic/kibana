@@ -100,7 +100,6 @@
         { "id": "kibCoreSavedObjectsPluginApi" },
         { "id": "kibFieldFormatsPluginApi" },
         { "id": "kibDataPluginApi" },
-        { "id": "kibDataAutocompletePluginApi" },
         { "id": "kibDataEnhancedPluginApi" },
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },

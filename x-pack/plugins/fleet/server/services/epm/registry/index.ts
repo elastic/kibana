@@ -152,7 +152,8 @@ export async function fetchFindLatestPackageOrUndefined(
 export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
   const registryUrl = getRegistryUrl();
   try {
-    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
+    // Trailing slash avoids 301 redirect / extra hop
+    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
 
     return res;
   } catch (err) {
