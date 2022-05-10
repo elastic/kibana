@@ -1517,6 +1517,54 @@ describe('TaskManagerRunner', () => {
         `Skipping reschedule for task bar \"${id}\" due to the task expiring`
       );
     });
+
+    test('Prints debug logs on task start/end', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
+    });
+
+    test('Prints debug logs on task start/end even if it throws error', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw new Error();
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
+    });
   });
 
   interface TestOpts {
