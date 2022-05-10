@@ -6,10 +6,6 @@
  */
 
 import React, { createContext, useContext, useState } from 'react';
-import { EuiPortal } from '@elastic/eui';
-
-import { AgentEnrollmentFlyout } from '../components';
-import { FleetServerFlyout } from '../applications/fleet/components';
 
 const agentFlyoutContext = createContext<
   | {
