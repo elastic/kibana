@@ -17,7 +17,7 @@ DOCKER_BUILD_FOLDER=$(mktemp -d)
 
 if [[ "$DOCKER_CONTEXT" == "default" ]]; then
   DOCKER_CONTEXT_FILE="kibana-$FULL_VERSION-docker-build-context.tar.gz"
-elif [[ "$DOCKER_CONTEXT" == "cloud" ]];
+elif [[ "$DOCKER_CONTEXT" == "cloud" ]]; then
   DOCKER_CONTEXT_FILE="kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
 fi
 
