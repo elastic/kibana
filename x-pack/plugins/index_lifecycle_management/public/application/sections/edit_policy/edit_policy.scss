@@ -1,7 +1,7 @@
-.ilm-phases-timeline [class*="euiTimelineItemIcon-top"] {
+.ilm-phases-timeline [class*='euiTimelineItemIcon-top'] {
   padding-top: $euiSize;
 }
 
-.ilm-phases-timeline [class*="euiTimelineItemIcon-top"]::before {
+.ilm-phases-timeline [class*='euiTimelineItemIcon-top']::before {
   top: $euiSizeL;
 }
