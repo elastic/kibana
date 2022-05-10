@@ -20,6 +20,7 @@ import { RULE_LOAD_ERROR } from '../pages/rule_details/translations';
 interface UseFetchLast24hAlertsProps {
   http: HttpSetup;
   features: string;
+  ruleId: string;
 }
 interface FetchLast24hAlerts {
   isLoadingLast24hAlerts: boolean;
@@ -27,8 +28,7 @@ interface FetchLast24hAlerts {
   errorLast24hAlerts: string | undefined;
 }
 
-// THIS HOOK IS WIP !!!! due to the bugs below
-export function useFetchLast24hAlerts({ http, features }: UseFetchLast24hAlertsProps) {
+export function useFetchLast24hAlerts({ http, features, ruleId }: UseFetchLast24hAlertsProps) {
   const [last24hAlerts, setLast24hAlerts] = useState<FetchLast24hAlerts>({
     isLoadingLast24hAlerts: true,
     last24hAlerts: 0,
@@ -41,7 +41,13 @@ export function useFetchLast24hAlerts({ http, features }: UseFetchLast24hAlertsP
         http,
         features,
       });
-      const res = await fetchLast24hAlertsAPI({ http, index });
+      const { error, alertsCount } = await fetchLast24hAlertsAPI({ http, index, ruleId });
+      if (error) throw error;
+      setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
+        ...oldState,
+        last24hAlerts: alertsCount,
+        isLoading: false,
+      }));
     } catch (error) {
       setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
         ...oldState,
@@ -51,7 +57,7 @@ export function useFetchLast24hAlerts({ http, features }: UseFetchLast24hAlertsP
         ),
       }));
     }
-  }, [http, features]);
+  }, [http, features, ruleId]);
   useEffect(() => {
     fetchLast24hAlerts();
   }, [fetchLast24hAlerts]);
@@ -80,43 +86,55 @@ export async function fetchIndexNameAPI({
 export async function fetchLast24hAlertsAPI({
   http,
   index,
+  ruleId,
 }: {
   http: HttpSetup;
   index: string;
-}): Promise<any> {
-  const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
-    body: JSON.stringify({
-      // TODO: fix this bug on the API side (adding internal and wildcard) in another PR
-      index: `.internal${index}*`,
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                'kibana.alert.rule.uuid': '85735100-c552-11ec-a7f8-6bb0cd108662',
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: 'now-24h',
-                  lt: 'now',
+  ruleId: string;
+}): Promise<{
+  error: string | null;
+  alertsCount: number;
+}> {
+  try {
+    const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+      body: JSON.stringify({
+        index,
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'kibana.alert.rule.uuid': ruleId,
                 },
               },
-            },
-          ],
-        },
-      },
-      // TODO: this works on DevTool. But the API in returns BadRequest.
-      // message: "[request body]: invalid keys \"cardinality,{\"field\":\"kibana.alert.uuid\"}\""
-      aggs: {
-        alerts_count: {
-          cardinality: {
-            field: 'kibana.alert.uuid',
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-24h',
+                    lt: 'now',
+                  },
+                },
+              },
+            ],
           },
         },
-      },
-    }),
-  });
-  return res;
+        aggs: {
+          alerts_count: {
+            cardinality: {
+              field: 'kibana.alert.uuid',
+            },
+          },
+        },
+      }),
+    });
+    return {
+      error: null,
+      alertsCount: res.aggregations.alerts_count.value,
+    };
+  } catch (error) {
+    return {
+      error,
+      alertsCount: 0,
+    };
+  }
 }

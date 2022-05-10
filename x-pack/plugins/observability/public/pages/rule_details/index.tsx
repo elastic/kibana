@@ -67,6 +67,7 @@ export function RuleDetailsPage() {
   const { last24hAlerts, isLoadingLast24hAlerts, errorLast24hAlerts } = useFetchLast24hAlerts({
     http,
     features,
+    ruleId,
   });
   const { isLoadingRuleSummary, ruleSummary, errorRuleSummary, reloadRuleSummary } =
     useFetchRuleSummary({ ruleId, http });
@@ -272,7 +273,7 @@ export function RuleDetailsPage() {
                     defaultMessage="Alerts (last 24 h)"
                   />
                   {/* TODO: Get all the Alerts not only the Active ones */}
-                  <ItemValueRuleSummary extraSpace={false} itemValue={String(alerts.length)} />
+                  <ItemValueRuleSummary extraSpace={false} itemValue={String(last24hAlerts)} />
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />
                 <EuiSpacer size="l" />
