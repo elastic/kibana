@@ -34,7 +34,7 @@ export const registerRegisterEventRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const { body, params } = req;
 
-      metadataEventsService.registerEvent({
+      await metadataEventsService.registerEvent({
         type: params.eventType,
         data: {
           so_id: body.soId,

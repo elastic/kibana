@@ -38,7 +38,7 @@ export const registerBulkEventsRoute = (
         };
       });
 
-      metadataEventsService.bulkRegisterEvents(events);
+      await metadataEventsService.bulkRegisterEvents(events);
 
       return res.ok({
         body: 'ok',
