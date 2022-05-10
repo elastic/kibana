@@ -26555,7 +26555,6 @@
     "xpack.securitySolution.search.getStarted": "はじめて使う",
     "xpack.securitySolution.search.hosts": "ホスト",
     "xpack.securitySolution.search.hosts.anomalies": "異常",
-    "xpack.securitySolution.search.hosts.authentications": "認証",
     "xpack.securitySolution.search.hosts.events": "イベント",
     "xpack.securitySolution.search.hosts.externalAlerts": "外部アラート",
     "xpack.securitySolution.search.hosts.sessions": "セッション",

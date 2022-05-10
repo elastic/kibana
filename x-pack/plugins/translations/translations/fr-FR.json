@@ -26404,7 +26404,6 @@
     "xpack.securitySolution.search.getStarted": "Premiers pas",
     "xpack.securitySolution.search.hosts": "Hôtes",
     "xpack.securitySolution.search.hosts.anomalies": "Anomalies",
-    "xpack.securitySolution.search.hosts.authentications": "Authentifications",
     "xpack.securitySolution.search.hosts.events": "Événements",
     "xpack.securitySolution.search.hosts.externalAlerts": "Alertes externes",
     "xpack.securitySolution.search.hosts.sessions": "Sessions",

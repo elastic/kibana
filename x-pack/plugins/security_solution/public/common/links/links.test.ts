@@ -27,6 +27,25 @@ const mockCapabilities = {
   [SERVER_APP_ID]: { show: true },
 } as unknown as Capabilities;
 
+const fakePageId = 'fakePage';
+const testFeatureflag = 'detectionResponseEnabled';
+
+jest.mock('./app_links', () => {
+  const actual = jest.requireActual('./app_links');
+  const fakeLink = {
+    id: fakePageId,
+    title: 'test fake menu item',
+    path: 'test fake path',
+    hideWhenExperimentalKey: testFeatureflag,
+  };
+
+  return {
+    ...actual,
+    getAppLinks: () => [...actual.appLinks, fakeLink],
+    appLinks: [...actual.appLinks, fakeLink],
+  };
+});
+
 const findDeepLink = (id: string, deepLinks: AppDeepLink[]): AppDeepLink | null =>
   deepLinks.reduce((deepLinkFound: AppDeepLink | null, deepLink) => {
     if (deepLinkFound !== null) {
@@ -69,7 +88,6 @@ const casesPages = [
 ];
 const featureFlagPages = [
   SecurityPageName.detectionAndResponse,
-  SecurityPageName.hostsAuthentications,
   SecurityPageName.hostsRisk,
   SecurityPageName.usersRisk,
 ];
@@ -165,20 +183,23 @@ describe('security app link helpers', () => {
     });
     it('hideWhenExperimentalKey hides entry when key = true', async () => {
       const links = await getDeepLinks({
-        enableExperimental: { ...mockExperimentalDefaults, usersEnabled: true },
+        enableExperimental: { ...mockExperimentalDefaults, [testFeatureflag]: true },
         license: mockLicense,
         capabilities: mockCapabilities,
       });
-      expect(findDeepLink(SecurityPageName.hostsAuthentications, links)).toBeFalsy();
+      expect(findDeepLink(fakePageId, links)).toBeFalsy();
     });
+
     it('hideWhenExperimentalKey shows entry when key = false', async () => {
       const links = await getDeepLinks({
-        enableExperimental: { ...mockExperimentalDefaults, usersEnabled: false },
+        enableExperimental: { ...mockExperimentalDefaults, [testFeatureflag]: false },
         license: mockLicense,
         capabilities: mockCapabilities,
       });
-      expect(findDeepLink(SecurityPageName.hostsAuthentications, links)).toBeTruthy();
+
+      expect(findDeepLink(fakePageId, links)).toBeTruthy();
     });
+
     it('experimentalKey shows entry when key = false', async () => {
       const links = await getDeepLinks({
         enableExperimental: {
@@ -281,22 +302,25 @@ describe('security app link helpers', () => {
         expect(findNavLink(page, links)).toBeTruthy();
       });
     });
+
     it('hideWhenExperimentalKey hides entry when key = true', () => {
       const links = getNavLinkItems({
-        enableExperimental: { ...mockExperimentalDefaults, usersEnabled: true },
+        enableExperimental: { ...mockExperimentalDefaults, [testFeatureflag]: true },
         license: mockLicense,
         capabilities: mockCapabilities,
       });
-      expect(findNavLink(SecurityPageName.hostsAuthentications, links)).toBeFalsy();
+      expect(findNavLink(fakePageId as SecurityPageName, links)).toBeFalsy();
     });
+
     it('hideWhenExperimentalKey shows entry when key = false', () => {
       const links = getNavLinkItems({
-        enableExperimental: { ...mockExperimentalDefaults, usersEnabled: false },
+        enableExperimental: { ...mockExperimentalDefaults, [testFeatureflag]: false },
         license: mockLicense,
         capabilities: mockCapabilities,
       });
-      expect(findNavLink(SecurityPageName.hostsAuthentications, links)).toBeTruthy();
+      expect(findNavLink(fakePageId as SecurityPageName, links)).toBeTruthy();
     });
+
     it('experimentalKey shows entry when key = false', () => {
       const links = getNavLinkItems({
         enableExperimental: {

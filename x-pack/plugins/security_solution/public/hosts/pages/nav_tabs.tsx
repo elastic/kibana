@@ -16,11 +16,9 @@ const getTabsOnHostsUrl = (tabName: HostsTableType) => `${HOSTS_PATH}/${tabName}
 export const navTabsHosts = ({
   hasMlUserPermissions,
   isRiskyHostsEnabled,
-  isUsersEnabled,
 }: {
   hasMlUserPermissions: boolean;
   isRiskyHostsEnabled: boolean;
-  isUsersEnabled: boolean;
 }): HostsNavTab => {
   const hiddenTabs = [];
   const hostsNavTabs = {
@@ -28,12 +26,6 @@ export const navTabsHosts = ({
       id: HostsTableType.hosts,
       name: i18n.NAVIGATION_ALL_HOSTS_TITLE,
       href: getTabsOnHostsUrl(HostsTableType.hosts),
-      disabled: false,
-    },
-    [HostsTableType.authentications]: {
-      id: HostsTableType.authentications,
-      name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-      href: getTabsOnHostsUrl(HostsTableType.authentications),
       disabled: false,
     },
     [HostsTableType.uncommonProcesses]: {
@@ -81,10 +73,6 @@ export const navTabsHosts = ({
 
   if (!isRiskyHostsEnabled) {
     hiddenTabs.push(HostsTableType.risk);
-  }
-
-  if (isUsersEnabled) {
-    hiddenTabs.push(HostsTableType.authentications);
   }
 
   return omit(hiddenTabs, hostsNavTabs);

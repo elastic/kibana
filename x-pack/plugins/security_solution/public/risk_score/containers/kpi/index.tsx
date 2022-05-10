@@ -91,14 +91,13 @@ export const useUserRiskScoreKpi = ({
 }: UseUserRiskScoreKpiProps): RiskScoreKpi => {
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
-  const usersFeatureEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
   return useRiskScoreKpi({
     filterQuery,
     skip,
     defaultIndex,
     aggBy: 'user.name',
-    featureEnabled: usersFeatureEnabled,
+    featureEnabled: true,
   });
 };
 
@@ -132,14 +131,13 @@ const useRiskScoreKpi = ({
   skip,
   defaultIndex,
   aggBy,
-  featureEnabled,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { error, result, start, loading } = useRiskyHostsComplete();
   const { data } = useKibana().services;
   const isModuleDisabled = !!error && isIndexNotFoundError(error);
 
   useEffect(() => {
-    if (!skip && defaultIndex && featureEnabled) {
+    if (!skip && defaultIndex) {
       start({
         data,
         filterQuery,
@@ -147,7 +145,7 @@ const useRiskScoreKpi = ({
         aggBy,
       });
     }
-  }, [data, defaultIndex, start, filterQuery, skip, aggBy, featureEnabled]);
+  }, [data, defaultIndex, start, filterQuery, skip, aggBy]);
 
   const severityCount = useMemo(
     () => ({

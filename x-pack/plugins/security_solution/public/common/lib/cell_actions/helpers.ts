@@ -63,26 +63,18 @@ export const COLUMNS_WITH_LINKS = [
     columnId: INDICATOR_REFERENCE,
     label: i18n.VIEW_INDICATOR_REFERENCE,
   },
+  {
+    columnId: USER_NAME_FIELD_NAME,
+    label: i18n.VIEW_USER_SUMMARY,
+  },
 ];
 
 export const getLinkColumnDefinition = (
   columnIdToFind: string,
   fieldType?: string,
-  linkField?: string,
-  usersEnabled?: boolean
-) => {
-  // TOOD move user name field to COLUMNS_WITH_LINKS when experiment is finished
-  return (
-    usersEnabled
-      ? [
-          ...COLUMNS_WITH_LINKS,
-          {
-            columnId: USER_NAME_FIELD_NAME,
-            label: i18n.VIEW_USER_SUMMARY,
-          },
-        ]
-      : COLUMNS_WITH_LINKS
-  ).find((column) => {
+  linkField?: string
+) =>
+  COLUMNS_WITH_LINKS.find((column) => {
     if (column.columnId === columnIdToFind) {
       return true;
     } else if (
@@ -95,4 +87,3 @@ export const getLinkColumnDefinition = (
       return false;
     }
   });
-};

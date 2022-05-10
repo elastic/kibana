@@ -26588,7 +26588,6 @@
     "xpack.securitySolution.search.getStarted": "入门",
     "xpack.securitySolution.search.hosts": "主机",
     "xpack.securitySolution.search.hosts.anomalies": "异常",
-    "xpack.securitySolution.search.hosts.authentications": "身份验证",
     "xpack.securitySolution.search.hosts.events": "事件",
     "xpack.securitySolution.search.hosts.externalAlerts": "外部告警",
     "xpack.securitySolution.search.hosts.sessions": "会话",
