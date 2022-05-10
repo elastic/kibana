@@ -7,8 +7,9 @@
 
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent, AgentOptions } from 'https';
-import HttpProxyAgent from 'http-proxy-agent';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+// import { HttpProxyAgent } from 'http-proxy-agent';
+// import { HttpsProxyAgent } from 'https-proxy-agent';
+import { HttpProxyAgent, HttpsProxyAgent } from 'hpagent';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
@@ -114,14 +115,13 @@ export function getCustomAgents(
   // At this point, we are going to use a proxy, so we need new agents.
   // We will though, copy over the calculated ssl options from above, into
   // the https agent.
-  const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl);
+  const httpAgent = new HttpProxyAgent({
+    proxy: proxyUrl,
+  });
   const httpsAgent = new HttpsProxyAgent({
-    host: proxyUrl.hostname,
-    port: Number(proxyUrl.port),
-    protocol: proxyUrl.protocol,
-    headers: proxySettings.proxyHeaders,
-    // do not fail on invalid certs if value is false
-    ...proxyNodeSSLOptions,
+    proxy: proxyUrl,
+    rejectUnauthorized: false,
+    ALPNProtocols: ['http/1.1'],
   }) as unknown as HttpsAgent;
   // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
 
