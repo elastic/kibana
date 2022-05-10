@@ -98,6 +98,41 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
   },
+
+  {
+    name: SOURCE_NAMES.CONFLUENCE_CONNECTOR_PACKAGE,
+    serviceType: 'external',
+    baseServiceType: 'confluence_cloud',
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: true,
+      needsBaseUrl: true,
+      documentationUrl: docLinks.workplaceSearchConfluenceCloud, // TODO Update this when we have a doclink
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
+    },
+    objTypes: [
+      SOURCE_OBJ_TYPES.PAGES,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
+      SOURCE_OBJ_TYPES.BLOG_POSTS,
+      SOURCE_OBJ_TYPES.SPACES,
+    ],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    isBeta: true,
+  },
   {
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
