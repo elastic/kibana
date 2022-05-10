@@ -40,7 +40,7 @@ Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
 `xpack.fleet.agents.fleet_server.hosts`::
 Hostnames used by {agent} for accessing {fleet-server}.
 
-`xpack.fleet.agents.elasticsearch.hosts`::
+[[xpack-fleet-agents-elasticsearch-hosts]] `xpack.fleet.agents.elasticsearch.hosts`::
 Hostnames used by {agent} for accessing {es}.
 
 `xpack.fleet.agents.elasticsearch.ca_sha256`::
