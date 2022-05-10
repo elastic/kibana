@@ -70,13 +70,11 @@ describe('use cases add to new case flyout hook', () => {
   it('should dispatch the open action when invoked with attachments', () => {
     const { result } = renderHook(
       () => {
-        return useCasesAddToNewCaseFlyout({
-          attachments: [alertComment],
-        });
+        return useCasesAddToNewCaseFlyout({});
       },
       { wrapper }
     );
-    result.current.open();
+    result.current.open([alertComment]);
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,

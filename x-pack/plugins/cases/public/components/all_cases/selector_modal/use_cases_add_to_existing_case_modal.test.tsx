@@ -15,7 +15,6 @@ import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
-import { SupportedCaseAttachment } from '../../../types';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
@@ -35,23 +34,10 @@ const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
 const TestComponent: React.FC = () => {
-  const hook = useCasesAddToExistingCaseModal({
-    attachments: [alertComment as SupportedCaseAttachment],
-  });
+  const hook = useCasesAddToExistingCaseModal({});
 
   const onClick = () => {
-    hook.open();
-  };
-
-  return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
-};
-const TestComponentOpenWithAttachments: React.FC = () => {
-  const hook = useCasesAddToExistingCaseModal({
-    attachments: [alertComment as SupportedCaseAttachment],
-  });
-
-  const onClick = () => {
-    hook.open([alertComment, alertComment]);
+    hook.open([alertComment]);
   };
 
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
@@ -165,36 +151,6 @@ describe('use cases add to existing case modal hook', () => {
       expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
         caseId: 'test',
         data: [alertComment],
-        throwOnError: true,
-      });
-    });
-    expect(mockedToastSuccess).toHaveBeenCalled();
-  });
-
-  it('should call createAttachments with custom attachments when a case is selected and show a toast message', async () => {
-    const mockBulkCreateAttachments = jest.fn();
-    useCreateAttachmentsMock.mockReturnValueOnce({
-      createAttachments: mockBulkCreateAttachments,
-    });
-
-    const mockedToastSuccess = jest.fn();
-    useCasesToastMock.mockReturnValue({
-      showSuccessAttach: mockedToastSuccess,
-    });
-
-    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test' } as Case);
-      return null;
-    });
-
-    const result = appMockRender.render(<TestComponentOpenWithAttachments />);
-    userEvent.click(result.getByTestId('open-modal'));
-
-    await waitFor(() => {
-      expect(mockBulkCreateAttachments).toHaveBeenCalledTimes(1);
-      expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
-        caseId: 'test',
-        data: [alertComment, alertComment],
         throwOnError: true,
       });
     });

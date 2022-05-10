@@ -19,12 +19,10 @@ import { useCreateAttachments } from '../../../containers/use_create_attachments
 type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastTitle?: string;
   toastContent?: string;
-  attachments?: CaseAttachments;
 };
 
 export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
-    attachments: props.attachments,
     onClose: props.onClose,
     // TODO there's no need for onSuccess to be async. This will be fixed
     // in a follow up clean up
@@ -98,7 +96,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
           ...props,
           hiddenStatuses: [CaseStatuses.closed, StatusAll],
           onRowClick: (theCase?: Case) => {
-            const caseAttachments = attachments ?? props.attachments ?? [];
+            const caseAttachments = attachments ?? [];
             handleOnRowClick(theCase, caseAttachments);
           },
           onClose: () => {
