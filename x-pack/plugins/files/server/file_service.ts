@@ -15,9 +15,9 @@ import { fileObjectType } from './saved_objects';
 export class InternalFileService {
   constructor(
     private readonly savedObjectsSetup: SavedObjectsServiceSetup,
-    // @ts-ignore
+    // @ts-ignore FIXME:
     private readonly savedObjectsStart: SavedObjectsServiceStart,
-    // @ts-ignore
+    // @ts-ignore FIXME:
     private readonly blobStorageService: BlobStorageService,
     private readonly logger: Logger
   ) {}

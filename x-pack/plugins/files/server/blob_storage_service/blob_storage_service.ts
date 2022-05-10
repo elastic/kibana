@@ -10,7 +10,7 @@ import { BlobStorage } from './types';
 import { ElasticsearchBlobStorage } from './adapters';
 
 export class BlobStorageService {
-  // @ts-ignore
+  // @ts-ignore FIXME:
   private readonly adapters: { es: BlobStorage };
 
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {

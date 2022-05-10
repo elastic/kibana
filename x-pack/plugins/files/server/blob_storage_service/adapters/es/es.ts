@@ -20,7 +20,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
 
   private readonly indexName = BLOB_STORAGE_SYSTEM_INDEX_NAME;
 
-  // @ts-ignore
+  // @ts-ignore FIXME: Added this functionality prematurely, not being used anywhere yet
   private async createIndex() {
     if (await this.esClient.indices.exists({ index: this.indexName })) {
       this.logger.debug(`${this.indexName} already exists.`);
