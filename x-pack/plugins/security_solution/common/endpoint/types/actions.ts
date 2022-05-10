@@ -40,6 +40,11 @@ interface ActionResponseFields {
   completed_at: string;
   started_at: string;
 }
+
+/**
+ * An endpoint Action created in the Endpoint's `.logs-endpoint.actions-default` index.
+ * @since v7.16
+ */
 export interface LogsEndpointAction {
   '@timestamp': string;
   agent: {
@@ -52,6 +57,10 @@ export interface LogsEndpointAction {
   };
 }
 
+/**
+ * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
+ * @since v7.16
+ */
 export interface LogsEndpointActionResponse {
   '@timestamp': string;
   agent: {
@@ -72,6 +81,9 @@ export interface FleetActionResponseData {
   };
 }
 
+/**
+ * And endpoint action created in Fleet's `.fleet-actions`
+ */
 export interface EndpointAction {
   action_id: string;
   '@timestamp': string;
@@ -136,11 +148,17 @@ export interface ActivityLogActionResponse {
     data: EndpointActionResponse;
   };
 }
+
+/**
+ * One of the possible Response Action Log entry - Either a Fleet Action request, Fleet action response,
+ * Endpoint action request and/or endpoint action response.
+ */
 export type ActivityLogEntry =
   | ActivityLogAction
   | ActivityLogActionResponse
   | EndpointActivityLogAction
   | EndpointActivityLogActionResponse;
+
 export interface ActivityLog {
   page: number;
   pageSize: number;
@@ -168,3 +186,32 @@ export interface PendingActionsResponse {
 }
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
+
+export interface ActionDetails {
+  /** The action id */
+  id: string;
+  /**
+   * The Endpoint ID (and fleet agent ID - they are the same) for which the action was created for.
+   * This is an Array because the action could have been sent to multiple endpoints.
+   */
+  agents: string[];
+  /**
+   * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
+   * performed on the endpoint
+   */
+  command: string;
+  isExpired: boolean;
+  isCompleted: boolean;
+  /** The date when the initial action request was submitted */
+  startedAt: string;
+  /** The date when the action was completed (a response by the endpoint (not fleet) was received) */
+  completedAt: string | undefined;
+  /**
+   * The list of action log items (actions and responses) received thus far for the action.
+   */
+  logEntries: ActivityLogEntry[];
+}
+
+export interface ActionDetailsApiResponse {
+  data: ActionDetails;
+}
