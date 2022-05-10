@@ -14,7 +14,6 @@ import { useToasts } from './lib/kibana';
 import { useCaseViewNavigation } from './navigation';
 import { CaseAttachments } from '../types';
 import {
-  CASE_ALERT_PLURAL_SUCCESS_TOAST,
   CASE_ALERT_SUCCESS_SYNC_TEXT,
   CASE_ALERT_SUCCESS_TOAST,
   CASE_SUCCESS_TOAST,
@@ -63,11 +62,7 @@ function getToastTitle({
   }
   if (attachments !== undefined) {
     const alertsCount = getAlertsCount(attachments);
-    if (alertsCount === 1) {
-      return CASE_ALERT_SUCCESS_TOAST(theCase.title);
-    } else if (alertsCount > 1) {
-      return CASE_ALERT_PLURAL_SUCCESS_TOAST(theCase.title);
-    }
+    return CASE_ALERT_SUCCESS_TOAST(theCase.title, alertsCount);
   }
   return CASE_SUCCESS_TOAST(theCase.title);
 }
