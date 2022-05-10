@@ -89,7 +89,7 @@ export interface MapsPluginSetupDependencies {
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  screenshotMode: ScreenshotModePluginSetup;
+  screenshotMode?: ScreenshotModePluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -112,6 +112,7 @@ export interface MapsPluginStartDependencies {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -151,7 +152,7 @@ export class MapsPlugin
 
       // Override this when we know we are taking a screenshot (i.e. no user interaction)
       // to avoid a blank-canvas issue when rendering maps on a PDF
-      preserveDrawingBuffer: plugins.screenshotMode.isScreenshotMode()
+      preserveDrawingBuffer: plugins.screenshotMode?.isScreenshotMode()
         ? true
         : config.preserveDrawingBuffer,
     });
