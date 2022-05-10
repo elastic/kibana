@@ -28,6 +28,7 @@ import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
+import * as testHooks from './hooks';
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
 
@@ -62,6 +63,8 @@ export const IntegrationsAppContext: React.FC<{
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
+    // console.log({ testHooks });
+
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
@@ -81,9 +84,11 @@ export const IntegrationsAppContext: React.FC<{
                                     notifications={startServices.notifications}
                                     theme$={theme$}
                                   >
-                                    <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
-                                    <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                                    <Chat />
+                                    <FlyoutContextProvider>
+                                      <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                      {children}
+                                      <Chat />
+                                    </FlyoutContextProvider>
                                   </PackageInstallProvider>
                                 </AgentPolicyContextProvider>
                               </Router>

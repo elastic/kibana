@@ -40,6 +40,7 @@ import {
   UIExtensionsContext,
   FlyoutContextProvider,
 } from './hooks';
+import * as testHooks from './hooks';
 import { Error, Loading, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
 
@@ -235,6 +236,8 @@ export const FleetAppContext: React.FC<{
     theme$,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+
+    // console.log({ testHooks });
 
     return (
       <RedirectAppLinks application={startServices.application}>

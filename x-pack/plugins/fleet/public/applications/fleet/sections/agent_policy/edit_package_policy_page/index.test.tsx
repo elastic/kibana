@@ -25,6 +25,8 @@ import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
+// console.log({ actualHooks: jest.requireActual('../../../hooks') });
+
 jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
