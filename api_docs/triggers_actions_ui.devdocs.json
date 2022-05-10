@@ -54,7 +54,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly rulesDetailLogs: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly internalShareableComponentsSandbox: boolean; readonly rulesDetailLogs: boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false
@@ -1325,6 +1325,85 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.snoozeRule",
+        "type": "Function",
+        "tags": [],
+        "label": "snoozeRule",
+        "description": [],
+        "signature": [
+          "({\n  id,\n  snoozeEndTime,\n  http,\n}: { id: string; snoozeEndTime: string | -1; http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.snoozeRule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  snoozeEndTime,\n  http,\n}",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.snoozeRule.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.snoozeRule.$1.snoozeEndTime",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "snoozeEndTime",
+                "description": [],
+                "signature": [
+                  "string | -1"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.snoozeRule.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.ThresholdExpression",
         "type": "Function",
         "tags": [],
@@ -1413,6 +1492,72 @@
                   }
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.unsnoozeRule",
+        "type": "Function",
+        "tags": [],
+        "label": "unsnoozeRule",
+        "description": [],
+        "signature": [
+          "({ id, http }: { id: string; http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.unsnoozeRule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ id, http }",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.unsnoozeRule.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.unsnoozeRule.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
                 "deprecated": false
               }
             ]
@@ -2489,6 +2634,19 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              "DataViewsServicePublic"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.RuleTypeParamsExpressionProps.unifiedSearch",
             "type": "Object",
             "tags": [],
@@ -2551,6 +2709,19 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              "DataViewsServicePublic"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
@@ -2756,6 +2927,25 @@
                 "text": "RuleTypeParams"
               },
               ">) => void; has: (id: string) => boolean; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.alertsTableConfigurationRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "alertsTableConfigurationRegistry",
+            "description": [],
+            "signature": [
+              "{ list: () => ",
+              "AlertsTableConfigurationRegistry",
+              "[]; get: (id: string) => ",
+              "AlertsTableConfigurationRegistry",
+              "; register: (objectType: ",
+              "AlertsTableConfigurationRegistry",
+              ") => void; has: (id: string) => boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
@@ -3026,6 +3216,20 @@
         "description": [],
         "signature": [
           "string[]"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"triggersActions\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
         "deprecated": false,
@@ -3993,6 +4197,22 @@
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginSetup.alertsTableConfigurationRegistry",
+          "type": "Object",
+          "tags": [],
+          "label": "alertsTableConfigurationRegistry",
+          "description": [],
+          "signature": [
+            "TypeRegistry",
+            "<",
+            "AlertsTableConfigurationRegistry",
+            ">"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false
         }
       ],
       "lifecycle": "setup",
@@ -4042,6 +4262,22 @@
               "text": "RuleTypeModel"
             },
             "<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.alertsTableConfigurationRegistry",
+          "type": "Object",
+          "tags": [],
+          "label": "alertsTableConfigurationRegistry",
+          "description": [],
+          "signature": [
+            "TypeRegistry",
+            "<",
+            "AlertsTableConfigurationRegistry",
+            ">"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false
@@ -4216,6 +4452,40 @@
               "description": [],
               "signature": [
                 "AlertsTableProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleStatusDropdown",
+          "type": "Function",
+          "tags": [],
+          "label": "getRuleStatusDropdown",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "ComponentOpts",
+            ") => React.ReactElement<",
+            "ComponentOpts",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleStatusDropdown.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "ComponentOpts"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -4625,10 +4895,10 @@
         ],
         "label": "parseExperimentalConfigValue",
         "description": [
-          "\nParses the string value used in `xpack.triggersActionsUi.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
+          "\nParses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
         ],
         "signature": [
-          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; rulesDetailLogs: boolean; }>"
+          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; internalShareableComponentsSandbox: boolean; rulesDetailLogs: boolean; }>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -4785,7 +5055,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly rulesDetailLogs: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly internalShareableComponentsSandbox: boolean; readonly rulesDetailLogs: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -4814,10 +5084,10 @@
         "tags": [],
         "label": "allowedExperimentalValues",
         "description": [
-          "\nA list of allowed values that can be used in `xpack.triggersActionsUi.enableExperimental`.\nThis object is then used to validate and parse the value entered."
+          "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly rulesDetailLogs: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly internalShareableComponentsSandbox: boolean; readonly rulesDetailLogs: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
