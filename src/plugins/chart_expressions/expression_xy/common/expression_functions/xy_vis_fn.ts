@@ -8,6 +8,7 @@
 
 import moment from 'moment';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import { Datatable } from '@kbn/expressions-plugin';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn } from '../types';
@@ -21,7 +22,7 @@ import {
   validateValueLabels,
 } from './validate';
 
-function normalizeTable(data, xAccessor) {
+function normalizeTable(data: Datatable, xAccessor?: string) {
   if (xAccessor) {
     const xColumn = data.columns.find((col) => col.id === xAccessor);
     data.rows = data.rows.reduce((normalizedRows, row) => {

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import React, { useMemo, useRef } from 'react';
 import {
   Chart,
