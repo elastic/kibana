@@ -20,5 +20,7 @@ export interface BlobStorage {
 
   upload(fileName: string, content: ReadStream): Promise<{ uri: string }>;
 
+  download(uri: string): Promise<ReadStream>;
+
   delete(uri: string): Promise<void>;
 }

@@ -43,6 +43,10 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     throw new Error('Not implemented');
   }
 
+  async download(uri: string): Promise<ReadStream> {
+    throw new Error('Not implemented');
+  }
+
   async delete(uri: string): Promise<void> {
     throw new Error('Not implemented');
   }
