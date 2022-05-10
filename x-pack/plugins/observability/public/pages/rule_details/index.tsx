@@ -269,10 +269,18 @@ export function RuleDetailsPage() {
 
                 <EuiFlexGroup>
                   <ItemTitleRuleSummary
-                    translationKey="xpack.observability.ruleDetails.last24hAlerts"
-                    defaultMessage="Alerts (last 24 h)"
+                    translationKey="xpack.observability.ruleDetails.alerts"
+                    defaultMessage="Alerts"
                   />
-                  <ItemValueRuleSummary extraSpace={false} itemValue={String(last24hAlerts)} />
+                  <ItemValueRuleSummary
+                    extraSpace={false}
+                    itemValue={`${String(last24hAlerts)} ${i18n.translate(
+                      'xpack.observability.ruleDetails.last24h',
+                      {
+                        defaultMessage: '(last 24 h)',
+                      }
+                    )}`}
+                  />
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />
                 <EuiSpacer size="l" />
