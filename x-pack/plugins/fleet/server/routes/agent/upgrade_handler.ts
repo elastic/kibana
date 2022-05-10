@@ -20,13 +20,8 @@ import { defaultIngestErrorHandler } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../../common';
 import { isAgentUpgradeable } from '../../../common/services';
 import { getAgentById, getAgentsByKuery } from '../../services/agents';
-import {
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENTS_PREFIX,
-} from '../../constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, AGENTS_PREFIX } from '../../constants';
 
-import { agentPolicyService } from '../../services/agent_policy';
 import { getMaxVersion } from '../../../common/services/get_max_version';
 
 import { packagePolicyService } from '../../services/package_policy';
@@ -154,7 +149,7 @@ export const checkKibanaVersion = (
   } else {
     if (semverGt(version, kibanaVersion))
       throw new Error(
-        `cannot upgrade agent to ${versionToUpgradeNumber} because it is bigger than the installed kibana version ${kibanaVersionNumber}`
+        `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
       );
   }
 };
@@ -176,16 +171,11 @@ const checkFleetServerVersion = async (
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: fleet_server`,
   });
-  const fleetServerIds = packagePolicyData?.items.map((item) => item.id);
+  const agentPoliciesIds = packagePolicyData?.items.map((item) => item.policy_id);
 
-  const agentPolicies = await agentPolicyService.list(soClient, {
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${fleetServerIds
-      .map((id) => `"${id}"`)
-      .join(' or ')}`,
-    perPage: SO_SEARCH_LIMIT,
-    withPackagePolicies: true,
-  });
-  const agentPoliciesIds = agentPolicies.items?.map((item) => item.id);
+  if (agentPoliciesIds.length === 0) {
+    return;
+  }
 
   const { agents } = await getAgentsByKuery(esClient, {
     showInactive: false,
@@ -193,12 +183,16 @@ const checkFleetServerVersion = async (
     kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,
   });
 
+  if (agents.length === 0) {
+    return;
+  }
+
   const agentVersions = agents.map((agent) => agent.local_metadata.elastic.agent.version);
 
-  const fleetServerVersion = getMaxVersion(agentVersions);
+  const maxFleetServerVersion = getMaxVersion(agentVersions);
 
-  if (semverGt(versionToUpgradeNumber, fleetServerVersion))
+  if (semverGt(versionToUpgradeNumber, maxFleetServerVersion))
     throw new Error(
-      `cannot upgrade agent to ${versionToUpgradeNumber} because it is bigger than the latest fleet server version ${fleetServerVersion}`
+      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
     );
 };

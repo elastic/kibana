@@ -445,7 +445,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
       });
-      it('should not upgrade an non upgradeable agent during bulk_upgrade', async () => {
+      it('should not upgrade a non-upgradeable agent during bulk_upgrade', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
@@ -550,7 +550,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
         expect(typeof agent3data.body.item.upgrade_started_at).to.be('string');
       });
-      it('should respond 400 if trying to bulk upgrade to a version that does not match installed kibana version', async () => {
+      it('should respond 400 if trying to bulk upgrade to a version that is higher than the latest installed kibana version', async () => {
+        const kibanaVersion = await kibanaServer.version.get();
+        const higherVersion = semver.inc(kibanaVersion, 'patch');
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -576,13 +578,12 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             agents: ['agent1', 'agent2'],
-            version: '1.0.0',
+            version: higherVersion,
             force: true,
           })
           .expect(400);
       });
-
-      it('should respond 400 if trying to bulk upgrade to a version that does not match installed kibana version', async () => {
+      it('should throw an error if source_uri parameter is passed', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
