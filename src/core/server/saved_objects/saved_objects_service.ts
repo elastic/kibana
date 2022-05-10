@@ -165,9 +165,9 @@ export interface SavedObjectsServiceSetup {
    */
   getKibanaIndex: () => string;
 
-  /** Register a "pre" hook to execute before a SavedObject clients Crud method */
+  /** Register a "pre" hook to execute before a SavedObject clients API method ("get", "create"...) */
   pre: SavedObjectsHooksRegistry['pre'];
-  /** Register a "post" hook to execute before a SavedObject clients Crud method */
+  /** Register a "post" hook to execute after a SavedObject clients API method ("get", "create"...) */
   post: SavedObjectsHooksRegistry['post'];
 }
 
