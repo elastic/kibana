@@ -23,8 +23,6 @@ import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/
 import { createPerformanceObsHook } from './measure_duration';
 import { usageCollectorsStatsCollector } from './collector_stats';
 
-
-
 const SECOND_IN_MS = 1000;
 // Needed for the general array containing all the collectors. We don't really care about their types here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -136,7 +134,7 @@ export class CollectorSet {
         if (isReadyWithTimeout.timedout) {
           return { isReadyWithTimeout, collector };
         }
-        console.log('isReadyWithTimeout::', isReadyWithTimeout, collector.type )
+
         return {
           isReadyWithTimeout: {
             value: isReadyWithTimeout.value,
@@ -268,18 +266,21 @@ export class CollectorSet {
       nonReadyCollectorTypes,
       timedOutCollectorsTypes,
       isReadyExecutionDurationByType,
-      
+
       // fetch stats
       fetchExecutionDurationByType,
     });
 
     const usageCollectorStats = this.makeUsageCollector(usageCollectorStatsOptions);
-    
+
     return [
       ...fetchExecutions
         .map(({ type, fetchResult }) => ({ type, result: fetchResult }))
-        .filter((response): response is { type: string; result: unknown,  } => typeof response !== 'undefined'),
-      
+        .filter(
+          (response): response is { type: string; result: unknown } =>
+            typeof response !== 'undefined'
+        ),
+
       // Treat collector stats as just another "collector"
       { type: usageCollectorStats.type, result: usageCollectorStats.fetch(context) },
     ];

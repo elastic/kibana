@@ -8,7 +8,7 @@
 
 import { sumBy } from 'lodash';
 import type { UsageCollectorOptions } from '../usage_collector';
-import { schema } from './schema'
+import { schema } from './schema';
 
 export interface CollectorsStats {
   not_ready: { count: number; names: string[] };
@@ -16,9 +16,9 @@ export interface CollectorsStats {
   succeeded: { count: number; names: string[] };
   failed: { count: number; names: string[] };
 
-  total_duration: number,
-  total_is_ready_duration: number,
-  total_fetch_duration: number,
+  total_duration: number;
+  total_is_ready_duration: number;
+  total_fetch_duration: number;
   is_ready_duration_breakdown: Record<string, number>;
   fetch_duration_breakdown: Record<string, number>;
 }
@@ -51,7 +51,10 @@ export const usageCollectorsStatsCollector = ({
       const collectorsStats: CollectorsStats = {
         // isReady and fetch stats
         not_ready: { count: nonReadyCollectorTypes.length, names: nonReadyCollectorTypes },
-        not_ready_timeout: { count: timedOutCollectorsTypes.length, names: timedOutCollectorsTypes },
+        not_ready_timeout: {
+          count: timedOutCollectorsTypes.length,
+          names: timedOutCollectorsTypes,
+        },
         succeeded: { count: succeededCollectorTypes.length, names: succeededCollectorTypes },
         failed: { count: failedCollectorTypes.length, names: failedCollectorTypes },
 
@@ -61,10 +64,13 @@ export const usageCollectorsStatsCollector = ({
         total_duration: totalIsReadyDuration + totalFetchDuration,
 
         // durations breakdown
-        is_ready_duration_breakdown: isReadyExecutionDurationByType.reduce((acc, {type, duration}) => {
-          acc[type] = duration;
-          return acc;
-        }, {} as Record<string, number>),
+        is_ready_duration_breakdown: isReadyExecutionDurationByType.reduce(
+          (acc, { type, duration }) => {
+            acc[type] = duration;
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
 
         fetch_duration_breakdown: fetchExecutionDurationByType.reduce((acc, {type, duration}) => {
           acc[type] = duration
@@ -73,6 +79,6 @@ export const usageCollectorsStatsCollector = ({
       };
 
       return collectorsStats;
-    }
-  }
-}
+    },
+  };
+};

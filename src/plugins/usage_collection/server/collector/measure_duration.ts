@@ -10,7 +10,6 @@ import { PerformanceObserver, performance } from 'perf_hooks';
 export const createPerformanceObsHook = () => {
   const marks: Record<string, number> = {};
   const obs = new PerformanceObserver((items) => {
-    console.log('items.getEntries()::', items.getEntries())
     for (const { duration, name } of items.getEntries()) {
       marks[name] = duration;
     }
