@@ -112,6 +112,7 @@ export const getIndexPatterns = (): string[] => [
   'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
+  '-*elastic-cloud-logs-*',
 ];
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
