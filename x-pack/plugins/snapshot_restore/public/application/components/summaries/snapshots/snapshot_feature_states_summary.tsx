@@ -17,16 +17,12 @@ import { SnapshotConfig } from '../../../../../common/types';
 import { CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
 export const SnapshotFeatureStatesSummary: React.FunctionComponent<SnapshotConfig> = ({
-  featureStates = [],
+  featureStates,
 }) => {
-  {
-    /*
-    When a policy that includes featureStates: ['none'] is executed, the resulting
-    snapshot wont include the `none` in the featureStates array but instead will return
-    an empty array.
-  */
-  }
-  const hasNoFeatureStates = featureStates && featureStates.length === 0;
+  // When a policy that includes featureStates: ['none'] is executed, the resulting
+  // snapshot wont include the `none` in the featureStates array but instead will
+  // return an empty array.
+  const hasNoFeatureStates = !featureStates || featureStates.length === 0;
 
   return (
     <EuiFlexItem data-test-subj="snapshotFeatureStatesSummary">
@@ -37,7 +33,7 @@ export const SnapshotFeatureStatesSummary: React.FunctionComponent<SnapshotConfi
             defaultMessage="Include feature state"
           />
         </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
+        <EuiDescriptionListDescription data-test-subj="value">
           {hasNoFeatureStates ? (
             <FormattedMessage
               id="xpack.snapshotRestore.summary.snapshotNoFeatureStatesLabel"

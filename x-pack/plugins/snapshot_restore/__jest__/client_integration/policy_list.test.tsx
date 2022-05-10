@@ -54,8 +54,8 @@ describe('<PolicyList />', () => {
       // Assert against first resutl shown in the table, which should have includeGlobalState enabled
       await actions.clickPolicyAt(0);
 
-      expect(find('includeGlobalState').text()).toContain('Yes, including feature states from');
-      expect(find('policyDetail.featureStatesList').text()).toBe('kibana');
+      expect(find('includeGlobalState.value').text()).toEqual('Yes');
+      expect(find('policyFeatureStatesSummary.featureStatesList').text()).toEqual('kibana');
 
       // Close the flyout
       find('srPolicyDetailsFlyoutCloseButton').simulate('click');
@@ -68,7 +68,8 @@ describe('<PolicyList />', () => {
       // Now we will assert against the second result of the table which shouldnt have includeGlobalState
       await actions.clickPolicyAt(1);
 
-      expect(find('includeGlobalState.value').text()).toContain('No');
+      expect(find('includeGlobalState.value').text()).toEqual('No');
+      expect(find('policyFeatureStatesSummary.value').text()).toEqual('No');
     });
   });
 });

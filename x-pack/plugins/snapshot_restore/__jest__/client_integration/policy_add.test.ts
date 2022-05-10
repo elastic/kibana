@@ -224,39 +224,38 @@ describe('<PolicyAdd />', () => {
         component.update();
       });
 
-      test('Enabling include none disables dropdown', async () => {
+      test('Enabling include global state enables include feature state', async () => {
         const { find, component, form } = testBed;
 
-        // By default the toggle is enabled
-        expect(find('featureStatesDropdown').props().disabled).toBe(false);
-
+        // By default includeGlobalState is enabled, so we need to toogle twice
         await act(async () => {
-          form.toggleEuiSwitch('toggleIncludeNone');
-        });
-        component.update();
-
-        expect(find('featureStatesDropdown').props().disabled).toBe(true);
-      });
-
-      test('feature states dropdown is only shown when include global state is enabled', async () => {
-        const { exists, component, form } = testBed;
-
-        // By default the toggle is enabled
-        expect(exists('featureStatesDropdown')).toBe(true);
-
-        await act(async () => {
+          form.toggleEuiSwitch('globalStateToggle');
           form.toggleEuiSwitch('globalStateToggle');
         });
         component.update();
 
+        expect(find('featureStatesToggle').props().disabled).toBeUndefined();
+      });
+
+      test('feature states dropdown is only shown when include feature states is enabled', async () => {
+        const { exists, component, form } = testBed;
+
+        // By default the toggle is enabled
         expect(exists('featureStatesDropdown')).toBe(false);
+
+        await act(async () => {
+          form.toggleEuiSwitch('featureStatesToggle');
+        });
+        component.update();
+
+        expect(exists('featureStatesDropdown')).toBe(true);
       });
 
       test('include all features', async () => {
         const { actions, form, component } = testBed;
 
         await act(async () => {
-          form.toggleEuiSwitch('toggleIncludeNone');
+          form.toggleEuiSwitch('featureStatesToggle');
         });
         component.update();
 
@@ -275,13 +274,17 @@ describe('<PolicyAdd />', () => {
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
         expect(parsedReqBody.config).toEqual({
-          includeGlobalState: true,
-          featureStates: [FEATURE_STATES_NONE_OPTION],
+          featureStates: [],
         });
       });
 
       test('include some features', async () => {
-        const { actions, form } = testBed;
+        const { actions, form, component } = testBed;
+
+        await act(async () => {
+          form.toggleEuiSwitch('featureStatesToggle');
+        });
+        component.update();
 
         form.setComboBoxValue('featureStatesDropdown', 'kibana');
 
@@ -300,7 +303,6 @@ describe('<PolicyAdd />', () => {
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
         expect(parsedReqBody.config).toEqual({
-          includeGlobalState: true,
           featureStates: ['kibana'],
         });
       });
@@ -322,7 +324,7 @@ describe('<PolicyAdd />', () => {
         const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
-        expect(parsedReqBody.config).toEqual({ includeGlobalState: true });
+        expect(parsedReqBody.config).toEqual({});
       });
     });
 
@@ -360,9 +362,7 @@ describe('<PolicyAdd />', () => {
               snapshotName: SNAPSHOT_NAME,
               schedule: DEFAULT_POLICY_SCHEDULE,
               repository: repository.name,
-              config: {
-                includeGlobalState: true,
-              },
+              config: {},
               retention: {
                 expireAfterValue: Number(EXPIRE_AFTER_VALUE),
                 expireAfterUnit: 'd', // default

@@ -18,9 +18,9 @@ import { FEATURE_STATES_NONE_OPTION } from '../../../../../common/constants';
 import { CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
 export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig> = ({
-  featureStates = [],
+  featureStates,
 }) => {
-  const hasNoFeatureStates = featureStates?.includes(FEATURE_STATES_NONE_OPTION);
+  const hasNoFeatureStates = !featureStates || featureStates?.includes(FEATURE_STATES_NONE_OPTION);
   const hasAllFeatureStates = featureStates?.length === 0;
 
   return (
@@ -32,7 +32,7 @@ export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig>
             defaultMessage="Include feature state"
           />
         </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
+        <EuiDescriptionListDescription data-test-subj="value">
           {hasNoFeatureStates && (
             <FormattedMessage
               id="xpack.snapshotRestore.summary.policyNoFeatureStatesLabel"

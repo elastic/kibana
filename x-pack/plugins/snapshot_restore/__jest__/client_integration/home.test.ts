@@ -714,11 +714,9 @@ describe('<SnapshotRestoreHome />', () => {
           test('should show feature states if include global state is enabled', async () => {
             const { find } = testBed;
 
-            // Assert against first snapshot shown in the table, which should have includeGlobalState enabled
-            expect(find('includeGlobalState.value').text()).toContain(
-              'Yes, including feature states from'
-            );
-            expect(find('snapshotDetail.featureStatesList').text()).toBe('kibana');
+            // Assert against first snapshot shown in the table, which should have includeGlobalState and a featureState
+            expect(find('includeGlobalState.value').text()).toEqual('Yes');
+            expect(find('snapshotFeatureStatesSummary.featureStatesList').text()).toEqual('kibana');
 
             // Close the flyout
             find('snapshotDetail.closeButton').simulate('click');
@@ -730,10 +728,11 @@ describe('<SnapshotRestoreHome />', () => {
               snapshot2
             );
 
-            // Now we will assert against the second result of the table which shouldnt have includeGlobalState
+            // Now we will assert against the second result of the table which shouldnt have includeGlobalState or a featureState
             await testBed.actions.clickSnapshotAt(1);
 
-            expect(find('includeGlobalState.value').text()).toContain('No');
+            expect(find('includeGlobalState.value').text()).toEqual('No');
+            expect(find('snapshotFeatureStatesSummary.value').text()).toEqual('No');
           });
 
           describe('tabs', () => {
@@ -765,9 +764,10 @@ describe('<SnapshotRestoreHome />', () => {
                 );
                 expect(find('snapshotDetail.uuid.value').text()).toBe(uuid);
                 expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
-                expect(find('snapshotDetail.includeGlobalState.value').text()).toBe(
-                  'Yes, including feature states from: kibana'
-                );
+                expect(find('snapshotDetail.includeGlobalState.value').text()).toEqual('Yes');
+                expect(
+                  find('snapshotDetail.snapshotFeatureStatesSummary.featureStatesList').text()
+                ).toEqual('kibana');
                 expect(find('snapshotDetail.indices.title').text()).toBe(
                   `Indices (${indices.length})`
                 );

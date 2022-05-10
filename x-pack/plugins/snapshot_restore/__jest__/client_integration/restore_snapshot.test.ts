@@ -10,6 +10,7 @@ import { API_BASE_PATH } from '../../common';
 import { pageHelpers, setupEnvironment } from './helpers';
 import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
 import { REPOSITORY_NAME, SNAPSHOT_NAME } from './helpers/constant';
+import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 import * as fixtures from '../../test/fixtures';
 
 const {
@@ -85,31 +86,6 @@ describe('<RestoreSnapshot />', () => {
     });
   });
 
-  describe('global state', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(
-        REPOSITORY_NAME,
-        SNAPSHOT_NAME,
-        fixtures.getSnapshot({ featureStates: ['kibana'] })
-      );
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
-
-      testBed.component.update();
-    });
-
-    test('shows an info callout when include_global_state is enabled', () => {
-      const { exists, actions } = testBed;
-
-      expect(exists('systemIndicesInfoCallOut')).toBe(false);
-
-      actions.toggleGlobalState();
-
-      expect(exists('systemIndicesInfoCallOut')).toBe(true);
-    });
-  });
-
   describe('feature states', () => {
     test('when no feature states hide dropdown and show no features callout', async () => {
       httpRequestsMockHelpers.setGetSnapshotResponse(
@@ -131,7 +107,7 @@ describe('<RestoreSnapshot />', () => {
       expect(exists('noFeatureStatesCallout')).toBe(true);
     });
 
-    test('enabling include none disables dropdown', async () => {
+    test('shows an extra info callout when includeFeatureState is enabled and we have featureStates present in snapshot', async () => {
       httpRequestsMockHelpers.setGetSnapshotResponse(
         REPOSITORY_NAME,
         SNAPSHOT_NAME,
@@ -141,20 +117,16 @@ describe('<RestoreSnapshot />', () => {
       await act(async () => {
         testBed = await setup(httpSetup);
       });
+
       testBed.component.update();
 
-      const { component, form, actions, find } = testBed;
+      const { exists, actions } = testBed;
 
-      actions.toggleGlobalState();
+      expect(exists('systemIndicesInfoCallOut')).toBe(false);
 
-      expect(find('featureStatesDropdown').props().disabled).toBe(false);
+      await actions.toggleFeatureState();
 
-      await act(async () => {
-        form.toggleEuiSwitch('toggleIncludeNone');
-      });
-      component.update();
-
-      expect(find('featureStatesDropdown').props().disabled).toBe(true);
+      expect(exists('systemIndicesInfoCallOut')).toBe(true);
     });
   });
 
@@ -185,6 +157,7 @@ describe('<RestoreSnapshot />', () => {
         `${API_BASE_PATH}restore/${REPOSITORY_NAME}/${SNAPSHOT_NAME}`,
         expect.objectContaining({
           body: JSON.stringify({
+            featureStates: [FEATURE_STATES_NONE_OPTION],
             includeAliases: false,
           }),
         })

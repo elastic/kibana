@@ -51,6 +51,14 @@ const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
       component.update();
     },
 
+    async toggleFeatureState() {
+      await act(async () => {
+        form.toggleEuiSwitch('includeFeatureStatesSwitch');
+      });
+
+      component.update();
+    },
+
     toggleIncludeAliases() {
       act(() => {
         form.toggleEuiSwitch('includeAliasesSwitch');
@@ -100,6 +108,7 @@ export type RestoreSnapshotFormTestSubject =
   | 'includeGlobalStateSwitch'
   | 'includeAliasesSwitch'
   | 'featureStatesDropdown'
+  | 'includeFeatureStatesSwitch'
   | 'toggleIncludeNone'
   | 'nextButton'
   | 'restoreButton'
