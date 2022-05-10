@@ -1,5 +1,5 @@
 {
-    "job_id": "v3_linux_anomalous_process_all_hosts_ecs",
+    "job_id": "JOB_ID",
     "indices": [
       "INDEX_PATTERN_NAME"
     ],
@@ -59,36 +59,6 @@
                     "host.os.family": {
                       "query": "ubuntu",
                       "operator": "OR"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        ],
-        "must_not": [
-          {
-            "bool": {
-              "should": [
-                {
-                  "term": {
-                    "user.name": "jenkins-worker"
-                  }
-                },
-                {
-                  "term": {
-                    "user.name": "jenkins-user"
-                  }
-                },
-                {
-                  "term": {
-                    "user.name": "jenkins"
-                  }
-                },
-                {
-                  "wildcard": {
-                    "process.name": {
-                      "wildcard": "jenkins*"
                     }
                   }
                 }

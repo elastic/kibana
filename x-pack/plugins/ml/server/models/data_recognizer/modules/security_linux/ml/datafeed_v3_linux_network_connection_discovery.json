@@ -1,5 +1,5 @@
 {
-    "job_id": "v3_linux_network_connection_discovery",
+    "job_id": "JOB_ID",
     "indices": [
       "INDEX_PATTERN_NAME"
     ],

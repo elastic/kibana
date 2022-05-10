@@ -1,5 +1,5 @@
 {
-  "job_id": "v3_linux_system_process_discovery",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],

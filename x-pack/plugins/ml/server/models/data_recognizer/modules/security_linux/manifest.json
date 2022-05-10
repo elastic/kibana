@@ -1,7 +1,7 @@
 {
   "id": "security_linux_v3",
   "title": "Security: Linux",
-  "description": "This module contains all shipping ML jobs for Linux host based threat hunting and detection.",
+  "description": "Anomaly detection jobs for Linux host based threat hunting and detection.",
   "type": "linux data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*,logs-*",
@@ -45,8 +45,8 @@
   },
   "jobs": [
     {
-      "id": "v3_linux_anomalous_network_port_activity_ecs",
-      "file": "v3_linux_anomalous_network_port_activity_ecs.json"
+      "id": "v3_linux_anomalous_network_port_activity",
+      "file": "v3_linux_anomalous_network_port_activity.json"
     },
     {
       "id": "v3_linux_network_configuration_discovery",
@@ -77,12 +77,12 @@
       "file": "v3_linux_system_user_discovery.json"
     },
     {
-      "id": "v3_linux_anomalous_process_all_hosts_ecs",
-      "file": "v3_linux_anomalous_process_all_hosts_ecs.json"
+      "id": "v3_linux_anomalous_process_all_hosts",
+      "file": "v3_linux_anomalous_process_all_hosts.json"
     },
     {
-      "id": "v3_linux_anomalous_user_name_ecs",
-      "file": "v3_linux_anomalous_user_name_ecs.json"
+      "id": "v3_linux_anomalous_user_name",
+      "file": "v3_linux_anomalous_user_name.json"
     },
     {
       "id": "v3_linux_rare_metadata_process",
@@ -93,8 +93,8 @@
       "file": "v3_linux_rare_metadata_user.json"
     },
     {
-      "id": "v3_rare_process_by_host_linux_ecs",
-      "file": "v3_rare_process_by_host_linux_ecs.json"
+      "id": "v3_rare_process_by_host_linux",
+      "file": "v3_rare_process_by_host_linux.json"
     },
     {
       "id": "v3_linux_anomalous_network_activity",
@@ -103,9 +103,9 @@
   ],
   "datafeeds": [
     {
-      "id": "datafeed-v3_linux_anomalous_network_port_activity_ecs",
-      "file": "datafeed_v3_linux_anomalous_network_port_activity_ecs.json",
-      "job_id": "v3_linux_anomalous_network_port_activity_ecs"
+      "id": "datafeed-v3_linux_anomalous_network_port_activity",
+      "file": "datafeed_v3_linux_anomalous_network_port_activity.json",
+      "job_id": "v3_linux_anomalous_network_port_activity"
     },
     {
       "id": "datafeed-v3_linux_network_configuration_discovery",
@@ -143,14 +143,14 @@
       "job_id": "v3_linux_system_user_discovery"
     },
     {
-      "id": "datafeed-v3_linux_anomalous_process_all_hosts_ecs",
-      "file": "datafeed_v3_linux_anomalous_process_all_hosts_ecs.json",
-      "job_id": "v3_linux_anomalous_process_all_hosts_ecs"
+      "id": "datafeed-v3_linux_anomalous_process_all_hosts",
+      "file": "datafeed_v3_linux_anomalous_process_all_hosts.json",
+      "job_id": "v3_linux_anomalous_process_all_hosts"
     },
     {
-      "id": "datafeed-v3_linux_anomalous_user_name_ecs",
-      "file": "datafeed_v3_linux_anomalous_user_name_ecs.json",
-      "job_id": "v3_linux_anomalous_user_name_ecs"
+      "id": "datafeed-v3_linux_anomalous_user_name",
+      "file": "datafeed_v3_linux_anomalous_user_name.json",
+      "job_id": "v3_linux_anomalous_user_name"
     },
     {
       "id": "datafeed-v3_linux_rare_metadata_process",
@@ -163,9 +163,9 @@
       "job_id": "v3_linux_rare_metadata_user"
     },
     {
-      "id": "datafeed-v3_rare_process_by_host_linux_ecs",
-      "file": "datafeed_v3_rare_process_by_host_linux_ecs.json",
-      "job_id": "v3_rare_process_by_host_linux_ecs"
+      "id": "datafeed-v3_rare_process_by_host_linux",
+      "file": "datafeed_v3_rare_process_by_host_linux.json",
+      "job_id": "v3_rare_process_by_host_linux"
     },
     {
       "id": "datafeed-v3_linux_anomalous_network_activity",

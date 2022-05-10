@@ -1,5 +1,5 @@
 {
-    "job_id": "v3_linux_rare_user_compiler",
+    "job_id": "JOB_ID",
     "indices": [
       "INDEX_PATTERN_NAME"
     ],

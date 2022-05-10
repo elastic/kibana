@@ -1,5 +1,5 @@
 {
-  "job_id": "v3_windows_anomalous_script",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],

@@ -1,5 +1,5 @@
 {
-    "job_id": "v3_linux_anomalous_network_activity",
+    "job_id": "JOB_ID",
     "indices": [
       "INDEX_PATTERN_NAME"
     ],
