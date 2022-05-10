@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Router, Route, Switch, useHistory } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
-import { Loading, Error, AgentEnrollmentFlyout, FleetServerFlyout } from '../../components';
-import { useConfig, useFleetStatus, useBreadcrumbs, useAuthz, useGetSettings } from '../../hooks';
+import { Loading, Error } from '../../components';
+import {
+  useConfig,
+  useFleetStatus,
+  useBreadcrumbs,
+  useAuthz,
+  useGetSettings,
+  useFlyoutContext,
+} from '../../hooks';
 import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
 import { AgentListPage } from './agent_list_page';
@@ -21,29 +28,15 @@ import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal';
 
-// TODO: Move all instances of toggling these flyouts to a global context object to avoid cases in which
-// we can render duplicate "stacked" flyouts
-export const agentFlyoutContext = createContext<
-  | {
-      openEnrollmentFlyout: () => void;
-      closeEnrollmentFlyout: () => void;
-      openFleetServerFlyout: () => void;
-      closeFleetServerFlyout: () => void;
-    }
-  | undefined
->(undefined);
-
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
   const history = useHistory();
   const { agents } = useConfig();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
   const fleetStatus = useFleetStatus();
+  const flyoutContext = useFlyoutContext();
 
   const settings = useGetSettings();
-
-  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
-  const [isFleetServerFlyoutOpen, setIsFleetServerFlyoutOpen] = useState(false);
 
   const [fleetServerModalVisible, setFleetServerModalVisible] = useState(false);
   const onCloseFleetServerModal = useCallback(() => {
@@ -100,7 +93,7 @@ export const AgentsApp: React.FunctionComponent = () => {
           <EuiButton
             fill
             iconType="plusInCircle"
-            onClick={() => setIsEnrollmentFlyoutOpen(true)}
+            onClick={() => flyoutContext.openEnrollmentFlyout()}
             data-test-subj="addAgentBtnTop"
           >
             <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
@@ -111,49 +104,24 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) : undefined;
 
   return (
-    <agentFlyoutContext.Provider
-      value={{
-        openEnrollmentFlyout: () => setIsEnrollmentFlyoutOpen(true),
-        closeEnrollmentFlyout: () => setIsEnrollmentFlyoutOpen(false),
-        openFleetServerFlyout: () => setIsFleetServerFlyoutOpen(true),
-        closeFleetServerFlyout: () => setIsFleetServerFlyoutOpen(false),
-      }}
-    >
-      <Router history={history}>
-        <Switch>
-          <Route path={FLEET_ROUTING_PATHS.agent_details}>
-            <AgentDetailsPage />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.agents}>
-            <DefaultLayout section="agents" rightColumn={rightColumn}>
-              {fleetServerModalVisible && (
-                <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
-              )}
-              {hasOnlyFleetServerMissingRequirement ? (
-                <FleetServerRequirementPage showEnrollmentRecommendation={false} />
-              ) : (
-                <AgentListPage />
-              )}
-            </DefaultLayout>
-          </Route>
-        </Switch>
-
-        {isEnrollmentFlyoutOpen && (
-          <EuiPortal>
-            <AgentEnrollmentFlyout
-              defaultMode="standalone"
-              isIntegrationFlow={true}
-              onClose={() => setIsEnrollmentFlyoutOpen(false)}
-            />
-          </EuiPortal>
-        )}
-
-        {isFleetServerFlyoutOpen && (
-          <EuiPortal>
-            <FleetServerFlyout onClose={() => setIsFleetServerFlyoutOpen(false)} />
-          </EuiPortal>
-        )}
-      </Router>
-    </agentFlyoutContext.Provider>
+    <Router history={history}>
+      <Switch>
+        <Route path={FLEET_ROUTING_PATHS.agent_details}>
+          <AgentDetailsPage />
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.agents}>
+          <DefaultLayout section="agents" rightColumn={rightColumn}>
+            {fleetServerModalVisible && (
+              <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
+            )}
+            {hasOnlyFleetServerMissingRequirement ? (
+              <FleetServerRequirementPage showEnrollmentRecommendation={false} />
+            ) : (
+              <AgentListPage />
+            )}
+          </DefaultLayout>
+        </Route>
+      </Switch>
+    </Router>
   );
 };
