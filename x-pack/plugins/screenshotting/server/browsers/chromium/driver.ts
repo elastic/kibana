@@ -168,6 +168,8 @@ export class HeadlessChromiumDriver {
    *
    * https://bugs.chromium.org/p/chromium/issues/detail?id=809065
    * https://bugs.chromium.org/p/chromium/issues/detail?id=137576
+   *
+   * Idea adapted from: https://github.com/puppeteer/puppeteer/issues/1731#issuecomment-864345938
    */
   private async workaroundWebGLDrivenCanvases() {
     const canvases = await this.page.$$('canvas');
