@@ -25,13 +25,13 @@ import {
 function normalizeTable(data: Datatable, xAccessor?: string) {
   if (xAccessor) {
     const xColumn = data.columns.find((col) => col.id === xAccessor);
-    data.rows = data.rows.reduce((normalizedRows, row) => {
+    data.rows = data.rows.reduce<Datatable['rows']>((normalizedRows, row) => {
       return [
         ...normalizedRows,
         {
           ...row,
           [xAccessor]:
-            xColumn.meta.type === 'date' && typeof row[xAccessor] === 'string'
+            xColumn?.meta.type === 'date' && typeof row[xAccessor] === 'string'
               ? moment(row[xAccessor]).valueOf()
               : row[xAccessor],
         },
