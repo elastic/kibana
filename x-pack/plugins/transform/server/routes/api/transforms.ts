@@ -13,10 +13,9 @@ import {
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
@@ -74,7 +73,7 @@ enum TRANSFORM_ACTIONS {
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
-  const { router, license } = routeDependencies;
+  const { router, license, getStartServices } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -303,7 +302,16 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
       async (ctx, req, res) => {
         try {
-          const body = await deleteTransforms(req.body, ctx, res);
+          const [{ savedObjects, elasticsearch }, { dataViews }] = await getStartServices();
+          const savedObjectsClient = savedObjects.getScopedClient(req);
+          const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+
+          const dataViewsService = await dataViews.dataViewsServiceFactory(
+            savedObjectsClient,
+            esClient,
+            req
+          );
+          const body = await deleteTransforms(req.body, ctx, res, dataViewsService);
 
           if (body && body.status) {
             if (body.status === 404) {
@@ -456,29 +464,20 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   registerTransformNodesRoutes(routeDependencies);
 }
 
-async function getDataViewId(indexName: string, savedObjectsClient: SavedObjectsClientContract) {
-  const response = await savedObjectsClient.find<DataView>({
-    type: 'index-pattern',
-    perPage: 1,
-    search: `"${indexName}"`,
-    searchFields: ['title'],
-    fields: ['title'],
-  });
-  const ip = response.saved_objects.find((obj) => obj.attributes.title === indexName);
-  return ip?.id;
+async function getDataViewId(indexName: string, dataViewsService: DataViewsService) {
+  const dv = (await dataViewsService.find(indexName)).find(({ title }) => title === indexName);
+  return dv?.id;
 }
 
-async function deleteDestDataViewById(
-  dataViewId: string,
-  savedObjectsClient: SavedObjectsClientContract
-) {
-  return await savedObjectsClient.delete('index-pattern', dataViewId);
+async function deleteDestDataViewById(dataViewId: string, dataViewsService: DataViewsService) {
+  return await dataViewsService.delete(dataViewId);
 }
 
 async function deleteTransforms(
   reqBody: DeleteTransformsRequestSchema,
   ctx: RequestHandlerContext,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
+  dataViewsService: DataViewsService
 ) {
   const { transformsInfo } = reqBody;
 
@@ -491,7 +490,6 @@ async function deleteTransforms(
 
   const coreContext = await ctx.core;
   const esClient = coreContext.elasticsearch.client;
-  const soClient = coreContext.savedObjects.client;
 
   for (const transformInfo of transformsInfo) {
     let destinationIndex: string | undefined;
@@ -548,9 +546,9 @@ async function deleteTransforms(
       // Delete the data view if there's a data view that matches the name of dest index
       if (destinationIndex && deleteDestDataView) {
         try {
-          const dataViewId = await getDataViewId(destinationIndex, soClient);
+          const dataViewId = await getDataViewId(destinationIndex, dataViewsService);
           if (dataViewId) {
-            await deleteDestDataViewById(dataViewId, soClient);
+            await deleteDestDataViewById(dataViewId, dataViewsService);
             destDataViewDeleted.success = true;
           }
         } catch (deleteDestDataViewError) {
