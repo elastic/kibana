@@ -108,10 +108,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     // https://bl.ocks.org/guilhermesimoes/e6356aa90a16163a6f917f53600a2b4a
 
     // can not take square root of 0 or negative number
-    // shift values to be positive integers >= 2
-    // Why 2? fallback for hit with property value is "minValue - 1"
-    const valueShift = rangeFieldMeta.min < 2
-      ? rangeFieldMeta.min <= 0 ? Math.abs(rangeFieldMeta.min) + 2 : 2 - rangeFieldMeta.min
+    // shift values to be positive integers >= 1
+    const valueShift = rangeFieldMeta.min < 1
+      ? Math.abs(rangeFieldMeta.min) + 1
       : 0;
 
     const maxValueStopInput = isArea ? Math.sqrt(rangeFieldMeta.max + valueShift) : rangeFieldMeta.max;
@@ -128,8 +127,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       maxValue: rangeFieldMeta.max,
       minValue: rangeFieldMeta.min,
       fieldName: this.getMbFieldName(),
+      fallback: rangeFieldMeta.min,
     });
-    const valueShiftExpression = rangeFieldMeta.min < 2
+    const valueShiftExpression = rangeFieldMeta.min < 1
       ? ['+', valueExpression, valueShift]
       : valueExpression;
     const sqrtValueExpression = ['sqrt', valueShiftExpression];
