@@ -76,7 +76,6 @@ export const setupValueSuggestionProvider = (
         resCount: 0,
       };
 
-
       return core.http
         .fetch<string[]>(`/api/kibana/suggestions/values/${index}`, {
           method: 'POST',

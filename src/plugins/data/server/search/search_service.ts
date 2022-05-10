@@ -201,8 +201,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       true
     );
 
-    this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger, core.analytics));
-    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger, core.analytics));
+    this.registerSearchStrategy(
+      EQL_SEARCH_STRATEGY,
+      eqlSearchStrategyProvider(this.logger, core.analytics)
+    );
+    this.registerSearchStrategy(
+      SQL_SEARCH_STRATEGY,
+      sqlSearchStrategyProvider(this.logger, core.analytics)
+    );
 
     registerBsearchRoute(
       bfetch,

@@ -24,7 +24,7 @@ import { getCommonDefaultAsyncGetParams } from '../common/async_utils';
 
 export const eqlSearchStrategyProvider = (
   logger: Logger,
-  analytics: AnalyticsClient,
+  analytics: AnalyticsClient
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = esClient.asCurrentUser.eql;

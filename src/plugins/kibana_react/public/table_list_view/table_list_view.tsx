@@ -20,7 +20,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart, CoreStart, AnalyticsServiceStart } from '@kbn/core/public';
+import {
+  ThemeServiceStart,
+  HttpFetchError,
+  ToastsStart,
+  ApplicationStart,
+  CoreStart,
+  AnalyticsServiceStart,
+} from '@kbn/core/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
@@ -90,11 +97,9 @@ class TableListView<V extends {}> extends React.Component<
 
   constructor(props: TableListViewProps<V>) {
     super(props);
-    
+
     const {
-      services: {
-        analytics
-      },
+      services: { analytics },
     } = useKibana<CoreStart>();
     this.analytics = analytics;
 
