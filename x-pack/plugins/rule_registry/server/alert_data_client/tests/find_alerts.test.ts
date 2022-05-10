@@ -197,7 +197,7 @@ describe('find()', () => {
       ]
     `);
   });
-  
+
   test('allows custom sort', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     esClientMock.search.mockResponseOnce({
@@ -238,7 +238,7 @@ describe('find()', () => {
       index: '.alerts-observability.apm.alerts',
       sort: {
         '@timestamp': 'desc',
-      }
+      },
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
