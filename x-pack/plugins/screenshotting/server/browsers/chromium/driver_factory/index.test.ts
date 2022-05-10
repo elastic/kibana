@@ -11,7 +11,12 @@ import { mergeMap, take } from 'rxjs/operators';
 import type { Logger } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '../../../config';
-import { HeadlessChromiumDriverFactory, DEFAULT_VIEWPORT } from '.';
+import { HeadlessChromiumDriverFactory } from '.';
+
+const DEFAULT_VIEWPORT = {
+  width: 1950,
+  height: 1200,
+};
 
 jest.mock('puppeteer');
 
@@ -71,7 +76,7 @@ describe('HeadlessChromiumDriverFactory', () => {
     it('returns browser driver, unexpected process exit observable, and close callback', async () => {
       await expect(
         factory
-          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .createPage({ openUrlTimeout: 0, viewport: DEFAULT_VIEWPORT })
           .pipe(take(1))
           .toPromise()
       ).resolves.toEqual(
@@ -89,7 +94,7 @@ describe('HeadlessChromiumDriverFactory', () => {
       );
       expect(() =>
         factory
-          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .createPage({ openUrlTimeout: 0, viewport: DEFAULT_VIEWPORT })
           .pipe(take(1))
           .toPromise()
       ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -100,7 +105,7 @@ describe('HeadlessChromiumDriverFactory', () => {
     describe('close behaviour', () => {
       it('does not allow close to be called on the browse more than once', async () => {
         await factory
-          .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
+          .createPage({ openUrlTimeout: 0, viewport: DEFAULT_VIEWPORT })
           .pipe(
             take(1),
             mergeMap(async ({ close }) => {

@@ -11,7 +11,6 @@ export type { Context, PerformanceMetrics } from './chromium';
 export {
   getChromiumDisconnectedError,
   ChromiumArchivePaths,
-  DEFAULT_VIEWPORT,
   HeadlessChromiumDriver,
   HeadlessChromiumDriverFactory,
 } from './chromium';

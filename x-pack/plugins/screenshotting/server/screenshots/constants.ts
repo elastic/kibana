@@ -8,6 +8,7 @@
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`;
 
+// FIXME cleanup needed: these can be used from the Actions enum in the event logging code
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
 export const CONTEXT_INJECTCSS = 'InjectCss';
 export const CONTEXT_WAITFORRENDER = 'WaitForRender';

@@ -5,31 +5,30 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
-import _ from 'lodash';
 import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page } from 'puppeteer';
+import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import {
   catchError,
+  concatMap,
   ignoreElements,
   map,
-  concatMap,
   mergeMap,
   reduce,
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import type { Logger } from '@kbn/core/server';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import { ConfigType } from '../../../config';
-import { errors } from '../../../../common';
 import { getChromiumDisconnectedError } from '..';
+import { errors } from '../../../../common';
+import { ConfigType } from '../../../config';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -37,12 +36,7 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  defaultViewport: {
-    /** Size in pixels */
-    width?: number;
-    /** Size in pixels */
-    height?: number;
-  };
+  viewport: Pick<Viewport, 'height' | 'width'>;
   openUrlTimeout: number;
 }
 
@@ -62,11 +56,6 @@ interface CreatePageResult {
 interface ClosePageResult {
   metrics?: PerformanceMetrics;
 }
-
-export const DEFAULT_VIEWPORT = {
-  width: 1950,
-  height: 1200,
-};
 
 // Default args used by pptr
 // https://github.com/puppeteer/puppeteer/blob/13ea347/src/node/Launcher.ts#L168
@@ -116,12 +105,14 @@ export class HeadlessChromiumDriverFactory {
     this.userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
   }
 
-  private getChromiumArgs() {
+  private getChromiumArgs(viewport: Viewport | null) {
+    const height = viewport?.height ?? 1200;
+    const width = viewport?.width ?? 1950;
     return args({
       userDataDir: this.userDataDir,
       disableSandbox: this.config.browser.chromium.disableSandbox,
       proxy: this.config.browser.chromium.proxy,
-      windowSize: DEFAULT_VIEWPORT, // Approximate the default viewport size
+      windowSize: { height, width }, // use viewport size from job params
     });
   }
 
@@ -129,15 +120,15 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { browserTimezone, openUrlTimeout, defaultViewport }: CreatePageOptions,
+    { browserTimezone, openUrlTimeout, viewport }: CreatePageOptions,
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
       const logger = pLogger.get('browser-driver');
       logger.info(`Creating browser page driver`);
 
-      const chromiumArgs = this.getChromiumArgs();
-      logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
+      const chromiumArgs = this.getChromiumArgs(viewport);
+      logger.warn(`Chromium launch args set to: ${chromiumArgs}`);
       (async () => {
         let browser: Browser | undefined;
         try {
@@ -148,16 +139,8 @@ export class HeadlessChromiumDriverFactory {
             ignoreHTTPSErrors: true,
             handleSIGHUP: false,
             args: chromiumArgs,
-
-            // We optionally set this at page creation to reduce the chances of
-            // browser reflow. In most cases only the height needs to be adjusted
-            // before taking a screenshot.
-            // NOTE: _.defaults assigns to the target object, so we copy it.
-            // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
-            defaultViewport: _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT),
-            env: {
-              TZ: browserTimezone,
-            },
+            defaultViewport: viewport,
+            env: { TZ: browserTimezone },
           });
         } catch (err) {
           observer.error(
@@ -384,7 +367,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   diagnose(overrideFlags: string[] = []): Rx.Observable<string> {
-    const kbnArgs = this.getChromiumArgs();
+    const kbnArgs = this.getChromiumArgs(null);
     const finalArgs = uniq([...DEFAULT_ARGS, ...kbnArgs, ...overrideFlags]);
 
     // On non-windows platforms, `detached: true` makes child process a

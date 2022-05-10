@@ -13,6 +13,7 @@ import { Actions, EventLogger } from './event_logger';
 export const openUrl = async (
   browser: HeadlessChromiumDriver,
   eventLogger: EventLogger,
+  viewport: any,
   timeout: number,
   index: number,
   url: string,
@@ -28,7 +29,28 @@ export const openUrl = async (
   const waitForSelector = page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
 
   try {
+    if (viewport) {
+      // Set the viewport allowing time for the browser to handle reflow and redraw
+      // before checking for readiness of visualizations.
+      await browser.setViewport(viewport, eventLogger.kbnLogger);
+    }
+
+    // navigate to the app
     await browser.open(url, { context, headers, waitForSelector, timeout }, kbnLogger);
+
+    // add debug logging for expensive resize events
+    await browser.evaluate(
+      {
+        fn: () => {
+          window.addEventListener('resize', () => {
+            console.log('resize', document.documentElement.clientWidth); // eslint-disable-line no-console
+          });
+        },
+        args: [],
+      },
+      { context: 'DEBUG' },
+      kbnLogger
+    );
   } catch (err) {
     kbnLogger.error(err);
 

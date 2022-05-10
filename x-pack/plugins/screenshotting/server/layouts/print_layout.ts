@@ -10,10 +10,17 @@ import type { LayoutParams, LayoutSelectorDictionary } from '../../common/layout
 import { LayoutTypes } from '../../common';
 import type { Layout } from '.';
 import { DEFAULT_SELECTORS } from '.';
-import { DEFAULT_VIEWPORT } from '../browsers';
 import { BaseLayout } from './base_layout';
 
+const DEFAULT_VIEWPORT = {
+  width: 1950,
+  height: 1200,
+};
+
 export class PrintLayout extends BaseLayout implements Layout {
+  public readonly height = DEFAULT_VIEWPORT.width;
+  public readonly width = DEFAULT_VIEWPORT.height;
+
   public readonly selectors: LayoutSelectorDictionary = {
     ...DEFAULT_SELECTORS,
     screenshot: '[data-shared-item]', // override '[data-shared-items-container]'

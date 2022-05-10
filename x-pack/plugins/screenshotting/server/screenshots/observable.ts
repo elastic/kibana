@@ -10,23 +10,24 @@ import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import { errors, LayoutTypes } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
+import { getChromiumDisconnectedError } from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
+import type { PdfScreenshotOptions } from '../formats';
 import type { Layout } from '../layouts';
+import { ViewZoomWidthHeight } from '../layouts';
 import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
-import { getRenderErrors } from './get_render_errors';
-import type { Screenshot } from './types';
-import { getScreenshots } from './get_screenshots';
 import { getPdf } from './get_pdf';
+import { getRenderErrors } from './get_render_errors';
+import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
+import type { Screenshot } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
-import type { PdfScreenshotOptions } from '../formats';
 
 type CaptureTimeouts = ConfigType['capture']['timeouts'];
 export interface PhaseTimeouts extends CaptureTimeouts {
@@ -92,40 +93,17 @@ interface PageSetupResults {
   renderErrors?: string[];
 }
 
-const getDefaultElementPosition = (
-  dimensions: { height?: number; width?: number } | null
-): ElementsPositionAndAttribute[] => {
-  const height = dimensions?.height || DEFAULT_VIEWPORT.height;
-  const width = dimensions?.width || DEFAULT_VIEWPORT.width;
-
-  return [
-    {
-      position: {
-        boundingClientRect: { top: 0, left: 0, height, width },
-        scroll: { x: 0, y: 0 },
-      },
-      attributes: {},
-    },
-  ];
-};
-
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  ...DEFAULT_VIEWPORT,
-  zoom: 1,
-});
-
 export class ScreenshotObservableHandler {
+  private viewport: ViewZoomWidthHeight | null;
   constructor(
     private readonly driver: HeadlessChromiumDriver,
     private readonly config: ConfigType,
     private readonly eventLogger: EventLogger,
     private readonly layout: Layout,
     private options: ScreenshotObservableOptions
-  ) {}
+  ) {
+    this.viewport = layout.getViewport(0);
+  }
 
   /*
    * Decorates a TimeoutError with context of the phase that has timed out.
@@ -159,6 +137,7 @@ export class ScreenshotObservableHandler {
       return openUrl(
         this.driver,
         this.eventLogger,
+        this.viewport,
         toNumber(this.config.capture.timeouts.openUrl),
         index,
         url,
@@ -175,11 +154,12 @@ export class ScreenshotObservableHandler {
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
       mergeMap(async (itemsCount) => {
         // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-
-        // Set the viewport allowing time for the browser to handle reflow and redraw
-        // before checking for readiness of visualizations.
-        await driver.setViewport(viewport, this.eventLogger.kbnLogger);
+        const viewport = this.layout.getViewport(itemsCount);
+        if (viewport) {
+          // Set the viewport allowing time for the browser to handle reflow and redraw
+          // before checking for readiness of visualizations.
+          await driver.setViewport(viewport, this.eventLogger.kbnLogger);
+        }
         await waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
@@ -259,14 +239,40 @@ export class ScreenshotObservableHandler {
     );
   }
 
+  private getElementPosition(
+    dataElementsPosition: ElementsPositionAndAttribute[] | null
+  ): ElementsPositionAndAttribute[] {
+    if (dataElementsPosition) {
+      return dataElementsPosition;
+    }
+
+    let height = this.viewport?.height;
+    let width = this.viewport?.width;
+    if (this.viewport) {
+      height = this.viewport.height;
+      width = this.viewport.width;
+    } else {
+      height = 1200;
+      width = 1950;
+    }
+
+    return [
+      {
+        position: {
+          boundingClientRect: { top: 0, left: 0, height, width },
+          scroll: { x: 0, y: 0 },
+        },
+        attributes: {},
+      },
+    ];
+  }
+
   public getScreenshots() {
     return (withRenderComplete: Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotObservableResult> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
-          const elements =
-            data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1));
+          const elements = this.getElementPosition(data.elementsPositionAndAttributes);
           let screenshots: Screenshot[] = [];
           try {
             screenshots = this.shouldCapturePdf()

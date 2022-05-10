@@ -24,7 +24,7 @@ interface LayoutSelectors {
   positionElements?(browser: HeadlessChromiumDriver, logger: Logger): Promise<void>;
 }
 
-export type Layout = BaseLayout & LayoutSelectors & Partial<Size>;
+export type Layout = BaseLayout & LayoutSelectors & Size;
 
 export const DEFAULT_SELECTORS: LayoutSelectorDictionary = {
   screenshot: '[data-shared-items-container]',
@@ -35,4 +35,5 @@ export const DEFAULT_SELECTORS: LayoutSelectorDictionary = {
   timefilterDurationAttribute: 'data-shared-timefilter-duration',
 };
 
+export { ViewZoomWidthHeight } from './base_layout';
 export { createLayout } from './create_layout';
