@@ -62,7 +62,9 @@ function getToastTitle({
   }
   if (attachments !== undefined) {
     const alertsCount = getAlertsCount(attachments);
-    return CASE_ALERT_SUCCESS_TOAST(theCase.title, alertsCount);
+    if (alertsCount > 0) {
+      return CASE_ALERT_SUCCESS_TOAST(theCase.title, alertsCount);
+    }
   }
   return CASE_SUCCESS_TOAST(theCase.title);
 }
