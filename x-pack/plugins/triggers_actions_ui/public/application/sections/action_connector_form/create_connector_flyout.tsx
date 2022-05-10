@@ -37,6 +37,7 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { ActionTypeMenu } from './action_type_menu';
+import { useCreateConnector } from '../../hooks/use_create_connector';
 
 interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -72,6 +73,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({
             type="submit"
             isLoading={isSaving}
             onClick={async () => {
+              onSubmit();
               const savedConnector = await createConnector();
               if (savedConnector) {
                 onTestConnector(savedConnector);
@@ -182,6 +184,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   } = useKibana().services;
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
+  const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
 
   const onFormSubmit: FormConfig<ConnectorFormData>['onSubmit'] = async (data, isValid) => {
     console.log('Form data:', data);
@@ -239,7 +242,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
               <SaveButton
-                isSaving={false}
+                isSaving={isSavingConnector}
                 onSubmit={form.submit}
                 createConnector={() => {}}
                 onTestConnector={onTestConnector}
