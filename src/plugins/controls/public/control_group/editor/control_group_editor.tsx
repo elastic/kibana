@@ -14,9 +14,8 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlyoutHeader,
   EuiButtonGroup,
@@ -31,8 +30,6 @@ import {
   EuiSpacer,
   EuiCheckbox,
   EuiForm,
-  EuiAccordion,
-  useGeneratedHtmlId,
   EuiSwitch,
   EuiText,
   EuiHorizontalRule,
@@ -68,7 +65,6 @@ export const ControlGroupEditor = ({
   onClose,
 }: EditControlGroupProps) => {
   const [resetAllWidths, setResetAllWidths] = useState(false);
-  const advancedSettingsAccordionId = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
 
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
@@ -96,14 +92,6 @@ export const ControlGroupEditor = ({
         },
       });
     },
-    [controlGroupEditorState]
-  );
-
-  const fullQuerySyncActive = useMemo(
-    () =>
-      !Object.values(omit(controlGroupEditorState.ignoreParentSettings, 'ignoreValidations')).some(
-        Boolean
-      ),
     [controlGroupEditorState]
   );
 
