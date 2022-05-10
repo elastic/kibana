@@ -269,6 +269,13 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const discoverPermissions = application.capabilities.discover;
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
+  const handleClick = useCallback(
+    (event) => {
+      event.preventDefault();
+      window.open(discoverUrl, '_blank');
+    },
+    [discoverUrl]
+  );
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
@@ -346,7 +353,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl} target="_blank">
+      <EuiButtonEmpty size="xs" iconType="discoverApp" onClick={handleClick}>
         {VIEW_IN_DISCOVER}
       </EuiButtonEmpty>
     );
@@ -354,12 +361,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   return (
     <EuiToolTip content={VIEW_IN_DISCOVER}>
-      <EuiButtonIcon
-        iconType="discoverApp"
-        href={discoverUrl}
-        aria-label={VIEW_IN_DISCOVER}
-        target="_blank"
-      />
+      <EuiButtonIcon iconType="discoverApp" aria-label={VIEW_IN_DISCOVER} onClick={handleClick} />
     </EuiToolTip>
   );
 };
