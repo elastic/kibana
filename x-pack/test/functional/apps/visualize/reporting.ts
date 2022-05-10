@@ -87,7 +87,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('PNG reports: sample data created in 7.6', () => {
       const reportFileName = 'tsvb';
-      let sessionReportPath: string;
 
       before(async () => {
         await kibanaServer.uiSettings.replace({
@@ -101,6 +100,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         log.debug('navigate to visualize');
         await PageObjects.common.navigateToApp('visualize');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+        );
+      });
+
+      it('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');
         await PageObjects.visualize.loadSavedVisualization(
           '[K7.6-eCommerce] Sold Products per Day',
@@ -121,22 +130,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = await PageObjects.reporting.getReportURL(60000);
         log.debug('download the report');
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-        sessionReportPath = await PageObjects.reporting.writeSessionReport(
+        const sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
           'png',
           reportData,
           REPORTS_FOLDER
         );
-      });
 
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
-        );
-      });
-
-      it('PNG file matches the baseline image', async function () {
+        // check the file
         const percentDiff = await reporting.checkIfPngsMatch(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
