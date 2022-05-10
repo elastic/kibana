@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatatableRow, getBucketIdentifier } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableRow, getBucketIdentifier } from '@kbn/expressions-plugin/common';
 import type { CollapseExpressionFunction } from './types';
 
 function getValueAsNumberArray(value: unknown) {
@@ -86,9 +86,12 @@ export const collapseFn: CollapseExpressionFunction['fn'] = (input, { by, metric
         const bucketIdentifier = getBucketIdentifier(row, by);
         if (setMarker[bucketIdentifier]) return undefined;
         setMarker[bucketIdentifier] = true;
-        const newRow = { ...row };
+        const newRow: Datatable['rows'][number] = {};
         metric?.forEach((m) => {
           newRow[m] = accumulators[m][bucketIdentifier];
+        });
+        by?.forEach((b) => {
+          newRow[b] = row[b];
         });
 
         return newRow;

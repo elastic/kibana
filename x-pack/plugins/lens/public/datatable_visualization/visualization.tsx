@@ -346,6 +346,10 @@ export const getDatatableVisualization = ({
       return null;
     }
 
+    if (!datasourceExpressionsByLayers || Object.keys(datasourceExpressionsByLayers).length === 0) {
+      return null;
+    }
+
     const columnMap: Record<string, ColumnState> = {};
     state.columns.forEach((column) => {
       columnMap[column.columnId] = column;
