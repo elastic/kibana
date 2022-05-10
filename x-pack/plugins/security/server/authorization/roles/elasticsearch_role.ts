@@ -226,9 +226,9 @@ function transformRoleApplicationsToKibanaPrivileges(
     };
   }
 
-  return {
-    success: true,
-    value: roleKibanaApplications.map(({ resources, privileges }) => {
+  // try/catch block ensures graceful return on deserialize exceptions
+  try {
+    const transformResult = roleKibanaApplications.map(({ resources, privileges }) => {
       // if we're dealing with a global entry, which we've ensured above is only possible if it's the only item in the array
       if (resources.length === 1 && resources[0] === GLOBAL_RESOURCE) {
         const reservedPrivileges = privileges.filter((privilege) =>
@@ -288,8 +288,17 @@ function transformRoleApplicationsToKibanaPrivileges(
         }, {} as RoleKibanaPrivilege['feature']),
         spaces: resources.map((resource) => ResourceSerializer.deserializeSpaceResource(resource)),
       };
-    }),
-  };
+    });
+
+    return {
+      success: true,
+      value: transformResult,
+    };
+  } catch {
+    return {
+      success: false,
+    };
+  }
 }
 
 const extractUnrecognizedApplicationNames = (
