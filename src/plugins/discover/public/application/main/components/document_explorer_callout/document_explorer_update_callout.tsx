@@ -74,7 +74,7 @@ export const DocumentExplorerUpdateCallout = () => {
         gutterSize="s"
       >
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={onTakeTour}>
+          <EuiButton size="s" onClick={onTakeTour} data-test-subj="discoverTakeTourButton">
             <FormattedMessage
               id="discover.docExplorerUpdateCallout.takeTourButtonLabel"
               defaultMessage="Take the tour"
