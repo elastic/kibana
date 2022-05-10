@@ -29,7 +29,7 @@ describe('alerts_route.ts', () => {
     it('should return an empty events array for a non existant entity_id', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
       const alertsClient = getAlertsClientMockInstance(esClient);
-      const body = await searchAlerts(alertsClient, 'asdf');
+      const body = await searchAlerts(alertsClient, 'asdf', 100);
 
       expect(body.events.length).toBe(0);
     });
@@ -37,7 +37,25 @@ describe('alerts_route.ts', () => {
     it('returns results for a particular session entity_id', async () => {
       const alertsClient = getAlertsClientMockInstance();
 
-      const body = await searchAlerts(alertsClient, 'asdf');
+      const body = await searchAlerts(alertsClient, 'asdf', 100);
+
+      expect(body.events.length).toBe(mockAlerts.length);
+    });
+
+    it('takes an investigatedAlertId', async () => {
+      const alertsClient = getAlertsClientMockInstance();
+
+      const body = await searchAlerts(alertsClient, 'asdf', 100, mockAlerts[0].kibana?.alert?.uuid);
+
+      expect(body.events.length).toBe(mockAlerts.length + 1);
+    });
+
+    it('takes a range', async () => {
+      const alertsClient = getAlertsClientMockInstance();
+
+      const start = '2021-11-23T15:25:04.210Z';
+      const end = '2021-20-23T15:25:04.210Z';
+      const body = await searchAlerts(alertsClient, 'asdf', 100, undefined, [start, end]);
 
       expect(body.events.length).toBe(mockAlerts.length);
     });

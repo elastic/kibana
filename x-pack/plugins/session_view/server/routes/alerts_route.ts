@@ -40,7 +40,14 @@ export const registerAlertsRoute = (
     async (_context, request, response) => {
       const client = await ruleRegistry.getRacClientWithRequest(request);
       const { sessionEntityId, investigatedAlertId, range, cursor } = request.query;
-      const body = await searchAlerts(client, sessionEntityId, investigatedAlertId, range, cursor);
+      const body = await searchAlerts(
+        client,
+        sessionEntityId,
+        ALERTS_PER_PAGE,
+        investigatedAlertId,
+        range,
+        cursor
+      );
 
       return response.ok({ body });
     }
@@ -50,6 +57,7 @@ export const registerAlertsRoute = (
 export const searchAlerts = async (
   client: AlertsClient,
   sessionEntityId: string,
+  size: number,
   investigatedAlertId?: string,
   range?: string[],
   cursor?: string
@@ -83,14 +91,15 @@ export const searchAlerts = async (
       },
     },
     track_total_hits: true,
-    size: ALERTS_PER_PAGE,
+    size,
     index: indices.join(','),
-    sort: { [ALERT_ORIGINAL_TIME_PROPERTY]: 'asc' },
+    sort: { '@timestamp': 'asc' },
     lastSortIds: cursor ? [cursor] : undefined,
   });
 
   // if an alert is being investigated, fetch it on it's own, as it's not guaranteed to come back in the above request.
-  if (investigatedAlertId) {
+  // we only need to do this for the first page of alerts.
+  if (!cursor && investigatedAlertId) {
     const investigatedAlertSearch = await client.find({
       query: {
         match: {
@@ -102,7 +111,7 @@ export const searchAlerts = async (
     });
 
     if (investigatedAlertSearch.hits.hits.length > 0) {
-      results.hits.hits.push(investigatedAlertSearch.hits.hits[0]);
+      results.hits.hits.unshift(investigatedAlertSearch.hits.hits[0]);
     }
   }
 

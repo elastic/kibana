@@ -13,6 +13,7 @@ import type {
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
 import {
+  ALERTS_PER_PROCESS_EVENTS_PAGE,
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
   PROCESS_EVENTS_INDEX,
@@ -90,7 +91,13 @@ export const doSearch = async (
       range = [firstEvent['@timestamp'], lastEvent['@timestamp']];
     }
 
-    const alertsBody = await searchAlerts(alertsClient, sessionEntityId, undefined, range);
+    const alertsBody = await searchAlerts(
+      alertsClient,
+      sessionEntityId,
+      ALERTS_PER_PROCESS_EVENTS_PAGE,
+      undefined,
+      range
+    );
 
     events = [...events, ...alertsBody.events];
   }

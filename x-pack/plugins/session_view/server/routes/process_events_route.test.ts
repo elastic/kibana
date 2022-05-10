@@ -8,6 +8,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { doSearch } from './process_events_route';
 import { mockEvents, mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance, resetAlertingAuthMock } from './alerts_client_mock.test';
+import { EventKind, ProcessEvent } from '../../common/types/process_tree';
 
 const getEmptyResponse = async () => {
   return {
@@ -54,6 +55,15 @@ describe('process_events_route.ts', () => {
       const body = await doSearch(client, alertsClient, 'mockId', undefined);
 
       expect(body.events.length).toBe(mockEvents.length + mockAlerts.length);
+
+      const eventsOnly = body.events.filter(
+        (event) => (event._source as ProcessEvent)?.event?.kind === EventKind.event
+      );
+      const alertsOnly = body.events.filter(
+        (event) => (event._source as ProcessEvent)?.event?.kind === EventKind.signal
+      );
+      expect(eventsOnly.length).toBe(mockEvents.length);
+      expect(alertsOnly.length).toBe(mockAlerts.length);
       expect(body.total).toBe(mockEvents.length);
     });
 
