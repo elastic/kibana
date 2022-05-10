@@ -28,6 +28,7 @@ export type TopNavMenuProps = StatefulSearchBarProps &
     showFilterBar?: boolean;
     unifiedSearch?: UnifiedSearchPublicPluginStart;
     className?: string;
+    visible?: boolean;
     /**
      * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
      *
@@ -105,9 +106,11 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   }
 
   function renderLayout() {
-    const { setMenuMountPoint } = props;
+    const { setMenuMountPoint, visible } = props;
     const menuClassName = classNames('kbnTopNavMenu', props.className);
-    const wrapperClassName = 'kbnTopNavMenu__wrapper';
+    const wrapperClassName = classNames('kbnTopNavMenu__wrapper', {
+      'kbnTopNavMenu__wrapper--hidden': visible === false,
+    });
     if (setMenuMountPoint) {
       return (
         <>
@@ -117,15 +120,15 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               {renderMenu(menuClassName)}
             </span>
           </MountPointPortal>
-          <span className={wrapperClassName}>{renderSearchBar()}</span>
+          {renderSearchBar()}
         </>
       );
     } else {
       return (
-        <span className={wrapperClassName}>
-          {renderMenu(menuClassName)}
+        <>
+          <span className={wrapperClassName}>{renderMenu(menuClassName)}</span>
           {renderSearchBar()}
-        </span>
+        </>
       );
     }
   }
