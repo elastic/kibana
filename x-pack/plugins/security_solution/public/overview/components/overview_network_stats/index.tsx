@@ -159,7 +159,7 @@ const NetworkStatsContainer = styled.div`
   }
 `;
 
-const Title = styled.div`
+const MoveItLeft = styled.div`
   margin-left: 24px;
 `;
 
@@ -186,6 +186,7 @@ const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, l
                 <EuiFlexGroup
                   data-test-subj={`network-stat-group-${statGroup.groupId}`}
                   justifyContent="spaceBetween"
+                  gutterSize="s"
                 >
                   <EuiFlexItem grow={false}>
                     <EuiText>{statGroup.name}</EuiText>
@@ -207,16 +208,18 @@ const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, l
                   <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
                       <EuiText color="subdued" size="s">
-                        <Title>{stat.title}</Title>
+                        <MoveItLeft>{stat.title}</MoveItLeft>
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem data-test-subj={`network-stat-${stat.id}`} grow={false}>
-                      <StatValue
-                        count={stat.count}
-                        isGroupStat={false}
-                        isLoading={loading}
-                        max={statsForGroupCount}
-                      />
+                      <MoveItLeft>
+                        <StatValue
+                          count={stat.count}
+                          isGroupStat={false}
+                          isLoading={loading}
+                          max={statsForGroupCount}
+                        />
+                      </MoveItLeft>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ))}

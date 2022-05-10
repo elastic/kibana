@@ -40,7 +40,7 @@ const StatValueComponent: React.FC<{
   }, [isLoading, isInitialLoading, setIsInitialLoading]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         {!isInitialLoading && (
           <EuiText color={isGroupStat ? 'default' : 'subdued'} size={isGroupStat ? 'm' : 's'}>

@@ -135,7 +135,6 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
         <EuiPanel hasBorder>
           <HeaderSection
             id={OverviewHostQueryId}
-            height={!toggleStatus ? 30 : undefined}
             subtitle={subtitle}
             toggleStatus={toggleStatus}
             toggleQuery={toggleQuery}

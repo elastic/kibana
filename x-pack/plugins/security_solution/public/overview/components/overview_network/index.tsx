@@ -141,7 +141,6 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
           <>
             <HeaderSection
               id={OverviewNetworkQueryId}
-              height={!toggleStatus ? 30 : undefined}
               subtitle={subtitle}
               title={title}
               toggleStatus={toggleStatus}
