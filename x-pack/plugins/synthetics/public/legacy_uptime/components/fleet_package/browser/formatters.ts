@@ -73,5 +73,8 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.IS_PUSH_MONITOR]: null,
+  [ConfigKey.JOURNEY_ID]: null,
+  [ConfigKey.PROJECT_ID]: null,
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   ...commonFormatters,
 };

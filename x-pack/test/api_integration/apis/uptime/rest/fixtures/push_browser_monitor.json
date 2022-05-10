@@ -1,8 +1,7 @@
 {
     "keep_stale": true,
     "project": "test-suite",
-    "monitors": [
-    {
+    "monitors": [{
         "throttling": {
             "download": 5,
             "upload": 3,
