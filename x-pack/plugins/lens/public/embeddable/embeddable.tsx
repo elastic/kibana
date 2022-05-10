@@ -348,6 +348,7 @@ export class Embeddable
     if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
     }
+
     return this.deps.visualizationMap[this.savedVis.visualizationType]?.triggers || [];
   }
 
@@ -458,6 +459,7 @@ export class Embeddable
       this.embeddableTitle = this.getTitle();
       isDirty = true;
     }
+
     return isDirty;
   }
 

@@ -26,6 +26,7 @@ interface StatefulSearchBarDeps {
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
+  isScreenshotMode?: boolean;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -110,7 +111,13 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data, usageCollection }: StatefulSearchBarDeps) {
+export function createSearchBar({
+  core,
+  storage,
+  data,
+  usageCollection,
+  isScreenshotMode = false,
+}: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -191,11 +198,13 @@ export function createSearchBar({ core, storage, data, usageCollection }: Statef
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           iconType={props.iconType}
           nonKqlMode={props.nonKqlMode}
-          nonKqlModeHelpText={props.nonKqlModeHelpText}
           customSubmitButton={props.customSubmitButton}
           isClearable={props.isClearable}
           placeholder={props.placeholder}
           {...overrideDefaultBehaviors(props)}
+          dataViewPickerComponentProps={props.dataViewPickerComponentProps}
+          displayStyle={props.displayStyle}
+          isScreenshotMode={isScreenshotMode}
         />
       </KibanaContextProvider>
     );

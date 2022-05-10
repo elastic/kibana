@@ -9,6 +9,7 @@ import { SavedObjectReference } from '@kbn/core/server';
 import {
   CasePostRequest,
   CaseSettings,
+  CaseSeverity,
   CaseStatuses,
   CommentUserAction,
   ConnectorUserAction,
@@ -27,6 +28,9 @@ export interface BuilderParameters {
   };
   status: {
     parameters: { payload: { status: CaseStatuses } };
+  };
+  severity: {
+    parameters: { payload: { severity: CaseSeverity } };
   };
   tags: {
     parameters: { payload: { tags: string[] } };
