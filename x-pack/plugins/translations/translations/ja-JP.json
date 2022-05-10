@@ -9509,7 +9509,6 @@
     "xpack.canvas.workpadTemplates.table.nameColumnTitle": "テンプレート名",
     "xpack.canvas.workpadTemplates.table.tagsColumnTitle": "タグ",
     "xpack.cases.actions.caseAlertSuccessSyncText": "このケースのアラートはステータスがケースステータスと同期されました",
-    "xpack.cases.actions.caseAlertSuccessToast": "アラートが「{title}」に追加されました",
     "xpack.cases.actions.caseSuccessToast": "{title}が更新されました",
     "xpack.cases.actions.viewCase": "ケースの表示",
     "xpack.cases.addConnector.title": "コネクターの追加",

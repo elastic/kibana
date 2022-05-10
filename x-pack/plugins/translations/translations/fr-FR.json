@@ -9413,7 +9413,6 @@
     "xpack.canvas.workpadTemplates.table.nameColumnTitle": "Nom de modèle",
     "xpack.canvas.workpadTemplates.table.tagsColumnTitle": "Balises",
     "xpack.cases.actions.caseAlertSuccessSyncText": "Les alertes dans ce cas ont leur statut synchronisé avec celui du cas",
-    "xpack.cases.actions.caseAlertSuccessToast": "Une alerte a été ajoutée à \"{title}\"",
     "xpack.cases.actions.caseSuccessToast": "{title} a été mis à jour",
     "xpack.cases.actions.viewCase": "Afficher le cas",
     "xpack.cases.addConnector.title": "Ajouter un connecteur",

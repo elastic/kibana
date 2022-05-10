@@ -9531,7 +9531,6 @@
     "xpack.canvas.workpadTemplates.table.nameColumnTitle": "模板名称",
     "xpack.canvas.workpadTemplates.table.tagsColumnTitle": "标签",
     "xpack.cases.actions.caseAlertSuccessSyncText": "此案例中的告警的状态已经与案例状态同步",
-    "xpack.cases.actions.caseAlertSuccessToast": "告警已添加到“{title}”",
     "xpack.cases.actions.caseSuccessToast": "{title} 已更新",
     "xpack.cases.actions.viewCase": "查看案例",
     "xpack.cases.addConnector.title": "添加连接器",
