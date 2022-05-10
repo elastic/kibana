@@ -38,6 +38,10 @@ import {
   getAccessorByDimension,
   getColumnByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
 import {
@@ -529,7 +533,7 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend?.isInside ? legendInsideParams : legend.position}
-        legendSize={legend.legendSize}
+        legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
         theme={{
           ...chartTheme,
           barSeriesStyle: {
