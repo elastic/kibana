@@ -136,7 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      // report is cut off
       it('PNG file matches the baseline image', async function () {
         const percentDiff = await reporting.checkIfPngsMatch(
           sessionReportPath,
