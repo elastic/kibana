@@ -160,6 +160,7 @@ export const DetailPanelAlertTab = ({
           isLoading={isFetchingAlerts}
           onClick={fetchNextPageAlerts}
           css={styles.loadMoreBtn}
+          data-test-subj="alerts-details-load-more"
         >
           <FormattedMessage
             id="xpack.sessionView.alertsLoadMoreButton"
