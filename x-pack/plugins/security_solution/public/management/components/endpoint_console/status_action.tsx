@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EndpointCommandDefinition } from './types';
 import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
-import { useFetchEndpointPendingActionsSummary } from '../../hooks/endpoint/use_fetch_endpoint_pending_actions_summary';
+import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import { EndpointPolicyStatus } from '../endpoint_policy_status';
 import { EndpointAgentAndIsolationStatus } from '../endpoint_agent_and_isolation_status';
-import { useGetEndpointHostInfo } from '../../hooks';
+import { useGetEndpointDetails } from '../../hooks';
 import { CommandExecutionComponentProps } from '../console/types';
 import { FormattedError } from '../formatted_error';
 
@@ -24,8 +24,8 @@ export const EndpointStatusActionResult = memo<
 >(({ command, status, setStatus }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId as string;
 
-  const { isFetching, error, data: endpointInfo, isFetched } = useGetEndpointHostInfo(endpointId);
-  const { data: endpointPendingActions } = useFetchEndpointPendingActionsSummary([endpointId]);
+  const { isFetching, error, data: endpointInfo, isFetched } = useGetEndpointDetails(endpointId);
+  const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId]);
 
   const pendingIsolationActions = useMemo<
     Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { useGetEndpointHostInfo } from './endpoint/use_get_endpoint_host_info';
+export { useGetEndpointDetails } from './endpoint/use_get_endpoint_details';
 export { useShowEndpointResponseActionsConsole } from './endpoint/use_show_endpoint_response_actions_console';

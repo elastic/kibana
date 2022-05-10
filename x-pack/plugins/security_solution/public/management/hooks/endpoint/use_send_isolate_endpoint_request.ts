@@ -14,7 +14,7 @@ import { HostIsolationRequestBody, HostIsolationResponse } from '../../../../com
  * Create host isolation requests
  * @param customOptions
  */
-export const useIsolateHost = (
+export const useSendIsolateEndpointRequest = (
   customOptions?: UseMutationOptions<
     HostIsolationResponse,
     HttpFetchError,

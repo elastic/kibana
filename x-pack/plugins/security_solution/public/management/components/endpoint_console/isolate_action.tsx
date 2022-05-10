@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
 import { EndpointCommandDefinition } from './types';
-import { useIsolateHost } from '../../hooks/endpoint/use_isolate_host';
+import { useSendIsolateEndpointRequest } from '../../hooks/endpoint/use_send_isolate_endpoint_request';
 import { CommandExecutionComponentProps } from '../console/types';
 
 export const IsolateActionResult = memo<CommandExecutionComponentProps<EndpointCommandDefinition>>(
@@ -19,7 +19,7 @@ export const IsolateActionResult = memo<CommandExecutionComponentProps<EndpointC
     const actionId = store.actionId;
 
     const actionRequestSent = Boolean(store.actionRequestSent);
-    const isolateHost = useIsolateHost();
+    const isolateHost = useSendIsolateEndpointRequest();
 
     useEffect(() => {
       if (!actionRequestSent && endpointId) {

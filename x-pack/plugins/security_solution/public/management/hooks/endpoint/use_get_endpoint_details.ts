@@ -17,7 +17,7 @@ import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
  * @param endpointId
  * @param options
  */
-export const useGetEndpointHostInfo = (
+export const useGetEndpointDetails = (
   endpointId: string,
   options: UseQueryOptions<HostInfo, HttpFetchError> = {}
 ): QueryObserverResult<HostInfo, HttpFetchError> => {

@@ -15,7 +15,7 @@ import { fetchPendingActionsByAgentId } from '../../../common/lib/endpoint_pendi
  * @param endpointAgentIds
  * @param options
  */
-export const useFetchEndpointPendingActionsSummary = (
+export const useGetEndpointPendingActionsSummary = (
   endpointAgentIds: string[],
   options: UseQueryOptions<PendingActionsResponse, HttpFetchError> = {}
 ): QueryObserverResult<PendingActionsResponse, HttpFetchError> => {

@@ -10,7 +10,7 @@ import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { useGetEndpointHostInfo } from '../../../management/hooks/endpoint/use_get_endpoint_host_info';
+import { useGetEndpointDetails } from '../../../management/hooks/endpoint/use_get_endpoint_details';
 import { useShowEndpointResponseActionsConsole } from '../../../management/hooks';
 
 export interface ResponseActionsConsoleContextMenuItemProps {
@@ -21,7 +21,7 @@ export interface ResponseActionsConsoleContextMenuItemProps {
 export const ResponseActionsConsoleContextMenuItem =
   memo<ResponseActionsConsoleContextMenuItemProps>(({ endpointId, onClick }) => {
     const showEndpointResponseActionsConsole = useShowEndpointResponseActionsConsole();
-    const { data: endpointHostInfo, isFetching, error } = useGetEndpointHostInfo(endpointId);
+    const { data: endpointHostInfo, isFetching, error } = useGetEndpointDetails(endpointId);
 
     const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
       if (!endpointId) {
