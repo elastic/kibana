@@ -203,7 +203,7 @@ export const searchProcessTree = (
       }
 
       const event = process.getDetails();
-      const { working_directory: workingDirectory, args } = event.process || {};
+      const { working_directory: workingDirectory, args } = event.process ?? {};
 
       // TODO: the text we search is the same as what we render.
       // in future we may support KQL searches to match against any property
