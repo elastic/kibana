@@ -6,6 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { EuiTextColor, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   ProcessEventHost,
   ProcessEventContainer,
@@ -45,7 +46,9 @@ export const DetailPanelHostTab = ({
     <>
       <DetailPanelAccordion
         id="metadataHost"
-        title="Host"
+        title={i18n.translate('xpack.sessionView.metadataDetailsTab.metadata', {
+          defaultMessage: 'Metadata',
+        })}
         isInitialOpen={true}
         listItems={[
           {
@@ -125,7 +128,9 @@ export const DetailPanelHostTab = ({
         >
           <DetailPanelAccordion
             id="hostOS"
-            title="Host OS"
+            title={i18n.translate('xpack.sessionView.metadataDetailsTab.host', {
+              defaultMessage: 'Host OS',
+            })}
             listItems={[
               {
                 title: <DetailPanelListItem>architecture</DetailPanelListItem>,
@@ -227,7 +232,9 @@ export const DetailPanelHostTab = ({
         <>
           <DetailPanelAccordion
             id="metadataContainer"
-            title="Container"
+            title={i18n.translate('xpack.sessionView.metadataDetailsTab.container', {
+              defaultMessage: 'Container',
+            })}
             listItems={[
               {
                 title: <DetailPanelListItem>id</DetailPanelListItem>,
@@ -302,7 +309,9 @@ export const DetailPanelHostTab = ({
         <>
           <DetailPanelAccordion
             id="metadataOrchestrator"
-            title="Orchestrator"
+            title={i18n.translate('xpack.sessionView.metadataDetailsTab.orchestrator', {
+              defaultMessage: 'Orchestrator',
+            })}
             listItems={[
               {
                 title: <DetailPanelListItem>resource.ip</DetailPanelListItem>,
