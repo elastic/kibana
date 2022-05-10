@@ -71,12 +71,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-auditbeatAuditd"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={73847}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={73847}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -103,12 +105,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-auditbeatFIM"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={107307}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={107307}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -135,12 +139,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-auditbeatLogin"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={60015}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={60015}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -167,12 +173,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-auditbeatPackage"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={2003}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={2003}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -199,12 +207,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-auditbeatProcess"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={1200}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={1200}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -231,12 +241,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-auditbeatUser"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={1979}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={1979}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </styled.div>
@@ -308,12 +320,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-endgameDns"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39123}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39123}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -340,12 +354,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-endgameFile"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39456}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39456}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -372,12 +388,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-endgameImageLoad"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39789}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39789}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -404,12 +422,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-endgameNetwork"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39101112}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39101112}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -436,12 +456,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-endgameProcess"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39131415}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39131415}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -468,12 +490,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-endgameRegistry"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39161718}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39161718}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -500,12 +524,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-endgameSecurity"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39202122}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39202122}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </styled.div>
@@ -577,12 +603,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-filebeatSystemModule"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={568}
-            isGroupStat={false}
-            isLoading={false}
-            max={568}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={568}
+              isGroupStat={false}
+              isLoading={false}
+              max={568}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </styled.div>
@@ -654,12 +682,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-winlogbeatSecurity"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={195929}
-            isGroupStat={false}
-            isLoading={false}
-            max={296999}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={195929}
+              isGroupStat={false}
+              isLoading={false}
+              max={296999}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -686,12 +716,14 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
           data-test-subj="host-stat-winlogbeatMWSysmonOperational"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={101070}
-            isGroupStat={false}
-            isLoading={false}
-            max={296999}
-          />
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={101070}
+              isGroupStat={false}
+              isLoading={false}
+              max={296999}
+            />
+          </styled.div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </styled.div>
