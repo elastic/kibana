@@ -245,7 +245,7 @@ export class HeadlessChromiumDriver {
 
     await this.page.setViewport({
       width,
-      height,
+      height: height * zoom, // NOTE: this fixes reports from TSVB editor
       deviceScaleFactor: zoom,
       isMobile: false,
     });
