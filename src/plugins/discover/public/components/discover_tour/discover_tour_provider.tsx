@@ -33,7 +33,6 @@ const MAX_WIDTH = 350;
 
 interface TourStepDefinition {
   anchor: EuiTourStepProps['anchor'];
-  anchorPosition: EuiTourStepProps['anchorPosition'];
   title: EuiTourStepProps['title'];
   content: EuiTourStepProps['content'];
   imageName: string;
@@ -43,7 +42,6 @@ interface TourStepDefinition {
 const tourStepDefinitions: TourStepDefinition[] = [
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.addFields,
-    anchorPosition: 'rightCenter',
     title: i18n.translate('discover.dscTour.stepAddFields.title', {
       defaultMessage: 'Add fields to the table',
     }),
@@ -64,7 +62,6 @@ const tourStepDefinitions: TourStepDefinition[] = [
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns,
-    anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepReorderColumns.title', {
       defaultMessage: 'Order columns',
     }),
@@ -81,7 +78,6 @@ const tourStepDefinitions: TourStepDefinition[] = [
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.sort,
-    anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepSort.title', {
       defaultMessage: 'Sort on one or more fields',
     }),
@@ -99,7 +95,6 @@ const tourStepDefinitions: TourStepDefinition[] = [
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.changeRowHeight,
-    anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepChangeRowHeight.title', {
       defaultMessage: 'Change the row height',
     }),
@@ -117,7 +112,6 @@ const tourStepDefinitions: TourStepDefinition[] = [
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.expandDocument,
-    anchorPosition: 'upCenter',
     title: i18n.translate('discover.dscTour.stepExpand.title', {
       defaultMessage: 'Expand documents',
     }),
@@ -156,7 +150,6 @@ const prepareTourSteps = (
   stepDefinitions.map((stepDefinition, index) => ({
     step: index + 1,
     anchor: stepDefinition.anchor,
-    anchorPosition: stepDefinition.anchorPosition,
     title: stepDefinition.title,
     maxWidth: MAX_WIDTH,
     content: (
