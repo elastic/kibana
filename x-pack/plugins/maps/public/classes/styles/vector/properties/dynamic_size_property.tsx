@@ -13,7 +13,6 @@ import { makeMbClampedNumberExpression } from '../style_util';
 import {
   FieldFormatter,
   HALF_MAKI_ICON_SIZE,
-  MB_LOOKUP_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
@@ -50,47 +49,35 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   syncHaloWidthWithMb(mbLayerId: string, mbMap: MbMap) {
-    const haloWidth = this.getMbSizeExpression(false);
-    mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
+    mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', this.getMbSizeExpression());
   }
 
   syncIconSizeWithMb(symbolLayerId: string, mbMap: MbMap) {
-    const iconSizeExpression = this.getMbSizeExpression(
-      true,
-      function(rangeValue) {
-        return rangeValue / HALF_MAKI_ICON_SIZE
-      }
-    );
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSizeExpression);
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-size', this.getMbSizeExpression());
   }
 
   syncCircleStrokeWidthWithMb(mbLayerId: string, mbMap: MbMap) {
-    const lineWidth = this.getMbSizeExpression(false);
-    mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
+    mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', this.getMbSizeExpression());
   }
 
   syncCircleRadiusWithMb(mbLayerId: string, mbMap: MbMap) {
-    const circleRadius = this.getMbSizeExpression(true);
-    console.log(JSON.stringify(circleRadius, null, 2));
-    mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
+    const circleRadiusExpression = this.getMbSizeExpression();
+    console.log(JSON.stringify(circleRadiusExpression, null, 2));
+    mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadiusExpression);
   }
 
   syncLineWidthWithMb(mbLayerId: string, mbMap: MbMap) {
-    const lineWidth = this.getMbSizeExpression(false);
-    mbMap.setPaintProperty(mbLayerId, 'line-width', lineWidth);
+    mbMap.setPaintProperty(mbLayerId, 'line-width', this.getMbSizeExpression());
   }
 
   syncLabelSizeWithMb(mbLayerId: string, mbMap: MbMap) {
-    const lineWidth = this.getMbSizeExpression(false);
-    mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
+    mbMap.setLayoutProperty(mbLayerId, 'text-size', this.getMbSizeExpression());
   }
 
   /*
    * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [minSize, maxSize]
-   * @param {boolean} isArea When true, translate square root of domain value to display range.
-   * @param {undefined | function} scaleRange
    */
-  getMbSizeExpression(isArea: boolean, scaleRange?: (rangeValue: number) => number) {
+  getMbSizeExpression() {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (!this._isSizeDynamicConfigComplete() || !rangeFieldMeta) {
       // return min of size to avoid flashing
@@ -100,26 +87,35 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       return this._options.minSize >= 0 ? this._options.minSize : null;
     }
 
+    const isArea = this.getStyleName() === VECTOR_STYLES.ICON_SIZE;
     // isArea === true
     // It's a mistake to linearly map a data value to an area dimension (i.e. cirle radius).
     // Area squares area dimension ("pie * r * r" or "x * x"), visually distorting proportions.
-    // Since it is the quadratic function that is causing this, 
-    // we need to counteract its effects by applying its inverse function — the square-root function. 
+    // Since it is the quadratic function that is causing this,
+    // we need to counteract its effects by applying its inverse function — the square-root function.
     // https://bl.ocks.org/guilhermesimoes/e6356aa90a16163a6f917f53600a2b4a
 
     // can not take square root of 0 or negative number
     // shift values to be positive integers >= 1
-    const valueShift = rangeFieldMeta.min < 1
-      ? Math.abs(rangeFieldMeta.min) + 1
-      : 0;
+    const valueShift = rangeFieldMeta.min < 1 ? Math.abs(rangeFieldMeta.min) + 1 : 0;
 
-    const maxValueStopInput = isArea ? Math.sqrt(rangeFieldMeta.max + valueShift) : rangeFieldMeta.max;
-    const minValueStopInput = isArea ? Math.sqrt(rangeFieldMeta.min + valueShift) : rangeFieldMeta.min;
-    const maxRangeStopOutput = scaleRange ? scaleRange(this._options.maxSize) : this._options.maxSize;
-    const minRangeStopOutput = scaleRange ? scaleRange(this._options.minSize) : this._options.minSize;
+    const maxValueStopInput = isArea
+      ? Math.sqrt(rangeFieldMeta.max + valueShift)
+      : rangeFieldMeta.max;
+    const minValueStopInput = isArea
+      ? Math.sqrt(rangeFieldMeta.min + valueShift)
+      : rangeFieldMeta.min;
+    const maxRangeStopOutput =
+      this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
+        ? this._options.maxSize / HALF_MAKI_ICON_SIZE
+        : this._options.maxSize;
+    const minRangeStopOutput =
+      this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
+        ? this._options.minSize / HALF_MAKI_ICON_SIZE
+        : this._options.minSize;
     const stops =
-      rangeFieldMeta.min === rangeFieldMeta.max 
-        ? [maxValueStopInput, maxRangeStopOutput] 
+      rangeFieldMeta.min === rangeFieldMeta.max
+        ? [maxValueStopInput, maxRangeStopOutput]
         : [minValueStopInput, minRangeStopOutput, maxValueStopInput, maxRangeStopOutput];
 
     const valueExpression = makeMbClampedNumberExpression({
@@ -129,18 +125,12 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       fieldName: this.getMbFieldName(),
       fallback: rangeFieldMeta.min,
     });
-    const valueShiftExpression = rangeFieldMeta.min < 1
-      ? ['+', valueExpression, valueShift]
-      : valueExpression;
+    const valueShiftExpression =
+      rangeFieldMeta.min < 1 ? ['+', valueExpression, valueShift] : valueExpression;
     const sqrtValueExpression = ['sqrt', valueShiftExpression];
     const inputExpression = isArea ? sqrtValueExpression : valueExpression;
 
-    return [
-      'interpolate',
-      ['linear'],
-      inputExpression,
-      ...stops,
-    ];
+    return ['interpolate', ['linear'], inputExpression, ...stops];
   }
 
   _isSizeDynamicConfigComplete() {
