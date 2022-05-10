@@ -8,4 +8,3 @@
 export * from '../../../hooks';
 
 export * from './use_breadcrumbs';
-export * from './flyout_context';

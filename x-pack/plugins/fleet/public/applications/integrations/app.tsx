@@ -28,7 +28,7 @@ import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import { PackageInstallProvider, UIExtensionsContext } from './hooks';
+import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
 
 const EmptyContext = () => <></>;
@@ -82,7 +82,7 @@ export const IntegrationsAppContext: React.FC<{
                                     theme$={theme$}
                                   >
                                     <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
-                                    {children}
+                                    <FlyoutContextProvider>{children}</FlyoutContextProvider>
                                     <Chat />
                                   </PackageInstallProvider>
                                 </AgentPolicyContextProvider>
