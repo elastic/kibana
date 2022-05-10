@@ -7,17 +7,17 @@
 
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { DynamicStyleProperty } from './dynamic_style_property';
-import { OrdinalLegend } from '../components/legend/ordinal_legend';
-import { makeMbClampedNumberExpression } from '../style_util';
+import { DynamicStyleProperty } from '../dynamic_style_property';
+import { OrdinalLegend } from '../../components/legend/ordinal_legend';
+import { makeMbClampedNumberExpression } from '../../style_util';
 import {
   FieldFormatter,
   HALF_MAKI_ICON_SIZE,
   VECTOR_STYLES,
-} from '../../../../../common/constants';
-import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
-import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer';
+} from '../../../../../../common/constants';
+import type { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
+import type { IField } from '../../../../fields/field';
+import type { IVectorLayer } from '../../../../layers/vector_layer';
 
 export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions> {
   private readonly _isSymbolizedAsIcon: boolean;
@@ -61,9 +61,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   syncCircleRadiusWithMb(mbLayerId: string, mbMap: MbMap) {
-    const circleRadiusExpression = this.getMbSizeExpression();
-    console.log(JSON.stringify(circleRadiusExpression, null, 2));
-    mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadiusExpression);
+    mbMap.setPaintProperty(mbLayerId, 'circle-radius', this.getMbSizeExpression());
   }
 
   syncLineWidthWithMb(mbLayerId: string, mbMap: MbMap) {
