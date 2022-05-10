@@ -15,16 +15,16 @@ import {
   SimpleConnectorForm,
 } from '../../simple_connector_form';
 
-const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
-  const configFormSchema: ConfigFieldSchema[] = [
-    { id: 'apiUrl', label: i18n.API_URL_LABEL, isUrlField: true },
-    { id: 'orgId', label: i18n.ORG_ID_LABEL },
-  ];
-  const secretsFormSchema: SecretsFieldSchema[] = [
-    { id: 'apiKeyId', label: i18n.API_KEY_ID_LABEL },
-    { id: 'apiKeySecret', label: i18n.API_KEY_SECRET_LABEL, isPasswordField: true },
-  ];
+const configFormSchema: ConfigFieldSchema[] = [
+  { id: 'apiUrl', label: i18n.API_URL_LABEL, isUrlField: true },
+  { id: 'orgId', label: i18n.ORG_ID_LABEL },
+];
+const secretsFormSchema: SecretsFieldSchema[] = [
+  { id: 'apiKeyId', label: i18n.API_KEY_ID_LABEL },
+  { id: 'apiKeySecret', label: i18n.API_KEY_SECRET_LABEL, isPasswordField: true },
+];
 
+const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   return (
     <SimpleConnectorForm
       isEdit={isEdit}

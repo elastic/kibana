@@ -16,16 +16,16 @@ import {
   SecretsFieldSchema,
 } from '../../simple_connector_form';
 
-const JiraConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
-  const configFormSchema: ConfigFieldSchema[] = [
-    { id: 'apiUrl', label: i18n.API_URL_LABEL, isUrlField: true },
-    { id: 'projectKey', label: i18n.JIRA_PROJECT_KEY_LABEL },
-  ];
-  const secretsFormSchema: SecretsFieldSchema[] = [
-    { id: 'email', label: i18n.JIRA_EMAIL_LABEL },
-    { id: 'apiToken', label: i18n.JIRA_API_TOKEN_LABEL, isPasswordField: true },
-  ];
+const configFormSchema: ConfigFieldSchema[] = [
+  { id: 'apiUrl', label: i18n.API_URL_LABEL, isUrlField: true },
+  { id: 'projectKey', label: i18n.JIRA_PROJECT_KEY_LABEL },
+];
+const secretsFormSchema: SecretsFieldSchema[] = [
+  { id: 'email', label: i18n.JIRA_EMAIL_LABEL },
+  { id: 'apiToken', label: i18n.JIRA_API_TOKEN_LABEL, isPasswordField: true },
+];
 
+const JiraConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   return (
     <SimpleConnectorForm
       isEdit={isEdit}

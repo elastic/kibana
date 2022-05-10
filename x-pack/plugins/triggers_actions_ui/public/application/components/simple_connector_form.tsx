@@ -26,6 +26,7 @@ import { getEncryptedFieldNotifyLabel } from './get_encrypted_field_notify_label
 export interface CommonFieldSchema {
   id: string;
   label: string;
+  helpText?: string;
 }
 
 export interface ConfigFieldSchema extends CommonFieldSchema {
@@ -114,7 +115,14 @@ const getFieldConfig = ({
   ],
 });
 
-const FormRow: React.FC<FormRowProps> = ({ id, label, readOnly, isPasswordField, isUrlField }) => {
+const FormRow: React.FC<FormRowProps> = ({
+  id,
+  label,
+  readOnly,
+  isPasswordField,
+  isUrlField,
+  helpText,
+}) => {
   return (
     <>
       <EuiFlexGroup>
@@ -123,6 +131,7 @@ const FormRow: React.FC<FormRowProps> = ({ id, label, readOnly, isPasswordField,
             <UseField
               path={id}
               config={getFieldConfig({ label, isUrlField })}
+              helpText={helpText}
               componentProps={{
                 euiFieldProps: { readOnly, fullWidth: true },
               }}
@@ -144,9 +153,9 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
 }) => {
   return (
     <>
-      {configFormSchema.map(({ id, label, isUrlField }, index) => (
+      {configFormSchema.map(({ id, ...restConfigSchema }, index) => (
         <>
-          <FormRow id={`config.${id}`} label={label} readOnly={readOnly} isUrlField={isUrlField} />
+          <FormRow id={`config.${id}`} {...restConfigSchema} readOnly={readOnly} />
           {index !== configFormSchema.length ? <EuiSpacer size="m" /> : null}
         </>
       ))}
@@ -184,14 +193,9 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {secretsFormSchema.map(({ id, label, isPasswordField }, index) => (
+      {secretsFormSchema.map(({ id, ...restSecretsSchema }, index) => (
         <>
-          <FormRow
-            id={`secrets.${id}`}
-            label={label}
-            readOnly={readOnly}
-            isPasswordField={isPasswordField}
-          />
+          <FormRow id={`secrets.${id}`} {...restSecretsSchema} readOnly={readOnly} />
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
         </>
       ))}

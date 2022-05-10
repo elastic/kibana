@@ -194,7 +194,6 @@ export function getServiceNowITOMActionType(): ActionTypeModel<
     iconClass: lazy(() => import('./logo')),
     selectMessage: SERVICENOW_ITOM_DESC,
     actionTypeTitle: SERVICENOW_ITOM_TITLE,
-    validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors_no_app')),
     validateParams: async (
       actionParams: ServiceNowITOMActionParams
