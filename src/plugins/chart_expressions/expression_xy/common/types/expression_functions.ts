@@ -10,6 +10,7 @@ import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/chart
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import {
   AxisExtentModes,
@@ -170,7 +171,7 @@ export interface LegendConfig {
    * Exact legend width (vertical) or height (horizontal)
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
-  legendSize?: number;
+  legendSize?: LegendSize;
 }
 
 export interface LabelsOrientationConfig {
@@ -180,7 +181,7 @@ export interface LabelsOrientationConfig {
 }
 
 // Arguments to XY chart expression, with computed properties
-export interface XYArgs {
+export interface XYArgs extends DataLayerArgs {
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -190,7 +191,6 @@ export interface XYArgs {
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
-  dataLayers: DataLayerConfigResult[];
   referenceLineLayers: ReferenceLineLayerConfigResult[];
   annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
@@ -385,12 +385,6 @@ export type LayeredXyVisFn = ExpressionFunctionDefinition<
   Promise<XYRender>
 >;
 
-export type DataLayerFn = ExpressionFunctionDefinition<
-  typeof DATA_LAYER,
-  Datatable,
-  DataLayerArgs,
-  DataLayerConfigResult
->;
 export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
   Datatable,
