@@ -27,7 +27,11 @@ const { startES } = kbnTestServer.createTestServers({
   settings: {
     es: {
       license: 'basic',
-      dataArchive: Path.join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
+      dataArchive: Path.join(
+        __dirname,
+        'archives',
+        '8.0.0_v1_migrations_sample_data_saved_objects.zip'
+      ),
     },
   },
 });
@@ -77,7 +81,7 @@ let esServer: kbnTestServer.TestElasticsearchUtils;
 async function updateRoutingAllocations(
   esClient: ElasticsearchClient,
   settingType: string = 'persistent',
-  value: string = 'none'
+  value: string | null
 ) {
   return await esClient.cluster.putSettings({
     [settingType]: { cluster: { routing: { allocation: { enable: value } } } },
@@ -97,7 +101,7 @@ describe('incompatible_cluster_routing_allocation', () => {
     await esServer.stop();
   });
 
-  it('fails with a descriptive message when persistent replica allocation is not enabled', async () => {
+  it('retries the INIT action with a descriptive message when cluster settings are incompatible', async () => {
     const initialSettings = await client.cluster.getSettings({ flat_settings: true });
 
     expect(getClusterRoutingAllocations(initialSettings)).toBe(true);
@@ -108,15 +112,14 @@ describe('incompatible_cluster_routing_allocation', () => {
 
     expect(getClusterRoutingAllocations(updatedSettings)).toBe(false);
 
-    // now try to start Kibana
+    // Start Kibana
     root = createKbnRoot();
     await root.preboot();
     await root.setup();
 
-    await expect(root.start()).rejects.toThrowError(
-      /Unable to complete saved object migrations for the \[\.kibana.*\] index: \[incompatible_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {\"transient\": {\"cluster\.routing\.allocation\.enable\": null}, \"persistent\": {\"cluster\.routing\.allocation\.enable\": null}}\. Refer to https:\/\/www.elastic.co\/guide\/en\/kibana\/master\/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue\./
-    );
+    root.start();
 
+    // Wait for the INIT -> INIT action retry
     await retryAsync(
       async () => {
         const logFileContent = await fs.readFile(logFilePath, 'utf-8');
@@ -124,32 +127,36 @@ describe('incompatible_cluster_routing_allocation', () => {
           .split('\n')
           .filter(Boolean)
           .map((str) => JSON5.parse(str)) as LogRecord[];
+
+        // Wait for logs of the second failed attempt to be sure we're correctly incrementing retries
         expect(
           records.find((rec) =>
-            /^Unable to complete saved object migrations for the \[\.kibana.*\] index: \[incompatible_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\./.test(
-              rec.message
+            rec.message.includes(
+              `Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue.'. Retrying attempt 2 in 4 seconds.`
             )
           )
         ).toBeDefined();
       },
-      { retryAttempts: 10, retryDelayMs: 200 }
+      { retryAttempts: 20, retryDelayMs: 500 }
     );
-  });
 
-  it('fails with a descriptive message when persistent replica allocation is set to "primaries"', async () => {
-    await updateRoutingAllocations(client, 'persistent', 'primaries');
+    // Reset the cluster routing allocation settings
+    await updateRoutingAllocations(client, 'persistent', null);
 
-    const updatedSettings = await client.cluster.getSettings({ flat_settings: true });
+    // Wait for migrations to succeed
+    await retryAsync(
+      async () => {
+        const logFileContent = await fs.readFile(logFilePath, 'utf-8');
+        const records = logFileContent
+          .split('\n')
+          .filter(Boolean)
+          .map((str) => JSON5.parse(str)) as LogRecord[];
 
-    expect(getClusterRoutingAllocations(updatedSettings)).toBe(false);
-
-    // now try to start Kibana
-    root = createKbnRoot();
-    await root.preboot();
-    await root.setup();
-
-    await expect(root.start()).rejects.toThrowError(
-      /Unable to complete saved object migrations for the \[\.kibana.*\] index: \[incompatible_cluster_routing_allocation\] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {\"transient\": {\"cluster\.routing\.allocation\.enable\": null}, \"persistent\": {\"cluster\.routing\.allocation\.enable\": null}}\. Refer to https:\/\/www.elastic.co\/guide\/en\/kibana\/master\/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue\./
+        expect(
+          records.find((rec) => rec.message.includes('MARK_VERSION_INDEX_READY -> DONE'))
+        ).toBeDefined();
+      },
+      { retryAttempts: 100, retryDelayMs: 500 }
     );
   });
 });
