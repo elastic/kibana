@@ -56,4 +56,9 @@ export interface FileSavedObjectAttributes extends SavedObjectAttributes {
    * Size of the contents in bytes.
    */
   size?: number;
+
+  /**
+   * User-defined metadata
+   */
+  metadata: SavedObjectAttributes;
 }

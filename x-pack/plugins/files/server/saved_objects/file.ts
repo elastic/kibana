@@ -43,6 +43,9 @@ export const fileObjectType: SavedObjectsType<FileSavedObjectAttributes> = {
       size: {
         type: 'long',
       },
+      metadata: {
+        type: 'object',
+      },
     },
   },
 };
