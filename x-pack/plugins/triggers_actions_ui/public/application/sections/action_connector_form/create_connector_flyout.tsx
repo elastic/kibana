@@ -18,6 +18,8 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiSpacer,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import {
   useForm,
@@ -31,7 +33,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
 
-import { ActionConnector, ActionType, ActionTypeRegistryContract } from '../../../types';
+import {
+  ActionConnector,
+  ActionType,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
+} from '../../../types';
 import { CreateConnectorForm } from './create_connector_form';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -46,6 +53,7 @@ interface CreateConnectorFlyoutProps {
 }
 
 interface ConnectorFormData {
+  actionType: ActionType | null;
   name: string;
   [key: string]: unknown;
 }
@@ -172,6 +180,50 @@ const UpgradeYourLicenseCallOut: React.FC<{ http: HttpSetup }> = ({ http }) => (
   </EuiCallOut>
 );
 
+const FlyoutHeaderContent: React.FC<{
+  actionTypeModel: ActionTypeModel | null;
+  actionType: ActionType | null;
+}> = ({ actionTypeModel, actionType }) => {
+  return (
+    <EuiFlexGroup gutterSize="m" alignItems="center">
+      {actionTypeModel != null && actionTypeModel.iconClass ? (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={actionTypeModel.iconClass} size="xl" />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem>
+        {actionTypeModel != null && actionType ? (
+          <>
+            <EuiTitle size="s">
+              <h3 id="flyoutTitle">
+                <FormattedMessage
+                  defaultMessage="{actionTypeName} connector"
+                  id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
+                  values={{
+                    actionTypeName: actionType.name,
+                  }}
+                />
+              </h3>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              {actionTypeModel.selectMessage}
+            </EuiText>
+          </>
+        ) : (
+          <EuiTitle size="s">
+            <h3 id="selectConnectorFlyoutTitle">
+              <FormattedMessage
+                defaultMessage="Select a connector"
+                id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
+              />
+            </h3>
+          </EuiTitle>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
   onClose,
@@ -191,17 +243,18 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   };
 
   const { form } = useForm({ onSubmit: onFormSubmit });
-  const [{ actionType }] = useFormData({ form, watch: ['actionType'] });
+  const [{ actionType }] = useFormData<ConnectorFormData>({ form, watch: ['actionType'] });
   const { setFieldValue } = form;
 
   const resetActionType = useCallback(() => setFieldValue('actionType', null), [setFieldValue]);
 
+  const actionTypeModel: ActionTypeModel | null =
+    actionType != null ? actionTypeRegistry.get(actionType.id) : null;
+
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{'Test'}</h2>
-        </EuiTitle>
+        <FlyoutHeaderContent actionTypeModel={actionTypeModel} actionType={actionType} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
