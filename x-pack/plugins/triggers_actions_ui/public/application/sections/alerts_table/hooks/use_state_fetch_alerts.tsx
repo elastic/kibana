@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export const useStateFetchAlerts = () => {
-
-}
+// TODO Implements ;)
+export const useStateFetchAlerts = () => {};

@@ -12,7 +12,8 @@ import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];
-  query?: { bool: estypes.QueryDslBoolQuery };
+  fields?: estypes.QueryDslFieldAndFormat[];
+  query?: Pick<estypes.QueryDslQueryContainer, 'bool' | 'ids'>;
   sort?: estypes.SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
 };
@@ -60,7 +61,8 @@ type DotNestedKeys<T, D extends number = 10> = [D] extends [never]
   ? { [K in keyof T]-?: Join<K, DotNestedKeys<T[K], Prev[D]>> }[keyof T]
   : '';
 
+export type EcsFields = DotNestedKeys<Omit<Ecs, 'ecs'>>;
 export type EcsFieldsResponse = {
-  [Property in DotNestedKeys<Ecs>]: string[];
+  [Property in EcsFields]: string[];
 };
 export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;

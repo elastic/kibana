@@ -53,6 +53,14 @@ import type {
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { PLUGIN_ID } from './common/constants';
+// import type {
+//   UseFetchAlerts,
+//   UsePagination,
+//   UseSorting,
+// } from './application/sections/alerts_table/hooks';
+import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
+import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
+// import { getAlertHooksLazy } from './common/get_alert_hook';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -76,7 +84,13 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditAlertFlyout: (
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
+  // getAlertHooks: () => {
+  //   useFetchAlerts: UseFetchAlerts;
+  //   usePagination: UsePagination;
+  //   useSorting: UseSorting;
+  // };
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
+  getAlertsStateTable: (props: AlertsTableStateProps) => ReactElement<AlertsTableStateProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
   getRuleTagBadge: (props: RuleTagBadgeProps) => ReactElement<RuleTagBadgeProps>;
 }
@@ -245,6 +259,12 @@ export class Plugin
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
         });
+      },
+      // getAlertHooks: () => {
+      //   return getAlertHooksLazy();
+      // },
+      getAlertsStateTable: (props: AlertsTableStateProps) => {
+        return getAlertsTableStateLazy(props);
       },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);

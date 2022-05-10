@@ -43,7 +43,7 @@ const PREVIOUS_LABEL = i18n.translate(
 );
 
 interface AlertsFlyoutProps {
-  alert: AlertsData;
+  alert: EcsFieldsResponse;
   onClose: () => void;
   onPaginateNext: () => void;
   onPaginatePrevious: () => void;

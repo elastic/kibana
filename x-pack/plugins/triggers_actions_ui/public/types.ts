@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ComponentType } from 'react';
@@ -18,6 +19,7 @@ import {
   EuiDataGridColumn,
   EuiDataGridControlColumn,
   EuiDataGridCellValueElementProps,
+  EuiDataGridSorting,
 } from '@elastic/eui';
 import {
   ActionType,
@@ -46,6 +48,8 @@ import {
   RuleType as CommonRuleType,
 } from '@kbn/alerting-plugin/common';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
@@ -381,19 +385,18 @@ export enum AlertsField {
   reason = 'kibana.alert.reason',
 }
 
-export type AlertsData = Record<AlertsField, any[]>;
-
 export interface FetchAlertData {
   activePage: number;
-  alerts: AlertsData[];
+  alerts: EcsFieldsResponse[];
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
   onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  onSortChange: (sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => void;
+  onSortChange: (sort: Array<EuiDataGridSorting['columns']>) => void;
   refresh: () => void;
+  sort: estypes.SortCombinations[];
 }
 
 export interface BulkActionsObjectProp {
@@ -403,8 +406,7 @@ export interface BulkActionsObjectProp {
 }
 
 export interface AlertsTableProps {
-  configurationId: string;
-  consumers: AlertConsumers[];
+  columns: EuiDataGridColumn[];
   bulkActions: BulkActionsObjectProp;
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
@@ -416,13 +418,12 @@ export interface AlertsTableProps {
   showCheckboxes: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
-  alerts: AlertsData[];
   'data-test-subj': string;
 }
 
 export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
-  alert: AlertsData;
-  field: AlertsField;
+  alert: EcsFieldsResponse;
+  field: string;
 };
 
 export interface AlertsTableConfigurationRegistry {
