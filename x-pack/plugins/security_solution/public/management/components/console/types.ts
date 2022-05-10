@@ -60,7 +60,7 @@ export interface Command<TDefinition extends CommandDefinition = CommandDefiniti
   // FIXME:PT this should be a generic that allows for the arguments type to be used
   /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInput;
-  /** The command defined associated with this user command */
+  /** The command definition associated with this user command */
   commandDefinition: TDefinition;
 }
 
