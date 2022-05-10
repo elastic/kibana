@@ -17,7 +17,12 @@ export interface Props {
   dataTestSubj?: string;
 }
 
-const StatsComponent: React.FC<Props> = ({ caseCount, caseStatus, isLoading, dataTestSubj }) => {
+const StatusStatsComponent: React.FC<Props> = ({
+  caseCount,
+  caseStatus,
+  isLoading,
+  dataTestSubj,
+}) => {
   const statusStats = useMemo(
     () => [
       {
@@ -36,5 +41,5 @@ const StatsComponent: React.FC<Props> = ({ caseCount, caseStatus, isLoading, dat
   );
 };
 
-StatsComponent.displayName = 'StatsComponent';
-export const Stats = memo(StatsComponent);
+StatusStatsComponent.displayName = 'StatusStats';
+export const StatusStats = memo(StatusStatsComponent);

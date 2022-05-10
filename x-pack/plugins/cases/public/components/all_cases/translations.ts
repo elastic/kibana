@@ -105,3 +105,11 @@ export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
 export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
   defaultMessage: 'Change status',
 });
+
+export const MTTR_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
+  defaultMessage: 'MTTR',
+});
+
+export const MTTR_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
+  defaultMessage: 'Mean time to response.',
+});
