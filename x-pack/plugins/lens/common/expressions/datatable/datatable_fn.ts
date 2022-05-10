@@ -90,11 +90,11 @@ export const datatableFn =
         sortDirection
       );
       // replace the table here
-      context.inspectorAdapters.tables.default.rows = (firstTable.rows || [])
+      context.inspectorAdapters.tables.tables.default.rows = (firstTable.rows || [])
         .slice()
         .sort(sortingCriteria);
       // replace also the local copy
-      firstTable.rows = context.inspectorAdapters.tables.default.rows;
+      firstTable.rows = context.inspectorAdapters.tables.tables.default.rows;
     } else {
       args.sortingColumnId = undefined;
       args.sortingDirection = 'none';
