@@ -71,7 +71,6 @@ const tourStepDefinitions: TourStepDefinition[] = [
       />
     ),
     imageName: 'reorder_columns.gif',
-    isOptional: true,
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.sort,
@@ -85,6 +84,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
         defaultMessage="Sort a single field by clicking a column header. Sort by multiple fields using the pop-up."
       />
     ),
+    imageName: 'sort.gif',
   },
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.changeRowHeight,
@@ -124,7 +124,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
         }}
       />
     ),
-    imageName: 'expand_document.gif',
+    imageName: 'expand.gif',
   },
 ];
 
@@ -132,29 +132,26 @@ const FIRST_STEP = 1;
 
 const prepareTourSteps = (
   stepDefinitions: TourStepDefinition[],
-  getAssetPath: (imageName: string) => string,
-  includeOptional: boolean
+  getAssetPath: (imageName: string) => string
 ): EuiTourStepProps[] =>
-  stepDefinitions
-    .filter((stepDefinition) => includeOptional || !stepDefinition.isOptional)
-    .map((stepDefinition, index) => ({
-      step: index + 1,
-      anchor: stepDefinition.anchor,
-      anchorPosition: stepDefinition.anchorPosition,
-      title: stepDefinition.title,
-      maxWidth: MAX_WIDTH,
-      content: (
-        <>
-          <p>{stepDefinition.content}</p>
-          {stepDefinition.imageName && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiImage alt="TODO" src={getAssetPath(stepDefinition.imageName)} size={300} />
-            </>
-          )}
-        </>
-      ),
-    })) as EuiTourStepProps[];
+  stepDefinitions.map((stepDefinition, index) => ({
+    step: index + 1,
+    anchor: stepDefinition.anchor,
+    anchorPosition: stepDefinition.anchorPosition,
+    title: stepDefinition.title,
+    maxWidth: MAX_WIDTH,
+    content: (
+      <>
+        <p>{stepDefinition.content}</p>
+        {stepDefinition.imageName && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiImage alt="TODO" src={getAssetPath(stepDefinition.imageName)} size={300} />
+          </>
+        )}
+      </>
+    ),
+  })) as EuiTourStepProps[];
 
 const findNextAvailableStep = (
   steps: EuiTourStepProps[],
@@ -188,7 +185,7 @@ export const DiscoverTourProvider: React.FC = ({ children }) => {
     [prependToBasePath]
   );
   const tourSteps = useMemo(
-    () => prepareTourSteps(tourStepDefinitions, getAssetPath, true),
+    () => prepareTourSteps(tourStepDefinitions, getAssetPath),
     [getAssetPath]
   );
   const [steps, actions, reducerState] = useEuiTour(tourSteps, tourConfig);
