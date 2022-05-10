@@ -564,7 +564,6 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       method: 'POST',
       body: JSON.stringify(objects),
     });
-
     return request;
   }
 
