@@ -18,15 +18,16 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
+
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
 import { mockTheme } from '../overview_cti_links/mock';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
+import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');
-const useRiskyHostsDashboardButtonHrefMock = useRiskyHostsDashboardButtonHref as jest.Mock;
+jest.mock('../../../common/hooks/use_dashboard_button_href');
+const useRiskyHostsDashboardButtonHrefMock = useDashboardButtonHref as jest.Mock;
 useRiskyHostsDashboardButtonHrefMock.mockReturnValue({ buttonHref: '/test' });
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links');

@@ -6,16 +6,23 @@
  */
 import { useState, useEffect } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../lib/kibana';
 
-const DASHBOARD_REQUEST_BODY_SEARCH = '"Current Risk Score for Hosts"';
-export const DASHBOARD_REQUEST_BODY = {
+export const dashboardRequestBody = (title: string) => ({
   type: 'dashboard',
-  search: DASHBOARD_REQUEST_BODY_SEARCH,
+  search: `"${title}"`,
   fields: ['title'],
-};
+});
 
-export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
+export const useDashboardButtonHref = ({
+  to,
+  from,
+  title,
+}: {
+  to: string;
+  from: string;
+  title: string;
+}) => {
   const {
     dashboard,
     savedObjects: { client: savedObjectsClient },
@@ -25,7 +32,7 @@ export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
 
   useEffect(() => {
     if (dashboard?.locator && savedObjectsClient) {
-      savedObjectsClient.find<SavedObjectAttributes>(DASHBOARD_REQUEST_BODY).then(
+      savedObjectsClient.find<SavedObjectAttributes>(dashboardRequestBody(title)).then(
         async (DashboardsSO?: {
           savedObjects?: Array<{
             attributes?: SavedObjectAttributes;
@@ -45,7 +52,7 @@ export const useRiskyHostsDashboardButtonHref = (to: string, from: string) => {
         }
       );
     }
-  }, [dashboard, from, savedObjectsClient, to]);
+  }, [dashboard, from, savedObjectsClient, to, title]);
 
   return {
     buttonHref,
