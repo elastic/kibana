@@ -453,8 +453,8 @@ function updateLayerType(layerId: string, newLayerType: string) {
     dispatch(clearDataRequests(layer));
     if (layer.getSource().isESSource()) {
       const adapters = getInspectorAdapters(getState());
-      adapters.vectorTiles.removeLayer(layerId);
-      adapters.requests.resetRequest(layerId);
+      adapters.vectorTiles?.removeLayer(layerId);
+      adapters.requests?.resetRequest(layerId);
     }
     dispatch({
       type: UPDATE_LAYER_PROP,
@@ -593,8 +593,7 @@ function removeLayerFromLayerList(layerId: string) {
     dispatch(updateTooltipStateForLayer(layerGettingRemoved));
     layerGettingRemoved.destroy();
     if (layerGettingRemoved.getSource().isESSource()) {
-      const adapters = getInspectorAdapters(getState());
-      adapters.vectorTiles.removeLayer(layerId);
+      getInspectorAdapters(getState())?.vectorTiles.removeLayer(layerId);
     }
     dispatch({
       type: REMOVE_LAYER,
