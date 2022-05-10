@@ -33,7 +33,6 @@ The address to use to reach the {package-manager} registry.
 
 `xpack.fleet.registryProxyUrl`::
 The proxy address to use to reach the {package-manager} registry if an internet connection is not directly available.
-Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
 
 ==== {fleet} settings
 
