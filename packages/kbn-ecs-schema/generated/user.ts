@@ -32,14 +32,58 @@ export const userEcs = {
       flat_name: 'user.changes.full_name',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'user.changes.full_name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'full_name',
       normalize: [],
       original_fieldset: 'user',
       short: "User's full name, if available.",
       type: 'keyword'
     },
-    group: { domain: [Object], id: [Object], name: [Object] },
+    group: {
+      domain: {
+        dashed_name: 'user-changes-group-domain',
+        description: 'Name of the directory the group is a member of.\n' +
+          'For example, an LDAP or Active Directory domain name.',
+        flat_name: 'user.changes.group.domain',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'domain',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Name of the directory the group is a member of.',
+        type: 'keyword'
+      },
+      id: {
+        dashed_name: 'user-changes-group-id',
+        description: 'Unique identifier for the group on the system/platform.',
+        flat_name: 'user.changes.group.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Unique identifier for the group on the system/platform.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'user-changes-group-name',
+        description: 'Name of the group.',
+        flat_name: 'user.changes.group.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Name of the group.',
+        type: 'keyword'
+      }
+    },
     hash: {
       dashed_name: 'user-changes-hash',
       description: 'Unique user hash to correlate information for a user in anonymized form.\n' +
@@ -73,7 +117,13 @@ export const userEcs = {
       flat_name: 'user.changes.name',
       ignore_above: 1024,
       level: 'core',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'user.changes.name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'name',
       normalize: [],
       original_fieldset: 'user',
@@ -88,7 +138,7 @@ export const userEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'roles',
-      normalize: [Array],
+      normalize: [ 'array' ],
       original_fieldset: 'user',
       short: 'Array of user roles at the time of the event.',
       type: 'keyword'
@@ -139,14 +189,58 @@ export const userEcs = {
       flat_name: 'user.effective.full_name',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'user.effective.full_name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'full_name',
       normalize: [],
       original_fieldset: 'user',
       short: "User's full name, if available.",
       type: 'keyword'
     },
-    group: { domain: [Object], id: [Object], name: [Object] },
+    group: {
+      domain: {
+        dashed_name: 'user-effective-group-domain',
+        description: 'Name of the directory the group is a member of.\n' +
+          'For example, an LDAP or Active Directory domain name.',
+        flat_name: 'user.effective.group.domain',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'domain',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Name of the directory the group is a member of.',
+        type: 'keyword'
+      },
+      id: {
+        dashed_name: 'user-effective-group-id',
+        description: 'Unique identifier for the group on the system/platform.',
+        flat_name: 'user.effective.group.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Unique identifier for the group on the system/platform.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'user-effective-group-name',
+        description: 'Name of the group.',
+        flat_name: 'user.effective.group.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Name of the group.',
+        type: 'keyword'
+      }
+    },
     hash: {
       dashed_name: 'user-effective-hash',
       description: 'Unique user hash to correlate information for a user in anonymized form.\n' +
@@ -180,7 +274,13 @@ export const userEcs = {
       flat_name: 'user.effective.name',
       ignore_above: 1024,
       level: 'core',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'user.effective.name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'name',
       normalize: [],
       original_fieldset: 'user',
@@ -195,7 +295,7 @@ export const userEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'roles',
-      normalize: [Array],
+      normalize: [ 'array' ],
       original_fieldset: 'user',
       short: 'Array of user roles at the time of the event.',
       type: 'keyword'
@@ -219,7 +319,13 @@ export const userEcs = {
     flat_name: 'user.full_name',
     ignore_above: 1024,
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'user.full_name.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'full_name',
     normalize: [],
     short: "User's full name, if available.",
@@ -295,7 +401,13 @@ export const userEcs = {
     flat_name: 'user.name',
     ignore_above: 1024,
     level: 'core',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'user.name.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'name',
     normalize: [],
     short: 'Short name or login of the user.',
@@ -346,14 +458,58 @@ export const userEcs = {
       flat_name: 'user.target.full_name',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'user.target.full_name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'full_name',
       normalize: [],
       original_fieldset: 'user',
       short: "User's full name, if available.",
       type: 'keyword'
     },
-    group: { domain: [Object], id: [Object], name: [Object] },
+    group: {
+      domain: {
+        dashed_name: 'user-target-group-domain',
+        description: 'Name of the directory the group is a member of.\n' +
+          'For example, an LDAP or Active Directory domain name.',
+        flat_name: 'user.target.group.domain',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'domain',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Name of the directory the group is a member of.',
+        type: 'keyword'
+      },
+      id: {
+        dashed_name: 'user-target-group-id',
+        description: 'Unique identifier for the group on the system/platform.',
+        flat_name: 'user.target.group.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Unique identifier for the group on the system/platform.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'user-target-group-name',
+        description: 'Name of the group.',
+        flat_name: 'user.target.group.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Name of the group.',
+        type: 'keyword'
+      }
+    },
     hash: {
       dashed_name: 'user-target-hash',
       description: 'Unique user hash to correlate information for a user in anonymized form.\n' +
@@ -387,7 +543,13 @@ export const userEcs = {
       flat_name: 'user.target.name',
       ignore_above: 1024,
       level: 'core',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'user.target.name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'name',
       normalize: [],
       original_fieldset: 'user',
@@ -402,7 +564,7 @@ export const userEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'roles',
-      normalize: [Array],
+      normalize: [ 'array' ],
       original_fieldset: 'user',
       short: 'Array of user roles at the time of the event.',
       type: 'keyword'

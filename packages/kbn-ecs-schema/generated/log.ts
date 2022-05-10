@@ -41,7 +41,32 @@ export const logEcs = {
     type: 'keyword'
   },
   origin: {
-    file: { line: [Object], name: [Object] },
+    file: {
+      line: {
+        dashed_name: 'log-origin-file-line',
+        description: 'The line number of the file containing the source code which originated the log event.',
+        example: 42,
+        flat_name: 'log.origin.file.line',
+        level: 'extended',
+        name: 'origin.file.line',
+        normalize: [],
+        short: 'The line number of the file which originated the log event.',
+        type: 'long'
+      },
+      name: {
+        dashed_name: 'log-origin-file-name',
+        description: 'The name of the file containing the source code which originated the log event.\n' +
+          'Note that this field is not meant to capture the log file. The correct field to capture the log file is `log.file.path`.',
+        example: 'Bootstrap.java',
+        flat_name: 'log.origin.file.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'origin.file.name',
+        normalize: [],
+        short: 'The code file which originated the log event.',
+        type: 'keyword'
+      }
+    },
     function: {
       dashed_name: 'log-origin-function',
       description: 'The name of the function or method which originated the log event.',
@@ -76,7 +101,33 @@ export const logEcs = {
       short: 'The device or application that originated the Syslog message.',
       type: 'keyword'
     },
-    facility: { code: [Object], name: [Object] },
+    facility: {
+      code: {
+        dashed_name: 'log-syslog-facility-code',
+        description: 'The Syslog numeric facility of the log event, if available.\n' +
+          'According to RFCs 5424 and 3164, this value should be an integer between 0 and 23.',
+        example: 23,
+        flat_name: 'log.syslog.facility.code',
+        format: 'string',
+        level: 'extended',
+        name: 'syslog.facility.code',
+        normalize: [],
+        short: 'Syslog numeric facility of the event.',
+        type: 'long'
+      },
+      name: {
+        dashed_name: 'log-syslog-facility-name',
+        description: 'The Syslog text-based facility of the log event, if available.',
+        example: 'local7',
+        flat_name: 'log.syslog.facility.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'syslog.facility.name',
+        normalize: [],
+        short: 'Syslog text-based facility of the event.',
+        type: 'keyword'
+      }
+    },
     hostname: {
       dashed_name: 'log-syslog-hostname',
       description: 'The hostname, FQDN, or IP of the machine that originally sent the Syslog message. This is sourced from the hostname field of the syslog header. Depending on the environment, this value may be different from the host that handled the event, especially if the host handling the events is acting as a collector.',
@@ -126,7 +177,33 @@ export const logEcs = {
       short: 'The process name or ID that originated the Syslog message.',
       type: 'keyword'
     },
-    severity: { code: [Object], name: [Object] },
+    severity: {
+      code: {
+        dashed_name: 'log-syslog-severity-code',
+        description: 'The Syslog numeric severity of the log event, if available.\n' +
+          "If the event source publishing via Syslog provides a different numeric severity value (e.g. firewall, IDS), your source's numeric severity should go to `event.severity`. If the event source does not specify a distinct severity, you can optionally copy the Syslog severity to `event.severity`.",
+        example: 3,
+        flat_name: 'log.syslog.severity.code',
+        level: 'extended',
+        name: 'syslog.severity.code',
+        normalize: [],
+        short: 'Syslog numeric severity of the event.',
+        type: 'long'
+      },
+      name: {
+        dashed_name: 'log-syslog-severity-name',
+        description: 'The Syslog numeric severity of the log event, if available.\n' +
+          "If the event source publishing via Syslog provides a different severity value (e.g. firewall, IDS), your source's text severity should go to `log.level`. If the event source does not specify a distinct severity, you can optionally copy the Syslog severity to `log.level`.",
+        example: 'Error',
+        flat_name: 'log.syslog.severity.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'syslog.severity.name',
+        normalize: [],
+        short: 'Syslog text-based severity of the event.',
+        type: 'keyword'
+      }
+    },
     structured_data: {
       dashed_name: 'log-syslog-structured-data',
       description: 'Structured data expressed in RFC 5424 messages, if available. These are key-value pairs formed from the structured data portion of the syslog message, as defined in RFC 5424 Section 6.3.',

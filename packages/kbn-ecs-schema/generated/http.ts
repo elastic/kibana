@@ -1,6 +1,37 @@
 export const httpEcs = {
   request: {
-    body: { bytes: [Object], content: [Object] },
+    body: {
+      bytes: {
+        dashed_name: 'http-request-body-bytes',
+        description: 'Size in bytes of the request body.',
+        example: 887,
+        flat_name: 'http.request.body.bytes',
+        format: 'bytes',
+        level: 'extended',
+        name: 'request.body.bytes',
+        normalize: [],
+        short: 'Size in bytes of the request body.',
+        type: 'long'
+      },
+      content: {
+        dashed_name: 'http-request-body-content',
+        description: 'The full HTTP request body.',
+        example: 'Hello world',
+        flat_name: 'http.request.body.content',
+        level: 'extended',
+        multi_fields: [
+          {
+            flat_name: 'http.request.body.content.text',
+            name: 'text',
+            type: 'match_only_text'
+          }
+        ],
+        name: 'request.body.content',
+        normalize: [],
+        short: 'The full HTTP request body.',
+        type: 'wildcard'
+      }
+    },
     bytes: {
       dashed_name: 'http-request-bytes',
       description: 'Total size in bytes of the request (body and headers).',
@@ -66,7 +97,38 @@ export const httpEcs = {
     }
   },
   response: {
-    body: { bytes: [Object], content: [Object] },
+    body: {
+      bytes: {
+        dashed_name: 'http-response-body-bytes',
+        description: 'Size in bytes of the response body.',
+        example: 887,
+        flat_name: 'http.response.body.bytes',
+        format: 'bytes',
+        level: 'extended',
+        name: 'response.body.bytes',
+        normalize: [],
+        short: 'Size in bytes of the response body.',
+        type: 'long'
+      },
+      content: {
+        dashed_name: 'http-response-body-content',
+        description: 'The full HTTP response body.',
+        example: 'Hello world',
+        flat_name: 'http.response.body.content',
+        level: 'extended',
+        multi_fields: [
+          {
+            flat_name: 'http.response.body.content.text',
+            name: 'text',
+            type: 'match_only_text'
+          }
+        ],
+        name: 'response.body.content',
+        normalize: [],
+        short: 'The full HTTP response body.',
+        type: 'wildcard'
+      }
+    },
     bytes: {
       dashed_name: 'http-response-bytes',
       description: 'Total size in bytes of the response (body and headers).',

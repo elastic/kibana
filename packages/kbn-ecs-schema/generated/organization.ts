@@ -16,7 +16,13 @@ export const organizationEcs = {
     flat_name: 'organization.name',
     ignore_above: 1024,
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'organization.name.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'name',
     normalize: [],
     short: 'Organization name.',

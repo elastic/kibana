@@ -21,7 +21,7 @@ function printGroupFiles(schema: GroupSchema, outPath: string) {
     if (group !== TOP_LEVEL_NAME) {
       console.log(`Writing ${group} to ${outPath}/${group.toLowerCase()}.ts`);
 
-      const details = `export const ${group}Ecs = ${util.inspect(schema[group])}`;
+      const details = `export const ${group}Ecs = ${util.inspect(schema[group], {depth: null})}`;
       write(`${outPath}/${group.toLowerCase()}.ts`, details);
     }
   }  

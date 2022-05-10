@@ -79,7 +79,36 @@ export const cloudEcs = {
     }
   },
   origin: {
-    account: { id: [Object], name: [Object] },
+    account: {
+      id: {
+        dashed_name: 'cloud-origin-account-id',
+        description: 'The cloud account or organization id used to identify different entities in a multi-tenant environment.\n' +
+          'Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
+        example: 666777888999,
+        flat_name: 'cloud.origin.account.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'account.id',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud account or organization id.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'cloud-origin-account-name',
+        description: 'The cloud account name or alias used to identify different entities in a multi-tenant environment.\n' +
+          'Examples: AWS account name, Google Cloud ORG display name.',
+        example: 'elastic-dev',
+        flat_name: 'cloud.origin.account.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'account.name',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud account name.',
+        type: 'keyword'
+      }
+    },
     availability_zone: {
       dashed_name: 'cloud-origin-availability-zone',
       description: 'Availability zone in which this host, resource, or service is located.',
@@ -93,9 +122,78 @@ export const cloudEcs = {
       short: 'Availability zone in which this host, resource, or service is located.',
       type: 'keyword'
     },
-    instance: { id: [Object], name: [Object] },
-    machine: { type: [Object] },
-    project: { id: [Object], name: [Object] },
+    instance: {
+      id: {
+        dashed_name: 'cloud-origin-instance-id',
+        description: 'Instance ID of the host machine.',
+        example: 'i-1234567890abcdef0',
+        flat_name: 'cloud.origin.instance.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'instance.id',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'Instance ID of the host machine.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'cloud-origin-instance-name',
+        description: 'Instance name of the host machine.',
+        flat_name: 'cloud.origin.instance.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'instance.name',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'Instance name of the host machine.',
+        type: 'keyword'
+      }
+    },
+    machine: {
+      type: {
+        dashed_name: 'cloud-origin-machine-type',
+        description: 'Machine type of the host machine.',
+        example: 't2.medium',
+        flat_name: 'cloud.origin.machine.type',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'machine.type',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'Machine type of the host machine.',
+        type: 'keyword'
+      }
+    },
+    project: {
+      id: {
+        dashed_name: 'cloud-origin-project-id',
+        description: 'The cloud project identifier.\n' +
+          'Examples: Google Cloud Project id, Azure Project id.',
+        example: 'my-project',
+        flat_name: 'cloud.origin.project.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'project.id',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud project id.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'cloud-origin-project-name',
+        description: 'The cloud project name.\n' +
+          'Examples: Google Cloud Project name, Azure Project name.',
+        example: 'my project',
+        flat_name: 'cloud.origin.project.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'project.name',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud project name.',
+        type: 'keyword'
+      }
+    },
     provider: {
       dashed_name: 'cloud-origin-provider',
       description: 'Name of the cloud provider. Example values are aws, azure, gcp, or digitalocean.',
@@ -122,7 +220,22 @@ export const cloudEcs = {
       short: 'Region in which this host, resource, or service is located.',
       type: 'keyword'
     },
-    service: { name: [Object] }
+    service: {
+      name: {
+        dashed_name: 'cloud-origin-service-name',
+        description: 'The cloud service name is intended to distinguish services running on different platforms within a provider, eg AWS EC2 vs Lambda, GCP GCE vs App Engine, Azure VM vs App Server.\n' +
+          'Examples: app engine, app service, cloud run, fargate, lambda.',
+        example: 'lambda',
+        flat_name: 'cloud.origin.service.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'service.name',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud service name.',
+        type: 'keyword'
+      }
+    }
   },
   project: {
     id: {
@@ -192,7 +305,36 @@ export const cloudEcs = {
     }
   },
   target: {
-    account: { id: [Object], name: [Object] },
+    account: {
+      id: {
+        dashed_name: 'cloud-target-account-id',
+        description: 'The cloud account or organization id used to identify different entities in a multi-tenant environment.\n' +
+          'Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
+        example: 666777888999,
+        flat_name: 'cloud.target.account.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'account.id',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud account or organization id.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'cloud-target-account-name',
+        description: 'The cloud account name or alias used to identify different entities in a multi-tenant environment.\n' +
+          'Examples: AWS account name, Google Cloud ORG display name.',
+        example: 'elastic-dev',
+        flat_name: 'cloud.target.account.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'account.name',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud account name.',
+        type: 'keyword'
+      }
+    },
     availability_zone: {
       dashed_name: 'cloud-target-availability-zone',
       description: 'Availability zone in which this host, resource, or service is located.',
@@ -206,9 +348,78 @@ export const cloudEcs = {
       short: 'Availability zone in which this host, resource, or service is located.',
       type: 'keyword'
     },
-    instance: { id: [Object], name: [Object] },
-    machine: { type: [Object] },
-    project: { id: [Object], name: [Object] },
+    instance: {
+      id: {
+        dashed_name: 'cloud-target-instance-id',
+        description: 'Instance ID of the host machine.',
+        example: 'i-1234567890abcdef0',
+        flat_name: 'cloud.target.instance.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'instance.id',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'Instance ID of the host machine.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'cloud-target-instance-name',
+        description: 'Instance name of the host machine.',
+        flat_name: 'cloud.target.instance.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'instance.name',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'Instance name of the host machine.',
+        type: 'keyword'
+      }
+    },
+    machine: {
+      type: {
+        dashed_name: 'cloud-target-machine-type',
+        description: 'Machine type of the host machine.',
+        example: 't2.medium',
+        flat_name: 'cloud.target.machine.type',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'machine.type',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'Machine type of the host machine.',
+        type: 'keyword'
+      }
+    },
+    project: {
+      id: {
+        dashed_name: 'cloud-target-project-id',
+        description: 'The cloud project identifier.\n' +
+          'Examples: Google Cloud Project id, Azure Project id.',
+        example: 'my-project',
+        flat_name: 'cloud.target.project.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'project.id',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud project id.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'cloud-target-project-name',
+        description: 'The cloud project name.\n' +
+          'Examples: Google Cloud Project name, Azure Project name.',
+        example: 'my project',
+        flat_name: 'cloud.target.project.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'project.name',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud project name.',
+        type: 'keyword'
+      }
+    },
     provider: {
       dashed_name: 'cloud-target-provider',
       description: 'Name of the cloud provider. Example values are aws, azure, gcp, or digitalocean.',
@@ -235,6 +446,21 @@ export const cloudEcs = {
       short: 'Region in which this host, resource, or service is located.',
       type: 'keyword'
     },
-    service: { name: [Object] }
+    service: {
+      name: {
+        dashed_name: 'cloud-target-service-name',
+        description: 'The cloud service name is intended to distinguish services running on different platforms within a provider, eg AWS EC2 vs Lambda, GCP GCE vs App Engine, Azure VM vs App Server.\n' +
+          'Examples: app engine, app service, cloud run, fargate, lambda.',
+        example: 'lambda',
+        flat_name: 'cloud.target.service.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'service.name',
+        normalize: [],
+        original_fieldset: 'cloud',
+        short: 'The cloud service name.',
+        type: 'keyword'
+      }
+    }
   }
 }

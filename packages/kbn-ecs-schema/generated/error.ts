@@ -36,7 +36,13 @@ export const errorEcs = {
     description: 'The stack trace of this error in plain text.',
     flat_name: 'error.stack_trace',
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'error.stack_trace.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'stack_trace',
     normalize: [],
     short: 'The stack trace of this error in plain text.',

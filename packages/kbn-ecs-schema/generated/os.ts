@@ -18,7 +18,13 @@ export const osEcs = {
     flat_name: 'os.full',
     ignore_above: 1024,
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'os.full.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'full',
     normalize: [],
     short: 'Operating system name, including the version or code name.',
@@ -43,7 +49,13 @@ export const osEcs = {
     flat_name: 'os.name',
     ignore_above: 1024,
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'os.name.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'name',
     normalize: [],
     short: 'Operating system name, without the version.',

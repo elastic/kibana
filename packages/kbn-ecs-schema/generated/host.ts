@@ -41,7 +41,32 @@ export const hostEcs = {
       type: 'scaled_float'
     }
   },
-  disk: { read: { bytes: [Object] }, write: { bytes: [Object] } },
+  disk: {
+    read: {
+      bytes: {
+        dashed_name: 'host-disk-read-bytes',
+        description: 'The total number of bytes (gauge) read successfully (aggregated from all disks) since the last metric collection.',
+        flat_name: 'host.disk.read.bytes',
+        level: 'extended',
+        name: 'disk.read.bytes',
+        normalize: [],
+        short: 'The number of bytes read by all disks.',
+        type: 'long'
+      }
+    },
+    write: {
+      bytes: {
+        dashed_name: 'host-disk-write-bytes',
+        description: 'The total number of bytes (gauge) written successfully (aggregated from all disks) since the last metric collection.',
+        flat_name: 'host.disk.write.bytes',
+        level: 'extended',
+        name: 'disk.write.bytes',
+        normalize: [],
+        short: 'The number of bytes written on all disks.',
+        type: 'long'
+      }
+    }
+  },
   domain: {
     dashed_name: 'host-domain',
     description: 'Name of the domain of which the host is a member.\n' +
@@ -263,8 +288,50 @@ export const hostEcs = {
     type: 'keyword'
   },
   network: {
-    egress: { bytes: [Object], packets: [Object] },
-    ingress: { bytes: [Object], packets: [Object] }
+    egress: {
+      bytes: {
+        dashed_name: 'host-network-egress-bytes',
+        description: 'The number of bytes (gauge) sent out on all network interfaces by the host since the last metric collection.',
+        flat_name: 'host.network.egress.bytes',
+        level: 'extended',
+        name: 'network.egress.bytes',
+        normalize: [],
+        short: 'The number of bytes sent on all network interfaces.',
+        type: 'long'
+      },
+      packets: {
+        dashed_name: 'host-network-egress-packets',
+        description: 'The number of packets (gauge) sent out on all network interfaces by the host since the last metric collection.',
+        flat_name: 'host.network.egress.packets',
+        level: 'extended',
+        name: 'network.egress.packets',
+        normalize: [],
+        short: 'The number of packets sent on all network interfaces.',
+        type: 'long'
+      }
+    },
+    ingress: {
+      bytes: {
+        dashed_name: 'host-network-ingress-bytes',
+        description: 'The number of bytes received (gauge) on all network interfaces by the host since the last metric collection.',
+        flat_name: 'host.network.ingress.bytes',
+        level: 'extended',
+        name: 'network.ingress.bytes',
+        normalize: [],
+        short: 'The number of bytes received on all network interfaces.',
+        type: 'long'
+      },
+      packets: {
+        dashed_name: 'host-network-ingress-packets',
+        description: 'The number of packets (gauge) received on all network interfaces by the host since the last metric collection.',
+        flat_name: 'host.network.ingress.packets',
+        level: 'extended',
+        name: 'network.ingress.packets',
+        normalize: [],
+        short: 'The number of packets received on all network interfaces.',
+        type: 'long'
+      }
+    }
   },
   os: {
     family: {
@@ -287,7 +354,13 @@ export const hostEcs = {
       flat_name: 'host.os.full',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'host.os.full.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'full',
       normalize: [],
       original_fieldset: 'os',
@@ -314,7 +387,13 @@ export const hostEcs = {
       flat_name: 'host.os.name',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'host.os.name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'name',
       normalize: [],
       original_fieldset: 'os',

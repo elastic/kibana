@@ -9,11 +9,140 @@ export const emailEcs = {
     short: 'List of objects describing the attachments.',
     type: 'nested',
     file: {
-      extension: [Object],
-      hash: [Object],
-      mime_type: [Object],
-      name: [Object],
-      size: [Object]
+      extension: {
+        dashed_name: 'email-attachments-file-extension',
+        description: 'Attachment file extension, excluding the leading dot.',
+        example: 'txt',
+        flat_name: 'email.attachments.file.extension',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'attachments.file.extension',
+        normalize: [],
+        short: 'Attachment file extension.',
+        type: 'keyword'
+      },
+      hash: {
+        md5: {
+          dashed_name: 'email-attachments-file-hash-md5',
+          description: 'MD5 hash.',
+          flat_name: 'email.attachments.file.hash.md5',
+          ignore_above: 1024,
+          level: 'extended',
+          name: 'md5',
+          normalize: [],
+          original_fieldset: 'hash',
+          short: 'MD5 hash.',
+          type: 'keyword'
+        },
+        sha1: {
+          dashed_name: 'email-attachments-file-hash-sha1',
+          description: 'SHA1 hash.',
+          flat_name: 'email.attachments.file.hash.sha1',
+          ignore_above: 1024,
+          level: 'extended',
+          name: 'sha1',
+          normalize: [],
+          original_fieldset: 'hash',
+          short: 'SHA1 hash.',
+          type: 'keyword'
+        },
+        sha256: {
+          dashed_name: 'email-attachments-file-hash-sha256',
+          description: 'SHA256 hash.',
+          flat_name: 'email.attachments.file.hash.sha256',
+          ignore_above: 1024,
+          level: 'extended',
+          name: 'sha256',
+          normalize: [],
+          original_fieldset: 'hash',
+          short: 'SHA256 hash.',
+          type: 'keyword'
+        },
+        sha384: {
+          dashed_name: 'email-attachments-file-hash-sha384',
+          description: 'SHA384 hash.',
+          flat_name: 'email.attachments.file.hash.sha384',
+          ignore_above: 1024,
+          level: 'extended',
+          name: 'sha384',
+          normalize: [],
+          original_fieldset: 'hash',
+          short: 'SHA384 hash.',
+          type: 'keyword'
+        },
+        sha512: {
+          dashed_name: 'email-attachments-file-hash-sha512',
+          description: 'SHA512 hash.',
+          flat_name: 'email.attachments.file.hash.sha512',
+          ignore_above: 1024,
+          level: 'extended',
+          name: 'sha512',
+          normalize: [],
+          original_fieldset: 'hash',
+          short: 'SHA512 hash.',
+          type: 'keyword'
+        },
+        ssdeep: {
+          dashed_name: 'email-attachments-file-hash-ssdeep',
+          description: 'SSDEEP hash.',
+          flat_name: 'email.attachments.file.hash.ssdeep',
+          ignore_above: 1024,
+          level: 'extended',
+          name: 'ssdeep',
+          normalize: [],
+          original_fieldset: 'hash',
+          short: 'SSDEEP hash.',
+          type: 'keyword'
+        },
+        tlsh: {
+          dashed_name: 'email-attachments-file-hash-tlsh',
+          description: 'TLSH hash.',
+          flat_name: 'email.attachments.file.hash.tlsh',
+          ignore_above: 1024,
+          level: 'extended',
+          name: 'tlsh',
+          normalize: [],
+          original_fieldset: 'hash',
+          short: 'TLSH hash.',
+          type: 'keyword'
+        }
+      },
+      mime_type: {
+        dashed_name: 'email-attachments-file-mime-type',
+        description: 'The MIME media type of the attachment.\n' +
+          'This value will typically be extracted from the `Content-Type` MIME header field.',
+        example: 'text/plain',
+        flat_name: 'email.attachments.file.mime_type',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'attachments.file.mime_type',
+        normalize: [],
+        short: 'MIME type of the attachment file.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'email-attachments-file-name',
+        description: 'Name of the attachment file including the file extension.',
+        example: 'attachment.txt',
+        flat_name: 'email.attachments.file.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'attachments.file.name',
+        normalize: [],
+        short: 'Name of the attachment file.',
+        type: 'keyword'
+      },
+      size: {
+        dashed_name: 'email-attachments-file-size',
+        description: 'Attachment file size in bytes.',
+        example: 64329,
+        flat_name: 'email.attachments.file.size',
+        level: 'extended',
+        name: 'attachments.file.size',
+        normalize: [],
+        short: 'Attachment file size.',
+        type: 'long'
+      }
     }
   },
   bcc: {
@@ -25,7 +154,7 @@ export const emailEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'bcc.address',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'Email address of BCC recipient',
       type: 'keyword'
     }
@@ -39,7 +168,7 @@ export const emailEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'cc.address',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'Email address of CC recipient',
       type: 'keyword'
     }
@@ -89,7 +218,7 @@ export const emailEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'from.address',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: "The sender's email address.",
       type: 'keyword'
     }
@@ -138,7 +267,7 @@ export const emailEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'reply_to.address',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'Address replies should be delivered to.',
       type: 'keyword'
     }
@@ -163,7 +292,13 @@ export const emailEcs = {
     flat_name: 'email.subject',
     ignore_above: 1024,
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'email.subject.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'subject',
     normalize: [],
     short: 'The subject of the email message.',
@@ -178,7 +313,7 @@ export const emailEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'to.address',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'Email address of recipient',
       type: 'keyword'
     }

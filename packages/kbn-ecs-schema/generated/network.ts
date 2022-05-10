@@ -95,7 +95,34 @@ export const networkEcs = {
     normalize: [],
     short: 'Inner VLAN tag information',
     type: 'object',
-    vlan: { id: [Object], name: [Object] }
+    vlan: {
+      id: {
+        dashed_name: 'network-inner-vlan-id',
+        description: 'VLAN ID as reported by the observer.',
+        example: 10,
+        flat_name: 'network.inner.vlan.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'vlan',
+        short: 'VLAN ID as reported by the observer.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'network-inner-vlan-name',
+        description: 'Optional VLAN name as reported by the observer.',
+        example: 'outside',
+        flat_name: 'network.inner.vlan.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'vlan',
+        short: 'Optional VLAN name as reported by the observer.',
+        type: 'keyword'
+      }
+    }
   },
   name: {
     dashed_name: 'network-name',

@@ -32,7 +32,13 @@ export const user_agentEcs = {
     flat_name: 'user_agent.original',
     ignore_above: 1024,
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'user_agent.original.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'original',
     normalize: [],
     short: 'Unparsed user_agent string.',
@@ -59,7 +65,13 @@ export const user_agentEcs = {
       flat_name: 'user_agent.os.full',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'user_agent.os.full.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'full',
       normalize: [],
       original_fieldset: 'os',
@@ -86,7 +98,13 @@ export const user_agentEcs = {
       flat_name: 'user_agent.os.name',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'user_agent.os.name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'name',
       normalize: [],
       original_fieldset: 'os',

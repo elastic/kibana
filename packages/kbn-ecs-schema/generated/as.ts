@@ -18,7 +18,13 @@ export const asEcs = {
       flat_name: 'as.organization.name',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'as.organization.name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'organization.name',
       normalize: [],
       short: 'Organization name.',

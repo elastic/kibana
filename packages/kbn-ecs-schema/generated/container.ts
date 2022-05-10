@@ -13,7 +13,34 @@ export const containerEcs = {
       type: 'scaled_float'
     }
   },
-  disk: { read: { bytes: [Object] }, write: { bytes: [Object] } },
+  disk: {
+    read: {
+      bytes: {
+        beta: 'This field is beta and subject to change.',
+        dashed_name: 'container-disk-read-bytes',
+        description: 'The total number of bytes (gauge) read successfully (aggregated from all disks) since the last metric collection.',
+        flat_name: 'container.disk.read.bytes',
+        level: 'extended',
+        name: 'disk.read.bytes',
+        normalize: [],
+        short: 'The number of bytes read by all disks.',
+        type: 'long'
+      }
+    },
+    write: {
+      bytes: {
+        beta: 'This field is beta and subject to change.',
+        dashed_name: 'container-disk-write-bytes',
+        description: 'The total number of bytes (gauge) written successfully (aggregated from all disks) since the last metric collection.',
+        flat_name: 'container.disk.write.bytes',
+        level: 'extended',
+        name: 'disk.write.bytes',
+        normalize: [],
+        short: 'The number of bytes written on all disks.',
+        type: 'long'
+      }
+    }
+  },
   id: {
     dashed_name: 'container-id',
     description: 'Unique container id.',
@@ -44,7 +71,7 @@ export const containerEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'image.tag',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'Container image tags.',
       type: 'keyword'
     }
@@ -85,7 +112,34 @@ export const containerEcs = {
     short: 'Container name.',
     type: 'keyword'
   },
-  network: { egress: { bytes: [Object] }, ingress: { bytes: [Object] } },
+  network: {
+    egress: {
+      bytes: {
+        beta: 'This field is beta and subject to change.',
+        dashed_name: 'container-network-egress-bytes',
+        description: 'The number of bytes (gauge) sent out on all network interfaces by the container since the last metric collection.',
+        flat_name: 'container.network.egress.bytes',
+        level: 'extended',
+        name: 'network.egress.bytes',
+        normalize: [],
+        short: 'The number of bytes sent on all network interfaces.',
+        type: 'long'
+      }
+    },
+    ingress: {
+      bytes: {
+        beta: 'This field is beta and subject to change.',
+        dashed_name: 'container-network-ingress-bytes',
+        description: 'The number of bytes received (gauge) on all network interfaces by the container since the last metric collection.',
+        flat_name: 'container.network.ingress.bytes',
+        level: 'extended',
+        name: 'network.ingress.bytes',
+        normalize: [],
+        short: 'The number of bytes received on all network interfaces.',
+        type: 'long'
+      }
+    }
+  },
   runtime: {
     dashed_name: 'container-runtime',
     description: 'Runtime managing this container.',

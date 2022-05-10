@@ -21,7 +21,7 @@ export const registryEcs = {
       flat_name: 'registry.data.strings',
       level: 'core',
       name: 'data.strings',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of strings representing what was written to the registry.',
       type: 'wildcard'
     },

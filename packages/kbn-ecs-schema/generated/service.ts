@@ -157,7 +157,23 @@ export const serviceEcs = {
       short: 'Name of the service.',
       type: 'keyword'
     },
-    node: { name: [Object] },
+    node: {
+      name: {
+        dashed_name: 'service-origin-node-name',
+        description: 'Name of a service node.\n' +
+          'This allows for two nodes of the same service running on the same host to be differentiated. Therefore, `service.node.name` should typically be unique across nodes of a given service.\n' +
+          "In the case of Elasticsearch, the `service.node.name` could contain the unique node name within the Elasticsearch cluster. In cases where the service doesn't have the concept of a node name, the host name or container name can be used to distinguish running instances that make up this service. If those do not provide uniqueness (e.g. multiple instances of the service running on the same host) - the node name can be manually set.",
+        example: 'instance-0000000016',
+        flat_name: 'service.origin.node.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'node.name',
+        normalize: [],
+        original_fieldset: 'service',
+        short: 'Name of the service node.',
+        type: 'keyword'
+      }
+    },
     state: {
       dashed_name: 'service-origin-state',
       description: 'Current state of the service.',
@@ -285,7 +301,23 @@ export const serviceEcs = {
       short: 'Name of the service.',
       type: 'keyword'
     },
-    node: { name: [Object] },
+    node: {
+      name: {
+        dashed_name: 'service-target-node-name',
+        description: 'Name of a service node.\n' +
+          'This allows for two nodes of the same service running on the same host to be differentiated. Therefore, `service.node.name` should typically be unique across nodes of a given service.\n' +
+          "In the case of Elasticsearch, the `service.node.name` could contain the unique node name within the Elasticsearch cluster. In cases where the service doesn't have the concept of a node name, the host name or container name can be used to distinguish running instances that make up this service. If those do not provide uniqueness (e.g. multiple instances of the service running on the same host) - the node name can be manually set.",
+        example: 'instance-0000000016',
+        flat_name: 'service.target.node.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'node.name',
+        normalize: [],
+        original_fieldset: 'service',
+        short: 'Name of the service node.',
+        type: 'keyword'
+      }
+    },
     state: {
       dashed_name: 'service-target-state',
       description: 'Current state of the service.',

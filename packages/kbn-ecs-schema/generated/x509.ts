@@ -20,7 +20,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.common_name',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of common name (CN) of issuing certificate authority.',
       type: 'keyword'
     },
@@ -32,7 +32,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.country',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of country (C) codes',
       type: 'keyword'
     },
@@ -56,7 +56,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.locality',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of locality names (L)',
       type: 'keyword'
     },
@@ -68,7 +68,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.organization',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of organizations (O) of issuing certificate authority.',
       type: 'keyword'
     },
@@ -80,7 +80,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.organizational_unit',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of organizational units (OU) of issuing certificate authority.',
       type: 'keyword'
     },
@@ -92,7 +92,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'issuer.state_or_province',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of state or province names (ST, S, or P)',
       type: 'keyword'
     }
@@ -200,7 +200,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.common_name',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of common names (CN) of subject.',
       type: 'keyword'
     },
@@ -212,7 +212,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.country',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of country (C) code',
       type: 'keyword'
     },
@@ -236,7 +236,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.locality',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of locality names (L)',
       type: 'keyword'
     },
@@ -248,7 +248,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.organization',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of organizations (O) of subject.',
       type: 'keyword'
     },
@@ -259,7 +259,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.organizational_unit',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of organizational units (OU) of subject.',
       type: 'keyword'
     },
@@ -271,7 +271,7 @@ export const x509Ecs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'subject.state_or_province',
-      normalize: [Array],
+      normalize: [ 'array' ],
       short: 'List of state or province names (ST, S, or P)',
       type: 'keyword'
     }

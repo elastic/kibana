@@ -33,15 +33,117 @@ export const eventEcs = {
   },
   category: {
     allowed_values: [
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object]
+      {
+        description: 'Events in this category are related to the challenge and response process in which credentials are supplied and verified to allow the creation of a session. Common sources for these logs are Windows event logs and ssh logs. Visualize and analyze events in this category to look for failed logins, and other authentication-related activity.',
+        expected_event_types: [ 'start', 'end', 'info' ],
+        name: 'authentication'
+      },
+      {
+        description: 'Events in the configuration category have to deal with creating, modifying, or deleting the settings or parameters of an application, process, or system.\n' +
+          'Example sources include security policy change logs, configuration auditing logging, and system integrity monitoring.',
+        expected_event_types: [ 'access', 'change', 'creation', 'deletion', 'info' ],
+        name: 'configuration'
+      },
+      {
+        description: 'The database category denotes events and metrics relating to a data storage and retrieval system. Note that use of this category is not limited to relational database systems. Examples include event logs from MS SQL, MySQL, Elasticsearch, MongoDB, etc. Use this category to visualize and analyze database activity such as accesses and changes.',
+        expected_event_types: [ 'access', 'change', 'info', 'error' ],
+        name: 'database'
+      },
+      {
+        description: 'Events in the driver category have to do with operating system device drivers and similar software entities such as Windows drivers, kernel extensions, kernel modules, etc.\n' +
+          'Use events and metrics in this category to visualize and analyze driver-related activity and status on hosts.',
+        expected_event_types: [ 'change', 'end', 'info', 'start' ],
+        name: 'driver'
+      },
+      {
+        description: 'This category is used for events relating to email messages, email attachments, and email network or protocol activity.\n' +
+          'Emails events can be produced by email security gateways, mail transfer agents, email cloud service providers, or mail server monitoring applications.',
+        expected_event_types: [ 'info' ],
+        name: 'email'
+      },
+      {
+        description: 'Relating to a set of information that has been created on, or has existed on a filesystem. Use this category of events to visualize and analyze the creation, access, and deletions of files. Events in this category can come from both host-based and network-based sources. An example source of a network-based detection of a file transfer would be the Zeek file.log.',
+        expected_event_types: [ 'change', 'creation', 'deletion', 'info' ],
+        name: 'file'
+      },
+      {
+        description: 'Use this category to visualize and analyze information such as host inventory or host lifecycle events.\n' +
+          `Most of the events in this category can usually be observed from the outside, such as from a hypervisor or a control plane's point of view. Some can also be seen from within, such as "start" or "end".\n` +
+          'Note that this category is for information about hosts themselves; it is not meant to capture activity "happening on a host".',
+        expected_event_types: [ 'access', 'change', 'end', 'info', 'start' ],
+        name: 'host'
+      },
+      {
+        description: 'Identity and access management (IAM) events relating to users, groups, and administration. Use this category to visualize and analyze IAM-related logs and data from active directory, LDAP, Okta, Duo, and other IAM systems.',
+        expected_event_types: [
+          'admin',    'change',
+          'creation', 'deletion',
+          'group',    'info',
+          'user'
+        ],
+        name: 'iam'
+      },
+      {
+        description: 'Relating to intrusion detections from IDS/IPS systems and functions, both network and host-based. Use this category to visualize and analyze intrusion detection alerts from systems such as Snort, Suricata, and Palo Alto threat detections.',
+        expected_event_types: [ 'allowed', 'denied', 'info' ],
+        name: 'intrusion_detection'
+      },
+      {
+        description: 'Malware detection events and alerts. Use this category to visualize and analyze malware detections from EDR/EPP systems such as Elastic Endpoint Security, Symantec Endpoint Protection, Crowdstrike, and network IDS/IPS systems such as Suricata, or other sources of malware-related events such as Palo Alto Networks threat logs and Wildfire logs.',
+        expected_event_types: [ 'info' ],
+        name: 'malware'
+      },
+      {
+        description: 'Relating to all network activity, including network connection lifecycle, network traffic, and essentially any event that includes an IP address. Many events containing decoded network protocol transactions fit into this category. Use events in this category to visualize or analyze counts of network ports, protocols, addresses, geolocation information, etc.',
+        expected_event_types: [
+          'access',
+          'allowed',
+          'connection',
+          'denied',
+          'end',
+          'info',
+          'protocol',
+          'start'
+        ],
+        name: 'network'
+      },
+      {
+        description: 'Relating to software packages installed on hosts. Use this category to visualize and analyze inventory of software installed on various hosts, or to determine host vulnerability in the absence of vulnerability scan data.',
+        expected_event_types: [
+          'access',
+          'change',
+          'deletion',
+          'info',
+          'installation',
+          'start'
+        ],
+        name: 'package'
+      },
+      {
+        description: 'Use this category of events to visualize and analyze process-specific information such as lifecycle events or process ancestry.',
+        expected_event_types: [ 'access', 'change', 'end', 'info', 'start' ],
+        name: 'process'
+      },
+      {
+        description: 'Having to do with settings and assets stored in the Windows registry. Use this category to visualize and analyze activity such as registry access and modifications.',
+        expected_event_types: [ 'access', 'change', 'creation', 'deletion' ],
+        name: 'registry'
+      },
+      {
+        description: 'The session category is applied to events and metrics regarding logical persistent connections to hosts and services. Use this category to visualize and analyze interactive or automated persistent connections between assets. Data for this category may come from Windows Event logs, SSH logs, or stateless sessions such as HTTP cookie-based sessions, etc.',
+        expected_event_types: [ 'start', 'end', 'info' ],
+        name: 'session'
+      },
+      {
+        description: "Use this category to visualize and analyze events describing threat actors' targets, motives, or behaviors.",
+        expected_event_types: [ 'indicator' ],
+        name: 'threat'
+      },
+      {
+        description: 'Relating to web server access. Use this category to create a dashboard of web server/proxy activity from apache, IIS, nginx web servers, etc. Note: events from network observers such as Zeek http log may also be included in this category.',
+        expected_event_types: [ 'access', 'error', 'info' ],
+        name: 'web'
+      }
     ],
     dashed_name: 'event-category',
     description: 'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy.\n' +
@@ -161,10 +263,43 @@ export const eventEcs = {
   },
   kind: {
     allowed_values: [
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object]
+      {
+        description: 'This value indicates an event such as an alert or notable event, triggered by a detection rule executing externally to the Elastic Stack.\n' +
+          '`event.kind:alert` is often populated for events coming from firewalls, intrusion detection systems, endpoint detection and response systems, and so on.\n' +
+          'This value is not used by Elastic solutions for alert documents that are created by rules executing within the Kibana alerting framework.',
+        name: 'alert'
+      },
+      {
+        description: 'The `enrichment` value indicates an event collected to provide additional context, often to other events.\n' +
+          'An example is collecting indicators of compromise (IOCs) from a threat intelligence provider with the intent to use those values to enrich other events. The IOC events from the intelligence provider should be categorized as `event.kind:enrichment`.',
+        name: 'enrichment'
+      },
+      {
+        description: 'This value is the most general and most common value for this field. It is used to represent events that indicate that something happened.',
+        name: 'event'
+      },
+      {
+        description: 'This value is used to indicate that this event describes a numeric measurement taken at given point in time.\n' +
+          'Examples include CPU utilization, memory usage, or device temperature.\n' +
+          'Metric events are often collected on a predictable frequency, such as once every few seconds, or once a minute, but can also be used to describe ad-hoc numeric metric queries.',
+        name: 'metric'
+      },
+      {
+        description: 'The state value is similar to metric, indicating that this event describes a measurement taken at given point in time, except that the measurement does not result in a numeric value, but rather one of a fixed set of categorical values that represent conditions or states.\n' +
+          'Examples include periodic events reporting Elasticsearch cluster state (green/yellow/red), the state of a TCP connection (open, closed, fin_wait, etc.), the state of a host with respect to a software vulnerability (vulnerable, not vulnerable), and the state of a system regarding compliance with a regulatory standard (compliant, not compliant).\n' +
+          "Note that an event that describes a change of state would not use `event.kind:state`, but instead would use 'event.kind:event' since a state change fits the more general event definition of something that happened.\n" +
+          'State events are often collected on a predictable frequency, such as once every few seconds, once a minute, once an hour, or once a day, but can also be used to describe ad-hoc state queries.',
+        name: 'state'
+      },
+      {
+        description: 'This value indicates that an error occurred during the ingestion of this event, and that event data may be missing, inconsistent, or incorrect. `event.kind:pipeline_error` is often associated with parsing errors.',
+        name: 'pipeline_error'
+      },
+      {
+        description: 'This value is used by Elastic solutions (e.g., Security, Observability) for alert documents that are created by rules executing within the Kibana alerting framework.\n' +
+          'Usage of this value is reserved, and data ingestion pipelines must not populate `event.kind` with the value "signal".',
+        name: 'signal'
+      }
     ],
     dashed_name: 'event-kind',
     description: 'This is one of four ECS Categorization Fields, and indicates the highest level in the ECS category hierarchy.\n' +
@@ -207,7 +342,20 @@ export const eventEcs = {
     type: 'keyword'
   },
   outcome: {
-    allowed_values: [ [Object], [Object], [Object] ],
+    allowed_values: [
+      {
+        description: 'Indicates that this event describes a failed result. A common example is `event.category:file AND event.type:access AND event.outcome:failure` to indicate that a file access was attempted, but was not successful.',
+        name: 'failure'
+      },
+      {
+        description: 'Indicates that this event describes a successful result. A common example is `event.category:file AND event.type:create AND event.outcome:success` to indicate that a file was successfully created.',
+        name: 'success'
+      },
+      {
+        description: "Indicates that this event describes only an attempt for which the result is unknown from the perspective of the event producer. For example, if the event contains information only about the request side of a transaction that results in a response, populating `event.outcome:unknown` in the request event is appropriate. The unknown value should not be used when an outcome doesn't make logical sense for the event. In such cases `event.outcome` should not be populated.",
+        name: 'unknown'
+      }
+    ],
     dashed_name: 'event-outcome',
     description: 'This is one of four ECS Categorization Fields, and indicates the lowest level in the ECS category hierarchy.\n' +
       '`event.outcome` simply denotes whether the event represents a success or a failure from the perspective of the entity that produced the event.\n' +
@@ -333,15 +481,75 @@ export const eventEcs = {
   },
   type: {
     allowed_values: [
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object], [Object],
-      [Object]
+      {
+        description: 'The access event type is used for the subset of events within a category that indicate that something was accessed. Common examples include `event.category:database AND event.type:access`, or `event.category:file AND event.type:access`. Note for file access, both directory listings and file opens should be included in this subcategory. You can further distinguish access operations using the ECS `event.action` field.',
+        name: 'access'
+      },
+      {
+        description: 'The admin event type is used for the subset of events within a category that are related to admin objects. For example, administrative changes within an IAM framework that do not specifically affect a user or group (e.g., adding new applications to a federation solution or connecting discrete forests in Active Directory) would fall into this subcategory. Common example: `event.category:iam AND event.type:change AND event.type:admin`. You can further distinguish admin operations using the ECS `event.action` field.',
+        name: 'admin'
+      },
+      {
+        description: 'The allowed event type is used for the subset of events within a category that indicate that something was allowed. Common examples include `event.category:network AND event.type:connection AND event.type:allowed` (to indicate a network firewall event for which the firewall disposition was to allow the connection to complete) and `event.category:intrusion_detection AND event.type:allowed` (to indicate a network intrusion prevention system event for which the IPS disposition was to allow the connection to complete). You can further distinguish allowed operations using the ECS `event.action` field, populating with values of your choosing, such as "allow", "detect", or "pass".',
+        name: 'allowed'
+      },
+      {
+        description: 'The change event type is used for the subset of events within a category that indicate that something has changed. If semantics best describe an event as modified, then include them in this subcategory. Common examples include `event.category:process AND event.type:change`, and `event.category:file AND event.type:change`. You can further distinguish change operations using the ECS `event.action` field.',
+        name: 'change'
+      },
+      {
+        description: 'Used primarily with `event.category:network` this value is used for the subset of network traffic that includes sufficient information for the event to be included in flow or connection analysis. Events in this subcategory will contain at least source and destination IP addresses, source and destination TCP/UDP ports, and will usually contain counts of bytes and/or packets transferred. Events in this subcategory may contain unidirectional or bidirectional information, including summary information. Use this subcategory to visualize and analyze network connections. Flow analysis, including Netflow, IPFIX, and other flow-related events fit in this subcategory. Note that firewall events from many Next-Generation Firewall (NGFW) devices will also fit into this subcategory.  A common filter for flow/connection information would be `event.category:network AND event.type:connection AND event.type:end` (to view or analyze all completed network connections, ignoring mid-flow reports). You can further distinguish connection events using the ECS `event.action` field, populating with values of your choosing, such as "timeout", or "reset".',
+        name: 'connection'
+      },
+      {
+        description: 'The "creation" event type is used for the subset of events within a category that indicate that something was created. A common example is `event.category:file AND event.type:creation`.',
+        name: 'creation'
+      },
+      {
+        description: 'The deletion event type is used for the subset of events within a category that indicate that something was deleted. A common example is `event.category:file AND event.type:deletion` to indicate that a file has been deleted.',
+        name: 'deletion'
+      },
+      {
+        description: 'The denied event type is used for the subset of events within a category that indicate that something was denied. Common examples include `event.category:network AND event.type:denied` (to indicate a network firewall event for which the firewall disposition was to deny the connection) and `event.category:intrusion_detection AND event.type:denied` (to indicate a network intrusion prevention system event for which the IPS disposition was to deny the connection to complete). You can further distinguish denied operations using the ECS `event.action` field, populating with values of your choosing, such as "blocked", "dropped", or "quarantined".',
+        name: 'denied'
+      },
+      {
+        description: 'The end event type is used for the subset of events within a category that indicate something has ended. A common example is `event.category:process AND event.type:end`.',
+        name: 'end'
+      },
+      {
+        description: 'The error event type is used for the subset of events within a category that indicate or describe an error. A common example is `event.category:database AND event.type:error`. Note that pipeline errors that occur during the event ingestion process should not use this `event.type` value. Instead, they should use `event.kind:pipeline_error`.',
+        name: 'error'
+      },
+      {
+        description: 'The group event type is used for the subset of events within a category that are related to group objects. Common example: `event.category:iam AND event.type:creation AND event.type:group`. You can further distinguish group operations using the ECS `event.action` field.',
+        name: 'group'
+      },
+      {
+        description: 'The indicator event type is used for the subset of events within a category that contain details about indicators of compromise (IOCs).\n' +
+          'A common example is `event.category:threat AND event.type:indicator`.',
+        name: 'indicator'
+      },
+      {
+        description: 'The info event type is used for the subset of events within a category that indicate that they are purely informational, and don\'t report a state change, or any type of action. For example, an initial run of a file integrity monitoring system (FIM), where an agent reports all files under management, would fall into the "info" subcategory. Similarly, an event containing a dump of all currently running processes (as opposed to reporting that a process started/ended) would fall into the "info" subcategory. An additional common examples is `event.category:intrusion_detection AND event.type:info`.',
+        name: 'info'
+      },
+      {
+        description: 'The installation event type is used for the subset of events within a category that indicate that something was installed. A common example is `event.category:package` AND `event.type:installation`.',
+        name: 'installation'
+      },
+      {
+        description: 'The protocol event type is used for the subset of events within a category that indicate that they contain protocol details or analysis, beyond simply identifying the protocol. Generally, network events that contain specific protocol details will fall into this subcategory. A common example is `event.category:network AND event.type:protocol AND event.type:connection AND event.type:end` (to indicate that the event is a network connection event sent at the end of a connection that also includes a protocol detail breakdown). Note that events that only indicate the name or id of the protocol should not use the protocol value. Further note that when the protocol subcategory is used, the identified protocol is populated in the ECS `network.protocol` field.',
+        name: 'protocol'
+      },
+      {
+        description: 'The start event type is used for the subset of events within a category that indicate something has started. A common example is `event.category:process AND event.type:start`.',
+        name: 'start'
+      },
+      {
+        description: 'The user event type is used for the subset of events within a category that are related to user objects. Common example: `event.category:iam AND event.type:deletion AND event.type:user`. You can further distinguish user operations using the ECS `event.action` field.',
+        name: 'user'
+      }
     ],
     dashed_name: 'event-type',
     description: 'This is one of four ECS Categorization Fields, and indicates the third level in the ECS category hierarchy.\n' +

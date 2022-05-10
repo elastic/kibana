@@ -8,8 +8,75 @@ export const observerEcs = {
     normalize: [],
     short: 'Object field for egress information',
     type: 'object',
-    interface: { alias: [Object], id: [Object], name: [Object] },
-    vlan: { id: [Object], name: [Object] },
+    interface: {
+      alias: {
+        dashed_name: 'observer-egress-interface-alias',
+        description: 'Interface alias as reported by the system, typically used in firewall implementations for e.g. inside, outside, or dmz logical interface naming.',
+        example: 'outside',
+        flat_name: 'observer.egress.interface.alias',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'alias',
+        normalize: [],
+        original_fieldset: 'interface',
+        short: 'Interface alias',
+        type: 'keyword'
+      },
+      id: {
+        dashed_name: 'observer-egress-interface-id',
+        description: 'Interface ID as reported by an observer (typically SNMP interface ID).',
+        example: 10,
+        flat_name: 'observer.egress.interface.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'interface',
+        short: 'Interface ID',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'observer-egress-interface-name',
+        description: 'Interface name as reported by the system.',
+        example: 'eth0',
+        flat_name: 'observer.egress.interface.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'interface',
+        short: 'Interface name',
+        type: 'keyword'
+      }
+    },
+    vlan: {
+      id: {
+        dashed_name: 'observer-egress-vlan-id',
+        description: 'VLAN ID as reported by the observer.',
+        example: 10,
+        flat_name: 'observer.egress.vlan.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'vlan',
+        short: 'VLAN ID as reported by the observer.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'observer-egress-vlan-name',
+        description: 'Optional VLAN name as reported by the observer.',
+        example: 'outside',
+        flat_name: 'observer.egress.vlan.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'vlan',
+        short: 'Optional VLAN name as reported by the observer.',
+        type: 'keyword'
+      }
+    },
     zone: {
       dashed_name: 'observer-egress-zone',
       description: 'Network zone of outbound traffic as reported by the observer to categorize the destination area of egress traffic, e.g. Internal, External, DMZ, HR, Legal, etc.',
@@ -190,8 +257,75 @@ export const observerEcs = {
     normalize: [],
     short: 'Object field for ingress information',
     type: 'object',
-    interface: { alias: [Object], id: [Object], name: [Object] },
-    vlan: { id: [Object], name: [Object] },
+    interface: {
+      alias: {
+        dashed_name: 'observer-ingress-interface-alias',
+        description: 'Interface alias as reported by the system, typically used in firewall implementations for e.g. inside, outside, or dmz logical interface naming.',
+        example: 'outside',
+        flat_name: 'observer.ingress.interface.alias',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'alias',
+        normalize: [],
+        original_fieldset: 'interface',
+        short: 'Interface alias',
+        type: 'keyword'
+      },
+      id: {
+        dashed_name: 'observer-ingress-interface-id',
+        description: 'Interface ID as reported by an observer (typically SNMP interface ID).',
+        example: 10,
+        flat_name: 'observer.ingress.interface.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'interface',
+        short: 'Interface ID',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'observer-ingress-interface-name',
+        description: 'Interface name as reported by the system.',
+        example: 'eth0',
+        flat_name: 'observer.ingress.interface.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'interface',
+        short: 'Interface name',
+        type: 'keyword'
+      }
+    },
+    vlan: {
+      id: {
+        dashed_name: 'observer-ingress-vlan-id',
+        description: 'VLAN ID as reported by the observer.',
+        example: 10,
+        flat_name: 'observer.ingress.vlan.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'vlan',
+        short: 'VLAN ID as reported by the observer.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'observer-ingress-vlan-name',
+        description: 'Optional VLAN name as reported by the observer.',
+        example: 'outside',
+        flat_name: 'observer.ingress.vlan.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'vlan',
+        short: 'Optional VLAN name as reported by the observer.',
+        type: 'keyword'
+      }
+    },
     zone: {
       dashed_name: 'observer-ingress-zone',
       description: 'Network zone of incoming traffic as reported by the observer to categorize the source area of ingress traffic. e.g. internal, External, DMZ, HR, Legal, etc.',
@@ -263,7 +397,13 @@ export const observerEcs = {
       flat_name: 'observer.os.full',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'observer.os.full.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'full',
       normalize: [],
       original_fieldset: 'os',
@@ -290,7 +430,13 @@ export const observerEcs = {
       flat_name: 'observer.os.name',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'observer.os.name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'name',
       normalize: [],
       original_fieldset: 'os',

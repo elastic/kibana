@@ -24,7 +24,28 @@ export const serverEcs = {
       short: 'Unique number allocated to the autonomous system.',
       type: 'long'
     },
-    organization: { name: [Object] }
+    organization: {
+      name: {
+        dashed_name: 'server-as-organization-name',
+        description: 'Organization name.',
+        example: 'Google LLC',
+        flat_name: 'server.as.organization.name',
+        ignore_above: 1024,
+        level: 'extended',
+        multi_fields: [
+          {
+            flat_name: 'server.as.organization.name.text',
+            name: 'text',
+            type: 'match_only_text'
+          }
+        ],
+        name: 'organization.name',
+        normalize: [],
+        original_fieldset: 'as',
+        short: 'Organization name.',
+        type: 'keyword'
+      }
+    }
   },
   bytes: {
     dashed_name: 'server-bytes',
@@ -341,14 +362,58 @@ export const serverEcs = {
       flat_name: 'server.user.full_name',
       ignore_above: 1024,
       level: 'extended',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'server.user.full_name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'full_name',
       normalize: [],
       original_fieldset: 'user',
       short: "User's full name, if available.",
       type: 'keyword'
     },
-    group: { domain: [Object], id: [Object], name: [Object] },
+    group: {
+      domain: {
+        dashed_name: 'server-user-group-domain',
+        description: 'Name of the directory the group is a member of.\n' +
+          'For example, an LDAP or Active Directory domain name.',
+        flat_name: 'server.user.group.domain',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'domain',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Name of the directory the group is a member of.',
+        type: 'keyword'
+      },
+      id: {
+        dashed_name: 'server-user-group-id',
+        description: 'Unique identifier for the group on the system/platform.',
+        flat_name: 'server.user.group.id',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'id',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Unique identifier for the group on the system/platform.',
+        type: 'keyword'
+      },
+      name: {
+        dashed_name: 'server-user-group-name',
+        description: 'Name of the group.',
+        flat_name: 'server.user.group.name',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'name',
+        normalize: [],
+        original_fieldset: 'group',
+        short: 'Name of the group.',
+        type: 'keyword'
+      }
+    },
     hash: {
       dashed_name: 'server-user-hash',
       description: 'Unique user hash to correlate information for a user in anonymized form.\n' +
@@ -382,7 +447,13 @@ export const serverEcs = {
       flat_name: 'server.user.name',
       ignore_above: 1024,
       level: 'core',
-      multi_fields: [Array],
+      multi_fields: [
+        {
+          flat_name: 'server.user.name.text',
+          name: 'text',
+          type: 'match_only_text'
+        }
+      ],
       name: 'name',
       normalize: [],
       original_fieldset: 'user',
@@ -397,7 +468,7 @@ export const serverEcs = {
       ignore_above: 1024,
       level: 'extended',
       name: 'roles',
-      normalize: [Array],
+      normalize: [ 'array' ],
       original_fieldset: 'user',
       short: 'Array of user roles at the time of the event.',
       type: 'keyword'

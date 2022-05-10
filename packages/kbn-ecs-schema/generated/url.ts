@@ -46,7 +46,13 @@ export const urlEcs = {
     example: 'https://www.elastic.co:443/search?q=elasticsearch#top',
     flat_name: 'url.full',
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'url.full.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'full',
     normalize: [],
     short: 'Full unparsed URL.',
@@ -60,7 +66,13 @@ export const urlEcs = {
     example: 'https://www.elastic.co:443/search?q=elasticsearch#top or /search?q=elasticsearch',
     flat_name: 'url.original',
     level: 'extended',
-    multi_fields: [ [Object] ],
+    multi_fields: [
+      {
+        flat_name: 'url.original.text',
+        name: 'text',
+        type: 'match_only_text'
+      }
+    ],
     name: 'original',
     normalize: [],
     short: 'Unmodified original url as seen in the event source.',
