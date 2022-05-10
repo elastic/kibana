@@ -25,7 +25,6 @@ import {
   extractTransformFailuresReason,
   extractUnknownDocFailureReason,
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
-  fatalReasonClusterRoutingAllocationIncompatible,
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {

@@ -36,7 +36,7 @@ export const checkClusterRoutingAllocationEnabledTask =
     client,
   }: {
     client: ElasticsearchClient;
-  }): TaskEither.TaskEither<RetryableEsClientError | UnsupportedClusterRoutingAllocation, {}> =>
+  }): TaskEither.TaskEither<RetryableEsClientError | IncompatibleClusterRoutingAllocation, {}> =>
   () => {
     return client.cluster
       .getSettings({
@@ -66,7 +66,7 @@ export const initAction = ({
   client,
   indices,
 }: InitActionParams): TaskEither.TaskEither<
-  RetryableEsClientError | UnsupportedClusterRoutingAllocation,
+  RetryableEsClientError | IncompatibleClusterRoutingAllocation,
   FetchIndexResponse
 > => {
   return pipe(
