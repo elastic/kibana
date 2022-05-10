@@ -72,6 +72,7 @@ export interface APMPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  infra: InfraPluginSetup;
 
   // optional dependencies
   actions?: ActionsPlugin['setup'];
@@ -84,7 +85,6 @@ export interface APMPluginSetupDependencies {
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  infra?: InfraPluginSetup;
 }
 
 export interface APMPluginStartDependencies {
@@ -94,6 +94,7 @@ export interface APMPluginStartDependencies {
   licensing: LicensingPluginStart;
   observability: undefined;
   ruleRegistry: RuleRegistryPluginStartContract;
+  infra: InfraPluginStart;
 
   // optional dependencies
   actions?: ActionsPlugin['start'];
@@ -106,5 +107,4 @@ export interface APMPluginStartDependencies {
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
-  infra?: InfraPluginStart;
 }

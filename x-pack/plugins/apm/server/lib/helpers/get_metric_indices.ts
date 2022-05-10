@@ -12,13 +12,9 @@ export async function getMetricIndices({
   infraPlugin,
   savedObjectsClient,
 }: {
-  infraPlugin: APMRouteHandlerResources['plugins']['infra'];
+  infraPlugin: Required<APMRouteHandlerResources['plugins']['infra']>;
   savedObjectsClient: SavedObjectsClientContract;
-}): Promise<string | undefined> {
-  if (!infraPlugin) {
-    return;
-  }
-
+}): Promise<string> {
   const infra = await infraPlugin.start();
   const metricIndices = await infra.getMetricIndices(savedObjectsClient);
 
