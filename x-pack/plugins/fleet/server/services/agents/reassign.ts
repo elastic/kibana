@@ -20,7 +20,7 @@ import {
   bulkUpdateAgents,
 } from './crud';
 import type { GetAgentsOptions } from '.';
-import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { createAgentAction } from './actions';
 import { searchHitToAgent } from './helpers';
 
 export async function reassignAgent(
@@ -42,7 +42,7 @@ export async function reassignAgent(
   });
 
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'POLICY_REASSIGN',
   });
@@ -161,14 +161,11 @@ export async function reassignAgents(
   });
 
   const now = new Date().toISOString();
-  await bulkCreateAgentActions(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agent_id: agent.id,
-      created_at: now,
-      type: 'POLICY_REASSIGN',
-    }))
-  );
+  await createAgentAction(esClient, {
+    agents: agentsToUpdate.map((agent) => agent.id),
+    created_at: now,
+    type: 'POLICY_REASSIGN',
+  });
 
   return { items: orderedOut };
 }

@@ -96,7 +96,7 @@ describe('unenrollAgents (plural)', () => {
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
 
     // calls ES update with correct values
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -116,7 +116,7 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -175,7 +175,7 @@ describe('unenrollAgents (plural)', () => {
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll, force: true });
 
     // calls ES update with correct values
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -231,18 +231,6 @@ describe('unenrollAgents (plural)', () => {
 
 function createClientMock() {
   const soClientMock = savedObjectsClientMock.create();
-
-  // need to mock .create & bulkCreate due to (bulk)createAgentAction(s) in unenrollAgent(s)
-  // @ts-expect-error
-  soClientMock.create.mockResolvedValue({ attributes: { agent_id: 'tata' } });
-  soClientMock.bulkCreate.mockImplementation(async ([{ type, attributes }]) => {
-    return {
-      saved_objects: [await soClientMock.create(type, attributes)],
-    };
-  });
-  soClientMock.bulkUpdate.mockResolvedValue({
-    saved_objects: [],
-  });
 
   soClientMock.get.mockImplementation(async (_, id) => {
     switch (id) {

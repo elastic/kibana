@@ -33,7 +33,7 @@ export const postNewAgentActionHandlerBuilder = function (
       const savedAgentAction = await actionsService.createAgentAction(esClient, {
         created_at: new Date().toISOString(),
         ...newAgentAction,
-        agent_id: agent.id,
+        agents: [agent.id],
       });
 
       const body: PostNewAgentActionResponse = {

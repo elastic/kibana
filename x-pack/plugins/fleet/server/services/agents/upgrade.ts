@@ -17,7 +17,7 @@ import {
 import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
 
-import { bulkCreateAgentActions, createAgentAction } from './actions';
+import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
   getAgentDocuments,
@@ -59,7 +59,7 @@ export async function sendUpgradeAgentAction({
   }
 
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: now,
     data,
     ack_data: data,
@@ -75,8 +75,8 @@ export async function sendUpgradeAgentsActions(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
-    sourceUri: string | undefined;
     version: string;
+    sourceUri?: string | undefined;
     force?: boolean;
   }
 ) {
@@ -158,16 +158,13 @@ export async function sendUpgradeAgentsActions(
     source_uri: options.sourceUri,
   };
 
-  await bulkCreateAgentActions(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agent_id: agent.id,
-      created_at: now,
-      data,
-      ack_data: data,
-      type: 'UPGRADE',
-    }))
-  );
+  await createAgentAction(esClient, {
+    created_at: now,
+    data,
+    ack_data: data,
+    type: 'UPGRADE',
+    agents: agentsToUpdate.map((agent) => agent.id),
+  });
 
   await bulkUpdateAgents(
     esClient,
