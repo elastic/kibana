@@ -8,7 +8,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectAttributes } from '@kbn/core/server';
 
-export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOAD_FAILED' | 'AVAILABLE';
+export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'ERROR';
 
 export interface FileSavedObjectAttributes extends SavedObjectAttributes {
   created_at: string;
