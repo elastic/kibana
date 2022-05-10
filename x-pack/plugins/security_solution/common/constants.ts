@@ -121,7 +121,6 @@ export enum SecurityPageName {
   usersExternalAlerts = 'users-external_alerts',
   threatHuntingLanding = 'threat-hunting',
   dashboardsLanding = 'dashboards',
-  manageLanding = 'manage',
 }
 
 export const THREAT_HUNTING_PATH = '/threat_hunting' as const;

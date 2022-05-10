@@ -222,6 +222,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
     licenseService.start(plugins.licensing.license$);
     const licensing = licenseService.getLicenseInformation$();
+
     /**
      * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
      */
