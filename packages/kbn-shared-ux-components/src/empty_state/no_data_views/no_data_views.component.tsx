@@ -56,6 +56,7 @@ export const NoDataViews = ({
       layout="horizontal"
       css={css`
         max-width: ${MAX_WIDTH}px !important; // Necessary to override EuiEmptyPrompt to fit content
+        flex-grow: 0;
       `}
       color={emptyPromptColor}
       icon={<DataViewIllustration />}
