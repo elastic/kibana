@@ -228,7 +228,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             }}
           </UseField>
           {actionType != null ? (
-            <CreateConnectorForm actionTypeRegistry={actionTypeRegistry} />
+            <CreateConnectorForm actionTypeRegistry={actionTypeRegistry} isEdit={false} />
           ) : null}
         </Form>
       </EuiFlyoutBody>

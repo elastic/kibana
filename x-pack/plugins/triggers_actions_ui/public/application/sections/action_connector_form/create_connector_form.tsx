@@ -30,12 +30,13 @@ interface ConnectorFormData {
 
 interface CreateConnectorFormProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  isEdit: boolean;
 }
 
 const { emptyField } = fieldValidators;
 
 const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
-  label: 'Name',
+  label: 'Connector name',
   validations: [
     {
       validator: emptyField(
@@ -52,6 +53,7 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
 
 const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   actionTypeRegistry,
+  isEdit,
 }) => {
   const {
     docLinks,
@@ -94,7 +96,7 @@ const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
                 </SectionLoading>
               }
             >
-              <FieldsComponent />
+              <FieldsComponent readOnly={!canSave} isEdit={isEdit} />
             </Suspense>
           </EuiErrorBoundary>
         </>

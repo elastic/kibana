@@ -6,11 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
+import { getEncryptedFieldNotifyLabel } from './get_encrypted_field_notify_label';
 
 interface FieldSchema {
   id: string;
@@ -81,16 +82,40 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
           {index !== configFormSchema.length ? <EuiSpacer size="m" /> : null}
         </>
       ))}
-      <EuiTitle size="xxs">
-        <h4>
-          {i18n.translate(
-            'xpack.triggersActionsUI.components.simpleConnectorForm.secrets.authenticationLabel',
-            {
-              defaultMessage: 'Authentication',
-            }
-          )}
-        </h4>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4>
+              {i18n.translate(
+                'xpack.triggersActionsUI.components.simpleConnectorForm.secrets.authenticationLabel',
+                {
+                  defaultMessage: 'Authentication',
+                }
+              )}
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth>
+            {getEncryptedFieldNotifyLabel(
+              !isEdit,
+              secretsFormSchema.length,
+              // TODO: Pass isMissingSecrets from connector
+              false,
+              i18n.translate(
+                'xpack.triggersActionsUI.components.simpleConnectorForm.secrets.reenterValuesLabel',
+                {
+                  defaultMessage:
+                    'Authentication credentials are encrypted. Please reenter values for these fields.',
+                }
+              )
+            )}
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {secretsFormSchema.map(({ id, label }, index) => (
         <>
           <FormRow id={`secrets.${id}`} label={label} readOnly={readOnly} />
