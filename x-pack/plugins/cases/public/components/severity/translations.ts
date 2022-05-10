@@ -26,3 +26,7 @@ export const CRITICAL = i18n.translate('xpack.cases.severity.critical', {
 export const SEVERITY_TITLE = i18n.translate('xpack.cases.severity.title', {
   defaultMessage: 'Severity',
 });
+
+export const ALL_SEVERITIES = i18n.translate('xpack.cases.severity.all', {
+  defaultMessage: 'All severities',
+});
