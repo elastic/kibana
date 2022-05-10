@@ -10,7 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { flashAPIErrors, clearFlashMessages } from '../../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../../shared/http';
 import { AppLogic } from '../../../../../app_logic';
-import { CustomSource, SourceDataItem } from '../../../../../types';
+import { CustomSource } from '../../../../../types';
 
 export interface AddCustomSourceProps {
   baseServiceType?: string;
@@ -34,7 +34,6 @@ interface AddCustomSourceValues {
   currentStep: AddCustomSourceSteps;
   customSourceNameValue: string;
   newCustomSource: CustomSource;
-  sourceData: SourceDataItem;
 }
 
 /**

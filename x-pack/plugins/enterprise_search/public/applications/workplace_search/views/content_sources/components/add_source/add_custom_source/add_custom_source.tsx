@@ -44,8 +44,12 @@ export const AddCustomSource: React.FC = () => {
 
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, sourceData.name]}>
-      {currentStep === AddCustomSourceSteps.ConfigureCustomStep && <ConfigureCustom />}
-      {currentStep === AddCustomSourceSteps.SaveCustomStep && <SaveCustom />}
+      {currentStep === AddCustomSourceSteps.ConfigureCustomStep && (
+        <ConfigureCustom sourceData={sourceData} />
+      )}
+      {currentStep === AddCustomSourceSteps.SaveCustomStep && (
+        <SaveCustom sourceData={sourceData} />
+      )}
     </Layout>
   );
 };
