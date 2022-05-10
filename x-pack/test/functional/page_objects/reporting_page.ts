@@ -76,7 +76,7 @@ export class ReportingPageObject extends FtrService {
     return res;
   }
 
-  async getRawScreenshotReportData(url: string): Promise<Buffer> {
+  async getRawPdfReportData(url: string): Promise<Buffer> {
     this.log.debug(`getRawScreenshotReportData for ${url}`);
     const response = await this.getResponse(url);
     expect(response.body).to.be.a(Buffer);
