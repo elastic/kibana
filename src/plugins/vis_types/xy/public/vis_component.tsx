@@ -33,7 +33,11 @@ import {
   useActiveCursor,
 } from '@kbn/charts-plugin/public';
 import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+  PersistedState,
+} from '@kbn/visualizations-plugin/public';
 import { VisParams } from './types';
 import {
   getAdjustedDomain,
@@ -361,7 +365,7 @@ const VisComponent = (props: VisComponentProps) => {
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}
           legendPosition={legendPosition}
-          legendSize={visParams.legendSize}
+          legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={legendColorPicker}

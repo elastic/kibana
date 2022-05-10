@@ -15,6 +15,7 @@ import type {
   FakeParams,
   HistogramParams,
   DateHistogramParams,
+  LegendSize,
 } from '@kbn/visualizations-plugin/public';
 import type { ChartType, XyVisType } from '../../common';
 import type {
@@ -124,7 +125,7 @@ export interface VisParams {
   addTimeMarker: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   categoryAxes: CategoryAxis[];
   orderBucketsBySum?: boolean;
   labels: Labels;
@@ -165,7 +166,7 @@ export interface XYVisConfig {
   addTimeMarker: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   orderBucketsBySum?: boolean;
   labels: ExpressionValueLabel;
   thresholdLine: ExpressionValueThresholdLine;

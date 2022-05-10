@@ -15,6 +15,7 @@ import {
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
@@ -43,7 +44,7 @@ export interface HeatmapLegendConfig {
    * Exact legend width (vertical) or height (horizontal)
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
-  legendSize?: number;
+  legendSize?: LegendSize;
 }
 
 export type HeatmapLegendConfigResult = HeatmapLegendConfig & {

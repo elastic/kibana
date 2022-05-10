@@ -8,6 +8,7 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { LEGEND_CONFIG } from '../constants';
 import { LegendConfigFn } from '../types';
 
@@ -85,10 +86,19 @@ export const legendConfigFunction: LegendConfigFn = {
       }),
     },
     legendSize: {
-      types: ['number'],
+      types: ['string'],
+      default: DEFAULT_LEGEND_SIZE,
       help: i18n.translate('expressionXY.legendConfig.legendSize.help', {
-        defaultMessage: 'Specifies the legend size in pixels.',
+        defaultMessage: 'Specifies the legend size.',
       }),
+      options: [
+        LegendSize.AUTO,
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+      ],
+      strict: true,
     },
   },
   async fn(input, args, handlers) {
