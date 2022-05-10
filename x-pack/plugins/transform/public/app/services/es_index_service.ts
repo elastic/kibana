@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
 export class IndexService {
@@ -19,8 +19,7 @@ export class IndexService {
   }
 
   async dataViewExists(dataViewsContract: DataViewsContract, indexName: string) {
-    const dv = (await dataViewsContract.find(indexName)).find(({ title }) => title === indexName);
-    return dv !== undefined;
+    return (await dataViewsContract.find(indexName)).some(({ title }) => title === indexName);
   }
 }
 

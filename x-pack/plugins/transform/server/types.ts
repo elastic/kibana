@@ -12,18 +12,18 @@ import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin
 import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import { License } from './services';
 
-export interface Dependencies {
+export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
   alerting?: AlertingPlugin['setup'];
 }
 
+export interface PluginStartDependencies {
+  dataViews: DataViewsServerPluginStart;
+}
+
 export interface RouteDependencies {
   router: IRouter;
   license: License;
-  getStartServices: CoreSetup<PluginStartContract>['getStartServices'];
-}
-
-export interface PluginStartContract {
-  dataViews: DataViewsServerPluginStart;
+  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
 }

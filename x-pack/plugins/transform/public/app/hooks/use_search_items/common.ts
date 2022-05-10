@@ -6,9 +6,9 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { matchAllQuery } from '../../common';
 

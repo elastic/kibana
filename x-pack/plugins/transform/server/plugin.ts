@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
-import { Dependencies, PluginStartContract } from './types';
+import { PluginSetupDependencies, PluginStartDependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License } from './services';
 import { registerTransformHealthRuleType } from './lib/alerting';
@@ -38,8 +38,8 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   }
 
   setup(
-    { http, getStartServices, elasticsearch }: CoreSetup<PluginStartContract>,
-    { licensing, features, alerting }: Dependencies
+    { http, getStartServices, elasticsearch }: CoreSetup<PluginStartDependencies>,
+    { licensing, features, alerting }: PluginSetupDependencies
   ): {} {
     const router = http.createRouter();
 
@@ -84,7 +84,7 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     return {};
   }
 
-  start(core: CoreStart, plugins: PluginStartContract) {}
+  start(core: CoreStart, plugins: PluginStartDependencies) {}
 
   stop() {}
 }
