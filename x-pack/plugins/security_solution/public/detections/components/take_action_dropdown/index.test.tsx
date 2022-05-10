@@ -16,7 +16,7 @@ import { TimelineId } from '../../../../common/types';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, useGetUserCasesPermissions } from '../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -26,10 +26,10 @@ jest.mock('../../../common/components/user_privileges');
 jest.mock('../user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-  useGetUserCasesPermissions: jest.fn().mockReturnValue({ crud: true }),
-}));
+
+jest.mock('../../../common/lib/kibana');
+(useGetUserCasesPermissions as jest.Mock).mockReturnValue({ crud: true });
+
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
 }));
