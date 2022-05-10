@@ -278,7 +278,7 @@ export class SavedObjectsClient {
    * @param options
    * @returns
    */
-  public create = async <T = unknown>(
+  public create = <T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -313,7 +313,7 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns The result of the create operation containing created saved objects.
    */
-  public bulkCreate = async (
+  public bulkCreate = (
     objects: SavedObjectsBulkCreateObject[] = [],
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
@@ -461,7 +461,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  public bulkGet = (objects: ObjectTypeAndId[] = []) => {
+  public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
     const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
     return this.performBulkGet(filteredObjects).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
@@ -478,7 +478,6 @@ export class SavedObjectsClient {
       method: 'POST',
       body: JSON.stringify(objects),
     });
-
     return request;
   }
 
