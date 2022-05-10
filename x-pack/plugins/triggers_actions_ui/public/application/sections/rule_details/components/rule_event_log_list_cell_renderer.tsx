@@ -7,6 +7,8 @@
 
 import React from 'react';
 import moment from 'moment';
+// eslint-disable-next-line no-restricted-imports
+import Semver from 'semver';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EcsEventOutcome } from '@kbn/core/server';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
@@ -22,12 +24,13 @@ export type ColumnId = typeof RULE_EXECUTION_LOG_COLUMN_IDS[number];
 
 interface RuleEventLogListCellRendererProps {
   columnId: ColumnId;
+  version?: string;
   value?: string;
   dateFormat?: string;
 }
 
 export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
-  const { columnId, value, dateFormat = DEFAULT_DATE_FORMAT } = props;
+  const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT } = props;
 
   if (typeof value === 'undefined') {
     return null;
@@ -39,6 +42,17 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
 
   if (columnId === 'timestamp') {
     return <>{moment(value).format(dateFormat)}</>;
+  }
+
+  if (
+    version &&
+    (columnId === 'num_new_alerts' ||
+      columnId === 'num_active_alerts' ||
+      columnId === 'num_recovered_alerts')
+  ) {
+    if (parseInt(value, 10) === 0 && Semver.lt(version, '8.3.0')) {
+      return <>{'--'}</>;
+    }
   }
 
   if (RULE_EXECUTION_LOG_DURATION_COLUMNS.includes(columnId)) {

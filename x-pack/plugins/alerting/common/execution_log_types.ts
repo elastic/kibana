@@ -26,6 +26,7 @@ export interface IExecutionLog {
   duration_ms: number;
   status: string;
   message: string;
+  version: string;
   num_active_alerts: number;
   num_new_alerts: number;
   num_recovered_alerts: number;

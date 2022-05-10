@@ -226,7 +226,9 @@ describe('getExecutionLogAggregation', () => {
                   outcomeAndMessage: {
                     top_hits: {
                       size: 1,
-                      _source: { includes: ['event.outcome', 'message', 'error.message'] },
+                      _source: {
+                        includes: ['event.outcome', 'message', 'error.message', 'kibana.version'],
+                      },
                     },
                   },
                 },
@@ -318,6 +320,9 @@ describe('formatExecutionLogResult', () => {
                             event: {
                               outcome: 'success',
                             },
+                            kibana: {
+                              version: '8.2.0',
+                            },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                           },
@@ -398,6 +403,9 @@ describe('formatExecutionLogResult', () => {
                             event: {
                               outcome: 'success',
                             },
+                            kibana: {
+                              version: '8.2.0',
+                            },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                           },
@@ -455,6 +463,7 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 0,
@@ -474,6 +483,7 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
@@ -541,6 +551,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'failure',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -625,6 +638,9 @@ describe('formatExecutionLogResult', () => {
                             event: {
                               outcome: 'success',
                             },
+                            kibana: {
+                              version: '8.2.0',
+                            },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                           },
@@ -682,6 +698,7 @@ describe('formatExecutionLogResult', () => {
           status: 'failure',
           message:
             "rule execution failure: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule' - I am erroring in rule execution!!",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 0,
@@ -701,6 +718,7 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
@@ -768,6 +786,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -844,6 +865,9 @@ describe('formatExecutionLogResult', () => {
                             event: {
                               outcome: 'success',
                             },
+                            kibana: {
+                              version: '8.2.0',
+                            },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                           },
@@ -901,6 +925,7 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 0,
           num_new_alerts: 0,
           num_recovered_alerts: 0,
@@ -920,6 +945,7 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
@@ -987,6 +1013,9 @@ describe('formatExecutionLogResult', () => {
                           _source: {
                             event: {
                               outcome: 'success',
+                            },
+                            kibana: {
+                              version: '8.2.0',
                             },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -1068,6 +1097,9 @@ describe('formatExecutionLogResult', () => {
                             event: {
                               outcome: 'success',
                             },
+                            kibana: {
+                              version: '8.2.0',
+                            },
                             message:
                               "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                           },
@@ -1125,6 +1157,7 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,
@@ -1144,6 +1177,7 @@ describe('formatExecutionLogResult', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,

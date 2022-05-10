@@ -145,6 +145,9 @@ const aggregateResults = {
                         event: {
                           outcome: 'success',
                         },
+                        kibana: {
+                          version: '8.2.0',
+                        },
                         message:
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
                       },
@@ -224,6 +227,9 @@ const aggregateResults = {
                       _source: {
                         event: {
                           outcome: 'success',
+                        },
+                        kibana: {
+                          version: '8.2.0',
                         },
                         message:
                           "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
@@ -621,6 +627,7 @@ describe('getExecutionLogForRule()', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 0,
@@ -640,6 +647,7 @@ describe('getExecutionLogForRule()', () => {
           status: 'success',
           message:
             "rule executed: example.always-firing:a348a740-9e2c-11ec-bd64-774ed95c43ef: 'test rule'",
+          version: '8.2.0',
           num_active_alerts: 5,
           num_new_alerts: 5,
           num_recovered_alerts: 5,

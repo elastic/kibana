@@ -20,6 +20,7 @@ const ACTION_FIELD = 'event.action';
 const OUTCOME_FIELD = 'event.outcome';
 const DURATION_FIELD = 'event.duration';
 const MESSAGE_FIELD = 'message';
+const VERSION_FIELD = 'kibana.version';
 const ERROR_MESSAGE_FIELD = 'error.message';
 const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
 const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_duration_ms';
@@ -224,7 +225,7 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                   top_hits: {
                     size: 1,
                     _source: {
-                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD],
+                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD, VERSION_FIELD],
                     },
                   },
                 },
@@ -281,12 +282,14 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     status === 'failure'
       ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
       : outcomeAndMessage?.message ?? '';
+  const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / Millis2Nanos,
     status,
     message,
+    version,
     num_active_alerts: bucket?.ruleExecution?.numActiveAlerts?.value ?? 0,
     num_new_alerts: bucket?.ruleExecution?.numNewAlerts?.value ?? 0,
     num_recovered_alerts: bucket?.ruleExecution?.numRecoveredAlerts?.value ?? 0,
