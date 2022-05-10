@@ -47,6 +47,10 @@ export interface InferenceStatsResponse {
   trained_model_stats: TrainedModelStat[];
 }
 
+export interface MlInferTrainedModelDeploymentResponse {
+  inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
+}
+
 /**
  * Service with APIs calls to perform inference operations.
  * @param httpService
@@ -143,20 +147,11 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     inferTrainedModel(modelId: string, payload: any, timeout?: string) {
       const body = JSON.stringify(payload);
-      return httpService.http<estypes.MlInferTrainedModelDeploymentResponse>({
+      return httpService.http<MlInferTrainedModelDeploymentResponse>({
         path: `${apiBasePath}/trained_models/infer/${modelId}`,
         method: 'POST',
         body,
         ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
-      });
-    },
-
-    ingestPipelineSimulate(payload: estypes.IngestSimulateRequest['body']) {
-      const body = JSON.stringify(payload);
-      return httpService.http<estypes.IngestSimulateResponse>({
-        path: `${apiBasePath}/trained_models/ingest_pipeline_simulate`,
-        method: 'POST',
-        body,
       });
     },
   };

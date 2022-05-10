@@ -10,12 +10,14 @@ import { InferResponse } from '../inference_base';
 const PROBABILITY_SIG_FIGS = 3;
 
 export interface RawTextClassificationResponse {
-  predicted_value: string;
-  prediction_probability: number;
-  top_classes?: Array<{
-    class_name: string;
-    class_probability: number;
-    class_score: number;
+  inference_results: Array<{
+    predicted_value: string;
+    prediction_probability: number;
+    top_classes?: Array<{
+      class_name: string;
+      class_probability: number;
+      class_score: number;
+    }>;
   }>;
 }
 
@@ -34,21 +36,24 @@ export function processResponse(
   model: estypes.MlTrainedModelConfig,
   inputText: string
 ): TextClassificationResponse {
+  const {
+    inference_results: [inferenceResults],
+  } = resp;
   const labels: string[] =
     // @ts-expect-error inference config is wrong
     model.inference_config.text_classification?.classification_labels ?? [];
 
   let formattedResponse = [
     {
-      value: resp.predicted_value,
-      predictionProbability: resp.prediction_probability,
+      value: inferenceResults.predicted_value,
+      predictionProbability: inferenceResults.prediction_probability,
     },
   ];
 
-  if (resp.top_classes !== undefined) {
+  if (inferenceResults.top_classes !== undefined) {
     // if num_top_classes has been specified in the model,
     // base the returned results on this list
-    formattedResponse = resp.top_classes.map((topClass) => {
+    formattedResponse = inferenceResults.top_classes.map((topClass) => {
       return {
         value: topClass.class_name,
         predictionProbability: topClass.class_probability,
@@ -59,9 +64,9 @@ export function processResponse(
     // we can safely assume the non-top value and return two results
     formattedResponse = labels.map((value) => {
       const predictionProbability =
-        resp.predicted_value === value
-          ? resp.prediction_probability
-          : 1 - resp.prediction_probability;
+        inferenceResults.predicted_value === value
+          ? inferenceResults.prediction_probability
+          : 1 - inferenceResults.prediction_probability;
 
       return {
         value,
