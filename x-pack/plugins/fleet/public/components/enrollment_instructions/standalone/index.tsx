@@ -23,8 +23,9 @@ tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
 cd elastic-agent-${kibanaVersion}-darwin-x86_64
 sudo ./elastic-agent install`;
 
-  const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+  const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = `$ProgressPreference = 'SilentlyContinue'
+wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationPath .
 cd elastic-agent-${kibanaVersion}-windows-x86_64
 .\\elastic-agent.exe install`;
 
