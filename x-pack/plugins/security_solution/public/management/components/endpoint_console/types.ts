@@ -7,8 +7,4 @@
 
 import { CommandDefinition } from '../console';
 
-interface EndpointCommandDefinitionMeta {
-  endpointId: string;
-}
-
-export type IsolateCommandDefinition = CommandDefinition<EndpointCommandDefinitionMeta>;
+export type EndpointCommandDefinition = CommandDefinition<{ endpointId: string }>;
