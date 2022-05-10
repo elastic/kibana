@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 import { withTimeout } from '@kbn/std';
-import { snakeCase, sumBy, groupBy } from 'lodash';
+import { snakeCase, } from 'lodash';
+import { performance } from 'perf_hooks';
+
 import type {
   Logger,
   ElasticsearchClient,
@@ -18,16 +20,17 @@ import { Collector } from './collector';
 import type { ICollector, CollectorOptions, CollectorFetchContext } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/constants';
-import { measureDuration, ResultWithDuration } from './measure_duration';
+import { createPerformanceObsHook } from './measure_duration';
 import { usageCollectorsStatsCollector } from './collector_stats';
-import { string } from 'joi';
 
+
+
+const SECOND_IN_MS = 1000;
 // Needed for the general array containing all the collectors. We don't really care about their types here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyCollector = ICollector<any, any>;
 interface CollectorWithStatus {
   isReadyWithTimeout: Awaited<ReturnType<typeof withTimeout>>;
-  duration: number;
   collector: AnyCollector;
 }
 
@@ -36,19 +39,6 @@ export interface CollectorSetConfig {
   executionContext: ExecutionContextSetup;
   maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: AnyCollector[];
-}
-
-// Schema manually added in src/plugins/telemetry/schema/oss_root.json under `stack_stats.kibana.plugins.usage_collector_stats`
-interface CollectorStats {
-  not_ready: { count: number; names: string[] };
-  not_ready_timeout: { count: number; names: string[] };
-  succeeded: { count: number; names: string[] };
-  failed: { count: number; names: string[] };
-
-  total_duration: number,
-  total_is_ready_duration: number,
-  total_fetch_duration: number,
-  duration_breakdown: Record<string, { is_ready: number, fetch: number }>,
 }
 
 export class CollectorSet {
@@ -117,7 +107,6 @@ export class CollectorSet {
     readyCollectors: AnyCollector[];
     nonReadyCollectorTypes: string[];
     timedOutCollectorsTypes: string[];
-    isReadyExecutionDurationByType: Array<{type: string, duration: number}>;
   }> => {
     if (!(collectors instanceof Map)) {
       throw new Error(
@@ -125,30 +114,32 @@ export class CollectorSet {
       );
     }
 
-    const secondInMs = 1000;
-    const timeoutMs = this.maximumWaitTimeForAllCollectorsInS * secondInMs;
+    const timeoutMs = this.maximumWaitTimeForAllCollectorsInS * SECOND_IN_MS;
     const collectorsWithStatus: CollectorWithStatus[] = await Promise.all(
       [...collectors.values()].map(async (collector) => {
-        const isReadyWithTimeout = await withTimeout<ResultWithDuration<boolean>>({
-          promise: measureDuration(async (): Promise<boolean> => {
-            try {
-              return await collector.isReady();
-            } catch (err) {
-              this.logger.debug(`Collector ${collector.type} failed to get ready. ${err}`);
-              return false;
-            }
-          }),
+        
+        const wrappedPromise = performance.timerify(Object.defineProperty(async (): Promise<boolean> => {
+          try {
+            return await collector.isReady();
+          } catch (err) {
+            this.logger.debug(`Collector ${collector.type} failed to get ready. ${err}`);
+            return false;
+          }
+        }, 'name', { value: `is_ready_${collector.type}`}));
+
+
+        const isReadyWithTimeout = await withTimeout<boolean>({
+          promise: wrappedPromise(),
           timeoutMs,
         });
 
         if (isReadyWithTimeout.timedout) {
-          return { isReadyWithTimeout, collector, duration: timeoutMs };
+          return { isReadyWithTimeout, collector };
         }
-
+        console.log('isReadyWithTimeout::', isReadyWithTimeout, collector.type )
         return {
-          duration: isReadyWithTimeout.value.duration,
           isReadyWithTimeout: {
-            value: isReadyWithTimeout.value.result,
+            value: isReadyWithTimeout.value,
             timedout: isReadyWithTimeout.timedout,
           },
           collector,
@@ -173,7 +164,6 @@ export class CollectorSet {
       ): collectorWithStatus is {
         isReadyWithTimeout: { timedout: false; value: boolean };
         collector: AnyCollector;
-        duration: number;
       } => collectorWithStatus.isReadyWithTimeout.timedout === false
     );
 
@@ -191,27 +181,21 @@ export class CollectorSet {
     const readyCollectors = nonTimedOutCollectors
       .filter(({ isReadyWithTimeout }) => isReadyWithTimeout.value === true)
       .map(({ collector }) => collector);
-
-    const isReadyExecutionDurationByType = collectorsWithStatus.map(({ duration, collector }) => {
-      return { duration, type: collector.type };
-    });
-
+    
     return {
       readyCollectors,
       nonReadyCollectorTypes: collectorsTypesNotReady,
       timedOutCollectorsTypes,
-      isReadyExecutionDurationByType,
     };
   };
 
-  public fetchCollector = async (collector: AnyCollector, context: CollectorFetchContext): Promise<{
-    duration: number,
-    fetchResult: unknown,
+  private fetchCollector = async (collector: AnyCollector, context: CollectorFetchContext): Promise<{
+    fetchResult?: unknown,
     status: 'failed' | 'success',
     type: string,
   }> => {
     const { type } = collector;
-    this.logger.debug(`Fetching data from ${collector.type} collector`);
+    this.logger.debug(`Fetching data from ${type} collector`);
     const executionContext: KibanaExecutionContext = {
       type: 'usage_collection',
       name: 'collector.fetch',
@@ -219,24 +203,13 @@ export class CollectorSet {
       description: `Fetch method in the Collector "${type}"`,
     };
 
-    const { duration, result: { fetchResult, status }} = await measureDuration(async () => {
-      try {
-        const fetchResult = this.executionContext.withContext(executionContext, () =>
-          collector.fetch(context)
-        );
-        return { fetchResult, status: 'success' as const };
-      } catch (err) {
-        this.logger.warn(err);
-        this.logger.warn(`Unable to fetch data from ${type} collector`);
-        return { fetchResult: undefined, status: 'failed' as const };
-      }
-    });
-    
-    return {
-      duration,
-      fetchResult,
-      status,
-      type,
+    try {
+      const fetchResult = await this.executionContext.withContext(executionContext, () => collector.fetch(context));
+      return { type, fetchResult, status: 'success' as const };
+    } catch (err) {
+      this.logger.warn(err);
+      this.logger.warn(`Unable to fetch data from ${type} collector`);
+      return { type, status: 'failed' as const };
     }
   }
 
@@ -246,17 +219,50 @@ export class CollectorSet {
     collectors: Map<string, AnyCollector> = this.collectors
   ) => {
     this.logger.debug(`Getting ready collectors`);
-    const { readyCollectors, nonReadyCollectorTypes, timedOutCollectorsTypes, isReadyExecutionDurationByType } =
+    const getMarks = createPerformanceObsHook();
+    const { readyCollectors, nonReadyCollectorTypes, timedOutCollectorsTypes } =
       await this.getReadyCollectors(collectors);
 
     // freeze object to prevent collectors from mutating it.
     const context = Object.freeze({ esClient, soClient });
+    
     const fetchExecutions = await Promise.all(
       readyCollectors.map(async (collector) => {
-        return await this.fetchCollector(collector, context);
+        const wrappedPromise = performance.timerify(Object.defineProperty(async () => {
+          return await this.fetchCollector(collector, context);
+        }, 'name', { value: `fetch_${collector.type}`}));
+
+        return await wrappedPromise();
       }),
     );
+    const durationMarks = getMarks();
 
+    const isReadyExecutionDurationByType = [
+      ...readyCollectors.map(({type}) => {
+        // should always find a duration, fallback to 0 in case something unexpected happened
+        const duration = durationMarks[`is_ready_${type}`] || 0;
+        return { duration, type };
+      }),
+      ...nonReadyCollectorTypes.map(type => {
+        // should always find a duration, fallback to 0 in case something unexpected happened
+        const duration = durationMarks[`is_ready_${type}`] || 0;
+        return { duration, type };
+      }),
+      ...timedOutCollectorsTypes.map(type => {
+        const timeoutMs = this.maximumWaitTimeForAllCollectorsInS * SECOND_IN_MS;
+        // if undefined default to timeoutMs since the collector timedout
+        const duration = durationMarks[`is_ready_${type}`] || timeoutMs;
+        return { duration, type };
+      }),
+    ];
+
+
+    const fetchExecutionDurationByType = fetchExecutions.map(({ type, status }) => {
+      // should always find a duration, fallback to 0 in case something unexpected happened
+      const duration = durationMarks[`fetch_${type}`] || 0;
+      return { duration, type, status };
+    });
+    
     const usageCollectorStatsOptions = usageCollectorsStatsCollector({
       // isReady stats
       nonReadyCollectorTypes,
@@ -264,7 +270,7 @@ export class CollectorSet {
       isReadyExecutionDurationByType,
       
       // fetch stats
-      fetchExecutions,
+      fetchExecutionDurationByType,
     });
 
     const usageCollectorStats = this.makeUsageCollector(usageCollectorStatsOptions);

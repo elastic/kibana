@@ -11,7 +11,7 @@ export const schema: MakeSchemaFrom<CollectorsStats> = {
   total_is_ready_duration: {
     type: 'long',
     _meta: {
-      description: 'The total execution duration of the fetch function for all collectors in milliseconds',
+      description: 'The total execution duration of the isReady function for all collectors in milliseconds',
     },
   },
   total_fetch_duration: {
@@ -32,51 +32,75 @@ export const schema: MakeSchemaFrom<CollectorsStats> = {
     DYNAMIC_KEY: {
       type: 'long',
       _meta: {
-        description: 'The execution duration of the isReady function for the collector in milliseconds',
+        description: 'The execution duration of the fetch function for the collector in milliseconds',
       },
     }
   },
   not_ready: {
     count: {
       type:'short',
+      _meta: {
+        description: 'The number of collectors that returned false from the isReady function',
+      },
     },
     names: {
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description: 'The name of the of collectors that returned false from the isReady function',
+        },
       },
     },
   },
   not_ready_timeout: {
     count: {
       type: 'short',
+      _meta: {
+        description: 'The number of collectors that timedout during the isReady function',
+      },
     },
     names: {
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description: 'The name of collectors that timedout during the isReady function',
+        },
       },
     },
   },
   succeeded: {
     count: {
       type: 'short',
+      _meta: {
+        description: 'The number of collectors that returned true from the fetch function',
+      },
     },
     names: {
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description: 'The name of the of collectors that returned true from the fetch function',
+        },
       },
     },
   },
   failed: {
     count: {
       type: 'short',
+      _meta: {
+        description: 'The number of collectors that threw an error from the fetch function',
+      },
     },
     names: {
       type: 'array',
       items: {
         type: 'keyword',
+        _meta: {
+          description: 'The name of the of collectors that threw an error from the fetch function',
+        },
       },
     },
   },

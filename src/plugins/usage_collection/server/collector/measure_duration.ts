@@ -5,14 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { PerformanceObserver, performance } from 'perf_hooks';
 
-export type ResultWithDuration<T> = { duration: number; result: T; }
+export const createPerformanceObsHook = () => {
+  const marks: Record<string, number> = {};
+  const obs = new PerformanceObserver((items) => {
+    console.log('items.getEntries()::', items.getEntries())
+    for (const { duration, name } of items.getEntries()) {
+      marks[name] = duration;
+    }
 
-export const measureDuration = async <Return>(fn: () => Promise<Return>): Promise<ResultWithDuration<Return>> => {
-  const start = process.hrtime();
-  const result = await fn();
-  const hrDuration = process.hrtime(start);
-  const duration = hrDuration[0] + hrDuration[1] / 1e9;
-  return { duration, result };
+    performance.clearMarks();
+  });
+
+  obs.observe({ entryTypes: ['function'] });
+
+  // teardown function returns the marked measurements.
+  // returning the data after teardown ensures that we proprely teardown
+  // the observer.
+  return () => {
+    obs.disconnect();
+    return marks;
+  }
 }
-

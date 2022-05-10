@@ -27,18 +27,14 @@ export interface CollectorsStatsCollectorParams {
   nonReadyCollectorTypes: string[];
   timedOutCollectorsTypes: string[];
   isReadyExecutionDurationByType: {duration: number, type: string }[];
-
-  fetchExecutions: {duration: number, type: string, status: 'failed' | 'success'}[];
+  fetchExecutionDurationByType: {duration: number, type: string, status: 'failed' | 'success'}[];
 }
 
 export const usageCollectorsStatsCollector = ({
-  // isReady stats
   nonReadyCollectorTypes,
   timedOutCollectorsTypes,
   isReadyExecutionDurationByType,
-
-  // fetch and collector stats
-  fetchExecutions,
+  fetchExecutionDurationByType
 }: CollectorsStatsCollectorParams): UsageCollectorOptions<CollectorsStats> => {
   return {
     type: 'usage_collector_stats',
@@ -46,10 +42,10 @@ export const usageCollectorsStatsCollector = ({
     schema,
     fetch: () => {
       const totalIsReadyDuration = sumBy(isReadyExecutionDurationByType, 'duration');
-      const totalFetchDuration = sumBy(fetchExecutions, 'duration');
+      const totalFetchDuration = sumBy(fetchExecutionDurationByType, 'duration');
 
-      const succeededCollectorTypes = fetchExecutions.filter(({ status }) => status === 'success').map(({ type }) => type);
-      const failedCollectorTypes = fetchExecutions.filter(({ status }) => status === 'failed').map(({ type }) => type);
+      const succeededCollectorTypes = fetchExecutionDurationByType.filter(({ status }) => status === 'success').map(({ type }) => type);
+      const failedCollectorTypes = fetchExecutionDurationByType.filter(({ status }) => status === 'failed').map(({ type }) => type);
 
 
       const collectorsStats: CollectorsStats = {
@@ -70,7 +66,7 @@ export const usageCollectorsStatsCollector = ({
           return acc;
         }, {} as Record<string, number>),
 
-        fetch_duration_breakdown: fetchExecutions.reduce((acc, {type, duration}) => {
+        fetch_duration_breakdown: fetchExecutionDurationByType.reduce((acc, {type, duration}) => {
           acc[type] = duration
           return acc;
         }, {} as Record<string, number>),
