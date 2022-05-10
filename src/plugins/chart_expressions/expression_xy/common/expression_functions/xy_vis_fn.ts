@@ -28,7 +28,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAccessor(args.splitRowAccessor, data.columns);
   validateAccessor(args.splitColumnAccessor, data.columns);
 
-  const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
   const {
     referenceLineLayers = [],
     annotationLayers = [],
