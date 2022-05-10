@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.ensureIsOnListPage();
       });
       // FLAKY: https://github.com/elastic/kibana/issues/131602
-      describe('when the endpint count link is clicked', () => {
+      describe('when the endpoint count link is clicked', () => {
         it('navigates to the endpoint list page filtered by policy', async () => {
           const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
           await endpointCount.click();
@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('admin searchbar contains the selected policy id', async () => {
           const expectedPolicyId = indexedData.integrationPolicies[0].id;
           await pageObjects.endpoint.ensureIsOnEndpointListPage();
-          const searchBar = await testSubjects.find('adminSearchBar');
+          const searchBar = (await testSubjects.findAll('adminSearchBar'))[0];
           expect(await searchBar.getVisibleText()).to.equal(
             `united.endpoint.Endpoint.policy.applied.id : "${expectedPolicyId}"`
           );
