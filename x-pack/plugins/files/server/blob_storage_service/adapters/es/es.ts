@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import { ReadStream } from 'fs';
 
 import type { BlobStorage } from '../../types';
@@ -27,16 +28,23 @@ export class ElasticsearchBlobStorage implements BlobStorage {
 
     this.logger.info(`Creating ${this.indexName} for Elasticsearch blob store.`);
 
-    await this.esClient.indices.create({
-      index: this.indexName,
-      body: {
-        settings: {
-          number_of_shards: 1,
-          auto_expand_replicas: '0-1',
+    try {
+      await this.esClient.indices.create({
+        index: this.indexName,
+        body: {
+          settings: {
+            number_of_shards: 1,
+            auto_expand_replicas: '0-1',
+          },
+          mappings,
         },
-        mappings,
-      },
-    });
+      });
+    } catch (e) {
+      if (e instanceof errors.ResponseError && e.statusCode === 400) {
+        this.logger.warn('Unable to create blob storage index, it may have been created already.');
+      }
+      throw e;
+    }
   }
 
   async upload(fileName: string, content: ReadStream): Promise<{ uri: string }> {
