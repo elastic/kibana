@@ -30,7 +30,8 @@ export const SnapshotFeatureStatesSummary: React.FunctionComponent<SnapshotConfi
         <EuiDescriptionListTitle>
           <FormattedMessage
             id="xpack.snapshotRestore.summary.snapshotFeatureStatesLabel"
-            defaultMessage="Include feature state"
+            defaultMessage="Include feature state {hasSpecificFeatures, plural, one {from} other {}}"
+            values={{ hasSpecificFeatures: !hasNoFeatureStates ? 1 : 0 }}
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription data-test-subj="value">
@@ -40,13 +41,7 @@ export const SnapshotFeatureStatesSummary: React.FunctionComponent<SnapshotConfi
               defaultMessage="No"
             />
           ) : (
-            <>
-              <FormattedMessage
-                id="xpack.snapshotRestore.summary.snapshotFeatureStatesFromLabel"
-                defaultMessage="Only from:"
-              />{' '}
-              <CollapsibleFeatureStatesList featureStates={featureStates} />
-            </>
+            <CollapsibleFeatureStatesList featureStates={featureStates} />
           )}
         </EuiDescriptionListDescription>
       </EuiDescriptionList>

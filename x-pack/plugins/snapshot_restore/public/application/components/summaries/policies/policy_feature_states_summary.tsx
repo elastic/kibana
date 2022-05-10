@@ -31,7 +31,8 @@ export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig>
         <EuiDescriptionListTitle>
           <FormattedMessage
             id="xpack.snapshotRestore.summary.policyFeatureStatesLabel"
-            defaultMessage="Include feature state"
+            defaultMessage="Include feature state {hasSpecificFeatures, plural, one {from} other {}}"
+            values={{ hasSpecificFeatures: !hasNoFeatureStates && !hasAllFeatureStates ? 1 : 0 }}
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription data-test-subj="value">
@@ -48,13 +49,7 @@ export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig>
             />
           )}
           {!hasNoFeatureStates && !hasAllFeatureStates && (
-            <>
-              <FormattedMessage
-                id="xpack.snapshotRestore.summary.policyFeatureStatesFromLabel"
-                defaultMessage="Only from:"
-              />{' '}
-              <CollapsibleFeatureStatesList featureStates={featureStates} />
-            </>
+            <CollapsibleFeatureStatesList featureStates={featureStates} />
           )}
         </EuiDescriptionListDescription>
       </EuiDescriptionList>

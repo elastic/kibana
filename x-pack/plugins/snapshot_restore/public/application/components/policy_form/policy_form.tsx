@@ -72,6 +72,9 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       // when creating the local state for the form and also set featureStates to be an empty array, which
       // for the API it means that it will include all featureStates.
       featureStates: [],
+      // IncludeGlobalState is set as default by the api, so we want to replicate that behaviour in our
+      // form state so that it gets explicitly represented in the request.
+      includeGlobalState: true,
       ...(originalPolicy.config || {}),
     },
     retention: {

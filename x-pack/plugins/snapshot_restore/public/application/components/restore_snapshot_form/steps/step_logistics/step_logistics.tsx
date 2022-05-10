@@ -647,6 +647,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               defaultMessage="Restores the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
             />
 
+            {/* Only display callout if includeFeatureState is enabled and the snapshot was created by ES 7.12+ */}
             {semverGt(version, '7.12.0') && isFeatureStatesToggleEnabled && (
               <>
                 <EuiSpacer size="s" />

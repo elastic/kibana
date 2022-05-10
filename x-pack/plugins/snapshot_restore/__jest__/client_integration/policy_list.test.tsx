@@ -9,7 +9,7 @@ import { setupEnvironment } from './helpers';
 import { getPolicy } from '../../test/fixtures';
 import { setupPoliciesListPage, PoliciesListTestBed } from './helpers/policy_list.helpers';
 
-const POLICY_WITH_GLOBAL_STATE = getPolicy({
+const POLICY_WITH_GLOBAL_STATE_AND_FEATURES = getPolicy({
   name: 'with_state',
   retention: { minCount: 1 },
   config: { includeGlobalState: true, featureStates: ['kibana'] },
@@ -33,13 +33,13 @@ describe('<PolicyList />', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadPoliciesResponse({
       policies: [
-        POLICY_WITH_GLOBAL_STATE,
+        POLICY_WITH_GLOBAL_STATE_AND_FEATURES,
         POLICY_WITHOUT_GLOBAL_STATE,
         POLICY_WITH_JUST_GLOBAL_STATE,
       ],
     });
-    httpRequestsMockHelpers.setGetPolicyResponse(POLICY_WITH_GLOBAL_STATE.name, {
-      policy: POLICY_WITH_GLOBAL_STATE,
+    httpRequestsMockHelpers.setGetPolicyResponse(POLICY_WITH_GLOBAL_STATE_AND_FEATURES.name, {
+      policy: POLICY_WITH_GLOBAL_STATE_AND_FEATURES,
     });
 
     testBed = await setupPoliciesListPage(httpSetup);
@@ -61,7 +61,7 @@ describe('<PolicyList />', () => {
     test('should show feature states if include global state is enabled', async () => {
       const { find, actions } = testBed;
 
-      // Assert against first resutl shown in the table, which should have includeGlobalState enabled
+      // Assert against first result shown in the table, which should have includeGlobalState enabled
       await actions.clickPolicyAt(0);
 
       expect(find('includeGlobalState.value').text()).toEqual('Yes');
@@ -93,7 +93,7 @@ describe('<PolicyList />', () => {
         policy: POLICY_WITH_JUST_GLOBAL_STATE,
       });
 
-      // Assert against third resutl shown in the table, which should have just includeGlobalState enabled
+      // Assert against third result shown in the table, which should have just includeGlobalState enabled
       await actions.clickPolicyAt(2);
 
       expect(find('includeGlobalState.value').text()).toEqual('Yes');

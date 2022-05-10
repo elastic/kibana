@@ -251,7 +251,7 @@ describe('<PolicyAdd />', () => {
         expect(exists('featureStatesDropdown')).toBe(false);
       });
 
-      test('include all features', async () => {
+      test('include all features by default', async () => {
         const { actions } = testBed;
 
         // Complete step 2
@@ -269,6 +269,7 @@ describe('<PolicyAdd />', () => {
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
         expect(parsedReqBody.config).toEqual({
+          includeGlobalState: true,
           featureStates: [],
         });
       });
@@ -293,6 +294,7 @@ describe('<PolicyAdd />', () => {
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
         expect(parsedReqBody.config).toEqual({
+          includeGlobalState: true,
           featureStates: ['kibana'],
         });
       });
@@ -320,7 +322,10 @@ describe('<PolicyAdd />', () => {
         const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
-        expect(parsedReqBody.config).toEqual({ featureStates: [FEATURE_STATES_NONE_OPTION] });
+        expect(parsedReqBody.config).toEqual({
+          includeGlobalState: true,
+          featureStates: [FEATURE_STATES_NONE_OPTION],
+        });
       });
     });
 
@@ -358,7 +363,7 @@ describe('<PolicyAdd />', () => {
               snapshotName: SNAPSHOT_NAME,
               schedule: DEFAULT_POLICY_SCHEDULE,
               repository: repository.name,
-              config: { featureStates: [] },
+              config: { featureStates: [], includeGlobalState: true },
               retention: {
                 expireAfterValue: Number(EXPIRE_AFTER_VALUE),
                 expireAfterUnit: 'd', // default
