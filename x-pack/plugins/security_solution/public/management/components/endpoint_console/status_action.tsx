@@ -9,7 +9,7 @@ import React, { memo, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EndpointCommandDefinition } from './types';
+import { EndpointCommandDefinitionMeta } from './types';
 import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../common/components/formatted_date';
@@ -20,7 +20,7 @@ import { CommandExecutionComponentProps } from '../console/types';
 import { FormattedError } from '../formatted_error';
 
 export const EndpointStatusActionResult = memo<
-  CommandExecutionComponentProps<EndpointCommandDefinition>
+  CommandExecutionComponentProps<{}, EndpointCommandDefinitionMeta>
 >(({ command, status, setStatus }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId as string;
 
