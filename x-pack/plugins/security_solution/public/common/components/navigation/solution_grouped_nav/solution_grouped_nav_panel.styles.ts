@@ -6,12 +6,13 @@
  */
 
 import { EuiThemeComputed } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const groupedNavPanelStyles = (
   euiTheme: EuiThemeComputed<{}>,
   isTimelineVisible: boolean
 ) => ({
-  panel: `
+  panel: css`
     position: fixed;
     top: 95px;
     left: 247px;
@@ -22,19 +23,17 @@ export const groupedNavPanelStyles = (
     box-shadow-bottom: none;
 
     // If the bottom bar is visible add padding to the navigation
-    ${
-      isTimelineVisible &&
-      `
-        height: inherit;
-        bottom: 51px;
-        box-shadow: 
-          // left
-          -${euiTheme.size.s} 0 ${euiTheme.size.s} -${euiTheme.size.s} rgb(0 0 0 / 15%), 
-          // right
-          ${euiTheme.size.s} 0 ${euiTheme.size.s} -${euiTheme.size.s} rgb(0 0 0 / 15%), 
-          // bottom inset to match timeline bar top shadow
-          inset 0 -${euiTheme.size.xs} ${euiTheme.size.xs} -${euiTheme.size.xs} rgb(0 0 0 / 6%); 
-      `
-    }
+    ${isTimelineVisible &&
+    `
+      height: inherit;
+      bottom: 51px;
+      box-shadow: 
+        // left
+        -${euiTheme.size.s} 0 ${euiTheme.size.s} -${euiTheme.size.s} rgb(0 0 0 / 15%), 
+        // right
+        ${euiTheme.size.s} 0 ${euiTheme.size.s} -${euiTheme.size.s} rgb(0 0 0 / 15%), 
+        // bottom inset to match timeline bar top shadow
+        inset 0 -${euiTheme.size.xs} ${euiTheme.size.xs} -${euiTheme.size.xs} rgb(0 0 0 / 6%); 
+    `}
   `,
 });

@@ -6,9 +6,10 @@
  */
 
 import { EuiThemeComputed, transparentize } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const solutionGroupedNavStyles = (euiTheme: EuiThemeComputed<{}>) => ({
-  sideNavItem: `
+  sideNavItem: css`
     font-weight: ${euiTheme.font.weight.regular};
     &.solutionGroupedNavItem--isPrimary {
       font-weight: ${euiTheme.font.weight.bold};

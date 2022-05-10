@@ -70,6 +70,7 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
               css={styles.panel}
               borderRadius="none"
               paddingSize="l"
+              data-test-subj="groupedNavPanel"
             >
               <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
                 <EuiFlexItem>

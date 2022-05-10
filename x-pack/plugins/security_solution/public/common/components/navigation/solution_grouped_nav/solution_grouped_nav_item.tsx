@@ -112,9 +112,9 @@ export const useNavItems: () => NavItem[] = () => {
     },
     // TODO: implement footer and move management
     {
-      id: SecurityPageName.manageLanding,
+      id: SecurityPageName.administration,
       label: 'Manage',
-      ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.manageLanding }),
+      ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.administration }),
       categories: [
         { label: 'SIEM', itemIds: [SecurityPageName.rules, SecurityPageName.exceptions] },
         {

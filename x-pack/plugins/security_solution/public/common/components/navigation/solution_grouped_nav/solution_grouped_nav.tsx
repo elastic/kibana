@@ -27,7 +27,7 @@ import {
 } from './solution_grouped_nav_item';
 import { EuiIconSpaces } from './icons/spaces';
 
-interface SolutionGroupedNavProps {
+export interface SolutionGroupedNavProps {
   items: NavItem[];
   selectedId: string;
   footerItems?: NavItem[];
@@ -58,11 +58,11 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
 
   const onClosePortalNav = useCallback(() => {
     const currentPortalNavId = activePortalNavIdRef.current;
-    // This event is triggered on outside click
     setTimeout(() => {
-      // closing the side nav at the end of event loop to make sure it
-      // closes even if the active "sub nav" open button has been clicked (toggle),
-      // but it does not close if any other "sub nav" open button has been clicked
+      // This event is triggered on outside click.
+      // Closing the side nav at the end of event loop to make sure it
+      // closes also if the active "nav group" button has been clicked (toggle),
+      // but it does not close if any some other "nav group" open button has been clicked.
       if (activePortalNavIdRef.current === currentPortalNavId) {
         closePortalNav();
       }
@@ -110,7 +110,13 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
 
       return (
         // eslint-disable-next-line @elastic/eui/href-or-on-click
-        <EuiLink key={id} href={href} onClick={onClick} color={isCurrentNav ? 'primary' : 'text'}>
+        <EuiLink
+          key={id}
+          href={href}
+          onClick={onClick}
+          color={isCurrentNav ? 'primary' : 'text'}
+          data-test-subj={`groupedNavItemLink-${id}`}
+        >
           <EuiListGroupItem
             className={itemClassNames}
             css={styles.sideNavItem}
@@ -131,6 +137,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
                     iconType: EuiIconSpaces,
                     iconSize: 'm',
                     'aria-label': 'Toggle group nav',
+                    'data-test-subj': `groupedNavItemButton-${id}`,
                     alwaysShow: true,
                   },
                 }
