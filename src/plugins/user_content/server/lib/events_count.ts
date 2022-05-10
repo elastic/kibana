@@ -52,8 +52,20 @@ export const bucketsAggregationToContentEventCount = (
 
   const aggregated = buckets.reduce((eventCountById, savedObjectBucket) => {
     const { key: savedObjectId } = savedObjectBucket;
-    const soType = hits.find((doc) => doc._source?.data?.so_id === savedObjectId)?._source?.data
-      .so_type;
+    const soType = hits.find((doc) => {
+      if (doc._source?.data?.so_id !== savedObjectId) {
+        return false;
+      }
+      // We **need** the saved object type to be able to increment the counter.
+      // If we don't have it we don't return the aggregate
+      return doc._source?.data?.so_type !== undefined;
+    })?._source?.data.so_type;
+
+    if (soType === undefined) {
+      // We probably want to log something here to indicate that
+      // the saved object type was not included as part of the metadata event
+      return eventCountById;
+    }
 
     // Sub aggregation "eventsCount"
     const eventsCount = savedObjectBucket.eventsCount as estypes.AggregationsRangeAggregate;

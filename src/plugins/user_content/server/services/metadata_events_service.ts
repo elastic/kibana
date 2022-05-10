@@ -138,6 +138,9 @@ export class MetadataEventsService {
       // @ts-expect-error Query should be declared at the root and not under "body"
       query,
       aggs,
+      // For the POC we set this huge limit. We should optimize this and create 2 daily snapshots
+      // so we will only need to fetch the last day of events
+      size: 10000,
     })) as estypes.SearchResponse<UserContentMetadataEvent>;
 
     const { buckets } = result.aggregations!
