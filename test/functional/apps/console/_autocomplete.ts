@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console']);
-  const retry = getService('retry');
   const find = getService('find');
 
   describe('console autocomplete feature', function describeIndexTests() {
