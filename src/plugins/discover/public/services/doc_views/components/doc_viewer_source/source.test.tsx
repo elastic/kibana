@@ -111,7 +111,7 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children().render()).toMatchSnapshot();
+    expect(comp.children()).toMatchSnapshot();
     const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
     expect(jsonCodeEditor).not.toBe(null);
   });
