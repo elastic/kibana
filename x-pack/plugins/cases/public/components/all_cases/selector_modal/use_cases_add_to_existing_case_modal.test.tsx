@@ -37,7 +37,7 @@ const TestComponent: React.FC = () => {
   const hook = useCasesAddToExistingCaseModal({});
 
   const onClick = () => {
-    hook.open([alertComment]);
+    hook.open({ attachments: [alertComment] });
   };
 
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;

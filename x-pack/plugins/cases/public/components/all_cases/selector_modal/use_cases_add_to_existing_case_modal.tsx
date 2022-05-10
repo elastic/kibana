@@ -21,7 +21,7 @@ type AddToExistingFlyoutProps = AllCasesSelectorModalProps & {
   toastContent?: string;
 };
 
-export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) => {
+export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps = {}) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
     onClose: props.onClose,
     // TODO there's no need for onSuccess to be async. This will be fixed
@@ -56,7 +56,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        createNewCaseFlyout.open(attachments);
+        createNewCaseFlyout.open({ attachments });
         return;
       }
 
@@ -89,7 +89,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
   );
 
   const openModal = useCallback(
-    (attachments?: CaseAttachments) => {
+    ({ attachments }: { attachments?: CaseAttachments } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {

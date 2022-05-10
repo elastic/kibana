@@ -74,7 +74,7 @@ describe('use cases add to new case flyout hook', () => {
       },
       { wrapper }
     );
-    result.current.open([alertComment]);
+    result.current.open({ attachments: [alertComment] });
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
@@ -92,7 +92,7 @@ describe('use cases add to new case flyout hook', () => {
       },
       { wrapper }
     );
-    result.current.open([alertComment]);
+    result.current.open({ attachments: [alertComment] });
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,

@@ -18,7 +18,7 @@ type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments'> & {
   toastContent?: string;
 };
 
-export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps) => {
+export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) => {
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
 
@@ -29,7 +29,7 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps) => {
   }, [dispatch]);
 
   const openFlyout = useCallback(
-    (attachments?: CaseAttachments) => {
+    ({ attachments }: { attachments?: CaseAttachments } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
