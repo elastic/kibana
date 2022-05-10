@@ -975,6 +975,66 @@ describe('rule_details', () => {
     });
   });
 
+  describe('enable/disable rule button', () => {
+    it('should disable the rule when clicked', async () => {
+      const rule = mockRule();
+      const requestRefresh = jest.fn();
+      const wrapper = mountWithIntl(
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      actionsButton.simulate('click');
+
+      const disableButton = wrapper.find('[data-test-subj="disableButton"]').first();
+      expect(disableButton.exists()).toBeTruthy();
+
+      disableButton.simulate('click');
+
+      expect(mockRuleApis.disableRule).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.disableRule).toHaveBeenCalledWith(rule);
+    });
+
+    it('should enable the rule when clicked', async () => {
+      const rule = { ...mockRule(), enabled: false };
+      const requestRefresh = jest.fn();
+      const wrapper = mountWithIntl(
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      actionsButton.simulate('click');
+
+      const enableButton = wrapper.find('[data-test-subj="disableButton"]').first();
+      expect(enableButton.exists()).toBeTruthy();
+
+      enableButton.simulate('click');
+
+      expect(mockRuleApis.enableRule).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.enableRule).toHaveBeenCalledWith(rule);
+    });
+  });
+
   function mockRule(overloads: Partial<Rule> = {}): Rule {
     return {
       id: uuid.v4(),

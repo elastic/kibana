@@ -273,7 +273,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         }}
         onErrors={async () => {
           // Refresh the rule from the server, it may have been deleted
-          await setRule();
+          await requestRefresh();
           setRulesToDelete([]);
         }}
         onCancel={() => {
@@ -296,7 +296,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         setIsLoadingState={() => {}}
         onUpdated={async () => {
           setRulesToUpdateAPIKey([]);
-          setRule();
+          requestRefresh();
         }}
       />
       <EuiPageHeader
@@ -428,6 +428,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             }}
             onApiKeyUpdate={(ruleId) => {
               setRulesToUpdateAPIKey([ruleId]);
+            }}
+            onEnableDisable={async (enable) => {
+              if (enable) {
+                await enableRule(rule);
+              } else {
+                await disableRule(rule);
+              }
+              requestRefresh();
             }}
           />,
           editButton,

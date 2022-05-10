@@ -15,6 +15,7 @@ export interface RuleActionsPopoverProps {
   canSaveRule: boolean;
   onDelete: (ruleId: string) => void;
   onApiKeyUpdate: (ruleId: string) => void;
+  onEnableDisable: (enable: boolean) => void;
 }
 
 export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps> = ({
@@ -22,6 +23,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
   canSaveRule,
   onDelete,
   onApiKeyUpdate,
+  onEnableDisable,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -51,6 +53,23 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
           {
             id: 0,
             items: [
+              {
+                disabled: !canSaveRule,
+                'data-test-subj': 'disableButton',
+                onClick: async () => {
+                  setIsPopoverOpen(false);
+                  onEnableDisable(!rule.enabled);
+                },
+                name: !rule.enabled
+                  ? i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleDetails.enableRuleButtonLabel',
+                      { defaultMessage: 'Enable' }
+                    )
+                  : i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel',
+                      { defaultMessage: 'Disable' }
+                    ),
+              },
               {
                 disabled: !canSaveRule,
                 'data-test-subj': 'updateAPIKeyButton',
