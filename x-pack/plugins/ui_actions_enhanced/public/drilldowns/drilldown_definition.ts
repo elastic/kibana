@@ -96,6 +96,12 @@ export interface DrilldownDefinition<
   isConfigValid: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['isConfigValid'];
 
   /**
+   * Compatibility check during drilldown creation.
+   * Could be used to filter out a drilldown if it's not compatible with the current context.
+   */
+  isConfigurable?(context: FactoryContext): boolean;
+
+  /**
    * Name of EUI icon to display when showing this drilldown to user.
    */
   euiIcon?: string;
