@@ -42,7 +42,7 @@ export const ENDPOINT_TITLE = i18n.translate(
 export const ENDPOINT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.endpoint.desc',
   {
-    defaultMessage: 'Prevent, collect, detect and respond -- all with Elastic Agent.',
+    defaultMessage: 'Prevent, collect, detect and respond — all with Elastic Agent.',
   }
 );
 
@@ -55,7 +55,7 @@ export const SIEM_CARD_TITLE = i18n.translate(
 export const SIEM_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.siemCard.desc',
   {
-    defaultMessage: 'Detect, investigate, and respond to evolving threats',
+    defaultMessage: 'Detect, investigate, and respond to evolving threats.',
   }
 );
 
@@ -69,6 +69,6 @@ export const UNIFY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.unify.desc',
   {
     defaultMessage:
-      'Elastic Security modernizes security operations — enabling analytics across years of data, automating key processes, and bringing native endpoint security to every host.',
+      'Elastic Security modernizes security operations — enabling analytics across years of data, automating key processes, and protecting every host.',
   }
 );
