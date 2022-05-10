@@ -92,7 +92,7 @@ describe('enable()', () => {
     (auditLogger.log as jest.Mock).mockClear();
     rulesClient = new RulesClient(rulesClientParams);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRule);
-    unsecuredSavedObjectsClient.get.mockResolvedValue(existingRuleWithoutApiKey);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
     rulesClientParams.createAPIKey.mockResolvedValue({
       apiKeysEnabled: false,
     });
