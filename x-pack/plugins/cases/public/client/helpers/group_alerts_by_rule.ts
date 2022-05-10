@@ -40,11 +40,5 @@ export const groupAlertsByRule = (items: Event[], owner: string): CaseAttachment
     }
     return acc;
   }, {});
-  const attachments: CaseAttachments = [];
-  const keys = Object.keys(attachmentsByRule);
-  for (const key of keys) {
-    const x = attachmentsByRule[key];
-    attachments.push(x);
-  }
-  return attachments;
+  return Object.values(attachmentsByRule);
 };
