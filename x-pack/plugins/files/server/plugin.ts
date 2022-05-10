@@ -29,7 +29,6 @@ export class FilesPlugin implements Plugin {
         esClient,
         this.logger.get('blob-storage-service')
       );
-      await blobStorageService.setup();
       this.fileService = new InternalFileService(
         core.savedObjects,
         coreStart.savedObjects,
