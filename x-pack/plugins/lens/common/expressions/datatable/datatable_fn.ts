@@ -24,10 +24,12 @@ export const datatableFn =
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
   ): DatatableExpressionFunction['fn'] =>
   async (data, args, context) => {
-    const firstTable = data;
     if (context?.inspectorAdapters?.tables) {
+      context.inspectorAdapters.tables.reset();
+      context.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
-        firstTable,
+        data,
         [
           [
             args.columns.map((column) => column.columnId),
@@ -43,10 +45,12 @@ export const datatableFn =
     }
 
     let untransposedData: Datatable | undefined;
+    const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
+
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);
 
-    firstTable.columns.forEach((column) => {
+    data.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);
     });
 
@@ -55,12 +59,12 @@ export const datatableFn =
       // store original shape of data separately
       untransposedData = cloneDeep(data);
       // transposes table and args inplace
-      transposeTable(args, firstTable, formatters);
+      transposeTable(args, data, formatters);
     }
 
     const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
-    const columnsReverseLookup = firstTable.columns.reduce<
+    const columnsReverseLookup = data.columns.reduce<
       Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
     >((memo, { id, name, meta }, i) => {
       memo[id] = { name, index: i, meta };
@@ -71,7 +75,7 @@ export const datatableFn =
     for (const column of columnsWithSummary) {
       column.summaryRowValue = computeSummaryRowForColumn(
         column,
-        firstTable,
+        data,
         formatters,
         formatFactory({ id: 'number' })
       );
@@ -90,11 +94,11 @@ export const datatableFn =
         sortDirection
       );
       // replace the table here
-      context.inspectorAdapters.tables.tables.default.rows = (firstTable.rows || [])
+      context.inspectorAdapters.tables[layerId].rows = (data.rows || [])
         .slice()
         .sort(sortingCriteria);
       // replace also the local copy
-      firstTable.rows = context.inspectorAdapters.tables.tables.default.rows;
+      data.rows = context.inspectorAdapters.tables[layerId].rows;
     } else {
       args.sortingColumnId = undefined;
       args.sortingDirection = 'none';
