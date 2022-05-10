@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
@@ -22,15 +22,17 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { ConfigContext, FleetStatusProvider, KibanaVersionContext } from '../../hooks';
 
-import { AgentPolicyContextProvider } from './hooks';
+import { FleetServerFlyout } from '../fleet/components';
+
+import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import * as testHooks from './hooks';
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
+import { AgentEnrollmentFlyout } from './components';
 
 const EmptyContext = () => <></>;
 
@@ -62,8 +64,6 @@ export const IntegrationsAppContext: React.FC<{
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
-
-    // console.log({ testHooks });
 
     return (
       <RedirectAppLinks application={startServices.application}>
@@ -109,6 +109,8 @@ export const IntegrationsAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
+  const flyoutContext = useFlyoutContext();
+
   return (
     <>
       <Switch>
@@ -136,6 +138,22 @@ export const AppRoutes = memo(() => {
           }}
         />
       </Switch>
+
+      {flyoutContext.isEnrollmentFlyoutOpen && (
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            defaultMode="standalone"
+            isIntegrationFlow={true}
+            onClose={() => flyoutContext.closeEnrollmentFlyout()}
+          />
+        </EuiPortal>
+      )}
+
+      {flyoutContext.isFleetServerFlyoutOpen && (
+        <EuiPortal>
+          <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+        </EuiPortal>
+      )}
     </>
   );
 });

@@ -39,22 +39,6 @@ export const FlyoutContextProvider: React.FunctionComponent = ({ children }) => 
       }}
     >
       {children}
-
-      {isEnrollmentFlyoutOpen && (
-        <EuiPortal>
-          <AgentEnrollmentFlyout
-            defaultMode="standalone"
-            isIntegrationFlow={true}
-            onClose={() => setIsEnrollmentFlyoutOpen(false)}
-          />
-        </EuiPortal>
-      )}
-
-      {isFleetServerFlyoutOpen && (
-        <EuiPortal>
-          <FleetServerFlyout onClose={() => setIsFleetServerFlyoutOpen(false)} />
-        </EuiPortal>
-      )}
     </agentFlyoutContext.Provider>
   );
 };
