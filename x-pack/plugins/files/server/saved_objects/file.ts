@@ -27,9 +27,6 @@ const properties: Properties = {
   status: {
     type: 'keyword',
   },
-  storage_id: {
-    type: 'keyword',
-  },
   content_ref: {
     type: 'keyword',
   },

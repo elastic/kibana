@@ -26,12 +26,6 @@ export type FileSavedObjectAttributes = {
    */
   plugin_id: string;
 
-  /**
-   * An identifier for the type of storage where the file is saved. This could be in
-   * ES, AWS S3, Google Cloud Storage or any other blob storage.
-   */
-  storage_id: string;
-
   status: FileStatus;
 
   /**
