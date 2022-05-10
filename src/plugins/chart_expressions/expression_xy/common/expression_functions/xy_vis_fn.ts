@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds } from '../helpers';
@@ -19,6 +20,24 @@ import {
   validateFillOpacity,
   validateValueLabels,
 } from './validate';
+
+function normalizeTable(data, xAccessor) {
+  if (xAccessor) {
+    const xColumn = data.columns.find((col) => col.id === xAccessor);
+    data.rows = data.rows.reduce((normalizedRows, row) => {
+      return [
+        ...normalizedRows,
+        {
+          ...row,
+          [xAccessor]:
+            xColumn.meta.type === 'date' && typeof row[xAccessor] === 'string'
+              ? moment(row[xAccessor]).valueOf()
+              : row[xAccessor],
+        },
+      ];
+    }, []);
+  }
+}
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const {
@@ -37,6 +56,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     palette,
     ...restArgs
   } = args;
+
+  normalizeTable(data, xAccessor);
+
   const dataLayers: DataLayerConfigResult[] = [
     {
       type: DATA_LAYER,

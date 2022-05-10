@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import React, { useMemo, useRef } from 'react';
 import {
   Chart,
@@ -182,7 +183,9 @@ export function XYChart({
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
-  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
+  const xAxisFormatter = formatFactory(
+    xAxisColumn && (xAxisColumn.meta?.params || { id: xAxisColumn.meta.type })
+  );
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -222,11 +225,9 @@ export function XYChart({
   const isTimeViz = Boolean(dataLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
-  const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
-    dataLayers,
-    minInterval,
-    isTimeViz,
-    isHistogramViz
+  const { baseDomain: rawXDomain, extendedDomain: xDomain } = useMemo(
+    () => getXDomain(dataLayers, minInterval, isTimeViz, isHistogramViz),
+    [dataLayers, minInterval, isTimeViz, isHistogramViz]
   );
 
   const yAxesMap = {

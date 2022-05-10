@@ -42,12 +42,17 @@ export const getXDomain = (
   isHistogram: boolean
 ) => {
   const appliedTimeRange = getAppliedTimeRange(layers)?.timeRange;
+  const xValues = uniq(
+    layers
+      .flatMap<number>(({ table, xAccessor }) => table.rows.map((row) => row[xAccessor!].valueOf()))
+      .sort()
+  );
   const from = appliedTimeRange?.from;
   const to = appliedTimeRange?.to;
   const baseDomain = isTimeViz
     ? {
-        min: from ? moment(from).valueOf() : NaN,
-        max: to ? moment(to).valueOf() : NaN,
+        min: from ? moment(from).valueOf() : xValues[0],
+        max: to ? moment(to).valueOf() : xValues[xValues.length - 1],
         minInterval,
       }
     : isHistogram
@@ -55,14 +60,6 @@ export const getXDomain = (
     : undefined;
 
   if (isHistogram && isFullyQualified(baseDomain)) {
-    const xValues = uniq(
-      layers
-        .flatMap<number>(({ table, xAccessor }) =>
-          table.rows.map((row) => row[xAccessor!].valueOf())
-        )
-        .sort()
-    );
-
     const [firstXValue] = xValues;
     const lastXValue = xValues[xValues.length - 1];
 
