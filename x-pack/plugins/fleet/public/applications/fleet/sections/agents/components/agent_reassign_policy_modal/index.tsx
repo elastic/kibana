@@ -99,6 +99,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
 
   return (
     <EuiConfirmModal
+      data-test-subj="agentReassignPolicyModal"
       title={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutTitle"

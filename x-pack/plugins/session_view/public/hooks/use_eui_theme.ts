@@ -13,6 +13,7 @@ type EuiThemeProps = Parameters<typeof useEuiThemeHook>;
 type ExtraEuiVars = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   euiColorVis6_asText: string;
+  buttonsBackgroundNormalDefaultPrimary: string;
 };
 type EuiVars = typeof euiLightVars & ExtraEuiVars;
 type EuiThemeReturn = ReturnType<typeof useEuiThemeHook> & { euiVars: EuiVars };
@@ -29,6 +30,7 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
     const extraEuiVars: ExtraEuiVars = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335),
+      buttonsBackgroundNormalDefaultPrimary: '#006DE4',
     };
 
     return {
