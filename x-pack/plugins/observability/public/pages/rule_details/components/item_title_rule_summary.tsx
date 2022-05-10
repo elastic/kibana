@@ -14,8 +14,8 @@ export function ItemTitleRuleSummary({
   defaultMessage,
 }: ItemTitleRuleSummaryProps) {
   return (
-    <EuiTitle style={{ whiteSpace: 'nowrap' }} size="xxs">
-      <EuiFlexItem grow={1}>
+    <EuiTitle size="xxs">
+      <EuiFlexItem style={{ whiteSpace: 'nowrap' }} grow={1}>
         {i18n.translate(translationKey, {
           defaultMessage,
         })}
