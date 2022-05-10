@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_id: 'rule-1',
             },
           ],
-          rules_count: 2,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
