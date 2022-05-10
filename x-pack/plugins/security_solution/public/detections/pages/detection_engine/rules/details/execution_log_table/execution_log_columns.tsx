@@ -6,9 +6,9 @@
  */
 
 import { EuiBasicTableColumn, EuiHealth, EuiLink, EuiText } from '@elastic/eui';
-import { capitalize } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { capitalize } from 'lodash';
 import React from 'react';
 import {
   AggregateRuleExecutionEvent,
@@ -19,9 +19,9 @@ import { FormattedDate } from '../../../../../../common/components/formatted_dat
 import { getStatusColor } from '../../../../../components/rules/rule_execution_status/utils';
 import { PopoverTooltip } from '../../all/popover_tooltip';
 import { TableHeaderTooltipCell } from '../../all/table_header_tooltip_cell';
+import { RuleDurationFormat } from './rule_duration_format';
 
 import * as i18n from './translations';
-import { RuleDurationFormat } from './rule_duration_format';
 
 export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecutionEvent>> = [
   {
@@ -32,7 +32,7 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<AggregateRuleExecu
       />
     ),
     field: 'security_status',
-    render: (value: RuleExecutionStatus, data) =>
+    render: (value: RuleExecutionStatus) =>
       value ? (
         <EuiHealth color={getStatusColor(value)}>{capitalize(value)}</EuiHealth>
       ) : (
@@ -89,7 +89,7 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
   docLinks: DocLinksStart
 ): Array<EuiBasicTableColumn<AggregateRuleExecutionEvent>> => [
   {
-    field: 'gap_duration_ms',
+    field: 'gap_duration_s',
     name: (
       <TableHeaderTooltipCell
         title={i18n.COLUMN_GAP_DURATION}
@@ -117,7 +117,7 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
       />
     ),
     render: (value: number) => (
-      <>{value ? <RuleDurationFormat duration={value} isMillis={true} /> : getEmptyValue()}</>
+      <>{value ? <RuleDurationFormat duration={value} isSeconds={true} /> : getEmptyValue()}</>
     ),
     sortable: true,
     truncateText: false,

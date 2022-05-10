@@ -58,6 +58,9 @@ describe('TelemetryEventsSender', () => {
             path: 'X',
             test: 'me',
             another: 'nope',
+            pe: {
+              original_file_name: 'malware.exe',
+            },
             Ext: {
               bytes_compressed: 'data up to 4mb',
               bytes_compressed_present: 'data up to 4mb',
@@ -89,6 +92,9 @@ describe('TelemetryEventsSender', () => {
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            Ext: {
+              protection: 'PsProtectedSignerAntimalware-Light',
+            },
           },
           Responses: '{ "result": 0 }', // >= 7.15
           Target: {
@@ -132,6 +138,9 @@ describe('TelemetryEventsSender', () => {
             size: 3,
             created: 0,
             path: 'X',
+            pe: {
+              original_file_name: 'malware.exe',
+            },
             Ext: {
               bytes_compressed: 'data up to 4mb',
               bytes_compressed_present: 'data up to 4mb',
@@ -159,6 +168,9 @@ describe('TelemetryEventsSender', () => {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            Ext: {
+              protection: 'PsProtectedSignerAntimalware-Light',
+            },
           },
           Responses: '{ "result": 0 }',
           Target: {
