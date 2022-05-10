@@ -10,3 +10,4 @@ export { CreatePackagePolicyPageStepsLayout } from './steps_layout';
 export { PackagePolicyInputPanel } from './package_policy_input_panel';
 export { PackagePolicyInputVarField } from './package_policy_input_var_field';
 export { PostInstallAddAgentModal } from './post_install_add_agent_modal';
+export { IntegrationBreadcrumb } from './integration_breadcrumb';

@@ -17,8 +17,14 @@ import {
   EuiButton,
   EuiStepNumber,
   EuiText,
+  EuiSpacer,
+  EuiLink,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
+import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
+import { IntegrationBreadcrumb } from '..';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
 import { WithHeaderLayout } from '../../../../../layouts';
 import { useStartServices } from '../../../../../hooks';
 
@@ -32,7 +38,7 @@ const AddIntegrationStepsIllustrations = () => {
   const assetsBasePath = http.basePath.prepend('/plugins/fleet/assets/');
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly" gutterSize="s">
+    <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
           direction="column"
@@ -154,9 +160,40 @@ const AddIntegrationStepsIllustrations = () => {
   );
 };
 
+const CenteredRoundedBottomBar = styled(EuiBottomBar)`
+  max-width: 820px;
+  margin: 0 auto;
+  border-radius: 8px 8px 0px 0px;
+`;
+
+// TODO: add proper link
+const CenteredDocLink = () => (
+  <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexItem grow={false}>
+      <EuiLink href="http://www.elastic.co" target="_blank">
+        <FormattedMessage
+          id="xpack.fleet.addFirstIntegrationSplash.learnMoreLink"
+          defaultMessage="Learn more about Elastic Agent"
+        />
+      </EuiLink>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+// TODO: make buttons work
 const InstallBottomBar = () => (
-  <EuiBottomBar>
-    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+  <CenteredRoundedBottomBar>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty color="ghost" size="s" onClick={() => {}}>
+            <FormattedMessage
+              id="xpack.fleet.addFirstIntegrationSplash.backButton"
+              defaultMessage="Go back"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton color="primary" fill size="m">
           <FormattedMessage
@@ -166,9 +203,13 @@ const InstallBottomBar = () => (
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiBottomBar>
+  </CenteredRoundedBottomBar>
 );
-export const AddFirstIntegrationSplashScreen: React.FC = ({ children }) => {
+
+export const AddFirstIntegrationSplashScreen: React.FC<{
+  integrationInfo?: RegistryPolicyTemplate;
+  packageInfo?: PackageInfo;
+}> = ({ integrationInfo, packageInfo }) => {
   const topContent = (
     <EuiTitle size="l">
       <PaddedCentralTitle>
@@ -182,8 +223,20 @@ export const AddFirstIntegrationSplashScreen: React.FC = ({ children }) => {
   return (
     <WithHeaderLayout topContent={topContent}>
       <>
+        <EuiSpacer size="xxl" />
+        <EuiSpacer size="xxl" />
         <AddIntegrationStepsIllustrations />
+        <EuiSpacer size="xxl" />
+        <EuiSpacer size="xxl" />
+        <CenteredDocLink />
         <InstallBottomBar />
+        {packageInfo && (
+          <IntegrationBreadcrumb
+            pkgTitle={integrationInfo?.title || packageInfo.title}
+            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+            integration={integrationInfo?.name}
+          />
+        )}
       </>
     </WithHeaderLayout>
   );

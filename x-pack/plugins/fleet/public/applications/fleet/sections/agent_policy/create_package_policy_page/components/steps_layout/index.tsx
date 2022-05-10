@@ -47,6 +47,11 @@ export const CreatePackagePolicyPageStepsLayout: React.FunctionComponent<{
     'data-test-subj': dataTestSubj,
     tabs = [],
   }) => {
-    return <AddFirstIntegrationSplashScreen />;
+    return (
+      <AddFirstIntegrationSplashScreen
+        integrationInfo={integrationInfo}
+        packageInfo={packageInfo}
+      />
+    );
   }
 );
