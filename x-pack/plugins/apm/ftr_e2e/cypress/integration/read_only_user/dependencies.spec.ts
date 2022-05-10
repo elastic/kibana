@@ -76,12 +76,16 @@ describe('Dependencies', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
+      cy.intercept('GET', '/internal/apm/backends/upstream_services?*').as(
+        'upstreamRequest'
+      );
       cy.visit(
         `/app/apm/backends/overview?${new URLSearchParams({
           ...timeRange,
           backendName: 'postgresql',
         })}`
       );
+      cy.wait('@upstreamRequest');
       cy.contains('h1', 'postgresql');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });

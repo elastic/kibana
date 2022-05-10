@@ -94,6 +94,8 @@ describe('Service overview - header filters', () => {
         cy.intercept('GET', endpoint).as(name);
       });
       cy.visit(serviceOverviewHref);
+      cy.contains('opbeans-node');
+      cy.contains('Overview');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'

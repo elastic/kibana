@@ -109,8 +109,7 @@ describe('Service overview: Time Comparison', () => {
 
       // toggles off comparison
       cy.contains('Comparison').click();
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
-      // When comparison is disabled APIs are called withou comparison time range
+      // When comparison is disabled APIs are called without comparison time range
       cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {
           interceptions.map((interception) => {
@@ -118,6 +117,7 @@ describe('Service overview: Time Comparison', () => {
           });
         }
       );
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
     });
   });
 

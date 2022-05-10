@@ -88,8 +88,14 @@ describe('Error details', () => {
 
       describe('when clicking on View x occurences in discover', () => {
         it('should redirects the user to discover', () => {
+          cy.intercept(
+            'GET',
+            '/internal/apm/services/opbeans-java/errors/0000000000000000000000000Error%200?*'
+          ).as('errorRequest');
           cy.visit(errorDetailsPageHref);
-          cy.contains('View 1 occurrence in Discover.').click();
+          cy.wait('@errorRequest');
+          cy.contains('Error group 00000');
+          cy.contains('View 1 occurrence in Discover.').click({ force: true });
           cy.url().should('include', 'app/discover');
         });
       });

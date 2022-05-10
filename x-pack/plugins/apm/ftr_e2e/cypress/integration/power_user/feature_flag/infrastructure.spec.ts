@@ -38,7 +38,7 @@ describe('Infrastracture feature flag', () => {
   describe('when infrastracture feature is disabled', () => {
     it('shows the flag as disabled in kibana advanced settings', () => {
       cy.visit(settingsPath);
-
+      cy.contains('Settings');
       cy.get(infraToggle)
         .should('have.attr', 'aria-checked')
         .and('equal', 'false');
@@ -54,6 +54,7 @@ describe('Infrastracture feature flag', () => {
     after(() => {
       // Reverts to default state, which is infrastructureView disabled
       cy.visit(settingsPath);
+      cy.contains('Settings');
       cy.get(infraToggle).click();
       cy.contains('Save changes').should('not.be.disabled');
       cy.contains('Save changes').click();
@@ -61,6 +62,7 @@ describe('Infrastracture feature flag', () => {
 
     it('shows the flag as enabled in kibana advanced settings', () => {
       cy.visit(settingsPath);
+      cy.contains('Settings');
       cy.get(infraToggle).click();
       cy.contains('Save changes').should('not.be.disabled');
       cy.contains('Save changes').click();
