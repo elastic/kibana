@@ -35,7 +35,6 @@ import type {
 } from '../../../types';
 import {
   useLink,
-  useBreadcrumbs,
   sendCreatePackagePolicy,
   useStartServices,
   useConfig,
@@ -54,6 +53,7 @@ import {
   CreatePackagePolicyPageLayout,
   CreatePackagePolicyPageStepsLayout,
   PostInstallAddAgentModal,
+  IntegrationBreadcrumb,
 } from './components';
 import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
@@ -702,17 +702,4 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       </EuiErrorBoundary>
     </Cmp>
   );
-};
-
-const IntegrationBreadcrumb: React.FunctionComponent<{
-  pkgTitle: string;
-  pkgkey: string;
-  integration?: string;
-}> = ({ pkgTitle, pkgkey, integration }) => {
-  useBreadcrumbs('add_integration_to_policy', {
-    pkgTitle,
-    pkgkey,
-    ...(integration ? { integration } : {}),
-  });
-  return null;
 };
