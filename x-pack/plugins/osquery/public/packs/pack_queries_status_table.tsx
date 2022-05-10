@@ -354,7 +354,12 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   return (
     <EuiToolTip content={VIEW_IN_DISCOVER}>
-      <EuiButtonIcon iconType="discoverApp" href={discoverUrl} aria-label={VIEW_IN_DISCOVER} />
+      <EuiButtonIcon
+        iconType="discoverApp"
+        href={discoverUrl}
+        aria-label={VIEW_IN_DISCOVER}
+        target="_blank"
+      />
     </EuiToolTip>
   );
 };

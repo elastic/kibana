@@ -96,12 +96,24 @@ describe('ALL - Packs', () => {
       cy.contains('ID must be unique').should('exist');
       cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
     });
-    // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
-    it.skip('to click the icon and visit discover', () => {
+    it('to click the icon and visit discover', () => {
+      let discoverUrl = '';
+      cy.window().then((win) => {
+        cy.stub(win, 'open')
+          .as('windowOpen')
+          .callsFake((url) => {
+            discoverUrl = url;
+          });
+      });
       preparePack(PACK_NAME);
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
       }).click();
+      cy.window()
+        .its('open')
+        .then(() => {
+          cy.visit(discoverUrl);
+        });
       cy.getBySel('superDatePickerToggleQuickMenuButton').click();
       cy.getBySel('superDatePickerToggleRefreshButton').click();
       cy.getBySel('superDatePickerRefreshIntervalInput').clear().type('10');
