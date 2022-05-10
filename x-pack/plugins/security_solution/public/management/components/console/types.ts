@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ComponentType } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { CommandExecutionState } from './components/console_state/types';
@@ -79,9 +81,7 @@ export interface CommandExecutionComponentProps<TStore = Record<string, unknown>
   /**
    * Sets the `store` data above. Function will be called the latest (prevState) store data
    */
-  setStore: (
-    updateStoreFn: (prevState: CommandExecutionState['store']) => CommandExecutionState['store']
-  ) => void;
+  setStore: (updateStoreFn: (prevState: TStore) => TStore) => void;
 
   /**
    * The status of the command execution.

@@ -9,23 +9,67 @@ import React, { memo, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EndpointCommandDefinitionMeta } from './types';
+import type { HttpFetchError } from '@kbn/core/public';
+import { v4 as uuidV4 } from 'uuid';
+import type { HostInfo, PendingActionsResponse } from '../../../../common/endpoint/types';
+import type { EndpointCommandDefinitionMeta } from './types';
 import { EndpointHostIsolationStatusProps } from '../../../common/components/endpoint/host_isolation';
 import { useGetEndpointPendingActionsSummary } from '../../hooks/endpoint/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import { EndpointPolicyStatus } from '../endpoint_policy_status';
 import { EndpointAgentAndIsolationStatus } from '../endpoint_agent_and_isolation_status';
 import { useGetEndpointDetails } from '../../hooks';
-import { CommandExecutionComponentProps } from '../console/types';
+import type { CommandExecutionComponentProps } from '../console/types';
 import { FormattedError } from '../formatted_error';
 
 export const EndpointStatusActionResult = memo<
-  CommandExecutionComponentProps<{}, EndpointCommandDefinitionMeta>
->(({ command, status, setStatus }) => {
+  CommandExecutionComponentProps<
+    {
+      endpointDetails?: HostInfo;
+      detailsFetchError?: HttpFetchError;
+      endpointPendingActions?: PendingActionsResponse;
+    },
+    EndpointCommandDefinitionMeta
+  >
+>(({ command, status, setStatus, store, setStore }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId as string;
+  const { endpointPendingActions, endpointDetails, detailsFetchError } = store;
+  const isPending = status === 'pending';
 
-  const { isFetching, error, data: endpointInfo, isFetched } = useGetEndpointDetails(endpointId);
-  const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId]);
+  const { isFetching, isFetched } = useGetEndpointDetails(endpointId, {
+    enabled: isPending,
+    // Don't use cached data. Force a fetch so that it can be stored in the console's history
+    queryKey: uuidV4(),
+    onSuccess: (data) => {
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          endpointDetails: data,
+        };
+      });
+    },
+    onError: (err) => {
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          detailsFetchError: err,
+        };
+      });
+    },
+  });
+
+  useGetEndpointPendingActionsSummary([endpointId], {
+    enabled: isPending,
+    queryKey: uuidV4(),
+    onSuccess: (data) => {
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          endpointPendingActions: data,
+        };
+      });
+    },
+  });
 
   const pendingIsolationActions = useMemo<
     Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>
@@ -46,25 +90,25 @@ export const EndpointStatusActionResult = memo<
 
   useEffect(() => {
     if (isFetched && status === 'pending') {
-      setStatus(error ? 'error' : 'success');
+      setStatus(detailsFetchError ? 'error' : 'success');
     }
-  }, [error, isFetched, setStatus, status]);
+  }, [detailsFetchError, isFetched, setStatus, status]);
 
   if (isFetching) {
     return null;
   }
 
-  if (error) {
+  if (detailsFetchError) {
     return (
       <EuiCallOut>
         <EuiFieldText>
-          <FormattedError error={error} />
+          <FormattedError error={detailsFetchError} />
         </EuiFieldText>
       </EuiCallOut>
     );
   }
 
-  if (!endpointInfo) {
+  if (!endpointDetails) {
     return null;
   }
 
@@ -78,8 +122,8 @@ export const EndpointStatusActionResult = memo<
           />
         </EuiText>
         <EndpointAgentAndIsolationStatus
-          status={endpointInfo.host_status}
-          isIsolated={Boolean(endpointInfo.metadata.Endpoint.state?.isolation)}
+          status={endpointDetails.host_status}
+          isIsolated={Boolean(endpointDetails.metadata.Endpoint.state?.isolation)}
           {...pendingIsolationActions}
         />
       </EuiFlexItem>
@@ -90,7 +134,7 @@ export const EndpointStatusActionResult = memo<
             defaultMessage="Policy status"
           />
         </EuiText>
-        <EndpointPolicyStatus policyApplied={endpointInfo.metadata.Endpoint.policy.applied} />
+        <EndpointPolicyStatus policyApplied={endpointDetails.metadata.Endpoint.policy.applied} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s">
@@ -105,7 +149,7 @@ export const EndpointStatusActionResult = memo<
               'xpack.securitySolution.endpointResponseActions.status.lastActive',
               { defaultMessage: 'Last active' }
             )}
-            value={endpointInfo.metadata['@timestamp']}
+            value={endpointDetails.metadata['@timestamp']}
             className="eui-textTruncate"
           />
         </EuiText>
