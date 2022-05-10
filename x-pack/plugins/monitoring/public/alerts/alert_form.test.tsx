@@ -154,8 +154,10 @@ describe('alert_form', () => {
 
     it('renders alert name', async () => {
       const alertNameField = wrapper.find('[data-test-subj="ruleNameInput"]');
+      const target = {} as unknown as HTMLInputElement;
+      (alertNameField.first().prop('inputRef') as Function)(target);
       expect(alertNameField.exists()).toBeTruthy();
-      expect(alertNameField.first().prop('value')).toBe('test');
+      expect(target.value).toBe('test');
     });
 
     it('renders registered selected alert type', async () => {
