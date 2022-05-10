@@ -8,7 +8,7 @@
 import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import { errors } from '../../common';
+import { errors, LayoutTypes } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
@@ -18,13 +18,15 @@ import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
-import type { Screenshot } from './get_screenshots';
+import type { Screenshot } from './types';
 import { getScreenshots } from './get_screenshots';
+import { getPdf } from './get_pdf';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
+import type { PdfScreenshotOptions } from '../formats';
 
 type CaptureTimeouts = ConfigType['capture']['timeouts'];
 export interface PhaseTimeouts extends CaptureTimeouts {
@@ -237,6 +239,26 @@ export class ScreenshotObservableHandler {
     );
   }
 
+  /**
+   * Given a title and time range value look like:
+   *
+   * "[Logs] Web Traffic - Apr 14, 2022 @ 120742.318 to Apr 21, 2022 @ 120742.318"
+   *
+   * Otherwise closest thing to that or a blank string.
+   */
+  private getTitle(timeRange: null | string): string {
+    return `${(this.options as PdfScreenshotOptions).title ?? ''} ${
+      timeRange ? `- ${timeRange}` : ''
+    }`.trim();
+  }
+
+  private shouldCapturePdf(): boolean {
+    return (
+      this.layout.id === LayoutTypes.PRINT &&
+      (this.options as PdfScreenshotOptions).format === 'pdf'
+    );
+  }
+
   public getScreenshots() {
     return (withRenderComplete: Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
@@ -247,7 +269,14 @@ export class ScreenshotObservableHandler {
             getDefaultElementPosition(this.layout.getViewport(1));
           let screenshots: Screenshot[] = [];
           try {
-            screenshots = await getScreenshots(this.driver, this.eventLogger, elements);
+            screenshots = this.shouldCapturePdf()
+              ? await getPdf(
+                  this.driver,
+                  this.eventLogger,
+                  this.getTitle(data.timeRange),
+                  (this.options as PdfScreenshotOptions).logo
+                )
+              : await getScreenshots(this.driver, this.eventLogger, elements);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }
