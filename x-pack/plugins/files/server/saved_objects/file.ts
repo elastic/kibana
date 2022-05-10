@@ -23,7 +23,10 @@ export const fileObjectType: SavedObjectsType<FileSavedObjectAttributes> = {
         type: 'date',
       },
       name: {
-        type: 'keyword',
+        type: 'text',
+      },
+      alt: {
+        type: 'text',
       },
       status: {
         type: 'keyword',

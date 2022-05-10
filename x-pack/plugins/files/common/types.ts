@@ -20,19 +20,14 @@ export interface FileSavedObjectAttributes extends SavedObjectAttributes {
    */
   name: string;
 
-  status: FileStatus;
-
   /**
-   * Unique ID of the user that created this file.
-   *
-   * @note
-   * May not be available since we do not have a reliable unique ID for users unless we combine
-   * user name and realm. Security will expose truly unique user IDs in the future so if we use this
-   * we may need to migrate this data in the future.
-   *
-   * TODO: Should we just exclude this entirely for now?
+   * An alternate even more human-friendly name for the contents. This should be
+   * usable by, for example, the alt attribute in image tags if the content is an
+   * image.
    */
-  created_by?: string;
+  alt: string;
+
+  status: FileStatus;
 
   /**
    * An identifier for the type of storage where the file is saved. This could be in
