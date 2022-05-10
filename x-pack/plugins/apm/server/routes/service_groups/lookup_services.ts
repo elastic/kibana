@@ -6,6 +6,8 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { IUiSettingsClient } from '@kbn/core/server';
+import { serviceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
@@ -14,20 +16,24 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
-import { MAX_NUMBER_OF_SERVICE_GROUPS } from '../../../common/service_groups';
 
 export async function lookupServices({
   setup,
+  uiSettingsClient,
   kuery,
   start,
   end,
 }: {
   setup: Setup;
+  uiSettingsClient: IUiSettingsClient;
   kuery: string;
   start: number;
   end: number;
 }) {
   const { apmEventClient } = setup;
+  const maxNumberOfServices = await uiSettingsClient.get<number>(
+    serviceGroupMaxNumberOfServices
+  );
 
   const response = await apmEventClient.search('lookup_services', {
     apm: {
@@ -49,7 +55,7 @@ export async function lookupServices({
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: MAX_NUMBER_OF_SERVICE_GROUPS,
+            size: maxNumberOfServices,
           },
           aggs: {
             environments: {

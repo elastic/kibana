@@ -17,6 +17,7 @@ export {
   defaultApmServiceEnvironment,
   apmServiceInventoryOptimizedSorting,
   apmProgressiveLoading,
+  serviceGroupMaxNumberOfServices,
 } from './ui_settings_keys';
 
 export {

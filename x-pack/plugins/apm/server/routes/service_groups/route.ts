@@ -28,8 +28,14 @@ const serviceGroupsRoute = createApmServerRoute({
     resources
   ): Promise<{ serviceGroups: SavedServiceGroup[] }> => {
     const { context } = resources;
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const serviceGroups = await getServiceGroups({ savedObjectsClient });
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+    const serviceGroups = await getServiceGroups({
+      savedObjectsClient,
+      uiSettingsClient,
+    });
     return { serviceGroups };
   },
 });
@@ -46,7 +52,9 @@ const serviceGroupRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<{ serviceGroup: SavedServiceGroup }> => {
     const { context, params } = resources;
-    const savedObjectsClient = (await context.core).savedObjects.client;
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
     const serviceGroup = await getServiceGroup({
       savedObjectsClient,
       serviceGroupId: params.query.serviceGroup,
@@ -75,10 +83,15 @@ const serviceGroupSaveRoute = createApmServerRoute({
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const { start, end, serviceGroupId } = params.query;
-    const savedObjectsClient = (await context.core).savedObjects.client;
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+
     const setup = await setupRequest(resources);
     const items = await lookupServices({
       setup,
+      uiSettingsClient,
       kuery: params.body.kuery,
       start,
       end,
@@ -126,11 +139,15 @@ const serviceGroupServicesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ items: Awaited<ReturnType<typeof lookupServices>> }> => {
-    const { params } = resources;
+    const { params, context } = resources;
     const { kuery = '', start, end } = params.query;
+    const {
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
     const setup = await setupRequest(resources);
     const items = await lookupServices({
       setup,
+      uiSettingsClient,
       kuery,
       start,
       end,
