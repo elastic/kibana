@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { firstValueFrom, Observable, ReplaySubject } from 'rxjs';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -15,9 +15,12 @@ import { InternalMetricsServiceSetup, InternalMetricsServiceStart, OpsMetrics } 
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
+import type { AnalyticsServiceSetup } from '../analytics';
+import { opsMetricsSchema } from './ops_metrics_event_schema';
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
+  analytics: AnalyticsServiceSetup;
 }
 
 /** @internal */
@@ -26,6 +29,7 @@ export class MetricsService
 {
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
+  private readonly analyticsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
@@ -34,9 +38,13 @@ export class MetricsService
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
     this.opsMetricsLogger = coreContext.logger.get('metrics', 'ops');
+    this.analyticsMetricsLogger = coreContext.logger.get('metrics', 'metrics_analytics');
   }
 
-  public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
+  public async setup({
+    analytics,
+    http,
+  }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
     const config = await firstValueFrom(
       this.coreContext.configService.atPath<OpsConfigType>(opsConfig.path)
     );
@@ -54,6 +62,10 @@ export class MetricsService
 
     const metricsObservable = this.metrics$.asObservable();
 
+    this.setupOpsMetricsEventType(analytics, metricsObservable, this.analyticsMetricsLogger);
+
+    metricsObservable.subscribe();
+
     this.service = {
       collectionInterval: config.interval.asMilliseconds(),
       getOpsMetrics$: () => metricsObservable,
@@ -66,7 +78,6 @@ export class MetricsService
     if (!this.service) {
       throw new Error('#setup() needs to be run first');
     }
-
     return this.service;
   }
 
@@ -83,5 +94,23 @@ export class MetricsService
       clearInterval(this.collectInterval);
     }
     this.metrics$.complete();
+  }
+
+  private setupOpsMetricsEventType(
+    analytics: AnalyticsServiceSetup,
+    metricsObservable: Observable<OpsMetrics>,
+    analyticsMetricsLogger: Logger
+  ) {
+    analytics.registerEventType<OpsMetrics>({
+      eventType: 'core-ops_metrics',
+      schema: opsMetricsSchema,
+    });
+    metricsObservable.subscribe((metrics: OpsMetrics) => {
+      // did I add there for debugging and dev? Yes.
+      // is this needed for dev? Probably not
+      const { message } = getEcsOpsMetricsLog(metrics);
+      analyticsMetricsLogger.info(`reporting opsMetrics: ${message}`);
+      analytics.reportEvent('core-ops_metrics', { ...metrics });
+    });
   }
 }
