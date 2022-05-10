@@ -241,7 +241,7 @@ export function RuleDetailsPage() {
             >
               <EuiFlexGroup direction="column">
                 <EuiFlexItem>
-                  <EuiTitle size="m">
+                  <EuiTitle size="s">
                     <EuiHealth
                       textSize="inherit"
                       color={getColorStatusBased(rule.executionStatus.status)}
@@ -272,7 +272,6 @@ export function RuleDetailsPage() {
                     translationKey="xpack.observability.ruleDetails.last24hAlerts"
                     defaultMessage="Alerts (last 24 h)"
                   />
-                  {/* TODO: Get all the Alerts not only the Active ones */}
                   <ItemValueRuleSummary extraSpace={false} itemValue={String(last24hAlerts)} />
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />
@@ -285,7 +284,7 @@ export function RuleDetailsPage() {
 
           <EuiFlexItem grow={3}>
             <EuiPanel color="subdued" hasBorder={false} paddingSize={'l'}>
-              <EuiTitle>
+              <EuiTitle size="s">
                 <EuiFlexItem>
                   {i18n.translate('xpack.observability.ruleDetails.definition', {
                     defaultMessage: 'Definition',
