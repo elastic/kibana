@@ -15,6 +15,7 @@ import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@k
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../types';
@@ -225,6 +226,7 @@ export const getMetricVisualization = ({
       }
     );
   },
+  triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
     const hasColoring = props.state.palette != null;
