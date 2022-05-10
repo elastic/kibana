@@ -9,6 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { FEATURE_STATES_NONE_OPTION } from '../../../../common/constants';
 import { useCollapsibleList } from './use_collapsible_list';
 
 interface Props {
@@ -29,7 +30,7 @@ export const CollapsibleFeatureStatesList: React.FunctionComponent<Props> = ({ f
     );
   }
 
-  if (items.find((option) => option === 'none')) {
+  if (items.find((option) => option === FEATURE_STATES_NONE_OPTION)) {
     return (
       <FormattedMessage
         id="xpack.snapshotRestore.featureStatesList.noneFeaturesLabel"

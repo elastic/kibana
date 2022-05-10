@@ -6,7 +6,6 @@
  */
 
 import React, { FunctionComponent, useMemo } from 'react';
-import { sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -15,6 +14,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
+  EuiCallOut,
   EuiSpacer,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -35,19 +35,16 @@ export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
 export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, onUpdate }) => {
   const { config = {} } = policy;
-  const { error: errorLoadingFeatures, isLoading: isLoadingFeatures, data } = useLoadFeatures();
+  const {
+    error: errorLoadingFeatures,
+    isLoading: isLoadingFeatures,
+    data: featuresResponse,
+  } = useLoadFeatures();
 
-  const features = useMemo(() => {
-    if (!isLoadingFeatures && !errorLoadingFeatures) {
-      const featuresList = data?.features.map((feature) => ({
-        label: feature.name,
-      }));
-
-      return sortBy(featuresList, 'label');
-    }
-
-    return [];
-  }, [isLoadingFeatures, errorLoadingFeatures, data]);
+  const featuresOptions = useMemo(() => {
+    const features = featuresResponse?.features || [];
+    return features.map((feature) => feature.name);
+  }, [featuresResponse]);
 
   const selectedOptions = useMemo(() => {
     return config?.featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[];
@@ -56,6 +53,7 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
   const isFeatureStatesToggleEnabled =
     config.featureStates !== undefined &&
     !config.featureStates.includes(FEATURE_STATES_NONE_OPTION);
+
   const onFeatureStatesToggleChange = (event: EuiSwitchEvent) => {
     const { checked } = event.target;
 
@@ -101,12 +99,25 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
       {isFeatureStatesToggleEnabled && (
         <>
           <EuiSpacer size="m" />
-          <FeatureStatesFormField
-            isLoadingFeatures={isLoadingFeatures}
-            featuresOptions={features}
-            selectedOptions={selectedOptions}
-            onUpdateFormSettings={onUpdate}
-          />
+          {!errorLoadingFeatures ? (
+            <FeatureStatesFormField
+              isLoadingFeatures={isLoadingFeatures}
+              featuresOptions={featuresOptions}
+              selectedOptions={selectedOptions}
+              onUpdateFormSettings={onUpdate}
+            />
+          ) : (
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryWarningTitle"
+                  defaultMessage="There was an error loading the list of feature states"
+                />
+              }
+            />
+          )}
         </>
       )}
     </EuiDescribedFormGroup>

@@ -158,18 +158,13 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     renameReplacement: '',
   });
 
-  const onRestoreGlobalStateToggleChange = (event: EuiSwitchEvent) => {
-    updateRestoreSettings({
-      includeGlobalState: event.target.checked,
-    });
-  };
-
   const selectedFeatureStateOptions = useMemo(() => {
     return featureStates?.map((feature) => ({ label: feature })) as FeaturesOption[];
   }, [featureStates]);
 
   const isFeatureStatesToggleEnabled =
     featureStates !== undefined && !featureStates?.includes(FEATURE_STATES_NONE_OPTION);
+
   const onFeatureStatesToggleChange = (event: EuiSwitchEvent) => {
     const { checked } = event.target;
 
@@ -626,7 +621,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               />
             }
             checked={includeGlobalState === undefined ? false : includeGlobalState}
-            onChange={onRestoreGlobalStateToggleChange}
+            onChange={(e) => updateRestoreSettings({ includeGlobalState: e.target.checked })}
             disabled={!snapshotIncludeGlobalState}
             data-test-subj="includeGlobalStateSwitch"
           />
@@ -652,15 +647,12 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               defaultMessage="Restores the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
             />
 
-            {semverGt(version, '7.12.0') &&
-              featureStates &&
-              featureStates?.length >= 0 &&
-              isFeatureStatesToggleEnabled && (
-                <>
-                  <EuiSpacer size="s" />
-                  <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
-                </>
-              )}
+            {semverGt(version, '7.12.0') && isFeatureStatesToggleEnabled && (
+              <>
+                <EuiSpacer size="s" />
+                <SystemIndicesOverwrittenCallOut featureStates={restoreSettings?.featureStates} />
+              </>
+            )}
           </>
         }
         fullWidth
@@ -671,7 +663,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           helpText={
             snapshotIncludeFeatureStates ? null : (
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDisabledDescription"
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.includeFeatureStatesDisabledDescription"
                 defaultMessage="Not available for this snapshot."
               />
             )
@@ -695,7 +687,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <>
             <EuiSpacer size="m" />
             <FeatureStatesFormField
-              featuresOptions={snapshotIncludeFeatureStates?.map((feature) => ({ label: feature }))}
+              featuresOptions={snapshotIncludeFeatureStates}
               selectedOptions={selectedFeatureStateOptions}
               onUpdateFormSettings={updateRestoreSettings}
             />

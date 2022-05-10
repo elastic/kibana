@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
+import { sortBy } from 'lodash';
 
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
@@ -15,7 +16,7 @@ import { SlmPolicyPayload, RestoreSettings } from '../../../../common/types';
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
 interface Props {
-  featuresOptions: FeaturesOption[];
+  featuresOptions: string[];
   selectedOptions: FeaturesOption[];
   onUpdateFormSettings: (
     arg: Partial<SlmPolicyPayload['config']> & Partial<RestoreSettings>
@@ -31,6 +32,18 @@ export const FeatureStatesFormField: FunctionComponent<Props> = ({
 }) => {
   const { i18n } = useServices();
 
+  const optionsList = useMemo(() => {
+    if (!isLoadingFeatures) {
+      const featuresList = featuresOptions.map((feature) => ({
+        label: feature,
+      }));
+
+      return sortBy(featuresList, 'label');
+    }
+
+    return [];
+  }, [isLoadingFeatures, featuresOptions]);
+
   const onChange = (selected: FeaturesOption[]) => {
     onUpdateFormSettings({
       featureStates: selected.map((option) => option.label),
@@ -45,7 +58,7 @@ export const FeatureStatesFormField: FunctionComponent<Props> = ({
           'xpack.snapshotRestore.featureStatesFormField.allFeaturesLabel',
           { defaultMessage: 'All features' }
         )}
-        options={featuresOptions}
+        options={optionsList}
         selectedOptions={selectedOptions}
         onChange={onChange}
         isLoading={isLoadingFeatures}

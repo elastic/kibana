@@ -64,7 +64,6 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   const CurrentStepForm = stepMap[currentStep];
 
   // Policy state
-  const originalConfig = originalPolicy.config;
   const [policy, setPolicy] = useState<SlmPolicyPayload>({
     ...originalPolicy,
     config: {
@@ -73,7 +72,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       // when creating the local state for the form and also set featureStates to be an empty array, which
       // for the API it means that it will include all featureStates.
       featureStates: [],
-      ...(originalConfig || {}),
+      ...(originalPolicy.config || {}),
     },
     retention: {
       ...originalPolicy.retention,

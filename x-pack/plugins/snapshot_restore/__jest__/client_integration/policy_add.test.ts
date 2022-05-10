@@ -17,6 +17,7 @@ import { API_BASE_PATH } from '../../common';
 
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
+import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 
 const { setup } = pageHelpers.policyAdd;
 
@@ -240,23 +241,18 @@ describe('<PolicyAdd />', () => {
         const { exists, component, form } = testBed;
 
         // By default the toggle is enabled
-        expect(exists('featureStatesDropdown')).toBe(false);
+        expect(exists('featureStatesDropdown')).toBe(true);
 
         await act(async () => {
           form.toggleEuiSwitch('featureStatesToggle');
         });
         component.update();
 
-        expect(exists('featureStatesDropdown')).toBe(true);
+        expect(exists('featureStatesDropdown')).toBe(false);
       });
 
       test('include all features', async () => {
-        const { actions, form, component } = testBed;
-
-        await act(async () => {
-          form.toggleEuiSwitch('featureStatesToggle');
-        });
-        component.update();
+        const { actions } = testBed;
 
         // Complete step 2
         actions.clickNextButton();
@@ -278,12 +274,7 @@ describe('<PolicyAdd />', () => {
       });
 
       test('include some features', async () => {
-        const { actions, form, component } = testBed;
-
-        await act(async () => {
-          form.toggleEuiSwitch('featureStatesToggle');
-        });
-        component.update();
+        const { actions, form } = testBed;
 
         form.setComboBoxValue('featureStatesDropdown', 'kibana');
 
@@ -307,7 +298,13 @@ describe('<PolicyAdd />', () => {
       });
 
       test('include no features', async () => {
-        const { actions } = testBed;
+        const { actions, form, component } = testBed;
+
+        // Disable all features
+        await act(async () => {
+          form.toggleEuiSwitch('featureStatesToggle');
+        });
+        component.update();
 
         // Complete step 2
         actions.clickNextButton();
@@ -323,7 +320,7 @@ describe('<PolicyAdd />', () => {
         const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
-        expect(parsedReqBody.config).toEqual({});
+        expect(parsedReqBody.config).toEqual({ featureStates: [FEATURE_STATES_NONE_OPTION] });
       });
     });
 
@@ -361,7 +358,7 @@ describe('<PolicyAdd />', () => {
               snapshotName: SNAPSHOT_NAME,
               schedule: DEFAULT_POLICY_SCHEDULE,
               repository: repository.name,
-              config: {},
+              config: { featureStates: [] },
               retention: {
                 expireAfterValue: Number(EXPIRE_AFTER_VALUE),
                 expireAfterUnit: 'd', // default
