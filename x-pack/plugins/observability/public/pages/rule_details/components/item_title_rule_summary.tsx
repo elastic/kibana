@@ -14,7 +14,7 @@ export function ItemTitleRuleSummary({
   defaultMessage,
 }: ItemTitleRuleSummaryProps) {
   return (
-    <EuiTitle size="xs">
+    <EuiTitle size="xxs">
       <EuiFlexItem grow={1}>
         {i18n.translate(translationKey, {
           defaultMessage,

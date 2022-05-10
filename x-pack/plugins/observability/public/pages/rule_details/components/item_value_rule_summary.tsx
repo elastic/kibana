@@ -11,7 +11,7 @@ import { ItemValueRuleSummaryProps } from '../types';
 export function ItemValueRuleSummary({ itemValue, extraSpace = true }: ItemValueRuleSummaryProps) {
   return (
     <EuiFlexItem grow={extraSpace ? 3 : 1}>
-      <EuiText size="m">{itemValue}</EuiText>
+      <EuiText size="s">{itemValue}</EuiText>
     </EuiFlexItem>
   );
 }
