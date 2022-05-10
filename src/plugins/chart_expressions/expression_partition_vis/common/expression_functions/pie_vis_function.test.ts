@@ -128,6 +128,7 @@ describe('interpreter/functions#pieVis', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };
