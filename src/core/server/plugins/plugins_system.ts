@@ -99,6 +99,7 @@ export class PluginsSystem<T extends PluginType> {
 
     for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
+      const timeTookMs = new Date().getTime();
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
       const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
         // Only set if present. Could be absent if plugin does not have server-side code or is a
@@ -151,6 +152,10 @@ export class PluginsSystem<T extends PluginType> {
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
+      deps.analytics.reportEvent('plugin-setup', {
+        name: pluginName,
+        timeTookMs: new Date().getTime() - timeTookMs,
+      });
     }
 
     return contracts;
@@ -170,6 +175,7 @@ export class PluginsSystem<T extends PluginType> {
 
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
+      const timeTookMs = new Date().getTime();
       const plugin = this.plugins.get(pluginName)!;
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
       const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
@@ -210,6 +216,11 @@ export class PluginsSystem<T extends PluginType> {
       }
 
       contracts.set(pluginName, contract);
+
+      deps.analytics.reportEvent('plugin-start', {
+        name: pluginName,
+        timeTookMs: new Date().getTime() - timeTookMs,
+      });
     }
 
     return contracts;
