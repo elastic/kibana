@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { EndpointCommandDefinition } from './types';
+import { CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { EndpointStatusActionResult } from './status_action';
 
 export const getEndpointResponseActionsConsoleCommands = (
   endpointAgentId: string
-): EndpointCommandDefinition[] => {
+): CommandDefinition[] => {
   return [
     {
       name: 'isolate',

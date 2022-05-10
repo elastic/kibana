@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { CommandDefinition } from '../console';
-
-export type EndpointCommandDefinition = CommandDefinition<{ endpointId: string }>;
+export interface EndpointCommandDefinitionMeta {
+  endpointId: string;
+}

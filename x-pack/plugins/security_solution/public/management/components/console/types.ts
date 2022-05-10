@@ -11,7 +11,7 @@ import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
-export interface CommandDefinition<TMeta extends object = object> {
+export interface CommandDefinition<TMeta = unknown> {
   name: string;
   about: string;
   /**
@@ -64,10 +64,8 @@ export interface Command<TDefinition extends CommandDefinition = CommandDefiniti
   commandDefinition: TDefinition;
 }
 
-export interface CommandExecutionComponentProps<
-  TDefinition extends CommandDefinition = CommandDefinition
-> {
-  command: Command<TDefinition>;
+export interface CommandExecutionComponentProps<TStore = Record<string, unknown>, TMeta = unknown> {
+  command: Command<CommandDefinition<TMeta>>;
 
   /**
    * A data store for the command execution to store data in, if needed.
@@ -76,7 +74,7 @@ export interface CommandExecutionComponentProps<
    * persisting data (ex. API response with IDs) that the command can use to determine
    * if the command has already been executed or if it's a new instance.
    */
-  store: Immutable<CommandExecutionState['store']>;
+  store: Immutable<TStore>;
 
   /**
    * Sets the `store` data above. Function will be called the latest (prevState) store data
@@ -100,8 +98,10 @@ export interface CommandExecutionComponentProps<
 /**
  * The component that will handle the Command execution and display the result.
  */
-export type CommandExecutionComponent<TDefinition extends CommandDefinition = CommandDefinition> =
-  ComponentType<CommandExecutionComponentProps<TDefinition>>;
+export type CommandExecutionComponent<
+  TStore = Record<string, unknown>,
+  TMeta = unknown
+> = ComponentType<CommandExecutionComponentProps<TStore, TMeta>>;
 
 export interface ConsoleProps extends CommonProps {
   /**
