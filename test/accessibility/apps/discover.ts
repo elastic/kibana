@@ -162,11 +162,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for data grid in full screen with collapsed side bar', async () => {
       await PageObjects.discover.closeSidebar();
       await a11y.testAppSnapshot();
+      await PageObjects.discover.toggleSidebarCollapse();
     });
 
-    it('a11y test for actions on data view from side bar', async () => {
-      await PageObjects.discover.toggleSidebarCollapse();
-      await testSubjects.click('discover-addRuntimeField-popover');
+    it('a11y test for adding a field from side bar', async () => {
+      await testSubjects.click('indexPattern-add-field_btn');
       await a11y.testAppSnapshot();
     });
   });
