@@ -27,3 +27,22 @@ export const INTEGRATION_KEY_REQUIRED = i18n.translate(
     defaultMessage: 'An integration key / routing key is required.',
   }
 );
+
+export const API_URL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlTextFieldLabel',
+  {
+    defaultMessage: 'API URL (optional)',
+  }
+);
+
+export const INTEGRATION_KEY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
+  {
+    defaultMessage: 'Integration key',
+  }
+);
+
+export const ENC_MSG = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
+  { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
+);

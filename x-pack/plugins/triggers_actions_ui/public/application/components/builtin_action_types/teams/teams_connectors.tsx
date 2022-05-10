@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -16,16 +15,12 @@ import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
 
 const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
-  label: i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlTextFieldLabel',
-    {
-      defaultMessage: 'Webhook URL',
-    }
-  ),
+  label: i18n.WEBHOOK_URL_LABEL,
   helpText: (
     <EuiLink href={docLinks.links.alerting.teamsAction} target="_blank">
       <FormattedMessage
@@ -36,14 +31,7 @@ const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ),
   validations: [
     {
-      validator: emptyField(
-        i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlTextFieldLabel',
-          {
-            defaultMessage: 'Webhook URL',
-          }
-        )
-      ),
+      validator: emptyField(i18n.WEBHOOK_URL_REQUIRED),
     },
   ],
 });
@@ -61,10 +49,7 @@ const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
         1,
         // TODO: Get isMissingSecrets
         false,
-        i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
-          { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
-        )
+        i18n.WEBHOOK_URL_ENC_MSG
       )}
       <UseField
         path="secrets.webhookUrl"
