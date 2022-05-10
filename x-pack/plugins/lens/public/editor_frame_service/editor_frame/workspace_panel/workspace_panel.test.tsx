@@ -43,6 +43,7 @@ import {
 import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
+import { Ast, toExpression } from '@kbn/interpreter';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -71,6 +72,19 @@ const defaultProps = {
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
 };
+
+const toExpr = (
+  datasourceExpressionsByLayers: Record<string, Ast>,
+  fn: string = 'testVis',
+  layerId: string = 'first'
+) =>
+  toExpression({
+    type: 'expression',
+    chain: [
+      ...(datasourceExpressionsByLayers[layerId]?.chain ?? []),
+      { type: 'function', function: fn, arguments: {} },
+    ],
+  });
 
 const SELECTORS = {
   applyChangesButton: 'button[data-test-subj="lnsApplyChanges__toolbar"]',
@@ -147,7 +161,11 @@ describe('workspace_panel', () => {
       <WorkspacePanel
         {...defaultProps}
         visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
         }}
       />,
 
@@ -176,7 +194,11 @@ describe('workspace_panel', () => {
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
         }}
         ExpressionRenderer={expressionRendererMock}
       />
@@ -186,9 +208,10 @@ describe('workspace_panel', () => {
 
     instance.update();
 
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(
-      `"testVis"`
-    );
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+      "datasource
+      | testVis"
+    `);
   });
 
   it('should give user control when auto-apply disabled', async () => {
@@ -207,7 +230,11 @@ describe('workspace_panel', () => {
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
         }}
         ExpressionRenderer={expressionRendererMock}
       />,
@@ -224,19 +251,29 @@ describe('workspace_panel', () => {
     const getExpression = () => instance.find(expressionRendererMock).prop('expression');
 
     // allows initial render
-    expect(getExpression()).toMatchInlineSnapshot(`"testVis"`);
+    expect(getExpression()).toMatchInlineSnapshot(`
+      "datasource
+      | testVis"
+    `);
 
     mockDatasource.toExpression.mockReturnValue('new-datasource');
     act(() => {
       instance.setProps({
         visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'new-vis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers, 'new-vis'),
+          } as Visualization,
         },
       });
     });
     instance.update();
 
-    expect(getExpression()).toMatchInlineSnapshot(`"testVis"`);
+    expect(getExpression()).toMatchInlineSnapshot(`
+      "datasource
+      | testVis"
+    `);
 
     act(() => {
       mounted.lensStore.dispatch(applyChanges());
@@ -244,13 +281,20 @@ describe('workspace_panel', () => {
     instance.update();
 
     // should update
-    expect(getExpression()).toMatchInlineSnapshot(`"new-vis"`);
+    expect(getExpression()).toMatchInlineSnapshot(`
+      "new-datasource
+      | new-vis"
+    `);
 
     mockDatasource.toExpression.mockReturnValue('other-new-datasource');
     act(() => {
       instance.setProps({
         visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'other-new-vis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers, 'other-new-vis'),
+          } as Visualization,
         },
       });
       mounted.lensStore.dispatch(enableAutoApply());
@@ -258,7 +302,10 @@ describe('workspace_panel', () => {
     instance.update();
 
     // reenabling auto-apply triggers an update as well
-    expect(getExpression()).toMatchInlineSnapshot(`"other-new-vis"`);
+    expect(getExpression()).toMatchInlineSnapshot(`
+      "other-new-datasource
+      | other-new-vis"
+    `);
   });
 
   it('should base saveability on working changes when auto-apply disabled', async () => {
@@ -286,7 +333,11 @@ describe('workspace_panel', () => {
         }}
         framePublicAPI={framePublicAPI}
         visualizationMap={{
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpr(datasourceExpressionsByLayers),
+          },
         }}
         ExpressionRenderer={expressionRendererMock}
       />
@@ -298,9 +349,10 @@ describe('workspace_panel', () => {
     instance.update();
 
     // allows initial render
-    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(
-      `"testVis"`
-    );
+    expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+      "datasource
+      | testVis"
+    `);
     expect(isSaveable()).toBe(true);
 
     act(() => {

@@ -48,6 +48,7 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
+import { toExpression } from '@kbn/interpreter';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -208,10 +209,20 @@ describe('editor_frame', () => {
     it('should render the resulting expression using the expression renderer', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
 
-      const props = {
+      const props: EditorFrameProps = {
         ...getDefaultProps(),
         visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpression({
+                type: 'expression',
+                chain: [
+                  ...(datasourceExpressionsByLayers.first?.chain ?? []),
+                  { type: 'function', function: 'testVis', arguments: {} },
+                ],
+              }),
+          },
         },
         datasourceMap: {
           testDatasource: {
@@ -240,9 +251,10 @@ describe('editor_frame', () => {
 
       instance.update();
 
-      expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(
-        `"testVis"`
-      );
+      expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+        "datasource
+        | testVis"
+      `);
     });
   });
 
