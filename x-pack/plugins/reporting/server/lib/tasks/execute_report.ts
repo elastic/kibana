@@ -303,6 +303,7 @@ export class ExecuteReportTask implements ReportingTask {
   private getTaskRunner(): TaskRunCreatorFunction {
     // Keep a separate local stack for each task run
     return (context: RunContext) => {
+      let logger = this.logger;
       let jobId: string;
       const cancellationToken = new CancellationToken();
 
@@ -320,6 +321,7 @@ export class ExecuteReportTask implements ReportingTask {
           // find the job in the store and set status to processing
           const task = context.taskInstance.params as ReportTaskParams;
           jobId = task?.id;
+          logger = logger.get(jobId);
 
           try {
             if (!jobId) {
@@ -332,22 +334,22 @@ export class ExecuteReportTask implements ReportingTask {
           } catch (failedToClaim) {
             // error claiming report - log the error
             // could be version conflict, or no longer connected to ES
-            errorLogger(this.logger, `Error in claiming ${jobId}`, failedToClaim);
+            errorLogger(logger, `Error in claiming ${jobId}`, failedToClaim);
           }
 
           if (!report) {
             this.reporting.untrackReport(jobId);
-            errorLogger(this.logger, `Job ${jobId} could not be claimed. Exiting...`);
+            errorLogger(logger, `Job ${jobId} could not be claimed. Exiting...`);
             return;
           }
 
           const { jobtype: jobType, attempts } = report;
           const maxAttempts = this.config.capture.maxAttempts;
 
-          this.logger.debug(
+          logger.debug(
             `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
           );
-          this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
+          logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           const eventLog = this.reporting.getEventLogger(
             new Report({ ...task, _id: task.id, _index: task.index })
@@ -388,14 +390,14 @@ export class ExecuteReportTask implements ReportingTask {
             });
 
             if (output) {
-              this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
               report = await this._completeJob(report, {
                 ...output,
                 size: stream.bytesWritten,
               });
             }
             // untrack the report for concurrency awareness
-            this.logger.debug(`Stopping ${jobId}.`);
+            logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
             eventLog.logError(failedToExecuteErr);
 
@@ -410,16 +412,16 @@ export class ExecuteReportTask implements ReportingTask {
                 // reschedule to retry
                 const remainingAttempts = maxAttempts - report.attempts;
                 errorLogger(
-                  this.logger,
+                  logger,
                   `Scheduling retry for job ${jobId}. Retries remaining: ${remainingAttempts}.`,
                   failedToExecuteErr
                 );
 
-                await this.rescheduleTask(reportFromTask(task).toReportTaskJSON(), this.logger);
+                await this.rescheduleTask(reportFromTask(task).toReportTaskJSON(), logger);
               } catch (rescheduleErr) {
                 // can not be rescheduled - log the error
                 errorLogger(
-                  this.logger,
+                  logger,
                   `Could not reschedule the errored job ${jobId}!`,
                   rescheduleErr
                 );
@@ -438,7 +440,7 @@ export class ExecuteReportTask implements ReportingTask {
                 report._seq_no = resp._seq_no;
                 report._primary_term = resp._primary_term;
               } catch (failedToFailError) {
-                errorLogger(this.logger, `Could not fail ${jobId}!`, failedToFailError);
+                errorLogger(logger, `Could not fail ${jobId}!`, failedToFailError);
               }
             }
           } finally {
