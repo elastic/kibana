@@ -244,8 +244,8 @@ export class HeadlessChromiumDriver {
     logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
 
     await this.page.setViewport({
-      width,
-      height: height * zoom, // NOTE: this fixes reports from TSVB editor
+      width: Math.ceil(width * 1.2),
+      height: height * 2,
       deviceScaleFactor: zoom,
       isMobile: false,
     });
