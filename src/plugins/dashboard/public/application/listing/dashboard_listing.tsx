@@ -15,15 +15,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiSearchBarProps,
-  EuiSelect,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
-import type { ViewsCountRangeField } from '@kbn/user-content-plugin/public';
-import { viewsCountRangeFields, VIEWS_TOTAL_FIELD } from '@kbn/user-content-plugin/public';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -82,24 +78,10 @@ export const DashboardListing = ({
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
-  const [userContentTableColumns, setUserContentTableColumns] = useState<
-    Array<EuiBasicTableColumn<Record<string, unknown>>>
-  >([]);
-  const [viewsCountRange, setViewsCountRange] = useState<ViewsCountRangeField>(VIEWS_TOTAL_FIELD);
-
   useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'list',
   });
-
-  const loadUserContentTableColumnDefinition = useCallback(async () => {
-    const columnDefinition = await userContent.ui.getUserContentTableColumnsDefinitions({
-      contentType: 'dashboard',
-      selectedViewsRange: viewsCountRange,
-    });
-
-    setUserContentTableColumns(columnDefinition);
-  }, [userContent, viewsCountRange]);
 
   // Set breadcrumbs useEffect
   useEffect(() => {
@@ -131,10 +113,6 @@ export const DashboardListing = ({
       stopSyncingQueryServiceStateWithUrl();
     };
   }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
-
-  useEffect(() => {
-    loadUserContentTableColumnDefinition();
-  }, [loadUserContentTableColumnDefinition]);
 
   const { showWriteControls } = dashboardCapabilities;
   const listingLimit = core.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
@@ -171,15 +149,8 @@ export const DashboardListing = ({
         sortable: true,
       },
       ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
-      ...(userContentTableColumns ?? {}),
     ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
-  }, [
-    core.application,
-    core.uiSettings,
-    kbnUrlStateStorage,
-    savedObjectsTagging,
-    userContentTableColumns,
-  ]);
+  }, [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]);
 
   const createItem = useCallback(() => {
     if (!dashboardSessionStorage.dashboardHasUnsavedEdits()) {
@@ -342,36 +313,6 @@ export const DashboardListing = ({
       : [];
   }, [savedObjectsTagging]);
 
-  const toolsRight = useMemo<EuiSearchBarProps['toolsRight']>(() => {
-    const daysRangeOptions = viewsCountRangeFields.map((range) => {
-      const days = /_(\d+)_/.exec(range)?.[1];
-      const text = `Last ${days} days`;
-
-      return {
-        value: range,
-        text,
-      };
-    });
-
-    const viewsCountOptions = [
-      {
-        value: VIEWS_TOTAL_FIELD,
-        text: 'Total views',
-      },
-      ...daysRangeOptions,
-    ];
-
-    return [
-      <EuiSelect
-        id="viewsDaysRangeSelect"
-        options={viewsCountOptions}
-        value={viewsCountRange}
-        onChange={(e) => setViewsCountRange(e.target.value as ViewsCountRangeField)}
-        aria-label="Select views count days range"
-      />,
-    ];
-  }, [viewsCountRange]);
-
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
     dashboardListingTable;
   return (
@@ -402,6 +343,8 @@ export const DashboardListing = ({
           }}
           theme={core.theme}
           application={core.application}
+          userContent={userContent}
+          contentType="dashboard"
         >
           <DashboardUnsavedListing
             redirectTo={redirectTo}

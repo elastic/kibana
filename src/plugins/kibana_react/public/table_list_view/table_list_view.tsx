@@ -22,10 +22,17 @@ import {
   SearchFilterConfig,
   EuiToolTip,
   EuiSearchBarProps,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
+import type { UserContentPluginStart } from '@kbn/user-content-plugin/public';
+import {
+  ViewsCountRangeField,
+  viewsCountRangeFields,
+  VIEWS_TOTAL_FIELD,
+} from '@kbn/user-content-plugin/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
@@ -62,10 +69,11 @@ export interface TableListViewProps<V> {
    * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
    */
   tableCaption: string;
+  contentType?: string;
   searchFilters?: SearchFilterConfig[];
-  toolsRight?: EuiSearchBarProps['toolsRight'];
   theme: ThemeServiceStart;
   application: ApplicationStart;
+  userContent: UserContentPluginStart;
 }
 
 export interface TableListViewState<V> {
@@ -84,6 +92,9 @@ export interface TableListViewState<V> {
     field: keyof V;
     direction: Direction;
   };
+  userContentTypes: string[];
+  viewsCountRange: ViewsCountRangeField | null;
+  userContentColumnDefinition: Array<EuiBasicTableColumn<Record<string, unknown>>>;
 }
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
@@ -118,6 +129,9 @@ class TableListView<V extends {}> extends React.Component<
       showLimitError: false,
       filter: props.initialFilter,
       selectedIds: [],
+      userContentTypes: [],
+      userContentColumnDefinition: [],
+      viewsCountRange: null,
     };
   }
 
@@ -132,6 +146,13 @@ class TableListView<V extends {}> extends React.Component<
 
   componentDidMount() {
     this.fetchItems();
+    this.fetchUserContentTypes();
+  }
+
+  componentDidUpdate(prevProps: TableListViewProps<V>, prevState: TableListViewState<V>) {
+    if (prevState.viewsCountRange !== this.state.viewsCountRange) {
+      this.loadUserContentTableColumnDefinition();
+    }
   }
 
   componentDidUpdate(prevProps: TableListViewProps<V>, prevState: TableListViewState<V>) {
@@ -188,6 +209,25 @@ class TableListView<V extends {}> extends React.Component<
     }
   }, 300);
 
+  fetchUserContentTypes = async () => {
+    const { userContent } = this.props;
+    const userContentTypes = await userContent.getUserContentTypes();
+
+    // If this is a user generated content we set the default value of the "Views day range"
+    const viewsCountRange = this.isUserContent(userContentTypes) ? VIEWS_TOTAL_FIELD : null;
+
+    this.setState({ userContentTypes, viewsCountRange });
+  };
+
+  loadUserContentTableColumnDefinition = async () => {
+    const userContentColumnDefinition =
+      await this.props.userContent.ui.getUserContentTableColumnsDefinitions({
+        contentType: this.props.contentType ?? '',
+        selectedViewsRange: this.state.viewsCountRange!,
+      });
+    this.setState({ userContentColumnDefinition });
+  };
+
   fetchItems = () => {
     this.setState(
       {
@@ -236,6 +276,9 @@ class TableListView<V extends {}> extends React.Component<
   openDeleteModal = () => {
     this.setState({ showDeleteModal: true });
   };
+
+  isUserContent = (userContentTypes = this.state.userContentTypes) =>
+    Boolean(userContentTypes.includes(this.props.contentType ?? ''));
 
   setFilter({ queryText }: { queryText: string }) {
     // If the user is searching, we want to clear the sort order so that
@@ -462,8 +505,44 @@ class TableListView<V extends {}> extends React.Component<
     }
   }
 
+  renderToolsRight(): EuiSearchBarProps['toolsRight'] {
+    if (!this.isUserContent() || this.state.viewsCountRange === null) {
+      return [];
+    }
+
+    const daysRangeOptions = viewsCountRangeFields.map((range) => {
+      const days = /_(\d+)_/.exec(range)?.[1];
+      const text = `Last ${days} days`;
+
+      return {
+        value: range,
+        text,
+      };
+    });
+
+    const viewsCountOptions = [
+      {
+        value: VIEWS_TOTAL_FIELD,
+        text: 'Total views',
+      },
+      ...daysRangeOptions,
+    ];
+
+    return [
+      <EuiSelect
+        id="viewsDaysRangeSelect"
+        options={viewsCountOptions}
+        value={this.state.viewsCountRange}
+        onChange={(e) => {
+          this.setState({ viewsCountRange: e.target.value as ViewsCountRangeField });
+        }}
+        aria-label="Select views count days range"
+      />,
+    ];
+  }
+
   renderTable() {
-    const { searchFilters, toolsRight } = this.props;
+    const { searchFilters } = this.props;
 
     const selection = this.props.deleteItems
       ? {
@@ -480,13 +559,13 @@ class TableListView<V extends {}> extends React.Component<
     const search: EuiSearchBarProps = {
       onChange: this.setFilter.bind(this),
       toolsLeft: this.renderToolsLeft(),
+      toolsRight: this.renderToolsRight(),
       defaultQuery: this.state.filter,
       box: {
         incremental: true,
         'data-test-subj': 'tableListSearchBox',
       },
       filters: searchFilters ?? [],
-      toolsRight,
     };
 
     const noItemsMessage = (
@@ -517,8 +596,7 @@ class TableListView<V extends {}> extends React.Component<
   }
 
   getTableColumns() {
-    const columns = this.props.tableColumns.slice();
-
+    const columns = [...this.props.tableColumns, ...this.state.userContentColumnDefinition];
     // Add "Last update" column
     if (this.state.hasUpdatedAtMetadata) {
       const renderUpdatedAt = (dateTime?: string) => {

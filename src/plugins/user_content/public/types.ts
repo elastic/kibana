@@ -13,6 +13,7 @@ import { MetadataEventsService } from './services';
 export interface UserContentPluginSetup {}
 
 export interface UserContentPluginStart {
+  getUserContentTypes: () => Promise<string[]>;
   ui: {
     getUserContentTableColumnsDefinitions: (
       options: GetUserContentTableColumnsDefinitionsOptions
