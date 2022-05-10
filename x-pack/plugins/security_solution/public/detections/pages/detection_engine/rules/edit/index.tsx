@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -73,6 +74,7 @@ const EditRulePageComponent: FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+  const { data: dataServices } = useKibana().services;
   const { navigateToApp } = useKibana().services.application;
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
@@ -101,6 +103,22 @@ const EditRulePageComponent: FC = () => {
     return stepData.data != null && !stepIsValid(stepData);
   });
   const [{ isLoading, isSaved }, setRule] = useUpdateRule();
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
+    };
+    fetchDataViews();
+  }, [dataServices.dataViews]);
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
   const setFormHook = useCallback(
     <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
@@ -136,6 +154,7 @@ const EditRulePageComponent: FC = () => {
                   isUpdateView
                   defaultValues={defineStep.data}
                   setForm={setFormHook}
+                  kibanaDataViews={dataViewOptions}
                 />
               )}
               <EuiSpacer />
@@ -224,6 +243,7 @@ const EditRulePageComponent: FC = () => {
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
+      dataViewOptions,
     ]
   );
 

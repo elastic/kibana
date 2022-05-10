@@ -256,7 +256,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [initIndexPattern, radioIdSelected]);
 
   useEffect(() => {
-    if (!isReadOnlyView) {
+    // adding the && !isUpdateView to ensure we
+    // are not resetting the query bar if editing a rule
+    // I should figure how to make this work so that
+    // it only resets if the radioSelected changes state.
+    if (!isReadOnlyView && !isUpdateView) {
       const { queryBar } = getFields();
       const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
       queryBar.reset({

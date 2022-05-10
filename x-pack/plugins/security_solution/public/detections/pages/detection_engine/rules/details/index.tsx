@@ -34,6 +34,7 @@ import {
 
 import { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -248,7 +249,22 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
 
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
+    };
+    fetchDataViews();
+  }, [data.dataViews]);
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const {
@@ -451,6 +467,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ),
     [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
+
+  // TODO: Revisit this logic. I think we can remove the await data
   const ruleIndices = useMemo(async () => {
     if (rule?.data_view_id != null && rule?.data_view_id !== '') {
       const dataView = await data.dataViews.get(rule?.data_view_id);
@@ -743,6 +761,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             isReadOnlyView={true}
                             isLoading={false}
                             defaultValues={defineRuleData}
+                            kibanaDataViews={dataViewOptions}
                           />
                         )}
                       </StepPanel>
@@ -818,18 +837,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   )}
                 </>
               )}
-              {ruleDetailTab === RuleDetailTabs.exceptions && (
-                <ExceptionsViewer
-                  ruleId={ruleId ?? ''}
-                  ruleName={rule?.name ?? ''}
-                  ruleIndices={ruleIndices}
-                  availableListTypes={exceptionLists.allowedExceptionListTypes}
-                  commentsAccordionId={'ruleDetailsTabExceptions'}
-                  exceptionListsMeta={exceptionLists.lists}
-                  onRuleChange={refreshRule}
-                />
-              )}
-
               {ruleDetailTab === RuleDetailTabs.exceptions && (
                 <ExceptionsViewer
                   ruleId={ruleId ?? ''}
