@@ -193,6 +193,7 @@ export const DiscoverTourProvider: React.FC = ({ children }) => {
   );
   const [steps, actions, reducerState] = useEuiTour(tourSteps, tourConfig);
   const currentTourStep = reducerState.currentTourStep;
+  const isTourActive = reducerState.isTourActive;
 
   const onStartTour = useCallback(() => {
     actions.resetTour();
@@ -223,19 +224,20 @@ export const DiscoverTourProvider: React.FC = ({ children }) => {
 
   return (
     <DiscoverTourContext.Provider value={contextValue}>
-      {steps.map((step) => (
-        <EuiTourStep
-          key={`step-${step.step}-is-${String(step.isStepOpen)}`}
-          {...step}
-          footerAction={
-            <DiscoverTourStepFooterAction
-              isLastStep={step.step === steps[steps.length - 1].step}
-              onNextTourStep={onNextTourStep}
-              onFinishTour={onFinishTour}
-            />
-          }
-        />
-      ))}
+      {isTourActive &&
+        steps.map((step) => (
+          <EuiTourStep
+            key={`step-${step.step}-is-${String(step.isStepOpen)}`}
+            {...step}
+            footerAction={
+              <DiscoverTourStepFooterAction
+                isLastStep={step.step === steps[steps.length - 1].step}
+                onNextTourStep={onNextTourStep}
+                onFinishTour={onFinishTour}
+              />
+            }
+          />
+        ))}
       {children}
     </DiscoverTourContext.Provider>
   );
