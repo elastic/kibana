@@ -29,6 +29,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/get_configure'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
+    loadTestFile(require.resolve('./configure/post_configure'));
+    loadTestFile(require.resolve('./metrics/get_cases_metrics'));
 
     /**
      * Internal routes

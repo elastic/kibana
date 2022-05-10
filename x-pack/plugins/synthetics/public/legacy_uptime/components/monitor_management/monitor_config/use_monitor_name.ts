@@ -8,8 +8,8 @@
 import { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useParams } from 'react-router-dom';
 import { syntheticsMonitorType } from '../../../../../common/types/saved_objects';
-import { useMonitorId } from '../../../hooks';
 
 interface AggsResponse {
   monitorNames: {
@@ -22,7 +22,7 @@ interface AggsResponse {
 export const useMonitorName = ({ search = '' }: { search?: string }) => {
   const [values, setValues] = useState<string[]>([]);
 
-  const monitorId = useMonitorId();
+  const { monitorId } = useParams<{ monitorId: string }>();
 
   const { savedObjects } = useKibana().services;
 

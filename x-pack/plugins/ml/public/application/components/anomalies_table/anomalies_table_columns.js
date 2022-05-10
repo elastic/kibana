@@ -18,6 +18,7 @@ import {
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
 } from '../../../../common/util/date_utils';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
@@ -47,7 +48,8 @@ function showLinksMenuForItem(item, showViewSeriesLink) {
     canConfigureRules ||
     (showViewSeriesLink && item.isTimeSeriesViewRecord) ||
     item.entityName === 'mlcategory' ||
-    item.customUrls !== undefined
+    item.customUrls !== undefined ||
+    item.detector.includes(ML_JOB_AGGREGATION.LAT_LONG)
   );
 }
 

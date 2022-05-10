@@ -128,6 +128,7 @@ describe(`feature_privilege_builder`, () => {
           Array [
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
           ]
         `);
       });
@@ -175,6 +176,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
           ]
         `);
       });
@@ -263,12 +265,13 @@ describe(`feature_privilege_builder`, () => {
         });
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-            Array [
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
-            ]
-          `);
+          Array [
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
+          ]
+        `);
       });
 
       test('grants `all` privileges to rules and alerts under feature consumer', () => {
@@ -326,6 +329,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
           ]
         `);
@@ -420,14 +424,16 @@ describe(`feature_privilege_builder`, () => {
         });
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
-            Array [
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
-              "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
-              "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
-            ]
-          `);
+          Array [
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+          ]
+        `);
       });
 
       test('grants both `all` and `read` to rules and alerts privileges under feature consumer', () => {
@@ -490,9 +496,11 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/update",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
           ]
         `);
       });

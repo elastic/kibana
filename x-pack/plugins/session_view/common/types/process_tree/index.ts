@@ -97,8 +97,8 @@ export interface ProcessEventHost {
   architecture?: string;
   hostname?: string;
   id?: string;
-  ip?: string;
-  mac?: string;
+  ip?: string[];
+  mac?: string[];
   name?: string;
   os?: {
     family?: string;

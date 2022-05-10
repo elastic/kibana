@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { saveInstalledEsRefs } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/install';
 import { getPathParts } from '../../archive';
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
@@ -18,7 +18,7 @@ import { getESAssetMetadata } from '../meta';
 
 import { retryTransientEsErrors } from '../retry';
 
-import { deleteTransforms, deleteTransformRefs } from './remove';
+import { deleteTransforms } from './remove';
 import { getAsset } from './common';
 
 interface TransformInstallation {
@@ -31,12 +31,14 @@ export const installTransform = async (
   paths: string[],
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
+  logger: Logger,
+  esReferences?: EsAssetReference[]
 ) => {
   const installation = await getInstallation({
     savedObjectsClient,
     pkgName: installablePackage.name,
   });
+  esReferences = esReferences ?? installation?.installed_es ?? [];
   let previousInstalledTransformEsAssets: EsAssetReference[] = [];
   if (installation) {
     previousInstalledTransformEsAssets = installation.installed_es.filter(
@@ -71,7 +73,14 @@ export const installTransform = async (
     }, []);
 
     // get and save transform refs before installing transforms
-    await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, transformRefs);
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      installablePackage.name,
+      esReferences,
+      {
+        assetsToAdd: transformRefs,
+      }
+    );
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
       const content = JSON.parse(getAsset(path).toString('utf-8'));
@@ -95,21 +104,17 @@ export const installTransform = async (
   }
 
   if (previousInstalledTransformEsAssets.length > 0) {
-    const currentInstallation = await getInstallation({
+    esReferences = await updateEsAssetReferences(
       savedObjectsClient,
-      pkgName: installablePackage.name,
-    });
-
-    // remove the saved object reference
-    await deleteTransformRefs(
-      savedObjectsClient,
-      currentInstallation?.installed_es || [],
       installablePackage.name,
-      previousInstalledTransformEsAssets.map((asset) => asset.id),
-      installedTransforms.map((installed) => installed.id)
+      esReferences,
+      {
+        assetsToRemove: previousInstalledTransformEsAssets,
+      }
     );
   }
-  return installedTransforms;
+
+  return { installedTransforms, esReferences };
 };
 
 export const isTransform = (path: string) => {
