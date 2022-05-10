@@ -9,7 +9,7 @@
 # Build stage 0 `builder`:
 # Extract Kibana artifact
 ################################################################################
-FROM {{{baseOSImage}}} AS builder
+FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
 RUN {{packageManager}} install -y findutils tar gzip
@@ -54,7 +54,7 @@ RUN mkdir -p /opt/filebeat /opt/metricbeat && \
 # Copy kibana from stage 0
 # Add entrypoint
 ################################################################################
-FROM {{{baseOSImage}}}
+FROM {{{baseImageName}}}
 EXPOSE 5601
 
 {{#ubi}}

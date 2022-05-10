@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-plugin/common';
 import { SortDirection } from '@kbn/data-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -18,7 +19,7 @@ import type { FindingsBaseURLQuery } from '../types';
 import { useFindingsCounter } from '../use_findings_count';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { getBaseQuery } from '../utils';
-import { PageWrapper } from '../layout/findings_layout';
+import { PageWrapper, PageTitle, PageTitleText } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
 import { findingsNavigation } from '../../../common/navigation/constants';
@@ -57,6 +58,13 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
         loading={findingsGroupByNone.isLoading}
       />
       <PageWrapper>
+        <PageTitle>
+          <PageTitleText
+            title={
+              <FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />
+            }
+          />
+        </PageTitle>
         <FindingsGroupBySelector type="default" />
         <FindingsDistributionBar
           total={findingsGroupByNone.data?.total || 0}

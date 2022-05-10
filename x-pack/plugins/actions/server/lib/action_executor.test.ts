@@ -521,7 +521,7 @@ test('logs a warning when alert executor throws an error', async () => {
   executorMock.mockRejectedValue(new Error('this action execution is intended to fail'));
   await actionExecutor.execute(executeParams);
   expect(loggerMock.warn).toBeCalledWith(
-    'action execution failure: test:1: action-1: an error occurred while running the action executor: this action execution is intended to fail'
+    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail'
   );
 });
 

@@ -27,7 +27,7 @@ import {
   TCPSimpleFields,
 } from '../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
-import { useBreakpoints } from '../../../hooks';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
@@ -120,11 +120,7 @@ export const MonitorManagementList = ({
       }),
       sortable: true,
       render: (name: string, { id }: EncryptedSyntheticsMonitorWithId) => (
-        <EuiLink
-          href={`${basePath}/app/uptime/monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
-        >
-          {name}
-        </EuiLink>
+        <EuiLink href={`${basePath}/app/uptime/monitor/${btoa(id)}`}>{name}</EuiLink>
       ),
     },
     {

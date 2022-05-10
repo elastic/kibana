@@ -6,8 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
   isInvestigated: boolean;
@@ -15,7 +16,7 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { size, colors, font } = euiTheme;
@@ -45,8 +46,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       display: 'flex',
       gap: size.s,
       alignItems: 'center',
-      minHeight: '20px',
-      padding: `${size.xs} ${size.base}`,
+      padding: `0 ${size.base}`,
       boxSizing: 'content-box',
       cursor: 'pointer',
       '&:not(:last-child)': {
@@ -56,9 +56,12 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       '&:hover': {
         background: hoverBgColor,
       },
-      button: {
+      '&& button': {
         flexShrink: 0,
         marginRight: size.s,
+        '&:hover, &:focus, &:focus-within': {
+          backgroundColor: transparentize(euiVars.buttonsBackgroundNormalDefaultPrimary, 0.2),
+        },
       },
     };
 
@@ -66,11 +69,17 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       textTransform: 'capitalize',
     };
 
+    const alertName: CSSObject = {
+      padding: `${size.xs} 0`,
+      color: colors.title,
+    };
+
     return {
       alert,
       alertStatus,
+      alertName,
     };
-  }, [euiTheme, isInvestigated, isSelected]);
+  }, [euiTheme, isInvestigated, isSelected, euiVars]);
 
   return cached;
 };

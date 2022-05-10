@@ -33,7 +33,7 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import './rule.scss';
-import { getHealthColor } from '../../rules_list/components/rule_status_filter';
+import { getHealthColor } from '../../rules_list/components/rule_execution_status_filter';
 import {
   rulesStatusesTranslationsMapping,
   ALERT_STATUS_LICENSE_ERROR,

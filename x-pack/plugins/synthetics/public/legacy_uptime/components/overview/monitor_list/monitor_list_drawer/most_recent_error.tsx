@@ -15,7 +15,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
 import { useGetUrlParams } from '../../../../hooks';
-import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
+import { stringifyUrlParams } from '../../../../../apps/synthetics/utils/url_params/stringify_url_params';
 import { PingError } from '../../../../../../common/runtime_types';
 
 interface MostRecentErrorProps {
