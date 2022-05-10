@@ -10,6 +10,8 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   BrowserFieldsCodec,
+  PushBrowserMonitorCodec,
+  PushBrowserMonitor,
   ConfigKey,
   DataStream,
   DataStreamCodec,
@@ -72,6 +74,27 @@ export function validateMonitor(monitorFields: MonitorFields): {
     return {
       valid: false,
       reason: `Monitor is not a valid monitor of type ${monitorType}`,
+      details: formatErrors(decodedMonitor.left).join(' | '),
+      payload: monitorFields,
+    };
+  }
+
+  return { valid: true, reason: '', details: '', payload: monitorFields };
+}
+
+export function validatePushMonitor(monitorFields: PushBrowserMonitor): {
+  valid: boolean;
+  reason: string;
+  details: string;
+  payload: object;
+} {
+  // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
+  const decodedMonitor = PushBrowserMonitorCodec.decode(monitorFields);
+
+  if (isLeft(decodedMonitor)) {
+    return {
+      valid: false,
+      reason: `Failed to save or update monitor. Configuration is not valid`,
       details: formatErrors(decodedMonitor.left).join(' | '),
       payload: monitorFields,
     };

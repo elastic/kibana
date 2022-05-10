@@ -36,6 +36,7 @@ import { UptimeServerSetup } from '../../lib/adapters/framework';
 import { syncNewMonitor } from './add_monitor';
 import { syncEditedMonitor } from './edit_monitor';
 import { deleteMonitor } from './delete_monitor';
+import { validatePushMonitor } from './monitor_validation';
 
 interface StaleMonitor {
   stale: boolean;
@@ -43,6 +44,7 @@ interface StaleMonitor {
   savedObjectId: string;
 }
 type StaleMonitorMap = Record<string, StaleMonitor>;
+type FailedMonitors = Array<{ id: string; reason: string; details: string; payload?: object }>;
 
 const getSuiteFilter = (projectId: string) => {
   return `${syntheticsMonitorType}.attributes.${ConfigKey.IS_PUSH_MONITOR}: true AND ${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: ${projectId}`;
@@ -68,8 +70,8 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
     const deletedMonitors: string[] = [];
     const updatedMonitors: string[] = [];
     const staleMonitors: string[] = [];
-    const failedMonitors: string[] = [];
-    const failedStaleMonitors: string[] = [];
+    const failedMonitors: FailedMonitors = [];
+    const failedStaleMonitors: FailedMonitors = [];
 
     await Promise.all(
       monitors.map((monitor) =>
@@ -95,6 +97,7 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
       deletedMonitors,
       server,
       keepStale,
+      failedStaleMonitors,
     });
 
     return response.ok({
@@ -104,6 +107,7 @@ export const addPublicSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMS
         staleMonitors,
         deletedMonitors,
         failedMonitors,
+        failedStaleMonitors,
       },
     });
   },
@@ -233,7 +237,7 @@ const configurePushMonitor = async ({
   monitor: PushBrowserMonitor;
   createdMonitors: string[];
   updatedMonitors: string[];
-  failedMonitors: string[];
+  failedMonitors: FailedMonitors;
   server: UptimeServerSetup;
   staleMonitorsMap: StaleMonitorMap;
   projectId: string;
@@ -241,6 +245,23 @@ const configurePushMonitor = async ({
   try {
     // check to see if monitor already exists
     const normalizedMonitor = normalizePushedMonitor({ locations, monitor, projectId });
+
+    const validationResult = validatePushMonitor(monitor);
+
+    if (!validationResult.valid) {
+      const { reason: message, details, payload } = validationResult;
+      failedMonitors.push({
+        id: monitor.id,
+        reason: message,
+        details,
+        payload,
+      });
+      if (staleMonitorsMap[monitor.id]) {
+        staleMonitorsMap[monitor.id].stale = false;
+      }
+      return null;
+    }
+
     const previousMonitor = await getExistingMonitor(savedObjectsClient, monitor.id, projectId);
 
     if (previousMonitor) {
@@ -269,7 +290,12 @@ const configurePushMonitor = async ({
   } catch (e) {
     server.logger.error(e);
     // determine failed monitors reason
-    failedMonitors.push(monitor.id);
+    failedMonitors.push({
+      id: monitor.id,
+      reason: 'Failed to create or update monitor',
+      details: e.message,
+      payload: monitor,
+    });
   }
 };
 
@@ -280,6 +306,7 @@ const handleStaleMonitors = async ({
   staleMonitors,
   deletedMonitors,
   keepStale,
+  failedStaleMonitors,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
@@ -287,6 +314,7 @@ const handleStaleMonitors = async ({
   staleMonitors: string[];
   deletedMonitors: string[];
   keepStale: boolean;
+  failedStaleMonitors: FailedMonitors;
 }) => {
   try {
     const staleMonitorsData = Object.values(staleMonitorsMap).filter(
@@ -301,6 +329,7 @@ const handleStaleMonitors = async ({
             server,
             monitorId: monitor.savedObjectId,
             journeyId: monitor.journeyId,
+            failedStaleMonitors,
           });
         } else {
           staleMonitors.push(monitor.journeyId);
@@ -319,13 +348,23 @@ const deleteStaleMonitor = async ({
   server,
   monitorId,
   journeyId,
+  failedStaleMonitors,
 }: {
   deletedMonitors: string[];
+  failedStaleMonitors: FailedMonitors;
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
   monitorId: string;
   journeyId: string;
 }) => {
-  await deleteMonitor({ savedObjectsClient, server, monitorId });
-  deletedMonitors.push(journeyId);
+  try {
+    await deleteMonitor({ savedObjectsClient, server, monitorId });
+    deletedMonitors.push(journeyId);
+  } catch (e) {
+    failedStaleMonitors.push({
+      id: monitorId,
+      reason: 'Failed to delete stale monitor',
+      details: e.message,
+    });
+  }
 };
