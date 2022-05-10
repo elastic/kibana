@@ -24,7 +24,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);
-const defaultConfigPath = resolveConfigPath('test/functional/config.js');
+const defaultConfigPath = resolveConfigPath('test/functional/config.base.js');
 
 export function runCli() {
   new RunWithCommands({
@@ -33,7 +33,7 @@ export function runCli() {
       string: ['es-url', 'kibana-url', 'config', 'es-ca', 'kibana-ca'],
       help: `
         --config           path to an FTR config file that sets --es-url and --kibana-url
-                             default: ${defaultConfigPath}
+                             default: ${Path.relative(process.cwd(), defaultConfigPath)}
         --es-url           url for Elasticsearch, prefer the --config flag
         --kibana-url       url for Kibana, prefer the --config flag
         --kibana-ca        if Kibana url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag

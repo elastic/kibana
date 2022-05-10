@@ -28,7 +28,7 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
     async assertNoResults(expectedDestinationIndex: string) {
       // Discover should use the destination index pattern
       const actualIndexPatternSwitchLinkText = await (
-        await testSubjects.find('indexPattern-switch-link')
+        await testSubjects.find('discover-dataView-switch-link')
       ).getVisibleText();
       expect(actualIndexPatternSwitchLinkText).to.eql(
         expectedDestinationIndex,
