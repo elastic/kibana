@@ -90,7 +90,6 @@ import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
 import { mapSortField, validateOperationOnAttributes, retryIfBulkEditConflicts } from './lib';
@@ -548,11 +547,12 @@ export class RulesClient {
       );
     } catch (e) {
       // Avoid unused API key
-      markApiKeyForInvalidation(
-        { apiKey: rawRule.apiKey },
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: rawRule.apiKey ? [rawRule.apiKey] : [] },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
+
       throw e;
     }
     if (data.enabled) {
@@ -1161,8 +1161,8 @@ export class RulesClient {
     await Promise.all([
       taskIdToRemove ? this.taskManager.removeIfExists(taskIdToRemove) : null,
       apiKeyToInvalidate
-        ? markApiKeyForInvalidation(
-            { apiKey: apiKeyToInvalidate },
+        ? bulkMarkApiKeysForInvalidation(
+            { apiKeys: [apiKeyToInvalidate] },
             this.logger,
             this.unsecuredSavedObjectsClient
           )
@@ -1238,8 +1238,8 @@ export class RulesClient {
 
     await Promise.all([
       alertSavedObject.attributes.apiKey
-        ? markApiKeyForInvalidation(
-            { apiKey: alertSavedObject.attributes.apiKey },
+        ? bulkMarkApiKeysForInvalidation(
+            { apiKeys: [alertSavedObject.attributes.apiKey] },
             this.logger,
             this.unsecuredSavedObjectsClient
           )
@@ -1338,11 +1338,12 @@ export class RulesClient {
       );
     } catch (e) {
       // Avoid unused API key
-      markApiKeyForInvalidation(
-        { apiKey: createAttributes.apiKey },
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: createAttributes.apiKey ? [createAttributes.apiKey] : [] },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
+
       throw e;
     }
 
@@ -1480,13 +1481,11 @@ export class RulesClient {
       qNodeFilterWithAuth
     );
 
-    if (apiKeysToInvalidate.length) {
-      await bulkMarkApiKeysForInvalidation(
-        { apiKeys: apiKeysToInvalidate },
-        this.logger,
-        this.unsecuredSavedObjectsClient
-      );
-    }
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: apiKeysToInvalidate },
+      this.logger,
+      this.unsecuredSavedObjectsClient
+    );
 
     const updatedRules = results.map(({ id, attributes, references }) => {
       return this.getAlertFromRaw<Params>(
@@ -1766,8 +1765,8 @@ export class RulesClient {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
     } catch (e) {
       // Avoid unused API key
-      markApiKeyForInvalidation(
-        { apiKey: updateAttributes.apiKey },
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: updateAttributes.apiKey ? [updateAttributes.apiKey] : [] },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
@@ -1775,8 +1774,8 @@ export class RulesClient {
     }
 
     if (apiKeyToInvalidate) {
-      await markApiKeyForInvalidation(
-        { apiKey: apiKeyToInvalidate },
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: [apiKeyToInvalidate] },
         this.logger,
         this.unsecuredSavedObjectsClient
       );
@@ -1877,8 +1876,8 @@ export class RulesClient {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
       } catch (e) {
         // Avoid unused API key
-        markApiKeyForInvalidation(
-          { apiKey: updateAttributes.apiKey },
+        await bulkMarkApiKeysForInvalidation(
+          { apiKeys: updateAttributes.apiKey ? [updateAttributes.apiKey] : [] },
           this.logger,
           this.unsecuredSavedObjectsClient
         );
@@ -1895,8 +1894,8 @@ export class RulesClient {
         scheduledTaskId: scheduledTask.id,
       });
       if (apiKeyToInvalidate) {
-        await markApiKeyForInvalidation(
-          { apiKey: apiKeyToInvalidate },
+        await bulkMarkApiKeysForInvalidation(
+          { apiKeys: [apiKeyToInvalidate] },
           this.logger,
           this.unsecuredSavedObjectsClient
         );
@@ -2035,8 +2034,8 @@ export class RulesClient {
           ? this.taskManager.removeIfExists(attributes.scheduledTaskId)
           : null,
         apiKeyToInvalidate
-          ? await markApiKeyForInvalidation(
-              { apiKey: apiKeyToInvalidate },
+          ? await bulkMarkApiKeysForInvalidation(
+              { apiKeys: [apiKeyToInvalidate] },
               this.logger,
               this.unsecuredSavedObjectsClient
             )

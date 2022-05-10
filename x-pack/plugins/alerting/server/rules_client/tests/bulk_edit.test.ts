@@ -562,7 +562,7 @@ describe('bulkEdit()', () => {
       });
     });
 
-    test('should call bulkMarkApiKeysForInvalidation if apiKey present', async () => {
+    test('should call bulkMarkApiKeysForInvalidation with keys apiKeys to invalidate', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
@@ -579,29 +579,6 @@ describe('bulkEdit()', () => {
         expect.any(Object),
         expect.any(Object)
       );
-    });
-
-    test('should not call bulkMarkApiKeysForInvalidation if apiKey absent', async () => {
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingRule,
-            attributes: { ...existingRule.attributes, apiKey: undefined as unknown as string },
-          },
-        ],
-      });
-      await rulesClient.bulkEdit({
-        filter: 'alert.attributes.tags: "APM"',
-        operations: [
-          {
-            field: 'tags',
-            operation: 'add',
-            value: ['test-1'],
-          },
-        ],
-      });
-
-      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
     });
 
     test('should not call create apiKey if rule is disabled', async () => {
