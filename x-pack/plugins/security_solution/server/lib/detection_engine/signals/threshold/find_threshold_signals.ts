@@ -142,6 +142,10 @@ export const findThresholdSignals = async ({
                 source: '""', // Group everything in the same bucket
                 lang: 'painless',
               },
+              min_doc_count: threshold.value,
+              ...(shouldFilterByCardinality(threshold)
+                ? { order: { cardinality_count: 'desc' } }
+                : {}),
             },
             aggs: leafAggs,
           },
@@ -179,6 +183,9 @@ export const findThresholdSignals = async ({
       }),
     ]);
   } while (sortKeys);
+
+  // TODO: sort by max_timestamp? sort by cardinality?
+
   return {
     searchResult: mergedSearchResults,
     searchDuration: result.searchAfterTimes.reduce((a, b) => Number(a) + Number(b), 0).toFixed(2),
