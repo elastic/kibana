@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
 
-  describe('Kibana users page a11y tests', () => {
+  describe('Kibana users Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.security.clickElasticsearchUsers();

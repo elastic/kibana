@@ -13,7 +13,7 @@ import type {
   FieldBasedIndexPatternColumn,
   SeriesType,
   OperationType,
-  YConfig,
+  ExtendedYConfig,
 } from '@kbn/lens-plugin/public';
 
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -71,7 +71,7 @@ export interface SeriesConfig {
   hasOperationType: boolean;
   palette?: PaletteOutput;
   yTitle?: string;
-  yConfig?: YConfig[];
+  yConfig?: ExtendedYConfig[];
   query?: { query: string; language: 'kuery' };
 }
 
