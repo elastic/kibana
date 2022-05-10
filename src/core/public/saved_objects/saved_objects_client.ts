@@ -404,7 +404,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     this.batchResolveQueue = [];
   }
 
-  public create = async <T = unknown>(
+  public create = <T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -439,7 +439,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
    * @property {boolean} [options.overwrite=false]
    * @returns The result of the create operation containing created saved objects.
    */
-  public bulkCreate = async (
+  public bulkCreate = (
     objects: SavedObjectsBulkCreateObject[] = [],
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
