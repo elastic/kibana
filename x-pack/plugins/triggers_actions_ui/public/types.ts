@@ -114,11 +114,7 @@ export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
   React.SetStateAction<ActionConnectorFieldsCallbacks>
 >;
 
-export interface ActionConnectorFieldsProps<TActionConnector> {
-  action: TActionConnector;
-  editActionConfig: (property: string, value: unknown) => void;
-  editActionSecrets: (property: string, value: unknown) => void;
-  errors: IErrorObject;
+export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   consumer?: string;
   setCallbacks: ActionConnectorFieldsSetCallbacks;
@@ -165,16 +161,11 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   iconClass: IconType;
   selectMessage: string;
   actionTypeTitle?: string;
-  validateConnector: (
-    connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => Promise<ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>>;
   validateParams: (
     actionParams: ActionParams
   ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<
-      ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
-    >
+    ComponentType<ActionConnectorFieldsProps>
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
