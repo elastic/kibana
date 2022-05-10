@@ -88,7 +88,7 @@ export const SourceSettings: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    getSourceConfigData(serviceType);
+    getSourceConfigData();
   }, []);
 
   const isGithubApp =

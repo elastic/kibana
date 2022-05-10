@@ -23,7 +23,12 @@ import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
 
 import { staticSourceData } from './source_data';
-import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_logic';
+import {
+  SourcesLogic,
+  fetchSourceStatuses,
+  POLLING_INTERVAL,
+  mergeServerAndStaticData,
+} from './sources_logic';
 
 describe('SourcesLogic', () => {
   const { http } = mockHttpValues;
@@ -37,8 +42,14 @@ describe('SourcesLogic', () => {
   const defaultValues = {
     contentSources: [],
     privateContentSources: [],
-    sourceData: staticSourceData.map((data) => ({ ...data, connected: false })),
-    availableSources: staticSourceData.map((data) => ({ ...data, connected: false })),
+    sourceData: mergeServerAndStaticData([], staticSourceData, []).map((data) => ({
+      ...data,
+      connected: false,
+    })),
+    availableSources: mergeServerAndStaticData([], staticSourceData, []).map((data) => ({
+      ...data,
+      connected: false,
+    })),
     configuredSources: [],
     serviceTypes: [],
     permissionsModal: null,
@@ -322,7 +333,7 @@ describe('SourcesLogic', () => {
     it('availableSources & configuredSources have correct length', () => {
       SourcesLogic.actions.onInitializeSources(serverResponse);
 
-      expect(SourcesLogic.values.availableSources).toHaveLength(18);
+      expect(SourcesLogic.values.availableSources).toHaveLength(19);
       expect(SourcesLogic.values.configuredSources).toHaveLength(5);
     });
     it('externalConfigured is set to true if external is configured', () => {

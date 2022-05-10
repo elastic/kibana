@@ -21,24 +21,24 @@ import { ConfigureCustom } from './configure_custom';
 describe('ConfigureCustom', () => {
   const setCustomSourceNameValue = jest.fn();
   const createContentSource = jest.fn();
+  const sourceData = staticSourceData[1];
 
   beforeEach(() => {
     setMockActions({ setCustomSourceNameValue, createContentSource });
     setMockValues({
       customSourceNameValue: 'name',
       buttonLoading: false,
-      sourceData: staticSourceData[1],
     });
   });
 
   it('renders', () => {
-    const wrapper = shallow(<ConfigureCustom />);
+    const wrapper = shallow(<ConfigureCustom sourceData={sourceData} />);
 
     expect(wrapper.find(EuiForm)).toHaveLength(1);
   });
 
   it('handles input change', () => {
-    const wrapper = shallow(<ConfigureCustom />);
+    const wrapper = shallow(<ConfigureCustom sourceData={sourceData} />);
     const text = 'changed for the better';
     const input = wrapper.find(EuiFieldText);
     input.simulate('change', { target: { value: text } });
@@ -47,7 +47,7 @@ describe('ConfigureCustom', () => {
   });
 
   it('handles form submission', () => {
-    const wrapper = shallow(<ConfigureCustom />);
+    const wrapper = shallow(<ConfigureCustom sourceData={sourceData} />);
 
     const preventDefault = jest.fn();
     wrapper.find('EuiForm').simulate('submit', { preventDefault });
