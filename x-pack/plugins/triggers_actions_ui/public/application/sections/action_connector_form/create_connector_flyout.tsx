@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -105,27 +105,26 @@ const SaveButton: React.FC<SaveButtonProps> = ({
 };
 
 interface CancelBackButtonProps {
-  buttonType: 'cancel' | 'back';
-  closeFlyout: () => void;
+  onClick: () => void;
 }
 
-const CancelBackButton: React.FC<CancelBackButtonProps> = ({ buttonType, closeFlyout }) => {
+const CancelButton: React.FC<CancelBackButtonProps> = ({ onClick }) => {
   return (
-    <EuiFlexItem grow={false}>
-      {buttonType === 'cancel' ? (
-        <EuiButtonEmpty data-test-subj="cancelButton" onClick={closeFlyout}>
-          {i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.cancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
-      ) : (
-        <EuiButtonEmpty data-test-subj="backButton" onClick={() => {}}>
-          {i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel', {
-            defaultMessage: 'Back',
-          })}
-        </EuiButtonEmpty>
-      )}
-    </EuiFlexItem>
+    <EuiButtonEmpty data-test-subj="cancelButton" onClick={onClick}>
+      {i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.cancelButtonLabel', {
+        defaultMessage: 'Cancel',
+      })}
+    </EuiButtonEmpty>
+  );
+};
+
+const BackButton: React.FC<CancelBackButtonProps> = ({ onClick }) => {
+  return (
+    <EuiButtonEmpty data-test-subj="backButton" onClick={onClick}>
+      {i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel', {
+        defaultMessage: 'Back',
+      })}
+    </EuiButtonEmpty>
   );
 };
 
@@ -189,8 +188,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   };
 
   const { form } = useForm({ onSubmit: onFormSubmit });
-  // const [{ actionTypeId }] = useFormData({ form, watch: 'actionTypeId' });
-  const [{ actionTypeId }] = useFormData({ form, watch: ['actionTypeId'] });
+  const [{ actionType }] = useFormData({ form, watch: ['actionType'] });
+  const { setFieldValue } = form;
+
+  const resetActionType = useCallback(() => setFieldValue('actionType', null), [setFieldValue]);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -201,38 +202,39 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          !actionTypeId && hasActionsUpgradeableByTrial ? (
+          !actionType && hasActionsUpgradeableByTrial ? (
             <UpgradeYourLicenseCallOut http={http} />
           ) : null
         }
       >
         <Form form={form}>
-          <UseField<string | null> path="actionTypeId" defaultValue={null}>
+          <UseField<ActionType | null> path="actionType" defaultValue={null}>
             {(field) => {
               const { setValue } = field;
-              if (actionTypeId != null) {
+              if (actionType != null) {
                 return null;
               }
 
               return (
                 <ActionTypeMenu
-                  onActionTypeChange={(actionType: ActionType) => setValue(actionType.id)}
+                  onActionTypeChange={(type: ActionType) => setValue(type)}
                   setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
                   actionTypeRegistry={actionTypeRegistry}
                 />
               );
             }}
           </UseField>
-          {actionTypeId != null ? <CreateConnectorForm /> : null}
+          {actionType != null ? <CreateConnectorForm /> : null}
         </Form>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <CancelBackButton
-              buttonType={actionTypeId == null ? 'cancel' : 'back'}
-              closeFlyout={onClose}
-            />
+            {actionType != null ? (
+              <BackButton onClick={resetActionType} />
+            ) : (
+              <CancelButton onClick={onClose} />
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
