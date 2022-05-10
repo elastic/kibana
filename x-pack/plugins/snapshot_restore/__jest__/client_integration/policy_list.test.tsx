@@ -20,13 +20,23 @@ const POLICY_WITHOUT_GLOBAL_STATE = getPolicy({
   config: { includeGlobalState: false },
 });
 
+const POLICY_WITH_JUST_GLOBAL_STATE = getPolicy({
+  name: 'without_state',
+  retention: { minCount: 1 },
+  config: { includeGlobalState: true },
+});
+
 describe('<PolicyList />', () => {
   let testBed: PoliciesListTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadPoliciesResponse({
-      policies: [POLICY_WITH_GLOBAL_STATE, POLICY_WITHOUT_GLOBAL_STATE],
+      policies: [
+        POLICY_WITH_GLOBAL_STATE,
+        POLICY_WITHOUT_GLOBAL_STATE,
+        POLICY_WITH_JUST_GLOBAL_STATE,
+      ],
     });
     httpRequestsMockHelpers.setGetPolicyResponse(POLICY_WITH_GLOBAL_STATE.name, {
       policy: POLICY_WITH_GLOBAL_STATE,
@@ -70,6 +80,24 @@ describe('<PolicyList />', () => {
 
       expect(find('includeGlobalState.value').text()).toEqual('No');
       expect(find('policyFeatureStatesSummary.value').text()).toEqual('No');
+
+      // Close the flyout
+      find('srPolicyDetailsFlyoutCloseButton').simulate('click');
+    });
+
+    test('When it only has include globalState summary should also mention that it includes all features', async () => {
+      const { find, actions } = testBed;
+
+      // Replace the get policy details api call with the payload of the second row which we're about to click
+      httpRequestsMockHelpers.setGetPolicyResponse(POLICY_WITH_JUST_GLOBAL_STATE.name, {
+        policy: POLICY_WITH_JUST_GLOBAL_STATE,
+      });
+
+      // Assert against third resutl shown in the table, which should have just includeGlobalState enabled
+      await actions.clickPolicyAt(2);
+
+      expect(find('includeGlobalState.value').text()).toEqual('Yes');
+      expect(find('policyFeatureStatesSummary.value').text()).toEqual('From all features');
     });
   });
 });

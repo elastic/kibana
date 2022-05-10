@@ -18,10 +18,12 @@ import { FEATURE_STATES_NONE_OPTION } from '../../../../../common/constants';
 import { CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
 export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig> = ({
+  includeGlobalState,
   featureStates,
 }) => {
+  const hasGlobalStateButNoFeatureStates = includeGlobalState && featureStates === undefined;
   const hasNoFeatureStates = !featureStates || featureStates?.includes(FEATURE_STATES_NONE_OPTION);
-  const hasAllFeatureStates = featureStates?.length === 0;
+  const hasAllFeatureStates = hasGlobalStateButNoFeatureStates || featureStates?.length === 0;
 
   return (
     <EuiFlexItem data-test-subj="policyFeatureStatesSummary">
@@ -33,7 +35,7 @@ export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig>
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription data-test-subj="value">
-          {hasNoFeatureStates && (
+          {!hasGlobalStateButNoFeatureStates && hasNoFeatureStates && (
             <FormattedMessage
               id="xpack.snapshotRestore.summary.policyNoFeatureStatesLabel"
               defaultMessage="No"

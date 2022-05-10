@@ -299,7 +299,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListDescription>
           </EuiFlexItem>
 
-          <PolicyFeatureStatesSummary featureStates={featureStates} />
+          <PolicyFeatureStatesSummary
+            includeGlobalState={includeGlobalState}
+            featureStates={featureStates}
+          />
         </EuiFlexGroup>
 
         <EuiFlexGroup>

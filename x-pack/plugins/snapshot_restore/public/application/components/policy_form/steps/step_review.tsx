@@ -210,7 +210,10 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
-        <PolicyFeatureStatesSummary featureStates={featureStates} />
+        <PolicyFeatureStatesSummary
+          includeGlobalState={includeGlobalState}
+          featureStates={featureStates}
+        />
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />

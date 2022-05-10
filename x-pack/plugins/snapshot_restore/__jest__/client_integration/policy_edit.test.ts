@@ -154,8 +154,8 @@ describe('<PolicyEdit />', () => {
               schedule,
               repository,
               config: {
-                includeGlobalState: true,
                 featureStates: ['kibana'],
+                includeGlobalState: true,
                 ignoreUnavailable: true,
               },
               retention: {
@@ -187,7 +187,7 @@ describe('<PolicyEdit />', () => {
           await nextTick();
         });
 
-        const { name, isManagedPolicy, schedule, repository, retention, config, snapshotName } =
+        const { name, isManagedPolicy, schedule, repository, retention, snapshotName } =
           POLICY_EDIT;
 
         expect(httpSetup.put).toHaveBeenLastCalledWith(
@@ -199,8 +199,8 @@ describe('<PolicyEdit />', () => {
               schedule,
               repository,
               config: {
+                featureStates: ['kibana'],
                 includeGlobalState: true,
-                ...config,
               },
               retention: {
                 ...retention,
