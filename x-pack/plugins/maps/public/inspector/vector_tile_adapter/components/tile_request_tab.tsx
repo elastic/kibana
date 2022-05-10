@@ -33,8 +33,7 @@ interface Props {
 export function TileRequestTab(props: Props) {
   try {
     const { path, body } = getTileRequest(props.tileRequest);
-    const bodyAsString = JSON.stringify(body, null, 2);
-    const consoleRequest = `POST ${path}\n${bodyAsString}`;
+    const consoleRequest = `POST ${path}\n${JSON.stringify(body, null, 2)}`;
     let consoleHref: string | undefined;
     if (getDevToolsCapabilities().show) {
       const devToolsDataUri = compressToEncodedURIComponent(consoleRequest);
@@ -55,7 +54,7 @@ export function TileRequestTab(props: Props) {
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" wrap>
             <EuiFlexItem grow={false}>
               <div>
-                <EuiCopy textToCopy={bodyAsString}>
+                <EuiCopy textToCopy={consoleRequest}>
                   {(copy) => (
                     <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
                       {i18n.translate(
