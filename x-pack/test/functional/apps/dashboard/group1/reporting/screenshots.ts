@@ -150,7 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await unloadEcommerce();
       });
 
-      it('downloads a PNG file: small dashboard', async function () {
+      it('PNG file matches the baseline: small dashboard', async function () {
         this.timeout(300000);
 
         await PageObjects.common.navigateToApp('dashboard');
@@ -179,7 +179,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(percentDiff).to.be.lessThan(0.09);
       });
 
-      it('downloads a PNG file: large dashboard', async function () {
+      it('PNG file matches the baseline: large dashboard', async function () {
         this.timeout(300000);
 
         await PageObjects.common.navigateToApp('dashboard');
