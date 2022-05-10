@@ -14,7 +14,6 @@ import { act } from 'react-dom/test-utils';
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import * as fixtures from '../../test/fixtures';
 import { API_BASE_PATH } from '../../common';
-import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
