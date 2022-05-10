@@ -29,6 +29,7 @@ export const QuickStartTab: React.FunctionComponent = () => {
       fleetServerHost: quickStartCreateForm.fleetServerHost,
       fleetServerPolicyId: quickStartCreateForm.fleetServerPolicyId,
       serviceToken: quickStartCreateForm.serviceToken,
+      deploymentMode: 'quickstart',
       disabled: quickStartCreateForm.status !== 'success',
     }),
     getConfirmFleetServerConnectionStep({
