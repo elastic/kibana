@@ -7,9 +7,10 @@
 
 import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiProgress, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import type { FillMaskInference } from './fill_mask_inference';
+import { TextClassificationOutput } from './text_classification_output';
 
 export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => (
   <FillMaskOutput inferrer={inferrer} />
@@ -32,20 +33,7 @@ const FillMaskOutput: FC<{
       </EuiTitle>
 
       <EuiSpacer />
-
-      {result.response.map(({ value, predictionProbability }) => (
-        <>
-          <EuiProgress value={predictionProbability * 100} max={100} size="m" />
-          <EuiSpacer size="s" />
-          <EuiFlexGroup>
-            <>
-              <EuiFlexItem>{value}</EuiFlexItem>
-              <EuiFlexItem grow={false}>{predictionProbability}</EuiFlexItem>
-            </>
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </>
-      ))}
+      <TextClassificationOutput inferrer={inferrer} />
     </>
   );
 };
