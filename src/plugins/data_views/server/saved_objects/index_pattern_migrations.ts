@@ -7,7 +7,7 @@
  */
 
 import { flow, omit } from 'lodash';
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 
 const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,

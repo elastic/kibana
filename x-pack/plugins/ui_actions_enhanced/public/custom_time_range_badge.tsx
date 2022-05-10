@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { prettyDuration, commonDurationRanges } from '@elastic/eui';
-import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
-import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
-import { TimeRange } from '../../../../src/plugins/data/public';
+import { renderToString } from 'react-dom/server';
+import { PrettyDuration } from '@elastic/eui';
+import { IEmbeddable, Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { OpenModal, CommonlyUsedRange } from './types';
 
@@ -52,11 +53,12 @@ export class CustomTimeRangeBadge implements Action<TimeBadgeActionContext> {
   }
 
   public getDisplayName({ embeddable }: TimeBadgeActionContext) {
-    return prettyDuration(
-      embeddable.getInput().timeRange.from,
-      embeddable.getInput().timeRange.to,
-      commonDurationRanges,
-      this.dateFormat
+    return renderToString(
+      <PrettyDuration
+        timeFrom={embeddable.getInput().timeRange.from}
+        timeTo={embeddable.getInput().timeRange.to}
+        dateFormat={this.dateFormat}
+      />
     );
   }
 

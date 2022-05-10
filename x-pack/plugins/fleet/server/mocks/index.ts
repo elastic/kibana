@@ -12,16 +12,17 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
+} from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
-import type { FleetConfigType } from '../../common';
+import type { FleetConfigType, ExperimentalFeatures } from '../../common';
 import { createFleetAuthzMock } from '../../common';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
@@ -60,6 +61,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
+    experimentalFeatures: {} as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -74,7 +76,7 @@ export const createAppContextStartContractMock = (
 };
 
 export const createFleetRequestHandlerContextMock = (): jest.Mocked<
-  FleetRequestHandlerContext['fleet']
+  Awaited<FleetRequestHandlerContext['fleet']>
 > => {
   return {
     authz: createFleetAuthzMock(),

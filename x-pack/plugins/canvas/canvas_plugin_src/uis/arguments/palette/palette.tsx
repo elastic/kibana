@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { ExpressionAstExpression } from 'src/plugins/expressions';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
 import { ColorPalette } from '../../../../common/lib';

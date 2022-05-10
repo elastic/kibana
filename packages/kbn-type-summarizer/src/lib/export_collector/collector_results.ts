@@ -41,10 +41,11 @@ export class CollectorResults {
 
   addImportFromNodeModules(
     exportInfo: ExportInfo | undefined,
-    symbol: DecSymbol,
+    sourceSymbol: DecSymbol,
+    importSymbol: DecSymbol,
     moduleId: string
   ) {
-    const imp = ImportedSymbol.fromSymbol(symbol, moduleId);
+    const imp = ImportedSymbol.fromSymbol(sourceSymbol, importSymbol, moduleId);
     imp.exportInfo ||= exportInfo;
     this.importedSymbols.add(imp);
   }

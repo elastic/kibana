@@ -46,16 +46,14 @@ const defaultProps: FieldTableProps = {
   filteredBrowserFields: {},
   searchInput: '',
   timelineId,
+  filterSelectedEnabled: false,
+  onFilterSelectedChange: jest.fn(),
   onHide: jest.fn(),
 };
 
 describe('FieldTable', () => {
   const timestampField = mockBrowserFields.base.fields![timestampFieldId];
   const defaultPageSize = 10;
-  const totalFields = Object.values(mockBrowserFields).reduce(
-    (total, { fields }) => total + Object.keys(fields ?? {}).length,
-    0
-  );
 
   beforeEach(() => {
     mockDispatch.mockClear();
@@ -69,7 +67,6 @@ describe('FieldTable', () => {
     );
 
     expect(result.getByText('No items found')).toBeInTheDocument();
-    expect(result.getByTestId('fields-count').textContent).toContain('0');
   });
 
   it('should render field table with fields of all categories', () => {
@@ -80,7 +77,6 @@ describe('FieldTable', () => {
     );
 
     expect(result.container.getElementsByClassName('euiTableRow').length).toBe(defaultPageSize);
-    expect(result.getByTestId('fields-count').textContent).toContain(totalFields);
   });
 
   it('should render field table with fields of categories selected', () => {
@@ -103,7 +99,6 @@ describe('FieldTable', () => {
     );
 
     expect(result.container.getElementsByClassName('euiTableRow').length).toBe(fieldCount);
-    expect(result.getByTestId('fields-count').textContent).toContain(fieldCount);
   });
 
   it('should render field table with custom columns', () => {
@@ -125,7 +120,6 @@ describe('FieldTable', () => {
       </TestProviders>
     );
 
-    expect(result.getByTestId('fields-count').textContent).toContain(totalFields);
     expect(result.getAllByText('Custom column').length).toBeGreaterThan(0);
     expect(result.getAllByTestId('customColumn').length).toEqual(defaultPageSize);
   });

@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes report metrics (not for job types under last_7_days)', async () => {
-      expect(reporting.printable_pdf.sizes).keys([
+      expect(reporting.printable_pdf.output_size).keys([
         '1_0',
         '25_0',
         '50_0',

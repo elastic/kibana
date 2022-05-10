@@ -9,6 +9,7 @@ import {
   FIELDS_BROWSER_CHECKBOX,
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
+  FIELDS_BROWSER_VIEW_BUTTON,
 } from '../../screens/fields_browser';
 import {
   HOST_GEO_CITY_NAME_HEADER,
@@ -18,11 +19,12 @@ import {
 } from '../../screens/hosts/events';
 
 import {
+  activateViewAll,
+  activateViewSelected,
   closeFieldsBrowser,
   filterFieldsBrowser,
-  toggleCategory,
 } from '../../tasks/fields_browser';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openEvents } from '../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
@@ -35,7 +37,7 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { resetFields } from '../../tasks/timeline';
-import { cleanKibana } from '../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -48,10 +50,18 @@ const defaultHeadersInDefaultEcsCategory = [
 ];
 
 describe('Events Viewer', () => {
+  before(() => {
+    esArchiverLoad('auditbeat_big');
+    login();
+  });
+
+  after(() => {
+    esArchiverUnload('auditbeat_big');
+  });
+
   context('Fields rendering', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -64,23 +74,26 @@ describe('Events Viewer', () => {
       cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
     });
 
+    it('displays "view all" option by default', () => {
+      cy.get(FIELDS_BROWSER_VIEW_BUTTON).should('contain.text', 'View: all');
+    });
+
     it('displays all categories (by default)', () => {
       cy.get(FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES).should('be.empty');
     });
 
-    it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
-      const category = 'default ECS';
-      toggleCategory(category);
+    it('displays only the default selected fields when "view selected" option is enabled', () => {
+      activateViewSelected();
       defaultHeadersInDefaultEcsCategory.forEach((header) =>
         cy.get(FIELDS_BROWSER_CHECKBOX(header.id)).should('be.checked')
       );
+      activateViewAll();
     });
   });
 
   context('Events viewer query modal', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -93,8 +106,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer fields behaviour', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
     });
 
@@ -124,8 +136,7 @@ describe('Events Viewer', () => {
 
   context('Events behavior', () => {
     before(() => {
-      cleanKibana();
-      loginAndWaitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
     });

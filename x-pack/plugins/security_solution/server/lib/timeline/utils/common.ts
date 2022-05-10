@@ -12,7 +12,7 @@ import { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { SetupPlugins, StartPlugins } from '../../../plugin';
 
@@ -23,7 +23,7 @@ export const buildFrameworkRequest = async (
   security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
-  const savedObjectsClient = context.core.savedObjects.client;
+  const savedObjectsClient = (await context.core).savedObjects.client;
   const user = await security?.authc.getCurrentUser(request);
 
   return set<FrameworkRequest>(

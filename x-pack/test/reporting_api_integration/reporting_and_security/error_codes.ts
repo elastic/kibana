@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ReportApiJSON } from '../../../plugins/reporting/common/types';
+import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

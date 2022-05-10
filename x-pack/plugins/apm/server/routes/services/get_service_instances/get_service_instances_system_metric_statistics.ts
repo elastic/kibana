@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from 'src/core/types/elasticsearch';
+import { AggregationOptionsByType } from '@kbn/core/types/elasticsearch';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
@@ -17,7 +18,6 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -25,6 +25,7 @@ import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../../metrics/by_agent/shared/memory';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
 interface ServiceInstanceSystemMetricPrimaryStatistics {
   serviceNodeName: string;
@@ -55,6 +56,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   serviceNodeIds,
   numBuckets,
   isComparisonSearch,
+  offset,
 }: {
   setup: Setup;
   serviceName: string;
@@ -66,10 +68,21 @@ export async function getServiceInstancesSystemMetricStatistics<
   kuery: string;
   size?: number;
   isComparisonSearch: T;
+  offset?: string;
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
   const { apmEventClient } = setup;
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
+
+  const { intervalString } = getBucketSize({
+    start: startWithOffset,
+    end: endWithOffset,
+    numBuckets,
+  });
 
   const systemMemoryFilter = {
     bool: {
@@ -99,8 +112,8 @@ export async function getServiceInstancesSystemMetricStatistics<
                 fixed_interval: intervalString,
                 min_doc_count: 0,
                 extended_bounds: {
-                  min: start,
-                  max: end,
+                  min: startWithOffset,
+                  max: endWithOffset,
                 },
               },
               aggs: { avg: { avg: agg } },
@@ -137,7 +150,7 @@ export async function getServiceInstancesSystemMetricStatistics<
           bool: {
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
-              ...rangeQuery(start, end),
+              ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
               ...(isComparisonSearch && serviceNodeIds

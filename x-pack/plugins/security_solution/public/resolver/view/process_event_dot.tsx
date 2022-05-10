@@ -18,6 +18,8 @@ import { ResolverNode } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import { SideEffectContext } from './side_effect_context';
 import * as nodeModel from '../../../common/endpoint/models/node';
+import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeDataModel from '../models/node_data';
 import * as selectors from '../store/selectors';
 import { fontSize } from './font_size';
 import { useCubeAssets } from './use_cube_assets';
@@ -327,8 +329,18 @@ const UnstyledProcessEventDot = React.memo(
     const grandTotal: number | null = useSelector((state: ResolverState) =>
       selectors.statsTotalForNode(state)(node)
     );
-
     const nodeName = nodeModel.nodeName(node);
+    const processEvent = useSelector((state: ResolverState) =>
+      nodeDataModel.firstEvent(selectors.nodeDataForID(state)(String(node.id)))
+    );
+    const processName = useMemo(() => {
+      if (processEvent !== undefined) {
+        return eventModel.processNameSafeVersion(processEvent);
+      } else {
+        return nodeName;
+      }
+    }, [processEvent, nodeName]);
+
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     return (
       <div
@@ -464,7 +476,7 @@ const UnstyledProcessEventDot = React.memo(
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
-              title={nodeModel.nodeName(node)}
+              title={processName}
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}
             >
@@ -476,7 +488,7 @@ const UnstyledProcessEventDot = React.memo(
                     defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
                     values: {
                       nodeState,
-                      nodeName,
+                      nodeName: processName,
                     },
                   })}
                 </span>

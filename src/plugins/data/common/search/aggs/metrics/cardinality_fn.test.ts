@@ -25,6 +25,7 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "customLabel": undefined,
+              "emptyAsNull": undefined,
               "field": "machine.os.keyword",
               "json": undefined,
               "timeShift": undefined,

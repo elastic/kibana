@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,

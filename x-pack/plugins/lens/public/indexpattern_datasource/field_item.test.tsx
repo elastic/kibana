@@ -10,14 +10,14 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { InnerFieldItem, FieldItemProps } from './field_item';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { IndexPattern } from './types';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from './document_field';
-import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
-import { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
@@ -120,7 +120,10 @@ describe('IndexPattern Field Item', () => {
 
   it('should display displayName of a field', () => {
     const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toEqual(
+
+    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
+    // which can't be seen, but shows in the text content
+    expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toContain(
       'bytesLabel'
     );
   });

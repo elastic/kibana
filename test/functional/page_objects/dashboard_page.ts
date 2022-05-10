@@ -143,10 +143,10 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async clickUnsavedChangesDiscard(title: string, confirmDiscard = true) {
-    this.log.debug(`Click Unsaved Changes Discard for `, title);
-    await this.testSubjects.existOrFail(`discard-unsaved-${title.split(' ').join('-')}`);
-    await this.testSubjects.click(`discard-unsaved-${title.split(' ').join('-')}`);
+  public async clickUnsavedChangesDiscard(testSubject: string, confirmDiscard = true) {
+    this.log.debug(`Click Unsaved Changes Discard for `, testSubject);
+    await this.testSubjects.existOrFail(testSubject);
+    await this.testSubjects.click(testSubject);
     if (confirmDiscard) {
       await this.common.clickConfirmOnModal();
     } else {
@@ -666,6 +666,11 @@ export class DashboardPageObject extends FtrService {
     const count = await this.getSharedItemsCount();
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));
+  }
+
+  public async verifyNoRenderErrors() {
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    expect(errorEmbeddables.length).to.be(0);
   }
 
   public async getSharedContainerData() {

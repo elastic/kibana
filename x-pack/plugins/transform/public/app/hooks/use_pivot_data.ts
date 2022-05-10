@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 
 import { difference } from 'lodash';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
@@ -96,7 +96,7 @@ export function getCombinedProperties(
 }
 
 export const usePivotData = (
-  indexPatternTitle: SearchItems['indexPattern']['title'],
+  dataViewTitle: SearchItems['dataView']['title'],
   query: PivotQuery,
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest'],
@@ -165,7 +165,7 @@ export const usePivotData = (
     setStatus(INDEX_STATUS.LOADING);
 
     const previewRequest = getPreviewTransformRequestBody(
-      indexPatternTitle,
+      dataViewTitle,
       query,
       requestPayload,
       combinedRuntimeMappings
@@ -233,7 +233,7 @@ export const usePivotData = (
     getPreviewData();
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [indexPatternTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
+  }, [dataViewTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
 
   if (sortingColumns.length > 0) {
     const sortingColumnsWithTypes = sortingColumns.map((c) => ({

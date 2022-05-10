@@ -6,9 +6,9 @@
  */
 
 import { Type } from '@kbn/config-schema';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { RequestHandler, RouteConfig } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import type { InternalAuthenticationServiceStart } from '../../authentication';

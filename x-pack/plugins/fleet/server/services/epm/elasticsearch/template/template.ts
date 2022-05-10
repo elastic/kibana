@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Field, Fields } from '../../fields/field';
@@ -15,8 +15,8 @@ import type {
   IndexTemplate,
   IndexTemplateMappings,
 } from '../../../../types';
-import { appContextService } from '../../../';
-import { getRegistryDataStreamAssetBaseName } from '../index';
+import { appContextService } from '../../..';
+import { getRegistryDataStreamAssetBaseName } from '..';
 import {
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
@@ -244,9 +244,8 @@ function generateMultiFields(fields: Fields): MultiFields {
           multiFields[f.name] = { ...generateKeywordMapping(f), type: f.type };
           break;
         case 'long':
-          multiFields[f.name] = { type: f.type };
-          break;
         case 'double':
+        case 'match_only_text':
           multiFields[f.name] = { type: f.type };
           break;
       }
@@ -302,7 +301,7 @@ function getDefaultProperties(field: Field): Properties {
   if (field.index !== undefined) {
     properties.index = field.index;
   }
-  if (field.doc_values) {
+  if (field.doc_values !== undefined) {
     properties.doc_values = field.doc_values;
   }
   if (field.copy_to) {

@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import { NewApiEventsPrompt } from './';
+import { NewApiEventsPrompt } from '.';
 
 describe('NewApiEventsPrompt', () => {
   const values = {

@@ -12,7 +12,7 @@ export type {
   Privileges,
   MissingPrivileges,
   Authorization,
-} from '../../../../src/plugins/es_ui_shared/public/';
+} from '@kbn/es-ui-shared-plugin/public';
 
 export {
   sendRequest,
@@ -22,17 +22,18 @@ export {
   WithPrivileges,
   AuthorizationProvider,
   AuthorizationContext,
-} from '../../../../src/plugins/es_ui_shared/public/';
+  NotAuthorizedSection,
+} from '@kbn/es-ui-shared-plugin/public';
 
-export { Storage } from '../../../../src/plugins/kibana_utils/public';
+export { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export {
   KibanaContextProvider,
   reactRouterNavigate,
   RedirectAppLinks,
   KibanaThemeProvider,
-} from '../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 
-export type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+export type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+export { APP_WRAPPER_CLASS } from '@kbn/core/public';

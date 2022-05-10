@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-import { mergeTables } from './index';
-import { ExpressionValueSearchContext } from 'src/plugins/data/public';
+import { mergeTables } from '.';
+import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common';
 import {
   Datatable,
   ExecutionContext,
   DefaultInspectorAdapters,
   TablesAdapter,
-} from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin';
 
 describe('lens_merge_tables', () => {
   const sampleTable1: Datatable = {

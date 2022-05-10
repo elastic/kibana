@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   EXCEPTION_LIST_ITEM_URL,
@@ -21,13 +21,13 @@ import {
   DeleteExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getTrustedAppsListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import { getTrustedAppsListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import {
   fleetGetAgentPolicyListHttpMock,
   FleetGetAgentPolicyListHttpMockInterface,

@@ -6,13 +6,13 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { MonitoringCollectionPlugin } from './plugin';
 import { configSchema } from './config';
 
 export type { MonitoringCollectionConfig } from './config';
 
-export type { MonitoringCollectionSetup, MetricResult } from './plugin';
+export type { MonitoringCollectionSetup, MetricResult, Metric } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new MonitoringCollectionPlugin(initContext);

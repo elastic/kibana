@@ -46,14 +46,12 @@ Object {
   },
   "outputs": Object {
     "data-output-id": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-data.co:9201",
       ],
       "type": "elasticsearch",
     },
     "default": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
@@ -110,14 +108,12 @@ Object {
   },
   "outputs": Object {
     "default": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],
@@ -174,14 +170,12 @@ Object {
   },
   "outputs": Object {
     "data-output-id": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-data.co:9201",
       ],
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],

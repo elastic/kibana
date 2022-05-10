@@ -17,6 +17,11 @@ export const FIELDS_BROWSER_FIELDS_COUNT = `${FIELDS_BROWSER_CONTAINER} [data-te
 
 export const FIELDS_BROWSER_FILTER_INPUT = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="field-search"]`;
 
+export const FIELDS_BROWSER_VIEW_BUTTON = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="viewSelectorButton"]`;
+export const FIELDS_BROWSER_VIEW_MENU = '[data-test-subj="viewSelectorMenu"]';
+export const FIELDS_BROWSER_VIEW_ALL = `${FIELDS_BROWSER_VIEW_MENU} [data-test-subj="viewSelectorOption-all"]`;
+export const FIELDS_BROWSER_VIEW_SELECTED = `${FIELDS_BROWSER_VIEW_MENU} [data-test-subj="viewSelectorOption-selected"]`;
+
 export const FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX = `${FIELDS_BROWSER_CONTAINER} [data-test-subj="field-host.geo.city_name-checkbox"]`;
 
 export const FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER =

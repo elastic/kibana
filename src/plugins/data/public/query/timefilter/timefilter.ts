@@ -32,15 +32,17 @@ export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
   // Fired when a user changes the timerange
-  private timeUpdate$ = new Subject();
+  private timeUpdate$ = new Subject<void>();
   // Fired when a user changes the the autorefresh settings
-  private refreshIntervalUpdate$ = new Subject();
-  private fetch$ = new Subject();
+  private refreshIntervalUpdate$ = new Subject<void>();
+  private fetch$ = new Subject<void>();
 
   private _time: TimeRange;
   // Denotes whether setTime has been called, can be used to determine if the constructor defaults are being used.
   private _isTimeTouched: boolean = false;
   private _refreshInterval!: RefreshInterval;
+  // Denotes whether the refresh interval defaults were overriden.
+  private _isRefreshIntervalTouched: boolean = false;
   private _history: TimeHistoryContract;
 
   private _isTimeRangeSelectorEnabled: boolean = false;
@@ -74,6 +76,10 @@ export class Timefilter {
 
   public isTimeTouched() {
     return this._isTimeTouched;
+  }
+
+  public isRefreshIntervalTouched() {
+    return this._isRefreshIntervalTouched;
   }
 
   public getEnabledUpdated$ = () => {
@@ -156,12 +162,18 @@ export class Timefilter {
     if (prevRefreshInterval?.value > 0 && newRefreshInterval.value <= 0) {
       shouldUnpauseRefreshLoop = false;
     }
+
+    this._isRefreshIntervalTouched =
+      this._isRefreshIntervalTouched ||
+      areRefreshIntervalsDifferent(this.refreshIntervalDefaults, newRefreshInterval);
+
     // If the refresh interval is <= 0 handle that as a paused refresh
     // unless the user has un-paused the refresh loop and the value is not going from > 0 to 0
     if (newRefreshInterval.value <= 0) {
       newRefreshInterval.value = 0;
       newRefreshInterval.pause = shouldUnpauseRefreshLoop ? false : true;
     }
+
     this._refreshInterval = {
       value: newRefreshInterval.value,
       pause: newRefreshInterval.pause,

@@ -10,23 +10,23 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
-import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
-  DatasourcePublicAPI,
+  DatasourceLayers,
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
-import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
+
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -492,7 +492,7 @@ export const getDatatableVisualization = ({
 
 function getDataSourceAndSortedColumns(
   state: DatatableVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   layerId: string
 ) {
   const datasource = datasourceLayers[state.layerId];

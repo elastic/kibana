@@ -34,7 +34,10 @@ describe('#stop', () => {
     service.stop();
 
     await expect(
-      Rx.combineLatest(client.getUpdate$(), client.getUpdateErrors$(), loadingCount$!).toPromise()
+      Rx.lastValueFrom(
+        Rx.combineLatest([client.getUpdate$(), client.getUpdateErrors$(), loadingCount$!]),
+        { defaultValue: undefined }
+      )
     ).resolves.toBe(undefined);
   });
 });

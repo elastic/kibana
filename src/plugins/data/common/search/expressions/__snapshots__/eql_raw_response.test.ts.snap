@@ -24,6 +24,9 @@ Object {
   ],
   "meta": Object {
     "source": "*",
+    "statistics": Object {
+      "totalCount": undefined,
+    },
     "type": "eql",
   },
   "rows": Array [
@@ -145,6 +148,9 @@ Object {
   ],
   "meta": Object {
     "source": "*",
+    "statistics": Object {
+      "totalCount": undefined,
+    },
     "type": "eql",
   },
   "rows": Array [

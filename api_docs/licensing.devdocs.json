@@ -103,6 +103,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": []
           },
           {
@@ -460,6 +461,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "apm",
@@ -717,6 +719,7 @@
           ],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "security",
@@ -790,6 +793,7 @@
           ],
           "path": "x-pack/plugins/licensing/public/types.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [],
           "children": [],
           "returnComment": []
@@ -1033,6 +1037,8 @@
             "section": "def-server.ResponseError",
             "text": "ResponseError"
           },
+          " | Buffer | ",
+          "Stream",
           ">) => ",
           "KibanaResponse",
           "<string | Error | { message: string | Error; attributes?: ",
@@ -1043,7 +1049,9 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; }>; redirected: (options: ",
+          " | undefined; } | Buffer | ",
+          "Stream",
+          ">; redirected: (options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1223,6 +1231,8 @@
             "section": "def-server.ResponseError",
             "text": "ResponseError"
           },
+          " | Buffer | ",
+          "Stream",
           ">) => ",
           "KibanaResponse",
           "<string | Error | { message: string | Error; attributes?: ",
@@ -1233,7 +1243,9 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; }>; redirected: (options: ",
+          " | undefined; } | Buffer | ",
+          "Stream",
+          ">; redirected: (options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -1445,6 +1457,8 @@
                 "section": "def-server.ResponseError",
                 "text": "ResponseError"
               },
+              " | Buffer | ",
+              "Stream",
               ">) => ",
               "KibanaResponse",
               "<string | Error | { message: string | Error; attributes?: ",
@@ -1455,7 +1469,9 @@
                 "section": "def-server.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; }>; redirected: (options: ",
+              " | undefined; } | Buffer | ",
+              "Stream",
+              ">; redirected: (options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1789,6 +1805,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": []
           },
           {
@@ -2193,6 +2210,7 @@
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "apm",
@@ -2494,6 +2512,7 @@
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "spaces",
@@ -2615,6 +2634,7 @@
           ],
           "path": "x-pack/plugins/licensing/server/types.ts",
           "deprecated": true,
+          "removeBy": "8.8.0",
           "references": [
             {
               "plugin": "mapsEms",

@@ -59,7 +59,7 @@ describe('getStatsFromFindingsEvaluationsAggs', () => {
     expect(score).toEqual(36.4);
   });
 
-  it('should return value matching CloudPostureStats["stats"]', async () => {
+  it('should return value matching ComplianceDashboardData["stats"]', async () => {
     const stats = getStatsFromFindingsEvaluationsAggs(standardQueryResult);
     expect(stats).toEqual({
       totalFailed: 30,

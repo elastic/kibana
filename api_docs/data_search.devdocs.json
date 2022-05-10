@@ -1476,55 +1476,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-server.DataRequestHandlerContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataRequestHandlerContext",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.DataRequestHandlerContext",
-            "text": "DataRequestHandlerContext"
-          },
-          " extends ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          }
-        ],
-        "path": "src/plugins/data/server/search/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.DataRequestHandlerContext.search",
-            "type": "Object",
-            "tags": [],
-            "label": "search",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-server.IScopedSearchClient",
-                "text": "IScopedSearchClient"
-              }
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-server.IScopedSearchClient",
         "type": "Interface",
         "tags": [],
@@ -2636,6 +2587,35 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "data",
+        "id": "def-server.DataRequestHandlerContext",
+        "type": "Type",
+        "tags": [],
+        "label": "DataRequestHandlerContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
+          " & { search: Promise<",
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.IScopedSearchClient",
+            "text": "IScopedSearchClient"
+          },
+          ">; }"
+        ],
+        "path": "src/plugins/data/server/search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "data",
         "id": "def-server.SearchRequestHandlerContext",
@@ -7601,6 +7581,117 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.MultiFieldKey",
+        "type": "Class",
+        "tags": [],
+        "label": "MultiFieldKey",
+        "description": [],
+        "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.id",
+            "type": "string",
+            "tags": [],
+            "label": "[id]",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.keys",
+            "type": "Array",
+            "tags": [],
+            "label": "keys",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.MultiFieldKey.Unnamed.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.idBucket",
+            "type": "Function",
+            "tags": [],
+            "label": "idBucket",
+            "description": [],
+            "signature": [
+              "(bucket: unknown) => string"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.MultiFieldKey.idBucket.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "bucket",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.MultiFieldKey.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_field_key.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.OptionedParamType",
         "type": "Class",
         "tags": [],
@@ -8534,16 +8625,16 @@
                 "path": "src/plugins/discover/public/application/context/utils/fetch_hits_in_interval.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_source/es_source.ts"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/lib/fetch_search_source_query.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/alert_type.test.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/alert_types/es_query/alert_type.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -16428,6 +16519,62 @@
             "description": [],
             "path": "src/plugins/data/common/search/aggs/metrics/cardinality.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsCardinality.emptyAsNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyAsNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/cardinality.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsCount",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsCount",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsCount",
+            "text": "AggParamsCount"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/count.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsCount.emptyAsNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyAsNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/count.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -16704,6 +16851,19 @@
                 "text": "ExtendedBounds"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsDateHistogram.extendToTimeRange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "extendToTimeRange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts",
             "deprecated": false
@@ -17503,6 +17663,19 @@
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsHistogram.autoExtendBounds",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoExtendBounds",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/histogram.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -17897,6 +18070,19 @@
             "type": "number",
             "tags": [],
             "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMultiTerms.shardSize",
+            "type": "number",
+            "tags": [],
+            "label": "shardSize",
             "description": [],
             "signature": [
               "number | undefined"
@@ -18591,6 +18777,19 @@
             "description": [],
             "path": "src/plugins/data/common/search/aggs/metrics/sum.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsSum.emptyAsNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "emptyAsNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/sum.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -18676,6 +18875,19 @@
             "type": "number",
             "tags": [],
             "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.shardSize",
+            "type": "number",
+            "tags": [],
+            "label": "shardSize",
             "description": [],
             "signature": [
               "number | undefined"
@@ -18809,7 +19021,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"concat\" | \"max\" | \"min\" | \"sum\" | \"average\""
+              "\"concat\" | \"sum\" | \"max\" | \"min\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false
@@ -23970,7 +24182,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"max\" | \"min\" | \"sum\" | \"avg\" | \"median\" | undefined"
+              "\"sum\" | \"avg\" | \"max\" | \"min\" | \"median\" | undefined"
             ],
             "path": "src/plugins/data/common/search/search_source/types.ts",
             "deprecated": false
@@ -24253,7 +24465,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
+          "{ id?: string | undefined; type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -24261,7 +24473,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; enabled?: boolean | undefined; params?: {} | ",
           "SerializableRecord",
           " | undefined; schema?: string | undefined; }"
         ],
@@ -24963,7 +25175,7 @@
         "label": "CreateAggConfigParams",
         "description": [],
         "signature": [
-          "{ type: string | ",
+          "{ id?: string | undefined; type: string | ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -24971,7 +25183,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; id?: string | undefined; enabled?: boolean | undefined; params?: {} | ",
+          "; enabled?: boolean | undefined; params?: {} | ",
           "SerializableRecord",
           " | undefined; schema?: string | undefined; }"
         ],
@@ -27727,6 +27939,90 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.SQL_SEARCH_STRATEGY",
+        "type": "string",
+        "tags": [],
+        "label": "SQL_SEARCH_STRATEGY",
+        "description": [],
+        "signature": [
+          "\"sql\""
+        ],
+        "path": "src/plugins/data/common/search/strategies/sql_search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SqlRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SqlRequestParams",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "SqlQueryRequest",
+          ", \"keep_alive\" | \"keep_on_completion\"> | Omit<",
+          "SqlGetAsyncRequest",
+          ", \"id\" | \"keep_alive\" | \"keep_on_completion\">"
+        ],
+        "path": "src/plugins/data/common/search/strategies/sql_search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SqlSearchStrategyRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "SqlSearchStrategyRequest",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchRequest",
+            "text": "IKibanaSearchRequest"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SqlRequestParams",
+            "text": "SqlRequestParams"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/strategies/sql_search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SqlSearchStrategyResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SqlSearchStrategyResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<",
+          "SqlQueryResponse",
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/strategies/sql_search/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.termsAggFilter",
         "type": "Array",
         "tags": [],
@@ -28229,7 +28525,7 @@
                     "section": "def-common.EqlRawResponse",
                     "text": "EqlRawResponse"
                   },
-                  ") => { type: string; meta: { type: string; source: string; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
+                  ") => { type: string; meta: { type: string; source: string; statistics: { totalCount: number; }; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
                 ],
                 "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
                 "deprecated": false,
@@ -28311,7 +28607,7 @@
                     "section": "def-common.EsRawResponse",
                     "text": "EsRawResponse"
                   },
-                  "<unknown>) => { type: string; meta: { type: string; source: string; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
+                  "<unknown>) => { type: string; meta: { type: string; source: string; statistics: { totalCount: number | undefined; }; }; columns: { id: string; name: string; meta: { type: \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\"; field: string; params: {}; }; }[]; rows: any[]; }"
                 ],
                 "path": "src/plugins/data/common/search/expressions/es_raw_response.ts",
                 "deprecated": false,

@@ -11,7 +11,7 @@ import {
   prepareLogTable,
   Dimension,
   validateAccessor,
-} from '../../../../visualizations/common/utils';
+} from '@kbn/visualizations-plugin/common/utils';
 import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
@@ -164,7 +164,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         if (args.bucket) {
           argsTable.push([[args.bucket], dimension.tags]);
         }
-        const logTable = prepareLogTable(input, argsTable);
+        const logTable = prepareLogTable(input, argsTable, true);
         handlers.inspectorAdapters.tables.logDatatable('default', logTable);
       }
       return {

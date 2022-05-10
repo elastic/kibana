@@ -10,7 +10,7 @@ import React from 'react';
 
 export const hasUserDataViewMock = jest.fn();
 
-jest.doMock('../../../../../../src/plugins/kibana_react/public', () => ({
+jest.doMock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },

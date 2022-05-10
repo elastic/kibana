@@ -44,7 +44,6 @@ import {
   AnomalyExplorerContext,
   useAnomalyExplorerContextValue,
 } from '../../explorer/anomaly_explorer_context';
-import type { AnomalyExplorerSwimLaneUrlState } from '../../../../common/types/locator';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -97,7 +96,7 @@ interface ExplorerUrlStateManagerProps {
 }
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
-  const [explorerUrlState, setExplorerUrlState, explorerUrlStateService] = useExplorerUrlState();
+  const [, , explorerUrlStateService] = useExplorerUrlState();
 
   const anomalyExplorerContext = useAnomalyExplorerContextValue(explorerUrlStateService);
 
@@ -151,30 +150,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, []);
 
-  const updateSwimLaneUrlState = useCallback(
-    (update: AnomalyExplorerSwimLaneUrlState | undefined, replaceState = false) => {
-      const ccc = explorerUrlState?.mlExplorerSwimlane;
-      const resultUpdate = replaceState ? update : { ...ccc, ...update };
-      return setExplorerUrlState({
-        ...explorerUrlState,
-        mlExplorerSwimlane: resultUpdate,
-      });
-    },
-    [explorerUrlState, setExplorerUrlState]
-  );
-
-  useEffect(
-    // TODO URL state service should provide observable with updates
-    // and immutable method for updates
-    function updateAnomalyTimelineStateFromUrl() {
-      const { anomalyTimelineStateService } = anomalyExplorerContext;
-
-      anomalyTimelineStateService.updateSetStateCallback(updateSwimLaneUrlState);
-      anomalyTimelineStateService.updateFromUrlState(explorerUrlState?.mlExplorerSwimlane);
-    },
-    [explorerUrlState?.mlExplorerSwimlane, updateSwimLaneUrlState]
-  );
-
   useEffect(
     function handleJobSelection() {
       if (jobIds.length > 0) {
@@ -192,6 +167,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       // upon component unmounting
       // clear any data to prevent next page from rendering old charts
       explorerService.clearExplorerData();
+
+      anomalyExplorerContext.anomalyExplorerCommonStateService.destroy();
+      anomalyExplorerContext.anomalyTimelineStateService.destroy();
+      anomalyExplorerContext.chartsStateService.destroy();
     };
   }, []);
 
@@ -207,17 +186,13 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [tableSeverity] = useTableSeverity();
 
   const showCharts = useObservable(
-    anomalyExplorerContext.anomalyExplorerCommonStateService.getShowCharts$(),
-    anomalyExplorerContext.anomalyExplorerCommonStateService.getShowCharts()
+    anomalyExplorerContext.chartsStateService.getShowCharts$(),
+    anomalyExplorerContext.chartsStateService.getShowCharts()
   );
 
   const selectedCells = useObservable(
-    anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$()
-  );
-
-  const swimlaneContainerWidth = useObservable(
-    anomalyExplorerContext.anomalyTimelineStateService.getContainerWidth$(),
-    anomalyExplorerContext.anomalyTimelineStateService.getContainerWidth()
+    anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells$(),
+    anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells()
   );
 
   const viewByFieldName = useObservable(
@@ -227,11 +202,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const swimLaneSeverity = useObservable(
     anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity$(),
     anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity()
-  );
-
-  const swimLaneBucketInterval = useObservable(
-    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneBucketInterval$(),
-    anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneBucketInterval()
   );
 
   const influencersFilterQuery = useObservable(
@@ -246,11 +216,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           noInfluencersConfigured: explorerState.noInfluencersConfigured,
           selectedCells,
           selectedJobs: explorerState.selectedJobs,
-          swimlaneBucketInterval: swimLaneBucketInterval,
           tableInterval: tableInterval.val,
           tableSeverity: tableSeverity.val,
           viewBySwimlaneFieldName: viewByFieldName,
-          swimlaneContainerWidth,
         }
       : undefined;
 
@@ -264,9 +232,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   );
 
   useEffect(() => {
-    if (explorerState && loadExplorerDataConfig?.swimlaneContainerWidth! > 0) {
-      loadExplorerData(loadExplorerDataConfig);
-    }
+    if (!loadExplorerDataConfig || loadExplorerDataConfig?.selectedCells === undefined) return;
+    loadExplorerData(loadExplorerDataConfig);
   }, [JSON.stringify(loadExplorerDataConfig)]);
 
   const overallSwimlaneData = useObservable(

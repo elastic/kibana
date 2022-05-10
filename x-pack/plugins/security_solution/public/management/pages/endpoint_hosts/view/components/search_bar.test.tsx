@@ -99,10 +99,18 @@ describe('when rendering the endpoint list `AdminSearchBar`', () => {
     }
   );
 
-  it('should reset the `page_index` to zero', async () => {
+  it('should reset the `page_index` to zero if query changes', async () => {
     await render({ page_index: '10' });
     await submitQuery('foo');
 
     expect(getQueryParamsFromStore().page_index).toBe('0');
+  });
+
+  it('should not reset the `page_index` if query unchanged', async () => {
+    const pageIndex = '10';
+    await render({ admin_query: "(language:kuery,query:'foo')", page_index: pageIndex });
+    await submitQuery('foo');
+
+    expect(getQueryParamsFromStore().page_index).toBe(pageIndex);
   });
 });

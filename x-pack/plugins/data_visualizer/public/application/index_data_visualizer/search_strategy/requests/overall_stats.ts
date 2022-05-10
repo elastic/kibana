@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -16,7 +17,6 @@ import {
 } from '../../../../../common/utils/query_utils';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
-import { IKibanaSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
 import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
 
@@ -90,6 +90,13 @@ export const checkAggregatableFieldsExistRequest = (
 export interface AggregatableFieldOverallStats extends IKibanaSearchResponse {
   aggregatableFields: string[];
 }
+
+export function isAggregatableFieldOverallStats(
+  arg: unknown
+): arg is AggregatableFieldOverallStats {
+  return isPopulatedObject(arg, ['aggregatableFields']);
+}
+
 export const processAggregatableFieldsExistResponse = (
   responses: AggregatableFieldOverallStats[] | undefined,
   aggregatableFields: string[],

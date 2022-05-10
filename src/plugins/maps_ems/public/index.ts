@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type { EMSClient } from '@elastic/ems-client';
 import { MapsEmsPlugin } from './plugin';
 import type { MapConfig } from '../config';

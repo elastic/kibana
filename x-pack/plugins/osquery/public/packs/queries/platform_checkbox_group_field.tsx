@@ -91,6 +91,7 @@ export const PlatformCheckBoxGroupField = ({
     () =>
       (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
         acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
+
         return acc;
       }, {} as Record<string, boolean>)
   );
@@ -116,6 +117,7 @@ export const PlatformCheckBoxGroupField = ({
     setCheckboxIdToSelectedMap(() =>
       (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
         acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
+
         return acc;
       }, {} as Record<string, boolean>)
     );

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
-import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
+import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { Setup } from '../../lib/helpers/setup_request';
-import { APMRouteHandlerResources } from '../../routes/typings';
-import { InternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client.js';
+import { APMRouteHandlerResources } from '../typings';
+import { InternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 import { getApmDataViewAttributes } from './get_apm_data_view_attributes';

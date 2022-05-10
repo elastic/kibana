@@ -9,7 +9,7 @@ import React from 'react';
 import { render, Matcher } from '@testing-library/react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { KeyUXMetrics } from './key_ux_metrics';
-import { FETCH_STATUS } from '../../../../../../observability/public';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
 describe('KeyUXMetrics', () => {
   it('renders metrics with correct formats', () => {
@@ -45,20 +45,22 @@ describe('KeyUXMetrics', () => {
       };
     };
 
+    // Tests include the word "info" between the task and time to account for the rendered text coming from
+    // the EuiIcon (tooltip) embedded within each stat description
     expect(
-      getAllByText(checkText('Longest long task duration271 ms'))[0]
+      getAllByText(checkText('Longest long task durationInfo271 ms'))[0]
     ).toBeInTheDocument();
     expect(
-      getAllByText(checkText('Total long tasks duration520 ms'))[0]
+      getAllByText(checkText('Total long tasks durationInfo520 ms'))[0]
     ).toBeInTheDocument();
     expect(
-      getAllByText(checkText('No. of long tasks3'))[0]
+      getAllByText(checkText('No. of long tasksInfo3'))[0]
     ).toBeInTheDocument();
     expect(
-      getAllByText(checkText('Total blocking time271 ms'))[0]
+      getAllByText(checkText('Total blocking timeInfo271 ms'))[0]
     ).toBeInTheDocument();
     expect(
-      getAllByText(checkText('First contentful paint1.27 s'))[0]
+      getAllByText(checkText('First contentful paintInfo1.27 s'))[0]
     ).toBeInTheDocument();
   });
 });

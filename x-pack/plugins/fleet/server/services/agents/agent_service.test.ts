@@ -9,8 +9,9 @@ jest.mock('../../routes/security');
 jest.mock('./crud');
 jest.mock('./status');
 
-import type { ElasticsearchClient } from '../../../../../../src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+
 import { FleetUnauthorizedError } from '../../errors';
 
 import { getAuthzFromRequest } from '../../routes/security';

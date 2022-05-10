@@ -12,11 +12,15 @@ import { useMlKibana, useTimefilter } from '../contexts/kibana';
 import { mlResultsServiceProvider } from '../services/results_service';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
+import { AnomalyChartsStateService } from './anomaly_charts_state_service';
+import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
+import { useTableSeverity } from '../components/controls/select_severity';
 
 export type AnomalyExplorerContextValue =
   | {
       anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService;
       anomalyTimelineStateService: AnomalyTimelineStateService;
+      chartsStateService: AnomalyChartsStateService;
     }
   | undefined;
 
@@ -55,6 +59,8 @@ export function useAnomalyExplorerContextValue(
     },
   } = useMlKibana();
 
+  const [, , tableSeverityState] = useTableSeverity();
+
   const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), []);
 
   const anomalyTimelineService = useMemo(() => {
@@ -66,13 +72,31 @@ export function useAnomalyExplorerContextValue(
       anomalyExplorerUrlStateService
     );
 
+    const anomalyTimelineStateService = new AnomalyTimelineStateService(
+      anomalyExplorerUrlStateService,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineService,
+      timefilter
+    );
+
+    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
+      timefilter,
+      mlApiServices,
+      mlResultsService
+    );
+
+    const chartsStateService = new AnomalyChartsStateService(
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService,
+      anomalyExplorerChartsService,
+      anomalyExplorerUrlStateService,
+      tableSeverityState
+    );
+
     return {
       anomalyExplorerCommonStateService,
-      anomalyTimelineStateService: new AnomalyTimelineStateService(
-        anomalyExplorerCommonStateService,
-        anomalyTimelineService,
-        timefilter
-      ),
+      anomalyTimelineStateService,
+      chartsStateService,
     };
   }, []);
 }

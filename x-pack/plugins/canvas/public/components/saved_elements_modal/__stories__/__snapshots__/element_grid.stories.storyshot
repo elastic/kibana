@@ -85,7 +85,9 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
                 color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -112,7 +114,9 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -192,7 +196,9 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
                 color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -219,7 +225,9 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -299,7 +307,9 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
                 color="inherit"
                 data-euiicon-type="pencil"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -326,7 +336,9 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>

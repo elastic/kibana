@@ -8,7 +8,7 @@
 
 import { createStreamingBatchedFunction } from './create_streaming_batched_function';
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
-import { AbortError, defer, of } from '../../../kibana_utils/public';
+import { AbortError, defer, of } from '@kbn/kibana-utils-plugin/public';
 import { Subject } from 'rxjs';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));

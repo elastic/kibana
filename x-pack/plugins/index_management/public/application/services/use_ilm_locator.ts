@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useLocatorUrl } from '../../../../../../src/plugins/share/public';
+import { useLocatorUrl } from '@kbn/share-plugin/public';
 import { useAppContext } from '../app_context';
 import { ILM_LOCATOR_ID } from '../constants';
 

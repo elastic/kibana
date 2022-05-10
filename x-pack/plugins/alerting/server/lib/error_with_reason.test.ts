@@ -6,21 +6,21 @@
  */
 
 import { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
-import { AlertExecutionStatusErrorReasons } from '../types';
+import { RuleExecutionStatusErrorReasons } from '../types';
 
 describe('ErrorWithReason', () => {
   const plainError = new Error('well, actually');
-  const errorWithReason = new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, plainError);
+  const errorWithReason = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, plainError);
 
   test('ErrorWithReason class', () => {
     expect(errorWithReason.message).toBe(plainError.message);
     expect(errorWithReason.error).toBe(plainError);
-    expect(errorWithReason.reason).toBe(AlertExecutionStatusErrorReasons.Decrypt);
+    expect(errorWithReason.reason).toBe(RuleExecutionStatusErrorReasons.Decrypt);
   });
 
   test('getReasonFromError()', () => {
     expect(getReasonFromError(plainError)).toBe('unknown');
-    expect(getReasonFromError(errorWithReason)).toBe(AlertExecutionStatusErrorReasons.Decrypt);
+    expect(getReasonFromError(errorWithReason)).toBe(RuleExecutionStatusErrorReasons.Decrypt);
   });
 
   test('isErrorWithReason()', () => {

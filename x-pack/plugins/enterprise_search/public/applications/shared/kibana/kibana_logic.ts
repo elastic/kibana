@@ -10,19 +10,22 @@ import { FC } from 'react';
 import { History } from 'history';
 import { kea, MakeLogicType } from 'kea';
 
-import { ApplicationStart, ChromeBreadcrumb } from '../../../../../../../src/core/public';
-import { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
-import { CloudSetup } from '../../../../../cloud/public';
-import { SecurityPluginStart } from '../../../../../security/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { ApplicationStart, ChromeBreadcrumb } from '@kbn/core/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
 
+type RequiredFieldsOnly<T> = {
+  [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
+};
 interface KibanaLogicProps {
   config: { host?: string };
   // Kibana core
   history: History;
-  navigateToUrl: ApplicationStart['navigateToUrl'];
+  navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;

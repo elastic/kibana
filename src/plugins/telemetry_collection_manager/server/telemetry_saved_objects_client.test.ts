@@ -7,7 +7,7 @@
  */
 
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
-import { savedObjectsRepositoryMock } from '../../../core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 
 describe('TelemetrySavedObjectsClient', () => {
   test("find requests are extended with `namespaces:['*']`", async () => {

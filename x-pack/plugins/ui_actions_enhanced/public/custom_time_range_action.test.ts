@@ -12,12 +12,12 @@ import { mount } from 'enzyme';
 
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { CustomTimeRangeAction } from './custom_time_range_action';
-import { HelloWorldContainer } from '../../../../src/plugins/embeddable/public/lib/test_samples';
+import { HelloWorldContainer } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
 import {
   HelloWorldEmbeddable,
   HELLO_WORLD_EMBEDDABLE,
-} from '../../../../src/plugins/embeddable/public/tests/fixtures';
+} from '@kbn/embeddable-plugin/public/tests/fixtures';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 import { ReactElement } from 'react';

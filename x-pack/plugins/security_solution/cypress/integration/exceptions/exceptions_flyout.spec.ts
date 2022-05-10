@@ -11,8 +11,8 @@ import { RULE_STATUS } from '../../screens/create_new_rule';
 
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { openExceptionFlyoutFromRuleSettings, goToExceptionsTab } from '../../tasks/rule_details';
 import {
   addExceptionEntryFieldValue,
@@ -36,7 +36,7 @@ import {
 } from '../../screens/exceptions';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { cleanKibana, reload } from '../../tasks/common';
+import { reload } from '../../tasks/common';
 import {
   createExceptionList,
   createExceptionListItem,
@@ -52,12 +52,12 @@ import { getExceptionList } from '../../objects/exception';
 // ensure the most basic logic holds.
 describe('Exceptions flyout', () => {
   before(() => {
-    cleanKibana();
+    esArchiverResetKibana();
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions
     esArchiverLoad('exceptions');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createCustomRule({
         ...getNewRule(),
@@ -72,7 +72,7 @@ describe('Exceptions flyout', () => {
         ],
       })
     );
-    reload();
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');
     goToExceptionsTab();

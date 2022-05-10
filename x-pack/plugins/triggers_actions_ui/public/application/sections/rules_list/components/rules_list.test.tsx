@@ -14,12 +14,13 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList, percentileFields } from './rules_list';
 import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
 import {
-  AlertExecutionStatusErrorReasons,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
   parseDuration,
-} from '../../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
@@ -32,6 +33,7 @@ jest.mock('../../../lib/rule_api', () => ({
   loadRules: jest.fn(),
   loadRuleTypes: jest.fn(),
   loadRuleAggregations: jest.fn(),
+  loadRuleTags: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -41,7 +43,9 @@ jest.mock('../../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
 }));
 jest.mock('../../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -57,7 +61,13 @@ jest.mock('../../../lib/capabilities', () => ({
   hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
-const { loadRules, loadRuleTypes, loadRuleAggregations } =
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+const ruleTags = ['a', 'b', 'c', 'd'];
+
+const { loadRules, loadRuleTypes, loadRuleAggregations, loadRuleTags } =
   jest.requireMock('../../../lib/rule_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -92,6 +102,10 @@ const ruleTypeFromApi = {
 ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+beforeEach(() => {
+  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+});
 
 describe('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
@@ -167,7 +181,7 @@ describe('rules_list component with items', () => {
       tags: ['tag1'],
       enabled: true,
       ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
+      schedule: { interval: '1s' },
       actions: [],
       params: { name: 'test rule type name' },
       scheduledTaskId: null,
@@ -303,7 +317,7 @@ describe('rules_list component with items', () => {
         lastDuration: 122000,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.Unknown,
+          reason: RuleExecutionStatusErrorReasons.Unknown,
           message: 'test',
         },
       },
@@ -329,7 +343,7 @@ describe('rules_list component with items', () => {
         lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.License,
+          reason: RuleExecutionStatusErrorReasons.License,
           message: 'test',
         },
       },
@@ -355,7 +369,7 @@ describe('rules_list component with items', () => {
         lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         warning: {
-          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
           message: 'test',
         },
       },
@@ -385,6 +399,10 @@ describe('rules_list component with items', () => {
       ruleEnabledStatus: { enabled: 2, disabled: 0 },
       ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
       ruleMutedStatus: { muted: 0, unmuted: 2 },
+      ruleTags,
+    });
+    loadRuleTags.mockResolvedValue({
+      ruleTags,
     });
 
     const ruleTypeMock: RuleTypeModel = {
@@ -425,11 +443,6 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
 
-    // Enabled switch column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-enabled"]').length).toEqual(
-      mockedRulesData.length
-    );
-
     // Name and rule type column
     const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
     expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
@@ -442,7 +455,7 @@ describe('rules_list component with items', () => {
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-tagsPopover"]').length
     ).toEqual(mockedRulesData.length);
     // only show tags popover if tags exist on rule
-    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagsBadge"]');
+    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagBadge"]');
     expect(tagsBadges.length).toEqual(
       mockedRulesData.filter((data) => data.tags.length > 0).length
     );
@@ -462,7 +475,7 @@ describe('rules_list component with items', () => {
     jest.runAllTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last execution.');
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last run.');
 
     wrapper
       .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
@@ -473,6 +486,19 @@ describe('rules_list component with items', () => {
     expect(
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
     ).toEqual(mockedRulesData.length);
+
+    // Schedule interval tooltip
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+      'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
+    );
+
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOut');
 
     // Duration column
     expect(
@@ -497,10 +523,10 @@ describe('rules_list component with items', () => {
       'The length of time it took for the rule to run (mm:ss).'
     );
 
-    // Status column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
-      mockedRulesData.length
-    );
+    // Last response column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
+    ).toEqual(mockedRulesData.length);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
@@ -519,6 +545,11 @@ describe('rules_list component with items', () => {
     );
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
       'License Error'
+    );
+
+    // Status control column
+    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
+      mockedRulesData.length
     );
 
     // Monitoring column
@@ -712,7 +743,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -731,10 +762,10 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('sorts rules when clicking the enabled column', async () => {
+  it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_8"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -785,6 +816,73 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('EuiHealth[data-test-subj="totalWarningRulesCount"]').text()).toEqual(
       'Warning: 6'
     );
+  });
+
+  it('does not render the status filter if the feature flag is off', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeFalsy();
+  });
+
+  it('renders the status filter if the experiment is on', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeTruthy();
+  });
+
+  it('can filter by rule states', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    loadRules.mockReset();
+    await setup();
+
+    expect(loadRules.mock.calls[0][0].ruleStatusesFilter).toEqual([]);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterButton"] button').simulate('click');
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[1][0].ruleStatusesFilter).toEqual(['enabled']);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[2][0].ruleStatusesFilter).toEqual(['enabled', 'snoozed']);
+
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
+
+    expect(loadRules.mock.calls[3][0].ruleStatusesFilter).toEqual(['enabled']);
+  });
+
+  it('does not render the tag filter is the feature flag is off', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleTagFilter"]').exists()).toBeFalsy();
+  });
+
+  it('renders the tag filter if the experiment is on', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    await setup();
+    expect(wrapper.find('[data-test-subj="ruleTagFilter"]').exists()).toBeTruthy();
+  });
+
+  it('can filter by tags', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+    loadRules.mockReset();
+    await setup();
+
+    expect(loadRules.mock.calls[0][0].tagsFilter).toEqual([]);
+
+    wrapper.find('[data-test-subj="ruleTagFilterButton"] button').simulate('click');
+
+    const tagFilterListItems = wrapper.find(
+      '[data-test-subj="ruleTagFilterSelectable"] .euiSelectableListItem'
+    );
+    expect(tagFilterListItems.length).toEqual(ruleTags.length);
+
+    tagFilterListItems.at(0).simulate('click');
+
+    expect(loadRules.mock.calls[1][0].tagsFilter).toEqual(['a']);
+
+    tagFilterListItems.at(1).simulate('click');
+
+    expect(loadRules.mock.calls[2][0].tagsFilter).toEqual(['a', 'b']);
   });
 });
 

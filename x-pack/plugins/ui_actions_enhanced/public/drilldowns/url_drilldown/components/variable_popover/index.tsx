@@ -16,12 +16,12 @@ import {
   EuiText,
   EuiSelectableOption,
 } from '@elastic/eui';
+import { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import {
   txtAddVariableButtonTitle,
   txtUrlTemplateVariablesHelpLinkText,
   txtUrlTemplateVariablesFilterPlaceholderText,
 } from './i18n';
-import { UrlTemplateEditorVariable } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface Props {
   variables: UrlTemplateEditorVariable[];

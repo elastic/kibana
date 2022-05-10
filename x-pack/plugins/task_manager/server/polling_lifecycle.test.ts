@@ -20,7 +20,7 @@ import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming'
 import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
-import { executionContextServiceMock } from '../../../../src/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -66,6 +66,10 @@ describe('TaskPollingLifecycle', () => {
       },
       unsafe: {
         exclude_task_types: [],
+      },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
       },
     },
     taskStore: mockTaskStore,

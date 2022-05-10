@@ -6,8 +6,8 @@
  */
 
 import { ActionType } from '../../../types';
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { loadActionTypes } from './index';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { loadActionTypes } from '.';
 
 const http = httpServiceMock.createStartContract();
 

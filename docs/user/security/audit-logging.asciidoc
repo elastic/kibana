@@ -155,6 +155,15 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is updating an alert.
 | `failure` | User is not authorized to update an alert.
 
+.2+| `rule_snooze`
+| `unknown` | User is snoozing a rule.
+| `failure` | User is not authorized to snooze a rule.
+
+.2+| `rule_unsnooze`
+| `unknown` | User is unsnoozing a rule.
+| `failure` | User is not authorized to unsnooze a rule.
+
+
 3+a|
 ====== Type: deletion
 

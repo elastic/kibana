@@ -158,7 +158,7 @@ describe('ExceptionEntries', () => {
     expect(parentValue.text()).toEqual(getEmptyValue());
 
     expect(nestedField.exists('.euiToolTipAnchor')).toBeTruthy();
-    expect(nestedField.text()).toEqual('host.name');
+    expect(nestedField.text()).toContain('host.name');
     expect(nestedOperator.text()).toEqual('is');
     expect(nestedValue.text()).toEqual('some name');
   });

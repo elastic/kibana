@@ -79,7 +79,7 @@ export const mathColumn: ExpressionFunctionDefinition<
       input.rows.map(async (row) => {
         const result = await math.fn(
           {
-            type: 'datatable',
+            ...input,
             columns: input.columns,
             rows: [row],
           },
@@ -128,7 +128,7 @@ export const mathColumn: ExpressionFunctionDefinition<
     columns.push(newColumn);
 
     return {
-      type: 'datatable',
+      ...input,
       columns,
       rows: newRows,
     } as Datatable;

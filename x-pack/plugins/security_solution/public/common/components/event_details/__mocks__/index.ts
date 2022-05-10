@@ -479,6 +479,12 @@ export const mockAlertDetailsData = [
   },
   {
     category: 'kibana',
+    field: 'kibana.alert.original_event.id',
+    values: ['f7bc2422-cb1e-4427-ba33-6f496ee8360c'],
+    originalValue: 'f7bc2422-cb1e-4427-ba33-6f496ee8360c',
+  },
+  {
+    category: 'kibana',
     field: 'kibana.alert.original_event.code',
     values: [4625],
     originalValue: 4625,

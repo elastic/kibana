@@ -18,7 +18,7 @@ import { createDataStreamPayload, createNonDataStreamIndex } from './data_stream
 // mocking the returned instance of the editor to always have the same values.
 const mockGetAceEditorValue = jest.fn().mockReturnValue(`{}`);
 
-jest.mock('../../../public/application/lib/ace.js', () => {
+jest.mock('../../../public/application/lib/ace', () => {
   const createAceEditor = () => {
     return {
       getValue: mockGetAceEditorValue,
@@ -49,22 +49,20 @@ stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
-  let server: ReturnType<typeof setupEnvironment>['server'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeEach(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
 
       await act(async () => {
         const { component } = testBed;
@@ -118,10 +116,11 @@ describe('<IndexManagementHome />', () => {
       httpRequestsMockHelpers.setLoadDataStreamsResponse([]);
 
       httpRequestsMockHelpers.setLoadDataStreamResponse(
+        'dataStream1',
         createDataStreamPayload({ name: 'dataStream1' })
       );
 
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
       });
 
@@ -162,7 +161,7 @@ describe('<IndexManagementHome />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
       const { component, find } = testBed;
 
       component.update();
@@ -174,32 +173,36 @@ describe('<IndexManagementHome />', () => {
       const { actions } = testBed;
       await actions.selectIndexDetailsTab('settings');
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
+      );
     });
 
     test('should encode indexName when loading mappings in detail panel', async () => {
       const { actions } = testBed;
       await actions.selectIndexDetailsTab('mappings');
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`
+      );
     });
 
     test('should encode indexName when loading stats in detail panel', async () => {
       const { actions } = testBed;
       await actions.selectIndexDetailsTab('stats');
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`
+      );
     });
 
     test('should encode indexName when editing settings in detail panel', async () => {
       const { actions } = testBed;
       await actions.selectIndexDetailsTab('edit_settings');
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`
+      );
     });
   });
 
@@ -222,7 +225,7 @@ describe('<IndexManagementHome />', () => {
       ]);
       httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexNameA, indexNameB] });
 
-      testBed = await setup();
+      testBed = await setup(httpSetup);
       const { component, find } = testBed;
 
       component.update();
@@ -236,8 +239,14 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('refreshIndexMenuButton');
 
-      const latestRequest = server.requests[server.requests.length - 2];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/refresh`);
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/refresh`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/reload`,
+        expect.anything()
+      );
     });
 
     test('should be able to close an open index', async () => {
@@ -246,13 +255,20 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('closeIndexMenuButton');
 
-      // A refresh call was added after closing an index so we need to check the second to last request.
-      const latestRequest = server.requests[server.requests.length - 2];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
+      // After the index is closed, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/close`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/reload`,
+        expect.anything()
+      );
     });
 
     test('should be able to open a closed index', async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
       const { component, find, actions } = testBed;
 
       component.update();
@@ -262,9 +278,16 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('openIndexMenuButton');
 
-      // A refresh call was added after closing an index so we need to check the second to last request.
-      const latestRequest = server.requests[server.requests.length - 2];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/open`);
+      // After the index is opened, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/open`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/reload`,
+        expect.anything()
+      );
     });
 
     test('should be able to flush index', async () => {
@@ -273,11 +296,16 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('flushIndexMenuButton');
 
-      const requestsCount = server.requests.length;
-      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/flush`);
-      // After the indices are flushed, we imediately reload them. So we need to expect to see
+      // After the index is flushed, we imediately do a reload. So we need to expect to see
       // a reload server call also.
-      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/flush`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/reload`,
+        expect.anything()
+      );
     });
 
     test("should be able to clear an index's cache", async () => {
@@ -287,8 +315,16 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('clearCacheIndexMenuButton');
 
-      const latestRequest = server.requests[server.requests.length - 2];
-      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/clear_cache`);
+      // After the index cache is cleared, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/clear_cache`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/reload`,
+        expect.anything()
+      );
     });
 
     test('should be able to unfreeze a frozen index', async () => {
@@ -302,11 +338,17 @@ describe('<IndexManagementHome />', () => {
       expect(exists('unfreezeIndexMenuButton')).toBe(true);
       await actions.clickContextMenuOption('unfreezeIndexMenuButton');
 
-      const requestsCount = server.requests.length;
-      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/unfreeze`);
       // After the index is unfrozen, we imediately do a reload. So we need to expect to see
       // a reload server call also.
-      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/unfreeze`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/reload`,
+        expect.anything()
+      );
+
       // Open context menu once again, since clicking an action will close it.
       await actions.clickManageContextMenuButton();
       // The unfreeze action should not be present anymore
@@ -326,15 +368,33 @@ describe('<IndexManagementHome />', () => {
 
       await actions.clickModalConfirm();
 
-      const requestsCount = server.requests.length;
-      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/forcemerge`);
-      // After the index is force merged, we immediately do a reload. So we need to expect to see
+      // After the index force merged, we imediately do a reload. So we need to expect to see
       // a reload server call also.
-      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/forcemerge`,
+        expect.anything()
+      );
+      expect(httpSetup.post).toHaveBeenCalledWith(
+        `${API_BASE_PATH}/indices/reload`,
+        expect.anything()
+      );
     });
   });
 
   describe('Edit index settings', () => {
+    const indexName = 'test';
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+
+      testBed = await setup(httpSetup);
+      const { component, find } = testBed;
+
+      component.update();
+
+      find('indexTableIndexNameLink').at(0).simulate('click');
+    });
+
     test('shows error callout when request fails', async () => {
       const { actions, find, component, exists } = testBed;
 
@@ -347,7 +407,7 @@ describe('<IndexManagementHome />', () => {
         error: 'Bad Request',
         message: 'invalid tier names found in ...',
       };
-      httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
+      httpRequestsMockHelpers.setUpdateIndexSettingsResponse(indexName, undefined, error);
 
       await actions.selectIndexDetailsTab('edit_settings');
 

@@ -8,7 +8,7 @@
 
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
+import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
 import { Filter, compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import {
   createStateContainer,
@@ -16,9 +16,9 @@ import {
   syncStates,
   withNotifyOnErrors,
   ReduxLikeStateContainer,
-} from '../../../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 
-import { FilterManager } from '../../../../../data/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 
 export interface AppState {

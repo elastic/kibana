@@ -32,7 +32,7 @@ describe('ExpressionRenderer', () => {
     const data$ = dataSubject.asObservable().pipe(share());
     const renderSubject = new Subject();
     const render$ = renderSubject.asObservable().pipe(share());
-    const loadingSubject = new Subject();
+    const loadingSubject = new Subject<void>();
     const loading$ = loadingSubject.asObservable().pipe(share());
 
     (ExpressionLoader as jest.Mock).mockImplementation(() => {
@@ -78,7 +78,7 @@ describe('ExpressionRenderer', () => {
   });
 
   it('updates the expression loader when refresh subject emits', () => {
-    const refreshSubject = new Subject();
+    const refreshSubject = new Subject<void>();
     const loaderUpdate = jest.fn();
 
     (ExpressionLoader as jest.Mock).mockImplementation(() => {
@@ -207,7 +207,7 @@ describe('ExpressionRenderer', () => {
     const data$ = dataSubject.asObservable().pipe(share());
     const renderSubject = new Subject();
     const render$ = renderSubject.asObservable().pipe(share());
-    const loadingSubject = new Subject();
+    const loadingSubject = new Subject<void>();
     const loading$ = loadingSubject.asObservable().pipe(share());
 
     let onRenderError: RenderErrorHandlerFnType;

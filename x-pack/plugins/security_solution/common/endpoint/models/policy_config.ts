@@ -104,6 +104,7 @@ export const policyFactory = (): PolicyConfig => {
         process: true,
         file: true,
         network: true,
+        session_data: false,
       },
       malware: {
         mode: ProtectionModes.prevent,

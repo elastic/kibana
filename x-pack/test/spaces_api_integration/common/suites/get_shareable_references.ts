@@ -11,7 +11,7 @@ import { SuperTest } from 'supertest';
 import {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import {
@@ -51,6 +51,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
+      spacesWithMatchingOrigins: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
       inboundReferences: [{ type: 'sharedtype', id: CASES.DEFAULT_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in the default space
     },
     {
@@ -64,6 +65,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.DEFAULT_ONLY.id,
       spaces: [DEFAULT_SPACE_ID],
+      spacesWithMatchingOrigins: [DEFAULT_SPACE_ID], // The first test assertion for spacesWithMatchingOrigins is an object that doesn't have any matching origins in other spaces
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
     {
@@ -84,6 +86,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
+      spacesWithMatchingOrigins: ['*'],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
   ],
@@ -91,6 +94,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
+      spacesWithMatchingOrigins: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
       inboundReferences: [{ type: 'sharedtype', id: CASES.SPACE_1_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in space 1
     },
     {
@@ -111,8 +115,9 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.SPACE_1_ONLY.id,
       spaces: [SPACE_1_ID],
-      inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
       spacesWithMatchingAliases: [DEFAULT_SPACE_ID, SPACE_2_ID], // aliases with a matching targetType and sourceId exist in two other spaces
+      spacesWithMatchingOrigins: ['other_space', SPACE_1_ID], // The second test assertion for spacesWithMatchingOrigins is an object that has a matching origin in one other space
+      inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
     {
       type: 'sharedtype',
@@ -125,6 +130,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
+      spacesWithMatchingOrigins: ['*'],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
   ],
@@ -132,6 +138,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
     {
       ...TEST_CASE_OBJECTS.SHAREABLE_TYPE,
       spaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
+      spacesWithMatchingOrigins: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
       inboundReferences: [{ type: 'sharedtype', id: CASES.SPACE_2_ONLY.id, name: 'refname' }], // only reflects inbound reference that exist in space 2
     },
     {
@@ -159,12 +166,14 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       type: 'sharedtype',
       id: CASES.SPACE_2_ONLY.id,
       spaces: [SPACE_2_ID],
+      spacesWithMatchingOrigins: ['*'], // The third test assertion for spacesWithMatchingOrigins is an object that has a matching origin in all spaces (this takes precedence, causing SPACE_2_ID to be omitted)
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
     {
       type: 'sharedtype',
       id: CASES.ALL_SPACES.id,
       spaces: ['*'],
+      spacesWithMatchingOrigins: ['*'],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
     },
   ],
@@ -177,7 +186,7 @@ const getTestTitle = ({ objects }: GetShareableReferencesTestCase) => {
 };
 const getRedactedSpaces = (authorizedSpace: string | undefined, spaces: string[]) => {
   if (!authorizedSpace) {
-    return spaces; // if authorizedSpace is undefined, we should not redact any spaces
+    return spaces.sort(); // if authorizedSpace is undefined, we should not redact any spaces
   }
   const redactedSpaces = spaces.map((x) => (x !== authorizedSpace && x !== '*' ? '?' : x));
   return redactedSpaces.sort((a, b) => (a === '?' ? 1 : b === '?' ? -1 : 0)); // unknown spaces are always at the end of the array
@@ -200,16 +209,22 @@ export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertes
         const apiResponse = response.body as SavedObjectsCollectMultiNamespaceReferencesResponse;
         expect(apiResponse.objects).to.have.length(expectedResults.length);
         expectedResults.forEach((expectedResult, i) => {
-          const { spaces, spacesWithMatchingAliases } = expectedResult;
+          const { spaces, spacesWithMatchingAliases, spacesWithMatchingOrigins } = expectedResult;
           const expectedSpaces = getRedactedSpaces(authorizedSpace, spaces);
           const expectedSpacesWithMatchingAliases =
             spacesWithMatchingAliases &&
             getRedactedSpaces(authorizedSpace, spacesWithMatchingAliases);
+          const expectedSpacesWithMatchingOrigins =
+            spacesWithMatchingOrigins &&
+            getRedactedSpaces(authorizedSpace, spacesWithMatchingOrigins);
           const expected = {
             ...expectedResult,
             spaces: expectedSpaces,
             ...(expectedSpacesWithMatchingAliases && {
               spacesWithMatchingAliases: expectedSpacesWithMatchingAliases,
+            }),
+            ...(expectedSpacesWithMatchingOrigins && {
+              spacesWithMatchingOrigins: expectedSpacesWithMatchingOrigins,
             }),
           };
           expect(apiResponse.objects[i]).to.eql(expected);

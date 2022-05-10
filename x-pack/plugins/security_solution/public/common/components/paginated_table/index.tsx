@@ -20,12 +20,11 @@ import {
   EuiTableRowCellProps,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { FC, memo, useState, useMemo, useEffect, ComponentType } from 'react';
+import React, { FC, memo, useState, useMemo, useEffect, ComponentType, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import { AuthTableColumns } from '../../../hosts/components/authentications_table';
 import { HostsTableColumns } from '../../../hosts/components/hosts_table';
 import { NetworkDnsColumns } from '../../../network/components/network_dns_table/columns';
 import { NetworkHttpColumns } from '../../../network/components/network_http_table/columns';
@@ -49,6 +48,9 @@ import { useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
+import { useQueryToggle } from '../../containers/query_toggle';
+import { UsersTableColumns } from '../../../users/components/all_users';
+import { AuthTableColumns } from '../authentication/types';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 
@@ -88,7 +90,8 @@ declare type BasicTableColumns =
   | HostRiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
-  | UsersColumns;
+  | UsersColumns
+  | UsersTableColumns;
 
 declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
@@ -113,6 +116,7 @@ export interface BasicTableProps<T> {
   onChange?: (criteria: Criteria) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
   split?: boolean;
@@ -153,6 +157,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   loadPage,
   onChange = noop,
   pageOfItems,
+  setQuerySkip,
   showMorePagesIndicator,
   sorting = null,
   split,
@@ -253,10 +258,24 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     [sorting]
   );
 
+  const { toggleStatus, setToggleStatus } = useQueryToggle(id);
+
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
+  );
+
   return (
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
+          height={!toggleStatus ? 40 : undefined}
+          toggleStatus={toggleStatus}
+          toggleQuery={toggleQuery}
           headerFilters={headerFilters}
           id={id}
           split={split}
@@ -274,50 +293,56 @@ const PaginatedTableComponent: FC<SiemTables> = ({
         >
           {!loadingInitial && headerSupplement}
         </HeaderSection>
+        {toggleStatus &&
+          (loadingInitial ? (
+            <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
+          ) : (
+            <>
+              <BasicTable
+                data-test-subj="paginated-basic-table"
+                columns={columns}
+                items={pageOfItems}
+                onChange={onChange}
+                sorting={tableSorting}
+              />
+              <FooterAction>
+                <EuiFlexItem>
+                  {itemsPerRow &&
+                    itemsPerRow.length > 0 &&
+                    totalCount >= itemsPerRow[0].numberOfRow && (
+                      <EuiPopover
+                        id="customizablePagination"
+                        data-test-subj="loadingMoreSizeRowPopover"
+                        button={button}
+                        isOpen={isPopoverOpen}
+                        closePopover={closePopover}
+                        panelPaddingSize="none"
+                        repositionOnScroll
+                      >
+                        <EuiContextMenuPanel
+                          items={rowItems}
+                          data-test-subj="loadingMorePickSizeRow"
+                        />
+                      </EuiPopover>
+                    )}
+                </EuiFlexItem>
 
-        {loadingInitial ? (
-          <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
-        ) : (
-          <>
-            <BasicTable
-              columns={columns}
-              items={pageOfItems}
-              onChange={onChange}
-              sorting={tableSorting}
-            />
-            <FooterAction>
-              <EuiFlexItem>
-                {itemsPerRow && itemsPerRow.length > 0 && totalCount >= itemsPerRow[0].numberOfRow && (
-                  <EuiPopover
-                    id="customizablePagination"
-                    data-test-subj="loadingMoreSizeRowPopover"
-                    button={button}
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                    panelPaddingSize="none"
-                    repositionOnScroll
-                  >
-                    <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
-                  </EuiPopover>
-                )}
-              </EuiFlexItem>
-
-              <PaginationWrapper grow={false}>
-                {totalCount > 0 && (
-                  <EuiPagination
-                    data-test-subj="numberedPagination"
-                    pageCount={pageCount}
-                    activePage={myActivePage}
-                    onPageClick={goToPage}
-                  />
-                )}
-              </PaginationWrapper>
-            </FooterAction>
-            {(isInspect || myLoading) && (
-              <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
-            )}
-          </>
-        )}
+                <PaginationWrapper grow={false}>
+                  {totalCount > 0 && (
+                    <EuiPagination
+                      data-test-subj="numberedPagination"
+                      pageCount={pageCount}
+                      activePage={myActivePage}
+                      onPageClick={goToPage}
+                    />
+                  )}
+                </PaginationWrapper>
+              </FooterAction>
+              {(isInspect || myLoading) && (
+                <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
+              )}
+            </>
+          ))}
       </Panel>
     </InspectButtonContainer>
   );

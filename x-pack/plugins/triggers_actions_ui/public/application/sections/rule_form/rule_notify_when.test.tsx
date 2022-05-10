@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Rule } from '../../../types';
-import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleNotifyWhen } from './rule_notify_when';
 
 describe('rule_notify_when', () => {

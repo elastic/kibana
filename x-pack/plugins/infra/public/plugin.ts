@@ -6,14 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
+import { AppMountParameters, PluginInitializerContext } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { defaultLogViewsStaticConfig } from '../common/log_views';
+import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import type { CoreProvidersProps } from './apps/common_providers';
 import { createLazyContainerMetricsTable } from './components/infrastructure_node_metrics_tables/container/create_lazy_container_metrics_table';
 import { createLazyHostMetricsTable } from './components/infrastructure_node_metrics_tables/host/create_lazy_host_metrics_table';
 import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
@@ -21,17 +22,29 @@ import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embedd
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
+import { LogViewsService } from './services/log_views';
 import {
   InfraClientCoreSetup,
   InfraClientCoreStart,
   InfraClientPluginClass,
   InfraClientSetupDeps,
   InfraClientStartDeps,
+  InfraClientStartExports,
+  InfraClientStartServices,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 
 export class Plugin implements InfraClientPluginClass {
-  constructor(_context: PluginInitializerContext) {}
+  public config: InfraPublicConfig;
+  private logViews: LogViewsService;
+
+  constructor(context: PluginInitializerContext<InfraPublicConfig>) {
+    this.config = context.config.get();
+    this.logViews = new LogViewsService({
+      messageFields:
+        this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
+    });
+  }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
     if (pluginsSetup.home) {
@@ -42,7 +55,9 @@ export class Plugin implements InfraClientPluginClass {
       createInventoryMetricRuleType()
     );
 
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(createLogThresholdRuleType());
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdRuleType(core)
+    );
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );
@@ -144,10 +159,10 @@ export class Plugin implements InfraClientPluginClass {
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/logs_app');
 
-        return renderApp(coreStart, pluginsStart, params);
+        return renderApp(coreStart, pluginsStart, pluginStart, params);
       },
     });
 
@@ -186,10 +201,10 @@ export class Plugin implements InfraClientPluginClass {
       ],
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/metrics_app');
 
-        return renderApp(coreStart, pluginsStart, params);
+        return renderApp(coreStart, pluginsStart, pluginStart, params);
       },
     });
 
@@ -209,17 +224,22 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    const coreProvidersProps: CoreProvidersProps = {
-      core,
-      plugins,
-      theme$: core.theme.theme$,
+    const getStartServices = (): InfraClientStartServices => [core, plugins, startContract];
+
+    const logViews = this.logViews.start({
+      http: core.http,
+      dataViews: plugins.dataViews,
+      search: plugins.data.search,
+    });
+
+    const startContract: InfraClientStartExports = {
+      logViews,
+      ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
+      HostMetricsTable: createLazyHostMetricsTable(getStartServices),
+      PodMetricsTable: createLazyPodMetricsTable(getStartServices),
     };
 
-    return {
-      ContainerMetricsTable: createLazyContainerMetricsTable(coreProvidersProps),
-      HostMetricsTable: createLazyHostMetricsTable(coreProvidersProps),
-      PodMetricsTable: createLazyPodMetricsTable(coreProvidersProps),
-    };
+    return startContract;
   }
 
   stop() {}

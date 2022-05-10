@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToastInputFields } from '../../../../../src/core/public';
+import { ToastInputFields } from '@kbn/core/public';
 
 export interface CanvasNotifyService {
   error: (err: string | Error, opts?: ToastInputFields) => void;

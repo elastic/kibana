@@ -12,7 +12,7 @@ import {
   CoreStart,
   Plugin,
   AppNavLinkStatus,
-} from '../../../src/core/public';
+} from '@kbn/core/public';
 import { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
 import { MetricsTracking } from './services';
 import { PLUGIN_NAME } from '../common';

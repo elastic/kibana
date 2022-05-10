@@ -8,7 +8,7 @@
 import { CanvasTemplate } from '../../types';
 import { getTemplateStrings } from './template_strings';
 
-import { TagStrings } from '../../i18n';
+import { TagStrings } from '..';
 
 /**
  * This function takes a set of Canvas  templates

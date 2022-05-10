@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -34,7 +34,8 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
     },
     async (context, request, response) => {
       try {
-        const alertsClient = await context.rac.getAlertsClient();
+        const racContext = await context.rac;
+        const alertsClient = await racContext.getAlertsClient();
         const { features } = request.query;
         const indexName = await alertsClient.getAuthorizedAlertsIndices(
           features?.split(',') ?? validFeatureIds

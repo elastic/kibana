@@ -20,10 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DocumentCreationLogic } from '..';
 import { CANCEL_BUTTON_LABEL, CONTINUE_BUTTON_LABEL } from '../../../../shared/constants';
 import { AppLogic } from '../../../app_logic';
-
-import { DocumentCreationLogic } from '../index';
 
 export const UploadJsonFileTabContent: React.FC = () => {
   const {

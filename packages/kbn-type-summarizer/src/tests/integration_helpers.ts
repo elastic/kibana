@@ -152,6 +152,15 @@ class MockCli {
     // convert the source files to .d.ts files
     this.buildDts();
 
+    // copy .d.ts files from source to dist
+    for (const [rel, content] of Object.entries(this.mockFiles)) {
+      if (rel.endsWith('.d.ts')) {
+        const path = Path.resolve(this.dtsOutputDir, rel);
+        await Fsp.mkdir(Path.dirname(path), { recursive: true });
+        await Fsp.writeFile(path, dedent(content));
+      }
+    }
+
     // summarize the .d.ts files into the output dir
     await summarizePackage(log, {
       dtsDir: normalizePath(this.dtsOutputDir),
@@ -159,7 +168,7 @@ class MockCli {
       outputDir: normalizePath(this.outputDir),
       repoRelativePackageDir: 'src',
       tsconfigPath: normalizePath(this.tsconfigPath),
-      strictPrinting: false,
+      strictPrinting: true,
     });
 
     // return the results

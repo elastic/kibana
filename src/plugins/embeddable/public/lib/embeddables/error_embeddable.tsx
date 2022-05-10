@@ -9,7 +9,7 @@
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider, Markdown } from '../../../../kibana_react/public';
+import { KibanaThemeProvider, Markdown } from '@kbn/kibana-react-plugin/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';

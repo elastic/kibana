@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
-import {
-  savedObjectsRepositoryMock,
-  loggingSystemMock,
-} from '../../../../../../src/core/server/mocks';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getCasesTelemetryData } from './cases';
 
 describe('getCasesTelemetryData', () => {

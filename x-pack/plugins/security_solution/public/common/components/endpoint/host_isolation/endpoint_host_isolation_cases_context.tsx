@@ -6,7 +6,7 @@
  */
 
 import React, { MutableRefObject, useContext } from 'react';
-import { CaseViewRefreshPropInterface } from '../../../../../../cases/common';
+import { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 
 /**
  * React Context that can hold the `Ref` that is created an passed to `CaseViewProps['refreshRef`]`, enabling

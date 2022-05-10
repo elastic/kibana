@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Print Spooler File Deletion",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type : \"deletion\" and\n not process.name : (\"spoolsv.exe\", \"dllhost.exe\", \"explorer.exe\") and\n file.path : \"?:\\\\Windows\\\\System32\\\\spool\\\\drivers\\\\x64\\\\3\\\\*.dll\"\n",
   "references": [
     "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34527",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

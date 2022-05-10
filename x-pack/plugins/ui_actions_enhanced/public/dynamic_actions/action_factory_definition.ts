@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
+import { Configurable } from '@kbn/kibana-utils-plugin/public';
+import { LicenseType } from '@kbn/licensing-plugin/public';
+import {
+  UiActionsActionDefinition as ActionDefinition,
+  UiActionsPresentable as Presentable,
+} from '@kbn/ui-actions-plugin/public';
+import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import {
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedAction,
   SerializedEvent,
 } from './types';
-import { LicenseType } from '../../../licensing/public';
-import {
-  UiActionsActionDefinition as ActionDefinition,
-  UiActionsPresentable as Presentable,
-} from '../../../../../src/plugins/ui_actions/public';
-import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface for registering new action factories.

@@ -15,7 +15,6 @@ import { from, isObservable, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, flatMap, scan, shareReplay } from 'rxjs/operators';
 import { DeepPartial } from '../../../common/types/common';
 import { jobSelectionActionCreator } from './actions';
-import type { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
 
@@ -63,9 +62,6 @@ export const explorerService = {
   },
   updateJobSelection: (selectedJobIds: string[]) => {
     explorerAction$.next(jobSelectionActionCreator(selectedJobIds));
-  },
-  setCharts: (payload: ExplorerChartsData) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS, payload });
   },
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
     explorerAction$.next(setExplorerDataActionCreator(payload));

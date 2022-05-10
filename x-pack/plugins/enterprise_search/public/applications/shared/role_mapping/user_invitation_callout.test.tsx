@@ -13,7 +13,7 @@ import { EuiText, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 
 import { EXISTING_INVITATION_LABEL } from './constants';
 
-import { UserInvitationCallout } from './';
+import { UserInvitationCallout } from '.';
 
 describe('UserInvitationCallout', () => {
   const props = {

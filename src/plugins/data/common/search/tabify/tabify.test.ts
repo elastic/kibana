@@ -52,6 +52,10 @@ describe('tabifyAggResponse Integration', () => {
 
     expect(resp.rows[0]).toEqual({ 'col-0-1': 1000 });
     expect(resp.columns[0]).toHaveProperty('name', aggConfigs.aggs[0].makeLabel());
+
+    expect(resp).toHaveProperty('meta.type', 'esaggs');
+    expect(resp).toHaveProperty('meta.source', '1234');
+    expect(resp).toHaveProperty('meta.statistics.totalCount', 1000);
   });
 
   describe('scaleMetricValues performance check', () => {

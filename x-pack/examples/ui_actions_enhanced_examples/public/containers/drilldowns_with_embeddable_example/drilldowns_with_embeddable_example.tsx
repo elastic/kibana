@@ -18,11 +18,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
+import { EmbeddableRoot, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
-import {
-  EmbeddableRoot,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/embeddable/public';
 import { ButtonEmbeddable } from '../../embeddables/button_embeddable';
 import { useUiActions } from '../../context';
 

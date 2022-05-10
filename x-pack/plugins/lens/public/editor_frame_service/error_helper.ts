@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEqual, uniqWith } from 'lodash';
-import { ExpressionRenderError } from '../../../../../src/plugins/expressions/public';
-import { isEsError } from '../../../../../src/plugins/data/public';
-import type { IEsError, Reason } from '../../../../../src/plugins/data/public';
+import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
+import { isEsError } from '@kbn/data-plugin/public';
+import type { IEsError, Reason } from '@kbn/data-plugin/public';
 
 type ErrorCause = Required<IEsError>['attributes'];
 

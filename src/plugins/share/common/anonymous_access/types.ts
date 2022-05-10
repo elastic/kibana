@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
 
 /**
  * The contract that is used to check anonymous access for the purposes of sharing public links. The implementation is intended to be

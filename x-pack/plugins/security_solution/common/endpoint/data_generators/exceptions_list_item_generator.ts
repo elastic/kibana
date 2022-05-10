@@ -256,19 +256,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     const os = this.randomOSFamily() as ExceptionListItemSchema['os_types'][number];
     const entriesList: CreateExceptionListItemSchema['entries'] = [
       {
-        field: 'file.path.text',
-        operator: 'included',
-        type: 'wildcard',
-        value: os === 'windows' ? 'C:\\Fol*\\file.*' : '/usr/*/*.dmg',
-      },
-      {
-        field: 'file.path.text',
-        operator: 'included',
-        type: 'wildcard',
-        value: os === 'windows' ? 'C:\\Fol*\\file.exe' : '/usr/*/app.dmg',
-      },
-      {
-        field: 'process.executable.caseless',
+        field: 'file.path',
         value:
           os === 'windows'
             ? ['C:\\some\\path', 'C:\\some\\other\\path', 'C:\\yet\\another\\path']
@@ -277,7 +265,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
         operator: 'included',
       },
       {
-        field: 'process.hash.sha256',
+        field: 'file.hash.sha256',
         value: [
           'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
           '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
@@ -287,27 +275,33 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
         operator: 'included',
       },
       {
-        field: 'process.Ext.code_signature',
+        field: 'file.hash.md5',
+        value: ['741462ab431a22233C787BAAB9B653C7'],
+        type: 'match_any',
+        operator: 'included',
+      },
+      {
+        field: 'file.hash.sha1',
+        value: ['aedb279e378BED6C2DB3C9DC9e12ba635e0b391c'],
+        type: 'match_any',
+        operator: 'included',
+      },
+    ];
+
+    if (os === 'windows') {
+      entriesList.push({
+        field: 'file.Ext.code_signature',
         entries: [
           {
-            field: 'trusted',
-            value: 'true',
-            type: 'match',
-            operator: 'included',
-          },
-          {
             field: 'subject_name',
-            value:
-              os === 'windows'
-                ? ['notsus.app', 'verynotsus.app', 'superlegit.app']
-                : ['notsus.exe', 'verynotsus.exe', 'superlegit.exe'],
+            value: ['notsus.exe', 'verynotsus.exe', 'superlegit.exe'],
             type: 'match_any',
             operator: 'included',
           },
         ],
         type: 'nested',
-      },
-    ];
+      });
+    }
 
     return this.generate({
       name: `Blocklist ${this.randomString(5)}`,
@@ -315,7 +309,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       item_id: `generator_endpoint_blocklist_${this.seededUUIDv4()}`,
       tags: [this.randomChoice([BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG])],
       os_types: [os],
-      entries: [entriesList[this.randomN(5)]],
+      entries: [entriesList[this.randomN(entriesList.length)]],
       ...overrides,
     });
   }

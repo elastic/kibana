@@ -10,15 +10,10 @@ import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigatio
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
-import {
-  login,
-  loginAndWaitForPageWithoutDateRange,
-  waitForPageWithoutDateRange,
-} from '../../tasks/login';
+import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createCustomRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../../tasks/common/callouts';
-import { cleanKibana } from '../../tasks/common';
 
 const loadPageAsReadOnlyUser = (url: string) => {
   waitForPageWithoutDateRange(url, ROLES.reader);
@@ -45,8 +40,8 @@ describe('Detections > Callouts', () => {
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
-    cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
+    login(ROLES.platform_engineer);
+    visitWithoutDateRange(ALERTS_URL);
 
     // After that we can login as a read-only user.
     login(ROLES.reader);

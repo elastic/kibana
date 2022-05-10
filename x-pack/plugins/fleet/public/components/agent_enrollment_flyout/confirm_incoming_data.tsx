@@ -6,69 +6,89 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import type { InstalledIntegrationPolicy } from '../../hooks';
-import { useGetAgentIncomingData } from '../../hooks';
+import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
+import { useGetAgentIncomingData, usePollingIncomingData } from './use_get_agent_incoming_data';
+
 interface Props {
-  agentsIds: string[];
+  agentIds: string[];
   installedPolicy?: InstalledIntegrationPolicy;
+  agentDataConfirmed: boolean;
+  setAgentDataConfirmed: (v: boolean) => void;
+  troubleshootLink: string;
 }
 
 export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
-  agentsIds,
+  agentIds,
   installedPolicy,
+  agentDataConfirmed,
+  setAgentDataConfirmed,
+  troubleshootLink,
 }) => {
-  const { enrolledAgents, numAgentsWithData, isLoading, linkButton } = useGetAgentIncomingData(
-    agentsIds,
+  const { incomingData, isLoading } = usePollingIncomingData(agentIds);
+
+  const { enrolledAgents, numAgentsWithData, linkButton, message } = useGetAgentIncomingData(
+    incomingData,
     installedPolicy
   );
 
+  if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
+    setAgentDataConfirmed(true);
+  }
+  if (!agentDataConfirmed) {
+    return (
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.confirmIncomingData.loading"
+          defaultMessage="It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our {link}. You may close this dialog and check later by viewing your integration assets."
+          values={{
+            link: (
+              <EuiLink target="_blank" external href={troubleshootLink}>
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+                  defaultMessage="troubleshooting guide"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+    );
+  }
+
   return (
     <>
-      {isLoading ? (
-        <EuiText size="s">
-          {i18n.translate('xpack.fleet.confirmIncomingData.loading', {
-            defaultMessage:
-              'It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our troubleshooting guide. You may close this dialog and check later by viewing our integration assets.',
-          })}
-        </EuiText>
-      ) : (
-        <>
-          <EuiCallOut
-            data-test-subj="IncomingDataConfirmedCallOut"
-            title={i18n.translate('xpack.fleet.confirmIncomingData.title', {
-              defaultMessage:
-                'Incoming data received from {numAgentsWithData} of {enrolledAgents} recently enrolled { enrolledAgents, plural, one {agent} other {agents}}.',
-              values: {
-                numAgentsWithData,
-                enrolledAgents,
-              },
-            })}
-            color="success"
-            iconType="check"
-          />
-          <EuiSpacer size="m" />
-          <EuiText size="s">
-            {i18n.translate('xpack.fleet.confirmIncomingData.subtitle', {
-              defaultMessage: 'Your agent is enrolled successfully and your data is received.',
-            })}
-          </EuiText>
-        </>
-      )}
-
-      <EuiSpacer size="m" />
+      <EuiCallOut
+        data-test-subj="IncomingDataConfirmedCallOut"
+        title={i18n.translate('xpack.fleet.confirmIncomingData.title', {
+          defaultMessage:
+            'Incoming data received from {numAgentsWithData} of {enrolledAgents} recently enrolled { enrolledAgents, plural, one {agent} other {agents}}.',
+          values: {
+            numAgentsWithData,
+            enrolledAgents,
+          },
+        })}
+        color="success"
+        iconType="check"
+      />
       {installedPolicy && (
-        <EuiButton
-          href={linkButton.href}
-          isDisabled={isLoading}
-          color="primary"
-          fill
-          data-test-subj="IncomingDataConfirmedButton"
-        >
-          {linkButton.text}
-        </EuiButton>
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s">{message}</EuiText>
+          <EuiSpacer size="m" />
+          <EuiButton
+            href={linkButton.href}
+            isDisabled={isLoading}
+            color="primary"
+            fill
+            data-test-subj="IncomingDataConfirmedButton"
+          >
+            {linkButton.text}
+          </EuiButton>
+        </>
       )}
     </>
   );

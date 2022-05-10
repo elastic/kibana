@@ -8,7 +8,7 @@
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -33,8 +33,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
     namespace_type: ['agnostic'],
     page: 1,
     per_page: 10,
-    sort_field: undefined,
-    sort_order: undefined,
+    sort_field: 'created_at',
+    sort_order: 'desc',
   },
 });
 

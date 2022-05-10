@@ -14,7 +14,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
 
@@ -40,6 +40,7 @@ describe('SourceConfig', () => {
     saveConfig.prop('onDeleteConfig')!();
 
     expect(wrapper.find(EuiConfirmModal)).toHaveLength(1);
+    expect(wrapper.find(EuiCallOut)).toHaveLength(0);
   });
 
   it('renders a breadcrumb fallback while data is loading', () => {
@@ -83,5 +84,12 @@ describe('SourceConfig', () => {
     wrapper.find(EuiConfirmModal).prop('onCancel')!({} as any);
 
     expect(wrapper.find(EuiConfirmModal)).toHaveLength(0);
+  });
+
+  it('shows feedback link for external sources', () => {
+    const wrapper = shallow(
+      <SourceConfig sourceData={{ ...staticSourceData[1], serviceType: 'external' }} />
+    );
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
   });
 });

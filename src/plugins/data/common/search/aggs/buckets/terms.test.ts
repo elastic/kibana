@@ -114,6 +114,9 @@ describe('Terms Agg', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {
+                          "emptyAsNull": Array [
+                            false,
+                          ],
                           "enabled": Array [
                             true,
                           ],
@@ -288,6 +291,18 @@ describe('Terms Agg', () => {
       const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
 
       expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
+    });
+
+    test('optionally supports shard_size', () => {
+      const aggConfigs = getAggConfigs({
+        field: 'string_field',
+        orderAgg: {
+          type: 'count',
+        },
+        shardSize: 1000,
+      });
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      expect(params.shard_size).toEqual(1000);
     });
 
     test('should override "hasPrecisionError" for the "terms" bucket type', () => {

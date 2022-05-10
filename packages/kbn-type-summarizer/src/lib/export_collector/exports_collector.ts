@@ -27,7 +27,8 @@ import { isNodeModule } from '../is_node_module';
 
 interface ResolvedNmImport {
   type: 'import_from_node_modules';
-  symbol: DecSymbol;
+  importSymbol: DecSymbol;
+  sourceSymbol: DecSymbol;
   moduleId: string;
 }
 interface ResolvedSymbol {
@@ -101,18 +102,31 @@ export class ExportCollector {
       const targetPaths = [
         ...new Set(aliased.declarations.map((d) => this.sourceMapper.getSourceFile(d).fileName)),
       ];
-      if (targetPaths.length > 1) {
-        throw new Error('importing a symbol from multiple locations is unsupported at this time');
+
+      let nmCount = 0;
+      let localCount = 0;
+      for (const targetPath of targetPaths) {
+        if (isNodeModule(this.dtsDir, targetPath)) {
+          nmCount += 1;
+        } else {
+          localCount += 1;
+        }
       }
 
-      const targetPath = targetPaths[0];
-      if (isNodeModule(this.dtsDir, targetPath)) {
+      if (nmCount === targetPaths.length) {
         return {
           type: 'import_from_node_modules',
-          symbol,
+          importSymbol: symbol,
+          sourceSymbol: aliased,
           moduleId: parentImport.moduleSpecifier.text,
         };
       }
+
+      if (localCount === targetPaths.length) {
+        return undefined;
+      }
+
+      throw new Error('using a symbol which is locally extended is unsupported at this time');
     }
   }
 
@@ -148,7 +162,12 @@ export class ExportCollector {
 
     const source = this.resolveAliasSymbol(symbol);
     if (source.type === 'import_from_node_modules') {
-      results.addImportFromNodeModules(exportInfo, source.symbol, source.moduleId);
+      results.addImportFromNodeModules(
+        exportInfo,
+        source.sourceSymbol,
+        source.importSymbol,
+        source.moduleId
+      );
       return;
     }
 

@@ -7,12 +7,12 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import type { DataViewState } from '../hooks/use_app_data_view';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import type { AppDataType } from '../types';
 
 const Embeddable = React.lazy(() => import('./embeddable'));

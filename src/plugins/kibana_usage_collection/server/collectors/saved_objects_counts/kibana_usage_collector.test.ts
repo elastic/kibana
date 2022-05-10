@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { getKibanaSavedObjectCounts, registerKibanaUsageCollector } from './kibana_usage_collector';
 
 const logger = loggingSystemMock.createLogger();

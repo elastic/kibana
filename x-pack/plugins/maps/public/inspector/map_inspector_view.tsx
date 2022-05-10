@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import type { Adapters } from 'src/plugins/inspector/public';
+import type { Adapters } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { LazyWrapper } from '../lazy_wrapper';
 

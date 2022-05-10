@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './use_cloud_posture_stats_api';
+export * from './use_compliance_dashboard_data_api';

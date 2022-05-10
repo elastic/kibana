@@ -14,8 +14,9 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
-import DateMath from '@elastic/datemath';
-import { Capabilities } from 'src/core/public';
+import DateMath from '@kbn/datemath';
+import { Capabilities } from '@kbn/core/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -28,7 +29,6 @@ import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
-import { useLinkProps } from '../../../../../../observability/public';
 
 export interface Props {
   options: MetricsExplorerOptions;

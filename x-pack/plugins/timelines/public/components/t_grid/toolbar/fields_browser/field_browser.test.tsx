@@ -12,7 +12,7 @@ import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mo
 import { mockGlobalState } from '../../../../mock/global_state';
 import { tGridActions } from '../../../../store/t_grid';
 
-import { FieldsBrowser } from './field_browser';
+import { FieldsBrowser, FieldsBrowserComponentProps } from './field_browser';
 
 import { createStore, State } from '../../../../types';
 import { createSecuritySolutionStorageMock } from '../../../../mock/mock_local_storage';
@@ -27,9 +27,8 @@ jest.mock('react-redux', () => {
 });
 const timelineId = 'test';
 const onHide = jest.fn();
-const testProps = {
+const testProps: FieldsBrowserComponentProps = {
   columnHeaders: [],
-  browserFields: mockBrowserFields,
   filteredBrowserFields: mockBrowserFields,
   searchInput: '',
   appliedFilterInput: '',
@@ -40,6 +39,8 @@ const testProps = {
   restoreFocusTo: React.createRef<HTMLButtonElement>(),
   selectedCategoryIds: [],
   timelineId,
+  filterSelectedEnabled: false,
+  onFilterSelectedChange: jest.fn(),
 };
 const { storage } = createSecuritySolutionStorageMock();
 

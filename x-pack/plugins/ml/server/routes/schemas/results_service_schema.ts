@@ -112,3 +112,27 @@ export const getDatafeedResultsChartDataSchema = schema.object({
   start: schema.number(),
   end: schema.number(),
 });
+
+export const getAnomalyChartsSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  influencers: schema.arrayOf(schema.any()),
+  /**
+   * Severity threshold
+   */
+  threshold: schema.number({ defaultValue: 0, min: 0, max: 99 }),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  /**
+   * Maximum amount of series data.
+   */
+  maxResults: schema.number({ defaultValue: 6, min: 1, max: 10 }),
+  influencersFilterQuery: schema.maybe(schema.any()),
+  /**
+   * Optimal number of data points per chart
+   */
+  numberOfPoints: schema.number(),
+  timeBounds: schema.object({
+    min: schema.maybe(schema.number()),
+    max: schema.maybe(schema.number()),
+  }),
+});

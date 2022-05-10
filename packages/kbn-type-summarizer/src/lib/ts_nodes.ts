@@ -13,7 +13,8 @@ export type ValueNode =
   | ts.FunctionDeclaration
   | ts.TypeAliasDeclaration
   | ts.VariableDeclaration
-  | ts.InterfaceDeclaration;
+  | ts.InterfaceDeclaration
+  | ts.EnumDeclaration;
 
 export function isExportedValueNode(node: ts.Node): node is ValueNode {
   return (
@@ -21,7 +22,8 @@ export function isExportedValueNode(node: ts.Node): node is ValueNode {
     node.kind === ts.SyntaxKind.FunctionDeclaration ||
     node.kind === ts.SyntaxKind.TypeAliasDeclaration ||
     node.kind === ts.SyntaxKind.VariableDeclaration ||
-    node.kind === ts.SyntaxKind.InterfaceDeclaration
+    node.kind === ts.SyntaxKind.InterfaceDeclaration ||
+    node.kind === ts.SyntaxKind.EnumDeclaration
   );
 }
 export function assertExportedValueNode(node: ts.Node): asserts node is ValueNode {

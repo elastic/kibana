@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
 
 const NUMBER_OF_CAPABILITIES = 36;
 

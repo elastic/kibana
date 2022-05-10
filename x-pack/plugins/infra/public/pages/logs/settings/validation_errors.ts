@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 export interface GenericValidationError {
   type: 'generic';

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { baseEmbeddableMigrations } from './migrate_base_input';
 import {
   MigrateFunctionsObject,
   PersistableState,
   PersistableStateMigrateFn,
-} from '../../../kibana_utils/common/persistable_state';
+} from '@kbn/kibana-utils-plugin/common/persistable_state';
+import { baseEmbeddableMigrations } from './migrate_base_input';
 
 export const getAllMigrations = (
   factories: unknown[],

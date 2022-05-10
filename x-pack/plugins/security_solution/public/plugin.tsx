@@ -10,6 +10,18 @@ import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { AnyAction, Reducer } from 'redux';
+import {
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Plugin as IPlugin,
+  DEFAULT_APP_CATEGORIES,
+  AppNavLinkStatus,
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { TimelineState } from '@kbn/timelines-plugin/public';
 import type {
   PluginSetup,
   PluginStart,
@@ -20,17 +32,6 @@ import type {
   SubPlugins,
   StartedSubPlugins,
 } from './types';
-import {
-  AppMountParameters,
-  AppUpdater,
-  CoreSetup,
-  CoreStart,
-  PluginInitializerContext,
-  Plugin as IPlugin,
-  DEFAULT_APP_CATEGORIES,
-  AppNavLinkStatus,
-} from '../../../../src/core/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
@@ -60,7 +61,6 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
-import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { SecurityDataView } from './common/containers/sourcerer/api';
@@ -142,6 +142,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       deepLinks: getDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
+        // required to show the alert table inside cases
+        const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
+        const { registerAlertsTableConfiguration } =
+          await this.lazyRegisterAlertsTableConfiguration();
+        registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
+
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
@@ -283,6 +289,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
   }
 
+  private lazyRegisterAlertsTableConfiguration() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_sub_plugins" */
+      './common/lib/triggers_actions_ui/register_alerts_table_configuration'
+    );
+  }
+
   /**
    * Lazily instantiated subPlugins. This should be instantiated just once.
    */
@@ -300,6 +317,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
+        landingPages: new subPluginClasses.LandingPages(),
       };
     }
     return this._subPlugins;
@@ -325,6 +343,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       network: subPlugins.network.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
+      landingPages: subPlugins.landingPages.start(),
     };
   }
   /**

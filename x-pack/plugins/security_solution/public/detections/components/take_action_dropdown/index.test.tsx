@@ -17,7 +17,7 @@ import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
@@ -34,6 +34,12 @@ jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () =
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
 }));
 jest.mock('../../../cases/components/use_insert_timeline');
+
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+  }),
+}));
 
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
@@ -78,6 +84,7 @@ describe('take action dropdown', () => {
     refetch: jest.fn(),
     refetchFlyoutData: jest.fn(),
     timelineId: TimelineId.active,
+    onOsqueryClick: jest.fn(),
   };
 
   beforeAll(() => {
@@ -89,8 +96,11 @@ describe('take action dropdown', () => {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
           cases: mockCasesContract(),
+          osquery: {
+            isOsqueryAvailable: jest.fn().mockReturnValue(true),
+          },
           application: {
-            capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+            capabilities: { siem: { crud_alerts: true, read_alerts: true }, osquery: true },
           },
         },
       };
@@ -188,6 +198,13 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').first().text()
         ).toEqual('Investigate in timeline');
+      });
+    });
+    test('should render "Run Osquery"', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="osquery-action-item"]').first().text()).toEqual(
+          'Run Osquery'
+        );
       });
     });
   });

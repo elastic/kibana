@@ -8,6 +8,7 @@
   "version": "8.2.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
+    "unifiedSearch",
     "alerting",
     "features",
     "triggersActionsUi",

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { loggingSystemMock, httpServerMock } from 'src/core/server/mocks';
-import { securityMock } from '../../../../security/server/mocks';
+import { KibanaRequest } from '@kbn/core/server';
+import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { ReindexStep, ReindexStatus, ReindexSavedObject } from '../../../common/types';
 import { credentialStoreFactory } from './credential_store';
 

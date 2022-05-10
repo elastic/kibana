@@ -24,6 +24,8 @@ export * from './stub_web_worker';
 
 export * from './testbed';
 
+export * from './axe_helpers';
+
 export const nextTick = () => new Promise((res) => process.nextTick(res));
 
 export const delay = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));

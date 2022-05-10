@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 
 export function registerPreviewScriptedFieldRoute(router: IRouter): void {
   router.post(
@@ -24,7 +24,7 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
       },
     },
     async (context, request, res) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { index, name, script, query, additionalFields } = request.body;
 
       try {

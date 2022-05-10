@@ -12,7 +12,12 @@ import { CasesContextStoreActionsList } from '../../cases_context/cases_context_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CreateCaseFlyoutProps } from './create_case_flyout';
 
-export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
+type AddToNewCaseFlyoutProps = CreateCaseFlyoutProps & {
+  toastTitle?: string;
+  toastContent?: string;
+};
+
+export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps) => {
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
 
@@ -35,7 +40,12 @@ export const useCasesAddToNewCaseFlyout = (props: CreateCaseFlyoutProps) => {
         },
         onSuccess: async (theCase: Case) => {
           if (theCase) {
-            casesToasts.showSuccessAttach(theCase);
+            casesToasts.showSuccessAttach({
+              theCase,
+              attachments: props.attachments,
+              title: props.toastTitle,
+              content: props.toastContent,
+            });
           }
           if (props.onSuccess) {
             return props.onSuccess(theCase);

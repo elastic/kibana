@@ -22,12 +22,12 @@ import {
 import _ from 'lodash';
 import React, { Component } from 'react';
 
+import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { Role } from '../../../../common/model';
 import {
   getExtendedRoleDeprecationNotice,

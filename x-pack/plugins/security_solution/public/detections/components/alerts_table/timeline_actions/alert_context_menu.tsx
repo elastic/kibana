@@ -12,11 +12,11 @@ import { indexOf } from 'lodash';
 import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../timelines/public';
 import { Ecs } from '../../../../../common/ecs';
 import {
   AddExceptionFlyout,
@@ -88,6 +88,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
+  const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
+
+  const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -173,7 +176,14 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
-    disabled: !isEvent || !canCreateEndpointEventFilters,
+    disabled:
+      !isEndpointEvent ||
+      !canCreateEndpointEventFilters ||
+      timelineId !== TimelineId.hostsPageEvents,
+    tooltipMessage:
+      timelineId !== TimelineId.hostsPageEvents
+        ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
+        : undefined,
   });
   const items: React.ReactElement[] = useMemo(
     () =>

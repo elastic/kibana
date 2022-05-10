@@ -28,7 +28,9 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
             color="inherit"
             data-euiicon-type="arrowRight"
             size="m"
-          />
+          >
+            
+          </span>
         </button>
         <button
           aria-controls="accordion-variables"
@@ -77,7 +79,9 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                 color="inherit"
                 data-euiicon-type="plusInCircle"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>

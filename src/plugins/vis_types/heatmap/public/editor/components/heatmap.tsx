@@ -24,9 +24,9 @@ import {
   PercentageModeOption,
   LongLegendOptions,
   LegendSizeSettings,
-} from '../../../../../vis_default_editor/public';
-import { colorSchemas } from '../../../../../charts/public';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
+} from '@kbn/vis-default-editor-plugin/public';
+import { colorSchemas } from '@kbn/charts-plugin/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams, HeatmapTypeProps, ValueAxis } from '../../types';
 import { LabelsPanel } from './labels_panel';
 import { legendPositions, scaleTypes } from '../collections';

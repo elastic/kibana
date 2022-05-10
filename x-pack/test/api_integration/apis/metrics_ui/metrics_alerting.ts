@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { MetricExpressionParams } from '../../../../plugins/infra/common/alerting/metrics';
-import { getElasticsearchMetricQuery } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/metric_query';
+import { MetricExpressionParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import { getElasticsearchMetricQuery } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/metric_query';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

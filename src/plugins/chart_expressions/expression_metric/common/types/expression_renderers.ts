@@ -7,14 +7,14 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import {
   ColorMode,
   Labels,
   CustomPaletteState,
   Style as ChartStyle,
-} from '../../../../charts/common';
-import { Style } from '../../../../expressions/common';
+} from '@kbn/charts-plugin/common';
+import { Style } from '@kbn/expressions-plugin/common';
 import { LabelPosition } from '../constants';
 
 export const visType = 'metric';

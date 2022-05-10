@@ -12,9 +12,11 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Network Connection via Certutil",
+  "note": "## Triage and analysis\n\n### Investigating Network Connection via Certutil\n\nAttackers can abuse `certutil.exe` to download malware, offensive security tools, and certificates from external sources\nin order to take the next steps in a compromised environment.\n\nThis rule looks for network events where `certutil.exe` contacts IP ranges other than the ones specified in\n[IANA IPv4 Special-Purpose Address Registry](https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml)\n\n#### Possible investigation steps\n\n- Investigate the script execution chain (parent process tree).\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Investigate if the downloaded file was executed.\n- Determine the context in which `certutil.exe` and the file were run.\n- Retrieve the file downloaded and:\n  - Use a sandboxed malware analysis system to perform analysis.\n    - Observe attempts of contacting external domains and addresses.\n  - Use the PowerShell Get-FileHash cmdlet to get the SHA-256 hash value of the file.\n    - Search for the existence of this file in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. If trusted software uses this command and the triage has not identified\nanything suspicious, this alert can be closed as a false positive.\n- If this activity is expected and noisy in your environment, consider adding exceptions \u2014 preferably with a combination\nof user and command line conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n- Implement any temporary network rules, procedures, and segmentation required to contain the malware.\n",
   "query": "sequence by process.entity_id\n  [process where process.name : \"certutil.exe\" and event.type == \"start\"]\n  [network where process.name : \"certutil.exe\" and\n    not cidrmatch(destination.ip, \"10.0.0.0/8\", \"127.0.0.0/8\", \"169.254.0.0/16\", \"172.16.0.0/12\", \"192.0.0.0/24\",\n                                  \"192.0.0.0/29\", \"192.0.0.8/32\", \"192.0.0.9/32\", \"192.0.0.10/32\", \"192.0.0.170/32\",\n                                  \"192.0.0.171/32\", \"192.0.2.0/24\", \"192.31.196.0/24\", \"192.52.193.0/24\",\n                                  \"192.168.0.0/16\", \"192.88.99.0/24\", \"224.0.0.0/4\", \"100.64.0.0/10\", \"192.175.48.0/24\",\n                                  \"198.18.0.0/15\", \"198.51.100.0/24\", \"203.0.113.0/24\", \"240.0.0.0/4\", \"::1\",\n                                  \"FE80::/10\", \"FF00::/8\")]\n",
   "references": [
-    "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
+    "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml",
+    "https://frsecure.com/malware-incident-response-playbook/"
   ],
   "risk_score": 21,
   "rule_id": "3838e0e3-1850-4850-a411-2e8c5ba40ba8",
@@ -44,5 +46,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 7
 }

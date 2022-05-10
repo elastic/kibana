@@ -7,13 +7,13 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { HttpFetchOptions } from '../../../../../../../src/core/public';
+import type { HttpFetchOptions } from '@kbn/core/public';
 import type {
   DataResponseMock,
   NodeMetricsTableFetchMock,
   SourceResponseMock,
 } from '../test_helpers';
-import { createCoreProvidersPropsMock } from '../test_helpers';
+import { createStartServicesAccessorMock } from '../test_helpers';
 import { createLazyContainerMetricsTable } from './create_lazy_container_metrics_table';
 import IntegratedContainerMetricsTable from './integrated_container_metrics_table';
 import { metricByField } from './use_container_metrics_table';
@@ -41,8 +41,8 @@ describe('ContainerMetricsTable', () => {
 
   describe('createLazyContainerMetricsTable', () => {
     it('should lazily load and render the table', async () => {
-      const { coreProvidersPropsMock, fetch } = createCoreProvidersPropsMock(fetchMock);
-      const LazyContainerMetricsTable = createLazyContainerMetricsTable(coreProvidersPropsMock);
+      const { fetch, getStartServices } = createStartServicesAccessorMock(fetchMock);
+      const LazyContainerMetricsTable = createLazyContainerMetricsTable(getStartServices);
 
       render(<LazyContainerMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
 
@@ -62,7 +62,7 @@ describe('ContainerMetricsTable', () => {
 
   describe('IntegratedContainerMetricsTable', () => {
     it('should render a single row of data', async () => {
-      const { coreProvidersPropsMock, fetch } = createCoreProvidersPropsMock(fetchMock);
+      const { coreProvidersPropsMock, fetch } = createStartServicesAccessorMock(fetchMock);
 
       const { findByText } = render(
         <IntegratedContainerMetricsTable

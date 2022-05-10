@@ -9,9 +9,17 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 
-export function StaticIconForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
-  const onChange = (selectedIconId) => {
-    onStaticStyleChange(styleProperty.getStyleName(), { value: selectedIconId });
+export function StaticIconForm({
+  onStaticStyleChange,
+  onCustomIconsChange,
+  customIcons,
+  staticDynamicSelect,
+  styleProperty,
+}) {
+  const onChange = ({ selectedIconId }) => {
+    onStaticStyleChange(styleProperty.getStyleName(), {
+      value: selectedIconId,
+    });
   };
 
   return (
@@ -20,7 +28,12 @@ export function StaticIconForm({ onStaticStyleChange, staticDynamicSelect, style
         {staticDynamicSelect}
       </EuiFlexItem>
       <EuiFlexItem>
-        <IconSelect onChange={onChange} value={styleProperty.getOptions().value} />
+        <IconSelect
+          customIcons={customIcons}
+          onChange={onChange}
+          onCustomIconsChange={onCustomIconsChange}
+          icon={styleProperty.getOptions()}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

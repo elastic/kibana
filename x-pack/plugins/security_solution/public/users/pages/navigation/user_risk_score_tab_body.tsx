@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
 import { UsersComponentsQueryProps } from './types';
@@ -20,6 +20,7 @@ import {
   useUserRiskScore,
   useUserRiskScoreKpi,
 } from '../../../risk_score/containers';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -43,15 +44,22 @@ export const UserRiskScoreQueryTabBody = ({
     [activePage, limit]
   );
 
+  const { toggleStatus } = useQueryToggle(UserRiskScoreQueryId.USERS_BY_RISK);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
+
   const [loading, { data, totalCount, inspect, isInspected, refetch }] = useUserRiskScore({
     filterQuery,
-    skip,
+    skip: querySkip,
     pagination,
     sort,
   });
 
   const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
     filterQuery,
+    skip: querySkip,
   });
 
   return (
@@ -65,6 +73,7 @@ export const UserRiskScoreQueryTabBody = ({
       loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       severityCount={severityCount}
       totalCount={totalCount}
       type={type}

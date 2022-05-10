@@ -38,6 +38,7 @@ export interface NavTab {
   disabled: boolean;
   urlKey?: UrlStateType;
   pageId?: SecurityPageName;
+  isBeta?: boolean;
 }
 
 export type SecurityNavKey =
@@ -47,6 +48,7 @@ export type SecurityNavKey =
   | SecurityPageName.detectionAndResponse
   | SecurityPageName.case
   | SecurityPageName.endpoints
+  | SecurityPageName.landing
   | SecurityPageName.policies
   | SecurityPageName.eventFilters
   | SecurityPageName.exceptions

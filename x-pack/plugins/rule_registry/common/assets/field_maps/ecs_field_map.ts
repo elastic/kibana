@@ -2401,6 +2401,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.entry_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.executable': {
     type: 'keyword',
     array: false,
@@ -2813,6 +2818,11 @@ export const ecsFieldMap = {
   },
   'process.pid': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.entity_id': {
+    type: 'keyword',
     array: false,
     required: false,
   },

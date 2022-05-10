@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
-import type { TagsHandlerContext } from './types';
+import type {
+  TagsHandlerContext,
+  SavedObjectTaggingStart,
+  CreateTagClientOptions,
+  CreateTagAssignmentServiceOptions,
+} from './types';
 import { TagsRequestHandlerContext } from './request_handler_context';
 import { registerRoutes } from './routes';
 import { createTagUsageCollector } from './usage';
+import { TagsClient, AssignmentService } from './services';
 
 interface SetupDeps {
   features: FeaturesPluginSetup;
@@ -22,7 +28,13 @@ interface SetupDeps {
   security?: SecurityPluginSetup;
 }
 
-export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
+interface StartDeps {
+  security?: SecurityPluginStart;
+}
+
+export class SavedObjectTaggingPlugin
+  implements Plugin<{}, SavedObjectTaggingStart, SetupDeps, StartDeps>
+{
   public setup(
     { savedObjects, http }: CoreSetup,
     { features, usageCollection, security }: SetupDeps
@@ -35,7 +47,7 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
     http.registerRouteHandlerContext<TagsHandlerContext, 'tags'>(
       'tags',
       async (context, req, res) => {
-        return new TagsRequestHandlerContext(req, context.core, security);
+        return new TagsRequestHandlerContext(req, await context.core, security);
       }
     );
 
@@ -53,7 +65,19 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
     return {};
   }
 
-  public start(core: CoreStart) {
-    return {};
+  public start(core: CoreStart, { security }: StartDeps) {
+    return {
+      createTagClient: ({ client }: CreateTagClientOptions) => {
+        return new TagsClient({ client });
+      },
+      createInternalAssignmentService: ({ client }: CreateTagAssignmentServiceOptions) => {
+        return new AssignmentService({
+          client,
+          authorization: security?.authz,
+          typeRegistry: core.savedObjects.getTypeRegistry(),
+          internal: true,
+        });
+      },
+    };
   }
 }

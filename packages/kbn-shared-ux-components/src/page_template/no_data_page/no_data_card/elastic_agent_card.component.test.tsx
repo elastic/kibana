@@ -40,19 +40,6 @@ describe('ElasticAgentCardComponent', () => {
   });
 
   describe('props', () => {
-    test('recommended', () => {
-      const component = shallow(
-        <ElasticAgentCardComponent
-          recommended
-          canAccessFleet={true}
-          navigateToUrl={navigateToUrl}
-          currentAppId$={currentAppId$}
-        />
-      );
-      expect(component.find(NoDataCard).props().recommended).toBe(true);
-      expect(component).toMatchSnapshot();
-    });
-
     test('button', () => {
       const component = shallow(
         <ElasticAgentCardComponent

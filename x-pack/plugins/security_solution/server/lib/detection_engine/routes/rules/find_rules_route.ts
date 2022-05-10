@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -22,11 +22,7 @@ import { transformFindAlerts } from './utils';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
-export const findRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
-) => {
+export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -49,12 +45,12 @@ export const findRulesRoute = (
 
       try {
         const { query } = request;
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
         const rules = await findRules({
-          isRuleRegistryEnabled,
           rulesClient,
           perPage: query.per_page,
           page: query.page,

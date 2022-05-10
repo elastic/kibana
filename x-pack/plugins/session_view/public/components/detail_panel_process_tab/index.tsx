@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DetailPanelProcess } from '../../types';
+import { Process } from '../../../common/types/process_tree';
 import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelDescriptionList } from '../detail_panel_description_list';
 import { DetailPanelListItem } from '../detail_panel_list_item';
 import { dataOrDash } from '../../utils/data_or_dash';
-import { getProcessExecutableCopyText } from './helpers';
+import { getProcessExecutableCopyText, getDetailPanelProcess } from './helpers';
 import { useStyles } from './styles';
 
 interface DetailPanelProcessTabDeps {
-  processDetail: DetailPanelProcess;
+  selectedProcess: Process | null;
 }
 
 type ListItems = Array<{
@@ -31,50 +31,163 @@ const leaderDescriptionListInfo = [
     id: 'processEntryLeader',
     title: 'Entry Leader',
     tooltipContent: i18n.translate('xpack.sessionView.detailPanel.entryLeaderTooltip', {
-      defaultMessage: 'A entry leader placeholder description',
+      defaultMessage:
+        'Session leader process associated with initial terminal or remote access via SSH, SSM and other remote access protocols. Entry sessions are also used to represent a service directly started by the init process. In many cases this is the same as the session_leader.',
     }),
   },
   {
     id: 'processSessionLeader',
     title: 'Session Leader',
     tooltipContent: i18n.translate('xpack.sessionView.detailPanel.sessionLeaderTooltip', {
-      defaultMessage: 'A session leader placeholder description',
+      defaultMessage:
+        'Often the same as entry_leader. When it differs, this represents a session started within another session. Some tools like tmux and screen will start a new session to obtain a new tty and/or separate their lifecycle from the entry session.',
     }),
   },
   {
     id: 'processGroupLeader',
     title: 'Group Leader',
     tooltipContent: i18n.translate('xpack.sessionView.detailPanel.processGroupLeaderTooltip', {
-      defaultMessage: 'a group leader placeholder description',
+      defaultMessage: 'The process group leader to the current process.',
     }),
   },
   {
     id: 'processParent',
     title: 'Parent',
     tooltipContent: i18n.translate('xpack.sessionView.detailPanel.processParentTooltip', {
-      defaultMessage: 'a parent placeholder description',
+      defaultMessage: 'The direct parent to the current process.',
     }),
   },
+];
+
+const PROCESS_FIELD_PREFIX = 'process';
+const LEADER_FIELD_PREFIX = [
+  `${PROCESS_FIELD_PREFIX}.entry_leader`,
+  `${PROCESS_FIELD_PREFIX}.session_leader`,
+  `${PROCESS_FIELD_PREFIX}.group_leader`,
+  `${PROCESS_FIELD_PREFIX}.parent`,
 ];
 
 /**
  * Detail panel in the session view.
  */
-export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDeps) => {
+export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTabDeps) => {
   const styles = useStyles();
+
+  const processDetail = useMemo(() => getDetailPanelProcess(selectedProcess), [selectedProcess]);
+  const renderExecs = useCallback(
+    (executable: string[][]) =>
+      executable.map((execTuple, idx) => {
+        const [exec, eventAction] = execTuple;
+        return (
+          <div key={`executable-${idx}`} css={styles.ellipsis}>
+            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+              {exec}
+            </EuiTextColor>
+            {eventAction && (
+              <EuiTextColor color="subdued" css={styles.executableAction}>
+                {eventAction}
+              </EuiTextColor>
+            )}
+          </div>
+        );
+      }),
+    [styles.descriptionSemibold, styles.ellipsis, styles.executableAction]
+  );
+
   const leaderListItems = [
     processDetail.entryLeader,
     processDetail.sessionLeader,
     processDetail.groupLeader,
     processDetail.parent,
   ].map((leader, idx) => {
+    const {
+      id,
+      start,
+      end,
+      exitCode,
+      entryMetaType,
+      interactive,
+      workingDirectory,
+      args,
+      executable,
+      pid,
+      userName,
+      groupName,
+      entryMetaSourceIp,
+    } = leader;
+
+    const leaderExecutableText = getProcessExecutableCopyText(executable);
     const listItems: ListItems = [
       {
-        title: <DetailPanelListItem>id</DetailPanelListItem>,
+        title: <DetailPanelListItem>entity_id</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={leader.id}>
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.entity_id: "${id}"`}
+            tooltipContent={id}
+          >
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {dataOrDash(leader.id)}
+              {id}
+            </EuiTextColor>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>args</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.args: "${args}"`}
+            tooltipContent={args}
+          >
+            {args}
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>executable</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.executable: "${leaderExecutableText}"`}
+            tooltipContent={leaderExecutableText}
+          >
+            {renderExecs(executable)}
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>interactive</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.interactive: "${interactive}"`}
+            tooltipContent={interactive}
+          >
+            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+              {interactive}
+            </EuiTextColor>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>working_directory</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.working_directory: "${workingDirectory}"`}
+            tooltipContent={workingDirectory}
+          >
+            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+              {workingDirectory}
+            </EuiTextColor>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>pid</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.pid: "${pid}"`}
+            tooltipContent={pid}
+          >
+            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+              {pid}
             </EuiTextColor>
           </DetailPanelCopy>
         ),
@@ -82,62 +195,91 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       {
         title: <DetailPanelListItem>start</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={leader.start}>
-            <span css={styles.description}>{leader.start}</span>
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.start: "${start}"`}
+            tooltipContent={start}
+          >
+            {start}
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>end</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.end: "${end}"`}
+            tooltipContent={end}
+          >
+            {end}
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.exit_code: "${exitCode}"`}
+            tooltipContent={exitCode}
+          >
+            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+              {exitCode}
+            </EuiTextColor>
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>user.name</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.user.name: "${userName}"`}
+            tooltipContent={userName}
+          >
+            {userName}
+          </DetailPanelCopy>
+        ),
+      },
+      {
+        title: <DetailPanelListItem>group.name</DetailPanelListItem>,
+        description: (
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.group.name: "${groupName}"`}
+            tooltipContent={groupName}
+          >
+            {groupName}
           </DetailPanelCopy>
         ),
       },
     ];
-    // Only include entry_meta.type for entry leader
+    // Only include entry_meta.type and entry_meta.source.ip for entry leader
     if (idx === 0) {
-      listItems.push({
-        title: <DetailPanelListItem>entry_meta.type</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={leader.entryMetaType}>
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {dataOrDash(leader.entryMetaType)}
-            </EuiTextColor>
-          </DetailPanelCopy>
-        ),
-      });
+      listItems.push(
+        {
+          title: <DetailPanelListItem>entry_meta.type</DetailPanelListItem>,
+          description: (
+            <DetailPanelCopy
+              textToCopy={`${LEADER_FIELD_PREFIX[idx]}.entry_meta.type: "${entryMetaType}"`}
+              tooltipContent={entryMetaType}
+            >
+              <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                {entryMetaType}
+              </EuiTextColor>
+            </DetailPanelCopy>
+          ),
+        },
+        {
+          title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
+          description: (
+            <DetailPanelCopy
+              textToCopy={`${LEADER_FIELD_PREFIX[idx]}.entry_meta.source.ip: "${entryMetaSourceIp}"`}
+              tooltipContent={entryMetaSourceIp}
+            >
+              {dataOrDash(entryMetaSourceIp)}
+            </DetailPanelCopy>
+          ),
+        }
+      );
     }
-    listItems.push(
-      {
-        title: <DetailPanelListItem>user.name</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={leader.userName}>
-            <span css={styles.description}>{dataOrDash(leader.userName)}</span>
-          </DetailPanelCopy>
-        ),
-      },
-      {
-        title: <DetailPanelListItem>interactive</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={leader.interactive ? 'True' : 'False'}>
-            <span css={styles.description}>{leader.interactive ? 'True' : 'False'}</span>
-          </DetailPanelCopy>
-        ),
-      },
-      {
-        title: <DetailPanelListItem>pid</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={leader.pid}>
-            <span css={styles.description}>{dataOrDash(leader.pid)}</span>
-          </DetailPanelCopy>
-        ),
-      }
-    );
-    // Only include entry_meta.source.ip for entry leader
-    if (idx === 0) {
-      listItems.push({
-        title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={leader.entryMetaSourceIp}>
-            <span css={styles.description}>{dataOrDash(leader.entryMetaSourceIp)}</span>
-          </DetailPanelCopy>
-        ),
-      });
-    }
+
     return {
       ...leaderDescriptionListInfo[idx],
       name: leader.name,
@@ -145,63 +287,46 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
     };
   });
 
-  const processArgs = processDetail.args.length
-    ? `[${processDetail.args.map((arg) => `'${arg}'`)}]`
-    : '-';
+  const {
+    id,
+    start,
+    end,
+    executable,
+    exitCode,
+    pid,
+    workingDirectory,
+    interactive,
+    userName,
+    groupName,
+    args,
+  } = processDetail;
+  const executableText = getProcessExecutableCopyText(executable);
 
   return (
     <>
       <DetailPanelDescriptionList
         listItems={[
           {
-            title: <DetailPanelListItem>id</DetailPanelListItem>,
+            title: <DetailPanelListItem>entity_id</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processDetail.id}>
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.entity_id: "${id}"`}
+                tooltipContent={id}
+              >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processDetail.id)}
+                  {id}
                 </EuiTextColor>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>start</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={processDetail.start}>
-                <span css={styles.description}>{processDetail.start}</span>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>end</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={processDetail.end}>
-                <span css={styles.description}>{processDetail.end}</span>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={processDetail.exit_code}>
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processDetail.exit_code)}
-                </EuiTextColor>
-              </DetailPanelCopy>
-            ),
-          },
-          {
-            title: <DetailPanelListItem>user</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={processDetail.user}>
-                <span css={styles.description}>{dataOrDash(processDetail.user)}</span>
               </DetailPanelCopy>
             ),
           },
           {
             title: <DetailPanelListItem>args</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processArgs}>
-                <span css={styles.description}>{processArgs}</span>
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.args: "${args}"`}
+                tooltipContent={args}
+              >
+                {args}
               </DetailPanelCopy>
             ),
           },
@@ -209,32 +334,107 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>executable</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
-                textToCopy={getProcessExecutableCopyText(processDetail.executable)}
+                textToCopy={`${PROCESS_FIELD_PREFIX}.executable: "${executableText}"`}
+                tooltipContent={executableText}
                 display="block"
               >
-                {processDetail.executable.map((execTuple, idx) => {
-                  const [executable, eventAction] = execTuple;
-                  return (
-                    <div key={`executable-${idx}`} css={styles.description}>
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {executable}
-                      </EuiTextColor>
-                      <EuiTextColor color="subdued" css={styles.executableAction}>
-                        {eventAction}
-                      </EuiTextColor>
-                    </div>
-                  );
-                })}
+                {renderExecs(executable)}
               </DetailPanelCopy>
             ),
           },
           {
-            title: <DetailPanelListItem>process.pid</DetailPanelListItem>,
+            title: <DetailPanelListItem>interactive</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processDetail.pid}>
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.interactive: "${interactive}"`}
+                tooltipContent={interactive}
+              >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processDetail.pid)}
+                  {interactive}
                 </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>working_directory</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.working_directory: "${workingDirectory}"`}
+                tooltipContent={workingDirectory}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {workingDirectory}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>pid</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.pid: "${pid}"`}
+                tooltipContent={pid}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {pid}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>start</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.start: "${start}"`}
+                tooltipContent={start}
+              >
+                {start}
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>end</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.end: "${end}"`}
+                tooltipContent={end}
+              >
+                {end}
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.exit_code: "${exitCode}"`}
+                tooltipContent={exitCode}
+              >
+                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                  {exitCode}
+                </EuiTextColor>
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>user.name</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.user.name: "${userName}"`}
+                tooltipContent={userName}
+              >
+                {userName}
+              </DetailPanelCopy>
+            ),
+          },
+          {
+            title: <DetailPanelListItem>group.name</DetailPanelListItem>,
+            description: (
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.group.name: "${groupName}"`}
+                tooltipContent={groupName}
+              >
+                {groupName}
               </DetailPanelCopy>
             ),
           },

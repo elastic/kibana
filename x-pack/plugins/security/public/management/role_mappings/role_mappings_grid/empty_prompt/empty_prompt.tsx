@@ -8,8 +8,8 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
+import type { ScopedHistory } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ScopedHistory } from 'src/core/public';
 
 import { CreateRoleMappingButton } from '../create_role_mapping_button';
 

@@ -136,7 +136,7 @@ export interface SwimlaneProps {
   showLegend?: boolean;
   swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
   swimlaneType: SwimlaneType;
-  selection?: AppStateSelectedCells;
+  selection?: AppStateSelectedCells | null;
   onCellsSelection?: (payload?: AppStateSelectedCells) => void;
   'data-test-subj'?: string;
   onResize: (width: number) => void;

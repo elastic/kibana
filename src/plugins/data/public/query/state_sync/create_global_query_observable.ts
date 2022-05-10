@@ -9,10 +9,10 @@
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { isFilterPinned } from '@kbn/es-query';
+import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { TimefilterSetup } from '../timefilter';
 import { FilterManager } from '../filter_manager';
-import { QueryState, QueryStateChange } from './index';
-import { createStateContainer } from '../../../../kibana_utils/public';
+import { QueryState, QueryStateChange } from '.';
 import { compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 import type { QueryStringContract } from '../query_string';
 

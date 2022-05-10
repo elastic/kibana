@@ -98,7 +98,9 @@ jest.mock('../../../contexts/kibana', () => ({
   },
 }));
 
-const MockedEuiSuperDatePicker = EuiSuperDatePicker as jest.MockedClass<typeof EuiSuperDatePicker>;
+const MockedEuiSuperDatePicker = EuiSuperDatePicker as jest.MockedFunction<
+  typeof EuiSuperDatePicker
+>;
 
 describe('Navigation Menu: <DatePickerWrapper />', () => {
   beforeEach(() => {

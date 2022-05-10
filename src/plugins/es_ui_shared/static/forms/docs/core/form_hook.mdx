@@ -212,3 +212,22 @@ Sets field errors imperatively.
 ```js
 form.setFieldErrors('name', [{ message: 'There is an error in the field' }]);
 ```
+
+### updateFieldValues()
+
+**Arguments:** `updatedFormData: Partial<T>, options?: { runDeserializer?: boolean }` 
+
+Update multiple field values at once. You don't need to provide all the form fields, **partial** update is supported. This method is mainly useful to update an array of object fields or to avoid multiple `form.setFieldValue()` calls.
+
+```js
+// Update an array of object (e.g "myArray[0].foo", "myArray[0].baz"...)
+form.updateFieldValues({
+  myArray: [
+    { foo: 'bar', baz: true },
+    { foo2: 'bar2', baz: false }
+  ]
+});
+
+// or simply multiple fields at once
+form.updateFieldValues({ foo: 'bar', baz: false })
+```

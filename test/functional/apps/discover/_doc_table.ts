@@ -189,6 +189,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(defaultMessageElResubmit).to.be.ok();
           });
         });
+        it('should show allow toggling columns from the expanded document', async function () {
+          await PageObjects.discover.clickNewSearchButton();
+          await testSubjects.click('dscExplorerCalloutClose');
+          await retry.try(async function () {
+            await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+
+            // add columns
+            const fields = ['_id', '_index', 'agent'];
+            for (const field of fields) {
+              await testSubjects.click(`toggleColumnButton-${field}`);
+            }
+
+            const headerWithFields = await docTable.getHeaderFields();
+            expect(headerWithFields.join(' ')).to.contain(fields.join(' '));
+
+            // remove columns
+            for (const field of fields) {
+              await testSubjects.click(`toggleColumnButton-${field}`);
+            }
+
+            const headerWithoutFields = await docTable.getHeaderFields();
+            expect(headerWithoutFields.join(' ')).not.to.contain(fields.join(' '));
+          });
+        });
       });
 
       describe('add and remove columns', function () {

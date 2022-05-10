@@ -8,6 +8,7 @@
 
 import React, { Component } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   getSupportedScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -15,8 +16,6 @@ import {
 
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';
-
-import { DataView, DataViewsPublicPluginStart } from '../../../../../../plugins/data_views/public';
 
 interface ScriptedFieldsTableProps {
   indexPattern: DataView;

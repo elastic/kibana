@@ -7,7 +7,7 @@
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
-import React, { Component, ReactElement } from 'react';
+import React, { Component } from 'react';
 import {
   DocLinksStart,
   HttpStart,
@@ -15,11 +15,13 @@ import {
   NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import { IndexPattern, QueryStringInput } from '../../../../../src/plugins/data/public';
-
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
@@ -58,6 +60,8 @@ function getServiceMocks() {
       query: {
         savedQueries: {},
       },
+    },
+    unifiedSearch: {
       autocomplete: {
         hasQuerySuggestions: () => false,
       },
@@ -87,18 +91,23 @@ describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as IndexPattern)),
+      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as DataView)),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();
     },
-    onIndexPatternChange: (indexPattern?: IndexPattern) => {
+    onIndexPatternChange: (indexPattern?: DataView) => {
       instance.setProps({
         ...defaultProps,
         currentIndexPattern: indexPattern,
       });
     },
   };
+
+  beforeEach(() => {
+    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+    setAutocomplete(autocompleteStart.autocomplete);
+  });
 
   beforeEach(() => {
     store = createMockGraphStore({
@@ -194,9 +203,7 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (
-      instance.find(QueryStringInput).prop('prepend') as ReactElement
-    ).props.children.props.onClick();
+    instance.find('[data-test-subj="graphDatasourceButton"]').first().simulate('click');
 
     expect(openSourceModal).toHaveBeenCalled();
   });

@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   FactoryQueryTypes,
   MatrixHistogramRequestOptions,
@@ -15,17 +15,13 @@ import {
   MatrixHistogramQuery,
   MatrixHistogramType,
   MatrixHistogramDataConfig,
-  MatrixHistogramQueryEntities,
 } from '../../../../../common/search_strategy/security_solution';
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../types';
 import { getGenericData } from './helpers';
 import { alertsMatrixHistogramConfig } from './alerts';
 import { anomaliesMatrixHistogramConfig } from './anomalies';
-import {
-  authenticationsMatrixHistogramConfig,
-  authenticationsMatrixHistogramEntitiesConfig,
-} from './authentications';
+import { authenticationsMatrixHistogramConfig } from './authentications';
 import { dnsMatrixHistogramConfig } from './dns';
 import { eventsMatrixHistogramConfig } from './events';
 import { previewMatrixHistogramConfig } from './preview';
@@ -34,7 +30,6 @@ const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [MatrixHistogramType.alerts]: alertsMatrixHistogramConfig,
   [MatrixHistogramType.anomalies]: anomaliesMatrixHistogramConfig,
   [MatrixHistogramType.authentications]: authenticationsMatrixHistogramConfig,
-  [MatrixHistogramType.authenticationsEntities]: authenticationsMatrixHistogramEntitiesConfig,
   [MatrixHistogramType.dns]: dnsMatrixHistogramConfig,
   [MatrixHistogramType.events]: eventsMatrixHistogramConfig,
   [MatrixHistogramType.preview]: previewMatrixHistogramConfig,
@@ -113,9 +108,8 @@ export const matrixHistogramEntities: SecuritySolutionFactory<typeof MatrixHisto
 };
 
 export const matrixHistogramFactory: Record<
-  typeof MatrixHistogramQuery | typeof MatrixHistogramQueryEntities,
+  typeof MatrixHistogramQuery,
   SecuritySolutionFactory<FactoryQueryTypes>
 > = {
   [MatrixHistogramQuery]: matrixHistogram,
-  [MatrixHistogramQueryEntities]: matrixHistogramEntities,
 };

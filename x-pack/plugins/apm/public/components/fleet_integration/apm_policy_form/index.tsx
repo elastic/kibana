@@ -7,6 +7,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getAgentAuthorizationSettings } from './settings_definition/agent_authorization_settings';
 import { getApmSettings } from './settings_definition/apm_settings';
 import {
@@ -25,19 +26,13 @@ import {
 import { SettingsForm, SettingsSection } from './settings_form';
 import { isSettingsFormValid, mergeNewVars } from './settings_form/utils';
 import { PackagePolicyVars } from './typings';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
   vars?: PackagePolicyVars;
-  isCloudPolicy: boolean;
 }
 
-export function APMPolicyForm({
-  vars = {},
-  isCloudPolicy,
-  updateAPMPolicy,
-}: Props) {
+export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
   const tailSamplingPoliciesDocsLink =
     useKibana().services.docLinks?.links.apm.tailSamplingPolicies;
   const {
@@ -48,17 +43,15 @@ export function APMPolicyForm({
     tailSamplingSettings,
   } = useMemo(() => {
     return {
-      apmSettings: getApmSettings({ isCloudPolicy }),
+      apmSettings: getApmSettings(),
       rumSettings: getRUMSettings(),
       tlsSettings: getTLSSettings(),
-      agentAuthorizationSettings: getAgentAuthorizationSettings({
-        isCloudPolicy,
-      }),
+      agentAuthorizationSettings: getAgentAuthorizationSettings(),
       tailSamplingSettings: getTailSamplingSettings(
         tailSamplingPoliciesDocsLink
       ),
     };
-  }, [isCloudPolicy, tailSamplingPoliciesDocsLink]);
+  }, [tailSamplingPoliciesDocsLink]);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields

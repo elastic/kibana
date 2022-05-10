@@ -13,7 +13,6 @@ export * from './get_general_filters';
 export * from './get_ids_and_namespaces';
 export * from './get_saved_object_type';
 export * from './get_saved_object_types';
-export * from './get_trusted_apps_filter';
 export * from './has_large_value_list';
 export * from './helpers';
 export * from './types';

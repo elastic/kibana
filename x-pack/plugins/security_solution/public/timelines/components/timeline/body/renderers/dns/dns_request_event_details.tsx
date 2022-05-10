@@ -9,7 +9,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
 import { Details } from '../helpers';
 import { Ecs } from '../../../../../../../common/ecs';
 import { NetflowRenderer } from '../netflow';
@@ -17,7 +16,6 @@ import { NetflowRenderer } from '../netflow';
 import { DnsRequestEventDetailsLine } from './dns_request_event_details_line';
 
 interface Props {
-  browserFields: BrowserFields;
   contextId: string;
   data: Ecs;
   isDraggable?: boolean;
