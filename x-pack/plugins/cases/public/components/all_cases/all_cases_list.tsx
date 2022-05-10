@@ -57,6 +57,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { owner, userCanCrud } = useCasesContext();
     const hasOwner = !!owner.length;
     const availableSolutions = useAvailableCasesOwners();
+    const [refresh, setRefresh] = useState(0);
 
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
@@ -110,8 +111,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
+        setRefresh(refresh + 1);
       },
-      [deselectCases, doRefresh, refetchCases]
+      [deselectCases, doRefresh, refetchCases, refresh]
     );
 
     const tableOnChangeCallback = useCallback(
@@ -207,7 +209,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           className="essentialAnimation"
           $isShow={(isCasesLoading || isLoading) && !isDataEmpty}
         />
-        <Count refresh={data.total} />
+        <Count refresh={refresh} />
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}

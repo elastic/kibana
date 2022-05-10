@@ -111,5 +111,6 @@ export const MTTR_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
 });
 
 export const MTTR_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
-  defaultMessage: 'Mean time to response.',
+  defaultMessage:
+    'MTTR (mean time to respond) is the average time it takes to recover from a product or system failure from the time when you are first alerted to that failure. This does not include any lag time in your alert system. ',
 });
