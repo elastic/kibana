@@ -36,6 +36,8 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { sourcererSelectors } from '../../../common/store';
 
+const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
+
 const OverlayStyle = css`
   display: flex;
   flex-direction: column;
@@ -65,10 +67,12 @@ const StyledResolver = styled(Resolver)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM};
-  background-color: ${theme.eui.euiColorEmptyShade};`}
+  ${({ theme }) => `background-color: ${theme.eui.euiColorEmptyShade};`}
   overflow: hidden;
   width: 100%;
+  &.${SESSION_VIEW_FULL_SCREEN} {
+    ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM}`}
+  }
 `;
 
 interface GraphOverlayProps {
@@ -168,7 +172,9 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
           <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
-          <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
+          <ScrollableFlexItem grow={2} className={fullScreen ? SESSION_VIEW_FULL_SCREEN : ''}>
+            {SessionView}
+          </ScrollableFlexItem>
         </EuiFlexGroup>
       </OverlayContainer>
     );
