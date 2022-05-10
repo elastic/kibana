@@ -30,11 +30,14 @@ import {
   LogsEndpointActionResponse,
   ActivityLogEntry,
 } from '../../../common/endpoint/types';
-import { doesLogsEndpointActionsIndexExist } from '.';
+import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
 
-const actionsIndices = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
+export const ACTION_REQUEST_INDICES = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
 // search all responses indices irrelevant of namespace
-const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN];
+export const ACTION_RESPONSE_INDICES = [
+  AGENT_ACTIONS_RESULTS_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+];
 export const logsEndpointActionsRegex = new RegExp(`(^\.ds-\.logs-endpoint\.actions-default-).+`);
 // matches index names like .ds-.logs-endpoint.action.responses-name_space---suffix-2022.01.25-000001
 export const logsEndpointResponsesRegex = new RegExp(
@@ -173,7 +176,7 @@ export const getActionRequestsResult = async ({
   });
 
   const actionsSearchQuery: SearchRequest = {
-    index: hasLogsEndpointActionsIndex ? actionsIndices : AGENT_ACTIONS_INDEX,
+    index: hasLogsEndpointActionsIndex ? ACTION_REQUEST_INDICES : AGENT_ACTIONS_INDEX,
     size,
     from,
     body: {
@@ -238,7 +241,9 @@ export const getActionResponsesResult = async ({
   });
 
   const responsesSearchQuery: SearchRequest = {
-    index: hasLogsEndpointActionResponsesIndex ? responseIndices : AGENT_ACTIONS_RESULTS_INDEX,
+    index: hasLogsEndpointActionResponsesIndex
+      ? ACTION_RESPONSE_INDICES
+      : AGENT_ACTIONS_RESULTS_INDEX,
     size: 1000,
     body: {
       query: {

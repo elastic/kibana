@@ -7,6 +7,7 @@
 
 import seedrandom from 'seedrandom';
 import uuid from 'uuid';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
 /** Array of 14 day offsets */
@@ -179,5 +180,46 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   protected randomHostname(): string {
     return `Host-${this.randomString(10)}`;
+  }
+
+  /**
+   * Returns an single search hit (normally found in a `SearchResponse`) for the given document source.
+   * @param hitSource
+   */
+  toEsSearchHit<T extends object = object>(hitSource: T): estypes.SearchHit<T> {
+    return {
+      _index: 'some-index',
+      _id: this.seededUUIDv4(),
+      _score: 1.0,
+      _source: hitSource,
+    };
+  }
+
+  /**
+   * Returns an ES Search Response for the give set of records. Each record will be wrapped with
+   * the `toEsSearchHit()`
+   * @param hitsSource
+   */
+  toEsSearchResponse<T extends object = object>(
+    hitsSource: Array<estypes.SearchHit<T>>
+  ): estypes.SearchResponse<T> {
+    return {
+      took: 3,
+      timed_out: false,
+      _shards: {
+        total: 2,
+        successful: 2,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: hitsSource.length,
+          relation: 'eq',
+        },
+        max_score: 0,
+        hits: hitsSource,
+      },
+    };
   }
 }

@@ -190,6 +190,7 @@ export const isolationRequestHandler = function (
             body: {
               ...doc,
             },
+            refresh: 'wait_for',
           },
           { meta: true }
         );
@@ -221,6 +222,7 @@ export const isolationRequestHandler = function (
             timeout: 300, // 5 minutes
             user_id: doc.user.id,
           },
+          refresh: 'wait_for',
         },
         { meta: true }
       );
