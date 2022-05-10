@@ -5,9 +5,50 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
 import { FILE_SO_TYPE } from '../../common';
 import type { FileSavedObjectAttributes } from '../../common';
+
+type Properties = Record<keyof FileSavedObjectAttributes, SavedObjectsFieldMapping>;
+
+const properties: Properties = {
+  created_at: {
+    type: 'date',
+  },
+  updated_at: {
+    type: 'date',
+  },
+  name: {
+    type: 'text',
+  },
+  alt: {
+    type: 'text',
+  },
+  status: {
+    type: 'keyword',
+  },
+  storage_id: {
+    type: 'keyword',
+  },
+  content_ref: {
+    type: 'keyword',
+  },
+  mime: {
+    type: 'keyword',
+  },
+  extension: {
+    type: 'keyword',
+  },
+  size: {
+    type: 'long',
+  },
+  meta: {
+    type: 'object',
+  },
+  plugin_id: {
+    type: 'keyword',
+  },
+};
 
 export const fileObjectType: SavedObjectsType<FileSavedObjectAttributes> = {
   name: FILE_SO_TYPE,
@@ -18,43 +59,6 @@ export const fileObjectType: SavedObjectsType<FileSavedObjectAttributes> = {
   },
   mappings: {
     dynamic: false,
-    properties: {
-      created_at: {
-        type: 'date',
-      },
-      updated_at: {
-        type: 'date',
-      },
-      name: {
-        type: 'text',
-      },
-      alt: {
-        type: 'text',
-      },
-      status: {
-        type: 'keyword',
-      },
-      created_by: {
-        type: 'keyword',
-      },
-      storage_id: {
-        type: 'keyword',
-      },
-      content_ref: {
-        type: 'keyword',
-      },
-      mime: {
-        type: 'keyword',
-      },
-      extension: {
-        type: 'keyword',
-      },
-      size: {
-        type: 'long',
-      },
-      metadata: {
-        type: 'object',
-      },
-    },
+    properties,
   },
 };

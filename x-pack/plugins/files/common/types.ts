@@ -10,7 +10,8 @@ import type { SavedObjectAttributes } from '@kbn/core/server';
 
 export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'ERROR';
 
-export interface FileSavedObjectAttributes extends SavedObjectAttributes {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type FileSavedObjectAttributes = {
   created_at: string;
 
   updated_at: string;
@@ -21,19 +22,24 @@ export interface FileSavedObjectAttributes extends SavedObjectAttributes {
   name: string;
 
   /**
-   * An alternate even more human-friendly name for the contents. This should be
-   * usable by, for example, the alt attribute in image tags if the content is an
-   * image.
+   * Unique identifier of the plugin that created the file.
    */
-  alt: string;
-
-  status: FileStatus;
+  plugin_id: string;
 
   /**
    * An identifier for the type of storage where the file is saved. This could be in
    * ES, AWS S3, Google Cloud Storage or any other blob storage.
    */
   storage_id: string;
+
+  status: FileStatus;
+
+  /**
+   * An alternate even more human-friendly name for the contents. This should be
+   * usable by, for example, the alt attribute in image tags if the content is an
+   * image.
+   */
+  alt?: string;
 
   /**
    * A unique ID for file content that enables retrieval from a blob store.
@@ -61,5 +67,5 @@ export interface FileSavedObjectAttributes extends SavedObjectAttributes {
   /**
    * User-defined metadata
    */
-  metadata: SavedObjectAttributes;
-}
+  meta?: SavedObjectAttributes;
+};
