@@ -66,6 +66,14 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
     }
   }, [errors, notifications.toasts]);
 
+  const buttonLabel = isRunning
+    ? i18n.translate('xpack.aiops.stopbuttonText', {
+        defaultMessage: 'Stop development',
+      })
+    : i18n.translate('xpack.aiops.startbuttonText', {
+        defaultMessage: 'Start development',
+      });
+
   return (
     <EuiPage restrictWidth="1000px">
       <EuiPageBody>
@@ -84,19 +92,13 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
             <EuiText>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                    {!isRunning && (
-                      <FormattedMessage
-                        id="xpack.aiops.startbuttonText"
-                        defaultMessage="Start development"
-                      />
-                    )}
-                    {isRunning && (
-                      <FormattedMessage
-                        id="xpack.aiops.cancelbuttonText"
-                        defaultMessage="Stop development"
-                      />
-                    )}
+                  <EuiButton
+                    type="primary"
+                    size="s"
+                    onClick={onClickHandler}
+                    aria-label={buttonLabel}
+                  >
+                    {buttonLabel}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
