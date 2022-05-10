@@ -116,7 +116,6 @@ export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
 
 export interface ActionConnectorFieldsProps {
   readOnly: boolean;
-  consumer?: string;
   setCallbacks: ActionConnectorFieldsSetCallbacks;
   isEdit: boolean;
 }
