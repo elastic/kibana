@@ -50,7 +50,7 @@ export const workpadTemplateType = (
       },
     },
   },
-  migrations: templateWorkpadMigrationsFactory(deps),
+  migrations: () => templateWorkpadMigrationsFactory(deps),
   management: {
     importableAndExportable: false,
     icon: 'canvasApp',
