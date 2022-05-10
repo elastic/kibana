@@ -28,6 +28,7 @@ import {
 } from '../../screens/exceptions';
 import { createExceptionList } from '../../tasks/api_calls/exceptions';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
+import { TOASTER } from '../../screens/alerts_detection_rules';
 
 const getExceptionList1 = () => ({
   ...getExceptionList(),
@@ -72,18 +73,21 @@ describe('Exceptions Table', () => {
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
   });
 
-  it('Exports exception list', function () {
+  it.only('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
     visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     exportExceptionList();
 
-    cy.wait('@export').then(({ response }) =>
-      cy
-        .wrap(response?.body)
-        .should('eql', expectedExportedExceptionList(this.exceptionListResponse))
-    );
+    cy.wait('@export').then(({ response }) => {
+      cy.wrap(response?.body).should(
+        'eql',
+        expectedExportedExceptionList(this.exceptionListResponse)
+      );
+
+      cy.get(TOASTER).should('have.text', 'Exception list export success');
+    });
   });
 
   it('Filters exception lists on search', () => {
