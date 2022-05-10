@@ -727,6 +727,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               category: response.body.rule_type_id,
               license: 'basic',
               ruleset: 'alertsFixture',
+              name: 'abc',
             },
             consumer: 'alertsFixture',
             numActiveAlerts: 0,
