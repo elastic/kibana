@@ -31,6 +31,19 @@ export function validateTimeRange(time?: TimeRange): boolean {
   return !!(momentDateFrom && momentDateFrom.isValid() && momentDateTo && momentDateTo.isValid());
 }
 
+export function createAbsoluteTimeRange(time: TimeRange) {
+  if (validateTimeRange(time) === false) {
+    return null;
+  }
+
+  const momentDateFrom = dateMath.parse(time.from);
+  const momentDateTo = dateMath.parse(time.to);
+  return {
+    to: momentDateTo?.valueOf(),
+    from: momentDateFrom?.valueOf(),
+  };
+}
+
 export const timeFormatter = (value: number) => {
   return formatDate(value, TIME_FORMAT);
 };

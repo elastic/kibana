@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
@@ -23,6 +22,7 @@ import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import { createAbsoluteTimeRange } from '../../../../../common/util/date_utils';
 import { createQueries, getDefaultQuery } from '../utils/new_job_utils';
 import { lensOperationToMlFunction } from './utils';
 
@@ -58,8 +58,29 @@ export async function canCreateAndStashADJob(
       kibanaConfig
     );
 
-    const start = moment(startString).valueOf();
-    const end = moment(endString).valueOf();
+    let start: number | undefined;
+    let end: number | undefined;
+    let includeTimeRange = true;
+
+    try {
+      // attempt to parse the start and end dates.
+      // if start and end values cannot be determined
+      // instruct the job cloning code to auto-select the
+      // full time range for the index.
+      const range = createAbsoluteTimeRange({ to: endString, from: startString });
+      start = range?.from;
+      end = range?.to;
+
+      if (start === undefined || end === undefined || isNaN(start) || isNaN(end)) {
+        throw Error('Incompatible time range');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      includeTimeRange = false;
+      start = undefined;
+      end = undefined;
+    }
 
     stashJobForCloning(
       {
@@ -70,7 +91,8 @@ export async function canCreateAndStashADJob(
         end,
       } as JobCreatorType,
       true,
-      true
+      includeTimeRange,
+      !includeTimeRange
     );
   } catch (error) {
     // eslint-disable-next-line no-console
