@@ -41,14 +41,20 @@ export const registerProcessEventsRoute = (
       const client = (await context.core).elasticsearch.client.asCurrentUser;
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const { sessionEntityId, cursor, forward = true } = request.query;
-      const body = await doSearch(client, alertsClient, sessionEntityId, cursor, forward);
+      const body = await fetchEventsAndScopedAlerts(
+        client,
+        alertsClient,
+        sessionEntityId,
+        cursor,
+        forward
+      );
 
       return response.ok({ body });
     }
   );
 };
 
-export const doSearch = async (
+export const fetchEventsAndScopedAlerts = async (
   client: ElasticsearchClient,
   alertsClient: AlertsClient,
   sessionEntityId: string,

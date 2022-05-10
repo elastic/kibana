@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import uuid from 'uuid';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 import {
   AlertStatusEventEntityIdMap,
@@ -19,7 +20,7 @@ import { ProcessImpl } from './hooks';
 // This is used to ensure we always have a record for a session leader, as well as
 // a parent record for potentially orphaned processes
 export function inferProcessFromLeaderInfo(sourceEvent?: ProcessEvent, leader?: ProcessFields) {
-  const entityId = leader?.entity_id || '';
+  const entityId = leader?.entity_id || uuid.v4();
   const process = new ProcessImpl(entityId);
 
   if (sourceEvent && leader) {
