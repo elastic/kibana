@@ -35,9 +35,13 @@ fi
 if [[ "$BAZEL_CACHE_MODE" == "populate-local-gcs" ]]; then
   echo "[bazel] enabling caching with GCS buckets for local dev"
 
+  # Some of the agents that populate this bazel cache are not GCP instances, so we need to grab separate credentials
+  BAZEL_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
+  retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_CREDENTIALS_FILE"
+
 cat <<EOF >> $KIBANA_DIR/.bazelrc
   build --remote_cache=https://storage.googleapis.com/kibana-local-bazel-remote-cache
-  build --google_default_credentials
+  build --google_credentials=$BAZEL_CREDENTIALS_FILE
 EOF
 fi
 

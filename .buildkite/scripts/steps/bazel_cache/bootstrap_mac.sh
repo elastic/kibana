@@ -7,10 +7,6 @@ source .buildkite/scripts/common/util.sh
 export BAZEL_CACHE_MODE=populate-local-gcs
 export DISABLE_BOOTSTRAP_VALIDATION=true
 
-GOOGLE_APPLICATION_CREDENTIALS="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
-export GOOGLE_APPLICATION_CREDENTIALS
-retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$GOOGLE_APPLICATION_CREDENTIALS"
-
 # Clear out bazel cache between runs to make sure that any artifacts that don't exist in the cache are uploaded
 rm -rf ~/.bazel-cache
 
