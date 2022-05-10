@@ -359,7 +359,6 @@ export interface DocLinks {
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     upgradeElasticAgent: string;
-    upgradeElasticAgent712lower: string;
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;
