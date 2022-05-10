@@ -54,7 +54,7 @@ export const Count: FunctionComponent<CountProps> = ({ refresh }) => {
 
   return (
     <CountFlexGroup>
-      <EuiFlexGroup responsive={true}>
+      <EuiFlexGroup responsive={true} data-test-subj="cases-count-stats">
         <EuiFlexItem grow={true}>
           <StatusStats
             dataTestSubj="openStatsHeader"
