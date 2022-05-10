@@ -197,7 +197,7 @@ function renderPopoverContent({
     return (
       <EuiFlexGroup gutterSize="none" direction="column" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
             <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
