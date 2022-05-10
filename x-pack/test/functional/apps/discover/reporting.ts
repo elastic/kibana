@@ -151,6 +151,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
+      afterEach(async () => {
+        await PageObjects.reporting.checkForReportingToasts();
+      });
+
       it('generates a report with data', async () => {
         await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
