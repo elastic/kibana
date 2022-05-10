@@ -54,7 +54,7 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
-import { DashboardViewTour, DASHBOARD_VIEW_TOUR_STORAGE_KEY } from '../../tour';
+import { DashboardViewTour, DASHBOARD_VIEW_TOUR_STORAGE_KEY } from '../tour';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
