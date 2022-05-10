@@ -50,6 +50,21 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const getCommandByPlatform = (plat: PLATFORM_TYPE) => {
+    switch (plat) {
+      case 'linux':
+        return linuxCommand;
+      case 'mac':
+        return macCommand;
+      case 'windows':
+        return windowsCommand;
+      case 'deb':
+        return linuxDebCommand;
+      case 'rpm':
+        return linuxRpmCommand;
+    }
+  };
+
   return (
     <>
       {isK8s ? (
@@ -67,39 +82,22 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             })}
           />
           <EuiSpacer size="s" />
-          {platform === 'linux' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{linuxCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'mac' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{macCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'windows' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{windowsCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'deb' && (
+          {(platform === 'deb' || platform === 'rpm') && (
             <>
               {systemPackageCallout}
               <EuiSpacer size="m" />
-              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-                <CommandCode>{linuxDebCommand}</CommandCode>
-              </EuiCodeBlock>
             </>
           )}
-          {platform === 'rpm' && (
-            <>
-              {systemPackageCallout}
-              <EuiSpacer size="m" />
-              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-                <CommandCode>{linuxRpmCommand}</CommandCode>
-              </EuiCodeBlock>
-            </>
-          )}
+          <EuiCodeBlock
+            fontSize="m"
+            isCopyable={true}
+            paddingSize="m"
+            css={`
+              max-width: 1100px;
+            `}
+          >
+            <CommandCode>{getCommandByPlatform(platform)}</CommandCode>
+          </EuiCodeBlock>
         </>
       )}
     </>
