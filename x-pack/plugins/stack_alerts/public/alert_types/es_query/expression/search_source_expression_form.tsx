@@ -58,7 +58,7 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
   return action.type === 'filter' || action.type === 'index' || action.type === 'query';
 };
 
-const withDebounce = debounce((execute: () => void) => execute(), 500, {
+const withDebounce = debounce((execute: () => void) => execute(), 0, {
   leading: false,
   trailing: true,
 });

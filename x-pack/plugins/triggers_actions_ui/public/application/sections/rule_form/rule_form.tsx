@@ -83,7 +83,7 @@ function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
 
-const withDebounce = debounce((execute: () => void) => execute(), 500, {
+const withDebounce = debounce((execute: () => void) => execute(), 0, {
   leading: false,
   trailing: true,
 });
