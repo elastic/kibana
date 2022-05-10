@@ -12,10 +12,11 @@ import { strings } from '../i18n';
 import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
 type CommonDataLayerArgs = ExtendedDataLayerArgs | DataLayerArgs;
-
-export const commonDataLayerArgs: {
+type CommonDataLayerFnArgs = {
   [key in keyof CommonDataLayerArgs]: ArgumentType<CommonDataLayerArgs[key]>;
-} = {
+};
+
+export const commonDataLayerArgs: CommonDataLayerFnArgs = {
   hide: {
     types: ['boolean'],
     default: false,
