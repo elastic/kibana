@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import {
+  Dimension,
+  prepareLogTable,
+  validateAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn } from '../types';
@@ -37,24 +41,30 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     palette,
     ...restArgs
   } = args;
-  const dataLayers: DataLayerConfigResult[] = [
-    {
-      type: DATA_LAYER,
-      seriesType,
-      accessors,
-      xAccessor,
-      hide,
-      splitAccessor,
-      columnToLabel,
-      yScaleType,
-      xScaleType,
-      isHistogram,
-      palette,
-      yConfig,
-      layerType: LayerTypes.DATA,
-      table: data,
-    },
-  ];
+
+  const dataLayer: DataLayerConfigResult = {
+    type: DATA_LAYER,
+    seriesType,
+    accessors,
+    xAccessor,
+    hide,
+    splitAccessor,
+    columnToLabel,
+    yScaleType,
+    xScaleType,
+    isHistogram,
+    palette,
+    yConfig,
+    layerType: LayerTypes.DATA,
+    table: data,
+  };
+
+  validateAccessor(dataLayer.xAccessor, dataLayer.table.columns);
+  validateAccessor(dataLayer.splitAccessor, dataLayer.table.columns);
+  dataLayer.accessors.forEach((accessor) => validateAccessor(accessor, dataLayer.table.columns));
+
+  const dataLayers: DataLayerConfigResult[] = [dataLayer];
+
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
     ...appendLayerIds(referenceLineLayers, 'referenceLineLayers'),

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
@@ -42,12 +43,19 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
     },
   },
   fn(input, args) {
+    const table = args.table ?? input;
+    const accessors = args.accessors ?? [];
+
+    validateAccessor(args.xAccessor, table.columns);
+    validateAccessor(args.splitAccessor, table.columns);
+    accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
+
     return {
       type: EXTENDED_DATA_LAYER,
       ...args,
-      accessors: args.accessors ?? [],
       layerType: LayerTypes.DATA,
-      table: args.table ?? input,
+      accessors,
+      table,
     };
   },
 };
