@@ -216,7 +216,7 @@ management section itself.
 
 
 |{kib-repo}blob/{branch}/src/plugins/metadata_events_streams/README.md[metadataEventsStreams]
-|The metadataEventsStreams plugin manages metadata events streams for entities. Currently used for saved objects created by users where we want to register the "viewed" events.
+|The metadataEventsStreams plugin manages metadata events streams (e.g. "viewed"|"edited") for entities.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -308,7 +308,7 @@ In general this plugin provides:
 
 
 |{kib-repo}blob/{branch}/src/plugins/user_content/README.md[userContent]
-|The userContent plugin manages all the user generated content (Saved Objects).
+|The userContent plugin manages user generated content (Saved Objects created by our users that we surface in the UI).
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
