@@ -70,6 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'observability',
           'securitySolution',
           'kibana',
+          'kibana',
         ]);
       });
 
@@ -120,7 +121,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows only the kibana solution', async () => {
         const solutions = await PageObjects.home.getVisibileSolutions();
-        expect(solutions).to.eql(['kibana']);
+        expect(solutions).to.eql(['kibana', 'kibana']);
       });
 
       it('does not show the management section', async () => {
