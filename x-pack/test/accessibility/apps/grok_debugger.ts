@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // Fixes:https://github.com/elastic/kibana/issues/62102
   describe('Dev tools grok debugger', () => {
-     before(async () => {
+    before(async () => {
       await PageObjects.common.navigateToApp('grokDebugger');
       await grokDebugger.assertExists();
     });
