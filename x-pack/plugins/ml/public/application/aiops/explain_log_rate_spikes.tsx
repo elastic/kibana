@@ -30,7 +30,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
     }
   }, []);
 
-  return ExplainLogRateSpikes ? (
+  return (
     <>
       {ExplainLogRateSpikes !== null ? (
         <>
@@ -45,7 +45,5 @@ export const ExplainLogRateSpikesPage: FC = () => {
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </>
-  ) : (
-    <></>
   );
 };
