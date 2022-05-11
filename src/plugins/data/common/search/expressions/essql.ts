@@ -8,23 +8,26 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
+import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import {
+  Datatable,
+  DatatableColumnType,
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from '@kbn/expressions-plugin/common';
-import type {
-  EssqlSearchStrategyRequest,
-  EssqlSearchStrategyResponse,
-} from '@kbn/canvas-plugin/types';
 
+import { map, zipObject } from 'lodash';
 import { lastValueFrom } from 'rxjs';
-import { ISearchGeneric } from '..';
-
-const name = 'essql';
+import {
+  ISearchGeneric,
+  SqlSearchStrategyRequest,
+  SqlSearchStrategyResponse,
+  SQL_SEARCH_STRATEGY,
+} from '..';
 
 type Input = ExpressionValueFilter;
-type Output = any;
+type Output = Promise<Datatable>;
 
 interface Arguments {
   query: string;
@@ -48,9 +51,28 @@ interface EssqlStartDependencies {
   search: ISearchGeneric;
 }
 
+function normalizeType(type: string): DatatableColumnType {
+  switch (type) {
+    case ES_FIELD_TYPES._INDEX:
+    case ES_FIELD_TYPES.GEO_POINT:
+    case ES_FIELD_TYPES.IP:
+      return KBN_FIELD_TYPES.STRING;
+    case '_version':
+      return KBN_FIELD_TYPES.NUMBER;
+    case 'datetime':
+      return KBN_FIELD_TYPES.DATE;
+    default:
+      return castEsToKbnFieldTypeName(type) as DatatableColumnType;
+  }
+}
+
+function sanitize(value: string) {
+  return value.replace(/[\(\)]/g, '_');
+}
+
 export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
   const essql: EssqlExpressionFunctionDefinition = {
-    name,
+    name: 'essql',
     type: 'datatable',
     inputTypes: ['filter'],
     help: i18n.translate('data.search.essql.help', {
@@ -90,7 +112,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         }),
       },
     },
-    async fn(input, args, { getKibanaRequest }) {
+    async fn(input, { parameter, timezone, count, query }, { getKibanaRequest }) {
       const { search } = await getStartDependencies(() => {
         const request = getKibanaRequest?.();
         if (!request) {
@@ -103,43 +125,59 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         return request;
       });
 
-      const { parameter, ...restOfArgs } = args;
-      const req = {
-        ...restOfArgs,
+      const params = {
+        query,
+        fetch_size: count,
+        time_zone: timezone,
         params: parameter,
-        filter: input.and,
+        field_multi_value_leniency: true,
+        filter: {
+          bool: {
+            must: [{ match_all: {} }],
+          },
+        },
       };
 
-      return lastValueFrom(
-        search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
-          strategy: 'essql',
-        })
-      )
-        .then(({ columns, rows }: EssqlSearchStrategyResponse) => {
-          return {
-            type: 'datatable',
-            meta: {
-              type: 'essql',
-            },
-            columns,
-            rows,
-          };
-        })
-        .catch((e) => {
-          let message = `Unexpected error from Elasticsearch: ${e.message}`;
-          if (e.err) {
-            const { type, reason } = e.err.attributes;
-            if (type === 'parsing_exception') {
-              message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
-            } else {
-              message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
-            }
-          }
+      try {
+        const { rawResponse: body } = await lastValueFrom(
+          search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(
+            { params },
+            { strategy: SQL_SEARCH_STRATEGY }
+          )
+        );
 
-          // Re-write the error message before surfacing it up
-          e.message = message;
-          throw e;
-        });
+        const columns =
+          body.columns?.map(({ name, type }) => ({
+            id: sanitize(name),
+            name: sanitize(name),
+            meta: { type: normalizeType(type) },
+          })) ?? [];
+        const columnNames = map(columns, 'name');
+        const rows = body.rows.map((row) => zipObject(columnNames, row));
+
+        return {
+          type: 'datatable',
+          meta: {
+            type: 'essql',
+          },
+          columns,
+          rows,
+        };
+      } catch (e) {
+        let message = `Unexpected error from Elasticsearch: ${e.message}`;
+        if (e.err) {
+          const { type, reason } = e.err.attributes;
+          if (type === 'parsing_exception') {
+            message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
+          } else {
+            message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+          }
+        }
+
+        // Re-write the error message before surfacing it up
+        e.message = message;
+        throw e;
+      }
     },
   };
 
