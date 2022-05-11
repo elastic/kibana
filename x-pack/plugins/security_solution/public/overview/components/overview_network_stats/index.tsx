@@ -158,9 +158,20 @@ const NetworkStatsContainer = styled.div`
     width: 100%;
   }
 `;
-
+const MoveItLeftTitle = styled.div`
+  margin-left: 24px;
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    max-width: 40px;
+  }
+`;
 const MoveItLeft = styled.div`
   margin-left: 24px;
+`;
+
+const NoMarginTopFlexItem = styled(EuiFlexItem)`
+  @media only screen and (max-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    margin-top: -10px !important;
+  }
 `;
 
 const AccordionContent = styled.div`
@@ -205,13 +216,13 @@ const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, l
             >
               <AccordionContent>
                 {statsForGroup.map((stat) => (
-                  <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+                  <EuiFlexGroup key={stat.id} gutterSize="s" justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
                       <EuiText color="subdued" size="s">
-                        <MoveItLeft>{stat.title}</MoveItLeft>
+                        <MoveItLeftTitle>{stat.title}</MoveItLeftTitle>
                       </EuiText>
                     </EuiFlexItem>
-                    <EuiFlexItem data-test-subj={`network-stat-${stat.id}`} grow={false}>
+                    <NoMarginTopFlexItem data-test-subj={`network-stat-${stat.id}`} grow={false}>
                       <MoveItLeft>
                         <StatValue
                           count={stat.count}
@@ -220,7 +231,7 @@ const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, l
                           max={statsForGroupCount}
                         />
                       </MoveItLeft>
-                    </EuiFlexItem>
+                    </NoMarginTopFlexItem>
                   </EuiFlexGroup>
                 ))}
               </AccordionContent>
