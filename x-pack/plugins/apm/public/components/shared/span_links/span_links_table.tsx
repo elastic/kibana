@@ -84,7 +84,7 @@ export function SpanLinksTable({ items }: Props) {
       }),
       sortable: true,
       render: (_, { spanId, traceId, details }) => {
-        if (details) {
+        if (details && details.transactionId) {
           return (
             <EuiFlexGroup
               alignItems="center"
@@ -100,7 +100,7 @@ export function SpanLinksTable({ items }: Props) {
               <EuiFlexItem>
                 <EuiLink
                   href={router.link('/link-to/transaction/{transactionId}', {
-                    path: { transactionId: details.transactionId || spanId },
+                    path: { transactionId: details.transactionId },
                     query: { waterfallItemId: spanId },
                   })}
                 >
