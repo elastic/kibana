@@ -75,7 +75,9 @@ const usePreviousSnoozeInterval: (p?: string | null) => [string | null, (n: stri
 };
 
 const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean }) =>
-  Boolean((rule.isSnoozedUntil && rule.isSnoozedUntil.getTime() > Date.now()) || rule.muteAll);
+  Boolean(
+    (rule.isSnoozedUntil && new Date(rule.isSnoozedUntil).getTime() > Date.now()) || rule.muteAll
+  );
 
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   rule,
