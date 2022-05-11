@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import React from 'react';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { casesPath } from '../../common';
 import { CasesPage } from '../pages/cases';
 import { AlertsPage } from '../pages/alerts/containers/alerts_page';
@@ -67,7 +68,16 @@ export const routes = {
   },
   '/alerts': {
     handler: () => {
-      return <AlertsPage />;
+      return (
+        // TODO define viewIds in a config file
+        /**
+         * The prop viewId is used as a unique identifier for your plugin.
+         * The Application Id is automatically attached to the tracked usage, based on the ID used when registering your app via core.application.register
+         */
+        <TrackApplicationView viewId="alerts">
+          <AlertsPage />
+        </TrackApplicationView>
+      );
     },
     params: {
       // Technically gets a '_a' param by using Kibana URL state sync helpers
