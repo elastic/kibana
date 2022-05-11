@@ -8,7 +8,6 @@
 import type { EuiDataGridSorting } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
-import type { LensMultiTable } from '../../../common';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 import type { ColumnConfig, LensGridDirection } from '../../../common/expressions';
 import { getOriginalId } from '../../../common/expressions';
@@ -93,14 +92,14 @@ export const createGridFilterHandler =
 export const createTransposeColumnFilterHandler =
   (
     onClickValue: (data: ClickTriggerEvent['data']) => void,
-    untransposedDataRef: React.MutableRefObject<LensMultiTable | undefined>
+    untransposedDataRef: React.MutableRefObject<Datatable | undefined>
   ) =>
   (
     bucketValues: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>,
     negate: boolean = false
   ) => {
     if (!untransposedDataRef.current) return;
-    const originalTable = Object.values(untransposedDataRef.current.tables)[0];
+    const originalTable = untransposedDataRef.current;
 
     const data: ClickTriggerEvent['data'] = {
       negate,

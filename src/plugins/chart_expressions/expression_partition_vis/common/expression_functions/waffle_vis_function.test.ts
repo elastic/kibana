@@ -106,6 +106,7 @@ describe('interpreter/functions#waffleVis', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };

@@ -111,6 +111,7 @@ describe('interpreter/functions#gauge', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };

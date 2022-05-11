@@ -931,12 +931,6 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
-
-  /**
-   * `datasourceExpressionsByLayers` will be passed to the params of `toExpression` and `toPreviewExpression`
-   * functions and datasource expressions will not be appended to the expression automatically.
-   */
-  shouldBuildDatasourceExpressionManually?: () => boolean;
 }
 
 // Use same technique as TriggerContext

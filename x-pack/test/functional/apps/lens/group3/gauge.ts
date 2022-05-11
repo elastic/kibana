@@ -48,6 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reflect edits for gauge', async () => {
+      await PageObjects.lens.switchToVisualization('horizontalBullet', 'gauge');
+      await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.configureDimension({
         dimension: 'lnsGauge_metricDimensionPanel > lns-dimensionTrigger',
         operation: 'count',

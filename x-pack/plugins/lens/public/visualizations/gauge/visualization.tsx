@@ -113,9 +113,11 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>
+  attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>,
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
+  const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
   const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
   if (!originalOrder || !state.metricAccessor) {
@@ -125,6 +127,7 @@ const toExpression = (
   return {
     type: 'expression',
     chain: [
+      ...(datasourceExpression?.chain ?? []),
       {
         type: 'function',
         function: EXPRESSION_GAUGE_NAME,
@@ -420,10 +423,17 @@ export const getGaugeVisualization = ({
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) =>
-    toExpression(paletteService, state, datasourceLayers, { ...attributes }),
-  toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(paletteService, state, datasourceLayers),
+  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers = {}) =>
+    toExpression(
+      paletteService,
+      state,
+      datasourceLayers,
+      { ...attributes },
+      datasourceExpressionsByLayers
+    ),
+
+  toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers = {}) =>
+    toExpression(paletteService, state, datasourceLayers, undefined, datasourceExpressionsByLayers),
 
   getErrorMessages(state) {
     // not possible to break it?

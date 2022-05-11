@@ -384,6 +384,11 @@ describe('IndexPattern Data Source', () => {
         Object {
           "chain": Array [
             Object {
+              "arguments": Object {},
+              "function": "kibana",
+              "type": "function",
+            },
+            Object {
               "arguments": Object {
                 "aggs": Array [
                   Object {
@@ -552,7 +557,7 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
+      expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
     it('should pass time shift parameter to metric agg functions', async () => {
@@ -589,7 +594,7 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect((ast.chain[0].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
+      expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
     });
 
     it('should wrap filtered metrics in filtered metric aggregation', async () => {
@@ -638,7 +643,7 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.aggs[0]).toMatchInlineSnapshot(`
+      expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -898,8 +903,8 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.metricsAtAllLevels).toEqual([false]);
-      expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
+      expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
+      expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
         'col-0-0': expect.objectContaining({ id: 'bucket1' }),
         'col-1-1': expect.objectContaining({ id: 'bucket2' }),
         'col-2-2': expect.objectContaining({ id: 'metric' }),
@@ -939,8 +944,8 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
-      expect(ast.chain[0].arguments.timeFields).not.toContain('timefield');
+      expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
+      expect(ast.chain[1].arguments.timeFields).not.toContain('timefield');
     });
 
     describe('references', () => {
@@ -988,7 +993,7 @@ describe('IndexPattern Data Source', () => {
         const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
-        expect(ast.chain[2]).toEqual('mock');
+        expect(ast.chain[3]).toEqual('mock');
       });
 
       it('should keep correct column mapping keys with reference columns present', async () => {
@@ -1021,7 +1026,7 @@ describe('IndexPattern Data Source', () => {
         const state = enrichBaseState(queryBaseState);
 
         const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-        expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
+        expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
           'col-0-0': expect.objectContaining({
             id: 'col1',
           }),

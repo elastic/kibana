@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensMultiTable } from '@kbn/lens-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 export interface ChoroplethChartState {
   layerId: string;
@@ -21,6 +21,6 @@ export interface ChoroplethChartConfig extends ChoroplethChartState {
 }
 
 export interface ChoroplethChartProps {
-  data: LensMultiTable;
+  data: Datatable;
   args: ChoroplethChartConfig;
 }

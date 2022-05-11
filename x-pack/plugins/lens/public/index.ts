@@ -87,7 +87,6 @@ export type {
   IconPosition,
   ExtendedYConfigResult,
   DataLayerArgs,
-  LensMultiTable,
   ValueLabelMode,
   AxisExtentMode,
   DataLayerConfig,

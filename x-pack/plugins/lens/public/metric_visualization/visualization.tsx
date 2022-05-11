@@ -50,13 +50,15 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>
+  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>,
+  datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   if (!state.accessor) {
     return null;
   }
 
   const [datasource] = Object.values(datasourceLayers);
+  const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
   const stops = state.palette?.params?.stops || [];
@@ -100,6 +102,7 @@ const toExpression = (
   return {
     type: 'expression',
     chain: [
+      ...(datasourceExpression?.chain ?? []),
       {
         type: 'function',
         function: 'metricVis',
@@ -273,10 +276,23 @@ export const getMetricVisualization = ({
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) =>
-    toExpression(paletteService, state, datasourceLayers, { ...attributes }),
-  toPreviewExpression: (state, datasourceLayers) =>
-    toExpression(paletteService, state, datasourceLayers, { mode: 'reduced' }),
+  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
+    toExpression(
+      paletteService,
+      state,
+      datasourceLayers,
+      { ...attributes },
+      datasourceExpressionsByLayers
+    ),
+
+  toPreviewExpression: (state, datasourceLayers, datasourceExpressionsByLayers) =>
+    toExpression(
+      paletteService,
+      state,
+      datasourceLayers,
+      { mode: 'reduced' },
+      datasourceExpressionsByLayers
+    ),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };

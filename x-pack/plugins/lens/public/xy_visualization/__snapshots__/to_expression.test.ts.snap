@@ -134,13 +134,7 @@ Object {
                   ],
                   "table": Array [
                     Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {},
-                          "function": "kibana",
-                          "type": "function",
-                        },
-                      ],
+                      "chain": Array [],
                       "type": "expression",
                     },
                   ],
