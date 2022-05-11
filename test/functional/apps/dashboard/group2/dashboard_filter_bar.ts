@@ -17,8 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const queryBar = getService('queryBar');
   const security = getService('security');
   const PageObjects = getPageObjects([
     'common',
@@ -109,6 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultDataRange();
+        await elasticChart.setNewChartUiDebugFlag(true);
       });
 
       it('are not selected by default', async function () {
@@ -119,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are added when a pie chart slice is clicked', async function () {
         await dashboardAddPanel.addVisualization('Rendering Test: pie');
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.filterOnPieSlice('4,886');
+        await pieChart.filterOnPieSlice('4886');
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
 
@@ -129,6 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('are preserved after saving a dashboard', async () => {
         await PageObjects.dashboard.saveDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
@@ -140,6 +144,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
+        await queryBar.submitQuery();
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
@@ -152,6 +158,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goForward();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
+        await elasticChart.setNewChartUiDebugFlag(true);
+        await queryBar.submitQuery();
         await pieChart.expectPieSliceCount(1);
       });
 

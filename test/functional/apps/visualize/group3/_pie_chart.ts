@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('setNumericInterval 4000');
       await PageObjects.visEditor.setInterval('40000', { type: 'numeric' });
       log.debug('clickGo');
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
     });
 
     it('should save and load', async function () {
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show 10 slices in pie chart', async function () {
-      pieChart.expectPieSliceCount(10);
+      pieChart.expectPieSliceCount(10, isNewChartsLibraryEnabled);
     });
 
     it('should show correct data', async function () {
@@ -105,8 +105,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.toggleOtherBucket(2);
         await PageObjects.visEditor.toggleMissingBucket(2);
         log.debug('clickGo');
-        await PageObjects.visEditor.clickGo();
-        await pieChart.expectPieChartLabels(expectedTableData);
+        await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
+        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
       });
 
       it('should apply correct filter on other bucket', async () => {
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await pieChart.filterOnPieSlice('Other');
         await PageObjects.visChart.waitForVisualization();
-        await pieChart.expectPieChartLabels(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
         await filterBar.removeFilter('machine.os.raw');
         await PageObjects.visChart.waitForVisualization();
       });
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.visChart.filterLegend('Other');
         await PageObjects.visChart.waitForVisualization();
-        await pieChart.expectPieChartLabels(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
         await filterBar.removeFilter('machine.os.raw');
         await PageObjects.visChart.waitForVisualization();
       });
@@ -183,8 +183,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.toggleOtherBucket(3);
         await PageObjects.visEditor.toggleMissingBucket(3);
         log.debug('clickGo');
-        await PageObjects.visEditor.clickGo();
-        await pieChart.expectPieChartLabels(expectedTableData);
+        await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
+        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
       });
     });
 
@@ -201,9 +201,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('machine.os.raw');
         await PageObjects.visEditor.toggleDisabledAgg(2);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
 
-        await pieChart.expectPieChartLabels(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
       });
 
       it('should correctly save disabled agg', async () => {
@@ -213,12 +213,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForRenderingCount();
 
         const expectedTableData = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
-        await pieChart.expectPieChartLabels(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
       });
 
       it('should show correct result when agg is re-enabled', async () => {
         await PageObjects.visEditor.toggleDisabledAgg(2);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
 
         const expectedTableData = [
           '0',
@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'osx',
         ].sort();
 
-        await pieChart.expectPieChartLabels(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
       });
     });
 
@@ -304,7 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.addNewFilterAggregation();
         log.debug('Set the 2nd filter value');
         await PageObjects.visEditor.setFilterAggregationValue('geo.dest:"CN"', 1);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
         const emptyFromTime = 'Sep 19, 2016 @ 06:31:44.000';
         const emptyToTime = 'Sep 23, 2016 @ 18:31:44.000';
         log.debug(
@@ -346,7 +346,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickBucket('Split slices');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('geo.dest');
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
       });
 
       it('should show correct chart', async () => {
@@ -435,16 +435,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '360,000',
           'CN',
         ].sort();
-        if (await PageObjects.visChart.isNewLibraryChart('partitionVisChart')) {
+        if (isNewChartsLibraryEnabled) {
           await PageObjects.visEditor.clickOptionsTab();
           await PageObjects.visEditor.togglePieLegend();
           await PageObjects.visEditor.togglePieNestedLegend();
           await PageObjects.visEditor.clickDataTab();
-          await PageObjects.visEditor.clickGo();
+          await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
         }
         await PageObjects.visChart.filterLegend('CN');
         await PageObjects.visChart.waitForVisualization();
-        await pieChart.expectPieChartLabels(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
         await filterBar.removeFilter('geo.dest');
         await PageObjects.visChart.waitForVisualization();
       });
@@ -474,7 +474,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Filters');
         log.debug('Set the 1st filter value of the aggregation id 3');
         await PageObjects.visEditor.setFilterAggregationValue('geo.dest:"UX"', 0, 3);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
         const legends = await PageObjects.visChart.getLegendEntries();
         const expectedLegends = ['geo.dest:"US"', 'geo.dest:"UX"'];
         expect(legends).to.eql(expectedLegends);
@@ -496,7 +496,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickBucket('Split slices');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('geo.src');
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
       });
 
       it('shows correct split chart', async () => {

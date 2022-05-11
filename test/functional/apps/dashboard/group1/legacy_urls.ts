@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const elasticChart = getService('elasticChart');
 
   let kibanaLegacyBaseUrl: string;
   let kibanaVisualizeBaseUrl: string;
@@ -63,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = `${kibanaLegacyBaseUrl}#/dashboard/${testDashboardId}`;
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
         await PageObjects.timePicker.setDefaultDataRange();
 
         await PageObjects.dashboard.waitForRenderComplete();
@@ -72,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('redirects from legacy hash in wrong app', async () => {
         const url = `${kibanaVisualizeBaseUrl}#/dashboard/${testDashboardId}`;
         await browser.get(url, true);
+        await elasticChart.setNewChartUiDebugFlag(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.timePicker.setDefaultDataRange();
 
@@ -111,6 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addVisualization('legacy url markdown');
         (await find.byLinkText('abc')).click();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await elasticChart.setNewChartUiDebugFlag(true);
         await PageObjects.timePicker.setDefaultDataRange();
 
         await PageObjects.dashboard.waitForRenderComplete();

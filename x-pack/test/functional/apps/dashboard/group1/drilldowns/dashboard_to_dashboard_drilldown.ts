@@ -41,6 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_all']);
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.preserveCrossAppState();
+        await elasticChart.setNewChartUiDebugFlag();
       });
 
       after(async () => {
@@ -141,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const testDashboardDrilldown = async (drilldownAction: (text: string) => Promise<void>) => {
         // trigger drilldown action by clicking on a pie and picking drilldown action by it's name
-        await pieChart.clickOnPieSlice('40,000');
+        await pieChart.clickOnPieSlice('40000');
         await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
 
         const href = await dashboardDrilldownPanelActions.getActionHrefByText(

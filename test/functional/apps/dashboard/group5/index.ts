@@ -25,11 +25,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('dashboard app - group 5', function () {
     // TODO: Remove when vislib is removed
     // https://github.com/elastic/kibana/issues/56143
-    describe('new charts library', function () {
+    describe('old charts library', function () {
       before(async () => {
         await loadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();
       });
@@ -37,7 +37,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       after(async () => {
         await unloadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': true,
+          'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
       });

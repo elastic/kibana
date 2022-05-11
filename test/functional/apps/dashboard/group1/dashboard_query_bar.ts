@@ -38,12 +38,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('causes panels to reload when refresh is clicked', async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
-
       await queryBar.clickQuerySubmitButton();
       await retry.tryForTime(5000, async () => {
         const headers = await PageObjects.discover.getColumnHeaders();
         expect(headers.length).to.be(0);
-        await pieChart.expectPieSliceCount(0);
+        await pieChart.expectEmptyPieChart();
       });
     });
   });
