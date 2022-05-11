@@ -87,7 +87,7 @@ export function makeMbClampedNumberExpression({
     [
       'case',
       ['==', [lookupFunction, fieldName], null],
-      minValue - 1, // == does a JS-y like check where returns true for null and undefined
+      fallback, // == does a JS-y like check where returns true for null and undefined
       clamp,
     ],
     fallback,
