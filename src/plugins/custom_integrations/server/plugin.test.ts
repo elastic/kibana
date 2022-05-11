@@ -146,7 +146,8 @@ describe('CustomIntegrationsPlugin', () => {
             'Collect logs using AWS Lambda application available in AWS Serverless Application Repository.',
           type: 'ui_link',
           shipper: 'placeholders',
-          uiInternalPath:
+          uiInternalPath: '',
+          uiExternalLink:
             'https://serverlessrepo.aws.amazon.com/applications/eu-central-1/267093732750/elastic-serverless-forwarder',
           isBeta: false,
           icons: [{ type: 'svg' }],

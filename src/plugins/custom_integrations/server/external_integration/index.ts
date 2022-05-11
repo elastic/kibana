@@ -11,7 +11,7 @@ import { CoreSetup } from '@kbn/core/server';
 import { CustomIntegrationRegistry } from '../custom_integration_registry';
 import { CustomIntegrationIcon, IntegrationCategory, PLUGIN_ID } from '../../common';
 
-interface PlaceholderIntegration {
+interface ExternalIntegration {
   id: string;
   title: string;
   icon?: string;
@@ -21,7 +21,7 @@ interface PlaceholderIntegration {
   categories: IntegrationCategory[];
 }
 
-export const integrations: PlaceholderIntegration[] = [
+export const integrations: ExternalIntegration[] = [
   {
     id: 'esf',
     title: i18n.translate('customIntegrations.placeholders.EsfTitle', {
@@ -37,12 +37,12 @@ export const integrations: PlaceholderIntegration[] = [
   },
 ];
 
-export function registerPlaceholders(
+export function registerExternalIntegrations(
   core: CoreSetup,
   registry: CustomIntegrationRegistry,
   branch: string
 ) {
-  integrations.forEach((integration: PlaceholderIntegration) => {
+  integrations.forEach((integration: ExternalIntegration) => {
     const icons: CustomIntegrationIcon[] = [];
     if (integration.euiIconName) {
       icons.push({
@@ -59,12 +59,13 @@ export function registerPlaceholders(
     }
 
     registry.registerCustomIntegration({
+      uiInternalPath: '',
       id: `placeholder.${integration.id}`,
       title: integration.title,
       description: integration.description,
       type: 'ui_link',
       shipper: 'placeholders',
-      uiInternalPath: integration.docUrlTemplate,
+      uiExternalLink: integration.docUrlTemplate,
       isBeta: false,
       icons,
       categories: integration.categories,
