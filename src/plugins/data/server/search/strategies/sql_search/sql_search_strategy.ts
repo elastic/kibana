@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClient, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { AnalyticsClient } from '@kbn/analytics-client';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { SqlGetAsyncRequest, SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';

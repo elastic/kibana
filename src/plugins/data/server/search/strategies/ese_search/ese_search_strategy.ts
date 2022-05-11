@@ -7,7 +7,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { AnalyticsClient, IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
+import type { AnalyticsClient } from '@kbn/analytics-client';
+import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';

@@ -10,7 +10,6 @@ import { firstValueFrom, from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
-  AnalyticsClient,
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -20,6 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
+import type { AnalyticsClient } from '@kbn/analytics-client';
 import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';

@@ -31,8 +31,8 @@ import {
   ThemeServiceSetup,
   ToastsSetup,
   ExecutionContextSetup,
-  AnalyticsClient,
 } from '@kbn/core/public';
+import type { AnalyticsClient } from '@kbn/analytics-client';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
