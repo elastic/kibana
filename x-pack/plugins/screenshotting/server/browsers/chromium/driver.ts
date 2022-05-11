@@ -35,12 +35,6 @@ export interface ElementPosition {
   };
 }
 
-interface Viewport {
-  zoom: number;
-  width: number;
-  height: number;
-}
-
 interface OpenOptions {
   context?: Context;
   headers: Headers;
@@ -269,7 +263,7 @@ export class HeadlessChromiumDriver {
    * viewport can not be captured.
    */
   async setViewport(
-    { width: _width, height: _height, zoom }: Viewport,
+    { width: _width, height: _height, zoom }: { zoom: number; width: number; height: number },
     logger: Logger
   ): Promise<void> {
     const width = Math.floor(_width);

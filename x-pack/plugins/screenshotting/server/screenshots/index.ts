@@ -31,7 +31,7 @@ import {
   errors,
 } from '../../common';
 import { systemHasInsufficientMemory } from '../cloud';
-import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
+import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import type { ConfigType } from '../config';
 import { durationToNumber } from '../config';
 import {
@@ -122,8 +122,8 @@ export class Screenshots {
           browserTimezone,
           openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
           defaultViewport: {
-            height: layout.height,
-            width: layout.width,
+            height: layout.height || DEFAULT_VIEWPORT.height,
+            width: layout.width || DEFAULT_VIEWPORT.width,
             deviceScaleFactor: layout.getBrowserZoom(),
           },
         },

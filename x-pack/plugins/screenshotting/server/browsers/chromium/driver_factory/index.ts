@@ -62,9 +62,12 @@ interface ClosePageResult {
   metrics?: PerformanceMetrics;
 }
 
-export const DEFAULT_VIEWPORT: Pick<puppeteer.Viewport, 'width' | 'height'> = {
+export const DEFAULT_VIEWPORT: Required<
+  Pick<puppeteer.Viewport, 'width' | 'height' | 'deviceScaleFactor'>
+> = {
   width: 1950,
   height: 1200,
+  deviceScaleFactor: 1,
 };
 
 // Default args used by pptr

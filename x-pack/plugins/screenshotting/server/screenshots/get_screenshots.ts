@@ -27,11 +27,13 @@ export const getScreenshots = async (
       const { position, attributes } = elementsPositionAndAttributes[i];
       const { boundingClientRect, scroll } = position;
 
-      // ensure the viewport includes the element to capture
-      // this will cause a window resize event
+      // Default to use width from the layout object to avoid having the elements move around horizontally,
+      // which makes the position data no longer valid.
+      const width = layout.width || boundingClientRect.left + scroll.x + boundingClientRect.width;
+
       await browser.setViewport(
         {
-          width: boundingClientRect.left + scroll.x + boundingClientRect.width,
+          width,
           height: boundingClientRect.top + scroll.y + boundingClientRect.height,
           zoom: layout.getBrowserZoom(),
         },
