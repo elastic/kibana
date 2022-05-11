@@ -1500,7 +1500,7 @@ export class RulesClient {
         this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
       );
     } catch (error) {
-      throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
+      throw Boom.badRequest(`Error creating API key for rule: ${error.message}`);
     }
 
     return this.apiKeyAsAlertAttributes(createdAPIKey, username);

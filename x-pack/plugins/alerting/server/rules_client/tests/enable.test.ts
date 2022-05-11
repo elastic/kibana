@@ -376,9 +376,7 @@ describe('enable()', () => {
     });
     await expect(
       async () => await rulesClient.enable({ id: '1' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error enabling rule: could not create API key - no"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error creating API key for rule: no"`);
   });
 
   test('falls back when failing to getDecryptedAsInternalUser', async () => {
