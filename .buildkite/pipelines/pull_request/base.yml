@@ -23,8 +23,8 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FUNCTIONAL_MINIMUM_ISOLATION_MIN: '2'
-      FUNCTIONAL_MAX_MINUTES: '20'
+      FUNCTIONAL_MINIMUM_ISOLATION_MIN: '10'
+      FUNCTIONAL_MAX_MINUTES: '30'
     retry:
       automatic:
         - exit_status: '*'
