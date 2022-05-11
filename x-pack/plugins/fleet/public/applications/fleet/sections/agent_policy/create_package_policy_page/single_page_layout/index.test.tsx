@@ -23,7 +23,7 @@ import {
   useGetPackageInfoByKey,
 } from '../../../../hooks';
 
-import { CreatePackagePolicyPage } from '.';
+import { CreatePackagePolicySinglePage } from '.';
 
 jest.mock('../../../../hooks', () => {
   return {
@@ -108,7 +108,7 @@ describe('when on the package policy create page', () => {
   const render = (queryParamsPolicyId?: string) =>
     (renderResult = testRenderer.render(
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <CreatePackagePolicySinglePage from="package" queryParamsPolicyId={queryParamsPolicyId} />
+        <CreatePackagePolicySinglePage />
       </Route>
     ));
   let mockPackageInfo: any;

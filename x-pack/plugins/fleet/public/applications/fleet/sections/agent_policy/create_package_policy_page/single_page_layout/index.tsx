@@ -36,13 +36,11 @@ import { ExtensionWrapper } from '../../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 
-import type { EditPackagePolicyFrom, PackagePolicyFormState } from '../types';
+import type { EditPackagePolicyFrom, PackagePolicyFormState, AddToPolicyParams } from '../types';
 
 import { IntegrationBreadcrumb } from '../components';
 
-import { CreatePackagePolicyMultiPageLayout } from '../multi_page_layout';
-
-import { CreatePackagePolicyPageLayout, PostInstallAddAgentModal } from './components';
+import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
 import { appendOnSaveQueryParamsToPath } from './utils';
@@ -66,13 +64,7 @@ const CustomEuiBottomBar = styled(EuiBottomBar)`
   z-index: 50;
 `;
 
-interface AddToPolicyParams {
-  pkgkey: string;
-  integration?: string;
-  policyId?: string;
-}
-
-export const CreatePackagePolicyPage: React.FunctionComponent = () => {
+export const CreatePackagePolicySinglePage: React.FunctionComponent = () => {
   const {
     application: { navigateToApp },
     notifications,
@@ -94,8 +86,6 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]
   );
-  const useMultiPageLayout = useMemo(() => queryParams.has('useMultiPageLayout'), [queryParams]);
-
   /**
    * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
    * in the query params (?policyId=foo).
@@ -119,11 +109,8 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     return <CreatePackagePolicyMultiPage {...pageParams} />;
   }
 
-  const Cmp = useMultiPageLayout
-    ? CreatePackagePolicyMultiPageLayout
-    : CreatePackagePolicyPageLayout;
   return (
-    <Cmp {...layoutProps} data-test-subj="createPackagePolicy">
+    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
         {formState === 'CONFIRM' && agentPolicy && (
           <ConfirmDeployAgentPolicyModal
@@ -198,6 +185,6 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
           </EuiFlexGroup>
         </CustomEuiBottomBar>
       </EuiErrorBoundary>
-    </Cmp>
+    </CreatePackagePolicySinglePageLayout>
   );
 };

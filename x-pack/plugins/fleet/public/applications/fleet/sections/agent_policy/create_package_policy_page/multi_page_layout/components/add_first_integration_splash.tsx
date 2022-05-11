@@ -6,10 +6,8 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import useWindowSize from 'react-use/lib/useWindowSize';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiImageProps } from '@elastic/eui';
 import {
   EuiImage,
   EuiTitle,
@@ -22,66 +20,20 @@ import {
   EuiSpacer,
   EuiLink,
   EuiButtonEmpty,
-  EuiHideFor,
-  EuiShowFor,
-  isWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
 import { IntegrationBreadcrumb } from '../../components';
-import { Error } from '../../../../../components';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 import { WithHeaderLayout } from '../../../../../layouts';
 import { useStartServices } from '../../../../../hooks';
 import type { RequestError } from '../../../../../hooks';
 
-const CentralTitle = styled('h1')`
+const PaddedCentralTitle = styled('h1')`
   text-align: center;
+  padding-top: 15px;
+  padding-bottom: 45px;
 `;
-const PaddedCentralTitle: React.FC = ({ children }) => (
-  <>
-    <EuiSpacer size={'s'} />
-    <EuiTitle size="l">
-      <CentralTitle>{children}</CentralTitle>
-    </EuiTitle>
-    <EuiSpacer size={'xl'} />
-  </>
-);
-
-const SubtitleText = styled(EuiText)`
-  max-width: 250px;
-  margin: 0 auto;
-  text-align: center;
-`;
-// step numbers are not centered in smaller layouts without this
-const CenteredEuiStepNumber = styled(EuiStepNumber)`
-  margin: 0 auto;
-`;
-
-// step numbers are not centered in smaller layouts without this
-const CenteredEuiImage = (props: EuiImageProps) => (
-  <div style={{ margin: '0 auto' }}>
-    <EuiImage {...props} />
-  </div>
-);
-
-const ResponsiveStepGroup: React.FC = ({ children }) => {
-  const { width } = useWindowSize();
-  const isScreenSmall = isWithinMaxBreakpoint(width, 's');
-
-  return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize={isScreenSmall ? 'xs' : 'l'}
-      alignItems="center"
-      justifyContent="center"
-      wrap={true}
-    >
-      {children}
-    </EuiFlexGroup>
-  );
-};
-
 const AddIntegrationStepsIllustrations = () => {
   const { http } = useStartServices();
   const assetsBasePath = http.basePath.prepend('/plugins/fleet/assets/');
@@ -89,17 +41,21 @@ const AddIntegrationStepsIllustrations = () => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceEvenly" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <ResponsiveStepGroup>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="l"
+          alignItems="center"
+          justifyContent="center"
+          wrap={true}
+        >
           <EuiFlexItem>
-            <CenteredEuiStepNumber status="incomplete" number={1} />
+            <EuiStepNumber status="incomplete" number={1} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <div style={{ margin: '0 auto' }}>
-              <CenteredEuiImage
-                alt="Illustration of installing the Elastic Agent"
-                src={assetsBasePath + '1_install_agent.svg'}
-              />
-            </div>
+            <EuiImage
+              alt="Illustration of installing the Elastic Agent"
+              src={assetsBasePath + '1_install_agent.svg'}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText textAlign="center">
@@ -110,35 +66,34 @@ const AddIntegrationStepsIllustrations = () => {
                 />
               </h4>
             </EuiText>
-            <SubtitleText>
+            <EuiText textAlign="center" style={{ maxWidth: '250px' }}>
               <FormattedMessage
                 id="xpack.fleet.addFirstIntegrationSplash.installAgentStep"
                 defaultMessage="Install agents on the hosts that you want to connect to Elastic."
               />
-            </SubtitleText>
+            </EuiText>
           </EuiFlexItem>
-        </ResponsiveStepGroup>
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiShowFor sizes={['s', 'xs']}>
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="xl" />
-        </EuiFlexItem>
-      </EuiShowFor>
-      <EuiHideFor sizes={['s', 'xs']}>
-        <EuiFlexItem grow={false}>
-          <CenteredEuiImage
-            alt="Illustration of an arrow pointing from left to right"
-            src={assetsBasePath + 'arrow_right_curve_over.svg'}
-          />
-        </EuiFlexItem>
-      </EuiHideFor>
       <EuiFlexItem grow={false}>
-        <ResponsiveStepGroup>
+        <EuiImage
+          alt="Illustration of installing the Elastic Agent"
+          src={assetsBasePath + 'arrow_right_curve_over.svg'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="l"
+          alignItems="center"
+          justifyContent="center"
+          wrap={true}
+        >
           <EuiFlexItem>
-            <CenteredEuiStepNumber status="incomplete" number={2} />
+            <EuiStepNumber status="incomplete" number={2} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <CenteredEuiImage
+            <EuiImage
               alt="Illustration of adding an integration"
               src={assetsBasePath + '2_add_integration.svg'}
             />
@@ -152,35 +107,34 @@ const AddIntegrationStepsIllustrations = () => {
                 />
               </h4>
             </EuiText>
-            <SubtitleText>
+            <EuiText textAlign="center" style={{ maxWidth: '250px' }}>
               <FormattedMessage
                 id="xpack.fleet.addFirstIntegrationSplash.addIntegrationStep"
                 defaultMessage="Make a few selections to finalize how Elastic receives your data."
               />
-            </SubtitleText>
+            </EuiText>
           </EuiFlexItem>
-        </ResponsiveStepGroup>
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiShowFor sizes={['s', 'xs']}>
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="xl" />
-        </EuiFlexItem>
-      </EuiShowFor>
-      <EuiHideFor sizes={['s', 'xs']}>
-        <EuiFlexItem grow={false}>
-          <CenteredEuiImage
-            alt="Illustration of an arrow pointing from left to right"
-            src={assetsBasePath + 'arrow_right_curve_under.svg'}
-          />
-        </EuiFlexItem>
-      </EuiHideFor>
       <EuiFlexItem grow={false}>
-        <ResponsiveStepGroup>
+        <EuiImage
+          alt="Illustration of installing the Elastic Agent"
+          src={assetsBasePath + 'arrow_right_curve_under.svg'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="l"
+          alignItems="center"
+          justifyContent="center"
+          wrap={true}
+        >
           <EuiFlexItem>
-            <CenteredEuiStepNumber status="incomplete" number={3} />
+            <EuiStepNumber status="incomplete" number={3} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <CenteredEuiImage
+            <EuiImage
               alt="Illustration of a dashboard with data"
               src={assetsBasePath + '3_confirm_data.svg'}
             />
@@ -194,14 +148,14 @@ const AddIntegrationStepsIllustrations = () => {
                 />
               </h4>
             </EuiText>
-            <SubtitleText>
+            <EuiText textAlign="center" style={{ maxWidth: '250px' }}>
               <FormattedMessage
                 id="xpack.fleet.addFirstIntegrationSplash.confirmDataStep"
                 defaultMessage="Explore and analyze the incoming data."
               />
-            </SubtitleText>
+            </EuiText>
           </EuiFlexItem>
-        </ResponsiveStepGroup>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -217,34 +171,27 @@ const NotObscuredByBottomBar = styled('div')`
   padding-bottom: 100px;
 `;
 
-const CenteredLearnMoreLink = () => {
-  const { docLinks } = useStartServices();
-  return (
-    <EuiFlexGroup justifyContent="spaceAround">
-      <EuiFlexItem grow={false}>
-        <EuiLink href={docLinks.links.fleet.guide} target="_blank">
-          <FormattedMessage
-            id="xpack.fleet.addFirstIntegrationSplash.learnMoreLink"
-            defaultMessage="Learn more about Elastic Agent"
-          />
-        </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+// TODO: add proper link
+const CenteredDocLink = () => (
+  <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexItem grow={false}>
+      <EuiLink href="http://www.elastic.co" target="_blank">
+        <FormattedMessage
+          id="xpack.fleet.addFirstIntegrationSplash.learnMoreLink"
+          defaultMessage="Learn more about Elastic Agent"
+        />
+      </EuiLink>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
-const InstallBottomBar: React.FC<{
-  isLoading: boolean;
-  cancelClickHandler: React.ReactEventHandler;
-  cancelUrl: string;
-  onNext: () => void;
-}> = ({ isLoading, onNext, cancelClickHandler, cancelUrl }) => (
+// TODO: make buttons work
+const InstallBottomBar = () => (
   <CenteredRoundedBottomBar>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiFlexItem grow={false}>
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+          <EuiButtonEmpty color="ghost" size="s" onClick={() => {}}>
             <FormattedMessage
               id="xpack.fleet.addFirstIntegrationSplash.backButton"
               defaultMessage="Go back"
@@ -253,18 +200,11 @@ const InstallBottomBar: React.FC<{
         </EuiFlexItem>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton color="primary" fill size="m" isLoading={isLoading} onClick={onNext}>
-          {isLoading ? (
-            <FormattedMessage
-              id="xpack.fleet.addFirstIntegrationSplash.loading"
-              defaultMessage="Loading..."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
-              defaultMessage="Install Elastic Agent"
-            />
-          )}
+        <EuiButton color="primary" fill size="m">
+          <FormattedMessage
+            id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
+            defaultMessage="Install Elastic Agent"
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -276,38 +216,16 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
   error: RequestError | null;
   packageInfo?: PackageInfo;
   isLoading: boolean;
-  cancelClickHandler: React.ReactEventHandler;
-  cancelUrl: string;
-  onNext: () => void;
-}> = ({
-  integrationInfo,
-  packageInfo,
-  isLoading,
-  error,
-  cancelUrl,
-  cancelClickHandler,
-  onNext,
-}) => {
-  if (error) {
-    return (
-      <Error
-        title={
-          <FormattedMessage
-            id="xpack.fleet.addFirstIntegrationSplash.errorLoadingPackageTitle"
-            defaultMessage="Error loading package information"
-          />
-        }
-        error={error}
-      />
-    );
-  }
+}> = ({ integrationInfo, packageInfo, isLoading, error }) => {
   const topContent = (
-    <PaddedCentralTitle>
-      <FormattedMessage
-        id="xpack.fleet.addFirstIntegrationSplash.pageTitle"
-        defaultMessage="Ready to add your first integration?"
-      />
-    </PaddedCentralTitle>
+    <EuiTitle size="l">
+      <PaddedCentralTitle>
+        <FormattedMessage
+          id="xpack.fleet.addFirstIntegrationSplash.pageTitle"
+          defaultMessage="Ready to add your first integration?"
+        />
+      </PaddedCentralTitle>
+    </EuiTitle>
   );
   return (
     <WithHeaderLayout topContent={topContent}>
@@ -318,14 +236,9 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
         <EuiSpacer size="xxl" />
         <EuiSpacer size="xxl" />
         <NotObscuredByBottomBar>
-          <CenteredLearnMoreLink />
+          <CenteredDocLink />
         </NotObscuredByBottomBar>
-        <InstallBottomBar
-          cancelUrl={cancelUrl}
-          cancelClickHandler={cancelClickHandler}
-          isLoading={isLoading}
-          onNext={onNext}
-        />
+        <InstallBottomBar />
         {packageInfo && (
           <IntegrationBreadcrumb
             pkgTitle={integrationInfo?.title || packageInfo.title}

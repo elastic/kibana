@@ -28,8 +28,3 @@ export interface AddToPolicyParams {
   integration?: string;
   policyId?: string;
 }
-
-export type CreatePackagePolicyParams = React.FunctionComponent<{
-  from: EditPackagePolicyFrom;
-  queryParamsPolicyId?: string;
-}>;
