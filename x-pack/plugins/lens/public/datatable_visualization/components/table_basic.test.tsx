@@ -511,8 +511,7 @@ describe('DatatableComponent', () => {
   test('it detect last_value filtered metric type', () => {
     const { data, args } = sampleArgs();
 
-    const table = data;
-    const column = table.columns[1];
+    const column = data.columns[1];
 
     column.meta = {
       ...column.meta,
@@ -520,7 +519,7 @@ describe('DatatableComponent', () => {
       type: 'number',
       sourceParams: { ...column.meta.sourceParams, type: 'filtered_metric' },
     };
-    table.rows[0].b = 'Hello';
+    data.rows[0].b = 'Hello';
 
     const wrapper = shallow(
       <DatatableComponent

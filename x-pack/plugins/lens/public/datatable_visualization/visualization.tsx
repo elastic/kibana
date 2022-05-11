@@ -328,13 +328,12 @@ export const getDatatableVisualization = ({
       return state.layerType;
     }
   },
-  shouldBuildDatasourceExpressionManually: () => true,
 
   toExpression(
     state,
     datasourceLayers,
     { title, description } = {},
-    datasourceExpressionsByLayers
+    datasourceExpressionsByLayers = {}
   ): Ast | null {
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, datasourceLayers, state.layerId) || {};
@@ -359,11 +358,12 @@ export const getDatatableVisualization = ({
       .filter((columnId) => datasource!.getOperationForColumnId(columnId))
       .map((columnId) => columnMap[columnId]);
 
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
+
     return {
       type: 'expression',
       chain: [
-        { type: 'function', function: 'kibana', arguments: {} },
-        ...Object.values(datasourceExpressionsByLayers || {})[0].chain,
+        ...(datasourceExpression?.chain ?? []),
         ...columns
           .filter((c) => c.collapseFn)
           .map((c) => {

@@ -49,9 +49,7 @@ function createTableRef(
 }
 
 function createUntransposedRef(options?: { withDate: boolean }): React.MutableRefObject<Datatable> {
-  return {
-    current: createTableRef(options).current,
-  };
+  return { current: createTableRef(options).current };
 }
 
 describe('Table actions', () => {

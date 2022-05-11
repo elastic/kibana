@@ -23,13 +23,13 @@ export const datatableFn =
   (
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
   ): DatatableExpressionFunction['fn'] =>
-  async (data, args, context) => {
+  async (table, args, context) => {
     if (context?.inspectorAdapters?.tables) {
       context.inspectorAdapters.tables.reset();
       context.inspectorAdapters.tables.allowCsvExport = true;
 
       const logTable = prepareLogTable(
-        data,
+        table,
         [
           [
             args.columns.map((column) => column.columnId),
@@ -45,26 +45,27 @@ export const datatableFn =
     }
 
     let untransposedData: Datatable | undefined;
+    // do the sorting at this level to propagate it also at CSV download
     const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
 
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);
 
-    data.columns.forEach((column) => {
+    table.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);
     });
 
     const hasTransposedColumns = args.columns.some((c) => c.isTransposed);
     if (hasTransposedColumns) {
       // store original shape of data separately
-      untransposedData = cloneDeep(data);
+      untransposedData = cloneDeep(table);
       // transposes table and args inplace
-      transposeTable(args, data, formatters);
+      transposeTable(args, table, formatters);
     }
 
     const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
-    const columnsReverseLookup = data.columns.reduce<
+    const columnsReverseLookup = table.columns.reduce<
       Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
     >((memo, { id, name, meta }, i) => {
       memo[id] = { name, index: i, meta };
@@ -75,7 +76,7 @@ export const datatableFn =
     for (const column of columnsWithSummary) {
       column.summaryRowValue = computeSummaryRowForColumn(
         column,
-        data,
+        table,
         formatters,
         formatFactory({ id: 'number' })
       );
@@ -94,20 +95,21 @@ export const datatableFn =
         sortDirection
       );
       // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = (data.rows || [])
+      context.inspectorAdapters.tables[layerId].rows = (table.rows || [])
         .slice()
         .sort(sortingCriteria);
       // replace also the local copy
-      data.rows = context.inspectorAdapters.tables[layerId].rows;
+      table.rows = context.inspectorAdapters.tables[layerId].rows;
     } else {
       args.sortingColumnId = undefined;
       args.sortingDirection = 'none';
     }
+
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
-        data,
+        data: table,
         untransposedData,
         args,
       },

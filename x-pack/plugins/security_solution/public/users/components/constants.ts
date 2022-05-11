@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { lensMultitable } from './lens_multitable';
-export type { LensMultitableExpressionTypeDefinition } from './lens_multitable';
+export const RISKY_USERS_DOC_LINK =
+  'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/user-risk-score.md';
