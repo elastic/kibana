@@ -188,7 +188,7 @@ describe('pluckStyleMetaFromFeatures', () => {
     });
   });
 
-  test('Should extract range with "min = 1" for count field', async () => {
+  test('Should extract range', async () => {
     const features = [
       {
         type: 'Feature',
@@ -256,7 +256,7 @@ describe('pluckStyleMetaFromFeatures', () => {
     });
   });
 
-  test('Should extract range', async () => {
+  test('Should extract range with "min = 1" for count field', async () => {
     const features = [
       {
         type: 'Feature',
