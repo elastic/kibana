@@ -97,7 +97,7 @@ export class ElasticV3BrowserShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
-    const { status, text, ok } = await fetch(this.url, {
+    const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
       headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
@@ -108,14 +108,17 @@ export class ElasticV3BrowserShipper implements IShipper {
 
     if (this.options.debug) {
       this.initContext.logger.debug(
-        `[${ElasticV3BrowserShipper.shipperName}]: ${status} - ${await text()}`
+        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await response.text()}`
       );
     }
 
-    if (!ok) {
-      throw new ErrorWithCode(`${status} - ${await text()}`, `${status}`);
+    if (!response.ok) {
+      throw new ErrorWithCode(
+        `${response.status} - ${await response.text()}`,
+        `${response.status}`
+      );
     }
 
-    return `${status}`;
+    return `${response.status}`;
   }
 }
