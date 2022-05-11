@@ -12,7 +12,7 @@ import {
   WEBSITE_URL_HELP_TEXT,
   WEBSITE_URL_LABEL,
 } from './simple_monitor_form';
-export { screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { render } from '../../utils/testing';
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
