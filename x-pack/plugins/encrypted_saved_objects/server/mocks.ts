@@ -25,18 +25,19 @@ function createEncryptedSavedObjectsSetupMock(
 function createEncryptedSavedObjectsStartMock() {
   return {
     isEncryptionError: jest.fn(),
-    getClient: jest.fn((opts) => createEncryptedSavedObjectsClienttMock(opts)),
+    getClient: jest.fn((opts) => createEncryptedSavedObjectsClientMock(opts)),
   } as jest.Mocked<EncryptedSavedObjectsPluginStart>;
 }
 
-function createEncryptedSavedObjectsClienttMock(opts?: EncryptedSavedObjectsClientOptions) {
+function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
     getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsClient>;
 }
 
 export const encryptedSavedObjectsMock = {
   createSetup: createEncryptedSavedObjectsSetupMock,
   createStart: createEncryptedSavedObjectsStartMock,
-  createClient: createEncryptedSavedObjectsClienttMock,
+  createClient: createEncryptedSavedObjectsClientMock,
 };
