@@ -49,7 +49,7 @@ export const DetailPanelMetadataTab = ({
         title={i18n.translate('xpack.sessionView.metadataDetailsTab.metadata', {
           defaultMessage: 'Metadata',
         })}
-        isInitialOpen={true}
+        initialIsOpen={true}
         listItems={[
           {
             title: <DetailPanelListItem>hostname</DetailPanelListItem>,

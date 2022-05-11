@@ -20,7 +20,7 @@ interface DetailPanelAccordionDeps {
   extraActionTitle?: string;
   onExtraActionClick?: () => void;
   children?: ReactNode;
-  isInitialOpen?: boolean;
+  initialIsOpen?: boolean;
 }
 
 /**
@@ -34,7 +34,7 @@ export const DetailPanelAccordion = ({
   extraActionTitle,
   onExtraActionClick,
   children,
-  isInitialOpen = false,
+  initialIsOpen = false,
 }: DetailPanelAccordionDeps) => {
   const styles = useStyles();
 
@@ -42,7 +42,7 @@ export const DetailPanelAccordion = ({
     <EuiAccordion
       id={id}
       arrowDisplay="right"
-      initialIsOpen={isInitialOpen}
+      initialIsOpen={initialIsOpen}
       buttonContent={
         <EuiFlexGroup
           alignItems="center"
