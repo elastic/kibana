@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
-import { Logger } from '@kbn/core/server';
+import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -81,12 +81,14 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public setup(
+    analytics: AnalyticsServiceSetup,
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
     telemetryUsageCounter?: UsageCounter
   ) {
     return this.composite.setup(
+      analytics,
       telemetryReceiver,
       telemetrySetup,
       taskManager,
@@ -111,17 +113,11 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public async queueTelemetryEvents(events: TelemetryEvent[]) {
-    const result = this.composite.queueTelemetryEvents(events);
-    await this.composite.sendIfDue(this.axiosInstance);
-    return result;
+    this.composite.queueTelemetryEvents(events);
   }
 
   public isTelemetryOptedIn(): Promise<boolean> {
     return this.composite.isTelemetryOptedIn();
-  }
-
-  public sendIfDue(axiosInstance?: AxiosInstance): Promise<void> {
-    return this.composite.sendIfDue(axiosInstance);
   }
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
