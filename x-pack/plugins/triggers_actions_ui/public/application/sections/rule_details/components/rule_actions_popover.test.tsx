@@ -60,7 +60,7 @@ describe('rule_actions_popover', () => {
     const actionButton = screen.getByTestId('ruleActionsButton');
     expect(actionButton).toBeInTheDocument();
     fireEvent.click(actionButton);
-    expect(screen.getByText('Update API Key')).toBeInTheDocument();
+    expect(screen.getByText('Update API key')).toBeInTheDocument();
     expect(screen.getByText('Delete rule')).toBeInTheDocument();
     expect(screen.getByText('Disable')).toBeInTheDocument();
   });
@@ -166,13 +166,13 @@ describe('rule_actions_popover', () => {
     expect(actionButton).toBeInTheDocument();
     fireEvent.click(actionButton);
 
-    const deleteButton = screen.getByText('Update API Key');
+    const deleteButton = screen.getByText('Update API key');
     expect(deleteButton).toBeInTheDocument();
     fireEvent.click(deleteButton);
 
     expect(onApiKeyUpdateMock).toHaveBeenCalledWith('12345');
     await waitFor(() => {
-      expect(screen.queryByText('Update API Key')).not.toBeInTheDocument();
+      expect(screen.queryByText('Update API key')).not.toBeInTheDocument();
     });
   });
 
@@ -195,7 +195,7 @@ describe('rule_actions_popover', () => {
     fireEvent.click(actionButton);
 
     expect(screen.getByText('Delete rule').closest('button')).toBeDisabled();
-    expect(screen.getByText('Update API Key').closest('button')).toBeDisabled();
+    expect(screen.getByText('Update API key').closest('button')).toBeDisabled();
     expect(screen.getByText('Disable').closest('button')).toBeDisabled();
   });
 });

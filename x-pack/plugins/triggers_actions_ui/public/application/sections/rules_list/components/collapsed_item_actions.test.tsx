@@ -147,7 +147,7 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
-    expect(wrapper.find(`[data-test-subj="updateApiKey"] button`).text()).toEqual('Update API Key');
+    expect(wrapper.find(`[data-test-subj="updateApiKey"] button`).text()).toEqual('Update API key');
   });
 
   test('handles case when rule is unmuted and enabled and mute is clicked', async () => {

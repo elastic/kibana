@@ -79,7 +79,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                 },
                 name: i18n.translate(
                   'xpack.triggersActionsUI.sections.ruleDetails.updateAPIKeyButtonLabel',
-                  { defaultMessage: 'Update API Key' }
+                  { defaultMessage: 'Update API key' }
                 ),
               },
               {

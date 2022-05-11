@@ -896,7 +896,7 @@ describe('rule_details', () => {
     });
   });
 
-  describe('update API Key button', () => {
+  describe('update API key button', () => {
     it('should call update api key when clicked', async () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();

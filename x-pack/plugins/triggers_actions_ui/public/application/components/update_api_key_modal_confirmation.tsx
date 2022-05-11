@@ -39,7 +39,7 @@ export const UpdateApiKeyModalConfirmation = ({
       buttonColor="primary"
       data-test-subj="updateApiKeyIdsConfirmation"
       title={i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.title', {
-        defaultMessage: 'Update API Key',
+        defaultMessage: 'Update API key',
       })}
       onCancel={() => {
         setUpdateModalVisibility(false);
@@ -53,7 +53,7 @@ export const UpdateApiKeyModalConfirmation = ({
           toasts.addSuccess(
             i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.successMessage', {
               defaultMessage:
-                'API {idsToUpdate, plural, one {Key} other {Keys}} {idsToUpdate, plural, one {has} other {have}} been updated',
+                'API {idsToUpdate, plural, one {key} other {keys}} {idsToUpdate, plural, one {has} other {have}} been updated',
               values: { idsToUpdate: idsToUpdate.length },
             })
           );
@@ -63,7 +63,7 @@ export const UpdateApiKeyModalConfirmation = ({
               'xpack.triggersActionsUI.updateApiKeyConfirmModal.failureMessage',
               {
                 defaultMessage:
-                  'Failed to update the API {idsToUpdate, plural, one {Key} other {Keys}}',
+                  'Failed to update the API {idsToUpdate, plural, one {key} other {keys}}',
                 values: { idsToUpdate: idsToUpdate.length },
               }
             ),
@@ -86,7 +86,9 @@ export const UpdateApiKeyModalConfirmation = ({
       )}
     >
       {i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.description', {
-        defaultMessage: "You can't recover the old API Key",
+        defaultMessage:
+          'You will not be able to recover the old API {idsToUpdate, plural, one {key} other {keys}}',
+        values: { idsToUpdate: idsToUpdate.length },
       })}
     </EuiConfirmModal>
   ) : null;

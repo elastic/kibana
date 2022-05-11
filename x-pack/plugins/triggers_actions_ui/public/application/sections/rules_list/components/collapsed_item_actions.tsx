@@ -143,7 +143,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           },
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
-            { defaultMessage: 'Update API Key' }
+            { defaultMessage: 'Update API key' }
           ),
         },
         {

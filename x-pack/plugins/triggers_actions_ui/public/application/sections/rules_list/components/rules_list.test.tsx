@@ -348,27 +348,29 @@ describe('Update Api Key', () => {
     fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Update API Key'));
-    expect(screen.getByText("You can't recover the old API Key")).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Update API key'));
+    expect(screen.getByText('You will not be able to recover the old API key')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Cancel'));
-    expect(screen.queryByText("You can't recover the old API Key")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('You will not be able to recover the old API key')
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Update API Key'));
+    fireEvent.click(screen.getByText('Update API key'));
 
     await act(async () => {
       fireEvent.click(screen.getByText('Update'));
     });
     expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
     expect(loadRules).toHaveBeenCalledTimes(2);
-    expect(screen.queryByText("You can't recover the old API Key")).not.toBeInTheDocument();
-    expect(addSuccess).toHaveBeenCalledWith('API Key has been updated');
+    expect(screen.queryByText("You can't recover the old API key")).not.toBeInTheDocument();
+    expect(addSuccess).toHaveBeenCalledWith('API key has been updated');
   });
 
-  it('Update Api Key fails', async () => {
+  it('Update API key fails', async () => {
     updateAPIKey.mockRejectedValueOnce(500);
     render(
       <IntlProvider locale="en">
@@ -381,16 +383,18 @@ describe('Update Api Key', () => {
     fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Update API Key'));
-    expect(screen.getByText("You can't recover the old API Key")).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Update API key'));
+    expect(screen.getByText('You will not be able to recover the old API key')).toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(screen.getByText('Update'));
     });
     expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
     expect(loadRules).toHaveBeenCalledTimes(2);
-    expect(screen.queryByText("You can't recover the old API Key")).not.toBeInTheDocument();
-    expect(addError).toHaveBeenCalledWith(500, { title: 'Failed to update the API Key' });
+    expect(
+      screen.queryByText('You will not be able to recover the old API key')
+    ).not.toBeInTheDocument();
+    expect(addError).toHaveBeenCalledWith(500, { title: 'Failed to update the API key' });
   });
 });
 
