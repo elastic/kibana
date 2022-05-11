@@ -57,6 +57,7 @@ import {
 } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { Annotations } from './annotations';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -756,6 +757,29 @@ describe('XYChart component', () => {
     expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
   });
 
+  test('it renders empty placeholder for no results with references layer', () => {
+    const { data, args } = sampleArgsWithReferenceLine();
+    const emptyDataLayers = args.layers.map((layer) => {
+      if (layer.type === 'dataLayer') {
+        return { ...layer, table: { ...data, rows: [] } };
+      } else {
+        return layer;
+      }
+    });
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: emptyDataLayers,
+        }}
+      />
+    );
+
+    expect(component.find(BarSeries)).toHaveLength(0);
+    expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
+  });
+
   test('onBrushEnd returns correct context data for date histogram data', () => {
     const { args } = sampleArgs();
 
@@ -772,7 +796,7 @@ describe('XYChart component', () => {
 
     expect(onSelectRange).toHaveBeenCalledWith({
       column: 0,
-      table: dateHistogramData.tables.timeLayer,
+      table: dateHistogramData,
       range: [1585757732783, 1585758880838],
     });
   });
@@ -968,7 +992,7 @@ describe('XYChart component', () => {
         {
           column: 0,
           row: 0,
-          table: dateHistogramData.tables.timeLayer,
+          table: dateHistogramData,
           value: 1585758120000,
         },
       ],
@@ -2375,6 +2399,37 @@ describe('XYChart component', () => {
     );
 
     expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+  });
+
+  it('computes correct legend sizes', () => {
+    const { args } = sampleArgs();
+
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          legend: { ...args.legend, legendSize: LegendSize.SMALL },
+        }}
+      />
+    );
+    expect(component.find(Settings).prop('legendSize')).toEqual(80);
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: { ...args.legend, legendSize: LegendSize.AUTO },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toBeUndefined();
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: { ...args.legend, legendSize: undefined },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toEqual(130);
   });
 
   test('it should apply the fitting function to all non-bar series', () => {
