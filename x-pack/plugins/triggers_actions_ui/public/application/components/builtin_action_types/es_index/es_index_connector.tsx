@@ -228,7 +228,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         }}
       />
       <EuiSpacer size="m" />
-      <div style={{ display: showTimeFieldCheckbox ? 'block' : 'none' }}>
+      {showTimeFieldCheckbox ? (
         <UseField
           path="__internal__.hasTimeFieldCheckbox"
           component={ToggleField}
@@ -253,28 +253,26 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             },
           }}
         />
-      </div>
-      <div style={{ display: hasTimeFieldCheckbox ? 'block' : 'none' }}>
-        <EuiSpacer size="m" />
-        <UseField
-          path="config.executionTimeField"
-          component={SelectField}
-          config={{
-            label: translations.EXECUTION_TIME_LABEL,
-            defaultValue: null,
-            serializer: (fieldValue: string) => {
-              return hasTimeFieldCheckbox ? fieldValue : null;
-            },
-          }}
-          componentProps={{
-            euiFieldProps: {
-              'data-test-subj': 'executionTimeFieldSelect',
-              options: timeFieldOptions,
-              fullWidth: true,
-            },
-          }}
-        />
-      </div>
+      ) : null}
+      {hasTimeFieldCheckbox ? (
+        <>
+          <EuiSpacer size="m" />
+          <UseField
+            path="config.executionTimeField"
+            component={SelectField}
+            config={{
+              label: translations.EXECUTION_TIME_LABEL,
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'executionTimeFieldSelect',
+                options: timeFieldOptions,
+                fullWidth: true,
+              },
+            }}
+          />
+        </>
+      ) : null}
     </>
   );
 };
