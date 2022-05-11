@@ -9,9 +9,10 @@ import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
-import { DASHBOARDS_PATH, THREAT_HUNTING_PATH } from '../../common/constants';
+import { DASHBOARDS_PATH, MANAGE_PATH, THREAT_HUNTING_PATH } from '../../common/constants';
 import { ThreatHuntingLandingPage } from './pages/threat_hunting';
 import { DashboardsLandingPage } from './pages/dashboards';
+import { ManageLandingPage } from './pages/manage';
 
 export const ThreatHuntingRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.threatHuntingLanding}>
@@ -25,6 +26,12 @@ export const DashboardRoutes = () => (
   </TrackApplicationView>
 );
 
+export const ManageRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.manageLanding}>
+    <ManageLandingPage />
+  </TrackApplicationView>
+);
+
 export const routes: SecuritySubPluginRoutes = [
   {
     path: THREAT_HUNTING_PATH,
@@ -33,5 +40,9 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: DASHBOARDS_PATH,
     render: DashboardRoutes,
+  },
+  {
+    path: MANAGE_PATH,
+    render: ManageRoutes,
   },
 ];

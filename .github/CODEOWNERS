@@ -83,6 +83,7 @@
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
+/src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
 
 ### Observability Plugins
 
@@ -128,6 +129,7 @@
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
 /src/core/types/elasticsearch @elastic/apm-ui
+/packages/elastic-apm-synthtrace/  @elastic/apm-ui
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
