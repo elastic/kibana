@@ -75,7 +75,7 @@ describe('buildSchema', () => {
     expect(Object.keys(result).length).toBe(0);
   });
 
-  test('group naming for top-level groups and non', () => {
+  test('actual build with top-level and non', () => {
     let result = buildSchema(testSchema);
 
     const resultGroups = Object.keys(result);
