@@ -11,6 +11,8 @@ import {
   CANCEL_BTN,
   EXCEPTION_ITEM_CONTAINER,
   EXCEPTION_FLYOUT_TITLE,
+  VALUES_INPUT,
+  VALUES_MATCH_ANY_INPUT,
 } from '../screens/exceptions';
 
 export const addExceptionEntryFieldValueOfItemX = (
@@ -33,6 +35,16 @@ export const addExceptionEntryFieldValue = (field: string, index = 0) => {
 
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
   cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
+};
+
+export const addExceptionEntryFieldValueValue = (value: string, index = 0) => {
+  cy.get(VALUES_INPUT).eq(index).type(`${value}{enter}`);
+  cy.get(EXCEPTION_FLYOUT_TITLE).click();
+};
+
+export const addExceptionEntryFieldMatchAnyValue = (value: string, index = 0) => {
+  cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
