@@ -1,0 +1,371 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { defaults, get } from 'lodash';
+import Puid from 'puid';
+import { Duplex } from 'stream';
+
+import type { FileChunkDocument } from '../mappings';
+
+/**
+ * @note The Elasticsearch `http.max_content_length` is including the whole POST body.
+ * But the update/index request also contains JSON-serialized query parameters.
+ * 1Kb span should be enough for that.
+ */
+const REQUEST_SPAN_SIZE_IN_BYTES = 1024;
+
+type Callback = (error?: Error) => void;
+type SearchRequest = estypes.SearchRequest;
+
+// interface ContentStreamDocument {
+//   id: string;
+//   index: string;
+//   if_primary_term?: number;
+//   if_seq_no?: number;
+// }
+
+// interface ChunkOutput {
+//   chunk: number;
+//   content: string;
+// }
+
+// interface ChunkSource {
+//   parent_id: string;
+//   output: ChunkOutput;
+// }
+
+export type ContentStreamEncoding = 'base64' | 'raw';
+
+export interface ContentStreamParameters {
+  size?: number;
+  /**
+   * Content encoding. By default, it is Base64.
+   */
+  encoding?: ContentStreamEncoding;
+}
+
+export class ContentStream extends Duplex {
+  /**
+   * @see https://en.wikipedia.org/wiki/Base64#Output_padding
+   */
+  private static getMaxBase64EncodedSize(max: number) {
+    return Math.floor(max / 4) * 3;
+  }
+
+  /**
+   * @note Raw data might be escaped during JSON serialization.
+   * In the worst-case, every character is escaped, so the max raw data length is twice less.
+   */
+  private static getMaxJsonEscapedSize(max: number) {
+    return Math.floor(max / 2);
+  }
+
+  private buffers: Buffer[] = [];
+  private bytesBuffered = 0;
+
+  private bytesRead = 0;
+  private chunksRead = 0;
+  private chunksWritten = 0;
+  private maxChunkSize?: number;
+  private parameters: Required<ContentStreamParameters>;
+  private puid = new Puid();
+  private primaryTerm?: number;
+  private seqNo?: number;
+
+  /**
+   * The number of bytes written so far.
+   * Does not include data that is still queued for writing.
+   */
+  bytesWritten = 0;
+
+  constructor(
+    private client: ElasticsearchClient,
+    private id: undefined | string,
+    private index: string,
+    private logger: Logger,
+    { encoding = 'base64', size = -1 }: ContentStreamParameters = {}
+  ) {
+    super();
+    this.parameters = { encoding, size };
+  }
+
+  private decode(content: string) {
+    return Buffer.from(content, this.parameters.encoding === 'base64' ? 'base64' : undefined);
+  }
+
+  private encode(buffer: Buffer) {
+    return buffer.toString(this.parameters.encoding === 'base64' ? 'base64' : undefined);
+  }
+
+  private async getMaxContentSize() {
+    const body = await this.client.cluster.getSettings({ include_defaults: true });
+    const { persistent, transient, defaults: defaultSettings } = body;
+    const settings = defaults({}, persistent, transient, defaultSettings);
+    const maxContentSize = get(settings, 'http.max_content_length', '100mb');
+
+    return ByteSizeValue.parse(maxContentSize).getValueInBytes();
+  }
+
+  private async getMaxChunkSize() {
+    if (!this.maxChunkSize) {
+      const maxContentSize = (await this.getMaxContentSize()) - REQUEST_SPAN_SIZE_IN_BYTES;
+
+      this.maxChunkSize =
+        this.parameters.encoding === 'base64'
+          ? ContentStream.getMaxBase64EncodedSize(maxContentSize)
+          : ContentStream.getMaxJsonEscapedSize(maxContentSize);
+
+      this.logger.debug(`Chunk size is ${this.maxChunkSize} bytes.`);
+    }
+
+    return this.maxChunkSize;
+  }
+
+  // private async readHead() {
+  //   if (!this.id) {
+  //     throw new Error('No document to read from');
+  //   }
+  //   const body: SearchRequest['body'] = {
+  //     _source: { includes: ['content'] },
+  //     query: {
+  //       constant_score: {
+  //         filter: {
+  //           bool: {
+  //             must: [{ term: { _id: this.id } }],
+  //           },
+  //         },
+  //       },
+  //     },
+  //     size: 1,
+  //   };
+
+  //   this.logger.debug(`Reading file contents.`);
+
+  //   const response = await this.client.search<FileChunkDocument>({ body, index: this.index });
+  //   const hits = response?.hits?.hits?.[0];
+
+  //   this.jobSize = hits?._source?.output?.size;
+
+  //   return hits?._source?.output?.content;
+  // }
+
+  private async readChunk() {
+    if (!this.id) {
+      throw new Error('No document ID provided. Cannot read chunk.');
+    }
+    const id = this.getNextChunkId(this.chunksRead);
+
+    this.logger.debug(`Reading chunk #${this.chunksRead}.`);
+
+    try {
+      const response = await this.client.search<FileChunkDocument>({
+        _source_includes: ['content'],
+        index: this.index,
+        query: {
+          constant_score: {
+            filter: {
+              bool: {
+                must: [{ term: { _id: id } }],
+              },
+            },
+          },
+        },
+        size: 1,
+      });
+      const hits = response?.hits?.hits?.[0];
+
+      return hits?._source?.content;
+    } catch (e) {
+      if (e instanceof errors.ResponseError && e.statusCode === 404) {
+        return null;
+      }
+      throw e;
+    }
+  }
+
+  private isRead() {
+    const { size } = this.parameters;
+    if (size > 0) {
+      return this.bytesRead >= size;
+    }
+    return false;
+  }
+
+  _read() {
+    this.readChunk()
+      .then((content) => {
+        if (!content) {
+          this.logger.debug(`Chunk is empty.`);
+          this.push(null);
+          return;
+        }
+
+        const buffer = this.decode(content);
+
+        this.push(buffer);
+        this.chunksRead++;
+        this.bytesRead += buffer.byteLength;
+
+        if (this.isRead()) {
+          this.logger.debug(`Read ${this.bytesRead} of ${this.parameters.size} bytes.`);
+          this.push(null);
+        }
+      })
+      .catch((err) => this.destroy(err));
+  }
+
+  private async removeChunks() {
+    await this.client.deleteByQuery({
+      index: this.index,
+      query: {
+        bool: {
+          should: [{ match: { head_chunk_id: this.id } }, { match: { _id: this.id } }],
+          minimum_should_match: 1,
+        },
+      },
+    });
+  }
+
+  // private async writeHead(content: string) {
+  //   this.logger.debug(`Updating file contents.`);
+
+  //   const body = await this.client.update<FileChunkDocument>({
+  //     ...this.document,
+  //     body: {
+  //       doc: {
+  //         content,
+  //       },
+  //     },
+  //   });
+
+  //   ({ _primary_term: this.primaryTerm, _seq_no: this.seqNo } = body);
+  // }
+
+  public getId(): undefined | string {
+    return this.id;
+  }
+
+  private getNextChunkId(chunkNumber = 0) {
+    if (!this.id) {
+      this.id = this.puid.generate();
+    }
+    return chunkNumber === 0 ? this.id : `${this.id}.${chunkNumber}`;
+  }
+
+  private async writeChunk(content: string) {
+    const id = this.getNextChunkId(this.chunksWritten);
+
+    this.logger.debug(`Writing chunk #${this.chunksWritten} (${id}).`);
+
+    await this.client.index<FileChunkDocument>({
+      id,
+      index: this.index,
+      document: {
+        content,
+        head_chunk_id: this.chunksWritten > 0 ? this.id : undefined,
+      },
+    });
+  }
+
+  private async flush(size = this.bytesBuffered) {
+    const buffersToFlush: Buffer[] = [];
+    let bytesToFlush = 0;
+
+    /*
+     Loop over each buffer, keeping track of how many bytes we have added
+     to the array of buffers to be flushed. The array of buffers to be flushed
+     contains buffers by reference, not copies. This avoids putting pressure on
+     the CPU for copying buffers or for gc activity. Please profile performance
+     with a large byte configuration and a large number of records (900k+)
+     before changing this code.
+    */
+    while (this.buffers.length) {
+      const remainder = size - bytesToFlush;
+      if (remainder <= 0) {
+        break;
+      }
+      const buffer = this.buffers.shift()!;
+      const chunkedBuffer = buffer.slice(0, remainder);
+      buffersToFlush.push(chunkedBuffer);
+      bytesToFlush += chunkedBuffer.byteLength;
+
+      if (buffer.byteLength > remainder) {
+        this.buffers.unshift(buffer.slice(remainder));
+      }
+    }
+
+    // We call Buffer.concat with the fewest number of buffers possible
+    const chunk = Buffer.concat(buffersToFlush);
+    const content = this.encode(chunk);
+
+    if (!this.chunksWritten) {
+      await this.removeChunks();
+    }
+    if (chunk.byteLength) {
+      await this.writeChunk(content);
+      this.chunksWritten++;
+    }
+
+    this.bytesWritten += chunk.byteLength;
+    this.bytesBuffered -= bytesToFlush;
+  }
+
+  private async flushAllFullChunks() {
+    const maxChunkSize = await this.getMaxChunkSize();
+
+    while (this.bytesBuffered >= maxChunkSize && this.buffers.length) {
+      await this.flush(maxChunkSize);
+    }
+  }
+
+  _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
+    this.bytesBuffered += buffer.byteLength;
+    this.buffers.push(buffer);
+
+    this.flushAllFullChunks()
+      .then(() => callback())
+      .catch(callback);
+  }
+
+  _final(callback: Callback) {
+    this.flush()
+      .then(() => callback())
+      .catch(callback);
+  }
+
+  getSeqNo(): number | undefined {
+    return this.seqNo;
+  }
+
+  getPrimaryTerm(): number | undefined {
+    return this.primaryTerm;
+  }
+}
+
+export interface ContentStreamArgs {
+  client: ElasticsearchClient;
+  /**
+   * Provide an ID to read from an existing document
+   */
+  id?: string;
+  index: string;
+
+  /**
+   * Known size of the file we are reading. This value can be used to optimize
+   * reading of the file.
+   */
+  logger: Logger;
+  parameters?: ContentStreamParameters;
+}
+
+export function getContentStream({ client, id, index, logger, parameters }: ContentStreamArgs) {
+  return new ContentStream(client, id, index, logger, parameters);
+}
