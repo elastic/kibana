@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../common';
 
 export const getColorStatusBased = (ruleStatus: string) => {
   switch (ruleStatus) {
@@ -21,4 +22,12 @@ export const getColorStatusBased = (ruleStatus: string) => {
     default:
       return 'subdued';
   }
+};
+
+export const formatInterval = (ruleInterval: string) => {
+  const interval: string[] | null = ruleInterval.match(/(^\d*)([s|m|h|d])/);
+  if (!interval || interval.length < 3) return ruleInterval;
+  const value: number = +interval[1];
+  const unit = interval[2] as TimeUnitChar;
+  return formatDurationFromTimeUnitChar(value, unit);
 };

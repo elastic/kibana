@@ -43,9 +43,9 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from './components';
 import { useKibana } from '../../utils/kibana_react';
-import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
+// import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
 import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
-import { getColorStatusBased } from './utils';
+import { formatInterval, getColorStatusBased } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 
 export function RuleDetailsPage() {
@@ -148,6 +148,7 @@ export function RuleDetailsPage() {
       content: <EuiText>Error log</EuiText>,
     },
   ];
+  console.log('rule', rule);
 
   if (isLoadingRule && !errorRule) return <EuiText>Loading</EuiText>;
   if (errorRule) return toasts.addDanger({ title: errorRule });
@@ -339,9 +340,7 @@ export function RuleDetailsPage() {
                       translationKey="xpack.observability.ruleDetails.runsEvery"
                       defaultMessage="Runs every"
                     />
-
-                    {/* TODO:  format interval*/}
-                    <ItemValueRuleSummary itemValue={rule.schedule.interval} />
+                    <ItemValueRuleSummary itemValue={formatInterval(rule.schedule.interval)} />
                   </EuiFlexGroup>
 
                   <EuiSpacer size="l" />
