@@ -15,12 +15,14 @@ Create {kib} rules.
 
 ==== {api-description-title}
 
-WARNING: This API supports only
+[WARNING]
+====
+* This API supports only
 <<token-api-authentication,token-based authentication>>.
-
-When you create a rule, it identifies which roles you have at that point in time.
+* When you create a rule, it identifies which roles you have at that point in time.
 Thereafter, when the rule performs queries, it uses those security privileges.
 If a user with different privileges updates the rule, its behavior might change.
+====
 
 [[create-rule-api-path-params]]
 ==== Path parameters
