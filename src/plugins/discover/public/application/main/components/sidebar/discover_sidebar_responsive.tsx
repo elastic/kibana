@@ -242,6 +242,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       return;
     }
     const ref = dataViewEditor.openEditor({
+      skipSave: true,
       onSave: async (dataView) => {
         onDataViewCreated(dataView);
       },

@@ -81,12 +81,29 @@ export async function loadIndexPattern(
 ): Promise<IndexPatternData> {
   const indexPatternList = (await indexPatterns.getCache()) as unknown as IndexPatternSavedObject[];
 
+  let loaded;
+  try {
+    loaded = await indexPatterns.get(id);
+  } catch (e) {
+    loaded = undefined;
+  }
   const actualId = getIndexPatternId(id, indexPatternList, config.get('defaultIndex'));
+
+  if (loaded && loaded.id !== actualId) {
+    indexPatternList.push({
+      id: loaded.id,
+      title: loaded.title,
+      attributes: loaded.getAsSavedObjectBody(),
+      type: 'index_pattern',
+      references: [],
+    });
+  }
+
   return {
     list: indexPatternList || [],
-    loaded: await indexPatterns.get(actualId),
+    loaded: loaded || (await indexPatterns.get(actualId)),
     stateVal: id,
-    stateValFound: !!id && actualId === id,
+    stateValFound: !!id && !!loaded,
   };
 }
 
