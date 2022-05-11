@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt, EuiEmptyPromptProps } from '@elastic/eui';
 
-import { DataViewIllustration } from '../assets';
+import { DataViewIllustration } from './data_view_illustration';
 import { DocumentationLink } from './documentation_link';
 
 export interface Props {
@@ -23,7 +23,7 @@ export interface Props {
   emptyPromptColor?: EuiEmptyPromptProps['color'];
 }
 
-const createDataViewText = i18n.translate('sharedUXComponents.noDataViewsPage.addDataViewText', {
+const createDataViewText = i18n.translate('sharedUXPackages.noDataViewsPage.addDataViewText', {
   defaultMessage: 'Create Data View',
 });
 
@@ -33,7 +33,7 @@ const MAX_WIDTH = 830;
 /**
  * A presentational component that is shown in cases when there are no data views created yet.
  */
-export const NoDataViews = ({
+export const NoDataViewsPrompt = ({
   onClickCreate,
   canCreateNewDataView,
   dataViewsDocLink,
@@ -62,12 +62,12 @@ export const NoDataViews = ({
       title={
         <h2>
           <FormattedMessage
-            id="sharedUXComponents.noDataViews.youHaveData"
+            id="sharedUXPackages.noDataViews.youHaveData"
             defaultMessage="You have data in Elasticsearch."
           />
           <br />
           <FormattedMessage
-            id="sharedUXComponents.noDataViews.nowCreate"
+            id="sharedUXPackages.noDataViews.nowCreate"
             defaultMessage="Now, create a data view."
           />
         </h2>
@@ -75,7 +75,7 @@ export const NoDataViews = ({
       body={
         <p>
           <FormattedMessage
-            id="sharedUXComponents.noDataViews.dataViewExplanation"
+            id="sharedUXPackages.noDataViews.dataViewExplanation"
             defaultMessage="Kibana requires a data view to identify which data streams,
             indices, and index aliases you want to explore. A data view can point to a
             specific index, for example, your log data from yesterday, or all indices

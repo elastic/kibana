@@ -8,20 +8,18 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { useEditors, usePermissions, useDocLinks } from '@kbn/shared-ux-services';
-import type { SharedUxEditorsService } from '@kbn/shared-ux-services';
-
-import { NoDataViews as NoDataViewsComponent } from './no_data_views.component';
+import { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';
+import { useServices, NoDataViewsPromptServices } from './services';
 
 // TODO: https://github.com/elastic/kibana/issues/127695
 export interface Props {
   onDataViewCreated: (dataView: unknown) => void;
 }
 
-type CloseDataViewEditorFn = ReturnType<SharedUxEditorsService['openDataViewEditor']>;
+type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewEditor']>;
 
 /**
- * A service-enabled component that provides Kibana-specific functionality to the `NoDataViews`
+ * A service-enabled component that provides Kibana-specific functionality to the `NoDataViewsPrompt`
  * component.
  *
  * Use of this component requires both the `EuiTheme` context as well as either a configured Shared UX
@@ -29,10 +27,8 @@ type CloseDataViewEditorFn = ReturnType<SharedUxEditorsService['openDataViewEdit
  *
  * See shared-ux/public/services for information.
  */
-export const NoDataViews = ({ onDataViewCreated }: Props) => {
-  const { canCreateNewDataView } = usePermissions();
-  const { openDataViewEditor } = useEditors();
-  const { dataViewsDocLink } = useDocLinks();
+export const NoDataViewsPrompt = ({ onDataViewCreated }: Props) => {
+  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink } = useServices();
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 
   useEffect(() => {
@@ -68,5 +64,7 @@ export const NoDataViews = ({ onDataViewCreated }: Props) => {
     }
   }, [canCreateNewDataView, openDataViewEditor, setDataViewEditorRef, onDataViewCreated]);
 
-  return <NoDataViewsComponent {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink }} />;
+  return (
+    <NoDataViewsPromptComponent {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink }} />
+  );
 };

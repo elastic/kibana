@@ -8,14 +8,10 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { servicesFactory } from '@kbn/shared-ux-storybook';
+import { NoDataViewsPrompt as NoDataViewsPromptComponent, Props } from './no_data_views.component';
+import { NoDataViewsPrompt } from './no_data_views';
 
-import { NoDataViews as NoDataViewsComponent, Props } from './no_data_views.component';
-import { NoDataViews } from './no_data_views';
-
-import mdx from './no_data_views.mdx';
-
-const services = servicesFactory({});
+import mdx from '../README.mdx';
 
 export default {
   title: 'No Data/No Data Views',
@@ -28,13 +24,13 @@ export default {
 };
 
 export const ConnectedComponent = () => {
-  return <NoDataViews onDataViewCreated={action('onDataViewCreated')} />;
+  return <NoDataViewsPrompt onDataViewCreated={action('onDataViewCreated')} />;
 };
 
 type Params = Pick<Props, 'canCreateNewDataView' | 'dataViewsDocLink'>;
 
 export const PureComponent = (params: Params) => {
-  return <NoDataViewsComponent onClickCreate={action('onClick')} {...params} />;
+  return <NoDataViewsPromptComponent onClickCreate={action('onClick')} {...params} />;
 };
 
 PureComponent.argTypes = {
@@ -43,7 +39,7 @@ PureComponent.argTypes = {
     defaultValue: true,
   },
   dataViewsDocLink: {
-    options: [services.docLinks.dataViewsDocLink, undefined],
+    options: ['some/link', undefined],
     control: { type: 'radio' },
   },
 };
