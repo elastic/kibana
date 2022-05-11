@@ -57,6 +57,21 @@ $controlMinWidth: $euiSize * 14;
       cursor: grabbing;
     }
   }
+
+  @media only screen and (max-width: 767px) {
+    width: 100%;
+    &--small {
+      min-width:unset;
+    }
+
+    &--medium {
+      min-width:unset;
+    }
+
+    &--large {
+      min-width:unset;
+    }
+  }
 }
 
 .controlFrame__labelToolTip {
@@ -125,6 +140,20 @@ $controlMinWidth: $euiSize * 14;
   &--large {
     width: $largeControl;
     min-width: $largeControl;
+  }
+
+  @media only screen and (max-width: 767px) {
+    &--small {
+      min-width:unset;
+    }
+
+    &--medium {
+      min-width:unset;
+    }
+
+    &--large {
+      min-width:unset;
+    }
   }
 
   &--insertBefore,
