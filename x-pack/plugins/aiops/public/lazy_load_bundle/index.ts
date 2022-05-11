@@ -6,11 +6,13 @@
  */
 
 import type { ExplainLogRateSpikesSpec } from '../components/explain_log_rate_spikes';
+import type { SingleEndpointStreamingDemoSpec } from '../components/single_endpoint_streaming_demo';
 
 let loadModulesPromise: Promise<LazyLoadedModules>;
 
 interface LazyLoadedModules {
   ExplainLogRateSpikes: ExplainLogRateSpikesSpec;
+  SingleEndpointStreamingDemo: SingleEndpointStreamingDemoSpec;
 }
 
 export async function lazyLoadModules(): Promise<LazyLoadedModules> {

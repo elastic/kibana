@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import { getExplainLogRateSpikesComponent } from './api';
+import { getExplainLogRateSpikesComponent, getSingleEndpointStreamingDemoComponent } from './api';
 import { setStartServices } from './kibana_services';
 import { AiopsPluginSetup, AiopsPluginStart } from './types';
 
@@ -18,6 +18,7 @@ export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
     setStartServices(core, {});
     return {
       getExplainLogRateSpikesComponent,
+      getSingleEndpointStreamingDemoComponent,
     };
   }
 

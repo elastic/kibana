@@ -7,3 +7,5 @@
 
 export type { ExplainLogRateSpikesSpec } from '../../components/explain_log_rate_spikes';
 export { ExplainLogRateSpikes } from '../../components/explain_log_rate_spikes';
+export type { SingleEndpointStreamingDemoSpec } from '../../components/single_endpoint_streaming_demo';
+export { SingleEndpointStreamingDemo } from '../../components/single_endpoint_streaming_demo';

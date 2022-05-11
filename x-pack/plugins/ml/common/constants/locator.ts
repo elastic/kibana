@@ -53,6 +53,7 @@ export const ML_PAGES = {
   OVERVIEW: 'overview',
   AIOPS: 'aiops',
   AIOPS_EXPLAIN_LOG_RATE_SPIKES: 'aiops/explain_log_rate_spikes',
+  AIOPS_SINGLE_ENDPOINT_STREAMING_DEMO: 'aiops/single_endpoint_streaming_demo',
 } as const;
 
 export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];

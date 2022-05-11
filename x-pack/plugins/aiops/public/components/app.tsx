@@ -10,7 +10,6 @@ import React, { useEffect, useState } from 'react';
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import {
@@ -19,14 +18,8 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
   EuiProgress,
   EuiSpacer,
-  EuiTitle,
   EuiText,
 } from '@elastic/eui';
 
@@ -72,96 +65,70 @@ export const AiopsApp = () => {
       });
 
   return (
-    <EuiPage restrictWidth="1000px">
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.aiops.congratulationsTitle"
-                  defaultMessage="Single endpoint streaming demo"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <EuiText>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    type="primary"
-                    size="s"
-                    onClick={onClickHandler}
-                    aria-label={buttonLabel}
-                  >
-                    {buttonLabel}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText>
-                    <EuiBadge>{progress}%</EuiBadge>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiProgress value={progress} max={100} size="xs" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
-              <div style={{ height: '300px' }}>
-                <Chart>
-                  <Settings rotation={90} />
-                  <Axis
-                    id="entities"
-                    position={Position.Bottom}
-                    title={i18n.translate('xpack.aiops.barChart.commitsTitle', {
-                      defaultMessage: 'Commits',
-                    })}
-                    showOverlappingTicks
-                  />
-                  <Axis
-                    id="left2"
-                    title={i18n.translate('xpack.aiops.barChart.developersTitle', {
-                      defaultMessage: 'Developers',
-                    })}
-                    position={Position.Left}
-                  />
+    <EuiText>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton type="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+            {buttonLabel}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <EuiBadge>{progress}%</EuiBadge>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiProgress value={progress} max={100} size="xs" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <div style={{ height: '300px' }}>
+        <Chart>
+          <Settings rotation={90} />
+          <Axis
+            id="entities"
+            position={Position.Bottom}
+            title={i18n.translate('xpack.aiops.barChart.commitsTitle', {
+              defaultMessage: 'Commits',
+            })}
+            showOverlappingTicks
+          />
+          <Axis
+            id="left2"
+            title={i18n.translate('xpack.aiops.barChart.developersTitle', {
+              defaultMessage: 'Developers',
+            })}
+            position={Position.Left}
+          />
 
-                  <BarSeries
-                    id="commits"
-                    xScaleType={ScaleType.Linear}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="x"
-                    yAccessors={['y']}
-                    data={Object.entries(entities)
-                      .map(([x, y]) => {
-                        return {
-                          x,
-                          y,
-                        };
-                      })
-                      .sort((a, b) => b.y - a.y)}
-                  />
-                </Chart>
-              </div>
-              <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
-              <EuiCheckbox
-                id="aiopSimulateErrorsCheckbox"
-                label={i18n.translate(
-                  'xpack.aiops.explainLogRateSpikes.simulateErrorsCheckboxLabel',
-                  {
-                    defaultMessage:
-                      'Simulate errors (gets applied to new streams only, not currently running ones).',
-                  }
-                )}
-                checked={simulateErrors}
-                onChange={(e) => setSimulateErrors(!simulateErrors)}
-                compressed
-              />
-            </EuiText>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+          <BarSeries
+            id="commits"
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            data={Object.entries(entities)
+              .map(([x, y]) => {
+                return {
+                  x,
+                  y,
+                };
+              })
+              .sort((a, b) => b.y - a.y)}
+          />
+        </Chart>
+      </div>
+      <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
+      <EuiCheckbox
+        id="aiopSimulateErrorsCheckbox"
+        label={i18n.translate('xpack.aiops.explainLogRateSpikes.simulateErrorsCheckboxLabel', {
+          defaultMessage:
+            'Simulate errors (gets applied to new streams only, not currently running ones).',
+        })}
+        checked={simulateErrors}
+        onChange={(e) => setSimulateErrors(!simulateErrors)}
+        compressed
+      />
+    </EuiText>
   );
 };
