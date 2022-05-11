@@ -28,7 +28,7 @@ export const go = `# ${i18n.translate(
       'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
   }
 )}
-export ELASTIC_APM_SERVICE_NAME=
+export ELASTIC_APM_SERVICE_NAME=my_go_service
 
 # ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.setCustomApmServerUrlComment',

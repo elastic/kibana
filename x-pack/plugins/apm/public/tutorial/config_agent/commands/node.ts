@@ -27,7 +27,7 @@ var apm = require('elastic-apm-node').start({
     defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
   }
 )}
-serviceName: '',
+serviceName: 'my_node_service',
 
 // ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
