@@ -385,9 +385,30 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'container.cpu.usage': {
+    type: 'scaled_float',
+    array: false,
+    required: false,
+    scaling_factor: 1000,
+  },
+  'container.disk.read.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'container.disk.write.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'container.id': {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  'container.image.hash.all': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   'container.image.name': {
@@ -405,8 +426,24 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'container.memory.usage': {
+    type: 'scaled_float',
+    array: false,
+    required: false,
+    scaling_factor: 1000,
+  },
   'container.name': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'container.network.egress.bytes': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'container.network.ingress.bytes': {
+    type: 'long',
     array: false,
     required: false,
   },
@@ -650,12 +687,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'dll.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'dll.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'dll.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -696,6 +743,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'dll.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'dll.pe.pehash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -799,6 +851,136 @@ export const ecsFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  'email.attachments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'email.attachments.file.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.mime_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.attachments.file.size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'email.bcc.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.cc.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.content_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.delivery_timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'email.direction': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.from.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.local_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.message_id': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'email.origination_timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'email.reply_to.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.sender.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.subject': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'email.to.address': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'email.x_mailer': {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   'error.code': {
     type: 'keyword',
@@ -965,6 +1147,16 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'faas.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'faas.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'faas.trigger': {
     type: 'nested',
     array: false,
@@ -976,6 +1168,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'faas.trigger.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'faas.version': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1240,12 +1437,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'file.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1311,6 +1518,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'file.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'file.pe.pehash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -1480,6 +1692,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'host.boot.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'host.cpu.usage': {
     type: 'scaled_float',
     array: false,
@@ -1636,6 +1853,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'host.pid_ns_ino': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'host.type': {
     type: 'keyword',
     array: false,
@@ -1751,6 +1973,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'log.syslog.appname': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'log.syslog.facility.code': {
     type: 'long',
     array: false,
@@ -1761,8 +1988,23 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'log.syslog.hostname': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'log.syslog.msgid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'log.syslog.priority': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'log.syslog.procid': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -1772,6 +2014,16 @@ export const ecsFieldMap = {
     required: false,
   },
   'log.syslog.severity.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'log.syslog.structured_data': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
+  'log.syslog.version': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2071,6 +2323,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'orchestrator.cluster.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'orchestrator.cluster.name': {
     type: 'keyword',
     array: false,
@@ -2096,7 +2353,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'orchestrator.resource.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.resource.ip': {
+    type: 'ip',
+    array: true,
+    required: false,
+  },
   'orchestrator.resource.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'orchestrator.resource.parent.type': {
     type: 'keyword',
     array: false,
     required: false,
@@ -2401,8 +2673,188 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.entry_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.entry_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
   'process.entry_leader.entity_id': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.source.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.entry_meta.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.parent.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.entry_leader.working_directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.env_vars': {
+    type: 'object',
     array: false,
     required: false,
   },
@@ -2413,6 +2865,146 @@ export const ecsFieldMap = {
   },
   'process.exit_code': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.group_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.group_leader.working_directory': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2431,6 +3023,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.hash.sha512': {
     type: 'keyword',
     array: false,
@@ -2438,6 +3035,16 @@ export const ecsFieldMap = {
   },
   'process.hash.ssdeep': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.interactive': {
+    type: 'boolean',
     array: false,
     required: false,
   },
@@ -2671,6 +3278,31 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.group_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
   'process.parent.hash.md5': {
     type: 'keyword',
     array: false,
@@ -2686,6 +3318,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.hash.sha512': {
     type: 'keyword',
     array: false,
@@ -2693,6 +3330,16 @@ export const ecsFieldMap = {
   },
   'process.parent.hash.ssdeep': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.hash.tlsh': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.interactive': {
+    type: 'boolean',
     array: false,
     required: false,
   },
@@ -2731,6 +3378,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.pe.product': {
     type: 'keyword',
     array: false,
@@ -2746,8 +3398,58 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.parent.start': {
     type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.parent.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.supplemental_groups.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2766,8 +3468,33 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.parent.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.parent.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'process.parent.uptime': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.parent.user.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2806,6 +3533,11 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.pe.pehash': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'process.pe.product': {
     type: 'keyword',
     array: false,
@@ -2821,13 +3553,243 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.previous.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.previous.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.previous.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.args': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'process.session_leader.args_count': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.command_line': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
   'process.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.executable': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.interactive': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.entity_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.parent.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.pid': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.real_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.same_as_process': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.saved_user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.start': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.supplemental_groups.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.user.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.session_leader.working_directory': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'process.start': {
     type: 'date',
+    array: false,
+    required: false,
+  },
+  'process.supplemental_groups.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.supplemental_groups.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -2846,8 +3808,33 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'process.tty': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'process.tty.char_device.major': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.tty.char_device.minor': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   'process.uptime': {
     type: 'long',
+    array: false,
+    required: false,
+  },
+  'process.user.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'process.user.name': {
+    type: 'keyword',
     array: false,
     required: false,
   },
@@ -3751,12 +4738,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.indicator.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.indicator.file.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'threat.enrichments.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -3822,6 +4819,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.enrichments.indicator.file.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.pe.pehash': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4326,7 +5328,32 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.matched.occurred': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.matched.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.dashboard_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.reference': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4641,12 +5668,22 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.indicator.file.hash.sha384': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.indicator.file.hash.sha512': {
     type: 'keyword',
     array: false,
     required: false,
   },
   'threat.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.hash.tlsh': {
     type: 'keyword',
     array: false,
     required: false,
@@ -4712,6 +5749,11 @@ export const ecsFieldMap = {
     required: false,
   },
   'threat.indicator.file.pe.original_file_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.indicator.file.pe.pehash': {
     type: 'keyword',
     array: false,
     required: false,
