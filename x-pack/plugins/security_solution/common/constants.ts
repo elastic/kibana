@@ -122,7 +122,6 @@ export enum SecurityPageName {
   kubernetes = 'kubernetes',
   threatHuntingLanding = 'threat-hunting',
   dashboardsLanding = 'dashboards',
-  manageLanding = 'manage',
 }
 
 export const THREAT_HUNTING_PATH = '/threat_hunting' as const;
