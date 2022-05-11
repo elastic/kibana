@@ -157,12 +157,14 @@ export const percentileOperation: OperationDefinition<
         functions: [fnBuilder],
       } = expressionBuilder;
       if (fnBuilder.name === 'aggSinglePercentile') {
-        const field = fnBuilder.getArgument('field')?.[0];
-        if (!(field in percentileExpressionsByArgs)) {
-          percentileExpressionsByArgs[field] = [];
+        const groupByKey = `${fnBuilder.getArgument('field')?.[0]}-${
+          fnBuilder.getArgument('timeShift')?.[0]
+        }`;
+        if (!(groupByKey in percentileExpressionsByArgs)) {
+          percentileExpressionsByArgs[groupByKey] = [];
         }
 
-        percentileExpressionsByArgs[field].push(expressionBuilder);
+        percentileExpressionsByArgs[groupByKey].push(expressionBuilder);
       }
     });
 
