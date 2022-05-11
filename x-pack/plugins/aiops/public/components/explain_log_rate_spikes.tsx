@@ -5,10 +5,64 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, FC } from 'react';
+
+import { EuiBadge } from '@elastic/eui';
+
+import {
+  API_ACTION_NAME,
+  AiopsExplainLogRateSpikesApiAction,
+} from '../../common/api/explain_log_rate_spikes';
+
+import { useStreamFetchReducer } from './use_stream_fetch_reducer';
+
+interface StreamState {
+  fields: string[];
+}
+
+const initialState: StreamState = {
+  fields: [],
+};
+
+function streamReducer(
+  state: StreamState,
+  action: AiopsExplainLogRateSpikesApiAction | AiopsExplainLogRateSpikesApiAction[]
+): StreamState {
+  if (Array.isArray(action)) {
+    return action.reduce(streamReducer, state);
+  }
+
+  switch (action.type) {
+    case API_ACTION_NAME.ADD_FIELDS:
+      return {
+        fields: [...state.fields, ...action.payload],
+      };
+    default:
+      return state;
+  }
+}
 
 export const ExplainLogRateSpikes: FC = () => {
-  return <span>CONTENT GOES HERE INSIDE AIOPS PLUGIN</span>;
+  const { start, data } = useStreamFetchReducer(
+    '/internal/aiops/explain_log_rate_spikes',
+    streamReducer,
+    initialState,
+    { index: 'my-index' }
+  );
+
+  useEffect(() => {
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <>
+      <p>ALL THE FIELDS</p>
+      {data.fields.map((field) => (
+        <EuiBadge>{field}</EuiBadge>
+      ))}
+    </>
+  );
 };
 
 // required for dynamic import using React.lazy()

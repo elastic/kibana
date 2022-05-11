@@ -7,8 +7,10 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
+import { AIOPS_ENABLED } from '../common';
+
 import { AiopsPluginSetup, AiopsPluginStart } from './types';
-import { defineRoutes } from './routes';
+import { defineExampleStreamRoute, defineExplainLogRateSpikesRoute } from './routes';
 
 export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
   private readonly logger: Logger;
@@ -22,7 +24,10 @@ export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router, this.logger);
+    if (AIOPS_ENABLED) {
+      defineExampleStreamRoute(router, this.logger);
+      defineExplainLogRateSpikesRoute(router, this.logger);
+    }
 
     return {};
   }

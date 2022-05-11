@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { useReducer, useRef, useState, Reducer, ReducerAction, ReducerState } from 'react';
+import {
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  Reducer,
+  ReducerAction,
+  ReducerState,
+} from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -55,6 +63,11 @@ export const useStreamFetchReducer = <R extends Reducer<any, any>, E = ApiEndpoi
     setIsCancelled(true);
     setIsRunning(false);
   };
+
+  // If components using this custom hook get unmounted, cancel any ongoing request.
+  useEffect(() => {
+    return () => abortCtrl.current.abort();
+  }, []);
 
   return {
     cancel,
