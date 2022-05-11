@@ -7,7 +7,7 @@
 
 import type { Headers } from '@kbn/core/server';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
+import { CONTEXT_DEBUG, DEFAULT_PAGELOAD_SELECTOR } from './constants';
 import { Actions, EventLogger } from './event_logger';
 
 export const openUrl = async (
@@ -36,13 +36,13 @@ export const openUrl = async (
           window.addEventListener('resize', () => {
             // eslint-disable-next-line no-console
             console.log(
-              `window resize triggered: width=${window.innerWidth} height=${window.innerHeight}`
+              `Detected a viewport resize: width=${window.innerWidth} height=${window.innerHeight}`
             );
           });
         },
         args: [],
       },
-      { context: 'DEBUG' },
+      { context: CONTEXT_DEBUG },
       kbnLogger
     );
   } catch (err) {

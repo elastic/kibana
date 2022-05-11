@@ -143,7 +143,7 @@ export class HeadlessChromiumDriverFactory {
       // NOTE: _.defaults assigns to the target object, so we copy it.
       // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
       const viewport = _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT);
-      logger.debug(`Viewport is: width=${viewport.width} height=${viewport.height}`);
+      logger.debug(`Launching with viewport: width=${viewport.width} height=${viewport.height}`);
 
       (async () => {
         let browser: Browser | undefined;
