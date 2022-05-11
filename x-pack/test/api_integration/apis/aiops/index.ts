@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('AIOps', function () {
-    this.tags(['mlqa', 'walterra']);
+    this.tags(['ml']);
 
     loadTestFile(require.resolve('./example_stream'));
   });
