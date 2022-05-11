@@ -138,7 +138,7 @@ with multiple forms, such as German.
 | **Input** | **Pattern** | **Locale** | **Output**
 | 3 | 0o | en (English) | 3rd
 | 34 | 0o | en (English) | 34th
-| 3 | 0o | es (Spanish) | 2er
+| 3 | 0o | es (Spanish) | 3er
 | 3 | 0o | ru (Russian) | 3.
 |===
 
