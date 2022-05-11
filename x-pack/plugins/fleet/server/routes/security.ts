@@ -342,10 +342,11 @@ export const hasRoutePrivileges = async (
     });
   appContextService.getLogger().warn(JSON.stringify(hasPrivilegesResponse, null, 2));
 
-  const packageResource = 'package:' + packageAuthz?.packageName; //  + ':*',
+  const packagePrefix = 'package:' + packageAuthz?.packageName;
+  const packageResource = packagePrefix + ':*';
 
   const actionResources = (packageAuthz?.packageActions ?? []).map(
-    (action) => `${packageResource}:${action}`
+    (action) => `${packagePrefix}:action:${action}`
   );
 
   const hasPackagePrivilegesResponse: HasPrivilegesResponse = await appContextService
