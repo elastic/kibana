@@ -76,35 +76,41 @@ export const renderApp = ({
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
+  const ApplicationUsageTrackingProvider =
+    plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
-      <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
-        <PluginContext.Provider
-          value={{
-            appMountParameters,
-            config,
-            observabilityRuleTypeRegistry,
-            ObservabilityPageTemplate,
-            kibanaFeatures,
-          }}
+    <ApplicationUsageTrackingProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaContextProvider
+          services={{ ...core, ...plugins, storage: new Storage(localStorage) }}
         >
-          <Router history={history}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <i18nCore.Context>
-                <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                  <DatePickerContextProvider>
-                    <HasDataContextProvider>
-                      <App />
-                    </HasDataContextProvider>
-                  </DatePickerContextProvider>
-                </RedirectAppLinks>
-              </i18nCore.Context>
-            </EuiThemeProvider>
-          </Router>
-        </PluginContext.Provider>
-      </KibanaContextProvider>
-    </KibanaThemeProvider>,
+          <PluginContext.Provider
+            value={{
+              appMountParameters,
+              config,
+              observabilityRuleTypeRegistry,
+              ObservabilityPageTemplate,
+              kibanaFeatures,
+            }}
+          >
+            <Router history={history}>
+              <EuiThemeProvider darkMode={isDarkMode}>
+                <i18nCore.Context>
+                  <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
+                    <DatePickerContextProvider>
+                      <HasDataContextProvider>
+                        <App />
+                      </HasDataContextProvider>
+                    </DatePickerContextProvider>
+                  </RedirectAppLinks>
+                </i18nCore.Context>
+              </EuiThemeProvider>
+            </Router>
+          </PluginContext.Provider>
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
+    </ApplicationUsageTrackingProvider>,
     element
   );
   return () => {

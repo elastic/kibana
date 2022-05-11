@@ -55,6 +55,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
+  usageCollection: any;
   cases: CasesUiStart;
   embeddable: EmbeddableStart;
   home?: HomePublicPluginStart;
