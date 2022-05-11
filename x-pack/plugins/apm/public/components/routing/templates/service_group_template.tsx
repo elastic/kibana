@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiLoadingContent,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +19,7 @@ import {
   KibanaPageTemplateProps,
 } from '@kbn/kibana-react-plugin/public';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -61,19 +60,8 @@ export function ServiceGroupTemplate({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { data: serviceGroupsData, status: serviceGroupsStatus } = useFetcher(
-    (callApmApi) => {
-      if (!serviceGroupId && isServiceGroupsEnabled) {
-        return callApmApi('GET /internal/apm/service-groups');
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
   const serviceGroupName = data?.serviceGroup.groupName;
   const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
-  const hasServiceGroups = !!serviceGroupsData?.serviceGroups.length;
   const serviceGroupsLink = router.link('/service-groups', {
     query: { ...query, serviceGroup: '' },
   });
@@ -86,12 +74,7 @@ export function ServiceGroupTemplate({
       justifyContent="flexStart"
       responsive={false}
     >
-      {serviceGroupsStatus === FETCH_STATUS.LOADING && (
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-      )}
-      {(serviceGroupId || hasServiceGroups) && (
+      {serviceGroupId && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="layers"
