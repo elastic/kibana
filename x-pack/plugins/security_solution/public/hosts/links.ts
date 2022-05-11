@@ -8,10 +8,16 @@ import { i18n } from '@kbn/i18n';
 import { HOSTS_PATH, SecurityPageName } from '../../common/constants';
 import { HOSTS } from '../app/translations';
 import { LinkItem } from '../common/links/types';
+import hostsPageImg from '../common/images/hosts_page.png';
 
 export const links: LinkItem = {
   id: SecurityPageName.hosts,
   title: HOSTS,
+  landingImage: hostsPageImg,
+  description: i18n.translate('xpack.securitySolution.landing.threatHunting.hostsDescription', {
+    defaultMessage:
+      'A computer or other device that communicates with other hosts on a network. Hosts on a network include clients and servers -- that send or receive data, services or applications.',
+  }),
   path: HOSTS_PATH,
   globalNavEnabled: true,
   globalSearchKeywords: [
