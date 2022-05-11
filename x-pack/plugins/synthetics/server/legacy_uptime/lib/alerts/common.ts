@@ -9,6 +9,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 export type UpdateUptimeAlertState = (
   state: Record<string, any>,
@@ -59,9 +60,17 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
 };
 
 export const generateAlertMessage = (messageTemplate: string, fields: Record<string, any>) => {
-  return Mustache.render(messageTemplate, { state: { ...fields } });
+  return Mustache.render(messageTemplate, { context: { ...fields }, state: { ...fields } });
 };
 export const getViewInAppUrl = (relativeViewInAppUrl: string, basePath: IBasePath) =>
   basePath.publicBaseUrl
     ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
     : relativeViewInAppUrl;
+
+export const setRecoveredAlertsContext = (alertFactory: RuleExecutorServices['alertFactory']) => {
+  const { getRecoveredAlerts } = alertFactory.done();
+  for (const alert of getRecoveredAlerts()) {
+    const state = alert.getState();
+    alert.setContext(state);
+  }
+};

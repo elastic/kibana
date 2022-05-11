@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { UptimeAlertTypeFactory } from './types';
-import { updateState, generateAlertMessage } from './common';
+import { updateState, generateAlertMessage, setRecoveredAlertsContext } from './common';
 import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { Cert, CertResult } from '../../../../common/runtime_types';
@@ -108,13 +108,14 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
     },
   ],
   actionVariables: {
-    context: [],
+    context: [...tlsTranslations.actionVariables, ...commonStateTranslations],
     state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
+  doesSetRecoveryContext: true,
   async executor({
-    services: { alertWithLifecycle, savedObjectsClient, scopedClusterClient },
+    services: { alertWithLifecycle, savedObjectsClient, scopedClusterClient, alertFactory },
     state,
   }) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
@@ -173,9 +174,11 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
           ...updateState(state, foundCerts),
           ...summary,
         });
-        alertInstance.scheduleActions(TLS.id);
+        alertInstance.scheduleActions(TLS.id, { ...summary });
       });
     }
+
+    setRecoveredAlertsContext(alertFactory);
 
     return updateState(state, foundCerts);
   },
