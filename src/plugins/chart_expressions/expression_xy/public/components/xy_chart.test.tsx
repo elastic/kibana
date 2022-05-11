@@ -796,7 +796,7 @@ describe('XYChart component', () => {
 
     expect(onSelectRange).toHaveBeenCalledWith({
       column: 0,
-      table: dateHistogramData.tables.timeLayer,
+      table: dateHistogramData,
       range: [1585757732783, 1585758880838],
     });
   });
@@ -992,7 +992,7 @@ describe('XYChart component', () => {
         {
           column: 0,
           row: 0,
-          table: dateHistogramData.tables.timeLayer,
+          table: dateHistogramData,
           value: 1585758120000,
         },
       ],
