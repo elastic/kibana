@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiText euiText--small css-5gcfa6-EuiText"
+        class="euiText euiText--small css-vxlbjf-EuiText"
         data-id="6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
         data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
       >
@@ -28,7 +28,7 @@ Object {
           data-euiicon-type="alert"
         />
         <div
-          class="euiText euiText--small"
+          class="euiText euiText--small css-lps5t-EuiText"
         >
           cmd test alert
         </div>
@@ -52,7 +52,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiText euiText--small css-5gcfa6-EuiText"
+      class="euiText euiText--small css-vxlbjf-EuiText"
       data-id="6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
       data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
     >
@@ -74,7 +74,7 @@ Object {
         data-euiicon-type="alert"
       />
       <div
-        class="euiText euiText--small"
+        class="euiText euiText--small css-lps5t-EuiText"
       >
         cmd test alert
       </div>

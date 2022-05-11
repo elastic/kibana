@@ -67,6 +67,11 @@ export interface ExecutionContext<
   isSyncColorsEnabled?: () => boolean;
 
   /**
+   * Returns the state (true|false) of the sync tooltips across panels switch.
+   */
+  isSyncTooltipsEnabled?: () => boolean;
+
+  /**
    * Contains the meta-data about the source of the expression.
    */
   getExecutionContext: () => KibanaExecutionContext | undefined;
