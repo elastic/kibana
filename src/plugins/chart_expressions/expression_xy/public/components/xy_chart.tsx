@@ -172,7 +172,7 @@ export function XYChart({
     [dataLayers, formatFactory]
   );
 
-  if (filteredLayers.length === 0) {
+  if (dataLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(
       getDataLayers(layers)?.[0]?.seriesType || SeriesTypes.BAR
     );
@@ -253,7 +253,7 @@ export function XYChart({
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = dataLayers[0]?.table;
 
-  const xColumnId = firstTable.columns.find((col) => col.id === dataLayers[0]?.xAccessor)?.id;
+  const xColumnId = firstTable?.columns.find((col) => col.id === dataLayers[0]?.xAccessor)?.id;
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
