@@ -47,20 +47,10 @@ export abstract class SubActionConnector<Config, Secrets> {
     return urlWithoutTrailingSlash.replace(replaceDoubleSlashesRegex, '$1');
   }
 
-  private removeNullOrUndefinedFields(data: unknown | undefined) {
-    if (isObject(data)) {
-      return Object.fromEntries(Object.entries(data).filter(([_, value]) => value != null));
-    }
-
-    return data;
-  }
-
   private normalizeData(data: unknown | undefined | null) {
     if (data == null) {
       return {};
     }
-
-    return this.removeNullOrUndefinedFields(data);
   }
 
   private assertURL(url: string) {
@@ -93,6 +83,14 @@ export abstract class SubActionConnector<Config, Secrets> {
 
   protected registerSubAction(subAction: SubAction) {
     this.subActions.set(subAction.name, subAction);
+  }
+
+  protected removeNullOrUndefinedFields(data: unknown | undefined) {
+    if (isObject(data)) {
+      return Object.fromEntries(Object.entries(data).filter(([_, value]) => value != null));
+    }
+
+    return data;
   }
 
   public getSubActions() {
