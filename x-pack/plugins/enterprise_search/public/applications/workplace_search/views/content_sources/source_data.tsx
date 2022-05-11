@@ -514,6 +514,7 @@ export const staticSourceData: SourceDataItem[] = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: true,
+      needsCredentials: true,
       documentationUrl: docLinks.workplaceSearchServiceNow,
       applicationPortalUrl: 'https://www.servicenow.com/my-account/sign-in.html',
     },

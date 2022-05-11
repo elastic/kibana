@@ -42,7 +42,7 @@ interface ConnectInstanceProps {
 }
 
 export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
-  configuration: { needsSubdomain, hasOauthRedirect },
+  configuration: { needsSubdomain, hasOauthRedirect, needsCredentials },
   features,
   objTypes,
   name,
@@ -78,6 +78,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   }, []);
 
   const doRedirect = hasOauthRedirect || connectionRequiresRedirect;
+
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
   const onOauthFormSubmit = () => getSourceConnectData(redirectOauth);
@@ -101,6 +102,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           name="login"
           value={loginValue}
           onChange={(e) => setSourceLoginValue(e.target.value)}
+          data-test-subj="LoginField"
         />
       </EuiFormRow>
       <EuiFormRow label="Password">
@@ -110,6 +112,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           type="password"
           value={passwordValue}
           onChange={(e) => setSourcePasswordValue(e.target.value)}
+          data-test-subj="PasswordField"
         />
       </EuiFormRow>
       <EuiSpacer size="xxl" />
@@ -141,7 +144,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   const formFields = (
     <>
       {isOrganization && hasPlatinumLicense && permissionField}
-      {!doRedirect && credentialsFields}
+      {needsCredentials && credentialsFields}
       {needsSubdomain && subdomainField}
       {permissionsExcluded && !hasPlatinumLicense && <DocumentPermissionsCallout />}
 

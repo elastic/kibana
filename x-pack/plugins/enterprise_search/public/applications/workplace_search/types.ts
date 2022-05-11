@@ -62,6 +62,7 @@ export interface Configuration {
   needsBaseUrl: boolean;
   needsSubdomain?: boolean;
   needsConfiguration?: boolean;
+  needsCredentials?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
   documentationUrl: string;
