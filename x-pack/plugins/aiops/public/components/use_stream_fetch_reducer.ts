@@ -7,6 +7,8 @@
 
 import { useReducer, useRef, useState, Reducer, ReducerAction, ReducerState } from 'react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import type { ApiEndpoint, ApiEndpointOptions } from '../../common/api';
 
 import { streamFetch } from './stream_fetch';
@@ -17,6 +19,8 @@ export const useStreamFetchReducer = <R extends Reducer<any, any>, E = ApiEndpoi
   initialState: ReducerState<R>,
   options: ApiEndpointOptions[ApiEndpoint]
 ) => {
+  const kibana = useKibana();
+
   const [isCancelled, setIsCancelled] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -34,7 +38,12 @@ export const useStreamFetchReducer = <R extends Reducer<any, any>, E = ApiEndpoi
 
     abortCtrl.current = new AbortController();
 
-    for await (const actions of streamFetch(endpoint, abortCtrl, options)) {
+    for await (const actions of streamFetch(
+      endpoint,
+      abortCtrl,
+      options,
+      kibana.services.http?.basePath.get()
+    )) {
       dispatch(actions as ReducerAction<R>);
     }
 

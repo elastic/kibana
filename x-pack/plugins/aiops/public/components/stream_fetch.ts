@@ -12,9 +12,10 @@ import type { ApiEndpoint, ApiEndpointOptions } from '../../common/api';
 export async function* streamFetch<A = unknown, E = ApiEndpoint>(
   endpoint: E,
   abortCtrl: React.MutableRefObject<AbortController>,
-  options: ApiEndpointOptions[ApiEndpoint]
+  options: ApiEndpointOptions[ApiEndpoint],
+  basePath = ''
 ) {
-  const stream = await fetch(endpoint as unknown as string, {
+  const stream = await fetch(`${basePath}${endpoint}`, {
     signal: abortCtrl.current.signal,
     method: 'POST',
     headers: {

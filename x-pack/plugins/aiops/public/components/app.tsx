@@ -11,6 +11,7 @@ import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiBadge,
@@ -29,17 +30,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
-
 import { getStatusMessage } from './get_status_message';
 import { initialState, resetStream, streamReducer } from './stream_reducer';
 import { useStreamFetchReducer } from './use_stream_fetch_reducer';
 
-interface AiopsAppDeps {
-  notifications: CoreStart['notifications'];
-}
+export const AiopsApp = () => {
+  const { notifications } = useKibana();
 
-export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
   const [simulateErrors, setSimulateErrors] = useState(false);
 
   const { dispatch, start, cancel, data, isCancelled, isRunning } = useStreamFetchReducer(
@@ -62,7 +59,7 @@ export const AiopsApp = ({ notifications }: AiopsAppDeps) => {
 
   useEffect(() => {
     if (errors.length > 0) {
-      notifications.toasts.addDanger(errors[errors.length - 1]);
+      notifications.toasts.danger({ body: errors[errors.length - 1] });
     }
   }, [errors, notifications.toasts]);
 
