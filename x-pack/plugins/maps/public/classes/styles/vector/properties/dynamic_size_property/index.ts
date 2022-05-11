@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { lensMultitable } from './lens_multitable';
-export type { LensMultitableExpressionTypeDefinition } from './lens_multitable';
+export { DynamicSizeProperty } from './dynamic_size_property';
