@@ -18,6 +18,7 @@ export type {
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
+  RuntimePrimitiveTypes,
 } from '../../data_views/common';
 export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
 
@@ -41,6 +42,7 @@ export {
   Form,
   UseField,
   useBehaviorSubject,
+  UseArray,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';

@@ -26,6 +26,8 @@ import {
   UseField,
   TextField,
   RuntimeType,
+  RuntimeFieldSubField,
+  RuntimePrimitiveTypes,
 } from '../../shared_imports';
 import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -45,7 +47,8 @@ export interface FieldEditorFormState {
   submit: FormHook<Field>['submit'];
 }
 
-export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType'> {
+export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
+  fields?: Array<{ name: string; type: string }>;
   type: Array<EuiComboBoxOptionOption<RuntimeType>>;
   __meta__: {
     isCustomLabelVisible: boolean;
@@ -79,11 +82,20 @@ const formDeserializer = (field: Field): FieldFormInternal => {
   }
 
   const format = field.format === null ? undefined : field.format;
-
+  // console.log('DESERIALIZER', field.fields);
   return {
     ...field,
     type: fieldType,
     format,
+    fields: field.fields
+      ? Object.entries(field.fields).reduce<Array<{ name: string; type: RuntimePrimitiveTypes }>>(
+          (col, [key, val]) => {
+            col.push({ name: key, type: val.type });
+            return col;
+          },
+          []
+        )
+      : undefined,
     __meta__: {
       isCustomLabelVisible: field.customLabel !== undefined,
       isValueVisible: field.script !== undefined,
@@ -94,12 +106,19 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 };
 
 const formSerializer = (field: FieldFormInternal): Field => {
-  const { __meta__, type, format, ...rest } = field;
+  const { __meta__, type, format, fields, ...rest } = field;
+  console.log('serializer', fields);
   return {
-    type: type[0].value!,
+    type: type && type[0].value!,
     // By passing "null" we are explicitly telling DataView to remove the
     // format if there is one defined for the field.
     format: format === undefined ? null : format,
+    fields: fields
+      ? fields.reduce<Record<string, RuntimeFieldSubField>>((acc, { name, type: subfieldType }) => {
+          acc[name] = { type: subfieldType as RuntimePrimitiveTypes };
+          return acc;
+        }, {})
+      : undefined,
     ...rest,
   };
 };
@@ -108,6 +127,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const { namesNotAllowed, fieldTypeToProcess } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
+    fields$,
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -128,6 +148,16 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       '__meta__.isFormatVisible',
       '__meta__.isPopularityVisible',
     ],
+  });
+
+  fields$.subscribe({
+    next: (flds) => {
+      flds.forEach((f, idx) => {
+        console.log('setting field', f);
+        form.setFieldValue(`fields.[${idx}].name`, f.name);
+        form.setFieldValue(`fields.[${idx}].type`, f.type);
+      });
+    },
   });
 
   const {
@@ -165,8 +195,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       onFormModifiedChange(isFormModified);
     }
   }, [isFormModified, onFormModifiedChange]);
-
-  console.log('render', updatedType && updatedType[0].value);
 
   return (
     <Form

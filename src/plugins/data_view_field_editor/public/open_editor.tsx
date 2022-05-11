@@ -93,7 +93,23 @@ export const getFieldEditorOpener =
         }
       };
 
-      const dataViewField = fieldName ? dataView.getFieldByName(fieldName) : undefined;
+      const getRuntimeField = (name: string) => {
+        const fld = dataView.getAllRuntimeFields()[name];
+        return {
+          name,
+          runtimeField: fld,
+          isMapped: false,
+          esTypes: [],
+          type: undefined,
+        };
+      };
+
+      // todo this is sloppy
+      const dataViewField = fieldName
+        ? dataView.getFieldByName(fieldName) || getRuntimeField(fieldName)
+        : undefined;
+
+      console.log('loaded field', dataViewField);
 
       if (fieldName && !dataViewField) {
         const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
@@ -105,12 +121,18 @@ export const getFieldEditorOpener =
       }
 
       const isNewRuntimeField = !fieldName;
+      console.log('IS RUNTIME FIELD', dataViewField);
       const isExistingRuntimeField =
         dataViewField &&
         dataViewField.runtimeField &&
         !dataViewField.isMapped &&
         // treat composite field instances as mapped fields for field editing purposes
-        dataViewField.runtimeField.type !== ('composite' as RuntimeType);
+        /*
+        (dataViewField.runtimeField.type !== ('composite' as RuntimeType) ||
+          (dataViewField.runtimeField.type === ('composite' as RuntimeType) &&
+            !dataViewField?.type));
+            */
+        (dataViewField.runtimeField.type !== ('composite' as RuntimeType) || !dataViewField.type);
       const fieldTypeToProcess: InternalFieldType =
         isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 

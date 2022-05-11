@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
+import { pickBy } from 'lodash';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFilterButton,
@@ -158,6 +159,19 @@ export function Tabs({
   ]);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
+
+  /*
+  const compositeRuntimeFields = useMemo(
+    () => pickBy(indexPattern.getAllRuntimeFields(), (fld) => fld.type === 'composite'),
+    [indexPattern]
+  );
+  */
+
+  console.log('recalculating composite fields', indexPattern.getAllRuntimeFields());
+  const compositeRuntimeFields = pickBy(
+    indexPattern.getAllRuntimeFields(),
+    (fld) => fld.type === 'composite'
+  );
 
   const updateFilterItem = (
     items: FilterItems[],
@@ -437,6 +451,7 @@ export function Tabs({
                 {(deleteField) => (
                   <IndexedFieldsTable
                     fields={fields}
+                    compositeRuntimeFields={compositeRuntimeFields}
                     indexPattern={indexPattern}
                     fieldFilter={fieldFilter}
                     fieldWildcardMatcher={fieldWildcardMatcherDecorated}
@@ -513,6 +528,7 @@ export function Tabs({
       overlays,
       theme,
       dataViews,
+      compositeRuntimeFields,
     ]
   );
 

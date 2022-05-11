@@ -23,7 +23,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
-export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
+export type RuntimePrimitiveTypes = Exclude<RuntimeType, 'composite'>;
 
 export interface RuntimeFieldBase {
   type: RuntimeType;
@@ -40,7 +40,7 @@ export interface RuntimeFieldSpec extends RuntimeFieldBase {
     string,
     {
       // It is not recursive, we can't create a composite inside a composite.
-      type: RuntimeTypeExceptComposite;
+      type: RuntimePrimitiveTypes;
     }
   >;
 }
@@ -62,7 +62,8 @@ export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
 }
 
 export interface RuntimeFieldSubField extends FieldConfiguration {
-  type: RuntimeTypeExceptComposite;
+  // It is not recursive, we can't create a composite inside a composite.
+  type: RuntimePrimitiveTypes;
 }
 
 /**

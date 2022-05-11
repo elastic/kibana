@@ -161,10 +161,29 @@ const labelDescription = i18n.translate(
   { defaultMessage: 'A custom label for the field.' }
 );
 
-const runtimeIconTipTitle = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitle',
-  { defaultMessage: 'Runtime field' }
-);
+function runtimeIconTipTitle(fld: IndexedFieldItem) {
+  // composite runtime fields
+  if (fld.runtimeField?.type === 'composite') {
+    // subfields have types
+    if (fld.type) {
+      return i18n.translate(
+        'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleComposite',
+        { defaultMessage: 'Composite runtime subfield' }
+      );
+      // composite defitions don't
+    } else {
+      return i18n.translate(
+        'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitleComposite',
+        { defaultMessage: 'Composite runtime field' }
+      );
+    }
+  }
+
+  return i18n.translate(
+    'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitle',
+    { defaultMessage: 'Runtime field' }
+  );
+}
 
 const runtimeIconTipText = i18n.translate(
   'indexPatternManagement.editDataView.fields.table.runtimeIconTipText',
@@ -229,7 +248,8 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
         &nbsp;
         <EuiIconTip
           type="indexRuntime"
-          title={runtimeIconTipTitle}
+          title={runtimeIconTipTitle(field)}
+          // todo improve this
           content={<span>{runtimeIconTipText}</span>}
         />
       </span>

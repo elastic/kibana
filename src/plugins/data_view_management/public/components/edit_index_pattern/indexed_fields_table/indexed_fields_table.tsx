@@ -9,7 +9,7 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { OverlayStart, ThemeServiceStart } from 'src/core/public';
-import { DataViewField, DataView } from '../../../../../../plugins/data_views/public';
+import { DataViewField, DataView, RuntimeField } from '../../../../../../plugins/data_views/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
 
@@ -28,6 +28,7 @@ interface IndexedFieldsTableProps {
   userEditPermission: boolean;
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
+  compositeRuntimeFields: Record<string, RuntimeField>;
 }
 
 interface IndexedFieldsTableState {
@@ -42,14 +43,14 @@ export class IndexedFieldsTable extends Component<
     super(props);
 
     this.state = {
-      fields: this.mapFields(this.props.fields),
+      fields: [...this.mapCompositeRuntimeFields(), ...this.mapFields(this.props.fields)],
     };
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: IndexedFieldsTableProps) {
     if (nextProps.fields !== this.props.fields) {
       this.setState({
-        fields: this.mapFields(nextProps.fields),
+        fields: [...this.mapCompositeRuntimeFields(), ...this.mapFields(nextProps.fields)],
       });
     }
   }
@@ -79,6 +80,43 @@ export class IndexedFieldsTable extends Component<
         })) ||
       []
     );
+  }
+
+  mapCompositeRuntimeFields(): IndexedFieldItem[] {
+    const { indexPattern, fieldWildcardMatcher, userEditPermission } = this.props;
+    const sourceFilters =
+      indexPattern.sourceFilters &&
+      indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
+    const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
+
+    return Object.entries(indexPattern.getAllRuntimeFields()).map(([name, fld]) => {
+      return {
+        spec: {
+          searchable: false,
+          aggregatable: false,
+          name,
+          type: '',
+          runtimeField: {
+            type: 'composite',
+            script: fld.script,
+          },
+        },
+        name,
+        type: '',
+        kbnType: '',
+        displayName: name,
+        // format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
+        excluded: fieldWildcardMatch ? fieldWildcardMatch(name) : false,
+        info: [],
+        isMapped: false,
+        isUserEditable: userEditPermission,
+        hasRuntime: true,
+        runtimeField: {
+          type: 'composite',
+          script: fld.script,
+        },
+      };
+    });
   }
 
   getFilteredFields = createSelector(

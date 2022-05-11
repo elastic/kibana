@@ -26,6 +26,7 @@ export {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
+  RuntimeField,
 } from '../common';
 
 export type { IndexPatternsContract } from './data_views';

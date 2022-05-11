@@ -21,6 +21,8 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { Subject } from 'rxjs';
+import { RuntimePrimitiveTypes } from '../../shared_imports';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -132,6 +134,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
+  }, []);
+
+  const subfields$ = useMemo(() => {
+    // todo
+    return new Subject<Array<{ name: string; type: RuntimePrimitiveTypes }>>();
   }, []);
 
   const allParamsDefined = useMemo(() => {
@@ -322,12 +329,13 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       const [value] = values;
       const formattedValue = valueFormatter(value);
 
+      subfields$.next();
       setPreviewResponse({
         fields: [{ key: fieldName, value, formattedValue }],
         error: null,
       });
     },
-    [valueFormatter]
+    [valueFormatter, subfields$]
   );
 
   const updateCompositeFieldPreview = useCallback(
@@ -355,6 +363,19 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         };
       });
 
+      // this will call a fn, with the updated fields
+      // ideally set value
+      // onSubfieldUpdate();
+      console.log('before next', compositeValues);
+      const subfields = Object.entries(compositeValues).map(([key, values]) => {
+        console.log('entries', key, values);
+        return {
+          name: key,
+          // todo
+          type: 'keyword' as RuntimePrimitiveTypes,
+        };
+      });
+      subfields$.next(subfields);
       setPreviewResponse({
         fields,
         error: null,
@@ -362,10 +383,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       setFieldsInScript(updatedFieldsInScript);
     },
-    [valueFormatter]
+    [valueFormatter, subfields$]
   );
 
   const updatePreview = useCallback(async () => {
+    console.log('UPDATE PREVIEW');
     if (scriptEditorValidation.isValidating) {
       return;
     }
@@ -382,8 +404,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     };
 
     const currentApiCall = ++previewCount.current;
-
-    console.log('getFieldPreview');
     const response = await getFieldPreview({
       index: dataView.title,
       document: document!,
@@ -412,7 +432,13 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     }
 
     if (response.data) {
-      const { values, error } = response.data;
+      // const { values, error } = response.data;
+      const values = {
+        'composite_field.a': [1],
+        'composite_field.b': [2],
+        'composite_field.c': [3],
+      };
+      const error = undefined;
 
       if (error) {
         setPreviewResponse({
@@ -478,6 +504,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
   const ctx = useMemo<Context>(
     () => ({
+      fields$: subfields$.asObservable(),
       fields: previewResponse.fields,
       error: previewResponse.error,
       isPreviewAvailable,
@@ -543,6 +570,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       reset,
       pinnedFields,
       fieldsInScript,
+      subfields$,
     ]
   );
 
@@ -599,6 +627,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         let key = name ?? '';
 
         if (type === 'composite') {
+          // todo find better way
           const { 1: fieldName } = field.key.split('.');
           key = `${name ?? ''}.${fieldName}`;
         }

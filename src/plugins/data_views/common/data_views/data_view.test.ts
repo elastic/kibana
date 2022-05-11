@@ -16,7 +16,7 @@ import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../../field_formats/common/mocks';
 import { FieldFormat } from '../../../field_formats/common';
-import { RuntimeField, RuntimeTypeExceptComposite } from '../types';
+import { RuntimeField, RuntimePrimitiveTypes } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
@@ -241,10 +241,10 @@ describe('IndexPattern', () => {
       },
       fields: {
         a: {
-          type: 'keyword' as RuntimeTypeExceptComposite,
+          type: 'keyword' as RuntimePrimitiveTypes,
         },
         b: {
-          type: 'long' as RuntimeTypeExceptComposite,
+          type: 'long' as RuntimePrimitiveTypes,
         },
       },
     };

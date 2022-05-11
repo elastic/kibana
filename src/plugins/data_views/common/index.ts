@@ -30,6 +30,7 @@ export type {
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
+  RuntimePrimitiveTypes,
   IIndexPattern,
   DataViewAttributes,
   IndexPatternAttributes,

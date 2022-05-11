@@ -7,7 +7,13 @@
  */
 import React from 'react';
 
-import type { RuntimeType, RuntimeField, SerializedFieldFormat } from '../../shared_imports';
+import type { Observable } from 'rxjs';
+import type {
+  RuntimeType,
+  RuntimeField,
+  SerializedFieldFormat,
+  RuntimePrimitiveTypes,
+} from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
 
 export type From = 'cluster' | 'custom';
@@ -65,6 +71,7 @@ export interface FieldPreview {
 }
 
 export interface Context {
+  fields$: Observable<Array<{ name: string; type: RuntimePrimitiveTypes }>>;
   fields: FieldPreview[];
   error: PreviewError | null;
   params: {

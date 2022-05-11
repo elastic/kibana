@@ -43,3 +43,7 @@ export const RUNTIME_FIELD_OPTIONS: Array<EuiComboBoxOptionOption<RuntimeType>> 
     value: 'composite',
   },
 ];
+
+export const RUNTIME_FIELD_OPTIONS_PRIMITIVE = RUNTIME_FIELD_OPTIONS.filter(
+  (option) => option.value !== 'composite'
+);
