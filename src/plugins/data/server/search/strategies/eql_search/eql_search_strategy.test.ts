@@ -7,6 +7,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { AnalyticsClient } from '@kbn/analytics-client';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 import { EqlSearchStrategyRequest } from '../../../../common';
@@ -31,19 +32,21 @@ const getMockEqlResponse = () => ({
 
 describe('EQL search strategy', () => {
   let mockLogger: Logger;
+  let mockAnalytics: AnalyticsClient;
 
   beforeEach(() => {
     mockLogger = { debug: jest.fn() } as unknown as Logger;
+    mockAnalytics = { reportEvent: jest.fn() } as unknown as AnalyticsClient;
   });
 
   describe('strategy interface', () => {
     it('returns a strategy with a `search` function', async () => {
-      const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+      const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
       expect(typeof eqlSearch.search).toBe('function');
     });
 
     it('returns a strategy with a `cancel` function', async () => {
-      const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+      const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
       expect(typeof eqlSearch.cancel).toBe('function');
     });
   });
@@ -80,7 +83,7 @@ describe('EQL search strategy', () => {
 
     describe('async functionality', () => {
       it('performs an eql client search with params when no ID is provided', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         await eqlSearch.search({ options, params }, {}, mockDeps).toPromise();
         const [[request, requestOptions]] = mockEqlSearch.mock.calls;
 
@@ -90,7 +93,7 @@ describe('EQL search strategy', () => {
       });
 
       it('retrieves the current request if an id is provided', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         await eqlSearch.search({ id: 'my-search-id' }, {}, mockDeps).toPromise();
         const [[requestParams]] = mockEqlGet.mock.calls;
 
@@ -101,7 +104,7 @@ describe('EQL search strategy', () => {
       it('emits an error if the client throws', async () => {
         expect.assertions(1);
         mockEqlSearch.mockReset().mockRejectedValueOnce(new Error('client error'));
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         eqlSearch.search({ options, params }, {}, mockDeps).subscribe(
           () => {},
           (err) => {
@@ -113,7 +116,7 @@ describe('EQL search strategy', () => {
 
     describe('arguments', () => {
       it('sends along async search options', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         await eqlSearch.search({ options, params }, {}, mockDeps).toPromise();
         const [[request]] = mockEqlSearch.mock.calls;
 
@@ -125,7 +128,7 @@ describe('EQL search strategy', () => {
       });
 
       it('sends along default search parameters', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         await eqlSearch.search({ options, params }, {}, mockDeps).toPromise();
         const [[request]] = mockEqlSearch.mock.calls;
 
@@ -137,7 +140,7 @@ describe('EQL search strategy', () => {
       });
 
       it('allows search parameters to be overridden', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         await eqlSearch
           .search(
             {
@@ -163,7 +166,7 @@ describe('EQL search strategy', () => {
       });
 
       it('allows search options to be overridden', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         await eqlSearch
           .search(
             {
@@ -185,7 +188,7 @@ describe('EQL search strategy', () => {
       });
 
       it('passes transport options for an existing request', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         await eqlSearch
           .search({ id: 'my-search-id', options: { ignore: [400] } }, {}, mockDeps)
           .toPromise();
@@ -198,7 +201,7 @@ describe('EQL search strategy', () => {
 
     describe('response', () => {
       it('contains a rawResponse field containing the full search response', async () => {
-        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger, mockAnalytics);
         const response = await eqlSearch
           .search({ id: 'my-search-id', options: { ignore: [400] } }, {}, mockDeps)
           .toPromise();

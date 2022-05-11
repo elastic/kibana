@@ -13,6 +13,7 @@ import { SearchStrategyDependencies } from '../../types';
 import { sqlSearchStrategyProvider } from './sql_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
 import { SqlSearchStrategyRequest } from '../../../../common';
+import type { AnalyticsClient } from '@kbn/analytics-client';
 
 const mockSqlResponse = {
   body: {
@@ -30,6 +31,7 @@ describe('SQL search strategy', () => {
   const mockLogger: any = {
     debug: () => {},
   };
+  const mockAnalytics = { reportEvent: jest.fn() } as unknown as AnalyticsClient;
   const mockDeps = {
     esClient: {
       asCurrentUser: {
@@ -50,7 +52,7 @@ describe('SQL search strategy', () => {
   });
 
   it('returns a strategy with `search and `cancel`, `extend`', async () => {
-    const esSearch = await sqlSearchStrategyProvider(mockLogger);
+    const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
     expect(typeof esSearch.search).toBe('function');
     expect(typeof esSearch.cancel).toBe('function');
@@ -66,7 +68,7 @@ describe('SQL search strategy', () => {
           query:
             'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
         };
-        const esSearch = await sqlSearchStrategyProvider(mockLogger);
+        const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
         await esSearch.search({ params }, {}, mockDeps).toPromise();
 
@@ -86,7 +88,7 @@ describe('SQL search strategy', () => {
             'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
         };
 
-        const esSearch = await sqlSearchStrategyProvider(mockLogger);
+        const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
         await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
@@ -107,7 +109,7 @@ describe('SQL search strategy', () => {
           query:
             'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
         };
-        const esSearch = await sqlSearchStrategyProvider(mockLogger);
+        const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
         await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
 
@@ -126,7 +128,7 @@ describe('SQL search strategy', () => {
             'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
         };
 
-        const esSearch = await sqlSearchStrategyProvider(mockLogger);
+        const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
         await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
 
@@ -145,7 +147,7 @@ describe('SQL search strategy', () => {
           query:
             'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
         };
-        const esSearch = await sqlSearchStrategyProvider(mockLogger);
+        const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
         await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
 
@@ -165,7 +167,7 @@ describe('SQL search strategy', () => {
             'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
         };
 
-        const esSearch = await sqlSearchStrategyProvider(mockLogger);
+        const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
         await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
 
@@ -192,7 +194,7 @@ describe('SQL search strategy', () => {
         query:
           'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
       };
-      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
       let err: KbnServerError | undefined;
       try {
@@ -216,7 +218,7 @@ describe('SQL search strategy', () => {
         query:
           'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
       };
-      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
       let err: KbnServerError | undefined;
       try {
@@ -237,7 +239,7 @@ describe('SQL search strategy', () => {
       mockSqlDelete.mockResolvedValueOnce(200);
 
       const id = 'some_id';
-      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
 
       await esSearch.cancel!(id, {}, mockDeps);
 
@@ -253,7 +255,7 @@ describe('SQL search strategy', () => {
 
       const id = 'some_other_id';
       const keepAlive = '1d';
-      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      const esSearch = await sqlSearchStrategyProvider(mockLogger, mockAnalytics);
       await esSearch.extend!(id, keepAlive, {}, mockDeps);
 
       expect(mockSqlGetAsync).toBeCalled();

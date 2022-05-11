@@ -10,6 +10,7 @@ import { firstValueFrom, from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
+  AnalyticsClient,
   CoreSetup,
   CoreStart,
   KibanaRequest,
@@ -171,6 +172,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       }
     );
 
+    const analytics = core.analytics as AnalyticsClient;
+
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
       esSearchStrategyProvider(
@@ -185,6 +188,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       enhancedEsSearchStrategyProvider(
         this.initializerContext.config.legacy.globalConfig$,
         this.logger,
+        analytics,
         usage
       )
     );
@@ -196,13 +200,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
       this.initializerContext.config.legacy.globalConfig$,
       this.logger,
-      core.analytics,
+      analytics,
       usage,
       true
     );
 
-    this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger, core.analytics));
-    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger, core.analytics));
+    this.registerSearchStrategy(
+      EQL_SEARCH_STRATEGY,
+      eqlSearchStrategyProvider(this.logger, analytics)
+    );
+    this.registerSearchStrategy(
+      SQL_SEARCH_STRATEGY,
+      sqlSearchStrategyProvider(this.logger, analytics)
+    );
 
     registerBsearchRoute(
       bfetch,
