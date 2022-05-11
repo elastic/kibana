@@ -14,7 +14,6 @@ import { TrustedAppsList } from './trusted_apps_list';
 import { exceptionsListAllHttpMocks } from '../../mocks/exceptions_list_http_mocks';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
-import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/components/user_privileges');
 

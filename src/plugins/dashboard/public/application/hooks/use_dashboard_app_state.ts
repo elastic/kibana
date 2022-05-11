@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { History } from 'history';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';

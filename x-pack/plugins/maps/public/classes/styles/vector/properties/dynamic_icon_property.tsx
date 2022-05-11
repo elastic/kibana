@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';

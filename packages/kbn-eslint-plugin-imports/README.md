@@ -54,3 +54,7 @@ Config example:
 This config will find any import of `@kbn/kitchen-sink` which specifically references the `Spatula` or `isSpatula` exports, remove the old exports from the import (potentially removing the entire import), and add a new import after the previous following it's style pointing to the new package.
 
 The auto-fixer here covers the vast majority of import styles in the repository but might not cover everything, including `import * as Namespace from '@kbn/kitchen-sink'`. Imports like this will need to be found and updated manually, though TypeScript should be able to find the vast majority of those.
+
+## `@kbn/imports/no_unused_imports`
+
+This rule finds imports that are unused and provides an auto-fix to remove them. When ESLint appears to be running in an editor, as defined by [`helpers/running_in_editor.ts`](src/helpers/running_in_editor.ts), this rule provided suggestions instead of fixes so that the removals are not applied automatically in case you are debugging, returning early, or something else which makes ESLint think that the import is unused when it isn't. On CI and in the pre-commit hook though, this fix will be applied automatically.

@@ -25,8 +25,6 @@ import {
 import { PipelineList } from './components/pipeline_list';
 import { PipelineEditView } from './pipeline_edit_view';
 // @ts-ignore
-import { Pipeline } from '../models/pipeline';
-// @ts-ignore
 import * as Breadcrumbs from './breadcrumbs';
 
 export const renderApp = async (
