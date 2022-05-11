@@ -13,7 +13,6 @@ export * from './annotation_layer';
 export * from './extended_annotation_layer';
 export * from './y_axis_config';
 export * from './extended_y_axis_config';
-export * from './data_layer';
 export * from './extended_data_layer';
 export * from './grid_lines_config';
 export * from './axis_extent_config';
