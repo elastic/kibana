@@ -81,7 +81,13 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { version, source_uri: sourceUri, agents, force } = request.body;
+  const {
+    version,
+    source_uri: sourceUri,
+    agents,
+    force,
+    rollout_duration_seconds: upgradeDurationSeconds,
+  } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkVersionIsSame(version, kibanaVersion);
@@ -102,6 +108,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
       sourceUri,
       version,
       force,
+      upgradeDurationSeconds,
     };
     const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
     const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
