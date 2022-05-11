@@ -33,6 +33,10 @@ import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
 import {
@@ -42,6 +46,7 @@ import {
   Series,
   getFormattedTablesByLayers,
   validateExtent,
+  getFormat,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -168,7 +173,7 @@ export function XYChart({
     [dataLayers, formatFactory]
   );
 
-  if (filteredLayers.length === 0) {
+  if (dataLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(
       getDataLayers(layers)?.[0]?.seriesType || SeriesTypes.BAR
     );
@@ -178,7 +183,7 @@ export function XYChart({
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
-  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
+  const xAxisFormatter = formatFactory(xAxisColumn && getFormat(xAxisColumn.meta));
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -249,7 +254,7 @@ export function XYChart({
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = dataLayers[0]?.table;
 
-  const xColumnId = firstTable.columns.find((col) => col.id === dataLayers[0]?.xAccessor)?.id;
+  const xColumnId = firstTable?.columns.find((col) => col.id === dataLayers[0]?.xAccessor)?.id;
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     annotationsLayers,
@@ -377,7 +382,7 @@ export function XYChart({
       layer.xAccessor &&
       formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor] &&
       xColumn
-        ? formatFactory(xColumn.meta.params)
+        ? formatFactory(getFormat(xColumn.meta))
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
@@ -402,7 +407,7 @@ export function XYChart({
       const pointValue = xySeries.seriesKeys[0];
 
       const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
-      const splitFormatter = formatFactory(splitColumn && splitColumn.meta?.params);
+      const splitFormatter = formatFactory(splitColumn && getFormat(splitColumn.meta));
 
       points.push({
         row: table.rows.findIndex((row) => {
@@ -506,7 +511,7 @@ export function XYChart({
             : legend.isVisible
         }
         legendPosition={legend?.isInside ? legendInsideParams : legend.position}
-        legendSize={legend.legendSize}
+        legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
         theme={{
           ...chartTheme,
           barSeriesStyle: {

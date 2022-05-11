@@ -8,6 +8,7 @@
 
 import React, { CSSProperties } from 'react';
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {
@@ -72,7 +73,13 @@ export const MetricVisValue = ({
 
   if (onFilter) {
     return (
-      <button style={{ display: 'block' }} onClick={() => onFilter()}>
+      <button
+        style={{ display: 'block' }}
+        onClick={() => onFilter()}
+        title={i18n.translate('expressionMetricVis.filterTitle', {
+          defaultMessage: 'Click to filter by field',
+        })}
+      >
         {metricComponent}
       </button>
     );

@@ -112,7 +112,7 @@ filter {
       "type" => "%{[resultSet][vehicle][type]}"
       "vehicle_id" => "%{[resultSet][vehicle][vehicleID]}"
     }
-    remove_field => [ "resultSet", "@version", "@timestamp" ]
+    remove_field => [ "resultSet", "@version", "@timestamp", "[event][original]" ]
   }
 
   mutate {
