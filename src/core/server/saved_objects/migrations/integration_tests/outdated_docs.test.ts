@@ -41,7 +41,7 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it.skip('migrates the documents to the highest version', async () => {
+  it('migrates the documents to the highest version', async () => {
     const migratedIndex = `.kibana_${pkg.version}_001`;
     const { startES } = kbnTestServer.createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -86,7 +86,7 @@ describe('migration v2', () => {
     expect(migratedDocs.length).toBe(1);
     const [doc] = migratedDocs;
     expect(doc._source.migrationVersion.foo).toBe('7.14.0');
-    expect(doc._source.coreMigrationVersion).toBe('8.0.0');
+    expect(doc._source.coreMigrationVersion).toBe(pkg.version);
   });
 });
 

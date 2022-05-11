@@ -25,7 +25,6 @@ import {
   extractTransformFailuresReason,
   extractUnknownDocFailureReason,
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
-  fatalReasonClusterRoutingAllocationUnsupported,
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
@@ -67,23 +66,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isLeft(res)) {
       const left = res.left;
-      if (isLeftTypeof(left, 'unsupported_cluster_routing_allocation')) {
-        const initErrorMessages = fatalReasonClusterRoutingAllocationUnsupported({
-          errorMessage: left.message,
-          docSectionLink: stateP.migrationDocLinks.routingAllocationDisabled,
-        });
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: initErrorMessages.fatalReason,
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'error',
-              message: initErrorMessages.logsErrorMessage,
-            },
-          ],
-        };
+      if (isLeftTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
       }
