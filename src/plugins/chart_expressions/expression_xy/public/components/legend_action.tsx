@@ -12,7 +12,7 @@ import type { FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
 import type { FormatFactory } from '../types';
 import { LegendActionPopover } from './legend_action_popover';
-import { DatatablesWithFormatInfo } from '../helpers';
+import { DatatablesWithFormatInfo, getFormat } from '../helpers';
 
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],
@@ -40,7 +40,7 @@ export const getLegendAction = (
 
     const { table } = layer;
     const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
-    const formatter = formatFactory(splitColumn && splitColumn.meta?.params);
+    const formatter = formatFactory(splitColumn && getFormat(splitColumn.meta));
 
     const rowIndex = table.rows.findIndex((row) => {
       if (formattedDatatables[layer.layerId]?.formattedColumns[accessor]) {
