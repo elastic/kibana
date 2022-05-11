@@ -14,7 +14,7 @@ export function RequestsViewCallout() {
     <EuiCallOut
       size="s"
       title={i18n.translate('xpack.maps.inspector.vectorTile.requestsView', {
-        defaultMessage: `You're viewing requests from the vector tile search API. To view requests from the search API, set the 'View' to 'Requests'.`,
+        defaultMessage: `You're viewing vector tile search requests. To view requests submitted to the search API, set View to Requests.`,
       })}
       iconType="iInCircle"
     />

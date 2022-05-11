@@ -25,7 +25,7 @@ export function EmptyPrompt() {
           <p>
             <FormattedMessage
               id="xpack.maps.inspector.vectorTile.noRequestsLoggedDescription.mapHasNotLoggedAnyRequestsText"
-              defaultMessage="This map did not request any data using the vector tile search API."
+              defaultMessage="This map does not have any vector tile search results."
             />
           </p>
         </React.Fragment>

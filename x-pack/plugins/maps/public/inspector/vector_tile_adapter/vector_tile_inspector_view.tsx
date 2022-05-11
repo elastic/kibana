@@ -20,7 +20,7 @@ export const VectorTileInspectorView = {
   }),
   order: 10,
   help: i18n.translate('xpack.maps.inspector.vectorTileViewHelpText', {
-    defaultMessage: 'View Elasticsearch vector tile requests',
+    defaultMessage: 'View the vector tile search requests used to collect the data',
   }),
   shouldShow(adapters: Adapters) {
     return Boolean(adapters.vectorTiles);
