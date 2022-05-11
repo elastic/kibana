@@ -77,7 +77,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               label: i18n.URL_LABEL,
               validations: [
                 {
-                  validator: emptyField(i18n.METHOD_REQUIRED),
+                  validator: emptyField(i18n.URL_REQUIRED),
                 },
               ],
             }}
@@ -113,7 +113,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div style={{ display: hasAuth ? 'block' : 'none' }}>
+      {hasAuth ? (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
             <UseField
@@ -140,7 +140,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      ) : null}
       <EuiSpacer size="m" />
       <UseField
         path="__internal__.hasHeaders"
@@ -154,7 +154,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         }}
       />
       <EuiSpacer size="m" />
-      <div style={{ display: hasHeaders ? 'block' : 'none' }}>
+      {hasHeaders ? (
         <UseArray path="config.headers">
           {({ items, addItem, removeItem }) => {
             return (
@@ -190,6 +190,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ))}
+                <EuiSpacer size="m" />
                 <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
                   {i18n.ADD_HEADER_BTN}
                 </EuiButtonEmpty>
@@ -198,7 +199,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             );
           }}
         </UseArray>
-      </div>
+      ) : null}
     </>
   );
 };

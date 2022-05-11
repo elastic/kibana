@@ -61,7 +61,7 @@ const ConnectorEditFlyout = ({
     docLinks,
     application: { capabilities },
   } = useKibana().services;
-
+  console.log(initialConnector);
   const getConnectorWithoutSecrets = () => ({
     ...(initialConnector as UserConfiguredActionConnector<
       Record<string, unknown>,
