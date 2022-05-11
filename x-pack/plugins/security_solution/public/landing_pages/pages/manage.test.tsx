@@ -9,43 +9,56 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
-import { LandingCategories, NavConfigType } from './manage';
+import { LandingCategories } from './manage';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
+import { NavLinkItem } from '../../common/links/types';
 
-const testConfig: NavConfigType = {
-  categories: [
-    {
-      label: 'first tests category',
-      itemIds: [SecurityPageName.rules],
-    },
-    {
-      label: 'second tests category',
-      itemIds: [SecurityPageName.exceptions],
-    },
-  ],
-  items: [
-    {
-      id: SecurityPageName.rules,
-      label: RULES_ITEM_LABEL,
-      description: '',
-      icon: 'testIcon1',
-    },
-    {
-      id: SecurityPageName.exceptions,
-      label: EXCEPTIONS_ITEM_LABEL,
-      description: '',
-      icon: 'testIcon2',
-    },
-  ],
-};
+const mockAppLinks: NavLinkItem[] = [
+  {
+    id: SecurityPageName.administration,
+    path: '',
+    title: 'admin',
+    links: [
+      {
+        id: SecurityPageName.rules,
+        title: RULES_ITEM_LABEL,
+        description: '',
+        icon: 'testIcon1',
+        path: '',
+      },
+      {
+        id: SecurityPageName.exceptions,
+        title: EXCEPTIONS_ITEM_LABEL,
+        description: '',
+        icon: 'testIcon2',
+        path: '',
+      },
+    ],
+  },
+];
+
+jest.mock('../../common/links', () => ({
+  useAppNavLinks: jest.fn(() => mockAppLinks),
+}));
 
 describe('LandingCategories', () => {
   it('renders items', () => {
     const { queryByText } = render(
       <TestProviders>
-        <LandingCategories navConfig={testConfig} />
+        <LandingCategories
+          groups={[
+            {
+              label: 'first tests category',
+              itemIds: [SecurityPageName.rules],
+            },
+            {
+              label: 'second tests category',
+              itemIds: [SecurityPageName.exceptions],
+            },
+          ]}
+        />
       </TestProviders>
     );
 
@@ -57,15 +70,12 @@ describe('LandingCategories', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
         <LandingCategories
-          navConfig={{
-            ...testConfig,
-            categories: [
-              {
-                label: '',
-                itemIds: [SecurityPageName.exceptions, SecurityPageName.rules],
-              },
-            ],
-          }}
+          groups={[
+            {
+              label: '',
+              itemIds: [SecurityPageName.exceptions, SecurityPageName.rules],
+            },
+          ]}
         />
       </TestProviders>
     );

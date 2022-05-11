@@ -8,6 +8,9 @@
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
 import { get } from 'lodash';
 import { SecurityPageName } from '../../../common/constants';
+import { useEnableExperimental } from '../hooks/use_experimental_features';
+import { useLicense } from '../hooks/use_license';
+import { useKibana } from '../lib/kibana';
 import { appLinks, getAppLinks } from './app_links';
 import {
   Feature,
@@ -32,8 +35,6 @@ const createDeepLink = (link: LinkItem, linkProps?: UserPermissions): AppDeepLin
         }),
       }
     : {}),
-  ...(link.icon != null ? { euiIconType: link.icon } : {}),
-  ...(link.image != null ? { icon: link.image } : {}),
   ...(link.globalSearchKeywords != null ? { keywords: link.globalSearchKeywords } : {}),
   ...(link.globalNavEnabled != null
     ? { navLinkStatus: link.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden }
@@ -47,8 +48,8 @@ const createNavLinkItem = (link: LinkItem, linkProps?: UserPermissions): NavLink
   path: link.path,
   title: link.title,
   ...(link.description != null ? { description: link.description } : {}),
-  ...(link.icon != null ? { icon: link.icon } : {}),
-  ...(link.image != null ? { image: link.image } : {}),
+  ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),
+  ...(link.landingImage != null ? { image: link.landingImage } : {}),
   ...(link.links && link.links.length
     ? {
         links: reduceLinks<NavLinkItem>({
@@ -194,4 +195,12 @@ export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
  */
 export const needsUrlState = (id: SecurityPageName): boolean => {
   return !getNormalizedLink(id).skipUrlState;
+};
+
+export const useAppNavLinks = (): NavLinkItem[] => {
+  const license = useLicense();
+  const enableExperimental = useEnableExperimental();
+  const capabilities = useKibana().services.application.capabilities;
+
+  return getNavLinkItems({ enableExperimental, license, capabilities });
 };
