@@ -299,33 +299,44 @@ export class CommonPageObject extends FtrService {
         }
       });
     });
-    await this.checkLinks();
   }
 
   async checkLinks() {
     // let url;
-    // const urls = new Set([]);
-    const linkList = await this.find.allByCssSelector('a', 100);
-    this.log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
+    const urls = new Set([]);
 
-    const links = await Promise.all(
-      linkList.map(async (link) => {
-        const url = await link.getAttribute('href');
-        try {
-          const response = await request.head(url);
-          // this.log.debug(`${url} response: ${response.status}`);
-          return { url, code: response.status };
-        } catch (err) {
-          this.log.debug(err);
-        }
-      })
-    );
+    // change this to test "if tests are running?"
+    while (true) {
 
-    const deadlinks = links.filter((l) => l.code !== 200);
-    if (deadlinks.length > 0) {
-      deadlinks.forEach((l) => this.log.debug(`${l.url} response: is ${l.code} but 200 expected`));
-      throw new Error('Dead links found');
+      const linkList = await this.find.allByCssSelector('a', 100);
+      this.log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
+
+      const links = await Promise.all(
+        linkList.map(async (link) => {
+          const url = await link.getAttribute('href');
+          // if url is NOT in urls, add it and test it
+          if (urls.has(url)) {
+            this.log.debug(`----- ${url} is already in set`);
+          } else {
+            urls.add(url);
+            try {
+              const response = await request.head(url);
+              this.log.debug(`${url} response: ${response.status}`);
+              return { url, code: response.status };
+            } catch (err) {
+              this.log.debug(err);
+            }
+          }
+        })
+      );
+      await this.sleep(1000);
     }
+      // const deadlinks = links.filter((l) => l.code !== 200);
+      // if (deadlinks.length > 0) {
+      //   deadlinks.forEach((l) => this.log.debug(`${l.url} response: is ${l.code} but 200 expected`));
+      //   throw new Error('Dead links found');
+      // }
+
 
     // await asyncForEach(linkList, async ({ _webElement }) => {
     //   const url = await _webElement.getAttribute('href');
