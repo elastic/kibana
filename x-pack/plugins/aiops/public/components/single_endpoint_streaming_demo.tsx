@@ -26,7 +26,7 @@ export const SingleEndpointStreamingDemo: FC = () => {
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={coreStart}>
         <I18nProvider>
-          <AiopsApp notifications={coreStart.notifications} />
+          <AiopsApp />
         </I18nProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
