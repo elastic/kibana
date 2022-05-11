@@ -17,9 +17,10 @@ import {
 } from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
-export const staticExternalSourceData: SourceDataItem = {
+// TODO remove Sharepoint-specific content after BYO connector support
+export const staticGenericExternalSourceData: SourceDataItem = {
   name: SOURCE_NAMES.SHAREPOINT,
-  iconName: SOURCE_NAMES.SHAREPOINT,
+  categories: [],
   serviceType: 'external',
   configuration: {
     isPublicKey: false,
@@ -40,16 +41,12 @@ export const staticExternalSourceData: SourceDataItem = {
     platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
   },
   accountContextOnly: false,
-  internalConnectorAvailable: true,
-  externalConnectorAvailable: false,
-  customConnectorAvailable: false,
   isBeta: true,
 };
 
 export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
-    iconName: SOURCE_NAMES.BOX,
     serviceType: 'box',
     configuration: {
       isPublicKey: false,
@@ -74,11 +71,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.CONFLUENCE,
-    iconName: SOURCE_NAMES.CONFLUENCE,
     serviceType: 'confluence_cloud',
     configuration: {
       isPublicKey: false,
@@ -108,11 +103,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
-    iconName: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
     configuration: {
       isPublicKey: true,
@@ -140,11 +133,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.DROPBOX,
-    iconName: SOURCE_NAMES.DROPBOX,
     serviceType: 'dropbox',
     configuration: {
       isPublicKey: false,
@@ -169,11 +160,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GITHUB,
-    iconName: SOURCE_NAMES.GITHUB,
     serviceType: 'github',
     configuration: {
       isPublicKey: false,
@@ -205,11 +194,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GITHUB_ENTERPRISE,
-    iconName: SOURCE_NAMES.GITHUB_ENTERPRISE,
     serviceType: 'github_enterprise_server',
     configuration: {
       isPublicKey: false,
@@ -247,11 +234,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GMAIL,
-    iconName: SOURCE_NAMES.GMAIL,
     serviceType: 'gmail',
     configuration: {
       isPublicKey: false,
@@ -265,11 +250,9 @@ export const staticSourceData: SourceDataItem[] = [
       platinumPrivateContext: [FeatureIds.Remote, FeatureIds.Private, FeatureIds.SearchableContent],
     },
     accountContextOnly: true,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,
-    iconName: SOURCE_NAMES.GOOGLE_DRIVE,
     serviceType: 'google_drive',
     configuration: {
       isPublicKey: false,
@@ -298,11 +281,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.JIRA,
-    iconName: SOURCE_NAMES.JIRA,
     serviceType: 'jira_cloud',
     configuration: {
       isPublicKey: false,
@@ -334,11 +315,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.JIRA_SERVER,
-    iconName: SOURCE_NAMES.JIRA_SERVER,
     serviceType: 'jira_server',
     configuration: {
       isPublicKey: true,
@@ -369,13 +348,12 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.NETWORK_DRVE,
-    iconName: SOURCE_NAMES.NETWORK_DRVE,
     categories: [SOURCE_CATEGORIES.STORAGE],
-    serviceType: 'network_drive', // this doesn't exist on the BE
+    serviceType: 'custom',
+    baseServiceType: 'network_drive',
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
@@ -385,12 +363,9 @@ export const staticSourceData: SourceDataItem[] = [
       githubRepository: 'elastic/enterprise-search-network-drive-connector',
     },
     accountContextOnly: false,
-    internalConnectorAvailable: false,
-    customConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.ONEDRIVE,
-    iconName: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',
     configuration: {
       isPublicKey: false,
@@ -415,17 +390,16 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.OUTLOOK,
-    iconName: SOURCE_NAMES.OUTLOOK,
     categories: [
       SOURCE_CATEGORIES.COMMUNICATIONS,
       SOURCE_CATEGORIES.PRODUCTIVITY,
       SOURCE_CATEGORIES.MICROSOFT,
     ],
-    serviceType: 'outlook', // this doesn't exist on the BE
+    serviceType: 'custom',
+    baseServiceType: 'outlook',
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
@@ -435,12 +409,9 @@ export const staticSourceData: SourceDataItem[] = [
       githubRepository: 'elastic/enterprise-search-outlook-connector',
     },
     accountContextOnly: false,
-    internalConnectorAvailable: false,
-    customConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SALESFORCE,
-    iconName: SOURCE_NAMES.SALESFORCE,
     serviceType: 'salesforce',
     configuration: {
       isPublicKey: false,
@@ -472,11 +443,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
-    iconName: SOURCE_NAMES.SALESFORCE_SANDBOX,
     serviceType: 'salesforce_sandbox',
     configuration: {
       isPublicKey: false,
@@ -508,11 +477,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SERVICENOW,
-    iconName: SOURCE_NAMES.SERVICENOW,
     serviceType: 'service_now',
     configuration: {
       isPublicKey: false,
@@ -541,11 +508,9 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SHAREPOINT,
-    iconName: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'share_point',
     configuration: {
       isPublicKey: false,
@@ -570,13 +535,39 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
-    externalConnectorAvailable: true,
   },
-  staticExternalSourceData,
+  {
+    name: SOURCE_NAMES.SHAREPOINT,
+    categories: [],
+    serviceType: 'external',
+    baseServiceType: 'share_point',
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: true,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
+      applicationPortalUrl: 'https://portal.azure.com/',
+    },
+    objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    isBeta: true,
+  },
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
-    iconName: SOURCE_NAMES.SHAREPOINT_SERVER,
     categories: [
       SOURCE_CATEGORIES.FILE_SHARING,
       SOURCE_CATEGORIES.STORAGE,
@@ -584,7 +575,8 @@ export const staticSourceData: SourceDataItem[] = [
       SOURCE_CATEGORIES.MICROSOFT,
       SOURCE_CATEGORIES.OFFICE_365,
     ],
-    serviceType: 'share_point_server', // this doesn't exist on the BE
+    serviceType: 'custom',
+    baseServiceType: 'share_point_server',
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
@@ -594,12 +586,9 @@ export const staticSourceData: SourceDataItem[] = [
       githubRepository: 'elastic/enterprise-search-sharepoint-server-connector',
     },
     accountContextOnly: false,
-    internalConnectorAvailable: false,
-    customConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SLACK,
-    iconName: SOURCE_NAMES.SLACK,
     serviceType: 'slack',
     configuration: {
       isPublicKey: false,
@@ -617,17 +606,16 @@ export const staticSourceData: SourceDataItem[] = [
       platinumPrivateContext: [FeatureIds.Remote, FeatureIds.Private, FeatureIds.SearchableContent],
     },
     accountContextOnly: true,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.TEAMS,
-    iconName: SOURCE_NAMES.TEAMS,
     categories: [
       SOURCE_CATEGORIES.COMMUNICATIONS,
       SOURCE_CATEGORIES.PRODUCTIVITY,
       SOURCE_CATEGORIES.MICROSOFT,
     ],
-    serviceType: 'teams', // this doesn't exist on the BE
+    serviceType: 'custom',
+    baseServiceType: 'teams',
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
@@ -637,12 +625,9 @@ export const staticSourceData: SourceDataItem[] = [
       githubRepository: 'elastic/enterprise-search-teams-connector',
     },
     accountContextOnly: false,
-    internalConnectorAvailable: false,
-    customConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.ZENDESK,
-    iconName: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',
     configuration: {
       isPublicKey: false,
@@ -667,13 +652,12 @@ export const staticSourceData: SourceDataItem[] = [
       ],
     },
     accountContextOnly: false,
-    internalConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.ZOOM,
-    iconName: SOURCE_NAMES.ZOOM,
     categories: [SOURCE_CATEGORIES.COMMUNICATIONS, SOURCE_CATEGORIES.PRODUCTIVITY],
-    serviceType: 'zoom', // this doesn't exist on the BE
+    serviceType: 'custom',
+    baseServiceType: 'zoom',
     configuration: {
       isPublicKey: false,
       hasOauthRedirect: false,
@@ -683,14 +667,12 @@ export const staticSourceData: SourceDataItem[] = [
       githubRepository: 'elastic/enterprise-search-zoom-connector',
     },
     accountContextOnly: false,
-    internalConnectorAvailable: false,
-    customConnectorAvailable: true,
   },
+  staticGenericExternalSourceData,
 ];
 
 export const staticCustomSourceData: SourceDataItem = {
   name: SOURCE_NAMES.CUSTOM,
-  iconName: SOURCE_NAMES.CUSTOM,
   categories: ['API', 'Custom'],
   serviceType: 'custom',
   configuration: {
@@ -701,12 +683,26 @@ export const staticCustomSourceData: SourceDataItem = {
     applicationPortalUrl: '',
   },
   accountContextOnly: false,
-  customConnectorAvailable: true,
 };
 
-export const getSourceData = (serviceType: string): SourceDataItem => {
-  return (
-    staticSourceData.find((staticSource) => staticSource.serviceType === serviceType) ||
-    staticCustomSourceData
+export const getSourceData = (
+  serviceType: string,
+  baseServiceType?: string
+): SourceDataItem | undefined => {
+  if (serviceType === 'custom' && typeof baseServiceType === 'undefined') {
+    return staticCustomSourceData;
+  }
+  return staticSourceData.find(
+    (staticSource) =>
+      staticSource.serviceType === serviceType && staticSource.baseServiceType === baseServiceType
   );
 };
+
+export const hasExternalConnectorOption = (serviceType: string): boolean =>
+  !!getSourceData('external', serviceType);
+
+export const hasCustomConnectorOption = (serviceType: string): boolean =>
+  !!getSourceData('custom', serviceType);
+
+export const hasMultipleConnectorOptions = (serviceType: string): boolean =>
+  hasExternalConnectorOption(serviceType) || hasCustomConnectorOption(serviceType);
