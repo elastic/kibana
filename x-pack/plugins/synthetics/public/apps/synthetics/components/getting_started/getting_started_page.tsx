@@ -62,6 +62,7 @@ const Wrapper = styled.div`
   &&& {
     .euiEmptyPrompt__content {
       max-width: 40em;
+      padding: 0;
     }
   }
 `;
