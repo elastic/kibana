@@ -87,7 +87,6 @@ export const AddSourceBYOIntro: React.FC = () => {
                           'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.steps.title',
                           {
                             defaultMessage: 'How to build and deploy a Custom Connector Package',
-                            values: { name },
                           }
                         )}
                       </h2>
@@ -117,7 +116,7 @@ export const AddSourceBYOIntro: React.FC = () => {
                           <EuiTitle size="xs">
                             <h3>
                               {i18n.translate(
-                                'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.heading',
+                                'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option1.heading',
                                 {
                                   defaultMessage: 'Option 1',
                                 }
@@ -130,13 +129,13 @@ export const AddSourceBYOIntro: React.FC = () => {
                         <EuiText size="m" grow={false}>
                           <h4>
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.title"
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option1.title"
                               defaultMessage="Start with our source code"
                             />
                           </h4>
                           <p>
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.text"
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option1.text"
                               defaultMessage="Check out our repository on github {link}"
                               values={{ link: <EuiLink>here</EuiLink> }}
                             />
@@ -156,7 +155,7 @@ export const AddSourceBYOIntro: React.FC = () => {
                           <EuiTitle size="xs">
                             <h4>
                               {i18n.translate(
-                                'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step2.heading',
+                                'xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option2.heading',
                                 {
                                   defaultMessage: 'Option 2',
                                 }
@@ -169,15 +168,17 @@ export const AddSourceBYOIntro: React.FC = () => {
                         <EuiText size="m" grow={false}>
                           <h4>
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.title"
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option2.title"
                               defaultMessage="Use our docs and tools to write your own"
                             />
                           </h4>
                           <p>
                             <FormattedMessage
-                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step1.text"
+                              id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.option2.text"
                               defaultMessage="Check out our helpful docs {link}"
-                              values={{ link: <EuiLink>here</EuiLink> }}
+                              values={
+                                { link: <EuiLink>here</EuiLink> } // TODO Update this when we have a doclink
+                              }
                             />
                           </p>
                         </EuiText>
@@ -188,9 +189,8 @@ export const AddSourceBYOIntro: React.FC = () => {
                     <EuiText size="m" grow={false}>
                       <p>
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step3.text"
+                          id="xpack.enterpriseSearch.workplaceSearch.contentSource.byoConfigIntro.step2.text"
                           defaultMessage="Once you've built and deployed your connector, come back here to register your connector, connect to your content source, and start ingesting documents."
-                          values={{ link: <EuiLink>here</EuiLink> }}
                         />
                       </p>
                     </EuiText>

@@ -146,7 +146,7 @@ export const SOURCE_NAMES = {
     { defaultMessage: 'Confluence' }
   ),
   CONFLUENCE_CONNECTOR_PACKAGE: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluence',
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluenceConnectorPackage',
     { defaultMessage: 'Confluence Connector Package' }
   ),
   CONFLUENCE_SERVER: i18n.translate(
