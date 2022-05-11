@@ -96,7 +96,7 @@ describe('calculateMinInterval', () => {
       },
     };
     xyProps.args.layers[0] = layer;
-    xyProps.args.xAxisInterval = '1h';
+    xyProps.args.minTimeBarInterval = '1h';
     const result = await calculateMinInterval(xyProps);
     expect(result).toEqual(60 * 60 * 1000);
   });

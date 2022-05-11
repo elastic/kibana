@@ -202,7 +202,7 @@ export interface XYArgs extends DataLayerArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  xAxisInterval?: string;
+  minTimeBarInterval?: string;
 }
 
 export interface LayeredXYArgs {
@@ -226,7 +226,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  xAxisInterval?: string;
+  minTimeBarInterval?: string;
 }
 
 export interface XYProps {
@@ -250,7 +250,7 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  xAxisInterval?: string;
+  minTimeBarInterval?: string;
 }
 
 export interface AnnotationLayerArgs {

@@ -113,9 +113,9 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
-  getXAxisIntervalHelp: () =>
+  getMinTimeBarIntervalHelp: () =>
     i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
-      defaultMessage: 'Specifies the interval for x-axis',
+      defaultMessage: 'Specifies the min interval for time bar chart',
     }),
   getDataLayerFnHelp: () =>
     i18n.translate('expressionXY.dataLayer.help', {

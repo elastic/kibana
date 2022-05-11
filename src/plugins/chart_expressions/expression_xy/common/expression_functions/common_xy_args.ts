@@ -115,8 +115,8 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getAriaLabelHelp(),
   },
-  xAxisInterval: {
+  minTimeBarInterval: {
     types: ['string'],
-    help: strings.getXAxisIntervalHelp(),
+    help: strings.getMinTimeBarIntervalHelp(),
   },
 };

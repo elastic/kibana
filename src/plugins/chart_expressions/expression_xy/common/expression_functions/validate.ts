@@ -12,9 +12,12 @@ import { AxisExtentModes, ValueLabelModes } from '../constants';
 import {
   AxisExtentConfigResult,
   DataLayerConfigResult,
+  CommonXYDataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
+  SeriesType,
 } from '../types';
+import { isTimeChart } from '../helpers';
 
 const errors = {
   extendBoundsAreInvalidError: () =>
@@ -41,8 +44,15 @@ const errors = {
   isInvalidIntervalError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.isInvalidIntervalError', {
       defaultMessage:
-        'Provided x-axis interval is invalid. The interval should includes quantity and unit name like 1d, 24h, 1w.',
+        'Provided x-axis interval is invalid. The interval should include quantity and unit names. Examples: 1d, 24h, 1w.',
     }),
+  minTimeBarIntervalNotForTimeBarChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.minTimeBarIntervalNotForTimeBarChartError',
+      {
+        defaultMessage: '`minTimeBarInterval` argument is applicable only for time bar charts.',
+      }
+    ),
 };
 
 export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
@@ -108,8 +118,18 @@ export const validateValueLabels = (
   }
 };
 
-export const validateXAxisInterval = (xAxisInterval?: string) => {
-  if (xAxisInterval && !isValidInterval(xAxisInterval)) {
-    throw new Error(errors.isInvalidIntervalError());
+export const validateMinTimeBarInterval = (
+  dataLayers: CommonXYDataLayerConfigResult[],
+  hasBar: boolean,
+  minTimeBarInterval?: string
+) => {
+  if (minTimeBarInterval) {
+    if (!isValidInterval(minTimeBarInterval)) {
+      throw new Error(errors.isInvalidIntervalError());
+    }
+
+    if (!hasBar || !isTimeChart(dataLayers)) {
+      throw new Error(errors.minTimeBarIntervalNotForTimeBarChartError());
+    }
   }
 };
