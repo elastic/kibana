@@ -42,6 +42,18 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
             {solutions.map((solution) => (
               <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
             ))}
+            <SolutionPanel
+              addBasePath={addBasePath}
+              key="kibana"
+              solution={{
+                id: 'kibana',
+                title: 'Rick Roll',
+                description: 'Never gonna give you up, never gonna let you down.',
+                icon: 'logoKibana',
+                path: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                order: 400,
+              }}
+            />
           </EuiFlexGroup>
         </section>
 
