@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method, AxiosError } from 'axios';
@@ -14,8 +15,8 @@ import { SubAction } from './types';
 import { ServiceParams } from './types';
 import * as i18n from './translations';
 
-const isObject = (v: unknown): v is Record<string, unknown> => {
-  return typeof v === 'object' && v !== null;
+const isObject = (value: unknown): value is Record<string, unknown> => {
+  return isPlainObject(value);
 };
 
 const isAxiosError = (error: unknown): error is AxiosError => (error as AxiosError).isAxiosError;
