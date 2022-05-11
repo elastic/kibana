@@ -214,7 +214,9 @@ describe('XYChart component', () => {
     });
 
     test('it uses passed in minInterval', () => {
-      const table1 = createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]);
+      const table1 = createSampleDatatableWithRows([
+        { a: 1, b: 2, c: '2019-01-02T05:00:00.000Z', d: 'Foo' },
+      ]);
       const table2 = createSampleDatatableWithRows([]);
 
       const component = shallow(
@@ -233,8 +235,8 @@ describe('XYChart component', () => {
       // real auto interval is 30mins = 1800000
       expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
         Object {
-          "max": NaN,
-          "min": NaN,
+          "max": "2019-01-02T05:00:00.000Z",
+          "min": "2019-01-02T05:00:00.000Z",
           "minInterval": 50,
         }
       `);
@@ -437,7 +439,7 @@ describe('XYChart component', () => {
 
       test('should pass enabled histogram mode and min interval to endzones component', () => {
         const component = shallow(
-          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={defaultTimeArgs} />
+          <XYChart {...defaultProps} minInterval={24 * 60 * 60 * 1000} args={timeArgs} />
         );
 
         expect(component.find(XyEndzones).dive().find('Endzones').props()).toEqual(
@@ -461,7 +463,8 @@ describe('XYChart component', () => {
                   seriesType: 'bar',
                   xScaleType: 'time',
                   isHistogram: true,
-                },
+                  table: newData,
+                } as DataLayerConfig,
               ],
             }}
           />

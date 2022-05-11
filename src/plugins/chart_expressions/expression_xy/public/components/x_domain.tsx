@@ -44,7 +44,10 @@ export const getXDomain = (
   const appliedTimeRange = getAppliedTimeRange(layers)?.timeRange;
   const xValues = uniq(
     layers
-      .flatMap<number>(({ table, xAccessor }) => table.rows.map((row) => row[xAccessor!].valueOf()))
+      .flatMap<number>(({ table, xAccessor }) =>
+        table.rows.map((row) => row[xAccessor!] && row[xAccessor!].valueOf())
+      )
+      .filter(Boolean)
       .sort()
   );
   const from = appliedTimeRange?.from;
