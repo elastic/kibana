@@ -18,6 +18,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ConfigSchema } from '..';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { DatePickerContextProvider } from '../context/date_picker_context';
@@ -54,6 +55,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
   kibanaFeatures,
+  usageCollection,
 }: {
   config: ConfigSchema;
   core: CoreStart;
@@ -62,6 +64,7 @@ export const renderApp = ({
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   kibanaFeatures: KibanaFeature[];
+  usageCollection: UsageCollectionSetup;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -76,9 +79,9 @@ export const renderApp = ({
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
-  const ApplicationUsageTrackingProvider =
-    plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
+  const ApplicationUsageTrackingProvider =
+    usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   ReactDOM.render(
     <ApplicationUsageTrackingProvider>
       <KibanaThemeProvider theme$={theme$}>

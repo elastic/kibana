@@ -53,6 +53,7 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
@@ -171,6 +172,7 @@ export class Plugin
         observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
         kibanaFeatures,
+        usageCollection: pluginsSetup.usageCollection,
       });
     };
 
