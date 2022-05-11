@@ -301,7 +301,7 @@ cloud.auth: <username:password>
 . Replace `<username:password>` with your Elastic Cloud deployment credentials.
 . Replace `<cloud_id>` with your {ece}/ece-cloud-id.html[elastic cloud id].
 . Open a terminal window, and then navigate to the {filebeat} folder.
-. In your `filebeat` folder, run Filebeat with the edited config:
+. In your `filebeat` folder, run {filebeat} with the edited config:
 +
 [source,bash]
 ----------------------------------
