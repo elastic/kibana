@@ -12,6 +12,7 @@ import { links as hostsLinks } from '../../hosts/links';
 import { links as detectionLinks } from '../../detections/links';
 import { links as networkLinks } from '../../network/links';
 import { links as usersLinks } from '../../users/links';
+import { links as kubernetesLinks } from '../../kubernetes/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';
 import { links as managementLinks } from '../../management/links';
@@ -32,7 +33,7 @@ export const appLinks: Readonly<LinkItem[]> = Object.freeze([
         defaultMessage: 'Threat hunting',
       }),
     ],
-    links: [hostsLinks, networkLinks, usersLinks],
+    links: [hostsLinks, networkLinks, usersLinks, kubernetesLinks],
   },
   timelinesLinks,
   getCasesLinkItems(),

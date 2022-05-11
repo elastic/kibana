@@ -72,7 +72,7 @@ export const links: LinkItem = {
       id: SecurityPageName.endpoints,
       globalNavEnabled: true,
       title: ENDPOINTS,
-      globalNavOrder: 9006,
+      globalNavOrder: 9008,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
     },
