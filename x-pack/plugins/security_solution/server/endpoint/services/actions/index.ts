@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { lensMultitable } from './lens_multitable';
-export type { LensMultitableExpressionTypeDefinition } from './lens_multitable';
+export * from './actions';
+export { getActionDetailsById } from './action_details_by_id';

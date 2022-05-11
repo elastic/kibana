@@ -72,18 +72,14 @@ export interface Configuration {
 
 export interface SourceDataItem {
   name: string;
-  iconName: string;
   categories?: string[];
   serviceType: string;
+  baseServiceType?: string;
   configuration: Configuration;
-  configured?: boolean;
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
   accountContextOnly: boolean;
-  internalConnectorAvailable?: boolean;
-  externalConnectorAvailable?: boolean;
-  customConnectorAvailable?: boolean;
   isBeta?: boolean;
 }
 

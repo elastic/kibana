@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export type { FormattedLangIdentResponse, LangIdentResponse } from './lang_ident_inference';
-export { LangIdentInference } from './lang_ident_inference';
-export { getLangIdentOutputComponent } from './lang_ident_output';
+/**
+ * The Page Size to be used when searching against the Actions indexes (both requests and responses)
+ */
+export const ACTIONS_SEARCH_PAGE_SIZE = 10000;
