@@ -70,6 +70,8 @@ export async function* streamFetch<A = unknown, E = ApiEndpoint>(
       }
     }
 
+    // The reader might finish with a partially filled actionBuffer so
+    // we need to clear it once more after the request is done.
     if (actionBuffer.length > 0) {
       yield actionBuffer;
       actionBuffer.length = 0;
