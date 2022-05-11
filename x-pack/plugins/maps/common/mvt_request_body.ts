@@ -50,6 +50,8 @@ export function getAggsTileRequest({
       aggs: requestBody.aggs,
       fields: requestBody.fields,
       runtime_mappings: requestBody.runtime_mappings,
+      // TODO only set "with_labels" when layer styling needs label points
+      with_labels: true,
     },
   };
 }
@@ -86,6 +88,8 @@ export function getHitsTileRequest({
       ),
       runtime_mappings: requestBody.runtime_mappings,
       track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
+      // TODO only set "with_labels" when layer styling needs label points
+      with_labels: true,
     },
   };
 }

@@ -94,11 +94,21 @@ const IS_POINT_FEATURE = [
 ];
 
 export function getPointFilterExpression(
+  isSourceGeoJson: boolean,
   joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
   return getFilterExpression(
-    [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
+    [
+      isSourceGeoJson
+        ? EXCLUDE_CENTROID_FEATURES
+        : [
+          '!=',
+          ['get', '_mvt_label_position'],
+          true,
+        ],
+      IS_POINT_FEATURE
+    ],
     joinFilter,
     timesliceMaskConfig
   );
@@ -116,6 +126,12 @@ export function getLabelFilterExpression(
     // For GeoJSON sources, show label for centroid features or point/multi-point features only.
     // no explicit isCentroidFeature filter is needed, centroids are points and are included in the geometry filter.
     filters.push(IS_POINT_FEATURE);
+  } else {
+    filters.push([
+      '==',
+      ['get', '_mvt_label_position'],
+      true,
+    ]);
   }
 
   return getFilterExpression(filters, joinFilter, timesliceMaskConfig);
