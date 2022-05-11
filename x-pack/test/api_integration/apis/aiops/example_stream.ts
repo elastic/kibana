@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       if (stream !== null) {
         let partial = '';
-        let throwed = false;
+        let threw = false;
         const progressData: any[] = [];
 
         try {
@@ -97,10 +97,10 @@ export default ({ getService }: FtrProviderContext) => {
             });
           }
         } catch (e) {
-          throwed = true;
+          threw = true;
         }
 
-        expect(throwed).to.be(false);
+        expect(threw).to.be(false);
 
         expect(progressData.length).to.be(100);
         expect(progressData[0].payload).to.be(1);
