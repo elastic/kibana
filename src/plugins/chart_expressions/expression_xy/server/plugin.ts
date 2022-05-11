@@ -19,7 +19,7 @@ import {
   tickLabelsConfigFunction,
   annotationLayerFunction,
   labelsOrientationConfigFunction,
-  referenceLineLayerFunction,
+  referenceLineFunction,
   axisTitlesVisibilityConfigFunction,
   extendedDataLayerFunction,
   extendedReferenceLineLayerFunction,
@@ -42,7 +42,7 @@ export class ExpressionXyPlugin
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
-    expressions.registerFunction(referenceLineLayerFunction);
+    expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(extendedReferenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);

@@ -6,23 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { LayerTypes, REFERENCE_LINE_LAYER } from '../constants';
-import { ReferenceLineLayerFn } from '../types';
+import { LayerTypes, REFERENCE_LINE } from '../constants';
+import { ReferenceLineFn } from '../types';
 import { strings } from '../i18n';
-import { commonReferenceLineLayerArgs } from './common_reference_line_layer_args';
 
-export const referenceLineLayerFunction: ReferenceLineLayerFn = {
-  name: REFERENCE_LINE_LAYER,
+export const referenceLineFunction: ReferenceLineFn = {
+  name: REFERENCE_LINE,
   aliases: [],
-  type: REFERENCE_LINE_LAYER,
+  type: REFERENCE_LINE,
   help: strings.getRLHelp(),
   inputTypes: ['datatable'],
-  args: { ...commonReferenceLineLayerArgs },
+  args: {},
   fn(table, args) {
     return {
-      type: REFERENCE_LINE_LAYER,
-      ...args,
-      accessors: args.accessors ?? [],
+      type: REFERENCE_LINE,
       layerType: LayerTypes.REFERENCELINE,
       table,
     };

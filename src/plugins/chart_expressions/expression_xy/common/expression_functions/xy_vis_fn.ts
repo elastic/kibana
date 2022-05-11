@@ -38,7 +38,7 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const {
-    referenceLineLayers = [],
+    referenceLines = [],
     annotationLayers = [],
     // data_layer args
     seriesType,
@@ -59,7 +59,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
 
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
-    ...appendLayerIds(referenceLineLayers, 'referenceLineLayers'),
+    ...appendLayerIds(referenceLines, 'referenceLines'),
     ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
