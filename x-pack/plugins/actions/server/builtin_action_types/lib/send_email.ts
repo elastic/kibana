@@ -116,7 +116,15 @@ export async function sendEmailWithExchange(
 
   const axiosInstance = axios.create();
   axiosInstance.interceptors.response.use(
-    (response: AxiosResponse) => response,
+    async (response: AxiosResponse) => {
+      // Look for 4xx errors that indicate something is wrong with the request
+      // We don't know for sure that it is an access token issue but remove saved
+      // token just to be sure
+      if (response.status >= 400 && response.status < 500) {
+        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+      }
+      return response;
+    },
     async (error) => {
       const statusCode = error?.response?.status;
 
@@ -138,7 +146,8 @@ export async function sendEmailWithExchange(
       graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
     },
     logger,
-    configurationUtilities
+    configurationUtilities,
+    axiosInstance
   );
 }
 
