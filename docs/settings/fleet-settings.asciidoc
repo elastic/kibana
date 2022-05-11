@@ -18,104 +18,140 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 [[general-fleet-settings-kb]]
 ==== General {fleet} settings
 
-[cols="2*<"]
-|===
-| `xpack.fleet.agents.enabled` {ess-icon}
-  | Set to `true` (default) to enable {fleet}.
-|===
+`xpack.fleet.agents.enabled` {ess-icon}::
+Set to `true` (default) to enable {fleet}.
+
 
 [[fleet-data-visualizer-settings]]
 
 ==== {package-manager} settings
 
-[cols="2*<"]
-|===
-| `xpack.fleet.registryUrl`
-  | The address to use to reach the {package-manager} registry.
-| `xpack.fleet.registryProxyUrl`
-  | The proxy address to use to reach the {package-manager} registry if an internet connection is not directly available.
-  Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
+`xpack.fleet.registryUrl`::
+The address to use to reach the {package-manager} registry.
 
-|===
+`xpack.fleet.registryProxyUrl`::
+The proxy address to use to reach the {package-manager} registry if an internet connection is not directly available.
+Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
+
 
 ==== {fleet} settings
 
-[cols="2*<"]
-|===
-| `xpack.fleet.agents.fleet_server.hosts`
-  | Hostnames used by {agent} for accessing {fleet-server}.
-| `xpack.fleet.agents.elasticsearch.hosts`
-  | Hostnames used by {agent} for accessing {es}.
-| `xpack.fleet.agents.elasticsearch.ca_sha256`
-  | Hash pin used for certificate verification. The pin is a base64-encoded
-    string of the SHA-256 fingerprint.
-|===
+`xpack.fleet.agents.fleet_server.hosts`::
+Hostnames used by {agent} for accessing {fleet-server}.
+
+`xpack.fleet.agents.elasticsearch.hosts`::
+Hostnames used by {agent} for accessing {es}.
+
+`xpack.fleet.agents.elasticsearch.ca_sha256`::
+Hash pin used for certificate verification. The pin is a base64-encoded string of the SHA-256 fingerprint.
 
 
+[role="child_attributes"]
 ==== Preconfiguration settings (for advanced use cases)
 
 Use these settings to pre-define integrations and agent policies that you
 want {fleet} to load up by default.
 
-[cols="2*<a"]
-|===
+`xpack.fleet.packages`::
+List of integrations that are installed when the {fleet} app starts up for the first time.
++
+.Required properties of `xpack.fleet.packages`
+[%collapsible%open]
+=====
+  `name`:::
+    Name of the integration from the package registry.
 
-| `xpack.fleet.packages`
-  | List of integrations that are installed when the {fleet} app starts
-  up for the first time. Required properties are:
+  `version`::: 
+    Either an exact semantic version, or the keyword `latest` to fetch the latest integration version.
+=====
 
-  `name`:: Name of the integration from the package registry.
-  `version`:: Either an exact semantic version, or the keyword `latest` to fetch
-  the latest integration version.
+`xpack.fleet.agentPolicies`::
+List of agent policies that are configured when the {fleet} app starts. 
++
+.Required properties of `xpack.fleet.agentPolicies`
+[%collapsible%open]
+=====
+  `id`::: 
+    Unique ID for this policy. The ID may be a number or string.
+  `name`::: 
+    Policy name.
+=====
++
+.Optional properties of `xpack.fleet.agentPolicies`
+[%collapsible%open]
+=====
+  `description`::: 
+    Text description of this policy.
+  `namespace`::: 
+    String identifying this policy's namespace.
+  `monitoring_enabled`::: 
+    List of keywords that specify the monitoring data to collect. Valid values include `['logs']`, `['metrics']`, and `['logs', 'metrics']`.
+  `is_managed`::: 
+    If `true`, this policy is not editable by the user and can only be changed by updating the {kib} config.
+  `is_default`::: 
+    If `true`, this policy is the default agent policy.
+  `is_default_fleet_server`::: 
+    If `true`, this policy is the default {fleet-server} agent policy.
+  `data_output_id`::: 
+    ID of the output to send data. (Need to be identical to `monitoring_output_id`)
+  `monitoring_output_id`::: 
+    ID of the output to send monitoring data. (Need to be identical to `data_output_id`)
+  `package_policies`::: 
+    List of integration policies to add to this policy.
++
+.Properties of `package_policies`
+[%collapsible%open]
+=======
+  `id`:::: 
+    Unique ID of the integration policy. The ID may be a number or string.
+  `name`:::: 
+    (required) Name of the integration policy.
+  `package`:::: 
+    (required) Integration that this policy configures.
++
+.Properties of `package`
+[%collapsible%open]
+========
+  `name`::::
+    Name of the integration associated with this policy.
+========
 
-| `xpack.fleet.agentPolicies`
-  | List of agent policies that are configured when the {fleet} app starts.
-Required properties are:
+  `description`:::: 
+    Text string describing this integration policy.
+  `namespace`:::: 
+    String identifying this policy's namespace.
+  `inputs`:::: 
+    Array that overrides any default input settings for this integration. Follows the same schema as integration inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
+=======
+=====
 
-  `id`:: Unique ID for this policy. The ID may be a number or string.
-  `name`:: Policy name.
-
-Optional properties are:
-
-  `description`:: Text description of this policy.
-  `namespace`:: String identifying this policy's namespace.
-  `monitoring_enabled`:: List of keywords that specify the monitoring data to collect.
-  Valid values include `['logs']`, `['metrics']`, and `['logs', 'metrics']`.
-  `is_managed`:: If `true`, this policy is not editable by the user and can only
-  be changed by updating the {kib} config.
-  `is_default`:: If `true`, this policy is the default agent policy.
-  `is_default_fleet_server`:: If `true`, this policy is the default {fleet-server} agent policy.
-  `data_output_id`:: ID of the output to send data (Need to be identical to `monitoring_output_id`)
-  `monitoring_output_id`:: ID of the output to send monitoring data. (Need to be identical to `data_output_id`)
-  `package_policies`:: List of integration policies to add to this policy.
-    `id`::: Unique ID of the integration policy. The ID may be a number or string.
-    `name`::: (required) Name of the integration policy.
-    `package`::: (required) Integration that this policy configures
-      `name`:::: Name of the integration associated with this policy.
-    `description`::: Text string describing this integration policy.
-    `namespace`::: String identifying this policy's namespace.
-    `inputs`::: Array that overrides any default input settings for this
-    integration. Follows the same schema as integration inputs, with the
-    exception that any object in `vars` can be passed `frozen: true` in order to
-    prevent that specific `var` from being edited by the user.
-
-| `xpack.fleet.outputs`
-  | List of outputs that are configured when the {fleet} app starts.
-Required properties are:
-
-  `id`:: Unique ID for this output. The ID should be a string.
-  `name`:: Output name.
-  `type`:: Type of Output. Currently we only support "elasticsearch".
-  `hosts`:: Array that contains the list of host for that output.
-  `config`:: Extra config for that output.
-
-Optional properties are:
-
-  `is_default`:: If `true`, this output is the default output.
-|===
-
+`xpack.fleet.outputs`::
+List of outputs that are configured when the {fleet} app starts. 
++
+.Required properties of `xpack.fleet.outputs`
+[%collapsible%open]
+=====
+  `id`::: 
+    Unique ID for this output. The ID should be a string.
+  `name`::: 
+    Output name.
+  `type`::: 
+    Type of Output. Currently we only support "elasticsearch".
+  `hosts`::: 
+    Array that contains the list of host for that output.
+  `config`::: 
+    Extra config for that output.
+=====
++
+.Optional properties of `xpack.fleet.outputs`
+[%collapsible%open]
+=====
+  `is_default`::: 
+    If `true`, this output is the default output.
+=====
++
 Example configuration:
-
++
 [source,yaml]
 ----
 xpack.fleet.packages:
