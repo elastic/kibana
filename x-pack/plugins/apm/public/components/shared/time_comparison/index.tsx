@@ -96,14 +96,14 @@ export function TimeComparison() {
         if (e.target.value === 'ml_expected_bounds') {
           urlHelpers.push(history, {
             query: {
-              mlExpectedBounds: true,
+              mlExpectedBounds: 'true',
             },
           });
         } else {
           urlHelpers.push(history, {
             query: {
               offset: e.target.value,
-              mlExpectedBounds: false,
+              mlExpectedBounds: 'false',
             },
           });
         }
