@@ -14,8 +14,11 @@ export const findExistingIndices = async (
   Promise.all(
     indices
       .map(async (index) => {
+        const indexToQuery = index.trim().startsWith('-')
+          ? index.trim().substring(1)
+          : index.trim();
         const searchResponse = await esClient.fieldCaps({
-          index,
+          index: indexToQuery,
           fields: '_id',
           ignore_unavailable: true,
           allow_no_indices: false,

@@ -25920,7 +25920,6 @@
     "xpack.securitySolution.inspect.modal.somethingWentWrongDescription": "Désolé, un problème est survenu.",
     "xpack.securitySolution.inspectDescription": "Inspecter",
     "xpack.securitySolution.inspectPatternDifferent": "Cet élément possède un modèle d'indexation unique séparé du paramètre de vue de données.",
-    "xpack.securitySolution.inspectPatternExcludeLogs": "Lorsque le modèle d'indexation logs-* est sélectionné, les logs Elastic Cloud sont exclus de la recherche.",
     "xpack.securitySolution.investigationEnrichment.requestError": "Une erreur est survenue lors de la demande de Threat Intelligence",
     "xpack.securitySolution.ja3.fingerprint.ja3.fingerprintLabel": "ja3",
     "xpack.securitySolution.kpiHost.enableHostRiskText": "Activer le module de risque de l'hôte pour afficher davantage de données",
