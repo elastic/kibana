@@ -7,6 +7,8 @@
 import type { CreatePackagePolicyRouteState } from '../../../../../types';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 
+// TODO: decide better way to infer this
+const SPECIAL_PACKAGES = ['apm', 'endpoint', 'synthetics'];
 interface GetInstallPkgRouteOptionsParams {
   currentPath: string;
   integration: string | null;
@@ -16,6 +18,9 @@ interface GetInstallPkgRouteOptionsParams {
   isExperimentalAddIntegrationPageEnabled: boolean;
   isFirstTimeAgentUser: boolean;
 }
+
+const isPackageExemptFromStepsLayout = (pkgkey: string) =>
+  SPECIAL_PACKAGES.some((pkgname) => pkgkey.startsWith(pkgname + '-'));
 /*
  * When the install package button is pressed, this fn decides which page to navigate to
  * by generating the options to be passed to `services.application.navigateToApp`.
@@ -30,11 +35,15 @@ export const getInstallPkgRouteOptions = ({
   isExperimentalAddIntegrationPageEnabled,
 }: GetInstallPkgRouteOptionsParams): [string, { path: string; state: unknown }] => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
-  const useStepsLayout = isExperimentalAddIntegrationPageEnabled && isCloud;
+  const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
+  const useStepsLayout =
+    isExperimentalAddIntegrationPageEnabled &&
+    isCloud &&
+    isFirstTimeAgentUser &&
+    !packageExemptFromStepsLayout;
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
     useStepsLayout,
-    isFirstTimeAgentUser,
     ...integrationOpts,
     ...(agentPolicyId ? { agentPolicyId } : {}),
   })[1];
