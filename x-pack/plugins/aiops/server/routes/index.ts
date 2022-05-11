@@ -117,7 +117,7 @@ export function defineRoutes(router: IRouter, logger: Logger) {
           }, Math.floor(Math.random() * maxTimeoutMs));
         }
 
-        // do call this using `await` so it will run asynchronously while we return the stream already.
+        // do not call this using `await` so it will run asynchronously while we return the stream already.
         pushStreamUpdate();
 
         return response.ok({

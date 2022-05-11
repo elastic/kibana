@@ -53,11 +53,11 @@ export function streamReducer(
         progress: action.payload,
       };
     case API_ACTION_NAME.DELETE_ENTITY:
-      const deleteFromEntitis = { ...state.entities };
-      delete deleteFromEntitis[action.payload];
+      const deleteFromEntities = { ...state.entities };
+      delete deleteFromEntities[action.payload];
       return {
         ...state,
-        entities: deleteFromEntitis,
+        entities: deleteFromEntities,
       };
     case API_ACTION_NAME.ADD_TO_ENTITY:
       const addToEntities = { ...state.entities };
@@ -80,7 +80,7 @@ export function streamReducer(
     default:
       return {
         ...state,
-        errors: [...state.errors, 'UNKNOWN_ACTION_ERRROR'],
+        errors: [...state.errors, 'UNKNOWN_ACTION_ERROR'],
       };
   }
 }
