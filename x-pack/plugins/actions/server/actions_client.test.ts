@@ -1583,7 +1583,6 @@ describe('delete()', () => {
     test('ensures user is authorised to delete actions', async () => {
       await actionsClient.delete({ id: '1' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
-      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1596,6 +1595,11 @@ describe('delete()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+    });
+
+    test(`deletes any existing authorization tokens`, async () => {
+      await actionsClient.delete({ id: '1' });
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1702,6 +1706,11 @@ describe('update()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    });
+
+    test(`deletes any existing authorization tokens`, async () => {
+      await actionsClient.delete({ id: '1' });
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
   });
 

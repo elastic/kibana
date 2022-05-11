@@ -283,6 +283,8 @@ export class ActionsClient {
       )
     );
 
+    await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
@@ -598,17 +600,8 @@ export class ActionsClient {
       })
     );
 
-    try {
-      await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
-    } catch (error) {
-      this.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.DELETE,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-    }
+    await this.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
