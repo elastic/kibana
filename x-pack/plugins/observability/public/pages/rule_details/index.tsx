@@ -29,7 +29,10 @@ import {
   disableRule,
   snoozeRule,
   unsnoozeRule,
+  deleteRules,
 } from '@kbn/triggers-actions-ui-plugin/public';
+// TODO: use a Delete modal from triggersActionUI when it's sharable
+import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import {
   RuleDetailsPathParams,
   EVENT_ERROR_LOG_TAB,
@@ -51,16 +54,16 @@ import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 export function RuleDetailsPage() {
   const {
     http,
-    triggersActionsUi: { ruleTypeRegistry },
-    application: { capabilities },
+    triggersActionsUi: { ruleTypeRegistry, getRuleStatusDropdown, getEditAlertFlyout },
+    application: { capabilities, navigateToUrl },
     notifications: { toasts },
-    triggersActionsUi,
   } = useKibana().services;
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isLoadingRule, rule, ruleType, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const [features, setFeatures] = useState<string>('');
+  const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const { last24hAlerts, isLoadingLast24hAlerts, errorLast24hAlerts } = useFetchLast24hAlerts({
     http,
     features,
@@ -176,20 +179,40 @@ export function RuleDetailsPage() {
                         />
                       }
                     >
-                      <EuiButtonEmpty
-                        size="m"
-                        iconType="pencil"
-                        onClick={() => {
-                          setIsRuleEditPopoverOpen(false);
-                          setEditFlyoutVisible(true);
-                        }}
-                      >
-                        <EuiText size="m">
-                          {i18n.translate('xpack.observability.ruleDetails.editRule', {
-                            defaultMessage: 'Edit rule',
-                          })}
-                        </EuiText>
-                      </EuiButtonEmpty>
+                      <EuiFlexGroup direction="column" alignItems="flexStart">
+                        <EuiButtonEmpty
+                          size="s"
+                          iconType="pencil"
+                          onClick={() => {
+                            setIsRuleEditPopoverOpen(false);
+                            setEditFlyoutVisible(true);
+                          }}
+                        >
+                          <EuiSpacer size="s" />
+                          <EuiText size="s">
+                            {i18n.translate('xpack.observability.ruleDetails.editRule', {
+                              defaultMessage: 'Edit rule',
+                            })}
+                          </EuiText>
+                        </EuiButtonEmpty>
+                        <EuiSpacer size="s" />
+                        <EuiButtonEmpty
+                          size="s"
+                          iconType="trash"
+                          color="danger"
+                          onClick={() => {
+                            setIsRuleEditPopoverOpen(false);
+                            setRuleToDelete([rule.id]);
+                          }}
+                        >
+                          <EuiText size="s">
+                            {i18n.translate('xpack.observability.ruleDetails.deleteRule', {
+                              defaultMessage: 'Delete rule',
+                            })}
+                          </EuiText>
+                        </EuiButtonEmpty>
+                        <EuiSpacer size="s" />
+                      </EuiFlexGroup>
                     </EuiPopover>
                   </EuiFlexItem>
                   <EuiSpacer size="s" />
@@ -202,7 +225,7 @@ export function RuleDetailsPage() {
                       </EuiFlexItem>
                     </EuiTitle>
 
-                    {triggersActionsUi.getRuleStatusDropdown({
+                    {getRuleStatusDropdown({
                       rule,
                       enableRule: async () => await enableRule({ http, id: rule.id }),
                       disableRule: async () => await disableRule({ http, id: rule.id }),
@@ -383,13 +406,29 @@ export function RuleDetailsPage() {
         <EuiSpacer size="l" />
         <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />
         {editFlyoutVisible &&
-          triggersActionsUi.getEditAlertFlyout({
+          getEditAlertFlyout({
             initialRule: rule,
             onClose: () => {
               setEditFlyoutVisible(false);
             },
             onSave: reloadRule,
           })}
+        <DeleteModalConfirmation
+          onDeleted={async () => {
+            setRuleToDelete([]);
+            navigateToUrl(http.basePath.prepend('/app/observability/alerts/rules'));
+          }}
+          onErrors={async () => {
+            setRuleToDelete([]);
+            navigateToUrl(http.basePath.prepend('/app/observability/alerts/rules'));
+          }}
+          onCancel={() => {}}
+          apiDeleteCall={deleteRules}
+          idsToDelete={ruleToDelete}
+          singleTitle={rule.name}
+          multipleTitle={rule.name}
+          setIsLoadingState={(isLoading: boolean) => {}}
+        />
       </ObservabilityPageTemplate>
     )
   );
