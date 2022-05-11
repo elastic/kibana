@@ -23,7 +23,7 @@ import {
 
 describe('useSecurityJobsHelpers', () => {
   describe('moduleToSecurityJob', () => {
-    test('correctly converts module to SecurityJob', () => {
+    test.skip('correctly converts module to SecurityJob', () => {
       const securityJob = moduleToSecurityJob(
         mockGetModuleResponse[0],
         mockGetModuleResponse[0].jobs[0],
@@ -53,7 +53,7 @@ describe('useSecurityJobsHelpers', () => {
     });
 
     describe('getAugmentedFields', () => {
-      test('return correct augmented fields for given matching compatible modules', () => {
+      test.skip('return correct augmented fields for given matching compatible modules', () => {
         const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
         const augmentedFields = getAugmentedFields('rare_process_by_host_linux_ecs', moduleJobs, [
           'siem_auditbeat',
@@ -68,14 +68,14 @@ describe('useSecurityJobsHelpers', () => {
     });
 
     describe('getModuleJobs', () => {
-      test('returns all jobs within a module for a compatible moduleId', () => {
+      test.skip('returns all jobs within a module for a compatible moduleId', () => {
         const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
         expect(moduleJobs.length).toEqual(3);
       });
     });
 
     describe('getInstalledJobs', () => {
-      test('returns all jobs from jobSummary for a compatible moduleId', () => {
+      test.skip('returns all jobs from jobSummary for a compatible moduleId', () => {
         const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
         const installedJobs = getInstalledJobs(mockJobsSummaryResponse, moduleJobs, [
           'siem_auditbeat',
@@ -85,7 +85,7 @@ describe('useSecurityJobsHelpers', () => {
     });
 
     describe('composeModuleAndInstalledJobs', () => {
-      test('returns correct number of jobs when composing separate module and installed jobs', () => {
+      test.skip('returns correct number of jobs when composing separate module and installed jobs', () => {
         const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
         const installedJobs = getInstalledJobs(mockJobsSummaryResponse, moduleJobs, [
           'siem_auditbeat',
@@ -96,7 +96,7 @@ describe('useSecurityJobsHelpers', () => {
     });
 
     describe('createSecurityJobs', () => {
-      test('returns correct number of jobs when creating jobs with successful responses', () => {
+      test.skip('returns correct number of jobs when creating jobs with successful responses', () => {
         const securityJobs = createSecurityJobs(
           mockJobsSummaryResponse,
           mockGetModuleResponse,
