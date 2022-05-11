@@ -15,7 +15,6 @@ import {
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
 import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
-import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/alerts';
 import {
   updateState,
   generateAlertMessage,
