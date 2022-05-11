@@ -8,7 +8,7 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
+import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
@@ -201,6 +201,47 @@ describe('Case Configuration API', () => {
           search: 'hello',
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should apply the severity field correctly (with severity value)', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: CaseSeverity.HIGH,
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters: [],
+          tags: [],
+          severity: CaseSeverity.HIGH,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should not send the severity field with "all" severity value', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: 'all',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters: [],
+          tags: [],
         },
         signal: abortCtrl.signal,
       });
