@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesFindRequest } from '../../../common/api';
+import { CasesFindRequest, CasesMetricsRequest } from '../../../common/api';
 import { HTTPService } from '..';
 import { casesMetrics, casesStatus } from '../../containers/mock';
 import { CasesMetrics, CasesStatus } from '../../containers/types';
@@ -20,5 +20,5 @@ export const getCasesMetrics = async ({
   http,
   signal,
   query,
-}: HTTPService & { query: CasesFindRequest }): Promise<CasesMetrics> =>
+}: HTTPService & { query: CasesMetricsRequest }): Promise<CasesMetrics> =>
   Promise.resolve(casesMetrics);
