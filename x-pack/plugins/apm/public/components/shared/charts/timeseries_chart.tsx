@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
@@ -78,6 +79,9 @@ export function TimeseriesChart({
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
+  const {
+    query: { mlExpectedBounds },
+  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
@@ -96,8 +100,9 @@ export function TimeseriesChart({
   const annotationColor = theme.eui.euiColorSuccess;
   const allSeries = [
     ...timeseries,
-    // TODO: re-enable anomaly boundaries when we have a fix for https://github.com/elastic/kibana/issues/100660
-    ...(anomalyChartTimeseries?.boundaries ?? []),
+    ...(mlExpectedBounds === true && anomalyChartTimeseries?.boundaries
+      ? anomalyChartTimeseries?.boundaries
+      : []),
     ...(anomalyChartTimeseries?.scores ?? []),
   ];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };

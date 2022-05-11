@@ -36,8 +36,6 @@ export function TimeComparison() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  // const comparisonOptions = getComparisonOptions({ start, end });
-
   const comparisonOptions = useMemo(
     () => [
       ...getComparisonOptions({ start, end }),
