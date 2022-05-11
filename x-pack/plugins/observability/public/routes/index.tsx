@@ -17,6 +17,7 @@ import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { RulesPage } from '../pages/rules';
+import { AlertingPages } from '../config';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -69,12 +70,7 @@ export const routes = {
   '/alerts': {
     handler: () => {
       return (
-        // TODO define viewIds in a config file
-        /**
-         * The prop viewId is used as a unique identifier for your plugin.
-         * The Application Id is automatically attached to the tracked usage, based on the ID used when registering your app via core.application.register
-         */
-        <TrackApplicationView viewId="alerts">
+        <TrackApplicationView viewId={AlertingPages.alerts}>
           <AlertsPage />
         </TrackApplicationView>
       );

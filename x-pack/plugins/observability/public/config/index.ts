@@ -7,3 +7,9 @@
 
 export { paths } from './paths';
 export { translations } from './translations';
+
+export enum AlertingPages {
+  alerts = 'alerts',
+  case = 'cases',
+  rules = 'rules',
+}
