@@ -122,7 +122,7 @@ describe('getCommands', () => {
 
         // Override the service name from package.json
         // Allowed characters: a-z, A-Z, 0-9, -, _, and space
-        serviceName: 'my_node_service',
+        serviceName: '',
 
         // Use if APM Server requires a secret token
         secretToken: '',
@@ -150,7 +150,7 @@ describe('getCommands', () => {
 
         // Override the service name from package.json
         // Allowed characters: a-z, A-Z, 0-9, -, _, and space
-        serviceName: 'my_node_service',
+        serviceName: '',
 
         // Use if APM Server requires a secret token
         secretToken: 'foobar',
@@ -422,7 +422,7 @@ describe('getCommands', () => {
 
         # Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.
         # If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.
-        export ELASTIC_APM_SERVICE_NAME=my_go_service
+        export ELASTIC_APM_SERVICE_NAME=
 
         # Set custom APM Server URL (default: http://localhost:8200)
         export ELASTIC_APM_SERVER_URL=
@@ -449,7 +449,7 @@ describe('getCommands', () => {
 
         # Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.
         # If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.
-        export ELASTIC_APM_SERVICE_NAME=my_go_service
+        export ELASTIC_APM_SERVICE_NAME=
 
         # Set custom APM Server URL (default: http://localhost:8200)
         export ELASTIC_APM_SERVER_URL=localhost:8220
