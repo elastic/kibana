@@ -280,13 +280,23 @@ export function RuleDetailsPage() {
 
           <EuiFlexItem grow={3}>
             <EuiPanel color="subdued" hasBorder={false} paddingSize={'l'}>
-              <EuiTitle size="s">
-                <EuiFlexItem>
-                  {i18n.translate('xpack.observability.ruleDetails.definition', {
-                    defaultMessage: 'Definition',
-                  })}
-                </EuiFlexItem>
-              </EuiTitle>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiTitle size="s">
+                  <EuiFlexItem grow={false}>
+                    {i18n.translate('xpack.observability.ruleDetails.definition', {
+                      defaultMessage: 'Definition',
+                    })}
+                  </EuiFlexItem>
+                </EuiTitle>
+                {hasEditButton && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType={'pencil'}
+                      onClick={() => setEditFlyoutVisible(true)}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
 
               <EuiSpacer size="l" />
 
