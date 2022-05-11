@@ -107,11 +107,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       (dataRefresh = true) => {
         deselectCases();
         if (dataRefresh) refetchCases();
-        if (doRefresh) doRefresh();
+        if (doRefresh) {
+          setRefresh(refresh + 1);
+          doRefresh();
+        }
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
-        setRefresh(refresh + 1);
       },
       [deselectCases, doRefresh, refetchCases, refresh]
     );
