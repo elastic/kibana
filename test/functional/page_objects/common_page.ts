@@ -301,81 +301,85 @@ export class CommonPageObject extends FtrService {
     });
   }
 
-  async checkLinks() {
-    // let url;
-    const urls = new Set([]);
+  // async checkLinks() {
+  //   // let url;
+  //   const urls = new Set<string>([]);
 
-    // change this to test "if tests are running?"
-    while (true) {
+  //   // change this to test "if tests are running?"
+  //   while (true) {
 
-      const linkList = await this.find.allByCssSelector('a', 100);
-      this.log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
+  //     const linkList = await this.find.allByCssSelector('a', 100);
+  //     this.log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
 
-      const links = await Promise.all(
-        linkList.map(async (link) => {
-          const url = await link.getAttribute('href');
-          // if url is NOT in urls, add it and test it
-          if (urls.has(url)) {
-            this.log.debug(`----- ${url} is already in set`);
-          } else {
-            urls.add(url);
-            try {
-              const response = await request.head(url);
-              this.log.debug(`${url} response: ${response.status}`);
-              return { url, code: response.status };
-            } catch (err) {
-              this.log.debug(err);
-            }
-          }
-        })
-      );
-      await this.sleep(1000);
-    }
-      // const deadlinks = links.filter((l) => l.code !== 200);
-      // if (deadlinks.length > 0) {
-      //   deadlinks.forEach((l) => this.log.debug(`${l.url} response: is ${l.code} but 200 expected`));
-      //   throw new Error('Dead links found');
-      // }
+  //     const links = await Promise.all(
+  //       linkList.map(async (link) => {
+  //         try {
+  //           const url = await link.getAttribute('href');
+  //           // if url is NOT in urls, add it and test it
+  //           if (urls.has(url)) {
+  //             this.log.debug(`----- ${url} is already in set`);
+  //           } else {
+  //             urls.add(url);
+  //             try {
+  //               const response = await request.head(url);
+  //               this.log.debug(`${url} response: ${response.status}`);
+  //               return { url, code: response.status };
+  //             } catch (err) {
+  //               this.log.debug(err);
+  //             }
+  //           }
+  //         } catch (err) {
+  //           // this should catch the stale element exceptions that happen
+  //           // when the page changes after we get the 'a' elements when we try to get the 'href's.
+  //         }
+  //       })
+  //     );
+  //     await this.sleep(1000);
+  //   }
+  //     const deadlinks = links.filter((l) => l.code !== 200);
+  //     if (deadlinks.length > 0) {
+  //       deadlinks.forEach((l) => this.log.debug(`${l.url} response: is ${l.code} but 200 expected`));
+  //       throw new Error('Dead links found');
+  //     }
 
+  //   // await asyncForEach(linkList, async ({ _webElement }) => {
+  //   //   const url = await _webElement.getAttribute('href');
+  //   //   // urls.add(url);
+  //   //   const response = await request.head(url);
+  //   //   this.log.debug(`${url} response: ${response.status}`);
+  //   //   expect(response.status).to.be(200);
+  //   // });
+  //   // console.log(urls);
+  //   // await asyncForEach(urls, async (myUrl) => {
+  //   // urls.forEach((myUrl) => {
+  //   //   this.log.debug(myUrl);
+  //   //   const response = request.head('some url');
+  //   //   this.log.debug(`${myUrl} response: ${response}`);
+  //   // });
 
-    // await asyncForEach(linkList, async ({ _webElement }) => {
-    //   const url = await _webElement.getAttribute('href');
-    //   // urls.add(url);
-    //   const response = await request.head(url);
-    //   this.log.debug(`${url} response: ${response.status}`);
-    //   expect(response.status).to.be(200);
-    // });
-    // console.log(urls);
-    // await asyncForEach(urls, async (myUrl) => {
-    // urls.forEach((myUrl) => {
-    //   this.log.debug(myUrl);
-    //   const response = request.head('some url');
-    //   this.log.debug(`${myUrl} response: ${response}`);
-    // });
+  //   // const bodyEl = await this.find.byCssSelector('body');
+  //   // const $ = await bodyEl.parseDomContent();
+  //   // // const appUrl = getUrl.noAuth(this.config.get('servers.kibana'), appConfig);
+  //   // const baseUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
+  //   // const links = $('a')
+  //   //   .toArray()
+  //   //   .map((element) => $(element).attr('href'));
+  //   // const uniqueLinks = Array.from(new Set(links)).map((i) => baseUrl.concat(i));
 
-    // const bodyEl = await this.find.byCssSelector('body');
-    // const $ = await bodyEl.parseDomContent();
-    // // const appUrl = getUrl.noAuth(this.config.get('servers.kibana'), appConfig);
-    // const baseUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
-    // const links = $('a')
-    //   .toArray()
-    //   .map((element) => $(element).attr('href'));
-    // const uniqueLinks = Array.from(new Set(links)).map((i) => baseUrl.concat(i));
+  //   // await Promise.all(
+  //   //   uniqueLinks.map(async (link) => {
+  //   //     this.log.debug(link);
+  //   //     const response = await request.head(link);
+  //   //     this.log.debug(`${link} response: ${response}`);
+  //   //   })
+  //   // );
 
-    // await Promise.all(
-    //   uniqueLinks.map(async (link) => {
-    //     this.log.debug(link);
-    //     const response = await request.head(link);
-    //     this.log.debug(`${link} response: ${response}`);
-    //   })
-    // );
-
-    // await asyncForEach(uniqueLinks, async (myUrl) => {
-    //   this.log.debug(myUrl);
-    //   const response = await request.head('some url');
-    //   this.log.debug(`${myUrl} response: ${response}`);
-    // });
-  }
+  //   // await asyncForEach(uniqueLinks, async (myUrl) => {
+  //   //   this.log.debug(myUrl);
+  //   //   const response = await request.head('some url');
+  //   //   this.log.debug(`${myUrl} response: ${response}`);
+  //   // });
+  // }
 
   async waitUntilUrlIncludes(path: string) {
     await this.retry.try(async () => {
