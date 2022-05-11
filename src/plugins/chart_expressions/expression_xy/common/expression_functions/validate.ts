@@ -15,7 +15,6 @@ import {
   CommonXYDataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
-  SeriesType,
 } from '../types';
 import { isTimeChart } from '../helpers';
 
