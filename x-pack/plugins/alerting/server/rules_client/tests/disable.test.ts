@@ -399,12 +399,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
-        meta: {
-          versionApiKeyLastmodified: 'v7.10.0',
-        },
         scheduledTaskId: null,
-        apiKey: null,
-        apiKeyOwner: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [

@@ -1617,8 +1617,6 @@ export class RulesClient {
         id,
         this.updateMeta({
           ...attributes,
-          ...(!attributes.apiKeyOwner && { apiKeyOwner: null }),
-          ...(!attributes.apiKey && { apiKey: null }),
           enabled: false,
           scheduledTaskId: null,
           updatedBy: await this.getUserName(),
