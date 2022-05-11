@@ -27,6 +27,7 @@ export const commonDataLayerArgs: CommonDataLayerFnArgs = {
     help: strings.getXAccessorHelp(),
   },
   seriesType: {
+    aliases: ['_'],
     types: ['string'],
     options: [...Object.values(SeriesTypes)],
     help: strings.getSeriesTypeHelp(),
