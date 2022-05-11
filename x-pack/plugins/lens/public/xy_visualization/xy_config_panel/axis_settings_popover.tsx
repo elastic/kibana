@@ -375,7 +375,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             fullWidth
             data-test-subj={`lnsshowEndzones`}
             aria-label={i18n.translate('xpack.lens.xyChart.setScale', {
-              defaultMessage: 'AxisScale',
+              defaultMessage: 'Axis scale',
             })}
             options={[
               {
