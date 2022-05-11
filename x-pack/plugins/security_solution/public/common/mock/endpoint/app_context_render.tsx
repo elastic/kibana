@@ -13,6 +13,7 @@ import { AppDeepLink } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { ConsoleManager } from '../../../management/components/console';
 import { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
@@ -136,7 +137,9 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <ConsoleManager>{children}</ConsoleManager>
+        </QueryClientProvider>
       </AppRootProvider>
     </KibanaContextProvider>
   );
