@@ -7,7 +7,7 @@
 
 import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
@@ -31,12 +31,20 @@ export function TimeComparison() {
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset, mlExpectedBounds },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const comparisonOptions = getComparisonOptions({ start, end });
+  // const comparisonOptions = getComparisonOptions({ start, end });
+
+  const comparisonOptions = useMemo(
+    () => [
+      ...getComparisonOptions({ start, end }),
+      { text: 'Expected bounds', value: 'ml_expected_bounds' },
+    ],
+    []
+  );
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
     ({ value }) => value === offset
@@ -56,7 +64,7 @@ export function TimeComparison() {
       data-test-subj="comparisonSelect"
       disabled={!comparisonEnabled}
       options={comparisonOptions}
-      value={offset}
+      value={mlExpectedBounds === true ? 'ml_expected_bounds' : offset}
       prepend={
         <PrependContainer>
           <EuiCheckbox
@@ -87,11 +95,20 @@ export function TimeComparison() {
         trackApmEvent({
           metric: `time_comparison_type_change_${e.target.value}`,
         });
-        urlHelpers.push(history, {
-          query: {
-            offset: e.target.value,
-          },
-        });
+        if (e.target.value === 'ml_expected_bounds') {
+          urlHelpers.push(history, {
+            query: {
+              mlExpectedBounds: true,
+            },
+          });
+        } else {
+          urlHelpers.push(history, {
+            query: {
+              offset: e.target.value,
+              mlExpectedBounds: false,
+            },
+          });
+        }
       }}
     />
   );

@@ -6,5 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 
-export const offsetRt = t.partial({ offset: t.string });
+export const offsetRt = t.partial({
+  offset: t.string,
+  mlExpectedBounds: toBooleanRt,
+});

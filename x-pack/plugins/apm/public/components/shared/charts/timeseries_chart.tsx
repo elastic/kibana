@@ -97,7 +97,7 @@ export function TimeseriesChart({
   const allSeries = [
     ...timeseries,
     // TODO: re-enable anomaly boundaries when we have a fix for https://github.com/elastic/kibana/issues/100660
-    // ...(anomalyChartTimeseries?.boundaries ?? []),
+    ...(anomalyChartTimeseries?.boundaries ?? []),
     ...(anomalyChartTimeseries?.scores ?? []),
   ];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
