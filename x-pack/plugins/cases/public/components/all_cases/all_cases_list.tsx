@@ -106,16 +106,18 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const refreshCases = useCallback(
       (dataRefresh = true) => {
         deselectCases();
-        if (dataRefresh) refetchCases();
+        if (dataRefresh) {
+          refetchCases();
+          setRefresh((currRefresh: number) => currRefresh + 1);
+        }
         if (doRefresh) {
-          setRefresh(refresh + 1);
           doRefresh();
         }
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
       },
-      [deselectCases, doRefresh, refetchCases, refresh]
+      [deselectCases, doRefresh, refetchCases]
     );
 
     const tableOnChangeCallback = useCallback(
