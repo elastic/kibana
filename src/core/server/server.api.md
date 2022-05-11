@@ -2797,9 +2797,10 @@ export class SavedObjectsRepository {
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     createPointInTimeFinder<T = unknown, A = unknown>(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder<T, A>;
     // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "ISavedObjectsHooks" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: IKibanaMigrator, typeRegistry: ISavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: IKibanaMigrator, typeRegistry: ISavedObjectTypeRegistry, hooks: ISavedObjectsHooks, indexName: string, client: ElasticsearchClient, logger: Logger, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
@@ -2850,6 +2851,9 @@ export class SavedObjectsSerializer {
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
     getKibanaIndex: () => string;
+    post: SavedObjectsHooksRegistry['post'];
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsHooksRegistry" needs to be exported by the entry point index.d.ts
+    pre: SavedObjectsHooksRegistry['pre'];
     registerType: <Attributes extends SavedObjectAttributes = any>(type: SavedObjectsType<Attributes>) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
