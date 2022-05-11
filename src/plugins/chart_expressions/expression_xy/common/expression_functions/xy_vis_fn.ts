@@ -69,6 +69,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   ];
 
   if (handlers.inspectorAdapters.tables) {
+    handlers.inspectorAdapters.tables.reset();
+    handlers.inspectorAdapters.tables.allowCsvExport = true;
+
     const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
       if (layer.layerType === LayerTypes.ANNOTATIONS) {
         return dimensions;
