@@ -18,8 +18,16 @@ export function buildSchema(spec: EcsNestedSchema) : GroupSchema {
       const name = TOP_LEVEL_GROUPS.includes(group)
         ? `${TOP_LEVEL_NAME}.${field.flat_name}` 
         : `${group}.${full_field_name.join(".")}`;
+
+      validateExampleFieldtype(name, field.example);
       set(schema, name, field);
     }
   }
   return schema;
+}
+
+function validateExampleFieldtype(fieldName: string, example: string) {
+  if (example !== undefined && typeof example !== 'string' && typeof example !== 'number' && typeof example !== 'boolean') {
+    console.error(`ERROR: ${fieldName} has invalid example type`);
+  }
 }

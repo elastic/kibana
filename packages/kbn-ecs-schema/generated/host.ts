@@ -272,6 +272,7 @@ export const hostEcs = {
     level: 'core',
     name: 'mac',
     normalize: [ 'array' ],
+    pattern: '^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$',
     short: 'Host MAC addresses.',
     type: 'keyword'
   },

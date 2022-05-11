@@ -484,6 +484,7 @@ client:
       level: core
       name: mac
       normalize: []
+      patther: ^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$
       short: MAC address of the client.
       type: keyword
     client.nat.ip:
@@ -1401,6 +1402,20 @@ container:
       normalize: []
       short: Unique container id.
       type: keyword
+    container.image.hash.all:
+      dashed_name: container-image-hash-all
+      description: 'An array of digests of the image the container was built on. Each
+        digest consists of the hash algorithm and value in this format: `algorithm:value`.
+        Algorithm names should align with the field names in the ECS hash field set.'
+      example: '[sha256:f8fefc80e3273dc756f288a63945820d6476ad64883892c771b5e2ece6bf1b26]'
+      flat_name: container.image.hash.all
+      ignore_above: 1024
+      level: extended
+      name: image.hash.all
+      normalize:
+      - array
+      short: An array of digests of the image the container was built on.
+      type: keyword
     container.image.name:
       dashed_name: container-image-name
       description: Name of the image the container was built on.
@@ -1806,6 +1821,7 @@ destination:
       level: core
       name: mac
       normalize: []
+      pattern: ^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$
       short: MAC address of the destination.
       type: keyword
     destination.nat.ip:
@@ -5394,7 +5410,7 @@ file:
     file.x509.not_after:
       dashed_name: file-x509-not-after
       description: Time at which the certificate is no longer considered valid.
-      example: 2020-07-16 03:15:39+00:00
+      example: '2020-07-16T03:15:39Z'
       flat_name: file.x509.not_after
       level: extended
       name: not_after
@@ -5405,7 +5421,7 @@ file:
     file.x509.not_before:
       dashed_name: file-x509-not-before
       description: Time at which the certificate is first considered valid.
-      example: 2019-08-16 01:40:25+00:00
+      example: '2019-08-16T01:40:25Z'
       flat_name: file.x509.not_before
       level: extended
       name: not_before
@@ -6248,6 +6264,7 @@ host:
       name: mac
       normalize:
       - array
+      pattern: ^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$
       short: Host MAC addresses.
       type: keyword
     host.name:
@@ -7546,6 +7563,7 @@ observer:
       name: mac
       normalize:
       - array
+      pattern: ^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$
       short: MAC addresses of the observer.
       type: keyword
     observer.name:
@@ -7767,6 +7785,16 @@ orchestrator:
       normalize: []
       short: API version being used to carry out the action
       type: keyword
+    orchestrator.cluster.id:
+      dashed_name: orchestrator-cluster-id
+      description: Unique ID of the cluster.
+      flat_name: orchestrator.cluster.id
+      ignore_above: 1024
+      level: extended
+      name: cluster.id
+      normalize: []
+      short: Unique ID of the cluster.
+      type: keyword
     orchestrator.cluster.name:
       dashed_name: orchestrator-cluster-name
       description: Name of the cluster.
@@ -7820,6 +7848,29 @@ orchestrator:
       normalize: []
       short: Organization affected by the event (for multi-tenant orchestrator setups).
       type: keyword
+    orchestrator.resource.id:
+      dashed_name: orchestrator-resource-id
+      description: Unique ID of the resource being acted upon.
+      flat_name: orchestrator.resource.id
+      ignore_above: 1024
+      level: extended
+      name: resource.id
+      normalize: []
+      short: Unique ID of the resource being acted upon.
+      type: keyword
+    orchestrator.resource.ip:
+      dashed_name: orchestrator-resource-ip
+      description: 'IP address assigned to the resource associated with the event
+        being observed. In the case of a Kubernetes Pod, this array would contain
+        only one element: the IP of the Pod (as opposed to the Node on which the Pod
+        is running).'
+      flat_name: orchestrator.resource.ip
+      level: extended
+      name: resource.ip
+      normalize:
+      - array
+      short: IP address assigned to the resource associated with the event being observed.
+      type: ip
     orchestrator.resource.name:
       dashed_name: orchestrator-resource-name
       description: Name of the resource being acted upon.
@@ -7830,6 +7881,19 @@ orchestrator:
       name: resource.name
       normalize: []
       short: Name of the resource being acted upon.
+      type: keyword
+    orchestrator.resource.parent.type:
+      dashed_name: orchestrator-resource-parent-type
+      description: Type or kind of the parent resource associated with the event being
+        observed. In Kubernetes, this will be the name of a built-in workload resource
+        (e.g., Deployment, StatefulSet, DaemonSet).
+      example: DaemonSet
+      flat_name: orchestrator.resource.parent.type
+      ignore_above: 1024
+      level: extended
+      name: resource.parent.type
+      normalize: []
+      short: Type or kind of the parent resource associated with the event being observed.
       type: keyword
     orchestrator.resource.type:
       dashed_name: orchestrator-resource-type
@@ -9346,8 +9410,10 @@ process:
     process.env_vars:
       beta: This field is beta and subject to change.
       dashed_name: process-env-vars
-      description: Environment variables (`env_vars`) set at the time of the event.
+      description: 'Environment variables (`env_vars`) set at the time of the event.
         May be filtered to protect sensitive information.
+
+        The field should not contain nested objects. All values should use `keyword`.'
       example: '{"USER": "elastic","LANG": "en_US.UTF-8","HOME": "/home/elastic"}'
       flat_name: process.env_vars
       level: extended
@@ -10759,7 +10825,7 @@ process:
     process.parent.pgid:
       dashed_name: process-parent-pgid
       description: 'Deprecated for removal in next major version release. This field
-        is superseded by  `process.group_leader.pid`.
+        is superseded by `process.group_leader.pid`.
 
         Identifier of the group of processes the process belongs to.'
       flat_name: process.parent.pgid
@@ -11161,7 +11227,7 @@ process:
     process.pgid:
       dashed_name: process-pgid
       description: 'Deprecated for removal in next major version release. This field
-        is superseded by  `process.group_leader.pid`.
+        is superseded by `process.group_leader.pid`.
 
         Identifier of the group of processes the process belongs to.'
       flat_name: process.pgid
@@ -12744,6 +12810,7 @@ server:
       level: core
       name: mac
       normalize: []
+      pattern: ^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$
       short: MAC address of the server.
       type: keyword
     server.nat.ip:
@@ -13733,6 +13800,7 @@ source:
       level: core
       name: mac
       normalize: []
+      pattern: ^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$
       short: MAC address of the source.
       type: keyword
     source.nat.ip:
@@ -15131,7 +15199,7 @@ threat:
     threat.enrichments.indicator.file.x509.not_after:
       dashed_name: threat-enrichments-indicator-file-x509-not-after
       description: Time at which the certificate is no longer considered valid.
-      example: 2020-07-16 03:15:39+00:00
+      example: '2020-07-16T03:15:39Z'
       flat_name: threat.enrichments.indicator.file.x509.not_after
       level: extended
       name: not_after
@@ -15142,7 +15210,7 @@ threat:
     threat.enrichments.indicator.file.x509.not_before:
       dashed_name: threat-enrichments-indicator-file-x509-not-before
       description: Time at which the certificate is first considered valid.
-      example: 2019-08-16 01:40:25+00:00
+      example: '2019-08-16T01:40:25Z'
       flat_name: threat.enrichments.indicator.file.x509.not_before
       level: extended
       name: not_before
@@ -16028,7 +16096,7 @@ threat:
     threat.enrichments.indicator.x509.not_after:
       dashed_name: threat-enrichments-indicator-x509-not-after
       description: Time at which the certificate is no longer considered valid.
-      example: 2020-07-16 03:15:39+00:00
+      example: '2020-07-16T03:15:39Z'
       flat_name: threat.enrichments.indicator.x509.not_after
       level: extended
       name: not_after
@@ -16039,7 +16107,7 @@ threat:
     threat.enrichments.indicator.x509.not_before:
       dashed_name: threat-enrichments-indicator-x509-not-before
       description: Time at which the certificate is first considered valid.
-      example: 2019-08-16 01:40:25+00:00
+      example: '2019-08-16T01:40:25Z'
       flat_name: threat.enrichments.indicator.x509.not_before
       level: extended
       name: not_before
@@ -16278,7 +16346,7 @@ threat:
     threat.enrichments.matched.occurred:
       dashed_name: threat-enrichments-matched-occurred
       description: Indicates when the indicator match was generated
-      example: 2021-10-05 17:00:58.326000+00:00
+      example: '2021-10-05T17:00:58.326Z'
       flat_name: threat.enrichments.matched.occurred
       level: extended
       name: enrichments.matched.occurred
@@ -17516,7 +17584,7 @@ threat:
     threat.indicator.file.x509.not_after:
       dashed_name: threat-indicator-file-x509-not-after
       description: Time at which the certificate is no longer considered valid.
-      example: 2020-07-16 03:15:39+00:00
+      example: '2020-07-16T03:15:39Z'
       flat_name: threat.indicator.file.x509.not_after
       level: extended
       name: not_after
@@ -17527,7 +17595,7 @@ threat:
     threat.indicator.file.x509.not_before:
       dashed_name: threat-indicator-file-x509-not-before
       description: Time at which the certificate is first considered valid.
-      example: 2019-08-16 01:40:25+00:00
+      example: '2019-08-16T01:40:25Z'
       flat_name: threat.indicator.file.x509.not_before
       level: extended
       name: not_before
@@ -18402,7 +18470,7 @@ threat:
     threat.indicator.x509.not_after:
       dashed_name: threat-indicator-x509-not-after
       description: Time at which the certificate is no longer considered valid.
-      example: 2020-07-16 03:15:39+00:00
+      example: '2020-07-16T03:15:39Z'
       flat_name: threat.indicator.x509.not_after
       level: extended
       name: not_after
@@ -18413,7 +18481,7 @@ threat:
     threat.indicator.x509.not_before:
       dashed_name: threat-indicator-x509-not-before
       description: Time at which the certificate is first considered valid.
-      example: 2019-08-16 01:40:25+00:00
+      example: '2019-08-16T01:40:25Z'
       flat_name: threat.indicator.x509.not_before
       level: extended
       name: not_before
@@ -19151,7 +19219,7 @@ tls:
     tls.client.x509.not_after:
       dashed_name: tls-client-x509-not-after
       description: Time at which the certificate is no longer considered valid.
-      example: 2020-07-16 03:15:39+00:00
+      example: '2020-07-16T03:15:39Z'
       flat_name: tls.client.x509.not_after
       level: extended
       name: not_after
@@ -19162,7 +19230,7 @@ tls:
     tls.client.x509.not_before:
       dashed_name: tls-client-x509-not-before
       description: Time at which the certificate is first considered valid.
-      example: 2019-08-16 01:40:25+00:00
+      example: '2019-08-16T01:40:25Z'
       flat_name: tls.client.x509.not_before
       level: extended
       name: not_before
@@ -19631,7 +19699,7 @@ tls:
     tls.server.x509.not_after:
       dashed_name: tls-server-x509-not-after
       description: Time at which the certificate is no longer considered valid.
-      example: 2020-07-16 03:15:39+00:00
+      example: '2020-07-16T03:15:39Z'
       flat_name: tls.server.x509.not_after
       level: extended
       name: not_after
@@ -19642,7 +19710,7 @@ tls:
     tls.server.x509.not_before:
       dashed_name: tls-server-x509-not-before
       description: Time at which the certificate is first considered valid.
-      example: 2019-08-16 01:40:25+00:00
+      example: '2019-08-16T01:40:25Z'
       flat_name: tls.server.x509.not_before
       level: extended
       name: not_before
@@ -21266,7 +21334,7 @@ x509:
     x509.not_after:
       dashed_name: x509-not-after
       description: Time at which the certificate is no longer considered valid.
-      example: 2020-07-16 03:15:39+00:00
+      example: '2020-07-16T03:15:39Z'
       flat_name: x509.not_after
       level: extended
       name: not_after
@@ -21276,7 +21344,7 @@ x509:
     x509.not_before:
       dashed_name: x509-not-before
       description: Time at which the certificate is first considered valid.
-      example: 2019-08-16 01:40:25+00:00
+      example: '2019-08-16T01:40:25Z'
       flat_name: x509.not_before
       level: extended
       name: not_before

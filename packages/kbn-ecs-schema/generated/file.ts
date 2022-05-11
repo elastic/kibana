@@ -1048,7 +1048,7 @@ export const fileEcs = {
     not_after: {
       dashed_name: 'file-x509-not-after',
       description: 'Time at which the certificate is no longer considered valid.',
-      example: 2020-07-16T03:15:39.000Z,
+      example: '2020-07-16T03:15:39Z',
       flat_name: 'file.x509.not_after',
       level: 'extended',
       name: 'not_after',
@@ -1060,7 +1060,7 @@ export const fileEcs = {
     not_before: {
       dashed_name: 'file-x509-not-before',
       description: 'Time at which the certificate is first considered valid.',
-      example: 2019-08-16T01:40:25.000Z,
+      example: '2019-08-16T01:40:25Z',
       flat_name: 'file.x509.not_before',
       level: 'extended',
       name: 'not_before',

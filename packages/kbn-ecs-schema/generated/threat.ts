@@ -1202,7 +1202,7 @@ export const threatEcs = {
           not_after: {
             dashed_name: 'threat-enrichments-indicator-file-x509-not-after',
             description: 'Time at which the certificate is no longer considered valid.',
-            example: 2020-07-16T03:15:39.000Z,
+            example: '2020-07-16T03:15:39Z',
             flat_name: 'threat.enrichments.indicator.file.x509.not_after',
             level: 'extended',
             name: 'not_after',
@@ -1214,7 +1214,7 @@ export const threatEcs = {
           not_before: {
             dashed_name: 'threat-enrichments-indicator-file-x509-not-before',
             description: 'Time at which the certificate is first considered valid.',
-            example: 2019-08-16T01:40:25.000Z,
+            example: '2019-08-16T01:40:25Z',
             flat_name: 'threat.enrichments.indicator.file.x509.not_before',
             level: 'extended',
             name: 'not_before',
@@ -2094,7 +2094,7 @@ export const threatEcs = {
         not_after: {
           dashed_name: 'threat-enrichments-indicator-x509-not-after',
           description: 'Time at which the certificate is no longer considered valid.',
-          example: 2020-07-16T03:15:39.000Z,
+          example: '2020-07-16T03:15:39Z',
           flat_name: 'threat.enrichments.indicator.x509.not_after',
           level: 'extended',
           name: 'not_after',
@@ -2106,7 +2106,7 @@ export const threatEcs = {
         not_before: {
           dashed_name: 'threat-enrichments-indicator-x509-not-before',
           description: 'Time at which the certificate is first considered valid.',
-          example: 2019-08-16T01:40:25.000Z,
+          example: '2019-08-16T01:40:25Z',
           flat_name: 'threat.enrichments.indicator.x509.not_before',
           level: 'extended',
           name: 'not_before',
@@ -2356,7 +2356,7 @@ export const threatEcs = {
       occurred: {
         dashed_name: 'threat-enrichments-matched-occurred',
         description: 'Indicates when the indicator match was generated',
-        example: 2021-10-05T17:00:58.326Z,
+        example: '2021-10-05T17:00:58.326Z',
         flat_name: 'threat.enrichments.matched.occurred',
         level: 'extended',
         name: 'enrichments.matched.occurred',
@@ -3648,7 +3648,7 @@ export const threatEcs = {
         not_after: {
           dashed_name: 'threat-indicator-file-x509-not-after',
           description: 'Time at which the certificate is no longer considered valid.',
-          example: 2020-07-16T03:15:39.000Z,
+          example: '2020-07-16T03:15:39Z',
           flat_name: 'threat.indicator.file.x509.not_after',
           level: 'extended',
           name: 'not_after',
@@ -3660,7 +3660,7 @@ export const threatEcs = {
         not_before: {
           dashed_name: 'threat-indicator-file-x509-not-before',
           description: 'Time at which the certificate is first considered valid.',
-          example: 2019-08-16T01:40:25.000Z,
+          example: '2019-08-16T01:40:25Z',
           flat_name: 'threat.indicator.file.x509.not_before',
           level: 'extended',
           name: 'not_before',
@@ -4561,7 +4561,7 @@ export const threatEcs = {
       not_after: {
         dashed_name: 'threat-indicator-x509-not-after',
         description: 'Time at which the certificate is no longer considered valid.',
-        example: 2020-07-16T03:15:39.000Z,
+        example: '2020-07-16T03:15:39Z',
         flat_name: 'threat.indicator.x509.not_after',
         level: 'extended',
         name: 'not_after',
@@ -4573,7 +4573,7 @@ export const threatEcs = {
       not_before: {
         dashed_name: 'threat-indicator-x509-not-before',
         description: 'Time at which the certificate is first considered valid.',
-        example: 2019-08-16T01:40:25.000Z,
+        example: '2019-08-16T01:40:25Z',
         flat_name: 'threat.indicator.x509.not_before',
         level: 'extended',
         name: 'not_before',

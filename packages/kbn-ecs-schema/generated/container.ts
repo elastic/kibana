@@ -53,6 +53,20 @@ export const containerEcs = {
     type: 'keyword'
   },
   image: {
+    hash: {
+      all: {
+        dashed_name: 'container-image-hash-all',
+        description: 'An array of digests of the image the container was built on. Each digest consists of the hash algorithm and value in this format: `algorithm:value`. Algorithm names should align with the field names in the ECS hash field set.',
+        example: '[sha256:f8fefc80e3273dc756f288a63945820d6476ad64883892c771b5e2ece6bf1b26]',
+        flat_name: 'container.image.hash.all',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'image.hash.all',
+        normalize: [ 'array' ],
+        short: 'An array of digests of the image the container was built on.',
+        type: 'keyword'
+      }
+    },
     name: {
       dashed_name: 'container-image-name',
       description: 'Name of the image the container was built on.',

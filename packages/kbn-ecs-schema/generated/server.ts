@@ -239,6 +239,7 @@ export const serverEcs = {
     level: 'core',
     name: 'mac',
     normalize: [],
+    pattern: '^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$',
     short: 'MAC address of the server.',
     type: 'keyword'
   },

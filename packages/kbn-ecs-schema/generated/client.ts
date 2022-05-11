@@ -239,6 +239,7 @@ export const clientEcs = {
     level: 'core',
     name: 'mac',
     normalize: [],
+    patther: '^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$',
     short: 'MAC address of the client.',
     type: 'keyword'
   },

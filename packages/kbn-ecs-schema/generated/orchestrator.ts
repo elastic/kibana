@@ -12,6 +12,17 @@ export const orchestratorEcs = {
     type: 'keyword'
   },
   cluster: {
+    id: {
+      dashed_name: 'orchestrator-cluster-id',
+      description: 'Unique ID of the cluster.',
+      flat_name: 'orchestrator.cluster.id',
+      ignore_above: 1024,
+      level: 'extended',
+      name: 'cluster.id',
+      normalize: [],
+      short: 'Unique ID of the cluster.',
+      type: 'keyword'
+    },
     name: {
       dashed_name: 'orchestrator-cluster-name',
       description: 'Name of the cluster.',
@@ -71,6 +82,27 @@ export const orchestratorEcs = {
     type: 'keyword'
   },
   resource: {
+    id: {
+      dashed_name: 'orchestrator-resource-id',
+      description: 'Unique ID of the resource being acted upon.',
+      flat_name: 'orchestrator.resource.id',
+      ignore_above: 1024,
+      level: 'extended',
+      name: 'resource.id',
+      normalize: [],
+      short: 'Unique ID of the resource being acted upon.',
+      type: 'keyword'
+    },
+    ip: {
+      dashed_name: 'orchestrator-resource-ip',
+      description: 'IP address assigned to the resource associated with the event being observed. In the case of a Kubernetes Pod, this array would contain only one element: the IP of the Pod (as opposed to the Node on which the Pod is running).',
+      flat_name: 'orchestrator.resource.ip',
+      level: 'extended',
+      name: 'resource.ip',
+      normalize: [ 'array' ],
+      short: 'IP address assigned to the resource associated with the event being observed.',
+      type: 'ip'
+    },
     name: {
       dashed_name: 'orchestrator-resource-name',
       description: 'Name of the resource being acted upon.',
@@ -82,6 +114,20 @@ export const orchestratorEcs = {
       normalize: [],
       short: 'Name of the resource being acted upon.',
       type: 'keyword'
+    },
+    parent: {
+      type: {
+        dashed_name: 'orchestrator-resource-parent-type',
+        description: 'Type or kind of the parent resource associated with the event being observed. In Kubernetes, this will be the name of a built-in workload resource (e.g., Deployment, StatefulSet, DaemonSet).',
+        example: 'DaemonSet',
+        flat_name: 'orchestrator.resource.parent.type',
+        ignore_above: 1024,
+        level: 'extended',
+        name: 'resource.parent.type',
+        normalize: [],
+        short: 'Type or kind of the parent resource associated with the event being observed.',
+        type: 'keyword'
+      }
     },
     type: {
       dashed_name: 'orchestrator-resource-type',

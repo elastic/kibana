@@ -1083,7 +1083,8 @@ export const processEcs = {
   env_vars: {
     beta: 'This field is beta and subject to change.',
     dashed_name: 'process-env-vars',
-    description: 'Environment variables (`env_vars`) set at the time of the event. May be filtered to protect sensitive information.',
+    description: 'Environment variables (`env_vars`) set at the time of the event. May be filtered to protect sensitive information.\n' +
+      'The field should not contain nested objects. All values should use `keyword`.',
     example: '{"USER": "elastic","LANG": "en_US.UTF-8","HOME": "/home/elastic"}',
     flat_name: 'process.env_vars',
     level: 'extended',
@@ -2549,7 +2550,7 @@ export const processEcs = {
     },
     pgid: {
       dashed_name: 'process-parent-pgid',
-      description: 'Deprecated for removal in next major version release. This field is superseded by  `process.group_leader.pid`.\n' +
+      description: 'Deprecated for removal in next major version release. This field is superseded by `process.group_leader.pid`.\n' +
         'Identifier of the group of processes the process belongs to.',
       flat_name: 'process.parent.pgid',
       format: 'string',
@@ -2999,7 +3000,7 @@ export const processEcs = {
   },
   pgid: {
     dashed_name: 'process-pgid',
-    description: 'Deprecated for removal in next major version release. This field is superseded by  `process.group_leader.pid`.\n' +
+    description: 'Deprecated for removal in next major version release. This field is superseded by `process.group_leader.pid`.\n' +
       'Identifier of the group of processes the process belongs to.',
     flat_name: 'process.pgid',
     format: 'string',

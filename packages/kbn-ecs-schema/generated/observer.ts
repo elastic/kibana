@@ -359,6 +359,7 @@ export const observerEcs = {
     level: 'core',
     name: 'mac',
     normalize: [ 'array' ],
+    pattern: '^[A-F0-9]{2}(-[A-F0-9]{2}){5,}$',
     short: 'MAC addresses of the observer.',
     type: 'keyword'
   },
