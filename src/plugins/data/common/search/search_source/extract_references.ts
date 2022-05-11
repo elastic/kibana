@@ -18,18 +18,22 @@ export const extractReferences = (
   let searchSourceFields: SerializedSearchSourceFields & { indexRefName?: string } = { ...state };
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {
-    const indexId = searchSourceFields.index;
-    const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-    references.push({
-      name: refName,
-      type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      id: indexId,
-    });
-    searchSourceFields = {
-      ...searchSourceFields,
-      indexRefName: refName,
-      index: undefined,
-    };
+    if (typeof searchSourceFields.index === 'string') {
+      const indexId = searchSourceFields.index;
+      const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+      references.push({
+        name: refName,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
+        id: indexId,
+      });
+      searchSourceFields = {
+        ...searchSourceFields,
+        indexRefName: refName,
+        index: undefined,
+      };
+    } else {
+      // call dataViews.extract() which atm does nothing
+    }
   }
 
   if (searchSourceFields.filter) {
