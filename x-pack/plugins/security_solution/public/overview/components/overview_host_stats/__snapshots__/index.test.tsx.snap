@@ -11,7 +11,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     arrowDisplay="left"
     buttonContent={
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -25,7 +25,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -34,7 +34,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
@@ -48,6 +48,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatAuditd"
       >
@@ -67,7 +68,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatAuditd"
           grow={false}
         >
@@ -79,9 +80,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={246351}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatFIM"
       >
@@ -101,7 +103,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatFIM"
           grow={false}
         >
@@ -113,9 +115,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={246351}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatLogin"
       >
@@ -135,7 +138,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatLogin"
           grow={false}
         >
@@ -147,9 +150,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={246351}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatPackage"
       >
@@ -169,7 +173,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatPackage"
           grow={false}
         >
@@ -181,9 +185,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={246351}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatProcess"
       >
@@ -203,7 +208,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatProcess"
           grow={false}
         >
@@ -215,9 +220,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={246351}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatUser"
       >
@@ -237,7 +243,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatUser"
           grow={false}
         >
@@ -249,7 +255,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={246351}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
   </EuiAccordion>
@@ -260,7 +266,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     arrowDisplay="left"
     buttonContent={
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -274,7 +280,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -283,7 +289,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
@@ -297,6 +303,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameDns"
       >
@@ -316,7 +323,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameDns"
           grow={false}
         >
@@ -328,9 +335,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={156714735}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameFile"
       >
@@ -350,7 +358,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameFile"
           grow={false}
         >
@@ -362,9 +370,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={156714735}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameImageLoad"
       >
@@ -384,7 +393,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameImageLoad"
           grow={false}
         >
@@ -396,9 +405,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={156714735}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameNetwork"
       >
@@ -418,7 +428,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameNetwork"
           grow={false}
         >
@@ -430,9 +440,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={156714735}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameProcess"
       >
@@ -452,7 +463,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameProcess"
           grow={false}
         >
@@ -464,9 +475,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={156714735}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameRegistry"
       >
@@ -486,7 +498,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameRegistry"
           grow={false}
         >
@@ -498,9 +510,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={156714735}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameSecurity"
       >
@@ -520,7 +533,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameSecurity"
           grow={false}
         >
@@ -532,7 +545,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={156714735}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
   </EuiAccordion>
@@ -543,7 +556,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     arrowDisplay="left"
     buttonContent={
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -557,7 +570,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -566,7 +579,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
@@ -580,6 +593,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatSystemModule"
       >
@@ -599,7 +613,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-filebeatSystemModule"
           grow={false}
         >
@@ -611,7 +625,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={568}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
   </EuiAccordion>
@@ -622,7 +636,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     arrowDisplay="left"
     buttonContent={
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -636,7 +650,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -645,7 +659,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
@@ -659,6 +673,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="winlogbeatSecurity"
       >
@@ -678,7 +693,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-winlogbeatSecurity"
           grow={false}
         >
@@ -690,9 +705,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={296999}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="winlogbeatMWSysmonOperational"
       >
@@ -712,7 +728,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-winlogbeatMWSysmonOperational"
           grow={false}
         >
@@ -724,7 +740,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
               max={296999}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
   </EuiAccordion>

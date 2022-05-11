@@ -49,6 +49,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatSocket"
       >
@@ -68,7 +69,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-auditbeatSocket"
           grow={false}
         >
@@ -80,7 +81,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={12}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
   </EuiAccordion>
@@ -129,6 +130,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatCisco"
       >
@@ -148,7 +150,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatCisco"
           grow={false}
         >
@@ -160,9 +162,10 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={70860}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatNetflow"
       >
@@ -182,7 +185,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatNetflow"
           grow={false}
         >
@@ -194,9 +197,10 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={70860}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatPanw"
       >
@@ -216,7 +220,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatPanw"
           grow={false}
         >
@@ -228,9 +232,10 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={70860}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatSuricata"
       >
@@ -250,7 +255,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatSuricata"
           grow={false}
         >
@@ -262,9 +267,10 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={70860}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatZeek"
       >
@@ -284,7 +290,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-filebeatZeek"
           grow={false}
         >
@@ -296,7 +302,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={70860}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
   </EuiAccordion>
@@ -345,6 +351,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="packetbeatDNS"
       >
@@ -364,7 +371,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-packetbeatDNS"
           grow={false}
         >
@@ -376,9 +383,10 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={13677323}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="packetbeatFlow"
       >
@@ -398,7 +406,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-packetbeatFlow"
           grow={false}
         >
@@ -410,9 +418,10 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={13677323}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="packetbeatTLS"
       >
@@ -432,7 +441,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="network-stat-packetbeatTLS"
           grow={false}
         >
@@ -444,7 +453,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               max={13677323}
             />
           </styled.div>
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
   </EuiAccordion>
