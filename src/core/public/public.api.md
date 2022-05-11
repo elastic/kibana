@@ -1200,6 +1200,12 @@ export interface SavedObjectsCreateOptions {
     references?: SavedObjectReference[];
 }
 
+// @public
+export type SavedObjectsFieldMapping = estypes.MappingProperty & {
+    dynamic?: false | 'strict';
+    properties?: Record<estypes.PropertyName, estypes.MappingProperty>;
+};
+
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
     // @alpha
@@ -1408,6 +1414,13 @@ export interface SavedObjectsResolveResponse<T = unknown> {
 export interface SavedObjectsStart {
     // (undocumented)
     client: SavedObjectsClientContract;
+}
+
+// @public
+export interface SavedObjectsTypeMappingDefinition {
+    dynamic?: false | 'strict';
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsMappingProperties" needs to be exported by the entry point index.d.ts
+    properties: SavedObjectsMappingProperties;
 }
 
 // @public (undocumented)
