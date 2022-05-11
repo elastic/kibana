@@ -7,9 +7,9 @@
  */
 
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import { LayerTypes, XY_VIS_RENDERER } from '../constants';
+import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds } from '../helpers';
-import { XYLayerConfig, XyVisFn } from '../types';
+import { DataLayerConfigResult, XYLayerConfig, XyVisFn } from '../types';
 import { getLayerDimensions } from '../utils';
 import {
   hasAreaLayer,
@@ -21,7 +21,40 @@ import {
 } from './validate';
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
-  const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
+  const {
+    referenceLineLayers = [],
+    annotationLayers = [],
+    seriesType,
+    accessors = [],
+    xAccessor,
+    hide,
+    splitAccessor,
+    columnToLabel,
+    yScaleType,
+    xScaleType,
+    isHistogram,
+    yConfig,
+    palette,
+    ...restArgs
+  } = args;
+  const dataLayers: DataLayerConfigResult[] = [
+    {
+      type: DATA_LAYER,
+      seriesType,
+      accessors,
+      xAccessor,
+      hide,
+      splitAccessor,
+      columnToLabel,
+      yScaleType,
+      xScaleType,
+      isHistogram,
+      palette,
+      yConfig,
+      layerType: LayerTypes.DATA,
+      table: data,
+    },
+  ];
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
     ...appendLayerIds(referenceLineLayers, 'referenceLineLayers'),
@@ -29,6 +62,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   ];
 
   if (handlers.inspectorAdapters.tables) {
+    handlers.inspectorAdapters.tables.reset();
+    handlers.inspectorAdapters.tables.allowCsvExport = true;
+
     const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
       if (layer.layerType === LayerTypes.ANNOTATIONS) {
         return dimensions;

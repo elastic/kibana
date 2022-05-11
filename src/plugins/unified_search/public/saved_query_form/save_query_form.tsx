@@ -203,7 +203,7 @@ export function SaveQueryForm({
           disabled={hasErrors}
         >
           {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormSaveButtonText', {
-            defaultMessage: 'Save filter set',
+            defaultMessage: 'Save saved query',
           })}
         </EuiButton>
       </EuiFormRow>
