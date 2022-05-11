@@ -42,7 +42,7 @@ const properties: Properties = {
   meta: {
     type: 'object',
   },
-  plugin_id: {
+  file_kind: {
     type: 'keyword',
   },
 };

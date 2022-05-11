@@ -22,9 +22,10 @@ export type FileSavedObjectAttributes = {
   name: string;
 
   /**
-   * Unique identifier of the plugin that created the file.
+   * Unique identifier of the kind of file. Kibana applications can register
+   * these at runtime.
    */
-  plugin_id: string;
+  file_kind: string;
 
   status: FileStatus;
 
