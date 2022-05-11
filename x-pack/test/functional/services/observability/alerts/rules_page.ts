@@ -11,8 +11,8 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   const find = getService('find');
 
   const getManageRulesPageHref = async () => {
-    const manageRulesPage = await testSubjects.find('manageRulesPage');
-    return manageRulesPage.getAttribute('href');
+    const manageRulesPageButton = await testSubjects.find('manageRulesPageButton');
+    return manageRulesPageButton.getAttribute('href');
   };
 
   const clickCreateRuleButton = async () => {
