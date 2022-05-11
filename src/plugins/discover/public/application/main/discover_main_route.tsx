@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState, memo, useCallback } from 'react';
-import { css } from '@emotion/react';
 import { useParams, useHistory } from 'react-router-dom';
 import { SavedObject } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
