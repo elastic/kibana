@@ -7,15 +7,15 @@
 
 import React from 'react';
 import moment from 'moment';
-// eslint-disable-next-line no-restricted-imports
-import Semver from 'semver';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EcsEventOutcome } from '@kbn/core/server';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
+import { RuleAlertCount } from './rule_alert_count';
 import {
   RULE_EXECUTION_LOG_COLUMN_IDS,
   RULE_EXECUTION_LOG_DURATION_COLUMNS,
+  RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS,
 } from '../../../constants';
 
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
@@ -44,15 +44,8 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
     return <>{moment(value).format(dateFormat)}</>;
   }
 
-  if (
-    version &&
-    (columnId === 'num_new_alerts' ||
-      columnId === 'num_active_alerts' ||
-      columnId === 'num_recovered_alerts')
-  ) {
-    if (parseInt(value, 10) === 0 && Semver.lt(version, '8.3.0')) {
-      return <>{'--'}</>;
-    }
+  if (RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS.includes(columnId)) {
+    return <RuleAlertCount value={value} version={version} />;
   }
 
   if (RULE_EXECUTION_LOG_DURATION_COLUMNS.includes(columnId)) {
