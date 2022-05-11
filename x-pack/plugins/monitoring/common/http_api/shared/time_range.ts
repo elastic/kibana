@@ -6,8 +6,29 @@
  */
 
 import * as rt from 'io-ts';
+import moment from 'moment';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { chain } from 'fp-ts/lib/Either';
+
+export const timestampFromStringRT = new rt.Type<number, string>(
+  'timestampFromStringRT',
+  (input): input is number => typeof input === 'number',
+  (input, context) =>
+    pipe(
+      rt.string.validate(input, context),
+      chain((stringInput) => {
+        const momentValue = moment.utc(stringInput);
+        return momentValue.isValid()
+          ? rt.success(momentValue.valueOf())
+          : rt.failure(stringInput, context);
+      })
+    ),
+  (output) => new Date(output).toISOString()
+);
 
 export const timeRangeRT = rt.type({
-  min: rt.string,
-  max: rt.string,
+  min: timestampFromStringRT,
+  max: timestampFromStringRT,
 });
+
+export type TimeRange = rt.TypeOf<typeof timeRangeRT>;

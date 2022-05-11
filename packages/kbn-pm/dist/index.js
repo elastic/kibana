@@ -1580,6 +1580,8 @@ var _ciStatsCore = __webpack_require__("../../node_modules/@kbn/ci-stats-core/ta
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
 
 function limitMetaStrings(meta) {
   return Object.fromEntries(Object.entries(meta).map(([key, value]) => {
@@ -1753,19 +1755,56 @@ class CiStatsReporter {
       throw new Error('unable to report tests unless buildId is configured and auth config available');
     }
 
-    return await this.req({
+    const groupResp = await this.req({
       auth: true,
-      path: '/v1/test_group',
+      path: '/v2/test_group',
       query: {
         buildId: (_this$config7 = this.config) === null || _this$config7 === void 0 ? void 0 : _this$config7.buildId
       },
-      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
-      body: [JSON.stringify({
-        group
-      }), ...testRuns.map(testRun => JSON.stringify({
-        testRun
-      }))].join('\n')
+      bodyDesc: `[${group.name}/${group.type}] test group`,
+      body: group
     });
+
+    if (!groupResp) {
+      return;
+    }
+
+    let bufferBytes = 0;
+    const buffer = [];
+
+    const flushBuffer = async () => {
+      var _this$config8;
+
+      await this.req({
+        auth: true,
+        path: '/v2/test_runs',
+        query: {
+          buildId: (_this$config8 = this.config) === null || _this$config8 === void 0 ? void 0 : _this$config8.buildId,
+          groupId: groupResp.groupId,
+          groupType: group.type
+        },
+        bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
+        body: buffer.join('\n'),
+        timeout: 5 * MINUTE
+      });
+      buffer.length = 0;
+      bufferBytes = 0;
+    }; // send test runs in chunks of ~500kb
+
+
+    for (const testRun of testRuns) {
+      const json = JSON.stringify(testRun);
+      bufferBytes += json.length;
+      buffer.push(json);
+
+      if (bufferBytes >= 450000) {
+        await flushBuffer();
+      }
+    }
+
+    if (bufferBytes) {
+      await flushBuffer();
+    }
   }
   /**
    * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
@@ -1815,7 +1854,8 @@ class CiStatsReporter {
     body,
     bodyDesc,
     path,
-    query
+    query,
+    timeout = 60 * SECOND
   }) {
     let attempt = 0;
     const maxAttempts = 5;
@@ -1843,7 +1883,8 @@ class CiStatsReporter {
           adapter: _http.default,
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,
-          maxContentLength: Infinity
+          maxContentLength: Infinity,
+          timeout
         });
         return resp.data;
       } catch (error) {
@@ -2229,8 +2270,6 @@ exports.observeLines = observeLines;
 
 var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
 
-var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
-
 var _observe_readable = __webpack_require__("../../node_modules/@kbn/stdio-dev-helpers/target_node/observe_readable.js");
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -2256,8 +2295,8 @@ const SEP = /\r?\n/;
  *  @return {Rx.Observable}
  */
 function observeLines(readable) {
-  const done$ = (0, _observe_readable.observeReadable)(readable).pipe((0, _operators.share)());
-  const scan$ = Rx.fromEvent(readable, 'data').pipe((0, _operators.scan)(({
+  const done$ = (0, _observe_readable.observeReadable)(readable).pipe(Rx.share());
+  const scan$ = Rx.fromEvent(readable, 'data').pipe(Rx.scan(({
     buffer
   }, chunk) => {
     buffer += chunk;
@@ -2281,16 +2320,15 @@ function observeLines(readable) {
   }, {
     buffer: ''
   }), // stop if done completes or errors
-  (0, _operators.takeUntil)(done$.pipe((0, _operators.materialize)())), (0, _operators.share)());
+  Rx.takeUntil(done$.pipe(Rx.materialize())), Rx.share());
   return Rx.merge( // use done$ to provide completion/errors
   done$, // merge in the "lines" from each step
-  scan$.pipe((0, _operators.mergeMap)(({
+  scan$.pipe(Rx.mergeMap(({
     lines
   }) => lines || [])), // inject the "unsplit" data at the end
-  scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
+  scan$.pipe(Rx.takeLast(1), Rx.mergeMap(({
     buffer
-  }) => buffer ? [buffer] : []), // if there were no lines, last() will error, so catch and complete
-  (0, _operators.catchError)(() => Rx.empty())));
+  }) => buffer ? [buffer] : [])));
 }
 
 /***/ }),
@@ -2307,8 +2345,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.observeReadable = observeReadable;
 
 var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
-
-var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
@@ -2328,7 +2364,9 @@ function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && 
  *   - fails on the first "error" event
  */
 function observeReadable(readable) {
-  return Rx.race(Rx.fromEvent(readable, 'end').pipe((0, _operators.first)(), (0, _operators.ignoreElements)()), Rx.fromEvent(readable, 'error').pipe((0, _operators.first)(), (0, _operators.mergeMap)(err => Rx.throwError(err))));
+  return Rx.race(Rx.fromEvent(readable, 'end').pipe(Rx.first(), Rx.ignoreElements()), Rx.fromEvent(readable, 'error').pipe(Rx.first(), Rx.map(err => {
+    throw err;
+  })));
 }
 
 /***/ }),
@@ -19267,7 +19305,7 @@ cmdShim.ifExists = cmdShimIfExists
 
 var fs = __webpack_require__("../../node_modules/graceful-fs/graceful-fs.js")
 
-var mkdir = __webpack_require__("../../node_modules/cmd-shim/node_modules/mkdirp/index.js")
+var mkdir = __webpack_require__("../../node_modules/mkdirp/index.js")
   , path = __webpack_require__("path")
   , toBatchSyntax = __webpack_require__("../../node_modules/cmd-shim/lib/to-batch-syntax.js")
   , shebangExpr = /^#\!\s*(?:\/usr\/bin\/env)?\s*([^ \t]+=[^ \t]+\s+)*\s*([^ \t]+)(.*)$/
@@ -19558,112 +19596,6 @@ function replaceDollarWithPercentPair(value) {
 }
 
 
-
-
-/***/ }),
-
-/***/ "../../node_modules/cmd-shim/node_modules/mkdirp/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-var path = __webpack_require__("path");
-var fs = __webpack_require__("fs");
-var _0777 = parseInt('0777', 8);
-
-module.exports = mkdirP.mkdirp = mkdirP.mkdirP = mkdirP;
-
-function mkdirP (p, opts, f, made) {
-    if (typeof opts === 'function') {
-        f = opts;
-        opts = {};
-    }
-    else if (!opts || typeof opts !== 'object') {
-        opts = { mode: opts };
-    }
-    
-    var mode = opts.mode;
-    var xfs = opts.fs || fs;
-    
-    if (mode === undefined) {
-        mode = _0777 & (~process.umask());
-    }
-    if (!made) made = null;
-    
-    var cb = f || function () {};
-    p = path.resolve(p);
-    
-    xfs.mkdir(p, mode, function (er) {
-        if (!er) {
-            made = made || p;
-            return cb(null, made);
-        }
-        switch (er.code) {
-            case 'ENOENT':
-                if (path.dirname(p) === p) return cb(er);
-                mkdirP(path.dirname(p), opts, function (er, made) {
-                    if (er) cb(er, made);
-                    else mkdirP(p, opts, cb, made);
-                });
-                break;
-
-            // In the case of any other error, just see if there's a dir
-            // there already.  If so, then hooray!  If not, then something
-            // is borked.
-            default:
-                xfs.stat(p, function (er2, stat) {
-                    // if the stat fails, then that's super weird.
-                    // let the original error be the failure reason.
-                    if (er2 || !stat.isDirectory()) cb(er, made)
-                    else cb(null, made);
-                });
-                break;
-        }
-    });
-}
-
-mkdirP.sync = function sync (p, opts, made) {
-    if (!opts || typeof opts !== 'object') {
-        opts = { mode: opts };
-    }
-    
-    var mode = opts.mode;
-    var xfs = opts.fs || fs;
-    
-    if (mode === undefined) {
-        mode = _0777 & (~process.umask());
-    }
-    if (!made) made = null;
-
-    p = path.resolve(p);
-
-    try {
-        xfs.mkdirSync(p, mode);
-        made = made || p;
-    }
-    catch (err0) {
-        switch (err0.code) {
-            case 'ENOENT' :
-                made = sync(path.dirname(p), opts, made);
-                sync(p, opts, made);
-                break;
-
-            // In the case of any other error, just see if there's a dir
-            // there already.  If so, then hooray!  If not, then something
-            // is borked.
-            default:
-                var stat;
-                try {
-                    stat = xfs.statSync(p);
-                }
-                catch (err1) {
-                    throw err0;
-                }
-                if (!stat.isDirectory()) throw err0;
-                break;
-        }
-    }
-
-    return made;
-};
 
 
 /***/ }),
@@ -36264,6 +36196,112 @@ function isNumber (x) {
 function isConstructorOrProto (obj, key) {
     return key === 'constructor' && typeof obj[key] === 'function' || key === '__proto__';
 }
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+var path = __webpack_require__("path");
+var fs = __webpack_require__("fs");
+var _0777 = parseInt('0777', 8);
+
+module.exports = mkdirP.mkdirp = mkdirP.mkdirP = mkdirP;
+
+function mkdirP (p, opts, f, made) {
+    if (typeof opts === 'function') {
+        f = opts;
+        opts = {};
+    }
+    else if (!opts || typeof opts !== 'object') {
+        opts = { mode: opts };
+    }
+    
+    var mode = opts.mode;
+    var xfs = opts.fs || fs;
+    
+    if (mode === undefined) {
+        mode = _0777 & (~process.umask());
+    }
+    if (!made) made = null;
+    
+    var cb = f || function () {};
+    p = path.resolve(p);
+    
+    xfs.mkdir(p, mode, function (er) {
+        if (!er) {
+            made = made || p;
+            return cb(null, made);
+        }
+        switch (er.code) {
+            case 'ENOENT':
+                if (path.dirname(p) === p) return cb(er);
+                mkdirP(path.dirname(p), opts, function (er, made) {
+                    if (er) cb(er, made);
+                    else mkdirP(p, opts, cb, made);
+                });
+                break;
+
+            // In the case of any other error, just see if there's a dir
+            // there already.  If so, then hooray!  If not, then something
+            // is borked.
+            default:
+                xfs.stat(p, function (er2, stat) {
+                    // if the stat fails, then that's super weird.
+                    // let the original error be the failure reason.
+                    if (er2 || !stat.isDirectory()) cb(er, made)
+                    else cb(null, made);
+                });
+                break;
+        }
+    });
+}
+
+mkdirP.sync = function sync (p, opts, made) {
+    if (!opts || typeof opts !== 'object') {
+        opts = { mode: opts };
+    }
+    
+    var mode = opts.mode;
+    var xfs = opts.fs || fs;
+    
+    if (mode === undefined) {
+        mode = _0777 & (~process.umask());
+    }
+    if (!made) made = null;
+
+    p = path.resolve(p);
+
+    try {
+        xfs.mkdirSync(p, mode);
+        made = made || p;
+    }
+    catch (err0) {
+        switch (err0.code) {
+            case 'ENOENT' :
+                made = sync(path.dirname(p), opts, made);
+                sync(p, opts, made);
+                break;
+
+            // In the case of any other error, just see if there's a dir
+            // there already.  If so, then hooray!  If not, then something
+            // is borked.
+            default:
+                var stat;
+                try {
+                    stat = xfs.statSync(p);
+                }
+                catch (err1) {
+                    throw err0;
+                }
+                if (!stat.isDirectory()) throw err0;
+                break;
+        }
+    }
+
+    return made;
+};
 
 
 /***/ }),
@@ -60634,17 +60672,6 @@ async function installBazelTools(repoRootPath) {
 
 
 
-async function isVaultAvailable() {
-  try {
-    await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__[/* spawn */ "a"])('vault', ['--version'], {
-      stdio: 'pipe'
-    });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 async function isElasticCommitter() {
   try {
     const {
@@ -60658,21 +60685,13 @@ async function isElasticCommitter() {
   }
 }
 
-async function migrateToNewServersIfNeeded(settingsPath) {
+async function upToDate(settingsPath) {
   if (!(await Object(_fs__WEBPACK_IMPORTED_MODULE_5__[/* isFile */ "d"])(settingsPath))) {
     return false;
   }
 
   const readSettingsFile = await Object(_fs__WEBPACK_IMPORTED_MODULE_5__[/* readFile */ "f"])(settingsPath, 'utf8');
-  const newReadSettingsFile = readSettingsFile.replace(/cloud\.buildbuddy\.io/g, 'remote.buildbuddy.io');
-
-  if (newReadSettingsFile === readSettingsFile) {
-    return false;
-  }
-
-  Object(_fs__WEBPACK_IMPORTED_MODULE_5__[/* writeFile */ "i"])(settingsPath, newReadSettingsFile);
-  _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info(`[bazel_tools] upgrade remote cache settings to use new server address`);
-  return true;
+  return readSettingsFile.startsWith('# V2 ');
 }
 
 async function setupRemoteCache(repoRootPath) {
@@ -60682,52 +60701,19 @@ async function setupRemoteCache(repoRootPath) {
   }
 
   _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].debug(`[bazel_tools] setting up remote cache settings if necessary`);
-  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade the servers used on .bazelrc.cache
-  //
-  // NOTE: this can be removed in the future once everyone is migrated into the new servers
+  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade or install the config file
 
-  if (await migrateToNewServersIfNeeded(settingsPath)) {
-    return;
-  }
-
-  if (Object(fs__WEBPACK_IMPORTED_MODULE_1__["existsSync"])(settingsPath)) {
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].debug(`[bazel_tools] remote cache settings already exist, skipping`);
-    return;
-  }
-
-  if (!(await isVaultAvailable())) {
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] vault is not available, unable to setup remote cache settings.');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] use the following guide or reach out to Operations for assistance');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] https://github.com/elastic/infra/tree/master/docs/vault');
-    return;
-  }
-
-  let apiKey = '';
-
-  try {
-    const {
-      stdout
-    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__[/* spawn */ "a"])('vault', ['read', '-field=readonly-key', 'secret/ui-team/kibana-bazel-remote-cache'], {
-      stdio: 'pipe'
-    });
-    apiKey = stdout.trim();
-  } catch (ex) {
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] unable to read bazel remote cache key from vault, are you authenticated?');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] reach out to Operations if you need assistance with this.');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info(`[bazel_tools] ${ex}`);
+  if (await upToDate(settingsPath)) {
+    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].debug(`[bazel_tools] remote cache config already exists and is up-to-date, skipping`);
     return;
   }
 
   const contents = dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-    # V1 - This file is automatically generated by 'yarn kbn bootstrap'
+    # V2 - This file is automatically generated by 'yarn kbn bootstrap'
     # To regenerate this file, delete it and run 'yarn kbn bootstrap' again.
-    build --bes_results_url=https://app.buildbuddy.io/invocation/
-    build --bes_backend=grpcs://remote.buildbuddy.io
-    build --remote_cache=grpcs://remote.buildbuddy.io
-    build --remote_timeout=3600
-    build --remote_header=${apiKey}
+    build --remote_cache=https://storage.googleapis.com/kibana-local-bazel-remote-cache
+    build --noremote_upload_local_results
+    build --incompatible_remote_results_ignore_disk
   `;
   Object(fs__WEBPACK_IMPORTED_MODULE_1__["writeFileSync"])(settingsPath, contents);
   _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info(`[bazel_tools] remote cache settings written to ${settingsPath}`);
@@ -61525,32 +61511,6 @@ class Project {
     return this.json.name;
   }
 
-  ensureValidProjectDependency(project) {
-    const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `${__dirname}/../../../bazel-bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
-    const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
-    const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
-    //  do not allow child projects to hold dependencies, unless they are meant to be published externally
-
-    if (versionInPackageJson === expectedVersionInPackageJson || versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg) {
-      return;
-    }
-
-    const updateMsg = 'Update its package.json to the expected value below.';
-    const meta = {
-      actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}" or "${project.name}": "${expectedVersionInPackageJsonIfBazelPkg}"`,
-      package: `${this.name} (${this.packageJsonLocation})`
-    };
-
-    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_5__[/* isLinkDependency */ "a"])(versionInPackageJson)) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_3__[/* CliError */ "a"](`[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`, meta);
-    }
-
-    throw new _errors__WEBPACK_IMPORTED_MODULE_3__[/* CliError */ "a"](`[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`, meta);
-  }
-
   getBuildConfig() {
     return this.json.kibana && this.json.kibana.build || {};
   }
@@ -61622,10 +61582,6 @@ class Project {
     return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_5__[/* isLinkDependency */ "a"])(dep));
   }
 
-} // We normalize all path separators to `/` in generated files
-
-function normalizePath(path) {
-  return path.replace(/[\\\/]+/g, '/');
 }
 
 /***/ }),
@@ -61647,7 +61603,8 @@ function normalizePath(path) {
 /* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("util");
 /* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/errors.ts");
-/* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/project.ts");
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/log.ts");
+/* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/project.ts");
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -61655,6 +61612,7 @@ function normalizePath(path) {
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -61678,7 +61636,7 @@ async function getProjects(rootPath, projectsPathsPatterns, {
     for (const filePath of pathsToProcess) {
       const projectConfigPath = normalize(filePath);
       const projectDir = path__WEBPACK_IMPORTED_MODULE_1___default.a.dirname(projectConfigPath);
-      const project = await _project__WEBPACK_IMPORTED_MODULE_4__[/* Project */ "a"].fromPath(projectDir);
+      const project = await _project__WEBPACK_IMPORTED_MODULE_5__[/* Project */ "a"].fromPath(projectDir);
       const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name) || bazelOnly && !project.isBazelPackage();
 
       if (excludeProject) {
@@ -61752,10 +61710,18 @@ function buildProjectGraph(projects) {
     const projectDeps = [];
     const dependencies = project.allDependencies;
 
+    if (!project.isSinglePackageJsonProject && Object.keys(dependencies).length > 0) {
+      _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].warning(`${project.name} is not allowed to hold local dependencies and they will be discarded. Please declare them at the root package.json`);
+    }
+
+    if (!project.isSinglePackageJsonProject) {
+      projectGraph.set(project.name, projectDeps);
+      continue;
+    }
+
     for (const depName of Object.keys(dependencies)) {
       if (projects.has(depName)) {
         const dep = projects.get(depName);
-        project.ensureValidProjectDependency(dep);
         projectDeps.push(dep);
       }
     }

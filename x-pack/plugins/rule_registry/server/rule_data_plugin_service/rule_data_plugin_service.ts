@@ -71,7 +71,7 @@ export interface IRuleDataService {
    * Looks up the index information associated with the given Kibana "feature".
    * Note: features are used in RBAC.
    */
-  findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[];
+  findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null;
 }
 
 // TODO: This is a leftover. Remove its usage from the "observability" plugin and delete it.
@@ -214,8 +214,13 @@ export class RuleDataService implements IRuleDataService {
     return this.indicesByBaseName.get(baseName) ?? null;
   }
 
-  public findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[] {
+  public findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null {
     const foundIndices = this.indicesByFeatureId.get(featureId) ?? [];
-    return dataset ? foundIndices.filter((i) => i.indexOptions.dataset === dataset) : foundIndices;
+    if (dataset && foundIndices.length > 0) {
+      return foundIndices.filter((i) => i.indexOptions.dataset === dataset)[0];
+    } else if (foundIndices.length > 0) {
+      return foundIndices[0];
+    }
+    return null;
   }
 }
