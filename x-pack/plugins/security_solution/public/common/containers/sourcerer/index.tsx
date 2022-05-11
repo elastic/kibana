@@ -28,7 +28,11 @@ import {
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import {
+  checkIfIndicesExist,
+  getScopePatternListSelection,
+  sortWithExcludesAtEnd,
+} from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
@@ -291,9 +295,6 @@ export const useInitSourcerer = (
   ]);
 };
 
-const LOGS_WILDCARD_INDEX = 'logs-*';
-export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
-
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default
 ): SelectedDataView => {
@@ -317,12 +318,8 @@ export const useSourcererDataView = (
       sourcererScope,
     };
   });
-
   const selectedPatterns = useMemo(
-    () =>
-      scopeSelectedPatterns.some((index) => index === LOGS_WILDCARD_INDEX)
-        ? [...scopeSelectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-        : scopeSelectedPatterns,
+    () => sortWithExcludesAtEnd(scopeSelectedPatterns),
     [scopeSelectedPatterns]
   );
 
@@ -386,7 +383,7 @@ export const useSourcererDataView = (
       // all active & inactive patterns in DATA_VIEW
       patternList: sourcererDataView.title.split(','),
       // selected patterns in DATA_VIEW including filter
-      selectedPatterns: selectedPatterns.sort(),
+      selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
     }),
@@ -418,11 +415,5 @@ export const sourcererPaths = [
 export const showSourcererByPath = (pathname: string): boolean =>
   matchPath(pathname, {
     path: sourcererPaths,
-    strict: false,
-  }) != null;
-
-export const isAlertsOrRulesDetailsPage = (pathname: string): boolean =>
-  matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`],
     strict: false,
   }) != null;

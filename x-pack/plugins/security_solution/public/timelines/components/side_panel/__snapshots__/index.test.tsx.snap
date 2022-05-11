@@ -855,7 +855,6 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       id="hostsDetailsQuery"
       indexNames={
         Array [
-          "-*elastic-cloud-logs-*",
           "apm-*-transaction*",
           "auditbeat-*",
           "endgame-*",
@@ -864,6 +863,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           "packetbeat-*",
           "traces-apm*",
           "winlogbeat-*",
+          "-*elastic-cloud-logs-*",
         ]
       }
       isDraggable={false}
