@@ -94,9 +94,6 @@ exports.EcsCustomPropertyMappings = {
                           },
                         },
                       },
-                      total_number_of_alerts: {
-                        type: 'long',
-                      },
                       number_of_searches: {
                         type: 'long',
                       },
