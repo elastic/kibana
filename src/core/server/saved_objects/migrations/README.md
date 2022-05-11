@@ -149,8 +149,12 @@ index.
 
 ### New control state
 1. Two conditions have to be met before migrations begin:
-    1. If replica allocation is set as a persistent or transient setting to "perimaries", "new_primaries" or "none" fail the migration. Without replica allocation enabled or not set to 'all', the migration will timeout when waiting for index yellow status before bulk indexing. The check only considers persistent and transient settings and does not take static configuration in `elasticsearch.yml` into account. If `cluster.routing.allocation.enable` is configured in `elaticsearch.yml` and not set to the default of 'all', the migration will timeout. Static settings can only be returned from the `nodes/info` API.
-      → `FATAL`
+    1. The Elasticsearch shard allocation cluster setting `cluster.routing.allocation.enable` needs to be unset or set to 'all'. When set to 'primaries', 'new_primaries' or 'none', the migration will timeout when waiting for index yellow status before bulk indexing because the replica cannot be allocated.
+
+    As per the Elasticsearch docs https://www.elastic.co/guide/en/elasticsearch/reference/8.2/restart-cluster.html#restart-cluster-rolling when Cloud performs a rolling restart such as during an upgrade, it will temporarily disable shard allocation. Kibana therefore keeps retrying the INIT step to wait for shard allocation to be enabled again.
+    
+    The check only considers persistent and transient settings and does not take static configuration in `elasticsearch.yml` into account since there are no known use cases for doing so. If `cluster.routing.allocation.enable` is configured in `elaticsearch.yml` and not set to the default of 'all', the migration will timeout. Static settings can only be returned from the `nodes/info` API.
+      → `INIT`
   
     2. If `.kibana` is pointing to an index that belongs to a later version of
     Kibana .e.g. a 7.11.0 instance found the `.kibana` alias pointing to
