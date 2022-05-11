@@ -159,6 +159,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.summaryView,
             name: i18n.OVERVIEW,
+            'data-test-subj': 'overviewTab',
             content: (
               <>
                 <EuiSpacer size="m" />

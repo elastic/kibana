@@ -14,6 +14,8 @@ import { TestProviders } from '../../../mock';
 import { EventFieldsData } from '../types';
 import { TimelineId } from '../../../../../common/types';
 
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+
 jest.mock('../../../lib/kibana');
 
 const eventId = 'TUWyf3wBFCFU0qRJTauW';
@@ -58,7 +60,7 @@ describe('AddToTimelineCellRenderer', () => {
           />
         </TestProviders>
       );
-      expect(screen.getByTestId('test-add-to-timeline')).toBeInTheDocument();
+      expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).toBeInTheDocument();
     });
   });
 
@@ -76,7 +78,7 @@ describe('AddToTimelineCellRenderer', () => {
           />
         </TestProviders>
       );
-      expect(screen.queryByTestId('test-add-to-timeline')).toBeNull();
+      expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).not.toBeInTheDocument();
     });
   });
 });
