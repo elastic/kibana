@@ -58,7 +58,7 @@ export interface UnifiedSearchPublicPluginStart {
 }
 
 /**
- * Filter options which will be available in menu panels
+ * Filter options from Unified Search menu panels
  */
 export type FilterPanelOption =
   | 'pinFilter'
