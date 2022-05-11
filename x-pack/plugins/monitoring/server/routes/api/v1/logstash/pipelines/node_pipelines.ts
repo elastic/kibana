@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/http_api/logstash';
 
 const throughputMetric = 'logstash_node_pipeline_throughput';
-const nodesCountMetric = 'logstash_node_pipeline_node_count';
+const nodesCountMetric = 'logstash_node_pipeline_nodes_count';
 
 // Mapping client and server metric keys together
 const sortMetricSetMap = {

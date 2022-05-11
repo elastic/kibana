@@ -198,13 +198,7 @@ export type Pipeline = {
   [key in PipelineMetricKey]?: number;
 };
 
-export type PipelineMetricKey =
-  | 'logstash_cluster_pipeline_throughput'
-  | 'logstash_cluster_pipeline_node_count'
-  | 'logstash_cluster_pipeline_nodes_count'
-  | 'logstash_node_pipeline_node_count'
-  | 'logstash_node_pipeline_nodes_count'
-  | 'logstash_node_pipeline_throughput';
+export type PipelineMetricKey = PipelineThroughputMetricKey | PipelineNodeCountMetricKey;
 
 export type PipelineThroughputMetricKey =
   | 'logstash_cluster_pipeline_throughput'
@@ -218,12 +212,12 @@ export type PipelineNodeCountMetricKey =
 
 export interface PipelineWithMetrics {
   id: string;
-  metrics: {
-    logstash_cluster_pipeline_throughput?: PipelineMetricsProcessed;
-    logstash_cluster_pipeline_node_count?: PipelineMetricsProcessed;
-    logstash_node_pipeline_throughput?: PipelineMetricsProcessed;
-    logstash_node_pipeline_node_count?: PipelineMetricsProcessed;
-  };
+  metrics:
+    | {
+        [key in PipelineMetricKey]: PipelineMetricsProcessed | undefined;
+      }
+    // backward compat with references that don't properly type the metric keys
+    | { [key: string]: PipelineMetricsProcessed | undefined };
 }
 
 export interface PipelineResponse {
