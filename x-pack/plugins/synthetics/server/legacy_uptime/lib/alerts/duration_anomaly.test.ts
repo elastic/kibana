@@ -12,7 +12,6 @@ import {
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../../common/constants/alerts';
 import { AnomaliesTableRecord, AnomalyRecordDoc } from '@kbn/ml-plugin/common/types/anomalies';
-import { DynamicSettings } from '../../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
 import { Ping } from '../../../../common/runtime_types/ping';

@@ -13,8 +13,6 @@ import { UMServerLibs } from '../../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../../types';
 import { getUptimeESMockClient } from '../../requests/helper';
-import { DynamicSettings } from '../../../../../common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
