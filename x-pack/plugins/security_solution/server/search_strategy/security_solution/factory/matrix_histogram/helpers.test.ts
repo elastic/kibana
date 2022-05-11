@@ -11,12 +11,12 @@ import { stackedByBooleanField, stackedByTextField, result, textResult } from '.
 
 describe('getGenericData', () => {
   test('stack by a boolean field', () => {
-    const res = getGenericData<MatrixHistogramType.events>(stackedByBooleanField, 'events.buckets');
+    const res = getGenericData<MatrixHistogramType.events>(stackedByBooleanField, 'events.bucket');
     expect(res).toEqual(result);
   });
 
   test('stack by a text field', () => {
-    const res = getGenericData<MatrixHistogramType.events>(stackedByTextField, 'events.buckets');
+    const res = getGenericData<MatrixHistogramType.events>(stackedByTextField, 'events.bucket');
     expect(res).toEqual(textResult);
   });
 });

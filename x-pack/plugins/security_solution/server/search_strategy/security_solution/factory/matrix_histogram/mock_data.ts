@@ -11,7 +11,7 @@ export const stackedByBooleanField = [
     key_as_string: 'true',
     doc_count: 7125,
     events: {
-      buckets: [
+      bucket: [
         { key_as_string: '2022-05-10T15:34:48.075Z', key: 1652196888075, doc_count: 0 },
         { key_as_string: '2022-05-10T16:19:48.074Z', key: 1652199588074, doc_count: 774 },
         { key_as_string: '2022-05-10T17:04:48.073Z', key: 1652202288073, doc_count: 415 },
@@ -30,7 +30,7 @@ export const stackedByTextField = [
     key: 'MacBook-Pro.local',
     doc_count: 7103,
     events: {
-      buckets: [
+      bucket: [
         { key_as_string: '2022-05-10T15:34:48.075Z', key: 1652196888075, doc_count: 0 },
         { key_as_string: '2022-05-10T16:19:48.074Z', key: 1652199588074, doc_count: 774 },
         { key_as_string: '2022-05-10T17:04:48.073Z', key: 1652202288073, doc_count: 415 },
