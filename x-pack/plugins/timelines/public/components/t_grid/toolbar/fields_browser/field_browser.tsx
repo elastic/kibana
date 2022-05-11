@@ -30,10 +30,7 @@ import { CategoriesSelector } from './categories_selector';
 import { FieldTable } from './field_table';
 import { CategoriesBadges } from './categories_badges';
 
-export type FieldsBrowserComponentProps = Pick<
-  FieldBrowserProps,
-  'width' | 'options'
-> & {
+export type FieldsBrowserComponentProps = Pick<FieldBrowserProps, 'width' | 'options'> & {
   /**
    * The current column headers
    */
@@ -110,7 +107,6 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   onToggleColumn,
   defaultColumns,
 }) => {
-
   const closeAndRestoreFocus = useCallback(() => {
     onHide();
     setTimeout(() => {
@@ -166,9 +162,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {CreateFieldButton && (
-                <CreateFieldButton onHide={onHide} />
-              )}
+              {CreateFieldButton && <CreateFieldButton onHide={onHide} />}
             </EuiFlexItem>
           </EuiFlexGroup>
 

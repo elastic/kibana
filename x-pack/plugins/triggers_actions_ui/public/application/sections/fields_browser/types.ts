@@ -7,9 +7,7 @@
 
 import { EuiBasicTableColumn, EuiDataGridColumn } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
-import type {
-  RuntimeField,
-} from '@kbn/data-plugin/common';
+import type { RuntimeField } from '@kbn/data-plugin/common';
 
 export interface BrowserField {
   aggregatable: boolean;
