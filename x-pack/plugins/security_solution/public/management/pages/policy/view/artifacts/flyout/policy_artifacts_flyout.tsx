@@ -26,7 +26,7 @@ import {
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../../common/lib/kibana';
-import { PolicyArtifactsAssignableList } from '../../artifacts/assignable';
+import { PolicyArtifactsAssignableList } from '../assignable';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useListArtifact, useBulkUpdateArtifact } from '../../../../../hooks/artifacts';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';

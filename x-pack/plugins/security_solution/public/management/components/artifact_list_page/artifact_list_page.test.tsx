@@ -18,9 +18,7 @@ import {
 
 jest.mock('../../../common/components/user_privileges');
 
-// FLAKY: https://github.com/elastic/kibana/issues/129837
-// FLAKY: https://github.com/elastic/kibana/issues/129836
-describe.skip('When using the ArtifactListPage component', () => {
+describe('When using the ArtifactListPage component', () => {
   let render: (
     props?: Partial<ArtifactListPageProps>
   ) => ReturnType<AppContextTestRender['render']>;
@@ -56,11 +54,13 @@ describe.skip('When using the ArtifactListPage component', () => {
   });
 
   describe('and data exists', () => {
-    let renderWithListData: () => Promise<ReturnType<typeof render>>;
+    let renderWithListData: (
+      props?: Partial<ArtifactListPageProps>
+    ) => Promise<ReturnType<typeof render>>;
 
     beforeEach(async () => {
-      renderWithListData = async () => {
-        render();
+      renderWithListData = async (props) => {
+        render(props);
 
         await act(async () => {
           await waitFor(() => {
@@ -115,7 +115,7 @@ describe.skip('When using the ArtifactListPage component', () => {
       });
     });
 
-    it('should persist pagination `page size` changes to the URL', async () => {
+    it('should persist pagination `pageSize` changes to the URL', async () => {
       const { getByTestId } = await renderWithListData();
       act(() => {
         userEvent.click(getByTestId('tablePaginationPopoverButton'));
@@ -124,6 +124,8 @@ describe.skip('When using the ArtifactListPage component', () => {
         await waitFor(() => {
           expect(getByTestId('tablePagination-20-rows'));
         });
+      });
+      act(() => {
         userEvent.click(getByTestId('tablePagination-20-rows'));
       });
 
@@ -159,8 +161,39 @@ describe.skip('When using the ArtifactListPage component', () => {
         const { getByTestId } = await renderWithListData();
         await clickCardAction('delete');
 
-        expect(getByTestId('testPage-deleteModal')).toBeTruthy();
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeTruthy();
+        });
       });
+
+      it.each([
+        ['create button', 'testPage-pageAddButton', { allowCardCreateAction: false }],
+        ['edit card action', 'testPage-card-cardEditAction', { allowCardEditAction: false }],
+        ['delete card action', 'testPage-card-cardDeleteAction', { allowCardDeleteAction: false }],
+      ])('should hide the %s', async (_, testId, renderProps) => {
+        const { queryByTestId } = await renderWithListData(
+          renderProps as Partial<ArtifactListPageProps>
+        );
+        await getFirstCard({ showActions: true });
+
+        expect(queryByTestId(testId)).toBeNull();
+      });
+
+      it.each([
+        ['create', 'show=create'],
+        ['edit', 'show=edit&itemId=123'],
+      ])(
+        'should NOT show flyout if url has a show param of %s but the action is not allowed',
+        async (_, urlParam) => {
+          history.push(`somepage?${urlParam}`);
+          const { queryByTestId } = await renderWithListData({
+            allowCardCreateAction: false,
+            allowCardEditAction: false,
+          });
+
+          expect(queryByTestId('testPage-flyout')).toBeNull();
+        }
+      );
     });
 
     describe('and search bar is used', () => {
@@ -259,7 +292,6 @@ describe.skip('When using the ArtifactListPage component', () => {
         });
 
         await waitFor(() => {
-          // console.log(`\n\n${renderResult.getByTestId('testPage-list').outerHTML}\n\n\n`);
           expect(renderResult.getByTestId('testPage-list-noResults')).toBeTruthy();
         });
       });

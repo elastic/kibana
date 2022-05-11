@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
-} from '../../../../triggers_actions_ui/server';
+} from '@kbn/triggers-actions-ui-plugin/server';
 import { ComparatorFnNames } from '../lib';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';

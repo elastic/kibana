@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { firstValueFrom } from 'rxjs';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { PLUGIN, MANAGEMENT_ID } from '../common/constants';
 import { init as initUiMetric } from './app/services/track_ui_metric';

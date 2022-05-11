@@ -11,7 +11,7 @@ import {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { APMConfig } from '../..';
 import { APMRouteCreateOptions, APMRouteHandlerResources } from '../typings';
 import { registerRoutes } from './register_apm_server_routes';

@@ -13,9 +13,9 @@ import { isRouteWithTimeRange } from '../is_route_with_time_range';
 import {
   TimeRangeComparisonEnum,
   dayAndWeekBeforeToOffset,
-} from '../../../components/shared/time_comparison/get_comparison_options';
+} from '../time_comparison/get_comparison_options';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { getComparisonEnabled } from '../../../components/shared/time_comparison/get_comparison_enabled';
+import { getComparisonEnabled } from '../time_comparison/get_comparison_enabled';
 import { toBoolean } from '../../../context/url_params_context/helpers';
 
 export function RedirectWithOffset({

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
-import { Maybe } from '../../../../../observability/common/typings';
+import { Maybe } from '@kbn/observability-plugin/common/typings';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { IsolateHost } from './isolate';

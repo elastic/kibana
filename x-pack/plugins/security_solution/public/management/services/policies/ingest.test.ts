@@ -10,8 +10,8 @@ import {
   sendGetPackagePolicy,
   sendGetEndpointSecurityPackage,
 } from './ingest';
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { EPM_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../fleet/common';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { EPM_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { policyListApiPathHandlers } from '../../pages/policy/store/test_mock_utils';
 
 describe('ingest service', () => {

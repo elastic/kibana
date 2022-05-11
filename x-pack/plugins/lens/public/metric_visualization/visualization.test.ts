@@ -11,9 +11,9 @@ import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { ColorMode } from 'src/plugins/charts/common';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { ColorMode } from '@kbn/charts-plugin/common';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../id_generator');
 

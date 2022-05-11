@@ -14,7 +14,7 @@ import {
   supportsGeoTileAgg,
 } from './index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
-import { IndexPatternField } from 'src/plugins/data/public';
+import { IndexPatternField } from '@kbn/data-plugin/public';
 
 describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {

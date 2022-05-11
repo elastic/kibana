@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '../../../../core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Collector } from './collector';
 
 const logger = loggingSystemMock.createLogger();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KbnServerError } from '../../../../../kibana_utils/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { SearchStrategyDependencies } from '../../types';

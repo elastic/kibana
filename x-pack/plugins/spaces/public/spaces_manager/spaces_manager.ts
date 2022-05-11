@@ -12,7 +12,7 @@ import { skipWhile } from 'rxjs/operators';
 import type {
   HttpSetup,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import type {
   GetAllSpacesOptions,

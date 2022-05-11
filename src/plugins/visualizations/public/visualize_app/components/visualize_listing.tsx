@@ -17,16 +17,16 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation } from 'react-router-dom';
 
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { useKibana, TableListView, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
-import { useKibana, TableListView, useExecutionContext } from '../../../../kibana_react/public';
 import {
   VISUALIZE_ENABLE_LABS_SETTING,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
-} from '../../../../visualizations/public';
+} from '../..';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';

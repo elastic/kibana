@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
-import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
+import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server/plugin';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../../../plugins/task_manager/server/plugin';
-import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
+} from '@kbn/task-manager-plugin/server/plugin';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { defineAlertTypes } from './alert_types';
 import { defineActionTypes } from './action_types';
 import { defineRoutes } from './routes';
-import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
-import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
-import { PluginStartContract as ActionsPluginStart } from '../../../../../../../plugins/actions/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;

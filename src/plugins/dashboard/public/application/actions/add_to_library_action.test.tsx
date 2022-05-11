@@ -10,12 +10,12 @@ import { AddToLibraryAction } from '.';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput } from '../test_helpers';
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { getStubPluginServices } from '../../../../presentation_util/public';
-import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
+import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 import {
   EmbeddableInput,

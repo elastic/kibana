@@ -7,10 +7,10 @@
 
 import uuid from 'uuid';
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type {
   InstallResult,

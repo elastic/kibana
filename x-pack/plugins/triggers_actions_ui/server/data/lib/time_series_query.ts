@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from 'kibana/server';
-import type { ElasticsearchClient } from 'src/core/server';
-import { getEsErrorMessage } from '../../../../alerting/server';
-import { DEFAULT_GROUPS } from '../index';
+import { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
+import { DEFAULT_GROUPS } from '..';
 import { getDateRangeInfo } from './date_range_info';
 
 import { TimeSeriesQuery, TimeSeriesResult, TimeSeriesResultRow } from './time_series_types';

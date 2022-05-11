@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { CommentType } from '../../../../../cases/common';
+import { CommentType } from '@kbn/cases-plugin/common';
 
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';

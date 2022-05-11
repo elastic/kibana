@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { SavedObjectsType } from '../../../../../../src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import {
   savedQuerySavedObjectType,
   packSavedObjectType,

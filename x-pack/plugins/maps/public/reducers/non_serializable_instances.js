@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestAdapter } from '../../../../../src/plugins/inspector/common/adapters/request';
+import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { MapAdapter } from '../inspector/map_adapter';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 

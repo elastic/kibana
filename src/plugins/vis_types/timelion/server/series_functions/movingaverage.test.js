@@ -14,7 +14,7 @@ import _ from 'lodash';
 import buckets from './fixtures/bucket_list';
 import getSeries from './helpers/get_series';
 import getSeriesList from './helpers/get_series_list';
-import invoke from './helpers/invoke_series_fn.js';
+import invoke from './helpers/invoke_series_fn';
 
 function getFivePointSeries() {
   return getSeriesList([

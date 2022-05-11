@@ -13,11 +13,8 @@ import type {
   IEsSearchRequest,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '../../../../../../src/plugins/data/common';
-import type {
-  ISearchStrategy,
-  PluginStart as DataPluginStart,
-} from '../../../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/common';
+import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
   getLogEntryCursorFromHit,
   LogColumn,

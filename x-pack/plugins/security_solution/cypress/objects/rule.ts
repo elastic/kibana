@@ -7,7 +7,7 @@
 
 import type { RulesSchema } from '../../common/detection_engine/schemas/response';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
+import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
@@ -105,13 +105,14 @@ export interface MachineLearningRule {
 
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
+  '-*elastic-cloud-logs-*',
 ];
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];

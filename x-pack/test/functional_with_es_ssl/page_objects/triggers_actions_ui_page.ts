@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   CustomCheerio,
   CustomCheerioStatic,
-} from 'test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
+} from '../../../../test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';

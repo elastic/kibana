@@ -24,9 +24,9 @@ import {
   withSuspense,
   LazyReduxEmbeddableWrapper,
   ReduxEmbeddableWrapperPropsWithChildren,
-} from '../../../../presentation_util/public';
-import { Embeddable, IContainer } from '../../../../embeddable/public';
-import { DataView, DataViewField } from '../../../../data_views/public';
+} from '@kbn/presentation-util-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
 import { ControlsDataViewsService } from '../../services/data_views';
 import { ControlsDataService } from '../../services/data';
@@ -311,7 +311,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.updateOutput({ filters: [rangeFilter], dataViews: [dataView], loading: false });
   };
 
-  reload = () => {
+  public reload = () => {
     this.fetchMinMax();
   };
 

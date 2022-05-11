@@ -27,7 +27,7 @@ describe('risk tab', () => {
     cy.get('[data-test-subj="navigation-hostRisk"]').click();
     waitForTableToLoad();
 
-    cy.get('[data-test-subj="topHostScoreContributors"]')
+    cy.get('[data-test-subj="topRiskScoreContributors"]')
       .find(TABLE_ROWS)
       .within(() => {
         cy.get(TABLE_CELL).contains('Unusual Linux Username');

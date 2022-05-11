@@ -17,12 +17,9 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
-import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('delete_rules - %s', (_, isRuleRegistryEnabled) => {
+describe('delete_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -31,49 +28,70 @@ describe.each([
     ({ clients, context } = requestContextMock.createTools());
     const logger = loggingSystemMock.createLogger();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
 
-    deleteRulesBulkRoute(server.router, isRuleRegistryEnabled, logger);
+    deleteRulesBulkRoute(server.router, logger);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
-      const response = await server.inject(getDeleteBulkRequest(), context);
+      const response = await server.inject(
+        getDeleteBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule and related rule status', async () => {
-      const response = await server.inject(getDeleteBulkRequest(), context);
+      const response = await server.inject(
+        getDeleteBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId using POST', async () => {
-      const response = await server.inject(getDeleteAsPostBulkRequest(), context);
+      const response = await server.inject(
+        getDeleteAsPostBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
-      const response = await server.inject(getDeleteBulkRequestById(), context);
+      const response = await server.inject(
+        getDeleteBulkRequestById(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id using POST', async () => {
-      const response = await server.inject(getDeleteAsPostBulkRequestById(), context);
+      const response = await server.inject(
+        getDeleteAsPostBulkRequestById(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 because the error is in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      const response = await server.inject(getDeleteBulkRequest(), context);
+      const response = await server.inject(
+        getDeleteBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 in the payload when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
-      const response = await server.inject(getDeleteBulkRequest(), context);
+      const response = await server.inject(
+        getDeleteBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(
         expect.arrayContaining([
@@ -93,7 +111,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_DELETE,
         body: [{}],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
@@ -109,7 +127,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_DELETE,
         body: [{ id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f', rule_id: 'rule_1' }],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {

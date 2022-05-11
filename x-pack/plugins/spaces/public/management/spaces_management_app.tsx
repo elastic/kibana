@@ -9,16 +9,16 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Route, Router, Switch, useParams } from 'react-router-dom';
 
+import type { StartServicesAccessor } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { StartServicesAccessor } from 'src/core/public';
-import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
-
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+
 import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';

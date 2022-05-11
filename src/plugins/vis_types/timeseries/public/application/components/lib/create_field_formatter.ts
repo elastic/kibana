@@ -7,11 +7,11 @@
  */
 
 import { isNumber } from 'lodash';
-import { getFieldFormats } from '../../../services';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatMap } from '@kbn/data-plugin/common';
+import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
-import { FIELD_FORMAT_IDS } from '../../../../../../field_formats/common';
-import type { FieldFormatMap } from '../../../../../../data/common';
-import type { FieldFormatsContentType } from '../../../../../../field_formats/common';
+import { getFieldFormats } from '../../../services';
 
 const DEFAULT_FIELD_FORMAT = { id: 'number' };
 

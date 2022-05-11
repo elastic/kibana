@@ -9,9 +9,9 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverFieldDetails } from '../discover_field_details';
-import { DataViewField } from '../../../../../../../data_views/public';
-import { DataView } from '../../../../../../../data_views/public';
 import { fieldSpecMap } from './fields';
 import { numericField as field } from './fields';
 import { Bucket } from '../types';

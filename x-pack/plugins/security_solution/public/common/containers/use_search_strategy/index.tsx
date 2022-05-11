@@ -11,6 +11,13 @@ import { Observable } from 'rxjs';
 
 import { OptionalSignalArgs, useObservable } from '@kbn/securitysolution-hook-utils';
 
+import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import {
+  DataPublicPluginStart,
+  isCompleteResponse,
+  isErrorResponse,
+} from '@kbn/data-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import * as i18n from './translations';
 
 import {
@@ -19,17 +26,10 @@ import {
   StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
-import { IKibanaSearchResponse } from '../../../../../../../src/plugins/data/common';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/public';
 import { getInspectResponse } from '../../../helpers';
 import { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 type UseSearchStrategyRequestArgs = RequestBasicOptions & {
   data: DataPublicPluginStart;

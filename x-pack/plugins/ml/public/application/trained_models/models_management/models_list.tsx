@@ -25,8 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { getAnalysisType } from '../../data_frame_analytics/common';
-import { ModelsTableToConfigMapping } from './index';
+import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { useMlKibana, useMlLocator, useNavigateToPath, useTimefilter } from '../../contexts/kibana';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
@@ -47,13 +48,12 @@ import { isPopulatedObject } from '../../../../common';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { TestTrainedModelFlyout, isTestable } from './test_models';
+import { TestTrainedModelFlyout, isTestable, isTestEnabled } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -184,10 +184,8 @@ export const ModelsList: FC<Props> = ({
         }
       }
 
-      // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchModelsStats(
-        newItems.filter((v) => v.model_type.includes(TRAINED_MODEL_TYPE.PYTORCH))
-      );
+      // Need to fetch state for all models to enable/disable actions
+      await fetchModelsStats(newItems);
 
       setItems(newItems);
 
@@ -484,6 +482,7 @@ export const ModelsList: FC<Props> = ({
           isPrimary: true,
           available: isTestable,
           onClick: setShowTestFlyout,
+          enabled: isTestEnabled,
         },
       ] as Array<Action<ModelItem>>)
     );

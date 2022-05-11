@@ -7,7 +7,7 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../common/ecs';
 import { NoteResult } from '../../../../common/types/timeline/note';

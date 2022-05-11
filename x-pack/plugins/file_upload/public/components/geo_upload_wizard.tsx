@@ -8,10 +8,10 @@
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiText } from '@elastic/eui';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getDataViewsService } from '../kibana_services';
 import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
 import { GeoFileImporter } from '../importer/geo';

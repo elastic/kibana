@@ -8,9 +8,9 @@
 import React from 'react';
 import moment from 'moment';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EcsEventOutcome } from 'kibana/server';
+import { EcsEventOutcome } from '@kbn/core/server';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
-import { RuleDurationFormat } from '../../../sections/rules_list/components/rule_duration_format';
+import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 import {
   RULE_EXECUTION_LOG_COLUMN_IDS,
   RULE_EXECUTION_LOG_DURATION_COLUMNS,

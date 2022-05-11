@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   missingMlPrivilegesTitle,
   missingMlSetupPrivilegesDescription,

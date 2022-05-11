@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  savedObjectsServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { savedObjectsServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   createInternalReadonlySoClient,
   InternalReadonlySoClientMethodNotAllowedError,

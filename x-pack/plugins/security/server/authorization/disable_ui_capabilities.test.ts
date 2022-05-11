@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ElasticsearchFeature, KibanaFeature } from '@kbn/features-plugin/server';
 
-import { ElasticsearchFeature, KibanaFeature } from '../../../features/server';
 import type { AuthenticatedUser } from '../../common/model';
 import { Actions } from './actions';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';

@@ -9,10 +9,10 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
-import { IErrorObject } from '../../../../../triggers_actions_ui/public';
-import { DataView } from '../../../../../../../src/plugins/data/common';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { DataView } from '@kbn/data-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const dataStartMock = dataPluginMock.createStartContract();
 const unifiedSearchStartMock = unifiedSearchPluginMock.createStartContract();

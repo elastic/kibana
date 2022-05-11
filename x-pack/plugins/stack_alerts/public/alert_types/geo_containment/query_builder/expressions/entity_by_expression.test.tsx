@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { EntityByExpression, getValidIndexPatternFields } from './entity_by_expression';
-import { DataViewField } from 'src/plugins/data_views/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 const defaultProps = {
   errors: {

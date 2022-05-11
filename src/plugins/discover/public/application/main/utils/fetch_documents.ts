@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
+import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
 

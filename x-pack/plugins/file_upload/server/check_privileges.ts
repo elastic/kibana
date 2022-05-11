@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
-import { AuthorizationServiceSetup, CheckPrivilegesPayload } from '../../security/server';
+import { KibanaRequest } from '@kbn/core/server';
+import { AuthorizationServiceSetup, CheckPrivilegesPayload } from '@kbn/security-plugin/server';
 
 interface Deps {
   request: KibanaRequest;

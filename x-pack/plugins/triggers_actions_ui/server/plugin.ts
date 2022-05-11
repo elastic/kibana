@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger, Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { PluginSetupContract as AlertingPluginSetup } from '../../alerting/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
+import { Logger, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute, createConfigRoute } from './routes';
 import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../common';

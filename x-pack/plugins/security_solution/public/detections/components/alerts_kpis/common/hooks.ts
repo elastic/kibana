@@ -8,7 +8,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { BrowserField } from '../../../../../../timelines/common';
+import type { BrowserField } from '@kbn/timelines-plugin/common';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getAllFieldsByName } from '../../../../common/containers/source';

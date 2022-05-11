@@ -23,7 +23,7 @@ Granting access to Saved Objects Management will authorize users to manage all s
 
 [float]
 [[managing-saved-objects-view]]
-=== View, edit, and delete
+=== View and delete
 
 * To view and edit an object in its associated application, click the object title.
 
@@ -104,27 +104,5 @@ resolve them manually.
 WARNING: The copy operation automatically includes child objects that are related to the saved objects. If you don't want this behavior, use
 the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
 
-
-[float]
-[[managing-saved-objects-object-definition]]
-=== Advanced editing
-
-Some objects offer an advanced *Edit* page for modifying the object definition.
-To open the page, click the actions icon image:images/actions_icon.png[Actions icon]
-and select *Inspect*.
-You can change the object title, add a description, and modify
-the JSON that defines the object properties.
-
-If you access an object whose index has been deleted, you can:
-
-* Recreate the index so you can continue using the object.
-* Delete the object and recreate it using a different index.
-* Change the index name in the object's `reference` array to point to an existing
-data view. This is useful if the index you were working with has been renamed.
-
-WARNING: Validation is not performed for object properties. Submitting an invalid
-change will render the object unusable. A more failsafe approach is to use
-*Discover* or *Dashboard* to create new objects instead of
-directly editing an existing one.
 
 include::saved-objects/saved-object-ids.asciidoc[]

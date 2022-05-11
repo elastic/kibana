@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AgentClient } from '../../../../../../fleet/server';
-import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
-import { Agent } from '../../../../../../fleet/common/types/models';
+import { AgentClient } from '@kbn/fleet-plugin/server';
+import { AgentStatusKueryHelper } from '@kbn/fleet-plugin/common/services';
+import { Agent } from '@kbn/fleet-plugin/common/types/models';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 const getStatusQueryMap = (path: string = '') =>

@@ -7,7 +7,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { KibanaResponseFactory } from 'kibana/server';
+import { KibanaResponseFactory } from '@kbn/core/server';
 import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {

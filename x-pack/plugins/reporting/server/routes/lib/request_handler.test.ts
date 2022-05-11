@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
-import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../..';
 import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
@@ -76,7 +76,7 @@ describe('Handle request to generate', () => {
     (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
 
     mockContext = getMockContext();
-    mockContext.reporting = {} as ReportingSetup;
+    mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
     requestHandler = new RequestHandler(
       reportingCore,

@@ -10,7 +10,7 @@ import { getNumericFieldStatsRequest } from './get_numeric_field_stats';
 import { getKeywordFieldStatsRequest } from './get_keyword_field_stats';
 import { getBooleanFieldStatsRequest } from './get_boolean_field_stats';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { fetchFieldsStats } from './get_fields_stats';
 
 const params = {

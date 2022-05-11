@@ -16,17 +16,17 @@ import type {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
 } from './types';
-import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { SeriesType } from '@kbn/expression-xy-plugin/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
-import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { Datatable } from 'src/plugins/expressions';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
-import { eventAnnotationServiceMock } from 'src/plugins/event_annotation/public/mocks';
-import { EventAnnotationConfig } from 'src/plugins/event_annotation/common';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { Datatable } from '@kbn/expressions-plugin';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',

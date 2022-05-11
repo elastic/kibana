@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { newJobCapsProvider } from './index';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { newJobCapsProvider } from '.';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import farequoteFieldCaps from './__mocks__/responses/farequote_field_caps.json';
 import cloudwatchFieldCaps from './__mocks__/responses/cloudwatch_field_caps.json';

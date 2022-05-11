@@ -7,8 +7,8 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../../triggers_actions_ui/public';
-import { PluginSetupContract as AlertingSetup } from '../../../../alerting/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';

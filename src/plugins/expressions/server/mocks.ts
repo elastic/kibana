@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { ExpressionsServerSetup, ExpressionsServerStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import { coreMock } from '../../../core/server/mocks';
 
 export type Setup = jest.Mocked<ExpressionsServerSetup>;
 export type Start = jest.Mocked<ExpressionsServerStart>;

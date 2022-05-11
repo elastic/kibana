@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ExceptionsListPreSummaryServerExtension } from '@kbn/lists-plugin/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExceptionsListPreSummaryServerExtension } from '../../../../../lists/server';
 import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,

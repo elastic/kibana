@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';

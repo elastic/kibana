@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
   GaugeExpressionFunctionDefinition,
   GaugeShape,
-} from '../../../chart_expressions/expression_gauge/common';
+} from '@kbn/expression-gauge-plugin/common';
 import { GaugeType, GaugeVisParams } from './types';
 import { getStopsWithColorsFromRanges } from './utils';
 import { getEsaggsFn } from './to_ast_esaggs';

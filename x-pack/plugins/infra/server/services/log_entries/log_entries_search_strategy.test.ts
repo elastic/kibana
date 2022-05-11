@@ -12,14 +12,14 @@ import {
   httpServerMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   IEsSearchRequest,
   IEsSearchResponse,
   ISearchStrategy,
   SearchStrategyDependencies,
-} from 'src/plugins/data/server';
-import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+} from '@kbn/data-plugin/server';
+import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
 import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
 import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
 import { createLogViewsServiceStartMock } from '../log_views/log_views_service.mock';

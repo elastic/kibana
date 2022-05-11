@@ -15,7 +15,7 @@ import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter, compareFilters } from '@kbn/es-query';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
   IContainer,
@@ -23,10 +23,10 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
-} from '../../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import { APPLY_FILTER_TRIGGER, TimeRange, Query } from '../../../../../src/plugins/data/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/unified_search/public';
+} from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER, TimeRange, Query } from '@kbn/data-plugin/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,

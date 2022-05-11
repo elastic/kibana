@@ -7,12 +7,12 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import { ISearchSource } from '../../../../../data/public';
 import { GetStateReturn } from '../services/discover_state';
-import { RequestAdapter } from '../../../../../inspector/public';
-import type { AutoRefreshDoneFn } from '../../../../../data/public';
 import { validateTimeRange } from './validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';

@@ -32,7 +32,9 @@ import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { ExecutionContextService } from './execution_context';
+import type { AnalyticsServiceSetup } from './analytics';
 import { AnalyticsService } from './analytics';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -148,9 +150,10 @@ export class CoreSystem {
       await this.integrations.setup();
       this.docLinks.setup();
 
-      const analytics = this.analytics.setup();
+      const analytics = this.analytics.setup({ injectedMetadata });
+      this.registerLoadedKibanaEventType(analytics);
 
-      const executionContext = this.executionContext.setup();
+      const executionContext = this.executionContext.setup({ analytics });
       const http = this.http.setup({
         injectedMetadata,
         fatalErrors: this.fatalErrorsSetup,
@@ -273,6 +276,11 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
+      analytics.reportEvent('Loaded Kibana', {
+        kibana_version: this.coreContext.env.packageInfo.version,
+        ...fetchOptionalMemoryInfo(),
+      });
+
       return {
         application,
         executionContext,
@@ -300,6 +308,31 @@ export class CoreSystem {
     this.application.stop();
     this.deprecations.stop();
     this.theme.stop();
+    this.analytics.stop();
     this.rootDomElement.textContent = '';
+  }
+
+  private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
+    analytics.registerEventType({
+      eventType: 'Loaded Kibana',
+      schema: {
+        kibana_version: {
+          type: 'keyword',
+          _meta: { description: 'The version of Kibana' },
+        },
+        memory_js_heap_size_limit: {
+          type: 'long',
+          _meta: { description: 'The maximum size of the heap', optional: true },
+        },
+        memory_js_heap_size_total: {
+          type: 'long',
+          _meta: { description: 'The total size of the heap', optional: true },
+        },
+        memory_js_heap_size_used: {
+          type: 'long',
+          _meta: { description: 'The used size of the heap', optional: true },
+        },
+      },
+    });
   }
 }

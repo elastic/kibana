@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
@@ -17,7 +18,6 @@ import {
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
-import { TrackApplicationView } from '../../../../../../src/plugins/usage_collection/public';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';

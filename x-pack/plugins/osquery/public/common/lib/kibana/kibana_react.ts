@@ -16,7 +16,7 @@ import {
   useUiSetting$,
   withKibana,
   reactRouterNavigate,
-} from '../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 import { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;
@@ -36,6 +36,7 @@ const useRouterNavigate = (
   onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
 ) => {
   const history = useHistory();
+
   return reactRouterNavigate(history, to, onClickCallback);
 };
 

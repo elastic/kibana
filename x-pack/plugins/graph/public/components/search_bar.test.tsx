@@ -7,7 +7,7 @@
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
-import React, { Component, ReactElement } from 'react';
+import React, { Component } from 'react';
 import {
   DocLinksStart,
   HttpStart,
@@ -15,12 +15,13 @@ import {
   NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import { QueryStringInput } from '../../../../../src/plugins/unified_search/public';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
-
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
@@ -59,6 +60,8 @@ function getServiceMocks() {
       query: {
         savedQueries: {},
       },
+    },
+    unifiedSearch: {
       autocomplete: {
         hasQuerySuggestions: () => false,
       },
@@ -100,6 +103,11 @@ describe('search_bar', () => {
       });
     },
   };
+
+  beforeEach(() => {
+    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+    setAutocomplete(autocompleteStart.autocomplete);
+  });
 
   beforeEach(() => {
     store = createMockGraphStore({
@@ -195,9 +203,7 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (
-      instance.find(QueryStringInput).prop('prepend') as ReactElement
-    ).props.children.props.onClick();
+    instance.find('[data-test-subj="graphDatasourceButton"]').first().simulate('click');
 
     expect(openSourceModal).toHaveBeenCalled();
   });

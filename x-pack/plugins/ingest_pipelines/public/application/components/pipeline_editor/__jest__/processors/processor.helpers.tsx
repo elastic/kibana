@@ -8,20 +8,20 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 
-import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
-import { HttpSetup } from 'kibana/public';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { HttpSetup } from '@kbn/core/public';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { uiMetricService, apiService } from '../../../../services';
-import { Props } from '../../';
+import { Props } from '../..';
 import { initHttpRequests } from '../http_requests.helpers';
 import { ProcessorsEditorWithDeps } from '../processors_editor';
 
 stubWebWorker();
 
-jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -180,4 +180,9 @@ type TestSubject =
   | 'transportField.input'
   | 'seedField.input'
   | 'copyFromInput'
-  | 'trimSwitch.input';
+  | 'trimSwitch.input'
+  | 'droppableList.addButton'
+  | 'droppableList.errorIcon'
+  | 'droppableList.input-0'
+  | 'droppableList.input-1'
+  | 'droppableList.input-2';

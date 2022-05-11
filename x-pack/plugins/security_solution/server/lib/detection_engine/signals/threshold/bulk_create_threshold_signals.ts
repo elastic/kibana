@@ -9,13 +9,13 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
 import set from 'set-value';
-import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger } from '../../../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
+import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
 import { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';

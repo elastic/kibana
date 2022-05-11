@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { getRuleMock, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
+import { legacyMigrate } from './utils';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 jest.mock('./patch_rules');
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
+jest.mock('./utils', () => {
+  const actual = jest.requireActual('./utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
+
+describe('updatePrepackagedRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let ruleExecutionLog: ReturnType<typeof ruleExecutionLogMock.forRoutes.create>;
@@ -27,6 +34,8 @@ describe.each([
     rulesClient = rulesClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
     ruleExecutionLog = ruleExecutionLogMock.forRoutes.create();
+
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -40,14 +49,13 @@ describe.each([
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, actions }],
       outputIndex,
-      isRuleRegistryEnabled,
       ruleExecutionLog
     );
 
@@ -71,14 +79,13 @@ describe.each([
       threat_query: 'threat:*',
     };
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, ...updatedThreatParams }],
       'output-index',
-      isRuleRegistryEnabled,
       ruleExecutionLog
     );
 

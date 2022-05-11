@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('./', () => ({
+jest.mock('.', () => ({
   generateReactRouterProps: ({ to }: { to: string }) => ({
     href: `/app/enterprise_search${to}`,
     onClick: () => {},

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
 import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
 
 import { deleteListItemsToBeOverwritten } from './delete_list_items_to_overwrite';

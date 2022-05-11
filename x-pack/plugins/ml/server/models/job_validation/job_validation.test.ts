@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../common/types/es_client';

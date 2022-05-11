@@ -8,7 +8,7 @@
 
 import { defaults } from 'lodash';
 import { DataViewsService, DataView } from '.';
-import { fieldFormatsMock } from '../../../field_formats/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';

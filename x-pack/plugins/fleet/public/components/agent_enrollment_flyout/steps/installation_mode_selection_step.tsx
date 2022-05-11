@@ -15,9 +15,11 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import type { FlyoutMode } from '../types';
 
 export const InstallationModeSelectionStep = ({
+  selectedPolicyId,
   mode,
   setMode,
 }: {
+  selectedPolicyId: string | undefined;
   mode: FlyoutMode;
   setMode: (v: FlyoutMode) => void;
 }): EuiContainedStepProps => {
@@ -32,10 +34,11 @@ export const InstallationModeSelectionStep = ({
   };
 
   return {
+    status: selectedPolicyId ? undefined : 'disabled',
     title: i18n.translate('xpack.fleet.agentEnrollment.stepInstallType', {
       defaultMessage: 'Enroll in Fleet?',
     }),
-    children: (
+    children: selectedPolicyId ? (
       <EuiRadioGroup
         options={[
           {
@@ -83,6 +86,6 @@ export const InstallationModeSelectionStep = ({
         onChange={onChangeCallback}
         name={`radio group ${radioSuffix}`}
       />
-    ),
+    ) : null,
   };
 };

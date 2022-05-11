@@ -24,6 +24,6 @@ export type {
   OptInConfig,
   ContextProviderOpts,
   TelemetryCounter,
-} from '@elastic/analytics';
+} from '@kbn/analytics-client';
 
-export { TelemetryCounterType } from '@elastic/analytics';
+export { TelemetryCounterType } from '@kbn/analytics-client';

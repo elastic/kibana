@@ -6,16 +6,73 @@
  * Side Public License, v 1.
  */
 
-import { xyVisFunction } from '../expression_functions';
-import { createMockExecutionContext } from '../../../../../plugins/expressions/common/mocks';
-import { sampleArgs } from '../__mocks__';
+import { xyVisFunction } from '.';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
+import { sampleArgs, sampleLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
 
 describe('xyVis', () => {
-  test('it renders with the specified data and args', () => {
+  test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
-    const result = xyVisFunction.fn(data, args, createMockExecutionContext());
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const result = await xyVisFunction.fn(
+      data,
+      { ...rest, ...restLayerArgs, referenceLineLayers: [], annotationLayers: [] },
+      createMockExecutionContext()
+    );
 
-    expect(result).toEqual({ type: 'render', as: XY_VIS, value: { data, args } });
+    expect(result).toEqual({
+      type: 'render',
+      as: XY_VIS,
+      value: {
+        args: {
+          ...rest,
+          layers: [{ layerType, table: data, layerId: 'dataLayers-0', type, ...restLayerArgs }],
+        },
+      },
+    });
+  });
+
+  test('it should throw error if splitRowAccessor is pointing to the absent column', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const splitRowAccessor = 'absent-accessor';
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          splitRowAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('it should throw error if splitColumnAccessor is pointing to the absent column', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const splitColumnAccessor = 'absent-accessor';
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLineLayers: [],
+          annotationLayers: [],
+          splitColumnAccessor,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });

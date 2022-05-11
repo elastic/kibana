@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-import { CaseStatuses } from '../../../../plugins/cases/common';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function CasesTableServiceProvider({ getService, getPageObject }: FtrProviderContext) {
@@ -124,6 +125,11 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
       await common.clickAndValidate('case-status-filter', `case-status-filter-${status}`);
 
       await testSubjects.click(`case-status-filter-${status}`);
+    },
+
+    async filterBySeverity(severity: CaseSeverityWithAll) {
+      await common.clickAndValidate('case-severity-filter', `case-severity-filter-${severity}`);
+      await testSubjects.click(`case-severity-filter-${severity}`);
     },
 
     async filterByReporter(reporter: string) {

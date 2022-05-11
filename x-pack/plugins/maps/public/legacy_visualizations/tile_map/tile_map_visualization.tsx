@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
-import type { Query, TimeRange } from '../../../../../../src/plugins/data/common';
+import type { Query, TimeRange } from '@kbn/data-plugin/common';
 import { TileMapVisConfig } from './types';
 import type { LazyLoadedMapModules } from '../../lazy_load_bundle';
 import { MapComponent } from '../../embeddable/map_component';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewsContract, DataViewField } from 'src/plugins/data_views/common';
-import type { Datatable, DatatableColumn } from 'src/plugins/expressions/common';
-import type { FieldFormatsStartCommon, FieldFormat } from 'src/plugins/field_formats/common';
+import type { DataView, DataViewsContract, DataViewField } from '@kbn/data-views-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { FieldFormatsStartCommon, FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { AggsCommonStart, AggConfig, CreateAggConfigParams, IAggType } from '../search';
 
 export class DatatableUtilitiesService {

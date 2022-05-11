@@ -8,15 +8,14 @@
 import { chunk } from 'lodash';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from 'src/core/server';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { Logger } from '@kbn/core/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { RulesClient, RuleExecutorServices } from '../../../../../alerting/server';
 
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
-import { isAlertType } from '../rules/types';
-import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
+import { isAlertType } from './types';
 import { findRules } from './find_rules';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 
@@ -45,8 +44,7 @@ export const getExportByObjectIds = async (
   exceptionsClient: ExceptionListClient | undefined,
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
@@ -56,8 +54,7 @@ export const getExportByObjectIds = async (
     rulesClient,
     savedObjectsClient,
     objects,
-    logger,
-    isRuleRegistryEnabled
+    logger
   );
 
   // Retrieve exceptions
@@ -83,8 +80,7 @@ export const getRulesFromObjects = async (
   rulesClient: RulesClient,
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ): Promise<RulesErrors> => {
   // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
   // then the KQL -> ES DSL query generator still puts them all in the same "should" array, but ES defaults
@@ -95,14 +91,11 @@ export const getRulesFromObjects = async (
   const chunkedObjects = chunk(objects, 1024);
   const filter = chunkedObjects
     .map((chunkedArray) => {
-      const joinedIds = chunkedArray
-        .map((object) => `"${INTERNAL_RULE_ID_KEY}:${object.rule_id}"`)
-        .join(' OR ');
-      return `alert.attributes.tags: (${joinedIds})`;
+      const joinedIds = chunkedArray.map((object) => object.rule_id).join(' OR ');
+      return `alert.attributes.params.ruleId: (${joinedIds})`;
     })
     .join(' OR ');
   const rules = await findRules({
-    isRuleRegistryEnabled,
     rulesClient,
     filter,
     page: 1,
@@ -122,7 +115,7 @@ export const getRulesFromObjects = async (
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
     if (
       matchingRule != null &&
-      isAlertType(isRuleRegistryEnabled, matchingRule) &&
+      isAlertType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
       return {

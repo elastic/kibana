@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { Observable } from 'rxjs';
-import type { CoreTheme } from 'kibana/public';
+import type { CoreTheme } from '@kbn/core/public';
 
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';

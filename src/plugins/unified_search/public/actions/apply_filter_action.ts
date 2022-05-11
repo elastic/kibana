@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ThemeServiceSetup } from 'kibana/public';
-import { toMountPoint } from '../../../kibana_react/public';
-import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { ThemeServiceSetup } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { Filter, FilterManager, TimefilterContract, esFilters } from '@kbn/data-plugin/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
-import { Filter, FilterManager, TimefilterContract, esFilters } from '../../../data/public';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 

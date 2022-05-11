@@ -13,10 +13,10 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { TaskManagerStartContract } from '../../../../../../../plugins/task_manager/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export interface SampleTaskManagerFixtureStartDeps {
   taskManager: TaskManagerStartContract;
@@ -88,7 +88,8 @@ export class SampleTaskManagerFixturePlugin
         req: KibanaRequest<any, any, any, any>,
         res: KibanaResponseFactory
       ): Promise<IKibanaResponse<any>> {
-        await context.core.elasticsearch.client.asInternalUser.indices.refresh({
+        const coreCtx = await context.core;
+        await coreCtx.elasticsearch.client.asInternalUser.indices.refresh({
           index: '.kibana_task_manager',
         });
         return res.ok({ body: {} });

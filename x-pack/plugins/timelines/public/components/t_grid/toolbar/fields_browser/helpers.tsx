@@ -6,10 +6,9 @@
  */
 
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
-import { pickBy } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { TimelineId } from '../../../../../public/types';
+import { TimelineId } from '../../../../types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
 import { ColumnHeaderOptions } from '../../../../../common';
@@ -108,27 +107,46 @@ export const filterSelectedBrowserFields = ({
 }): BrowserFields => {
   const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
 
-  const filteredBrowserFields: BrowserFields = Object.keys(browserFields).reduce(
-    (filteredCategories, categoryId) => ({
-      ...filteredCategories,
-      [categoryId]: {
-        ...browserFields[categoryId],
-        fields: pickBy(
-          ({ name }) => name != null && selectedFieldIds.has(name),
-          browserFields[categoryId].fields
-        ),
-      },
-    }),
-    {}
-  );
+  const result: Record<string, Partial<BrowserField>> = {};
 
-  // only pick non-empty categories from the filtered browser fields
-  const nonEmptyCategories: BrowserFields = pickBy(
-    (category) => categoryHasFields(category),
-    filteredBrowserFields
-  );
+  for (const [categoryName, categoryDescriptor] of Object.entries(browserFields)) {
+    if (!categoryDescriptor.fields) {
+      // ignore any category that is missing fields. This is not expected to happen.
+      // eslint-disable-next-line no-continue
+      continue;
+    }
 
-  return nonEmptyCategories;
+    // keep track of whether this category had a selected field, if so, we should emit it into the result
+    let hadSelected = false;
+
+    // The selected fields for this `categoryName`
+    const selectedFields: Record<string, Partial<BrowserField>> = {};
+
+    for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
+      // For historical reasons, we consider the name as it appears on the field descriptor, not the `fieldName` (attribute name) itself.
+      // It is unclear if there is any point in continuing to do this.
+      const fieldNameFromDescriptor = fieldDescriptor.name;
+
+      if (!fieldNameFromDescriptor) {
+        // Ignore any field that is missing a name in its descriptor. This is not expected to happen.
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      if (selectedFieldIds.has(fieldNameFromDescriptor)) {
+        hadSelected = true;
+        selectedFields[fieldName] = fieldDescriptor;
+      }
+    }
+
+    if (hadSelected) {
+      result[categoryName] = {
+        ...browserFields[categoryName],
+        fields: selectedFields,
+      };
+    }
+  }
+  return result;
 };
 
 export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>

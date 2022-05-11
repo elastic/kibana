@@ -13,6 +13,7 @@ export { cleanWriteTargets } from './lib/utils/clean_write_targets';
 export { createLogger, LogLevel } from './lib/utils/create_logger';
 
 export type { Fields } from './lib/entity';
+export type { ApmFields } from './lib/apm/apm_fields';
 export type { ApmException, ApmSynthtraceEsClient } from './lib/apm';
-export type { SpanIterable } from './lib/span_iterable';
-export { SpanArrayIterable } from './lib/span_iterable';
+export type { EntityIterable } from './lib/entity_iterable';
+export { EntityArrayIterable } from './lib/entity_iterable';

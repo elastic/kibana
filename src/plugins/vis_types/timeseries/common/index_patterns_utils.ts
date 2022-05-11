@@ -7,8 +7,8 @@
  */
 
 import { uniq } from 'lodash';
-import type { Panel, IndexPatternValue, FetchedIndexPattern } from '../common/types';
-import { DataViewsService } from '../../../data_views/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { Panel, IndexPatternValue, FetchedIndexPattern } from './types';
 
 export const isStringTypeIndexPattern = (
   indexPatternValue: IndexPatternValue

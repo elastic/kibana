@@ -7,13 +7,14 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  IKibanaResponse,
   IScopedClusterClient,
-  KibanaResponseFactory,
   Logger,
   RequestHandler,
   SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { errorHandler } from '../error_handler';
 import {
   HostInfo,
   HostMetadata,
@@ -24,18 +25,13 @@ import {
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { kibanaRequestToMetadataListESQuery } from './query_builders';
-import { PackagePolicy } from '../../../../../fleet/common/types/models';
-import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
-import { GetMetadataRequestSchema } from './index';
+import { GetMetadataRequestSchema } from '.';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
 import { queryResponseToHostListResult } from './support/query_strategies';
-import { NotFoundError } from '../../errors';
-import { EndpointHostUnEnrolledError } from '../../services/metadata';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import {
   ENDPOINT_DEFAULT_PAGE,
@@ -56,32 +52,6 @@ export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
 };
 
-const errorHandler = <E extends Error>(
-  logger: Logger,
-  res: KibanaResponseFactory,
-  error: E
-): IKibanaResponse => {
-  logger.error(error);
-
-  if (error instanceof CustomHttpRequestError) {
-    return res.customError({
-      statusCode: error.statusCode,
-      body: error,
-    });
-  }
-
-  if (error instanceof NotFoundError) {
-    return res.notFound({ body: error });
-  }
-
-  if (error instanceof EndpointHostUnEnrolledError) {
-    return res.badRequest({ body: error });
-  }
-
-  // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error
-  throw error;
-};
-
 export function getMetadataListRequestHandler(
   endpointAppContext: EndpointAppContext,
   logger: Logger
@@ -94,7 +64,7 @@ export function getMetadataListRequestHandler(
   return async (context, request, response) => {
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
     const fleetServices = endpointAppContext.service.getScopedFleetServices(request);
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     let doesUnitedIndexExist = false;
     let didUnitedIndexError = false;
@@ -168,9 +138,10 @@ export const getMetadataRequestHandler = function (
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
 
     try {
+      const esClient = (await context.core).elasticsearch.client;
       return response.ok({
         body: await endpointMetadataService.getEnrichedHostMetadata(
-          context.core.elasticsearch.client.asInternalUser,
+          esClient.asInternalUser,
           endpointAppContext.service.getScopedFleetServices(request),
           request.params.id
         ),
@@ -185,7 +156,7 @@ export function getMetadataTransformStatsHandler(
   logger: Logger
 ): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> {
   return async (context, _, response) => {
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     try {
       const transformStats = await esClient.transform.getTransformStats({
         transform_id: METADATA_TRANSFORMS_PATTERN,
@@ -235,19 +206,14 @@ export async function enrichHostMetadata(
   let hostStatus = HostStatus.UNHEALTHY;
   let elasticAgentId = hostMetadata?.elastic?.agent?.id;
   const log = metadataRequestContext.logger;
+  const coreContext = await metadataRequestContext.requestHandlerContext?.core;
 
   try {
-    if (
-      !metadataRequestContext.esClient &&
-      !metadataRequestContext.requestHandlerContext?.core.elasticsearch.client
-    ) {
+    if (!metadataRequestContext.esClient && !coreContext?.elasticsearch.client) {
       throw new Error('esClient not found');
     }
 
-    if (
-      !metadataRequestContext.savedObjectsClient &&
-      !metadataRequestContext.requestHandlerContext?.core.savedObjects
-    ) {
+    if (!metadataRequestContext.savedObjectsClient && !coreContext?.savedObjects) {
       throw new Error('esSavedObjectClient not found');
     }
   } catch (e) {
@@ -257,8 +223,8 @@ export async function enrichHostMetadata(
 
   const esSavedObjectClient =
     metadataRequestContext?.savedObjectsClient ??
-    (metadataRequestContext.requestHandlerContext?.core.savedObjects
-      .client as SavedObjectsClientContract);
+    (coreContext?.savedObjects.client as SavedObjectsClientContract);
+  const fleetContext = await metadataRequestContext.requestHandlerContext?.fleet;
 
   try {
     /**
@@ -270,10 +236,7 @@ export async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    const status =
-      await metadataRequestContext.requestHandlerContext?.fleet?.agentClient.asCurrentUser.getAgentStatusById(
-        elasticAgentId
-      );
+    const status = await fleetContext?.agentClient.asCurrentUser.getAgentStatusById(elasticAgentId);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     hostStatus = fleetAgentStatusToEndpointHostStatus(status!);
   } catch (e) {
@@ -287,10 +250,7 @@ export async function enrichHostMetadata(
 
   let policyInfo: HostInfo['policy_info'];
   try {
-    const agent =
-      await metadataRequestContext.requestHandlerContext?.fleet?.agentClient.asCurrentUser.getAgent(
-        elasticAgentId
-      );
+    const agent = await fleetContext?.agentClient.asCurrentUser.getAgent(elasticAgentId);
     const agentPolicy = await metadataRequestContext.endpointAppContextService
       .getAgentPolicyService()
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -338,17 +298,18 @@ async function legacyListMetadataQuery(
   queryOptions: GetMetadataListRequestQuery
 ): Promise<HostResultList> {
   const fleetAgentClient = fleetServices.agent;
+  const coreContext = await context.core;
 
   const metadataRequestContext: MetadataRequestContext = {
-    esClient: context.core.elasticsearch.client,
+    esClient: coreContext.elasticsearch.client,
     endpointAppContextService: endpointAppContext.service,
     logger,
     requestHandlerContext: context,
-    savedObjectsClient: context.core.savedObjects.client,
+    savedObjectsClient: coreContext.savedObjects.client,
   };
 
   const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   const unenrolledAgentIds = await findAllUnenrolledAgentIds(fleetAgentClient, endpointPolicyIds);
 

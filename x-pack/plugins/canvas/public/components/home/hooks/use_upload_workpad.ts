@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObject } from 'kibana/public';
+import { SavedObject } from '@kbn/core/public';
 import { CANVAS, JSON as JSONString } from '../../../../i18n/constants';
 import { useNotifyService } from '../../../services';
 import { getId } from '../../../lib/get_id';

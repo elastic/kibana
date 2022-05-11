@@ -7,8 +7,9 @@
  */
 
 import { Position } from '@elastic/charts';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
 import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -64,8 +65,17 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       strict: true,
     },
     legendSize: {
-      types: ['number'],
+      types: ['string'],
+      default: DEFAULT_LEGEND_SIZE,
       help: strings.getLegendSizeArgHelp(),
+      options: [
+        LegendSize.AUTO,
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+      ],
+      strict: true,
     },
     nestedLegend: {
       types: ['boolean'],
@@ -134,6 +144,9 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
     };
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
         context,
         [

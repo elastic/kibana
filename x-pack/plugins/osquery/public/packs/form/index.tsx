@@ -162,6 +162,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         policyIds,
         (acc, policyId) => {
           const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
+
           return acc + (agentPolicy?.agents ?? 0);
         },
         0
@@ -177,6 +178,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const handleSaveClick = useCallback(() => {
     if (agentCount) {
       setShowConfirmationModal(true);
+
       return;
     }
 

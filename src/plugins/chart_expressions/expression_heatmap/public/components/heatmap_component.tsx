@@ -22,13 +22,17 @@ import {
   ESCalendarIntervalUnit,
   PartialTheme,
 } from '@elastic/charts';
-import type { CustomPaletteState } from '../../../../charts/public';
-import { search } from '../../../../data/public';
-import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { search } from '@kbn/data-plugin/public';
+import { LegendToggle, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
   getAccessorByDimension,
   getFormatByAccessor,
-} from '../../../../visualizations/common/utils';
+} from '@kbn/visualizations-plugin/common/utils';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import {
@@ -485,7 +489,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}
-              legendSize={args.legend.legendSize}
+              legendSize={LegendSizeToPixels[args.legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}

@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import {
   formatDurationFromTimeUnitChar,
   TimeUnitChar,
-} from '../../../../../observability/common/utils/formatters/duration';
+} from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(

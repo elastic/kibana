@@ -10,8 +10,9 @@ import { mount, ReactWrapper } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
-import { Sourcerer } from './index';
+import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
+import { sortWithExcludesAtEnd } from '../../store/sourcerer/helpers';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -25,6 +26,7 @@ import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId, TimelineType } from '../../../../common/types';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 
 const mockDispatch = jest.fn();
 
@@ -43,8 +45,8 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,
@@ -52,32 +54,24 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
   };
 });
 
-const mockOptions = [
-  { label: 'apm-*-transaction*', value: 'apm-*-transaction*' },
-  { label: 'auditbeat-*', value: 'auditbeat-*' },
-  { label: 'endgame-*', value: 'endgame-*' },
-  { label: 'filebeat-*', value: 'filebeat-*' },
-  { label: 'logs-*', value: 'logs-*' },
-  { label: 'packetbeat-*', value: 'packetbeat-*' },
-  { label: 'traces-apm*', value: 'traces-apm*' },
-  { label: 'winlogbeat-*', value: 'winlogbeat-*' },
-];
+const mockOptions = DEFAULT_INDEX_PATTERN.map((index) => ({ label: index, value: index }));
 
 const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
 
 const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
-  availableOptionCount: wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).length,
+  availableOptionCount:
+    wrapper.find('List').length > 0 ? wrapper.find('List').prop('itemCount') : 0,
   optionsSelected: patterns.every((pattern) =>
     wrapper.find(`[data-test-subj="sourcerer-combo-box"] span[title="${pattern}"]`).first().exists()
   ),
 });
 
 const { id, patternList, title } = mockGlobalState.sourcerer.defaultDataView;
-const patternListNoSignals = patternList
-  .filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
-  .sort();
+const patternListNoSignals = sortWithExcludesAtEnd(
+  patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
+);
 let store: ReturnType<typeof createStore>;
 const sourcererDataView = {
   indicesExist: true,
@@ -88,11 +82,10 @@ describe('Sourcerer component', () => {
   const { storage } = createSecuritySolutionStorageMock();
   const pollForSignalIndexMock = jest.fn();
   beforeEach(() => {
+    jest.clearAllMocks();
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     (useSignalHelpers as jest.Mock).mockReturnValue({ signalIndexNeedsInit: false });
-
-    jest.clearAllMocks();
   });
 
   afterAll(() => {
@@ -134,10 +127,7 @@ describe('Sourcerer component', () => {
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="sourcerer-tooltip"]').prop('content')).toEqual(
-      mockOptions
-        .map((p) => p.label)
-        .sort()
-        .join(', ')
+      sortWithExcludesAtEnd(mockOptions.map((p) => p.label)).join(', ')
     );
   });
 

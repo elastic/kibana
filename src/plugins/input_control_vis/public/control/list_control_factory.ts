@@ -12,8 +12,8 @@ import {
   TimefilterContract,
   SerializedSearchSourceFields,
   DataPublicPluginStart,
-} from 'src/plugins/data/public';
-import { DataViewField } from '../../../data_views/public';
+} from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';

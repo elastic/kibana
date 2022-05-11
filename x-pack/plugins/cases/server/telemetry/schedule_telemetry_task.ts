@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { Logger } from '@kbn/core/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { CASES_TELEMETRY_TASK_NAME } from '../../common/constants';
 
 const MINUTES_ON_HALF_DAY = 60 * 12;

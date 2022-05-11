@@ -10,7 +10,7 @@ import { IndexPatternField } from './data_view_field';
 import { IndexPattern } from '..';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldSpec, RuntimeField } from '../types';
-import { FieldFormat } from '../../../field_formats/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {

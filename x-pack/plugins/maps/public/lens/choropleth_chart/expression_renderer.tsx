@@ -7,9 +7,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { IInterpreterRenderHandlers } from 'src/plugins/expressions/public';
-import type { EmbeddableFactory } from 'src/plugins/embeddable/public';
-import type { CoreSetup, CoreStart } from 'src/core/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import type { ChoroplethChartProps } from './types';
 import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';

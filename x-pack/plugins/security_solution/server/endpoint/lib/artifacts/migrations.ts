@@ -9,7 +9,7 @@ import {
   SavedObjectMigrationMap,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import { InternalManifestSchema } from '../../schemas/artifacts';
 

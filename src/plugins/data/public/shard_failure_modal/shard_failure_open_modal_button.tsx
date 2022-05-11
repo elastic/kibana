@@ -10,9 +10,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { getOverlays } from '../services';
-import { ThemeServiceStart } from '../../../../core/public';
-import { toMountPoint } from '../../../kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ShardFailureRequest } from './shard_failure_types';
 

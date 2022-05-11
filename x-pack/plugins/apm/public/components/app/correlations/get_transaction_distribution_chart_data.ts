@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { HistogramItem } from '../../../../common/correlations/types';
 import { TransactionDistributionChartData } from '../../shared/charts/transaction_distribution_chart';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';

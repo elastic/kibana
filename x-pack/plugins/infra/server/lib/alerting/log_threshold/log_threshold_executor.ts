@@ -12,7 +12,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ActionGroup,
   ActionGroupIdsOf,
@@ -20,7 +20,7 @@ import {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RuleTypeState,
-} from '../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
 
 import {
   RuleParams,

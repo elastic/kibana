@@ -19,18 +19,15 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 import { CommentType } from '../../../common/api';
 
-import { savedObjectsServiceMock } from '../../../../../../src/core/server/mocks';
-import { makeLensEmbeddableFactory } from '../../../../lens/server/embeddable/make_lens_embeddable_factory';
-import { LensDocShape715 } from '../../../../lens/server';
+import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
+import { LensDocShape715 } from '@kbn/lens-plugin/server';
 import {
   SavedObjectReference,
   SavedObjectsMigrationLogger,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/core/server';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 

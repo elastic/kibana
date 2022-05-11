@@ -8,13 +8,12 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import { KibanaResponseFactory, Logger } from 'src/core/server';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { RuleAlertType } from '../../rules/types';
-
-import type { RulesClient } from '../../../../../../alerting/server';
-import { SanitizedRule } from '../../../../../../alerting/common';
 
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -42,7 +41,6 @@ import { editRule } from '../../rules/edit_rule';
 import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -148,13 +146,11 @@ const fetchRulesByQueryOrIds = async ({
   query,
   ids,
   rulesClient,
-  isRuleRegistryEnabled,
   abortSignal,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
-  isRuleRegistryEnabled: boolean;
   abortSignal: AbortSignal;
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
@@ -162,7 +158,7 @@ const fetchRulesByQueryOrIds = async ({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: ids,
       executor: async (id: string) => {
-        const rule = await readRules({ id, rulesClient, isRuleRegistryEnabled, ruleId: undefined });
+        const rule = await readRules({ id, rulesClient, ruleId: undefined });
         if (rule == null) {
           throw Error('Rule not found');
         }
@@ -173,7 +169,6 @@ const fetchRulesByQueryOrIds = async ({
   }
 
   const { data, total } = await findRules({
-    isRuleRegistryEnabled,
     rulesClient,
     perPage: MAX_RULES_TO_PROCESS_TOTAL,
     filter: query !== '' ? query : undefined,
@@ -231,8 +226,7 @@ export const migrateRuleActions = async ({
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ) => {
   router.post(
     {
@@ -272,20 +266,27 @@ export const performBulkActionRoute = (
       request.events.completed$.subscribe(() => abortController.abort());
 
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const exceptionsClient = context.lists?.getExceptionListClient();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'licensing',
+          'lists',
+        ]);
+
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
         });
 
         const fetchRulesOutcome = await fetchRulesByQueryOrIds({
-          isRuleRegistryEnabled,
           rulesClient,
           query: body.query,
           ids: body.ids,
@@ -380,7 +381,7 @@ export const performBulkActionRoute = (
                 throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
 
                 const createdRule = await rulesClient.create({
-                  data: duplicateRule(migratedRule, isRuleRegistryEnabled),
+                  data: duplicateRule(migratedRule),
                 });
 
                 return createdRule;
@@ -394,8 +395,7 @@ export const performBulkActionRoute = (
               exceptionsClient,
               savedObjectsClient,
               rules.map(({ params }) => ({ rule_id: params.ruleId })),
-              logger,
-              isRuleRegistryEnabled
+              logger
             );
 
             const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;

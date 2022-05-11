@@ -12,11 +12,11 @@ import '../../mock/match_media';
 import * as i18n from './translations';
 import { AuthenticationsHostTable } from './authentications_host_table';
 import { hostsModel } from '../../../hosts/store';
-import { TestProviders } from '../../../common/mock';
-import { useAuthentications } from '../../../common/containers/authentications';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { TestProviders } from '../../mock';
+import { useAuthentications } from '../../containers/authentications';
+import { useQueryToggle } from '../../containers/query_toggle';
 
-jest.mock('../../../common/containers/query_toggle', () => ({
+jest.mock('../../containers/query_toggle', () => ({
   useQueryToggle: jest.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() }),
 }));
 jest.mock('../../containers/authentications', () => ({

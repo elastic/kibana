@@ -23,6 +23,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { CustomUrlEditor, CustomUrlList } from '../../../../components/custom_url_editor';
 import {
   getNewCustomUrlDefaults,
@@ -32,12 +34,10 @@ import {
   getTestUrl,
   CustomUrlSettings,
 } from '../../../../components/custom_url_editor/utils';
-import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { loadSavedDashboards, loadDataViewListItems } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
 import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { DataViewListItem } from '../../../../../../../../../../src/plugins/data_views/common';
 import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
 
 const MAX_NUMBER_DASHBOARDS = 1000;

@@ -9,7 +9,7 @@
 import { getMatchedIndices } from './get_matched_indices';
 import { Tag, MatchedItem } from '../types';
 
-jest.mock('./../constants', () => ({
+jest.mock('../constants', () => ({
   MAX_NUMBER_OF_MATCHING_INDICES: 6,
 }));
 

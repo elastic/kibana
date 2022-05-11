@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IInterpreterRenderHandlers } from '../../../../../../src/plugins/expressions';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { ShapeRendererConfig } from '../../../common/types';
 
 export interface ShapeComponentProps extends ShapeRendererConfig {

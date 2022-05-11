@@ -10,13 +10,14 @@ import { EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
-import { withKibana } from '../../../../kibana_react/public';
 
 interface Props extends PhraseSuggestorProps {
   values?: string[];
   onChange: (values: string[]) => void;
+  onParamsUpdate: (value: string) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
 }
@@ -24,7 +25,7 @@ interface Props extends PhraseSuggestorProps {
 class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
   public render() {
     const { suggestions } = this.state;
-    const { values, intl, onChange, fullWidth } = this.props;
+    const { values, intl, onChange, fullWidth, onParamsUpdate } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
       <EuiFormRow
@@ -40,11 +41,14 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
             id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',
           })}
+          delimiter=","
           options={options}
           getLabel={(option) => option}
           selectedOptions={values || []}
           onSearchChange={this.onSearchChange}
-          onCreateOption={(option: string) => onChange([...(values || []), option])}
+          onCreateOption={(option: string) => {
+            onParamsUpdate(option.trim());
+          }}
           onChange={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { RuleNotifyWhenType } from '../../common';
 import { UpdateOptions } from '../rules_client';
@@ -119,7 +119,7 @@ export const updateRuleRoute = (
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = context.alerting.getRulesClient();
+          const rulesClient = (await context.alerting).getRulesClient();
           const { id } = req.params;
           const rule = req.body;
           try {

@@ -8,15 +8,15 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
-import { CoreTheme } from 'kibana/public';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { CoreTheme } from '@kbn/core/public';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { CoreSetup } from '../../../../core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
+import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
 import { ProgressRendererConfig } from '../../common/types';
 import { LazyProgressComponent } from '../components/progress';
-import { withSuspense, defaultTheme$ } from '../../../presentation_util/public';
 
 const ProgressComponent = withSuspense(LazyProgressComponent);
 

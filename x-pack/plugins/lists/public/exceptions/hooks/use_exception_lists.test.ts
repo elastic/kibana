@@ -12,8 +12,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as api from '@kbn/securitysolution-list-api';
 import { ReturnExceptionLists, useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
 
 const mockKibanaHttpService = coreMock.createStart().http;

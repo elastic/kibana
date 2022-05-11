@@ -12,7 +12,7 @@ import { TimeIntervalParamEditor } from './time_interval';
 import { aggParamCommonPropsMock } from './test_utils';
 import { AggParamEditorProps } from '../agg_param_props';
 
-jest.mock('../../../../data/public', () => ({
+jest.mock('@kbn/data-plugin/public', () => ({
   search: {
     aggs: {
       isValidInterval: jest.fn().mockReturnValue(true),
@@ -22,7 +22,7 @@ jest.mock('../../../../data/public', () => ({
   },
 }));
 
-import { search } from '../../../../data/public';
+import { search } from '@kbn/data-plugin/public';
 
 describe('TimeIntervalParamEditor', () => {
   let props: AggParamEditorProps<string>;

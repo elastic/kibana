@@ -6,7 +6,7 @@
  */
 
 import type { outputType } from '../../constants';
-import type { ValueOf } from '../index';
+import type { ValueOf } from '..';
 
 export type OutputType = typeof outputType;
 

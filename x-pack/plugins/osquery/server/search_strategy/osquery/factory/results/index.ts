@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 import {
   ResultsStrategyResponse,
@@ -21,6 +21,7 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
+
     return buildResultsQuery(options);
   },
   parse: async (

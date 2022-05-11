@@ -17,14 +17,14 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Filter, ISearchSource } from '../../../../../../../src/plugins/data/common';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { Filter, ISearchSource } from '@kbn/data-plugin/common';
 import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
   ThresholdExpression,
   ValueExpression,
-} from '../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { ReadOnlyFilterItems } from './read_only_filter_items';
 

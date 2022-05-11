@@ -25,11 +25,11 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import type { Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '../../../config';
 import { errors } from '../../../../common';
-import { getChromiumDisconnectedError } from '../';
+import { getChromiumDisconnectedError } from '..';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -114,10 +114,6 @@ export class HeadlessChromiumDriverFactory {
     const dataDir = getDataPath();
     fs.mkdirSync(dataDir, { recursive: true });
     this.userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
-
-    if (this.config.browser.chromium.disableSandbox) {
-      logger.warn(`Enabling the Chromium sandbox provides an additional layer of protection.`);
-    }
   }
 
   private getChromiumArgs() {

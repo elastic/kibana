@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { AlertingSetup, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';

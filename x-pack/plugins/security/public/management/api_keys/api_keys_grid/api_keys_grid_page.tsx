@@ -28,14 +28,14 @@ import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
 
+import type { NotificationsStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart } from 'src/core/public';
 
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
-import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';

@@ -13,9 +13,8 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
-} from '../../../../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { RowRenderer } from '../../../../../../../common/types';
-import { BrowserFields } from '../../../../../../common/containers/source';
 import { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
@@ -37,7 +36,6 @@ import * as i18n from '../translations';
  */
 export const StatefulRowRenderer = ({
   ariaRowindex,
-  browserFields,
   containerRef,
   event,
   lastFocusedAriaColindex,
@@ -45,7 +43,6 @@ export const StatefulRowRenderer = ({
   timelineId,
 }: {
   ariaRowindex: number;
-  browserFields: BrowserFields;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   event: TimelineItem;
   lastFocusedAriaColindex: number;
@@ -78,7 +75,6 @@ export const StatefulRowRenderer = ({
               </EuiScreenReaderOnly>
               <div onKeyDown={onKeyDown}>
                 {rowRenderer.renderRow({
-                  browserFields,
                   data: event.ecs,
                   isDraggable: true,
                   timelineId,
@@ -90,7 +86,6 @@ export const StatefulRowRenderer = ({
       ),
     [
       ariaRowindex,
-      browserFields,
       event.ecs,
       focusOwnership,
       onFocus,

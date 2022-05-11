@@ -13,7 +13,7 @@ import {
 import { getHistogramsForFields } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 import { wrapError, wrapEsError } from './error_utils';
 
@@ -32,8 +32,9 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
         const { query, fields, runtimeMappings, samplerShardSize } = req.body;
 
         try {
+          const esClient = (await ctx.core).elasticsearch.client;
           const resp = await getHistogramsForFields(
-            ctx.core.elasticsearch.client,
+            esClient,
             dataViewTitle,
             query,
             fields,

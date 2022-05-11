@@ -53,12 +53,12 @@ Cypress.Commands.add(
     cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').click();
     cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .eq(0)
-      .clear()
+      .clear({ force: true })
       .type(moment(start).format(format), { force: true });
     cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').click();
     cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .eq(1)
-      .clear()
+      .clear({ force: true })
       .type(moment(end).format(format), { force: true });
   }
 );

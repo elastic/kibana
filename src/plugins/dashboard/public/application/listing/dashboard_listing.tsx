@@ -17,6 +17,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -26,7 +28,6 @@ import {
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
 } from '../../dashboard_strings';
-import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
@@ -35,7 +36,6 @@ import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
-import { useExecutionContext } from '../../../../kibana_react/public';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';

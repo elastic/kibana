@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AsApiContract } from '@kbn/actions-plugin/common';
 import { RuleExecutionStatus, Rule, RuleAction, RuleType } from '../../common';
-import { AsApiContract } from '../../../actions/common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
   const { connector_type_id: actionTypeId, ...rest } = input;

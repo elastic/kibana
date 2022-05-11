@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
-import { IUiSettingsClient } from 'kibana/public';
-import type { EmbeddableFactory } from 'src/plugins/embeddable/public';
-import type { Datatable } from 'src/plugins/expressions/public';
-import type { FormatFactory } from 'src/plugins/field_formats/common';
+import { IUiSettingsClient } from '@kbn/core/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
@@ -45,12 +45,10 @@ export function ChoroplethChart({
     return null;
   }
 
-  const table = data.tables[args.layerId];
-
   let emsLayerId = args.emsLayerId ? args.emsLayerId : emsWorldLayerId;
   let emsField = args.emsField ? args.emsField : 'iso2';
   if (!args.emsLayerId || !args.emsField) {
-    const emsSuggestion = getEmsSuggestion(emsFileLayers, table, args.regionAccessor);
+    const emsSuggestion = getEmsSuggestion(emsFileLayers, data, args.regionAccessor);
     if (emsSuggestion) {
       emsLayerId = emsSuggestion.layerId;
       emsField = emsSuggestion.field;
@@ -66,7 +64,7 @@ export function ChoroplethChart({
           defaultMessage: '{emsLayerLabel} by {accessorLabel}',
           values: {
             emsLayerLabel,
-            accessorLabel: getAccessorLabel(table, args.valueAccessor),
+            accessorLabel: getAccessorLabel(data, args.valueAccessor),
           },
         })
       : '',
@@ -76,16 +74,16 @@ export function ChoroplethChart({
         right: {
           id: args.valueAccessor,
           type: SOURCE_TYPES.TABLE_SOURCE,
-          __rows: table.rows,
+          __rows: data.rows,
           __columns: [
             {
               name: args.regionAccessor,
-              label: getAccessorLabel(table, args.regionAccessor),
+              label: getAccessorLabel(data, args.regionAccessor),
               type: 'string',
             },
             {
               name: args.valueAccessor,
-              label: getAccessorLabel(table, args.valueAccessor),
+              label: getAccessorLabel(data, args.valueAccessor),
               type: 'number',
             },
           ],

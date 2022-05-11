@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import SemVer from 'semver/classes/semver';
 
-import { CoreStart, CoreSetup } from '../../../../../src/core/public';
+import { CoreStart, CoreSetup } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common';
 import {

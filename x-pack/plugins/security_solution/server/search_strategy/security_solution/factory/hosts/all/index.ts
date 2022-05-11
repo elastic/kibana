@@ -7,7 +7,8 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
   HostAggEsItem,
@@ -27,7 +28,6 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { buildHostsQuery } from './query.all_hosts.dsl';
 import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
-import { IScopedClusterClient } from '../../../../../../../../../src/core/server';
 
 import { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';

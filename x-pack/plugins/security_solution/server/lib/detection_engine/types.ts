@@ -28,6 +28,7 @@ import { Version } from '@kbn/securitysolution-io-ts-types';
 
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter } from '@kbn/es-query';
+import { RuleTypeParams as AlertingRuleTypeParams } from '@kbn/alerting-plugin/common';
 import {
   AnomalyThresholdOrUndefined,
   Description,
@@ -52,8 +53,6 @@ import {
   TimestampOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
-
-import { RuleTypeParams as AlertingRuleTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;
 

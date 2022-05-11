@@ -215,6 +215,25 @@ exports.Cluster = class Cluster {
         }),
       ]);
     });
+
+    if (options.onEarlyExit) {
+      this._outcome
+        .then(
+          () => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly`);
+            }
+          },
+          (error) => {
+            if (!this._stopCalled) {
+              options.onEarlyExit(`ES exitted unexpectedly: ${error.stack}`);
+            }
+          }
+        )
+        .catch((error) => {
+          throw new Error(`failure handling early exit: ${error.stack}`);
+        });
+    }
   }
 
   /**
@@ -257,6 +276,24 @@ exports.Cluster = class Cluster {
 
     await treeKillAsync(this._process.pid);
 
+    await this._outcome;
+  }
+
+  /**
+   * Stops ES process, it it's running, without waiting for it to shutdown gracefully
+   */
+  async kill() {
+    if (this._stopCalled) {
+      return;
+    }
+
+    this._stopCalled;
+
+    if (!this._process || !this._outcome) {
+      throw new Error('ES has not been started');
+    }
+
+    await treeKillAsync(this._process.pid, 'SIGKILL');
     await this._outcome;
   }
 

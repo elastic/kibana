@@ -17,7 +17,7 @@ export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];
   onToggleDataset: (dataset: string) => void;
 }> = memo(({ selectedDatasets, onToggleDataset }) => {
-  const { data } = useStartServices();
+  const { unifiedSearch } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
@@ -29,7 +29,7 @@ export const DatasetFilter: React.FunctionComponent<{
     const fetchValues = async () => {
       setIsLoading(true);
       try {
-        const values = await data.autocomplete.getValueSuggestions({
+        const values = await unifiedSearch.autocomplete.getValueSuggestions({
           indexPattern: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [DATASET_FIELD],
@@ -44,7 +44,7 @@ export const DatasetFilter: React.FunctionComponent<{
       setIsLoading(false);
     };
     fetchValues();
-  }, [data.autocomplete]);
+  }, [unifiedSearch.autocomplete]);
 
   return (
     <EuiPopover

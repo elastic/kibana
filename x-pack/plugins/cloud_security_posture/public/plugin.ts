@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type {
   CspClientPluginSetup,
   CspClientPluginStart,
@@ -13,7 +14,6 @@ import type {
   CspClientPluginStartDeps,
 } from './types';
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 
 export class CspPlugin
   implements
@@ -35,7 +35,7 @@ export class CspPlugin
       category: DEFAULT_APP_CATEGORIES.security,
       async mount(params: AppMountParameters) {
         // Load application bundle
-        const { renderApp } = await import('./application/index');
+        const { renderApp } = await import('./application');
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application

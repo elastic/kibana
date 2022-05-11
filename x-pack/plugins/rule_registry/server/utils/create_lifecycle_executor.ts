@@ -18,7 +18,7 @@ import {
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
-} from '../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {

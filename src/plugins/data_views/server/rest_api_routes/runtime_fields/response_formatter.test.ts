@@ -8,7 +8,7 @@
 
 import { responseFormatter } from './response_formatter';
 import { SERVICE_KEY, SERVICE_KEY_LEGACY } from '../../constants';
-import { DataView, DataViewField } from 'src/plugins/data_views/common';
+import { DataView, DataViewField } from '../../../common';
 
 const dataView = {
   toSpec: () => {

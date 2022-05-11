@@ -9,7 +9,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
-import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '../task_running';
+import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '.';
 import {
   TaskEvent,
   asTaskRunEvent,
@@ -18,15 +18,15 @@ import {
   TaskPersistence,
 } from '../task_events';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
-import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
@@ -1516,6 +1516,54 @@ describe('TaskManagerRunner', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         `Skipping reschedule for task bar \"${id}\" due to the task expiring`
       );
+    });
+
+    test('Prints debug logs on task start/end', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
+    });
+
+    test('Prints debug logs on task start/end even if it throws error', async () => {
+      const { runner, logger } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                throw new Error();
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
+        tags: ['task:start', 'foo', 'bar'],
+      });
+      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+        tags: ['task:end', 'foo', 'bar'],
+      });
     });
   });
 

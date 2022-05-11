@@ -12,19 +12,19 @@ import {
   OverlayStart,
   SavedObjectsClientContract,
   SavedObjectAttributes,
-} from 'kibana/public';
+} from '@kbn/core/public';
 
 import {
   SavedObjectSaveOpts,
   checkForDuplicateTitle,
   saveWithConfirmation,
   isErrorNonFatal,
-} from '../../../../../src/plugins/saved_objects/public';
+} from '@kbn/saved-objects-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   injectReferences,
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
-import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/public';
 import { GraphWorkspaceSavedObject } from '../types';
 
 const savedWorkspaceType = 'graph-workspace';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, HttpStart } from 'kibana/public';
+import { CoreStart, HttpStart } from '@kbn/core/public';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
-import { HasDataViewsResponse, IndicesResponse, IndicesResponseModified } from '../';
+import { HasDataViewsResponse, IndicesResponse, IndicesResponseModified } from '..';
 
 export class HasData {
   private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;

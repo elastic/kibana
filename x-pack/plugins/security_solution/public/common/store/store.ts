@@ -20,6 +20,8 @@ import {
 import { createEpicMiddleware } from 'redux-observable';
 import { Observable } from 'rxjs';
 
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
 import { timelineSelectors } from '../../timelines/store/timeline';
@@ -29,8 +31,6 @@ import { createRootEpic } from './epic';
 import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
 import { State } from './types';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { CoreStart } from '../../../../../../src/core/public';
 import { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
 
 type ComposeType = typeof compose;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Datatable } from 'src/plugins/expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 import type { PaletteOutput } from '@kbn/coloring';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   Visualization,
   Datasource,
