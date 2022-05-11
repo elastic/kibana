@@ -57,10 +57,6 @@ const Spacer = styled.span`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
-`;
-
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
@@ -207,7 +203,7 @@ export const useCasesColumns = ({
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
           const badges = (
-            <TagWrapper data-test-subj="case-table-column-tags">
+            <EuiBadgeGroup data-test-subj="case-table-column-tags">
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
@@ -217,7 +213,7 @@ export const useCasesColumns = ({
                   {tag}
                 </EuiBadge>
               ))}
-            </TagWrapper>
+            </EuiBadgeGroup>
           );
 
           return (
