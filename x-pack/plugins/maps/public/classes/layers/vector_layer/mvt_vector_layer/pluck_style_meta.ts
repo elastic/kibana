@@ -70,7 +70,7 @@ function pluckCategoricalStyleMeta(
   return [];
 }
 
-function pluckOrdinalStyleMeta(
+export function pluckOrdinalStyleMeta(
   property: IDynamicStyleProperty<DynamicStylePropertyOptions>,
   metaFeatures: TileMetaFeature[],
   joinPropertiesMap: PropertiesMap | undefined
@@ -80,13 +80,16 @@ function pluckOrdinalStyleMeta(
     return null;
   }
 
-  let min = Infinity;
+  const isCount = field.isCount();
+  let min = isCount ? 1 : Infinity;
   let max = -Infinity;
   if (property.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
     for (let i = 0; i < metaFeatures.length; i++) {
       const range = field.pluckRangeFromTileMetaFeature(metaFeatures[i]);
       if (range) {
-        min = Math.min(range.min, min);
+        if (!isCount) {
+          min = Math.min(range.min, min);
+        }
         max = Math.max(range.max, max);
       }
     }
@@ -94,7 +97,9 @@ function pluckOrdinalStyleMeta(
     joinPropertiesMap.forEach((value: { [key: string]: unknown }) => {
       const propertyValue = value[field.getName()];
       if (typeof propertyValue === 'number') {
-        min = Math.min(propertyValue as number, min);
+        if (!isCount) {
+          min = Math.min(propertyValue as number, min);
+        }
         max = Math.max(propertyValue as number, max);
       }
     });
