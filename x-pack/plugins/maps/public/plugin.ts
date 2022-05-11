@@ -41,6 +41,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LensPublicSetup } from '@kbn/lens-plugin/public';
+import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import {
   createRegionMapFn,
   regionMapRenderer,
@@ -88,6 +89,7 @@ export interface MapsPluginSetupDependencies {
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -144,7 +146,15 @@ export class MapsPlugin
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
-    setMapAppConfig(config);
+    setMapAppConfig({
+      ...config,
+
+      // Override this when we know we are taking a screenshot (i.e. no user interaction)
+      // to avoid a blank-canvas issue when rendering maps on a PDF
+      preserveDrawingBuffer: plugins.screenshotMode.isScreenshotMode()
+        ? true
+        : config.preserveDrawingBuffer,
+    });
 
     const locator = plugins.share.url.locators.create(
       new MapsAppLocatorDefinition({
