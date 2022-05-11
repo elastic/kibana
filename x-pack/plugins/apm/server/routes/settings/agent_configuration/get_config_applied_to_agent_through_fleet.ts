@@ -6,12 +6,12 @@
  */
 
 import { termQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { keyBy } from 'lodash';
+import { keyBy, mapValues } from 'lodash';
 import datemath from '@kbn/datemath';
 import { METRICSET_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
 
-export async function getConfigAppliedToAgentsThroughFleet({
+export async function getConfigsAppliedToAgentsThroughFleet({
   setup,
 }: {
   setup: Setup;
@@ -48,5 +48,8 @@ export async function getConfigAppliedToAgentsThroughFleet({
     params
   );
 
-  return keyBy(response.aggregations?.config_by_etag.buckets, 'key');
+  return mapValues(
+    keyBy(response.aggregations?.config_by_etag.buckets, 'key'),
+    'key'
+  ) as Record<string, string>;
 }

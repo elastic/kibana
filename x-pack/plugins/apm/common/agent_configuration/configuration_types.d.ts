@@ -13,6 +13,7 @@ export type AgentConfigurationIntake = t.TypeOf<
 >;
 
 export type AgentConfiguration = {
+  id: string;
   '@timestamp': number;
   applied_by_agent?: boolean;
   etag?: string;

@@ -106,5 +106,14 @@ export async function createInternalESClient({
         params,
       });
     },
+    bulk: (operationName: string, params: estypes.BulkRequest) => {
+      return callEs(operationName, {
+        requestType: 'bulk',
+        cb: (signal) => {
+          return asInternalUser.bulk(params, { signal, meta: true });
+        },
+        params,
+      });
+    },
   };
 }
