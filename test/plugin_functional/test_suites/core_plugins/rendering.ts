@@ -139,7 +139,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
-        'newsfeed.service.urlRoot (any)',
+        'newsfeed.service.urlRoot (string)',
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.banner (boolean)',
         'telemetry.enabled (boolean)',

@@ -46,7 +46,6 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   features,
   objTypes,
   name,
-  serviceType,
   needsPermissions,
   onFormCreated,
   header,
@@ -74,8 +73,8 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
-  const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
-  const onCredentialsFormSubmit = () => createContentSource(serviceType, redirectFormCreated);
+  const onOauthFormSubmit = () => getSourceConnectData(redirectOauth);
+  const onCredentialsFormSubmit = () => createContentSource(redirectFormCreated);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
