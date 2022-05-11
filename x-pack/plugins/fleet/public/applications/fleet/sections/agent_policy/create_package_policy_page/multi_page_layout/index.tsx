@@ -11,7 +11,6 @@ import { splitPkgKey } from '../../../../../../../common';
 
 import { useGetPackageInfoByKey } from '../../../../hooks';
 
-// import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
 import type { AddToPolicyParams } from '../types';
 
 import { AddFirstIntegrationSplashScreen } from './components/add_first_integration_splash';
@@ -26,21 +25,14 @@ export const CreatePackagePolicyMultiPage: React.FunctionComponent = () => {
     isLoading: isPackageInfoLoading,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
-  const packageInfo = useMemo(() => {
-    if (packageInfoData && packageInfoData.item) {
-      return packageInfoData.item;
-    }
-  }, [packageInfoData]);
+  const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
 
-  const integrationInfo = useMemo(
-    () =>
-      (params as AddToPolicyParams).integration
-        ? packageInfo?.policy_templates?.find(
-            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
-          )
-        : undefined,
-    [packageInfo?.policy_templates, params]
-  );
+  const integrationInfo = useMemo(() => {
+    if (!params.integration) return;
+    return packageInfo?.policy_templates?.find(
+      (policyTemplate) => policyTemplate.name === params.integration
+    );
+  }, [packageInfo?.policy_templates, params]);
 
   return (
     <AddFirstIntegrationSplashScreen
