@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiDataGrid,
@@ -14,7 +13,6 @@ import {
   Pagination,
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
-  EuiText,
 } from '@elastic/eui';
 import {
   IExecutionLog,
@@ -22,6 +20,7 @@ import {
   ExecutionLogSortFields,
 } from '@kbn/alerting-plugin/common';
 import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
+import { RuleEventLogPaginationStatus } from './rule_event_log_pagination_status';
 
 const getIsColumnSortable = (columnId: string) => {
   return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
@@ -268,60 +267,13 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     );
   };
 
-  const renderShowingResultsRange = () => {
-    const { pageIndex, pageSize, totalItemCount } = pagination;
-    const end = Math.min(pageSize * (pageIndex + 1), totalItemCount);
-    if (pagination.totalItemCount === 0) {
-      return (
-        <strong>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogDataGrid.showingResultsRangeNoResult"
-            defaultMessage="0"
-          />
-        </strong>
-      );
-    }
-    return (
-      <strong>
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogDataGrid.showingResultsRange"
-          defaultMessage="{start, number} - {end, number}"
-          values={{
-            start: pageIndex * pageSize + 1,
-            end,
-          }}
-        />
-      </strong>
-    );
-  };
-
-  const renderShowingResults = () => {
-    return (
-      <EuiText data-test-subj="ruleEventLogListShowingResults" size="xs">
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogDataGrid.showingResults"
-          defaultMessage="Showing {range} of {total, number} {type}"
-          values={{
-            range: renderShowingResultsRange(),
-            total: pagination.totalItemCount,
-            type: (
-              <strong>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogDataGrid.showingResultsType"
-                  defaultMessage="log {total, plural, one {entry} other {entries}}"
-                  values={{ total: pagination.totalItemCount }}
-                />
-              </strong>
-            ),
-          }}
-        />
-      </EuiText>
-    );
-  };
-
   return (
     <>
-      {renderShowingResults()}
+      <RuleEventLogPaginationStatus
+        pageIndex={pagination.pageIndex}
+        pageSize={pagination.pageSize}
+        totalItemCount={pagination.totalItemCount}
+      />
       <EuiDataGrid
         aria-label="rule event log"
         data-test-subj="ruleEventLogList"

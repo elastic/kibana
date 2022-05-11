@@ -560,9 +560,9 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(
-      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
-    ).toEqual('Showing 0 of 0 log entries');
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 0 of 0 log entries'
+    );
   });
 
   it('shows the correct pagination result when result is 1', async () => {
@@ -583,9 +583,9 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(
-      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
-    ).toEqual('Showing 1 - 1 of 1 log entry');
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 1 - 1 of 1 log entry'
+    );
   });
 
   it('shows the correct pagination result when paginated', async () => {
@@ -606,9 +606,9 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(
-      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
-    ).toEqual('Showing 1 - 10 of 85 log entries');
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 1 - 10 of 85 log entries'
+    );
 
     wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
 
@@ -617,9 +617,9 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(
-      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
-    ).toEqual('Showing 11 - 20 of 85 log entries');
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 11 - 20 of 85 log entries'
+    );
 
     wrapper.find('[data-test-subj="pagination-button-8"]').first().simulate('click');
 
@@ -628,8 +628,8 @@ describe('rule_event_log_list', () => {
       wrapper.update();
     });
 
-    expect(
-      wrapper.find('[data-test-subj="ruleEventLogListShowingResults"]').first().text()
-    ).toEqual('Showing 81 - 85 of 85 log entries');
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 81 - 85 of 85 log entries'
+    );
   });
 });
