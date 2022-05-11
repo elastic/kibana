@@ -105,7 +105,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]
   );
-  const useStepsLayout = useMemo(() => queryParams.has('useStepsLayout'), [queryParams]);
+  const useMultiPageLayout = useMemo(() => queryParams.has('useMultiPageLayout'), [queryParams]);
 
   /**
    * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
@@ -624,7 +624,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     );
   }
 
-  const Cmp = useStepsLayout ? CreatePackagePolicyMultiPageLayout : CreatePackagePolicyPageLayout;
+  const Cmp = useMultiPageLayout
+    ? CreatePackagePolicyMultiPageLayout
+    : CreatePackagePolicyPageLayout;
   return (
     <Cmp {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
