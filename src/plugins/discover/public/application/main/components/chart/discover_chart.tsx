@@ -68,8 +68,7 @@ export function DiscoverChart({
     moveFocus: false,
   });
 
-  const timeField =
-    dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
+  const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
   const [canVisualize, setCanVisualize] = useState(false);
 
   useEffect(() => {

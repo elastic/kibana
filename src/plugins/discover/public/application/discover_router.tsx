@@ -29,9 +29,7 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
           <Route
             path="/doc/:dataView/:index/:type"
             render={(props) => (
-              <Redirect
-                to={`/doc/${props.match.params.dataView}/${props.match.params.index}`}
-              />
+              <Redirect to={`/doc/${props.match.params.dataView}/${props.match.params.index}`} />
             )}
           />
           <Route path="/doc/:dataViewId/:index">

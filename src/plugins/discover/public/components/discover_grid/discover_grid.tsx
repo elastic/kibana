@@ -291,9 +291,7 @@ export const DiscoverGrid = ({
         dataView,
         displayedRows,
         displayedRows
-          ? displayedRows.map((hit) =>
-              flattenHit(hit, dataView, { includeIgnoredValues: true })
-            )
+          ? displayedRows.map((hit) => flattenHit(hit, dataView, { includeIgnoredValues: true }))
           : [],
         useNewFieldsApi,
         fieldsToShow,

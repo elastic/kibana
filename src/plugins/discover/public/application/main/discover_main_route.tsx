@@ -102,9 +102,7 @@ export function DiscoverMainRoute() {
           spaces: services.spaces,
         });
 
-        const currentDataView = await loadDefaultOrCurrentDataView(
-          currentSavedSearch.searchSource
-        );
+        const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
 
         if (!currentDataView) {
           return;

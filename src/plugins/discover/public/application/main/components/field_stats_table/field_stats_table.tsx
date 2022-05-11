@@ -148,7 +148,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
-        dataView: dataView,
+        dataView,
         savedSearch,
         query,
         filters,
@@ -194,7 +194,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
-            dataView: dataView,
+            dataView,
             savedSearch,
             query,
             showPreviewByDefault,

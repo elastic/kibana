@@ -239,12 +239,7 @@ export class DiscoverPlugin
             </DeferredSpinner>
           }
         >
-          <SourceViewer
-            index={hit._index}
-            id={hit._id}
-            dataView={dataView}
-            hasLineNumbers
-          />
+          <SourceViewer index={hit._index} id={hit._id} dataView={dataView} hasLineNumbers />
         </React.Suspense>
       ),
     });

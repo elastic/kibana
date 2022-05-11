@@ -108,9 +108,7 @@ export const useNavigationProps = ({
 
     const onOpenSurrDocs = () =>
       history.push({
-        pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
-          String(rowId)
-        )}`,
+        pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(String(rowId))}`,
         search: `?${contextSearchHash}`,
         state: {
           breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),

@@ -49,9 +49,7 @@ describe('formatFieldValue', () => {
     (services.fieldFormats.getDefaultInstance as jest.Mock).mockReturnValue({
       convert: convertMock,
     });
-    expect(formatFieldValue('foo', hit, services.fieldFormats, dataViewMock)).toBe(
-      'formatted:foo'
-    );
+    expect(formatFieldValue('foo', hit, services.fieldFormats, dataViewMock)).toBe('formatted:foo');
     expect(services.fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
     expect(convertMock).toHaveBeenCalledWith('foo', 'html', { field: undefined, hit });
   });
