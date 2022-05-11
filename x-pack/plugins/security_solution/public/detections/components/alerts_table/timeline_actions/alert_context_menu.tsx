@@ -13,6 +13,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { OsqueryActionItem } from '../../osquery/osquery_action_item';
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
@@ -67,6 +68,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
   const [routeProps] = useRouteSpy();
+  const { osquery } = useKibana().services;
 
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
@@ -189,6 +191,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         : undefined,
   });
   const agentId = useMemo(() => get(0, ecsRowData?.agent?.id), [ecsRowData]);
+  const osqueryAvailable = osquery?.isOsqueryAvailable({
+    agentId: agentId || '',
+  });
   const handleOnOsqueryClick = useCallback(() => {
     setOsqueryFlyoutOpen((prevValue) => !prevValue);
     setPopover(false);
@@ -209,17 +214,22 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...addToCaseActionItems,
             ...statusActionItems,
             ...exceptionActionItems,
-            osqueryActionItem,
+            ...(osqueryAvailable ? [osqueryActionItem] : []),
           ]
-        : [...addToCaseActionItems, ...eventFilterActionItems, osqueryActionItem],
+        : [
+            ...addToCaseActionItems,
+            ...eventFilterActionItems,
+            ...(osqueryAvailable ? [osqueryActionItem] : []),
+          ],
     [
-      statusActionItems,
-      addToCaseActionItems,
-      eventFilterActionItems,
-      exceptionActionItems,
-      osqueryActionItem,
       isEvent,
       ruleId,
+      addToCaseActionItems,
+      statusActionItems,
+      exceptionActionItems,
+      osqueryAvailable,
+      osqueryActionItem,
+      eventFilterActionItems,
     ]
   );
 
