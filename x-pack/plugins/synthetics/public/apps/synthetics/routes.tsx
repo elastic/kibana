@@ -31,7 +31,7 @@ type RouteProps = {
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  pageHeader: {
+  pageHeader?: {
     pageTitle: string | JSX.Element;
     children?: JSX.Element;
     rightSideItems?: JSX.Element[];
@@ -59,20 +59,9 @@ const getRoutes = (): RouteProps[] => {
       path: GETTING_STARTED_ROUTE,
       component: () => <GettingStartedPage />,
       dataTestSubj: 'syntheticsGettingStartedPage',
-      pageHeader: {
-        pageTitle: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.synthetics.gettingStarted.pageHeader.title"
-                defaultMessage="Synthetics Getting started"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        rightSideItems: [
-          /* <AddMonitorBtn />*/
-        ],
+      template: 'centeredBody',
+      pageContentProps: {
+        paddingSize: 'none',
       },
     },
     {
