@@ -59,7 +59,7 @@ describe('ALL - Packs', () => {
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
         .clear()
-        .type('500');
+        .type('10');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
       findAndClickButton('Save pack');
@@ -141,11 +141,12 @@ describe('ALL - Packs', () => {
         .then(() => {
           cy.visit(discoverUrl);
         });
-      cy.getBySel('breadcrumbs').contains('Discover');
+
+      cy.get('nav').should('be.visible');
+      cy.contains('Discover');
+      cy.contains(`action_id: pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
       cy.getBySel('superDatePickerToggleQuickMenuButton').click();
-      cy.getBySel('superDatePickerToggleRefreshButton').click();
-      cy.getBySel('superDatePickerRefreshIntervalInput').clear().type('10');
-      cy.get('button').contains('Apply').click();
+      cy.getBySel('superDatePickerCommonlyUsed_Today').click();
       cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
         `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
       );
