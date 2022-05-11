@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateAccessor } from '@kbn/visualizations-plugin/common';
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, EXTENDED_REFERENCE_LINE_LAYER } from '../constants';
 import { ExtendedReferenceLineLayerFn } from '../types';
 import { strings } from '../i18n';
