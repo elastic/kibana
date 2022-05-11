@@ -83,7 +83,7 @@ Before you upgrade, review the known issues, then mitigate the impact to your ap
 
 There are no known issues in 7.16.3. 
 
-For the known issues in the previous releases, refer to the <<known-issue-7.16.0, known issues in 7.16.0>.
+For the known issues in the previous releases, refer to the <<known-issue-7.16.0,known issues in 7.16.0>>.
 
 [float]
 [[breaking-changes-v7.16.3]]
