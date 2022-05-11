@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { IUiSettingsClient } from '@kbn/core/server';
-import { serviceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
@@ -32,7 +32,7 @@ export async function lookupServices({
 }) {
   const { apmEventClient } = setup;
   const maxNumberOfServices = await uiSettingsClient.get<number>(
-    serviceGroupMaxNumberOfServices
+    apmServiceGroupMaxNumberOfServices
   );
 
   const response = await apmEventClient.search('lookup_services', {

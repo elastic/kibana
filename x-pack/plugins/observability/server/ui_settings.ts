@@ -19,7 +19,7 @@ import {
   enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   enableNewSyntheticsView,
-  serviceGroupMaxNumberOfServices,
+  apmServiceGroupMaxNumberOfServices,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -188,7 +188,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     requiresPageReload: false,
     type: 'boolean',
   },
-  [serviceGroupMaxNumberOfServices]: {
+  [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingName', {
       defaultMessage: 'Maximum services in a service group',

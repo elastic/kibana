@@ -15,4 +15,5 @@ export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
 export const enableServiceGroups = 'observability:enableServiceGroups';
 export const apmServiceInventoryOptimizedSorting =
   'observability:apmServiceInventoryOptimizedSorting';
-export const serviceGroupMaxNumberOfServices = 'observability:serviceGroupMaxNumberOfServices';
+export const apmServiceGroupMaxNumberOfServices =
+  'observability:apmServiceGroupMaxNumberOfServices';

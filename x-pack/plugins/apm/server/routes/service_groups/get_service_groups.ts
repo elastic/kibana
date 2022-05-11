@@ -9,7 +9,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { serviceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import {
   ServiceGroup,
   SavedServiceGroup,
@@ -24,7 +24,7 @@ export async function getServiceGroups({
   uiSettingsClient: IUiSettingsClient;
 }): Promise<SavedServiceGroup[]> {
   const maxNumberOfServices = await uiSettingsClient.get<number>(
-    serviceGroupMaxNumberOfServices
+    apmServiceGroupMaxNumberOfServices
   );
 
   const result = await savedObjectsClient.find<ServiceGroup>({
