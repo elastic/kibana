@@ -166,6 +166,10 @@ const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   border-radius: 8px 8px 0px 0px;
 `;
 
+const NotObscuredByBottomBar = styled('div')`
+  padding-bottom: 100px;
+`;
+
 // TODO: add proper link
 const CenteredDocLink = () => (
   <EuiFlexGroup justifyContent="spaceAround">
@@ -228,7 +232,9 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
         <AddIntegrationStepsIllustrations />
         <EuiSpacer size="xxl" />
         <EuiSpacer size="xxl" />
-        <CenteredDocLink />
+        <NotObscuredByBottomBar>
+          <CenteredDocLink />
+        </NotObscuredByBottomBar>
         <InstallBottomBar />
         {packageInfo && (
           <IntegrationBreadcrumb
