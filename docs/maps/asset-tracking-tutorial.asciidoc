@@ -213,8 +213,16 @@ PUT _index_template/tri_met_tracks
 [source,js]
 ----------------------------------
 PUT _ingest/pipeline/tri_met_tracks
+PUT _ingest/pipeline/tri_met_tracks
 {
   "processors": [
+    {
+      "set": {
+        "field": "trimet.inCongestion",
+        "value": "false",
+        "if": "ctx?.trimet?.inCongestion == null"
+      }
+    },
     {
       "convert": {
         "field": "trimet.bearing",
