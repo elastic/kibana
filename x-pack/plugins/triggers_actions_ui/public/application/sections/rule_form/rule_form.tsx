@@ -742,11 +742,11 @@ export const RuleForm = ({
                   name="interval"
                   data-test-subj="intervalInput"
                   onChange={(e) => {
-                    const interval =
-                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
+                    const value = e.target.value;
+                    const interval = value !== '' ? parseInt(value, 10) : undefined;
                     withDebounce(() => {
                       setRuleInterval(interval);
-                      setScheduleProperty('interval', `${e.target.value}${ruleIntervalUnit}`);
+                      setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
                     });
                   }}
                 />
