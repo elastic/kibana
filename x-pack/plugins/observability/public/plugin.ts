@@ -33,6 +33,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ConfigSchema } from '.';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -55,7 +56,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
-  usageCollection: any;
+  usageCollection: UsageCollectionSetup;
   cases: CasesUiStart;
   embeddable: EmbeddableStart;
   home?: HomePublicPluginStart;
