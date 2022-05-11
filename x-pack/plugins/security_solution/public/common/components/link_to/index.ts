@@ -85,12 +85,11 @@ function formatPath(path: string, search: string, skipSearch?: boolean) {
   return formattedPath;
 }
 
-// TODO use links.needsUrlState function instead when implemented and remove this function
+// TODO: migrate to links.needsUrlState
 function needsUrlState(pageId: SecurityPageName) {
   return (
     pageId !== SecurityPageName.dashboardsLanding &&
     pageId !== SecurityPageName.threatHuntingLanding &&
-    pageId !== SecurityPageName.manageLanding &&
     pageId !== SecurityPageName.administration &&
     pageId !== SecurityPageName.rules &&
     pageId !== SecurityPageName.exceptions &&

@@ -135,7 +135,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     ],
   },
   {
-    id: SecurityPageName.manageLanding,
+    id: SecurityPageName.administration,
     title: MANAGE,
     path: MANAGE_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
