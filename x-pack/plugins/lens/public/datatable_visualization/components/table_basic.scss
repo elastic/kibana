@@ -2,7 +2,7 @@
   height: 100%;
 }
 
-.lnsTableCell {
+[data-test-subj='dataGridRowCell'] .lnsTableCell {
   @include euiTextTruncate;
 }
 
