@@ -227,7 +227,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             aria-label={NAME_LABEL}
             id="eventFiltersFormInputName"
             defaultValue={exception?.name ?? ''}
-            data-test-subj={getTestId('name-input')}
+            data-test-subj={'eventFilters-form-name-input'}
             fullWidth
             maxLength={256}
             required={hasBeenInputNameVisited}
@@ -236,7 +236,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           />
         </EuiFormRow>
       ),
-      [hasNameError, getTestId, handleOnChangeName, hasBeenInputNameVisited, exception?.name]
+      [hasNameError, handleOnChangeName, hasBeenInputNameVisited, exception?.name]
     );
 
     // description and handler
@@ -256,13 +256,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             defaultValue={exception?.description ?? ''}
             onChange={handleOnDescriptionChange}
             fullWidth
-            data-test-subj={getTestId('description-input')}
+            data-test-subj={'eventFilters-form-description-input'}
             aria-label={DESCRIPTION_LABEL}
             maxLength={256}
           />
         </EuiFormRow>
       ),
-      [exception?.description, getTestId, handleOnDescriptionChange]
+      [exception?.description, handleOnDescriptionChange]
     );
 
     // OS and handler
@@ -453,10 +453,17 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           <EuiSpacer size="xs" />
           <EuiText size="s">
             <p>
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.criteriaSectionDescription"
-                defaultMessage="Select an operating system and add conditions."
-              />
+              {allowSelectOs ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.criteriaSectionDescription.withOs"
+                  defaultMessage="Select an operating system and add conditions."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.criteriaSectionDescription.withoutOs"
+                  defaultMessage="Add conditions."
+                />
+              )}
             </p>
           </EuiText>
           <EuiSpacer size="m" />

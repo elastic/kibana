@@ -198,7 +198,6 @@ describe('Event filter form', () => {
     it('should change name', async () => {
       render();
       const nameInput = renderResult.getByTestId('eventFilters-form-name-input');
-      // console.log('nameInput ', nameInput);
 
       act(() => {
         fireEvent.change(nameInput, {
