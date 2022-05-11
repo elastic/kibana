@@ -11,14 +11,17 @@ import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
-
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import moment from 'moment';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { addAgentConfigMetrics } from './agent_configuration/add_agent_config_metrics';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
   const log = getService('log');
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   const archiveName = 'apm_8.0.0';
 
@@ -154,7 +157,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             const { status, body } = await getAllConfigurations();
 
             expect(status).to.equal(200);
-            expect(omitTimestamp(body.configurations)).to.eql([
+            expect(omitTimestampAndId(body.configurations)).to.eql([
               {
                 service: {},
                 settings: { transaction_sample_rate: '0.55' },
@@ -240,7 +243,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           const { status, body } = await getAllConfigurations();
           expect(status).to.equal(200);
           expect(
-            orderBy(omitTimestamp(body.configurations), ['settings.transaction_sample_rate'])
+            orderBy(omitTimestampAndId(body.configurations), ['settings.transaction_sample_rate'])
           ).to.eql([
             {
               service: {},
@@ -375,6 +378,63 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     'agent configuration when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
+      describe('agent configurations through fleet', () => {
+        const name = 'myservice';
+        const environment = 'development';
+        const testConfig = {
+          service: { name, environment },
+          settings: { transaction_sample_rate: '0.9' },
+        };
+
+        let agentConfiguration:
+          | APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0]
+          | undefined;
+
+        before(async () => {
+          log.debug('creating agent configuration');
+          await createConfiguration(testConfig);
+
+          const {
+            body: { configurations },
+          } = await getAllConfigurations();
+
+          agentConfiguration = configurations.find(
+            (x) => x.service.name === name && x.service.environment === environment
+          );
+        });
+
+        after(async () => {
+          await deleteConfiguration(testConfig);
+          await synthtraceEsClient.clean();
+        });
+
+        it(`should have 'applied_by_agent=false' when there are no agent config metrics for this etag`, async () => {
+          expect(agentConfiguration?.applied_by_agent).to.be(false);
+        });
+
+        it(`should have 'applied_by_agent=true' when there are agent config metrics for this etag`, async () => {
+          const start = new Date().getTime();
+          const end = moment(start).add(15, 'minutes').valueOf();
+
+          await addAgentConfigMetrics({
+            synthtraceEsClient,
+            start,
+            end,
+            etag: agentConfiguration?.etag,
+          });
+
+          const {
+            body: { configurations },
+          } = await getAllConfigurations();
+
+          const updatedConfig = configurations.find(
+            (x) => x.service.name === name && x.service.environment === environment
+          );
+
+          expect(updatedConfig?.applied_by_agent).to.be(true);
+        });
+      });
+
       it('returns the environments, all unconfigured', async () => {
         const { body } = await getEnvironments('opbeans-node');
         const { environments } = body;
@@ -436,8 +496,8 @@ async function waitFor(cb: () => Promise<boolean>, retries = 50): Promise<boolea
   return res;
 }
 
-function omitTimestamp(configs: AgentConfigurationIntake[]) {
-  return configs.map((config: AgentConfigurationIntake) => omit(config, '@timestamp'));
+function omitTimestampAndId(configs: AgentConfigurationIntake[]) {
+  return configs.map((config: AgentConfigurationIntake) => omit(config, '@timestamp', 'id'));
 }
 
 async function expectStatusCode(
