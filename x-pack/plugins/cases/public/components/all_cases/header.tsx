@@ -26,7 +26,7 @@ export const CasesTableHeader: FunctionComponent<Props> = ({ actionsErrors, user
         <EuiFlexItem>
           <NavButtons actionsErrors={actionsErrors} />
         </EuiFlexItem>
-      ) : null}{' '}
+      ) : null}
     </EuiFlexGroup>
   </HeaderPage>
 );
