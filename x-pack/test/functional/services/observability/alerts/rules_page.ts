@@ -20,10 +20,9 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
     return createRuleButton.click();
   };
 
-  const clickRuleStatusDropDownMenu = async () => testSubjects.click('statusContextButton');
+  const clickRuleStatusDropDownMenu = async () => testSubjects.click('statusDropdown');
 
-  const clickDisableFromDropDownMenu = async () =>
-    find.clickByCssSelector('div.euiContextMenuPanel > div > div > button:nth-child(2)');
+  const clickDisableFromDropDownMenu = async () => testSubjects.click('statusDropdownDisabledItem');
 
   return {
     getManageRulesPageHref,
