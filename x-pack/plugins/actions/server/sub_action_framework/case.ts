@@ -92,9 +92,7 @@ export abstract class CaseConnector<Config, Secrets>
         incident: rest,
       });
     } else {
-      res = await this.createIncident({
-        ...rest,
-      });
+      res = await this.createIncident(rest);
     }
 
     if (comments && Array.isArray(comments) && comments.length > 0) {
