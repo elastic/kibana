@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useRef, useEffect, useContext } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -31,6 +31,7 @@ import {
   useBreadcrumbs,
   useKibanaVersion,
   useStartServices,
+  useFlyoutContext,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
@@ -44,8 +45,6 @@ import {
   FleetServerOnPremUnhealthyCallout,
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
-
-import { agentFlyoutContext } from '..';
 
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
@@ -125,7 +124,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     isOpen: false,
   });
 
-  const flyoutContext = useContext(agentFlyoutContext);
+  const flyoutContext = useFlyoutContext();
 
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
@@ -330,7 +329,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
   const onClickAddFleetServer = useCallback(() => {
-    flyoutContext?.openFleetServerFlyout();
+    flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
 
   const columns = [
