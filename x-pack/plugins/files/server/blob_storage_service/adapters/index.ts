@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME } from './constants';
-
-export type { FileSavedObjectAttributes, FileStatus } from './types';
+export { ElasticsearchBlobStorage } from './es';
