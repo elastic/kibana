@@ -78,7 +78,6 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       [policiesRequest]
     );
 
-    // Initialize the store with the id passed as prop to allow render the form. It acts as componentDidMount
     useEffect(() => {
       const enrichEvent = async () => {
         if (!data || !data._index) return;
@@ -164,14 +163,10 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
 
     // update flyout state with form state
     const onChange = useCallback((formState?: ArtifactFormComponentOnChangeCallbackProps) => {
-      setIsFormValid(!!formState?.isValid);
       if (!formState) return;
+      setIsFormValid(formState.isValid);
       setException(formState.item);
     }, []);
-
-    useEffect(() => {
-      onChange();
-    }, [onChange]);
 
     return (
       <EuiFlyout
