@@ -6,22 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiFieldPassword,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import {
-  getFieldValidityAndErrorMessage,
-  getUseField,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
 import { getEncryptedFieldNotifyLabel } from './get_encrypted_field_notify_label';
+import { PasswordField } from './password_field';
 
 export interface CommonFieldSchema {
   id: string;
@@ -48,36 +39,6 @@ type FormRowProps = ConfigFieldSchema & SecretsFieldSchema & { readOnly: boolean
 
 const UseField = getUseField({ component: Field });
 const { emptyField, urlField } = fieldValidators;
-
-const PasswordField: React.FC<FormRowProps> = ({ id, label, readOnly }) => {
-  return (
-    <UseField<string> path={id} config={getFieldConfig({ label })}>
-      {(field) => {
-        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-        return (
-          <EuiFormRow
-            label={field.label}
-            labelAppend={field.labelAppend}
-            helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
-            error={errorMessage}
-            isInvalid={isInvalid}
-            fullWidth
-          >
-            <EuiFieldPassword
-              isInvalid={isInvalid}
-              value={field.value as string}
-              onChange={field.onChange}
-              isLoading={field.isValidating}
-              fullWidth
-              readOnly={readOnly}
-            />
-          </EuiFormRow>
-        );
-      }}
-    </UseField>
-  );
-};
 
 const getFieldConfig = ({
   label,
@@ -137,7 +98,7 @@ const FormRow: React.FC<FormRowProps> = ({
               }}
             />
           ) : (
-            <PasswordField id={id} label={label} readOnly={readOnly} />
+            <PasswordField path={id} label={label} readOnly={readOnly} />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
