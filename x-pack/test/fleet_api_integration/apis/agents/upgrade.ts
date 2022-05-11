@@ -7,15 +7,11 @@
 
 import expect from '@kbn/expect';
 import semver from 'semver';
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, generateAgent, makeSnapshotVersion } from '../../helpers';
 import { testUsers } from '../test_users';
-
-const makeSnapshotVersion = (version: string) => {
-  return version.endsWith('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
-};
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -282,6 +278,35 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('multiple agents', () => {
+      beforeEach(async () => {
+        await supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'kibana').send({
+          name: 'Fleet Server policy 1',
+          policy_id: 'fleet-server-policy',
+          namespace: 'default',
+          has_fleet_server: true,
+        });
+
+        await kibanaServer.savedObjects.create({
+          id: `package-policy-test`,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          overwrite: true,
+          attributes: {
+            policy_id: 'fleet-server-policy',
+            name: 'Fleet Server',
+            output_id: 'default',
+            package: {
+              name: 'fleet_server',
+            },
+          },
+        });
+        await generateAgent(
+          providerContext,
+          'healthy',
+          'agentWithFS',
+          'fleet-server-policy',
+          '7.15.0'
+        );
+      });
       it('should respond 200 to bulk upgrade upgradeable agents and update the agent SOs', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await es.update({
@@ -583,6 +608,74 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
+      it('should respond 400 if trying to bulk upgrade to a version that is higher than the latest fleet server version', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              policy_id: `agent-policy-1`,
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              policy_id: `agent-policy-2`,
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent1', 'agent2'],
+            version: '8.0.0',
+            force: true,
+          })
+          .expect(400);
+      });
+
+      it('should respond 200 if trying to bulk upgrade to a version higher than the latest fleet server version if the agents include fleet server agents', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              policy_id: `agent-policy-1`,
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              policy_id: `agent-policy-2`,
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent1', 'agent2', 'agentWithFS'],
+            version: '8.0.0',
+            force: true,
+          })
+          .expect(200);
+      });
+
       it('should throw an error if source_uri parameter is passed', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         await es.update({

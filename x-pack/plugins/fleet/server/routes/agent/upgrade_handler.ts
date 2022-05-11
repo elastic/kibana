@@ -95,7 +95,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   try {
     checkKibanaVersion(version, kibanaVersion, false);
     checkSourceUriAllowed(sourceUri);
-    checkFleetServerVersion(version, soClient, esClient);
+    checkFleetServerVersion(version, agents, soClient, esClient);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -162,8 +162,11 @@ const checkSourceUriAllowed = (sourceUri?: string) => {
   }
 };
 
+// Check the installed fleet server versions
+// Allow upgrading if the agents to upgrade include fleet server agents
 const checkFleetServerVersion = async (
   versionToUpgradeNumber: string,
+  agentsIds: string | string[],
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
@@ -177,19 +180,32 @@ const checkFleetServerVersion = async (
     return;
   }
 
-  const { agents } = await getAgentsByKuery(esClient, {
+  const { agents: fleetServerAgents } = await getAgentsByKuery(esClient, {
     showInactive: false,
     perPage: SO_SEARCH_LIMIT,
     kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,
   });
 
-  if (agents.length === 0) {
+  if (fleetServerAgents.length === 0) {
+    return;
+  }
+  const fleetServerIds = fleetServerAgents.map((agent) => agent.id);
+
+  let hasFleetServerAgents: boolean;
+  if (Array.isArray(agentsIds)) {
+    hasFleetServerAgents = agentsIds.some((id) => fleetServerIds.includes(id));
+  } else {
+    hasFleetServerAgents = fleetServerIds.includes(agentsIds);
+  }
+  if (hasFleetServerAgents) {
     return;
   }
 
-  const agentVersions = agents.map((agent) => agent.local_metadata.elastic.agent.version);
+  const fleetServerVersions = fleetServerAgents.map(
+    (agent) => agent.local_metadata.elastic.agent.version
+  ) as string[];
 
-  const maxFleetServerVersion = getMaxVersion(agentVersions);
+  const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
 
   if (semverGt(versionToUpgradeNumber, maxFleetServerVersion))
     throw new Error(
