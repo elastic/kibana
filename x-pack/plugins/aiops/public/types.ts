@@ -13,7 +13,7 @@ import type { AiopsPlugin } from './plugin';
 export type AiopsPluginSetup = ReturnType<AiopsPlugin['setup']>;
 
 /**
- * aiops plugin publis start contract
+ * aiops plugin public start contract
  */
 export type AiopsPluginStart = ReturnType<AiopsPlugin['start']>;
 
