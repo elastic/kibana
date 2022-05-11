@@ -2190,6 +2190,8 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
       layers: [
         {
           layerId: 'first',
@@ -2261,6 +2263,8 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      yLeftScale: 'linear',
+      yRightScale: 'linear',
       layers: [
         {
           layerId: 'first',
