@@ -122,12 +122,6 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!hasTimeFieldCheckbox) {
-      setFieldValue('config.executionTimeField', null);
-    }
-  }, [setFieldValue, hasTimeFieldCheckbox]);
-
   return (
     <>
       <EuiTitle size="s">
@@ -245,6 +239,10 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           disabled={readOnly}
           onChange={() => {
             setHasTimeFieldCheckboxState(!hasTimeFieldCheckbox);
+
+            if (!hasTimeFieldCheckbox) {
+              setFieldValue('config.executionTimeField', null);
+            }
           }}
           label={
             <>
