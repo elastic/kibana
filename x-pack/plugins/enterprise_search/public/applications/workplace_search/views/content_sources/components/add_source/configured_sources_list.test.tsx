@@ -28,7 +28,7 @@ describe('ConfiguredSourcesList', () => {
 
     expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(22);
     expect(wrapper.find('[data-test-subj="AccountOnlyTooltip"]')).toHaveLength(2);
-    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(24);
+    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(25);
   });
 
   it('shows connect button for an source with multiple connector options that routes to choice page', () => {
