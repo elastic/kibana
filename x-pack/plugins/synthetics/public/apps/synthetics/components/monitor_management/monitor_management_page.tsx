@@ -5,14 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useDispatch, useSelector } from 'react-redux';
+import { Redirect } from 'react-router-dom';
+import {
+  fetchMonitorListAction,
+  monitorListSelector,
+} from '../../state/monitor_management/monitor_list';
+import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 import { useMonitorManagementBreadcrumbs } from './use_breadcrumbs';
 
 export const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'manage-monitors' });
   useTrackPageview({ app: 'synthetics', path: 'manage-monitors', delay: 15000 });
   useMonitorManagementBreadcrumbs();
+
+  const dispatch = useDispatch();
+
+  const { total } = useSelector(monitorListSelector);
+
+  useEffect(() => {
+    dispatch(fetchMonitorListAction({}));
+  }, [dispatch]);
+
+  if (total === 0) {
+    return <Redirect to={GETTING_STARTED_ROUTE} />;
+  }
 
   return (
     <>

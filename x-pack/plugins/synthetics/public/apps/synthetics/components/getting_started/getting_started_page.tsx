@@ -10,7 +10,7 @@ import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useBreadcrumbs } from '../../../../legacy_uptime/hooks/use_breadcrumbs';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { fetchServiceLocationsAction } from '../../state/monitor_management/service_locations';
 import { SimpleMonitorForm } from './simple_monitor_form';
 import { MONITORING_OVERVIEW_LABEL } from '../../../../legacy_uptime/routes';

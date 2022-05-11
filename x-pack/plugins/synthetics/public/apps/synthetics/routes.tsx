@@ -22,6 +22,7 @@ import {
   GETTING_STARTED_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_MANAGEMENT_ROUTE,
+  OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { MonitorManagementPage } from './components/monitor_management/monitor_management_page';
 import { apiService } from '../../utils/api_service';
@@ -70,7 +71,7 @@ const getRoutes = (): RouteProps[] => {
         defaultMessage: 'Synthetics Overview | {baseTitle}',
         values: { baseTitle },
       }),
-      path: MONITOR_MANAGEMENT_ROUTE,
+      path: OVERVIEW_ROUTE,
       component: () => <OverviewPage />,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
