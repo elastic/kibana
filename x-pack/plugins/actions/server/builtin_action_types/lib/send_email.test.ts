@@ -132,6 +132,7 @@ describe('send_email module', () => {
 
     delete sendEmailGraphApiMock.mock.calls[0][0].options.configurationUtilities;
     sendEmailGraphApiMock.mock.calls[0].pop();
+    sendEmailGraphApiMock.mock.calls[0].pop();
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
