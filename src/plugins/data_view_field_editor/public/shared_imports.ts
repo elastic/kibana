@@ -23,7 +23,7 @@ export type {
   RuntimeFieldSpec,
   RuntimeFieldSubField,
   RuntimePrimitiveTypes,
-} from '../../data_views/common';
+} from '@kbn/data-views-plugin/common';
 export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export {
