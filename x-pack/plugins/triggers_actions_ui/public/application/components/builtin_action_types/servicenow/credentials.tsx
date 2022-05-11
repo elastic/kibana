@@ -7,29 +7,16 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
-import { ServiceNowActionConnector } from './types';
 import { CredentialsApiUrl } from './credentials_api_url';
 import { CredentialsAuth } from './credentials_auth';
 
 interface Props {
-  action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
-  errors: ActionConnectorFieldsProps<ServiceNowActionConnector>['errors'];
   readOnly: boolean;
   isLoading: boolean;
-  editActionSecrets: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionSecrets'];
-  editActionConfig: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionConfig'];
 }
 
-const CredentialsComponent: React.FC<Props> = ({
-  action,
-  errors,
-  readOnly,
-  isLoading,
-  editActionSecrets,
-  editActionConfig,
-}) => {
+const CredentialsComponent: React.FC<Props> = ({ readOnly, isLoading }) => {
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -37,13 +24,7 @@ const CredentialsComponent: React.FC<Props> = ({
           <EuiTitle size="xxs">
             <h4>{i18n.SN_INSTANCE_LABEL}</h4>
           </EuiTitle>
-          <CredentialsApiUrl
-            action={action}
-            errors={errors}
-            readOnly={readOnly}
-            isLoading={isLoading}
-            editActionConfig={editActionConfig}
-          />
+          <CredentialsApiUrl readOnly={readOnly} isLoading={isLoading} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -55,13 +36,7 @@ const CredentialsComponent: React.FC<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
-        <CredentialsAuth
-          action={action}
-          errors={errors}
-          readOnly={readOnly}
-          isLoading={isLoading}
-          editActionSecrets={editActionSecrets}
-        />
+        <CredentialsAuth readOnly={readOnly} isLoading={isLoading} />
       </EuiFlexItem>
     </>
   );

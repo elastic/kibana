@@ -22,10 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
-import { ActionConnectorFieldsProps } from '../../../../types';
-import { ServiceNowActionConnector } from './types';
+import { useForm, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CredentialsApiUrl } from './credentials_api_url';
-import { isFieldInvalid } from './helpers';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { SNStoreLink } from './sn_store_button';
 import { CredentialsAuth } from './credentials_auth';
@@ -80,38 +78,24 @@ const warningMessage = i18n.translate(
 );
 
 export interface Props {
-  action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
   applicationInfoErrorMsg: string | null;
-  errors: ActionConnectorFieldsProps<ServiceNowActionConnector>['errors'];
   isLoading: boolean;
   readOnly: boolean;
-  editActionSecrets: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionSecrets'];
-  editActionConfig: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionConfig'];
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 const UpdateConnectorComponent: React.FC<Props> = ({
-  action,
   applicationInfoErrorMsg,
-  errors,
   isLoading,
   readOnly,
-  editActionSecrets,
-  editActionConfig,
   onCancel,
   onConfirm,
 }) => {
-  const { apiUrl } = action.config;
-  const { username, password } = action.secrets;
-
-  const hasErrorsOrEmptyFields =
-    apiUrl === undefined ||
-    username === undefined ||
-    password === undefined ||
-    isFieldInvalid(apiUrl, errors.apiUrl) ||
-    isFieldInvalid(username, errors.username) ||
-    isFieldInvalid(password, errors.password);
+  const { form } = useForm();
+  const [{ actionTypeId }] = useFormData({
+    watch: ['actionTypeId'],
+  });
 
   return (
     <EuiFlyout ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
@@ -142,9 +126,7 @@ const UpdateConnectorComponent: React.FC<Props> = ({
                     defaultMessage="The Elastic App from the ServiceNow app store must be installed prior to running the update. {visitLink} to install the app"
                     values={{
                       visitLink: (
-                        <SNStoreLink
-                          appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
-                        />
+                        <SNStoreLink appId={snExternalServiceConfig[actionTypeId].appId ?? ''} />
                       ),
                     }}
                   />
@@ -152,27 +134,11 @@ const UpdateConnectorComponent: React.FC<Props> = ({
               },
               {
                 title: step2InstanceUrlTitle,
-                children: (
-                  <CredentialsApiUrl
-                    action={action}
-                    errors={errors}
-                    readOnly={readOnly}
-                    isLoading={isLoading}
-                    editActionConfig={editActionConfig}
-                  />
-                ),
+                children: <CredentialsApiUrl readOnly={readOnly} isLoading={isLoading} />,
               },
               {
                 title: step3CredentialsTitle,
-                children: (
-                  <CredentialsAuth
-                    action={action}
-                    errors={errors}
-                    readOnly={readOnly}
-                    isLoading={isLoading}
-                    editActionSecrets={editActionSecrets}
-                  />
-                ),
+                children: <CredentialsAuth readOnly={readOnly} isLoading={isLoading} />,
               },
             ]}
           />
@@ -182,7 +148,7 @@ const UpdateConnectorComponent: React.FC<Props> = ({
             {applicationInfoErrorMsg && (
               <ApplicationRequiredCallout
                 message={applicationInfoErrorMsg}
-                appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''}
+                appId={snExternalServiceConfig[actionTypeId].appId ?? ''}
               />
             )}
           </EuiFlexItem>
@@ -201,7 +167,7 @@ const UpdateConnectorComponent: React.FC<Props> = ({
               onClick={onConfirm}
               color="danger"
               fill
-              disabled={hasErrorsOrEmptyFields}
+              disabled={!form.isValid}
               isLoading={isLoading}
             >
               {confirmButtonText}

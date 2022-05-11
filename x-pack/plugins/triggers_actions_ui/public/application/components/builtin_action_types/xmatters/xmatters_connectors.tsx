@@ -23,9 +23,9 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { XmattersActionConnector, XmattersAuthenticationType } from '../types';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
-const XmattersActionConnectorFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<XmattersActionConnector>
-> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
+const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+  readOnly,
+}) => {
   const { user, password, secretsUrl } = action.secrets;
   const { configUrl, usesBasic } = action.config;
 

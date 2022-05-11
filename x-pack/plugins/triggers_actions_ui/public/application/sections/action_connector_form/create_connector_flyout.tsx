@@ -242,7 +242,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     console.log('Form data:', data);
   };
 
-  const { form } = useForm({ onSubmit: onFormSubmit });
+  const { form } = useForm({ onSubmit: onFormSubmit, defaultValue: { config: {}, secrets: {} } });
   const [{ actionType }] = useFormData<ConnectorFormData>({ form, watch: ['actionType'] });
   const { setFieldValue } = form;
 

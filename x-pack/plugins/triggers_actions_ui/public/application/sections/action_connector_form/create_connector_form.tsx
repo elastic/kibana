@@ -56,7 +56,6 @@ const CreateConnectorFormComponent: React.FC<CreateConnectorFormProps> = ({
   isEdit,
 }) => {
   const {
-    docLinks,
     application: { capabilities },
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);

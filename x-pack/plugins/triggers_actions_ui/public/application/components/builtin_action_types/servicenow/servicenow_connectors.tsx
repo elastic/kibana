@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
-import { ActionConnectorFieldsProps } from '../../../../types';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import * as i18n from './translations';
-import { ServiceNowActionConnector } from './types';
+import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
@@ -22,18 +21,13 @@ import { InstallationCallout } from './installation_callout';
 import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
+import * as i18n from './translations';
+import { ServiceNowActionConnector } from './types';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
 
-const ServiceNowConnectorFields: React.FC<
-  ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({
-  action,
-  editActionSecrets,
-  editActionConfig,
-  errors,
-  consumer,
+const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   readOnly,
   setCallbacks,
   isEdit,
@@ -42,14 +36,34 @@ const ServiceNowConnectorFields: React.FC<
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { apiUrl, usesTableApi } = action.config;
-  const { username, password } = action.secrets;
-  const requiresNewApplication = !action.isDeprecated;
+  const [{ id, name, isDeprecated, actionType, config, secrets }] = useFormData({
+    watch: [
+      'id',
+      'isDeprecated',
+      'actionType',
+      'name',
+      'config.apiUrl',
+      'secrets.username',
+      'secrets.password',
+    ],
+  });
+
+  const requiresNewApplication = !!isDeprecated;
+  const action = useMemo(
+    () => ({
+      name,
+      actionTypeId: actionType.id,
+      config,
+      secrets,
+    }),
+    [name, actionType.id, config, secrets]
+    // TODO: Do we need the cast?
+  ) as ServiceNowActionConnector;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
   const { fetchAppInfo, isLoading } = useGetAppInfo({
-    actionTypeId: action.actionTypeId,
+    actionTypeId: actionType.id,
   });
 
   const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =
@@ -96,14 +110,14 @@ const ServiceNowConnectorFields: React.FC<
       await updateActionConnector({
         http,
         connector: {
-          name: action.name,
-          config: { apiUrl, usesTableApi: false },
-          secrets: { username, password },
+          name,
+          config: { apiUrl: config.apiUrl, usesTableApi: false },
+          secrets: { username: secrets.username, password: secrets.password },
         },
-        id: action.id,
+        id,
       });
 
-      editActionConfig('usesTableApi', false);
+      // editActionConfig('usesTableApi', false);
       setShowUpdateConnector(false);
 
       toasts.addSuccess({
@@ -118,17 +132,7 @@ const ServiceNowConnectorFields: React.FC<
        * We silent the errors as a callout will show and inform the user
        */
     }
-  }, [
-    getApplicationInfo,
-    http,
-    action.name,
-    action.id,
-    apiUrl,
-    username,
-    password,
-    editActionConfig,
-    toasts,
-  ]);
+  }, [getApplicationInfo, http, name, config, secrets, id, toasts, action.name]);
 
   /**
    * Defaults the usesTableApi attribute to false
@@ -136,23 +140,19 @@ const ServiceNowConnectorFields: React.FC<
    * will be undefined only at the creation of
    * the connector.
    */
-  useEffect(() => {
-    if (usesTableApi == null) {
-      editActionConfig('usesTableApi', false);
-    }
-  });
+  // useEffect(() => {
+  //   if (usesTableApi == null) {
+  //     editActionConfig('usesTableApi', false);
+  //   }
+  // });
 
   return (
     <>
       {showUpdateConnector && (
         <UpdateConnector
-          action={action}
           applicationInfoErrorMsg={applicationInfoErrorMsg}
-          errors={errors}
           readOnly={readOnly}
           isLoading={isLoading}
-          editActionSecrets={editActionSecrets}
-          editActionConfig={editActionConfig}
           onConfirm={onUpdateConnectorConfirm}
           onCancel={onModalCancel}
         />
@@ -161,14 +161,7 @@ const ServiceNowConnectorFields: React.FC<
         <InstallationCallout appId={snExternalServiceConfig[action.actionTypeId].appId ?? ''} />
       )}
       {!requiresNewApplication && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
-      <Credentials
-        action={action}
-        errors={errors}
-        readOnly={readOnly}
-        isLoading={isLoading}
-        editActionSecrets={editActionSecrets}
-        editActionConfig={editActionConfig}
-      />
+      <Credentials readOnly={readOnly} isLoading={isLoading} />
       {showApplicationRequiredCallout && requiresNewApplication && (
         <ApplicationRequiredCallout
           message={applicationInfoErrorMsg}
