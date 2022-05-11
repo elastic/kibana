@@ -58,7 +58,7 @@ describe('useGetReporters', () => {
     });
   });
 
-  it('fetch statuses', async () => {
+  it('fetch cases metrics', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
         () => useGetCasesMetrics(),
@@ -74,6 +74,31 @@ describe('useGetReporters', () => {
         isError: false,
         fetchCasesMetrics: result.current.fetchCasesMetrics,
       });
+    });
+  });
+
+  it('fetches metrics when fetchCasesMetrics is invoked', async () => {
+    const spy = jest.spyOn(api, 'getCasesMetrics');
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
+        () => useGetCasesMetrics(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
+      );
+
+      await waitForNextUpdate();
+      expect(spy).toBeCalledWith({
+        http: expect.anything(),
+        signal: expect.anything(),
+        query: {
+          features: ['mttr'],
+          owner: [SECURITY_SOLUTION_OWNER],
+        },
+      });
+      result.current.fetchCasesMetrics();
+      await waitForNextUpdate();
+      expect(spy).toHaveBeenCalledTimes(2);
     });
   });
 
