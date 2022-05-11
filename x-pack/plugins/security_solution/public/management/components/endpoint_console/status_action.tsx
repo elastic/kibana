@@ -25,6 +25,7 @@ import { FormattedError } from '../formatted_error';
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<
     {
+      apiCalled: boolean;
       endpointDetails?: HostInfo;
       detailsFetchError?: HttpFetchError;
       endpointPendingActions?: PendingActionsResponse;
@@ -33,43 +34,19 @@ export const EndpointStatusActionResult = memo<
   >
 >(({ command, status, setStatus, store, setStore }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId as string;
-  const { endpointPendingActions, endpointDetails, detailsFetchError } = store;
+  const { endpointPendingActions, endpointDetails, detailsFetchError, apiCalled } = store;
   const isPending = status === 'pending';
 
-  const { isFetching, isFetched } = useGetEndpointDetails(endpointId, {
-    enabled: isPending,
-    // Don't use cached data. Force a fetch so that it can be stored in the console's history
-    queryKey: uuidV4(),
-    onSuccess: (data) => {
-      setStore((prevState) => {
-        return {
-          ...prevState,
-          endpointDetails: data,
-        };
-      });
-    },
-    onError: (err) => {
-      setStore((prevState) => {
-        return {
-          ...prevState,
-          detailsFetchError: err,
-        };
-      });
-    },
-  });
+  const {
+    isFetching,
+    isFetched,
+    refetch: fetchEndpointDetails,
+  } = useGetEndpointDetails(endpointId, { enabled: false });
 
-  useGetEndpointPendingActionsSummary([endpointId], {
-    enabled: isPending,
-    queryKey: uuidV4(),
-    onSuccess: (data) => {
-      setStore((prevState) => {
-        return {
-          ...prevState,
-          endpointPendingActions: data,
-        };
-      });
-    },
-  });
+  const { refetch: fetchEndpointPendingActionsSummary } = useGetEndpointPendingActionsSummary(
+    [endpointId],
+    { enabled: false }
+  );
 
   const pendingIsolationActions = useMemo<
     Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>
@@ -89,10 +66,50 @@ export const EndpointStatusActionResult = memo<
   }, [endpointPendingActions?.data]);
 
   useEffect(() => {
-    if (isFetched && status === 'pending') {
+    if (!apiCalled) {
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          apiCalled: true,
+        };
+      });
+
+      // Using a unique `queryKey` here and below so that data is NOT updated
+      // from cache when future requests for this endpoint ID is done again.
+      fetchEndpointDetails({ queryKey: uuidV4() })
+        .then(({ data }) => {
+          setStore((prevState) => {
+            return {
+              ...prevState,
+              endpointDetails: data,
+            };
+          });
+        })
+        .catch((err) => {
+          setStore((prevState) => {
+            return {
+              ...prevState,
+              detailsFetchError: err,
+            };
+          });
+        });
+
+      fetchEndpointPendingActionsSummary({ queryKey: uuidV4() }).then(({ data }) => {
+        setStore((prevState) => {
+          return {
+            ...prevState,
+            endpointPendingActions: data,
+          };
+        });
+      });
+    }
+  }, [apiCalled, fetchEndpointDetails, fetchEndpointPendingActionsSummary, setStore]);
+
+  useEffect(() => {
+    if (isFetched && isPending) {
       setStatus(detailsFetchError ? 'error' : 'success');
     }
-  }, [detailsFetchError, isFetched, setStatus, status]);
+  }, [detailsFetchError, isFetched, setStatus, isPending]);
 
   if (isFetching) {
     return null;
