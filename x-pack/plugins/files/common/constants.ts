@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME } from './constants';
+export const PLUGIN_ID = 'files';
+export const PLUGIN_NAME = 'files';
 
-export type { FileSavedObjectAttributes, FileStatus } from './types';
+/**
+ * Unique type name of the file saved object
+ */
+export const FILE_SO_TYPE = 'file';
