@@ -66,6 +66,7 @@ interface ClosePageResult {
 export const DEFAULT_VIEWPORT = {
   width: 1950,
   height: 1200,
+  zoom: 1,
 };
 
 // Default args used by pptr

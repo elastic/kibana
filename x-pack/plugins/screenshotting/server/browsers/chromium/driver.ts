@@ -168,12 +168,8 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  /**
+  /*
    * Receive a PNG buffer of the page screenshot from Chromium
-   *
-   * @async
-   * @param {ElementPosition} elementPosition - coordinates to capture
-   * @returns {Promise<Buffer | undefined>} PNG Buffer, or `undefined` if a screenshot could not be generated
    */
   async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
@@ -242,8 +238,8 @@ export class HeadlessChromiumDriver {
     { width: _width, height: _height, zoom }: Viewport,
     logger: Logger
   ): Promise<void> {
-    const width = Math.ceil(_width);
-    const height = Math.ceil(_height);
+    const width = Math.floor(_width);
+    const height = Math.floor(_height);
 
     logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
 

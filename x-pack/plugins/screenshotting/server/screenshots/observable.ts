@@ -109,15 +109,6 @@ const getDefaultElementPosition = (
   ];
 };
 
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  ...DEFAULT_VIEWPORT,
-  zoom: 1,
-});
-
 export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
@@ -146,7 +137,11 @@ export class ScreenshotObservableHandler {
   }
 
   private openUrl(index: number, urlOrUrlWithContext: UrlOrUrlWithContext) {
-    return defer(() => {
+    return defer(async () => {
+      // set the viewport before navigation: https://puppeteer.github.io/puppeteer/docs/next/puppeteer.page.setviewport/#pagesetviewport-method
+      const viewport = this.layout.getViewport() ?? DEFAULT_VIEWPORT;
+      await this.driver.setViewport(viewport, this.eventLogger.kbnLogger);
+
       let url: string;
       let context: Context | undefined;
 
@@ -175,10 +170,7 @@ export class ScreenshotObservableHandler {
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
       mergeMap(async (itemsCount) => {
         // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-
-        // Set the viewport allowing time for the browser to handle reflow and redraw
-        // before checking for readiness of visualizations.
+        const viewport = this.layout.getViewport(itemsCount) ?? DEFAULT_VIEWPORT;
         await driver.setViewport(viewport, this.eventLogger.kbnLogger);
         await waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout);
       }),
@@ -266,7 +258,7 @@ export class ScreenshotObservableHandler {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
           const elements =
             data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1));
+            getDefaultElementPosition(this.layout.getViewport());
           let screenshots: Screenshot[] = [];
           try {
             screenshots = this.shouldCapturePdf()

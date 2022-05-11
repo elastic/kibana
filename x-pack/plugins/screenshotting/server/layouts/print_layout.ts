@@ -40,7 +40,7 @@ export class PrintLayout extends BaseLayout implements Layout {
     return this.zoom;
   }
 
-  public getViewport(itemsCount: number) {
+  public getViewport(itemsCount = 1) {
     return {
       zoom: this.zoom,
       width: this.viewport.width,
