@@ -201,7 +201,9 @@ export type Pipeline = {
 export type PipelineMetricKey =
   | 'logstash_cluster_pipeline_throughput'
   | 'logstash_cluster_pipeline_node_count'
+  | 'logstash_cluster_pipeline_nodes_count'
   | 'logstash_node_pipeline_node_count'
+  | 'logstash_node_pipeline_nodes_count'
   | 'logstash_node_pipeline_throughput';
 
 export type PipelineThroughputMetricKey =
@@ -210,7 +212,9 @@ export type PipelineThroughputMetricKey =
 
 export type PipelineNodeCountMetricKey =
   | 'logstash_cluster_pipeline_node_count'
-  | 'logstash_node_pipeline_node_count';
+  | 'logstash_cluster_pipeline_nodes_count'
+  | 'logstash_node_pipeline_node_count'
+  | 'logstash_node_pipeline_nodes_count';
 
 export interface PipelineWithMetrics {
   id: string;

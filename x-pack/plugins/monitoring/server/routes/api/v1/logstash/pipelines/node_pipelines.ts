@@ -35,7 +35,11 @@ export function logstashNodePipelinesRoute(server: MonitoringCore) {
       body: validateBody,
     },
     async handler(req) {
-      const { pagination, sort: { field = '', direction = 'desc' } = {}, queryText } = req.payload;
+      const {
+        pagination,
+        sort: { field = '', direction = 'desc' } = {},
+        queryText = '',
+      } = req.payload;
       const { clusterUuid, logstashUuid } = req.params;
 
       try {

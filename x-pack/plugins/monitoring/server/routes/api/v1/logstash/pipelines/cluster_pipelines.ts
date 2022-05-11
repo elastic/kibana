@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/http_api/logstash';
 
 const throughputMetric = 'logstash_cluster_pipeline_throughput';
-const nodesCountMetric = 'logstash_cluster_pipeline_node_count';
+const nodesCountMetric = 'logstash_cluster_pipeline_nodes_count';
 
 // Mapping client and server metric keys together
 const sortMetricSetMap = {
@@ -36,7 +36,11 @@ export function logstashClusterPipelinesRoute(server: MonitoringCore) {
       body: validateBody,
     },
     async handler(req) {
-      const { pagination, sort: { field = '', direction = 'desc' } = {}, queryText } = req.payload;
+      const {
+        pagination,
+        sort: { field = '', direction = 'desc' } = {},
+        queryText = '',
+      } = req.payload;
       const clusterUuid = req.params.clusterUuid;
 
       try {

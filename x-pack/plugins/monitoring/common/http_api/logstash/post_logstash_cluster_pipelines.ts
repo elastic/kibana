@@ -16,10 +16,10 @@ export const postLogstashClusterPipelinesRequestPayloadRT = rt.intersection([
   rt.partial({
     ccs: ccsRT,
     sort: sortingRT,
+    queryText: rt.string,
   }),
   rt.type({
     timeRange: timeRangeRT,
     pagination: paginationRT,
-    queryText: rt.string,
   }),
 ]);
