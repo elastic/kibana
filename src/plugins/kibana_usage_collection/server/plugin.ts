@@ -21,6 +21,7 @@ import type {
   CoreUsageDataStart,
 } from '@kbn/core/server';
 import { SavedObjectsClient, EventLoopDelaysMonitor } from '@kbn/core/server';
+import { registerEbtCounters } from './ebt_counters';
 import {
   startTrackingEventLoopDelaysUsage,
   startTrackingEventLoopDelaysThreshold,
@@ -68,6 +69,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+    registerEbtCounters(coreSetup.analytics, usageCollection);
     usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
