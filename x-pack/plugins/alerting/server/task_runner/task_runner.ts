@@ -6,10 +6,8 @@
  */
 import apm from 'elastic-apm-node';
 import { cloneDeep, mapValues, omit, pickBy, without } from 'lodash';
-import type { Request } from '@hapi/hapi';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import uuid from 'uuid';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { millisToNanos, nanosToMillis } from '@kbn/event-log-plugin/server';
@@ -23,7 +21,6 @@ import {
   executionStatusFromState,
   getRecoveredAlerts,
   ruleExecutionStatusToRaw,
-  validateRuleTypeParams,
   isRuleSnoozed,
 } from '../lib';
 import {
@@ -51,7 +48,6 @@ import {
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
-  MONITORING_HISTORY_LIMIT,
   parseDuration,
   WithoutReservedActionGroups,
 } from '../../common';
@@ -74,6 +70,7 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { SearchMetrics } from '../lib/types';
+import { loadRule, getDecryptedAttributes, getFakeKibanaRequest } from './rule_loader';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -143,52 +140,6 @@ export class TaskRunner<
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
-  }
-
-  private async getDecryptedAttributes(
-    ruleId: string,
-    spaceId: string
-  ): Promise<{ apiKey: string | null; enabled: boolean; consumer: string }> {
-    const namespace = this.context.spaceIdToNamespace(spaceId);
-    // Only fetch encrypted attributes here, we'll create a saved objects client
-    // scoped with the API key to fetch the remaining data.
-    const {
-      attributes: { apiKey, enabled, consumer },
-    } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
-      'alert',
-      ruleId,
-      { namespace }
-    );
-
-    return { apiKey, enabled, consumer };
-  }
-
-  private getFakeKibanaRequest(spaceId: string, apiKey: RawRule['apiKey']) {
-    const requestHeaders: Record<string, string> = {};
-
-    if (apiKey) {
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
-    }
-
-    const path = addSpaceIdToPath('/', spaceId);
-
-    const fakeRequest = KibanaRequest.from({
-      headers: requestHeaders,
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    } as unknown as Request);
-
-    this.context.basePathService.set(fakeRequest, path);
-
-    return fakeRequest;
   }
 
   private getExecutionHandler(
@@ -567,17 +518,16 @@ export class TaskRunner<
     };
   }
 
-  private async validateAndExecuteRule(
+  private async prepareAndExecuteRule(
     fakeRequest: KibanaRequest,
     apiKey: RawRule['apiKey'],
-    rule: SanitizedRule<Params>
+    rule: SanitizedRule<Params>,
+    validatedParams: Params
   ) {
     const {
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
 
-    // Validate
-    const validatedParams = validateRuleTypeParams(rule.params, this.ruleType.validate?.params);
     const executionHandler = this.getExecutionHandler(
       ruleId,
       rule.name,
@@ -599,12 +549,12 @@ export class TaskRunner<
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
     try {
-      const decryptedAttributes = await this.getDecryptedAttributes(ruleId, spaceId);
+      const decryptedAttributes = await getDecryptedAttributes(this.context, ruleId, spaceId);
       apiKey = decryptedAttributes.apiKey;
     } catch (err) {
       throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
     }
-    const fakeRequest = this.getFakeKibanaRequest(spaceId, apiKey);
+    const fakeRequest = getFakeKibanaRequest(this.context, spaceId, apiKey);
     const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
     await rulesClient.updateSnoozedUntilTime({ id });
   }
@@ -613,70 +563,31 @@ export class TaskRunner<
     const {
       params: { alertId: ruleId, spaceId },
     } = this.taskInstance;
-    let enabled: boolean;
-    let apiKey: string | null;
-    let consumer: string;
-    try {
-      const decryptedAttributes = await this.getDecryptedAttributes(ruleId, spaceId);
-      apiKey = decryptedAttributes.apiKey;
-      enabled = decryptedAttributes.enabled;
-      consumer = decryptedAttributes.consumer;
-    } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
+
+    const { rule, fakeRequest, apiKey, rulesClient, validatedParams } = await loadRule<Params>({
+      paramValidator: this.ruleType.validate?.params,
+      ruleId,
+      spaceId,
+      context: this.context,
+      ruleTypeRegistry: this.ruleTypeRegistry,
+      alertingEventLogger: this.alertingEventLogger,
+    });
+
+    if (apm.currentTransaction) {
+      apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
+      apm.currentTransaction.addLabels({
+        alerting_rule_consumer: rule.consumer,
+        alerting_rule_name: rule.name,
+        alerting_rule_tags: rule.tags.join(', '),
+        alerting_rule_type_id: rule.alertTypeId,
+        alerting_rule_params: JSON.stringify(rule.params),
+      });
     }
 
-    this.ruleConsumer = consumer;
-
-    if (!enabled) {
-      throw new ErrorWithReason(
-        RuleExecutionStatusErrorReasons.Disabled,
-        new Error(`Rule failed to execute because rule ran after it was disabled.`)
-      );
-    }
-
-    const fakeRequest = this.getFakeKibanaRequest(spaceId, apiKey);
-
-    // Get rules client with space level permissions
-    const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
-
-    let rule: SanitizedRule<Params>;
-
-    // Ensure API key is still valid and user has access
-    try {
-      rule = await rulesClient.get({ id: ruleId });
-
-      if (apm.currentTransaction) {
-        apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_consumer: rule.consumer,
-          alerting_rule_name: rule.name,
-          alerting_rule_tags: rule.tags.join(', '),
-          alerting_rule_type_id: rule.alertTypeId,
-          alerting_rule_params: JSON.stringify(rule.params),
-        });
-      }
-    } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Read, err);
-    }
-
-    this.alertingEventLogger.setRuleName(rule.name);
-
-    try {
-      this.ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
-    } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
-    }
-
-    if (rule.monitoring) {
-      if (rule.monitoring.execution.history.length >= MONITORING_HISTORY_LIMIT) {
-        // Remove the first (oldest) record
-        rule.monitoring.execution.history.shift();
-      }
-    }
     return {
       monitoring: asOk(rule.monitoring),
       stateWithMetrics: await promiseResult<RuleTaskStateAndMetrics, Error>(
-        this.validateAndExecuteRule(fakeRequest, apiKey, rule)
+        this.prepareAndExecuteRule(fakeRequest, apiKey, rule, validatedParams)
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have
