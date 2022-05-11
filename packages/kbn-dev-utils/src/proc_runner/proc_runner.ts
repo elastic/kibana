@@ -7,7 +7,6 @@
  */
 
 import * as Rx from 'rxjs';
-import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -22,6 +21,7 @@ const noop = () => {};
 interface RunOptions extends ProcOptions {
   wait: true | RegExp;
   waitTimeout?: number | false;
+  onEarlyExit?: (msg: string) => void;
 }
 
 /**
@@ -48,16 +48,6 @@ export class ProcRunner {
 
   /**
    *  Start a process, tracking it by `name`
-   *  @param  {String}  name
-   *  @param  {Object}  options
-   *  @property {String} options.cmd executable to run
-   *  @property {Array<String>?} options.args arguments to provide the executable
-   *  @property {String?} options.cwd current working directory for the process
-   *  @property {RegExp|Boolean} options.wait Should start() wait for some time? Use
-   *                                          `true` will wait until the proc exits,
-   *                                          a `RegExp` will wait until that log line
-   *                                          is found
-   *  @return {Promise<undefined>}
    */
   async run(name: string, options: RunOptions) {
     const {
@@ -67,6 +57,7 @@ export class ProcRunner {
       wait = false,
       waitTimeout = 15 * MINUTE,
       env = process.env,
+      onEarlyExit,
     } = options;
     const cmd = options.cmd === 'node' ? process.execPath : options.cmd;
 
@@ -90,32 +81,52 @@ export class ProcRunner {
       stdin,
     });
 
+    if (onEarlyExit) {
+      proc.outcomePromise
+        .then(
+          (code) => {
+            if (!proc.stopWasCalled()) {
+              onEarlyExit(`[${name}] exitted early with ${code}`);
+            }
+          },
+          (error) => {
+            if (!proc.stopWasCalled()) {
+              onEarlyExit(`[${name}] exitted early: ${error.message}`);
+            }
+          }
+        )
+        .catch((error) => {
+          throw new Error(`Error handling early exit: ${error.stack}`);
+        });
+    }
+
     try {
       if (wait instanceof RegExp) {
         // wait for process to log matching line
-        await Rx.race(
-          proc.lines$.pipe(
-            filter((line) => wait.test(line)),
-            first(),
-            catchError((err) => {
-              if (err.name !== 'EmptyError') {
-                throw createFailError(`[${name}] exited without matching pattern: ${wait}`);
-              } else {
-                throw err;
-              }
-            })
-          ),
-          waitTimeout === false
-            ? Rx.NEVER
-            : Rx.timer(waitTimeout).pipe(
-                map(() => {
-                  const sec = waitTimeout / SECOND;
-                  throw createFailError(
-                    `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
-                  );
-                })
-              )
-        ).toPromise();
+        await Rx.lastValueFrom(
+          Rx.race(
+            proc.lines$.pipe(
+              Rx.filter((line) => wait.test(line)),
+              Rx.take(1),
+              Rx.defaultIfEmpty(undefined),
+              Rx.map((line) => {
+                if (line === undefined) {
+                  throw createFailError(`[${name}] exited without matching pattern: ${wait}`);
+                }
+              })
+            ),
+            waitTimeout === false
+              ? Rx.NEVER
+              : Rx.timer(waitTimeout).pipe(
+                  Rx.map(() => {
+                    const sec = waitTimeout / SECOND;
+                    throw createFailError(
+                      `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
+                    );
+                  })
+                )
+          )
+        );
       }
 
       if (wait === true) {
