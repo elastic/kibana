@@ -208,7 +208,7 @@ PUT _index_template/tri_met_tracks
   "composed_of": []
 }
 ----------------------------------
-. In Console, Add the `tri_met_track` ingest pipeline. 
+. In **Console**, add the `tri_met_track` ingest pipeline. 
 +
 [source,js]
 ----------------------------------
