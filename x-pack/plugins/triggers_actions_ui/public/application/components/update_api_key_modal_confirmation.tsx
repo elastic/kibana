@@ -49,10 +49,12 @@ export const UpdateApiKeyModalConfirmation = ({
         setUpdateModalVisibility(false);
         setIsLoadingState(true);
         try {
-          await apiUpdateApiKeyCall({ id: idsToUpdate[0], http });
+          await Promise.all(idsToUpdate.map((id) => apiUpdateApiKeyCall({ id, http })));
           toasts.addSuccess(
             i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.successMessage', {
-              defaultMessage: 'API Key has been updated',
+              defaultMessage:
+                'API {idsToUpdate, plural, one {Key} other {Keys}} {idsToUpdate, plural, one {has} other {have}} been updated',
+              values: { idsToUpdate: idsToUpdate.length },
             })
           );
         } catch (e) {
@@ -60,7 +62,9 @@ export const UpdateApiKeyModalConfirmation = ({
             title: i18n.translate(
               'xpack.triggersActionsUI.updateApiKeyConfirmModal.failureMessage',
               {
-                defaultMessage: 'Failed to update the API Key',
+                defaultMessage:
+                  'Failed to update the API {idsToUpdate, plural, one {Key} other {Keys}}',
+                values: { idsToUpdate: idsToUpdate.length },
               }
             ),
           });

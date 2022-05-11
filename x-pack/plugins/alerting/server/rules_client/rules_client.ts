@@ -1615,7 +1615,7 @@ export class RulesClient {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
         id,
-        {
+        this.updateMeta({
           ...attributes,
           ...(!attributes.apiKeyOwner && { apiKeyOwner: null }),
           ...(!attributes.apiKey && { apiKey: null }),
@@ -1623,7 +1623,7 @@ export class RulesClient {
           scheduledTaskId: null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
-        },
+        }),
         { version }
       );
       if (attributes.scheduledTaskId) {

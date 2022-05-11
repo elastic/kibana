@@ -201,6 +201,9 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
         scheduledTaskId: null,
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -268,7 +271,9 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
-
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
         scheduledTaskId: null,
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -347,6 +352,9 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
         scheduledTaskId: null,
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
@@ -391,6 +399,9 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
         scheduledTaskId: null,
         apiKey: null,
         apiKeyOwner: null,

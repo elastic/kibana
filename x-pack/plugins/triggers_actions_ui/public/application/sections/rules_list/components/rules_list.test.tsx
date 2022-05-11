@@ -312,7 +312,6 @@ const mockedRulesData = [
 beforeEach(() => {
   (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
-
 describe('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
