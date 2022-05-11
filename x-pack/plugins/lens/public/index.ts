@@ -68,6 +68,7 @@ export type {
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
+  IndexPatternLayer,
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,

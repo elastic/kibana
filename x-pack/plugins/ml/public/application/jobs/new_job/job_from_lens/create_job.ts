@@ -16,6 +16,8 @@ import type {
   FieldBasedIndexPatternColumn,
   XYDataLayerConfig,
   IndexPatternPersistedState,
+  GenericIndexPatternColumn,
+  IndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 
 import type { JobCreatorType } from '../common/job_creator';
@@ -188,14 +190,11 @@ async function extractFields(vis: LensSavedObjectAttributes, dataViewClient: Dat
 
   const [layerId, layer] = compatibleIndexPatternLayer;
 
-  const { columns } = layer as { columns: Record<string, FieldBasedIndexPatternColumn> };
-  const cols = Object.entries(columns);
-  const timeFieldCol = cols.find(([, c]) => c.dataType === 'date');
-  if (timeFieldCol === undefined) {
+  const columns = getColumns(layer);
+  const timeField = Object.values(columns).find(({ dataType }) => dataType === 'date');
+  if (timeField === undefined) {
     throw Error('Cannot find a date field.');
   }
-
-  const [, timeField] = timeFieldCol;
 
   const fields = firstCompatibleLayer.accessors.map((a) => columns[a]);
 
@@ -246,4 +245,26 @@ async function getDataViewFromLens(
     return null;
   }
   return dataViewClient.get(dv.id);
+}
+
+function getColumns(layer: Omit<IndexPatternLayer, 'indexPatternId'>) {
+  const { columns } = layer;
+  if (
+    Object.values(columns).some(
+      (c) => hasSourceField(c) === false || hasIncompatibleProperties(c) === true
+    )
+  ) {
+    throw Error('Columns contain settings which are incompatible with ML detectors');
+  }
+  return columns as Record<string, FieldBasedIndexPatternColumn>;
+}
+
+export function hasSourceField(
+  column: GenericIndexPatternColumn
+): column is FieldBasedIndexPatternColumn {
+  return 'sourceField' in column;
+}
+
+export function hasIncompatibleProperties(column: GenericIndexPatternColumn) {
+  return 'timeShift' in column || 'filter' in column;
 }
