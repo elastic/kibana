@@ -7,8 +7,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '../expression_functions';
 import { FieldFormatParams, SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
+import { ExpressionValueVisDimension } from '../expression_functions';
 
 const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
   columns.length > accessor ? accessor : undefined;
