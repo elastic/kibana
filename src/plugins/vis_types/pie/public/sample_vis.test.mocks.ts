@@ -7,6 +7,7 @@
  */
 
 import { LegendDisplay } from '@kbn/expression-partition-vis-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 export const samplePieVis = {
   type: {
@@ -142,6 +143,7 @@ export const samplePieVis = {
     addTooltip: true,
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
+    legendSize: LegendSize.LARGE,
     isDonut: true,
     labels: {
       show: true,
