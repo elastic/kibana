@@ -18,7 +18,7 @@ jest.mock('../../containers/use_get_cases_status');
 const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 
-describe('Count stats', () => {
+describe('Cases metrics', () => {
   useGetCasesStatusMock.mockReturnValue({
     countOpenCases: 2,
     countInProgressCases: 3,
