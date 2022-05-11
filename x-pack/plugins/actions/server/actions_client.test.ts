@@ -1709,7 +1709,7 @@ describe('update()', () => {
     });
 
     test(`deletes any existing authorization tokens`, async () => {
-      await actionsClient.delete({ id: '1' });
+      await updateOperation();
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
   });
