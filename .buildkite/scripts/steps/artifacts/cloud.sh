@@ -51,31 +51,29 @@ CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]'
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
-# NOTE: disabled pending log sanitization
-# echo "--- Setup FTR"
-# export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol)")
-# export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
-# export TEST_KIBANA_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
-# export TEST_KIBANA_USERNAME=$CLOUD_DEPLOYMENT_USERNAME"
-# export TEST_KIBANA_PASS=$CLOUD_DEPLOYMENT_PASSWORD"
+function shutdown {
+  echo "--- Shutdown deployment"
+  ecctl deployment shutdown "$CLOUD_DEPLOYMENT_ID" --force --track --output json &> "$LOGS"
+}
+trap "shutdown" EXIT
 
-# export TEST_ES_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol)")
-# export TEST_ES_HOSTNAME==$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
-# export TEST_ES_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
-# export TEST_ES_USER="$CLOUD_DEPLOYMENT_USERNAME"
-# export TEST_ES_PASS="$CLOUD_DEPLOYMENT_PASSWORD"
+echo "--- FTR Setup"
+export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol)")
+export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
+export TEST_KIBANA_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
+export TEST_KIBANA_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
+export TEST_KIBANA_PASS="$CLOUD_DEPLOYMENT_PASSWORD"
 
-# export TEST_BROWSER_HEADLESS=1
+export TEST_ES_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol)")
+export TEST_ES_HOSTNAME==$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
+export TEST_ES_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
+export TEST_ES_USER="$CLOUD_DEPLOYMENT_USERNAME"
+export TEST_ES_PASS="$CLOUD_DEPLOYMENT_PASSWORD"
+
+export TEST_BROWSER_HEADLESS=1
 
 # Error: attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ConnectionError: self signed certificate in certificate chain
-# export NODE_TLS_REJECT_UNAUTHORIZED=0
+export NODE_TLS_REJECT_UNAUTHORIZED=0
 
-# echo "--- Run default functional tests"
-# node --no-warnings scripts/functional_test_runner.js --include-tag=cloud -exclude-tag=skipCloud
-
-# echo "--- Run x-pack functional tests"
-# cd x-pack
-# node --no-warnings scripts/functional_test_runner.js --include-tag=cloud -exclude-tag=skipCloud 
-
-echo "--- Shutdown deployment"
-ecctl deployment shutdown "$CLOUD_DEPLOYMENT_ID" --force --track --output json &> "$LOGS"
+echo "--- FTR - Reporting"
+node --no-warnings scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
