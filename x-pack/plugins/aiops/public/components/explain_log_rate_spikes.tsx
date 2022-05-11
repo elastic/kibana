@@ -7,28 +7,10 @@
 
 import React, { FC } from 'react';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
-
-import { getCoreStart } from '../kibana_services';
-
-import { AiopsApp } from './app';
-
-/**
- * Spec used for lazy loading in the ML plugin
- */
-export type ExplainLogRateSpikesSpec = typeof ExplainLogRateSpikes;
-
 export const ExplainLogRateSpikes: FC = () => {
-  const coreStart = getCoreStart();
-
-  return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-      <KibanaContextProvider services={coreStart}>
-        <I18nProvider>
-          <AiopsApp />
-        </I18nProvider>
-      </KibanaContextProvider>
-    </KibanaThemeProvider>
-  );
+  return <span>CONTENT GOES HERE INSIDE AIOPS PLUGIN</span>;
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default ExplainLogRateSpikes;
