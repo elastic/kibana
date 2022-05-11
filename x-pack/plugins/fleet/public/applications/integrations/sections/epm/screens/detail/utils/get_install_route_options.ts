@@ -36,14 +36,14 @@ export const getInstallPkgRouteOptions = ({
 }: GetInstallPkgRouteOptionsParams): [string, { path: string; state: unknown }] => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
-  const useStepsLayout =
+  const useMultiPageLayout =
     isExperimentalAddIntegrationPageEnabled &&
     isCloud &&
     isFirstTimeAgentUser &&
     !packageExemptFromStepsLayout;
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
-    useStepsLayout,
+    useMultiPageLayout,
     ...integrationOpts,
     ...(agentPolicyId ? { agentPolicyId } : {}),
   })[1];

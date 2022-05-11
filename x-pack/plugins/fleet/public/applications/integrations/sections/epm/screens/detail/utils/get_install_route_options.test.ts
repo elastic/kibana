@@ -85,7 +85,7 @@ describe('getInstallPkgRouteOptions', () => {
     const expectedRedirectURl = '/detail/myintegration-1.0.0/policies?integration=myintegration';
 
     const expectedOptions = {
-      path: '/integrations/myintegration-1.0.0/add-integration/myintegration?useStepsLayout',
+      path: '/integrations/myintegration-1.0.0/add-integration/myintegration?useMultiPageLayout',
       state: {
         onCancelUrl: 'currentPath',
         onCancelNavigateTo: expectedOnCancelNavigateTo,
