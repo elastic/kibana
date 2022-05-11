@@ -14,7 +14,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"process.executable\"",
+        "detector_description": "Detects rare process.executable values.",
         "function": "rare",
         "by_field_name": "process.executable",
         "detector_index": 0

@@ -14,7 +14,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare process executions on Windows",
+        "detector_description": "For each host.name, detects rare process.name values.",
         "function": "rare",
         "by_field_name": "process.name",
         "partition_field_name": "host.name",

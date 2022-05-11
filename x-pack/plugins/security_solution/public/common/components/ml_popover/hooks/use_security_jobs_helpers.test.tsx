@@ -39,7 +39,7 @@ describe('useSecurityJobsHelpers', () => {
         description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
         groups: ['auditbeat', 'process', 'siem'],
         hasDatafeed: false,
-        id: 'rare_process_by_host_linux_ecs',
+        id: 'rare_process_by_host_linux',
         isCompatible: false,
         isElasticJob: true,
         isInstalled: false,
@@ -55,7 +55,7 @@ describe('useSecurityJobsHelpers', () => {
     describe('getAugmentedFields', () => {
       test.skip('return correct augmented fields for given matching compatible modules', () => {
         const moduleJobs = getModuleJobs(mockGetModuleResponse, ['siem_auditbeat']);
-        const augmentedFields = getAugmentedFields('rare_process_by_host_linux_ecs', moduleJobs, [
+        const augmentedFields = getAugmentedFields('rare_process_by_host_linux', moduleJobs, [
           'siem_auditbeat',
         ]);
         expect(augmentedFields).toEqual({

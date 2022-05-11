@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.",
+  "description": "Security: Linux - Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.",
   "groups": [
     "auditbeat",
     "endpoint",
@@ -12,7 +12,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"process.name\"",
+        "detector_description": "Detects rare process.name values.",
         "function": "rare",
         "by_field_name": "process.name"
       }

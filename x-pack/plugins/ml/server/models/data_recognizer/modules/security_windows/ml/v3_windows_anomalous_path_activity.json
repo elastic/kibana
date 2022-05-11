@@ -13,7 +13,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"process.working_directory\"",
+        "detector_description": "Detects rare process.working_directory values.",
         "function": "rare",
         "by_field_name": "process.working_directory",
         "detector_index": 0

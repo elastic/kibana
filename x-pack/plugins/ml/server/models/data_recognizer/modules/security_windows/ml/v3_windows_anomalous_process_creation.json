@@ -14,7 +14,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Unusual process creation activity",
+        "detector_description": "For each process.parent.name, detects rare process.name values.",
         "function": "rare",
         "by_field_name": "process.name",
         "partition_field_name": "process.parent.name",

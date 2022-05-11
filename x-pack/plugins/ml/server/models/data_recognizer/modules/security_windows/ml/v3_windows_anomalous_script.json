@@ -13,7 +13,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high_info_content(\"powershell.file.script_block_text\")",
+        "detector_description": "Detects high information content in powershell.file.script_block_text values.",
         "function": "high_info_content",
         "field_name": "powershell.file.script_block_text"
       }

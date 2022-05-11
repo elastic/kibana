@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Security: Linux v3 -  Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
+  "description": "Security: Linux - Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
   "groups": [
     "security",
     "auditbeat",
@@ -12,7 +12,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"destination.port\"",
+        "detector_description": "Detects rare destination.port values.",
         "function": "rare",
         "by_field_name": "destination.port"
       }

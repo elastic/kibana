@@ -14,7 +14,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"winlog.event_data.ServiceName\"",
+        "detector_description": "Detects rare winlog.event_data.ServiceName values.",
         "function": "rare",
         "by_field_name": "winlog.event_data.ServiceName"
       }

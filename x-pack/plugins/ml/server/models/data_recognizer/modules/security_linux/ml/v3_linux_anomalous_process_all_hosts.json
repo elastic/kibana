@@ -12,7 +12,7 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"process.name\"",
+        "detector_description": "Detects rare process.name values.",
         "function": "rare",
         "by_field_name": "process.name",
         "detector_index": 0
