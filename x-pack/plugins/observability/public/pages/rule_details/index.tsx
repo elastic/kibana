@@ -63,7 +63,12 @@ import {
 export function RuleDetailsPage() {
   const {
     http,
-    triggersActionsUi: { ruleTypeRegistry, getRuleStatusDropdown, getEditAlertFlyout },
+    triggersActionsUi: {
+      ruleTypeRegistry,
+      getRuleStatusDropdown,
+      getEditAlertFlyout,
+      actionTypeRegistry,
+    },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
   } = useKibana().services;
@@ -440,7 +445,7 @@ export function RuleDetailsPage() {
                     })}
                   </ItemTitleRuleSummary>
                   <EuiFlexItem grow={3}>
-                    <Actions ruleActions={rule.actions} />
+                    <Actions ruleActions={rule.actions} actionTypeRegistry={actionTypeRegistry} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
