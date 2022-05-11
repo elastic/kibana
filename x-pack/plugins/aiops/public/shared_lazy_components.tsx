@@ -14,11 +14,9 @@ const SingleEndpointStreamingDemoLazy = React.lazy(
   () => import('./components/single_endpoint_streaming_demo')
 );
 
-const Loading: FC = () => <div>LOADING</div>;
-
 const LazyWrapper: FC = ({ children }) => (
   <EuiErrorBoundary>
-    <Suspense fallback={<Loading />}>{children}</Suspense>
+    <Suspense fallback={<div>LOADING</div>}>{children}</Suspense>
   </EuiErrorBoundary>
 );
 

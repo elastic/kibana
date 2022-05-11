@@ -11,8 +11,6 @@ import { AiopsPluginSetup, AiopsPluginStart } from './types';
 
 export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
   public setup(core: CoreSetup) {}
-
   public start(core: CoreStart) {}
-
   public stop() {}
 }
