@@ -93,6 +93,9 @@ Object {
         "legendPosition": Array [
           "right",
         ],
+        "legendSize": Array [
+          "large",
+        ],
         "metric": Array [
           Object {
             "chain": Array [
