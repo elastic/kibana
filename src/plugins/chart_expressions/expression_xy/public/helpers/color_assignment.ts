@@ -11,6 +11,7 @@ import { euiLightVars } from '@kbn/ui-theme';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
+import { getFormat } from './format';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -49,7 +50,7 @@ export function getColorAssignments(
       }
       const splitAccessor = layer.splitAccessor;
       const column = layer.table.columns?.find(({ id }) => id === splitAccessor);
-      const columnFormatter = column && formatFactory(column.meta.params);
+      const columnFormatter = column && formatFactory(getFormat(column.meta));
       const splits =
         !column || !layer.table
           ? []

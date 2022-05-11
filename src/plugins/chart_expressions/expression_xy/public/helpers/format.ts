@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './interval';
-export * from './layers';
-export * from './state';
-export * from './visualization';
-export * from './fitting_functions';
-export * from './axes_configuration';
-export * from './icon';
-export * from './color_assignment';
-export * from './annotations';
-export * from './data_layers';
-export * from './format';
+import { DatatableColumnMeta } from '@kbn/expressions-plugin';
+
+export const getFormat = (meta?: DatatableColumnMeta) => meta?.params || { id: meta?.type };

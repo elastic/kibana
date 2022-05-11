@@ -46,6 +46,7 @@ import {
   Series,
   getFormattedTablesByLayers,
   validateExtent,
+  getFormat,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -182,7 +183,7 @@ export function XYChart({
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
-  const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
+  const xAxisFormatter = formatFactory(xAxisColumn && getFormat(xAxisColumn.meta));
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -381,7 +382,7 @@ export function XYChart({
       layer.xAccessor &&
       formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor] &&
       xColumn
-        ? formatFactory(xColumn.meta.params)
+        ? formatFactory(getFormat(xColumn.meta))
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
@@ -406,7 +407,7 @@ export function XYChart({
       const pointValue = xySeries.seriesKeys[0];
 
       const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
-      const splitFormatter = formatFactory(splitColumn && splitColumn.meta?.params);
+      const splitFormatter = formatFactory(splitColumn && getFormat(splitColumn.meta));
 
       points.push({
         row: table.rows.findIndex((row) => {

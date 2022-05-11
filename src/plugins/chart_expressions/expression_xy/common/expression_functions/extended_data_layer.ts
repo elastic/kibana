@@ -10,6 +10,7 @@ import { ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
 import { commonDataLayerArgs } from './common_data_layer_args';
+import { getAccessors } from '../helpers';
 
 export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   name: EXTENDED_DATA_LAYER,
@@ -29,12 +30,13 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
     },
   },
   fn(input, args) {
+    const table = args.table ?? input;
     return {
       type: EXTENDED_DATA_LAYER,
       ...args,
-      accessors: args.accessors ?? [],
+      ...getAccessors(args, table),
       layerType: LayerTypes.DATA,
-      table: args.table ?? input,
+      table,
     };
   },
 };
