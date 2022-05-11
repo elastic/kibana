@@ -310,7 +310,7 @@ cloud.auth: <username:password>
 
 . Wait for {filebeat} to start shipping data to Elastic Cloud. {filebeat} should not produce any output to stdout. 
 
-. Leave the terminal window open and Filebeat running throughout this tutorial.
+. Leave the terminal window open and {filebeat} running throughout this tutorial.
 
 [float]
 ==== Step 3: Create a data view for the tri_met_tracks {es} index
