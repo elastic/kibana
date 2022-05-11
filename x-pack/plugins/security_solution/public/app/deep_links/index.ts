@@ -135,18 +135,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     ],
   },
   {
-    id: SecurityPageName.administration,
-    title: MANAGE,
-    path: MANAGE_PATH,
-    navLinkStatus: AppNavLinkStatus.hidden,
-    features: [FEATURE.general],
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.manage', {
-        defaultMessage: 'Manage',
-      }),
-    ],
-  },
-  {
     id: SecurityPageName.detectionAndResponse,
     title: DETECTION_RESPONSE,
     path: DETECTION_RESPONSE_PATH,
@@ -446,7 +434,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
   {
     id: SecurityPageName.administration,
     title: MANAGE,
-    path: ENDPOINTS_PATH,
+    path: MANAGE_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
     features: [FEATURE.general],
     keywords: [
