@@ -33,6 +33,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
+const createAPIKeyMock = jest.fn();
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -42,7 +43,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
+  createAPIKey: createAPIKeyMock,
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -576,6 +577,99 @@ describe('bulkEdit()', () => {
 
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
         { apiKeys: ['MTIzOmFiYw=='] },
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkUpdate failed', async () => {
+      createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, enabled: true },
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkUpdate.mockImplementation(() => {
+        throw new Error('Fail');
+      });
+
+      await expect(
+        rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        })
+      ).rejects.toThrow('Fail');
+
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: ['dW5kZWZpbmVkOjExMQ=='] },
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if SO update failed', async () => {
+      createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, enabled: true },
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: { index: ['test-index-*'] },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+            error: {
+              error: 'test failure',
+              statusCode: 409,
+              message: 'test failure',
+            },
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: ['dW5kZWZpbmVkOjExMQ=='] },
         expect.any(Object),
         expect.any(Object)
       );

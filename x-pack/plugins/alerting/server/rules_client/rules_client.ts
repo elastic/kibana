@@ -1520,6 +1520,7 @@ export class RulesClient {
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const errors: BulkEditError[] = [];
     const apiKeysToInvalidate: string[] = [];
+    const apiKeysMap = new Map<string, { oldApiKey?: string; newApiKey?: string }>();
     const username = await this.getUserName();
 
     for await (const response of rulesFinder.find()) {
@@ -1528,7 +1529,7 @@ export class RulesClient {
         async (rule) => {
           try {
             if (rule.attributes.apiKey) {
-              apiKeysToInvalidate.push(rule.attributes.apiKey);
+              apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
             }
 
             const ruleType = this.ruleTypeRegistry.get(rule.attributes.alertTypeId);
@@ -1602,7 +1603,16 @@ export class RulesClient {
             } catch (error) {
               throw Error(`Error updating rule: could not create API key - ${error.message}`);
             }
+
             const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
+
+            // collect generated API keys
+            if (apiKeyAttributes.apiKey) {
+              apiKeysMap.set(rule.id, {
+                ...apiKeysMap.get(rule.id),
+                newApiKey: apiKeyAttributes.apiKey,
+              });
+            }
 
             // get notifyWhen
             const notifyWhen = getRuleNotifyWhenType(
@@ -1652,7 +1662,41 @@ export class RulesClient {
       );
     }
 
-    const result = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
+    let result;
+    try {
+      result = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
+    } catch (e) {
+      // avoid unused newly generated API keys
+      if (apiKeysMap.size > 0) {
+        await bulkMarkApiKeysForInvalidation(
+          {
+            apiKeys: Array.from(apiKeysMap.values()).reduce<string[]>((acc, value) => {
+              if (value.newApiKey) {
+                acc.push(value.newApiKey);
+              }
+              return acc;
+            }, []),
+          },
+          this.logger,
+          this.unsecuredSavedObjectsClient
+        );
+      }
+      throw e;
+    }
+
+    result.saved_objects.map(({ id, error }) => {
+      const oldApiKey = apiKeysMap.get(id)?.oldApiKey;
+      const newApiKey = apiKeysMap.get(id)?.newApiKey;
+
+      // if SO wasn't saved and has new API key it will be invalidated
+      if (error && newApiKey) {
+        apiKeysToInvalidate.push(newApiKey);
+        // if SO saved and has old Api Key it will be invalidate
+      } else if (!error && oldApiKey) {
+        apiKeysToInvalidate.push(oldApiKey);
+      }
+    });
+
     return { apiKeysToInvalidate, resultSavedObjects: result.saved_objects, errors, rules };
   }
 
