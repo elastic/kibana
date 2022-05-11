@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-
-export function isAbortError(error: Error) {
-  return error instanceof errors.RequestAbortedError;
-}
+export { VectorTileAdapter } from './vector_tile_adapter';
+export { VectorTileInspectorView } from './vector_tile_inspector_view';
