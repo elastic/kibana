@@ -43,11 +43,12 @@ export async function getServiceLocations(server: UptimeServerSetup) {
       locations: Record<string, ManifestLocation>;
     }>(server.config.service!.manifestUrl!);
 
-    const availableLocations = server.config.service?.showExperimentalLocations
-      ? Object.entries(data.locations)
-      : Object.entries(data.locations).filter(([_, location]) => {
-          return location.status === LocationStatus.GA;
-        });
+    const availableLocations =
+      server.isDev || server.config.service?.showExperimentalLocations
+        ? Object.entries(data.locations)
+        : Object.entries(data.locations).filter(([_, location]) => {
+            return location.status === LocationStatus.GA;
+          });
 
     availableLocations.forEach(([locationId, location]) => {
       locations.push({

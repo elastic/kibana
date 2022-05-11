@@ -41,83 +41,137 @@ describe('getServiceLocations', function () {
     },
   });
 
-  it('should return parsed GA locations and throttling', async () => {
-    const locations = await getServiceLocations({
-      config: {
-        service: {
-          manifestUrl: 'http://local.dev',
-        },
-      },
-      // @ts-ignore
-      logger: {
-        error: jest.fn(),
-      },
-    });
-
-    expect(locations).toEqual({
-      throttling: {
-        [BandwidthLimitKey.DOWNLOAD]: 100,
-        [BandwidthLimitKey.UPLOAD]: 50,
-      },
-      locations: [
-        {
-          geo: {
-            lat: 41.25,
-            lon: -95.86,
+  describe('when out of production', () => {
+    it('should return all locations regardless of the `showExperimentalLocations` key', async () => {
+      const locations = await getServiceLocations({
+        isDev: true,
+        config: {
+          service: {
+            manifestUrl: 'http://local.dev',
+            showExperimentalLocations: false,
           },
-          id: 'us_central',
-          label: 'US Central',
-          url: 'https://local.dev',
-          isServiceManaged: true,
-          status: LocationStatus.GA,
         },
-      ],
+        // @ts-ignore
+        logger: {
+          error: jest.fn(),
+        },
+      });
+
+      expect(locations).toEqual({
+        throttling: {
+          [BandwidthLimitKey.DOWNLOAD]: 100,
+          [BandwidthLimitKey.UPLOAD]: 50,
+        },
+        locations: [
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_central',
+            label: 'US Central',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.GA,
+          },
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_east',
+            label: 'US East',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.EXPERIMENTAL,
+          },
+        ],
+      });
     });
   });
 
-  it('should return parsed experimental locations and throttling with `showExperimentalLocations` flag', async () => {
-    const locations = await getServiceLocations({
-      config: {
-        service: {
-          manifestUrl: 'http://local.dev',
-          showExperimentalLocations: true,
+  describe('when in production', () => {
+    it('should return only GA locations and throttling when `showExperimentalLocations` is set to false', async () => {
+      const locations = await getServiceLocations({
+        isDev: false,
+        config: {
+          service: {
+            manifestUrl: 'http://local.dev',
+            showExperimentalLocations: false,
+          },
         },
-      },
-      // @ts-ignore
-      logger: {
-        error: jest.fn(),
-      },
+        // @ts-ignore
+        logger: {
+          error: jest.fn(),
+        },
+      });
+
+      expect(locations).toEqual({
+        throttling: {
+          [BandwidthLimitKey.DOWNLOAD]: 100,
+          [BandwidthLimitKey.UPLOAD]: 50,
+        },
+        locations: [
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_central',
+            label: 'US Central',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.GA,
+          },
+        ],
+      });
     });
 
-    expect(locations).toEqual({
-      throttling: {
-        [BandwidthLimitKey.DOWNLOAD]: 100,
-        [BandwidthLimitKey.UPLOAD]: 50,
-      },
-      locations: [
-        {
-          geo: {
-            lat: 41.25,
-            lon: -95.86,
+    it('should return all locations and throttling when `showExperimentalLocations` flag is set to true', async () => {
+      const locations = await getServiceLocations({
+        isDev: false,
+        config: {
+          service: {
+            manifestUrl: 'http://local.dev',
+            showExperimentalLocations: true,
           },
-          id: 'us_central',
-          label: 'US Central',
-          url: 'https://local.dev',
-          isServiceManaged: true,
-          status: LocationStatus.GA,
         },
-        {
-          geo: {
-            lat: 41.25,
-            lon: -95.86,
+        // @ts-ignore
+        logger: {
+          error: jest.fn(),
+        },
+      });
+
+      expect(locations).toEqual({
+        throttling: {
+          [BandwidthLimitKey.DOWNLOAD]: 100,
+          [BandwidthLimitKey.UPLOAD]: 50,
+        },
+        locations: [
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_central',
+            label: 'US Central',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.GA,
           },
-          id: 'us_east',
-          label: 'US East',
-          url: 'https://local.dev',
-          isServiceManaged: true,
-          status: LocationStatus.EXPERIMENTAL,
-        },
-      ],
+          {
+            geo: {
+              lat: 41.25,
+              lon: -95.86,
+            },
+            id: 'us_east',
+            label: 'US East',
+            url: 'https://local.dev',
+            isServiceManaged: true,
+            status: LocationStatus.EXPERIMENTAL,
+          },
+        ],
+      });
     });
   });
 });
