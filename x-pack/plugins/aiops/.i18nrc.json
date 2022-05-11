@@ -1,7 +1,0 @@
-{
-  "prefix": "aiops",
-  "paths": {
-    "aiops": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}
