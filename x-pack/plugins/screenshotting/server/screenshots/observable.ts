@@ -138,10 +138,6 @@ export class ScreenshotObservableHandler {
 
   private openUrl(index: number, urlOrUrlWithContext: UrlOrUrlWithContext) {
     return defer(async () => {
-      // set the viewport before navigation: https://puppeteer.github.io/puppeteer/docs/next/puppeteer.page.setviewport/#pagesetviewport-method
-      const viewport = this.layout.getViewport() ?? DEFAULT_VIEWPORT;
-      await this.driver.setViewport(viewport, this.eventLogger.kbnLogger);
-
       let url: string;
       let context: Context | undefined;
 
@@ -169,9 +165,11 @@ export class ScreenshotObservableHandler {
 
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
       mergeMap(async (itemsCount) => {
-        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) ?? DEFAULT_VIEWPORT;
-        await driver.setViewport(viewport, this.eventLogger.kbnLogger);
+        // set the viewport to include the elements to capture, before checking for readiness of visualizations.
+        await driver.setViewport(
+          this.layout.getViewport(itemsCount) ?? DEFAULT_VIEWPORT,
+          this.eventLogger.kbnLogger
+        );
         await waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
