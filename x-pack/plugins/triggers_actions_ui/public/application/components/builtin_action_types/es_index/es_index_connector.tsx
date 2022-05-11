@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiFormRow,
-  EuiSwitch,
   EuiSpacer,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -21,7 +20,6 @@ import {
   FieldConfig,
   getFieldValidityAndErrorMessage,
   UseField,
-  useForm,
   useFormData,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -75,10 +73,8 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   readOnly,
 }) => {
   const { http, docLinks } = useKibana().services;
-  const { form } = useForm();
-  const { setFieldValue } = form;
-  const [{ config }] = useFormData({
-    watch: ['config.executionTimeField', 'config.index'],
+  const [{ config, __internal__ }] = useFormData({
+    watch: ['config.executionTimeField', 'config.index', '__internal__.hasTimeFieldCheckbox'],
   });
 
   const { executionTimeField, index } = config ?? { executionTimeField: null, index: null };
@@ -86,20 +82,18 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   const [showTimeFieldCheckbox, setShowTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
   );
-  const [hasTimeFieldCheckbox, setHasTimeFieldCheckboxState] = useState<boolean>(
-    executionTimeField != null
-  );
 
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState<TimeFieldOptions[]>([]);
   const [areIndiciesLoading, setAreIndicesLoading] = useState<boolean>(false);
+
+  const hasTimeFieldCheckbox = __internal__ != null ? __internal__.hasTimeFieldCheckbox : false;
 
   const setTimeFields = (fields: TimeFieldOptions[]) => {
     if (fields.length > 0) {
       setShowTimeFieldCheckboxState(true);
       setTimeFieldOptions([firstFieldOption, ...fields]);
     } else {
-      setHasTimeFieldCheckboxState(false);
       setShowTimeFieldCheckboxState(false);
       setTimeFieldOptions([]);
     }
@@ -232,33 +226,32 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         }}
       />
       <EuiSpacer size="m" />
-      {showTimeFieldCheckbox && (
-        <EuiSwitch
-          data-test-subj="hasTimeFieldCheckbox"
-          checked={hasTimeFieldCheckbox || false}
-          disabled={readOnly}
-          onChange={() => {
-            setHasTimeFieldCheckboxState(!hasTimeFieldCheckbox);
-
-            if (!hasTimeFieldCheckbox) {
-              setFieldValue('config.executionTimeField', null);
-            }
+      <div style={{ display: showTimeFieldCheckbox ? 'block' : 'none' }}>
+        <UseField
+          path="__internal__.hasTimeFieldCheckbox"
+          component={ToggleField}
+          config={{ defaultValue: false }}
+          componentProps={{
+            euiFieldProps: {
+              label: (
+                <>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
+                    defaultMessage="Define time field for each document"
+                  />
+                  <EuiIconTip
+                    position="right"
+                    type="questionInCircle"
+                    content={translations.SHOW_TIME_FIELD_TOGGLE_TOOLTIP}
+                  />
+                </>
+              ),
+              disabled: readOnly,
+              'data-test-subj': 'hasTimeFieldCheckbox',
+            },
           }}
-          label={
-            <>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
-                defaultMessage="Define time field for each document"
-              />
-              <EuiIconTip
-                position="right"
-                type="questionInCircle"
-                content={translations.SHOW_TIME_FIELD_TOGGLE_TOOLTIP}
-              />
-            </>
-          }
         />
-      )}
+      </div>
       <div style={{ display: hasTimeFieldCheckbox ? 'block' : 'none' }}>
         <EuiSpacer size="m" />
         <UseField
@@ -267,6 +260,9 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           config={{
             label: translations.EXECUTION_TIME_LABEL,
             defaultValue: null,
+            serializer: (fieldValue: string) => {
+              return hasTimeFieldCheckbox ? fieldValue : null;
+            },
           }}
           componentProps={{
             euiFieldProps: {
