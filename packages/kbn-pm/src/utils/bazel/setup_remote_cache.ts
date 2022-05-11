@@ -54,6 +54,7 @@ export async function setupRemoteCache(repoRootPath: string) {
     # To regenerate this file, delete it and run 'yarn kbn bootstrap' again.
     build --remote_cache=https://storage.googleapis.com/kibana-local-bazel-remote-cache
     build --noremote_upload_local_results
+    build --incompatible_remote_results_ignore_disk
   `;
 
   writeFileSync(settingsPath, contents);
