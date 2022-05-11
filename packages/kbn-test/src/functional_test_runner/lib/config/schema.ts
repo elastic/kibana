@@ -271,10 +271,10 @@ export const schema = Joi.object()
      */
     testData: Joi.object()
       .keys({
-        kbnArchives: Joi.array().items(Joi.string()).optional(),
-        esArchives: Joi.array().items(Joi.string()).optional(),
+        kbnArchives: Joi.array().items(Joi.string()).default([]),
+        esArchives: Joi.array().items(Joi.string()).default([]),
       })
-      .optional(),
+      .default(),
 
     /**
      * Optional settings to enable scalability testing for single user performance journey.
