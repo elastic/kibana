@@ -326,7 +326,12 @@ export const getDatatableVisualization = ({
     }
   },
 
-  toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {
+  toExpression(
+    state,
+    datasourceLayers,
+    { title, description } = {},
+    datasourceExpressionsByLayers = {}
+  ): Ast | null {
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, datasourceLayers, state.layerId) || {};
 
@@ -346,9 +351,12 @@ export const getDatatableVisualization = ({
       .filter((columnId) => datasource!.getOperationForColumnId(columnId))
       .map((columnId) => columnMap[columnId]);
 
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
+
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression?.chain ?? []),
         {
           type: 'function',
           function: 'lens_datatable',

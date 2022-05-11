@@ -35,7 +35,7 @@ export const createGridColumns = (
 ) => {
   const onFilterClick = (data: FilterCellData, negate: boolean) => {
     fireEvent({
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         data: [
           {
