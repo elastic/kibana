@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiI18n,
   EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import { PLUGIN_ID } from '../../../common';
 import { useDiscoverServices } from '../../utils/use_discover_services';
@@ -63,12 +64,12 @@ const tourStepDefinitions: TourStepDefinition[] = [
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns,
     title: i18n.translate('discover.dscTour.stepReorderColumns.title', {
-      defaultMessage: 'Order columns',
+      defaultMessage: 'Order the table columns',
     }),
     content: (
       <FormattedMessage
         id="discover.dscTour.stepReorderColumns.description"
-        defaultMessage="Order your columns however you want."
+        defaultMessage="Drag columns to the order you want."
       />
     ),
     imageName: 'reorder_columns.gif',
@@ -84,7 +85,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     content: (
       <FormattedMessage
         id="discover.dscTour.stepSort.description"
-        defaultMessage="Sort a single field by clicking a column header. Sort by multiple fields using the pop-up."
+        defaultMessage="Use the column heading to sort on a single field, or the popover for multiple fields."
       />
     ),
     imageName: 'sort.gif',
@@ -118,7 +119,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
     content: (
       <FormattedMessage
         id="discover.dscTour.stepExpand.description"
-        defaultMessage="Click {expandIcon} to inspect fields, set filters, and view the documents that came before and after it."
+        defaultMessage="Click {expandIcon} to view, compare, and filter documents."
         values={{
           expandIcon: (
             <EuiIcon
@@ -154,10 +155,12 @@ const prepareTourSteps = (
     maxWidth: MAX_WIDTH,
     content: (
       <>
-        <p>{stepDefinition.content}</p>
+        <EuiText>
+          <p>{stepDefinition.content}</p>
+        </EuiText>
         {stepDefinition.imageName && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiImage
               alt={stepDefinition.imageAltText}
               src={getAssetPath(stepDefinition.imageName)}
