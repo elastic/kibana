@@ -4248,7 +4248,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
           ],
           Array [
-            undefined,
+            Object {
+              "id": "string",
+            },
           ],
           Array [
             Object {
@@ -4487,7 +4489,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
           ],
           Array [
-            undefined,
+            Object {
+              "id": "string",
+            },
           ],
           Array [
             Object {
@@ -5043,7 +5047,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
           ],
           Array [
-            undefined,
+            Object {
+              "id": "string",
+            },
           ],
           Array [
             Object {
@@ -5281,7 +5287,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
           ],
           Array [
-            undefined,
+            Object {
+              "id": "string",
+            },
           ],
           Array [
             Object {
@@ -5837,7 +5845,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
           ],
           Array [
-            undefined,
+            Object {
+              "id": "string",
+            },
           ],
           Array [
             Object {
@@ -6075,7 +6085,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
           ],
           Array [
-            undefined,
+            Object {
+              "id": "string",
+            },
           ],
           Array [
             Object {
