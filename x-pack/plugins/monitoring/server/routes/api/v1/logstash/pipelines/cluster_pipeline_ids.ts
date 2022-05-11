@@ -14,7 +14,7 @@ import {
   postLogstashPipelineClusterIdsRequestPayloadRT,
 } from '../../../../../../common/http_api/logstash';
 
-export function logstashPipelineRoute(server: MonitoringCore) {
+export function logstashClusterPipelineIdsRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postLogstashPipelineClusterIdsRequestParamsRT);
   const validateBody = createValidationFunction(postLogstashPipelineClusterIdsRequestPayloadRT);
 

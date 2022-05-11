@@ -24,7 +24,7 @@ const sortMetricSetMap = {
   latestNodesCount: nodesCountMetric,
 };
 
-export function logstashClusterPipelinesRoute(server: MonitoringCore) {
+export function logstashNodePipelinesRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postLogstashNodePipelinesRequestParamsRT);
   const validateBody = createValidationFunction(postLogstashNodePipelinesRequestPayloadRT);
   server.route({
