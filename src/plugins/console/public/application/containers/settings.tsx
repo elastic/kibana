@@ -61,7 +61,10 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {} as DevToolsSettings['autocomplete']
       );
-      retrieveAutoCompleteInfo(http, settings, changedSettings);
+      retrieveAutoCompleteInfo(http, settings, {
+        ...settings.getAutocomplete(),
+        ...changedSettings,
+      });
     } else if (isPollingChanged && newSettings.polling) {
       // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
       retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());

@@ -31,3 +31,19 @@ export async function retrieveDataStreams(http: HttpSetup, settingsToRetrieve: S
 export function clearDataStreams() {
   dataStreams = [];
 }
+
+export class DataStreams {
+  constructor(private data: string[] = []) {}
+
+  get = () => {
+    return this.data;
+  };
+
+  load = (data: { data_streams: [] }) => {
+    this.data = (data.data_streams ?? []).map(({ name }) => name);
+  };
+
+  clear = () => {
+    this.data = [];
+  };
+}

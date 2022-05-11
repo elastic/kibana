@@ -7,11 +7,13 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import { API_BASE_PATH } from '../../../common/constants';
 import type { Settings, DevToolsSettings } from '../../services';
 import { send } from '../es';
 import { clearTemplates, retrieveTemplates } from './templates';
 import { clearDataStreams, retrieveDataStreams } from './data_streams';
 import { clearMappings, retrieveAliases, retrieveMappings } from './mappings';
+import { getAutocompleteInfo, setAutocompleteInfo } from '../../services';
 
 export interface SettingsToRetrieve {
   indices: boolean;
@@ -66,19 +68,10 @@ export function retrieveAutoCompleteInfo(
 ) {
   clearSubscriptions();
 
-  const config = {
-    ...settingsToRetrieve,
-    legacyTemplates: settingsToRetrieve.templates,
-    indexTemplates: settingsToRetrieve.templates,
-    componentTemplates: settingsToRetrieve.templates,
-  };
+  http.get(`${API_BASE_PATH}/mappings`, { query: { ...settingsToRetrieve } }).then((data) => {
+    console.log(data);
+    getAutocompleteInfo().dataStreams.load(data.dataStreams);
 
-  Promise.allSettled([
-    retrieveMappings(http, config),
-    retrieveAliases(http, config),
-    retrieveTemplates(http, config),
-    retrieveDataStreams(http, config),
-  ]).then(() => {
     // Schedule next request.
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send

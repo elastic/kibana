@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export type { DevToolsSettings } from './settings';
-export { createSettings, Settings, DEFAULT_SETTINGS } from './settings';
-export { AutocompleteInfo, getAutocompleteInfo, setAutocompleteInfo } from './autocomplete';
+import type { RouteDependencies } from '../../..';
+import { registerGetRoute } from './register_get_route';
+
+export function registerMappingsRoute(deps: RouteDependencies) {
+  registerGetRoute(deps);
+}

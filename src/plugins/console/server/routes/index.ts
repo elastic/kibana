@@ -16,6 +16,7 @@ import { ProxyConfigCollection } from '../lib';
 import { registerEsConfigRoute } from './api/console/es_config';
 import { registerProxyRoute } from './api/console/proxy';
 import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
+import { registerMappingsRoute } from './api/console/mappings';
 
 export interface ProxyDependencies {
   readLegacyESConfig: () => Promise<ESConfigForProxy>;
@@ -38,4 +39,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerEsConfigRoute(dependencies);
   registerProxyRoute(dependencies);
   registerSpecDefinitionsRoute(dependencies);
+  registerMappingsRoute(dependencies);
 };
