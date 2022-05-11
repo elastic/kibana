@@ -158,5 +158,7 @@ describe('incompatible_cluster_routing_allocation', () => {
       },
       { retryAttempts: 100, retryDelayMs: 500 }
     );
+
+    await root.shutdown();
   });
 });
