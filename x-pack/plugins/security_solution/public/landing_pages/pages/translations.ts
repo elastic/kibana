@@ -20,3 +20,7 @@ export const DASHBOARDS_PAGE_TITLE = i18n.translate(
     defaultMessage: 'Dashboards',
   }
 );
+
+export const MANAGE_PAGE_TITLE = i18n.translate('xpack.securitySolution.landing.manage.pageTitle', {
+  defaultMessage: 'Manage',
+});

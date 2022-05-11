@@ -14,5 +14,5 @@ export * from './fitting_functions';
 export * from './axes_configuration';
 export * from './icon';
 export * from './color_assignment';
-export * from './annotations_icon_set';
 export * from './annotations';
+export * from './data_layers';
