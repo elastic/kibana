@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import {
   notificationServiceMock,
   fatalErrorsServiceMock,
   docLinksServiceMock,
-} from '../../../../../../src/core/public/mocks';
+  executionContextServiceMock,
+} from '@kbn/core/public/mocks';
 
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { AppContextProvider } from '../../../public/application/app_context';
-import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
 
 import { init as initBreadcrumb } from '../../../public/application/services/breadcrumb';
 import { init as initHttp } from '../../../public/application/services/http';
@@ -31,7 +32,12 @@ export const WithAppDependencies =
 
     return (
       <AppContextProvider
-        context={{ isCloudEnabled: !!isCloudEnabled, cloudBaseUrl: 'test.com', ...overrides }}
+        context={{
+          isCloudEnabled: !!isCloudEnabled,
+          cloudBaseUrl: 'test.com',
+          executionContext: executionContextServiceMock.createStartContract(),
+          ...overrides,
+        }}
       >
         <Comp {...rest} />
       </AppContextProvider>

@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -41,10 +40,6 @@ interface ManagementStep {
   children: JSX.Element;
 }
 
-const StyledDiv = styled.div`
-  padding-left: 20%;
-`;
-
 const PolicyEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
@@ -53,7 +48,7 @@ const PolicyEmptyState = React.memo<{
 }>(({ loading, onActionClick, actionDisabled, policyEntryPoint = false }) => {
   const docLinks = useKibana().services.docLinks;
   return (
-    <StyledDiv data-test-subj="emptyPolicyTable">
+    <div data-test-subj="emptyPolicyTable">
       {loading ? (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
@@ -128,7 +123,7 @@ const PolicyEmptyState = React.memo<{
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </StyledDiv>
+    </div>
   );
 });
 

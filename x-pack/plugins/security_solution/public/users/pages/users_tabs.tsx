@@ -27,6 +27,7 @@ export const UsersTabs = memo<UsersTabsProps>(
   ({
     deleteQuery,
     filterQuery,
+    pageFilters,
     from,
     indexNames,
     isInitializing,
@@ -90,13 +91,17 @@ export const UsersTabs = memo<UsersTabsProps>(
           <UserRiskScoreQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}>
-          <EventsQueryTabBody {...tabProps} timelineId={TimelineId.usersPageEvents} />
+          <EventsQueryTabBody
+            {...tabProps}
+            timelineId={TimelineId.usersPageEvents}
+            pageFilters={pageFilters}
+          />
         </Route>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.alerts})`}>
           <AlertsView
             entityType="events"
             timelineId={TimelineId.usersPageExternalAlerts}
-            pageFilters={[]}
+            pageFilters={pageFilters ?? []}
             {...tabProps}
           />
         </Route>

@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
+  const refreshButtonSelector = 'refreshDataButton';
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -58,63 +59,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/118432
-    describe.skip(`when it's false`, () => {
+    describe(`when it's false`, () => {
       beforeEach(async () => await initSearchOnPageLoad(false));
 
       it('should not fetch data from ES initially', async function () {
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
       });
 
       it('should not fetch on indexPattern change', async function () {
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
         await PageObjects.discover.selectIndexPattern('date-nested');
 
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
       });
 
       it('should fetch data from ES after refreshDataButton click', async function () {
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
-        /**
-         * We should wait for debounce timeout expired 100 ms,
-         * otherwise click event will be skipped. See getFetch$ implementation.
-         */
-        await PageObjects.common.sleep(100);
-        await testSubjects.click('refreshDataButton');
+        await testSubjects.click(refreshButtonSelector);
+        await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await testSubjects.exists('refreshDataButton')).to.be(false);
       });
 
       it('should fetch data from ES after submit query', async function () {
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
         await queryBar.submitQuery();
+        await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await testSubjects.exists('refreshDataButton')).to.be(false);
       });
 
       it('should fetch data from ES after choosing commonly used time range', async function () {
         await PageObjects.discover.selectIndexPattern('logstash-*');
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
         await PageObjects.timePicker.setCommonlyUsedTime('This_week');
+        await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await testSubjects.exists('refreshDataButton')).to.be(false);
       });
     });
 
-    it(`when it's false should fetch data from ES initially`, async function () {
+    it(`when it's true should fetch data from ES initially`, async function () {
       await initSearchOnPageLoad(true);
       await retry.waitFor('number of fetches to be 1', waitForFetches(1));
     });

@@ -41,7 +41,7 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
-export const ElasticDatemath = require('@elastic/datemath');
+export const KbnDatemath = require('@kbn/datemath');
 export const ReactBeautifulDnD = require('react-beautiful-dnd');
 
 export const Lodash = require('lodash');

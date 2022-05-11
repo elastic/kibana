@@ -10,9 +10,9 @@ import type { ReactWrapper } from 'enzyme';
 import type { LocationDescriptorObject } from 'history';
 import React from 'react';
 
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { CoreStart, ScopedHistory } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import type { User } from '../../../../common/model';
 import { rolesAPIClientMock } from '../../roles/index.mock';

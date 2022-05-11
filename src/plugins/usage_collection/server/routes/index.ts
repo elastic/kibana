@@ -11,7 +11,7 @@ import {
   ISavedObjectsRepository,
   MetricsServiceSetup,
   ServiceStatus,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { Observable } from 'rxjs';
 import { CollectorSet } from '../collector';
 import { registerUiCountersRoute } from './ui_counters';

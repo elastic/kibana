@@ -7,7 +7,7 @@
 
 import { INSPECT_MODAL } from '../../screens/inspect';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { executeTimelineKQL, openTimelineInspectButton } from '../../tasks/timeline';
 
@@ -17,7 +17,8 @@ describe('Inspect', () => {
   context('Timeline', () => {
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';
-      loginAndWaitForPage(HOSTS_URL);
+      login();
+      visit(HOSTS_URL);
       openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
       openTimelineInspectButton();

@@ -37,10 +37,4 @@ export const META_FIELDS = 'metaFields';
 /** @public **/
 export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 
-/**
- * @deprecated Use DATA_VIEW_SAVED_OBJECT_TYPE. All index pattern interfaces were renamed.
- */
-
-export const INDEX_PATTERN_SAVED_OBJECT_TYPE = DATA_VIEW_SAVED_OBJECT_TYPE;
-
 export const PLUGIN_NAME = 'DataViews';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObject } from 'kibana/server';
+import { Logger, SavedObject } from '@kbn/core/server';
 import { RawRule } from '../types';
 import { RuleTypeRegistry } from '../rule_type_registry';
 

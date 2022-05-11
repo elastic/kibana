@@ -20,8 +20,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Embeddable, IContainer, ContainerInput } from '../../../../src/plugins/embeddable/public';
-import { TimeRange } from '../../../../src/plugins/data/public';
+import { Embeddable, IContainer, ContainerInput } from '@kbn/embeddable-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { TimeRangeInput } from './custom_time_range_action';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { CommonlyUsedRange } from './types';

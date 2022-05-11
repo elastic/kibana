@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, Logger } from 'kibana/server';
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 export interface Buckets {
   buckets: Array<{

@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { get, merge } from 'lodash';
 import { AlertingUsage } from './types';
+import { NUM_ALERTING_RULE_TYPES } from './alerting_usage_collector';
+
+const percentileFieldNameMapping: Record<string, string> = {
+  '50.0': 'p50',
+  '90.0': 'p90',
+  '99.0': 'p99',
+};
 
 const ruleTypeMetric = {
   scripted_metric: {
@@ -35,6 +44,20 @@ const ruleTypeMetric = {
       }
       return result;
     `,
+  },
+};
+
+const generatedActionsPercentilesAgg = {
+  percentiles: {
+    field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+    percents: [50, 90, 99],
+  },
+};
+
+const alertsPercentilesAgg = {
+  percentiles: {
+    field: 'kibana.alert.rule.execution.metrics.total_number_of_alerts',
+    percents: [50, 90, 99],
   },
 };
 
@@ -409,6 +432,18 @@ export async function getExecutionsPerDayCount(
         avgTotalSearchDuration: {
           avg: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
         },
+        percentileScheduledActions: generatedActionsPercentilesAgg,
+        percentileAlerts: alertsPercentilesAgg,
+        aggsByType: {
+          terms: {
+            field: 'rule.category',
+            size: NUM_ALERTING_RULE_TYPES,
+          },
+          aggs: {
+            percentileScheduledActions: generatedActionsPercentilesAgg,
+            percentileAlerts: alertsPercentilesAgg,
+          },
+        },
       },
     },
   });
@@ -438,6 +473,18 @@ export async function getExecutionsPerDayCount(
     // @ts-expect-error aggegation type is not specified
     searchResult.aggregations.avgTotalSearchDuration.value
   );
+
+  const aggsGeneratedActionsPercentiles =
+    // @ts-expect-error aggegation type is not specified
+    searchResult.aggregations.percentileScheduledActions.values;
+
+  const aggsAlertsPercentiles =
+    // @ts-expect-error aggegation type is not specified
+    searchResult.aggregations.percentileAlerts.values;
+
+  const aggsByTypeBuckets =
+    // @ts-expect-error aggegation type is not specified
+    searchResult.aggregations.aggsByType.buckets;
 
   const executionFailuresAggregations = searchResult.aggregations as {
     failuresByReason: { value: { reasons: Record<string, Record<string, string>> } };
@@ -536,6 +583,36 @@ export async function getExecutionsPerDayCount(
         ),
       }),
       {}
+    ),
+    generatedActionsPercentiles: Object.keys(aggsGeneratedActionsPercentiles).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (acc: any, curr: string) => ({
+        ...acc,
+        ...(percentileFieldNameMapping[curr]
+          ? { [percentileFieldNameMapping[curr]]: aggsGeneratedActionsPercentiles[curr] }
+          : {}),
+      }),
+      {}
+    ),
+    generatedActionsPercentilesByType: parsePercentileAggsByRuleType(
+      aggsByTypeBuckets,
+      'percentileScheduledActions.values'
+    ),
+    alertsPercentiles: Object.keys(aggsAlertsPercentiles).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (acc: any, curr: string) => ({
+        ...acc,
+        ...(percentileFieldNameMapping[curr]
+          ? { [percentileFieldNameMapping[curr]]: aggsAlertsPercentiles[curr] }
+          : {}),
+      }),
+      {}
+    ),
+    alertsPercentilesByType: parsePercentileAggsByRuleType(
+      aggsByTypeBuckets,
+      'percentileAlerts.values'
     ),
   };
 }
@@ -699,5 +776,32 @@ function replaceDotSymbolsInRuleTypeIds(ruleTypeIdObj: Record<string, string>) {
   return Object.keys(ruleTypeIdObj).reduce(
     (obj, key) => ({ ...obj, [replaceDotSymbols(key)]: ruleTypeIdObj[key] }),
     {}
+  );
+}
+
+export function parsePercentileAggsByRuleType(
+  aggsByType: estypes.AggregationsStringTermsBucketKeys[],
+  path: string
+) {
+  return (aggsByType ?? []).reduce(
+    (acc, curr) => {
+      const percentiles = get(curr, path, {});
+      return merge(
+        acc,
+        Object.keys(percentiles).reduce((pacc, pcurr) => {
+          return {
+            ...pacc,
+            ...(percentileFieldNameMapping[pcurr]
+              ? {
+                  [percentileFieldNameMapping[pcurr]]: {
+                    [replaceDotSymbols(curr.key)]: percentiles[pcurr] ?? 0,
+                  },
+                }
+              : {}),
+          };
+        }, {})
+      );
+    },
+    { p50: {}, p90: {}, p99: {} }
   );
 }

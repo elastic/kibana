@@ -24,7 +24,7 @@ import { VocabularyImpl } from "antlr4ts/VocabularyImpl";
 
 import * as Utils from "antlr4ts/misc/Utils";
 
-import { painless_parserListener } from "./painless_parserListener";
+import { painless_parserListener } from "./painless_parser_listener";
 
 export class painless_parser extends Parser {
 	public static readonly WS = 1;

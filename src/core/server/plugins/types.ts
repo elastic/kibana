@@ -27,6 +27,23 @@ type Maybe<T> = T | undefined;
 export type PluginConfigSchema<T> = Type<T>;
 
 /**
+ * Type defining the list of configuration properties that will be exposed on the client-side
+ * Object properties can either be fully exposed
+ *
+ * @public
+ */
+export type ExposedToBrowserDescriptor<T> = {
+  [Key in keyof T]?: T[Key] extends Maybe<any[]>
+    ? // handles arrays as primitive values
+      boolean
+    : T[Key] extends Maybe<object>
+    ? // can be nested for objects
+      ExposedToBrowserDescriptor<T[Key]> | boolean
+    : // primitives
+      boolean;
+};
+
+/**
  * Describes a plugin configuration properties.
  *
  * @example
@@ -64,7 +81,7 @@ export interface PluginConfigDescriptor<T = any> {
   /**
    * List of configuration properties that will be available on the client-side plugin.
    */
-  exposeToBrowser?: { [P in keyof T]?: boolean };
+  exposeToBrowser?: ExposedToBrowserDescriptor<T>;
   /**
    * Schema to use to validate the plugin configuration.
    *
@@ -242,6 +259,12 @@ export interface PluginManifest {
    * A brief description of what this plugin does and any capabilities it provides.
    */
   readonly description?: string;
+
+  /**
+   * Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when
+   * configured, etc.) Default is false.
+   */
+  readonly enabledOnAnonymousPages?: boolean;
 }
 
 /**
@@ -289,6 +312,12 @@ export interface DiscoveredPlugin {
    * duplicated here.
    */
   readonly requiredBundles: readonly PluginName[];
+
+  /**
+   * Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when
+   * configured, etc.) Default is false.
+   */
+  readonly enabledOnAnonymousPages?: boolean;
 }
 
 /**

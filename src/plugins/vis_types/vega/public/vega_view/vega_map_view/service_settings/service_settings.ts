@@ -9,9 +9,9 @@
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import type { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
+import type { MapConfig, TileMapConfig } from '@kbn/maps-ems-plugin/public';
 import type { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
 import { ORIGIN_LEGACY, TMS_IN_YML_ID } from './service_settings_types';
-import type { MapConfig, TileMapConfig } from '../../../../../../maps_ems/public';
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
  */

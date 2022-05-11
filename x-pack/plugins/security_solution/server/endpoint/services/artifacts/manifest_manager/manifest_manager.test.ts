@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
@@ -13,8 +13,8 @@ import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { PackagePolicy } from '../../../../../../fleet/common/types/models';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
 import {
   InternalArtifactCompleteSchema,

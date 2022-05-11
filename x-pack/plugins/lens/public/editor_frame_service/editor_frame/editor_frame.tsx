@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import { CoreStart } from 'kibana/public';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import { CoreStart } from '@kbn/core/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';

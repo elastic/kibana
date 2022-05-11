@@ -47,6 +47,9 @@ Object {
           "some custom sublabel",
         ],
         "metric": Array [],
+        "respectRanges": Array [
+          true,
+        ],
         "shape": Array [
           "circle",
         ],

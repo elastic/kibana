@@ -4,44 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema } from '@kbn/config-schema';
-import { compact } from 'lodash';
-import { ESSearchResponse } from 'src/core/types/elasticsearch';
+import datemath from '@kbn/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { schema } from '@kbn/config-schema';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-  ALERT_SEVERITY,
   ALERT_REASON,
+  ALERT_SEVERITY,
 } from '@kbn/rule-data-utils';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { getSeverity } from '../../../common/anomaly_detection';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  SERVICE_ENVIRONMENT,
-} from '../../../common/elasticsearch_fieldnames';
-import { getAlertUrlTransaction } from '../../../common/utils/formatters';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { compact } from 'lodash';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { KibanaRequest } from '@kbn/core/server';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
   formatAnomalyReason,
 } from '../../../common/alert_types';
-import { getMLJobs } from '../service_map/get_service_anomalies';
-import { apmActionVariables } from './action_variables';
-import { RegisterRuleDependencies } from './register_apm_alerts';
+import { getSeverity } from '../../../common/anomaly_detection';
+import {
+  ApmMlDetectorType,
+  getApmMlDetectorIndex,
+} from '../../../common/anomaly_detection/apm_ml_detectors';
+import {
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../common/elasticsearch_fieldnames';
 import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
-import { termQuery } from '../../../../observability/server';
+import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { getAlertUrlTransaction } from '../../../common/utils/formatters';
+import { getMLJobs } from '../service_map/get_service_anomalies';
+import { apmActionVariables } from './action_variables';
+import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -130,6 +134,14 @@ export function registerAnomalyAlertType({
           return {};
         }
 
+        // start time must be at least 30, does like this to support rules created before this change where default was 15
+        const startTime = Math.min(
+          datemath.parse('now-30m')!.valueOf(),
+          datemath
+            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)
+            ?.valueOf() || 0
+        );
+
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {
@@ -143,13 +155,17 @@ export function registerAnomalyAlertType({
                   {
                     range: {
                       timestamp: {
-                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                        gte: startTime,
                         format: 'epoch_millis',
                       },
                     },
                   },
                   ...termQuery('partition_field_value', ruleParams.serviceName),
                   ...termQuery('by_field_value', ruleParams.transactionType),
+                  ...termQuery(
+                    'detector_index',
+                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
+                  ),
                 ] as QueryDslQueryContainer[],
               },
             },

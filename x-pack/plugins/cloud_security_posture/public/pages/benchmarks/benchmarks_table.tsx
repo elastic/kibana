@@ -15,9 +15,9 @@ import {
 import React from 'react';
 import moment from 'moment';
 import { Link, useHistory, generatePath } from 'react-router-dom';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { TABLE_COLUMN_HEADERS } from './translations';
 import type { Benchmark } from '../../../common/types';
-import { pagePathGetters } from '../../../../fleet/public';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { allNavigationItems } from '../../common/navigation/constants';
 

@@ -15,7 +15,7 @@ import { defineDockerServersConfig } from '@kbn/test';
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
 // It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution@sha256:536fcac0b66de593bd21851fd3553892a28e6e838e191ee25818acb4a23ecc7f';
+  'docker.elastic.co/package-registry/distribution:e1a3906e0c9944ecade05308022ba35eb0ebd00a';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 

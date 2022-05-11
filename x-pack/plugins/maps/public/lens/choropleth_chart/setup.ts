@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ExpressionsSetup } from 'src/plugins/expressions/public';
-import type { CoreSetup, CoreStart } from 'src/core/public';
-import type { LensPublicSetup } from '../../../../lens/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import { getExpressionFunction } from './expression_function';
 import { getExpressionRenderer } from './expression_renderer';

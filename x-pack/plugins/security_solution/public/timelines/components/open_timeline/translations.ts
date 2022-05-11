@@ -379,7 +379,7 @@ export const IMPORT_FAILED = (totalTimelines: number) =>
     {
       values: { totalTimelines },
       defaultMessage:
-        'Failed to import {totalTimelines} {totalTimelines, plural, =1 {rule} other {rules}}',
+        'Failed to import {totalTimelines} {totalTimelines, plural, =1 {timeline} other {timelines}}',
     }
   );
 

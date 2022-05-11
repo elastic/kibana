@@ -18,6 +18,9 @@ describe('getIsExperimentalFeatureEnabled', () => {
         rulesListDatagrid: true,
         internalAlertsTable: true,
         rulesDetailLogs: true,
+        ruleTagFilter: true,
+        ruleStatusFilter: true,
+        internalShareableComponentsSandbox: true,
       },
     });
 
@@ -30,6 +33,18 @@ describe('getIsExperimentalFeatureEnabled', () => {
     expect(result).toEqual(true);
 
     result = getIsExperimentalFeatureEnabled('internalAlertsTable');
+
+    expect(result).toEqual(true);
+
+    result = getIsExperimentalFeatureEnabled('internalShareableComponentsSandbox');
+
+    expect(result).toEqual(true);
+
+    result = getIsExperimentalFeatureEnabled('ruleTagFilter');
+
+    expect(result).toEqual(true);
+
+    result = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
     expect(result).toEqual(true);
 

@@ -50,7 +50,12 @@ export const HostsContainer = React.memo(() => (
         match: {
           params: { detailName },
         },
-      }) => <HostDetails hostDetailsPagePath={hostDetailsPagePath} detailName={detailName} />}
+      }) => (
+        <HostDetails
+          hostDetailsPagePath={hostDetailsPagePath}
+          detailName={decodeURIComponent(detailName)}
+        />
+      )}
     />
     <Route
       path={hostDetailsPagePath}

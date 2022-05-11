@@ -10,7 +10,8 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/kuery/grammar/grammar.d.ts"
   ],
   "exclude": [
     "**/__fixtures__/**/*",

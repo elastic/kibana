@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -17,7 +18,6 @@ import {
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import type { DataView } from '../../../../../../src/plugins/data_views/public';
 import {
   ControlType,
   IndexPatternProvider,

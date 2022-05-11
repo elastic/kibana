@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';

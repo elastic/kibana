@@ -8,4 +8,4 @@
 export const AUTHENTICATIONS_TAB = '[data-test-subj="navigation-authentications"]';
 export const HEADER_SUBTITLE = '[data-test-subj="header-panel-subtitle"]';
 export const USER_NAME_CELL = '[data-test-subj="render-content-user.name"]';
-export const AUTHENTICATIONS_TABLE = '[data-test-subj="table-authentications-loading-false"]';
+export const AUTHENTICATIONS_TABLE = '[data-test-subj="table-users-authentications-loading-false"]';

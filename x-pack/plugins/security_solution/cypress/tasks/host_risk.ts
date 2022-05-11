@@ -10,12 +10,16 @@ import {
   HOST_BY_RISK_TABLE_FILTER_CRITICAL,
   HOST_BY_RISK_TABLE_PERPAGE_BUTTON,
   HOST_BY_RISK_TABLE_PERPAGE_OPTIONS,
+  LOADING_SPINNER,
   LOADING_TABLE,
   RISK_DETAILS_NAV,
   RISK_FLYOUT_TRIGGER,
 } from '../screens/hosts/host_risk';
 
-export const navigateToHostRiskDetailTab = () => cy.get(RISK_DETAILS_NAV).click();
+export const navigateToHostRiskDetailTab = () => {
+  cy.get(RISK_DETAILS_NAV).click();
+  cy.get(LOADING_SPINNER).should('not.exist');
+};
 
 export const openRiskFlyout = () => cy.get(RISK_FLYOUT_TRIGGER).click();
 

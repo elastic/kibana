@@ -7,7 +7,7 @@
 
 import type { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
-import { basePath } from './index';
+import { basePath } from '.';
 
 export const annotations = {
   getAnnotations$(obj: {

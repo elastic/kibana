@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { CorrelationsParams } from '../../../../common/correlations/types';
 import {

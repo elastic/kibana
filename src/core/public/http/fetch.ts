@@ -33,6 +33,7 @@ interface Params {
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
 const ZIP_CONTENT = /^(application\/zip)(;.*)?$/;
+const VECTOR_TILE = /^(application\/vnd.mapbox-vector-tile)(;.*)?$/;
 
 const removedUndefined = (obj: Record<string, any> | undefined) => {
   return omitBy(obj, (v) => v === undefined);
@@ -164,6 +165,8 @@ export class Fetch {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
         body = await response.json();
+      } else if (VECTOR_TILE.test(contentType)) {
+        body = await response.arrayBuffer();
       } else {
         const text = await response.text();
 

@@ -10,7 +10,7 @@ import {
   CoreStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   AggregationsAggregate,
   SearchRequest,
@@ -27,9 +27,9 @@ import {
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import { TransportResult } from '@elastic/elasticsearch';
-import { Agent, AgentPolicy } from '../../../../fleet/common';
-import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
-import { ExceptionListClient } from '../../../../lists/server';
+import { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
+import { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import {
@@ -533,8 +533,63 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                 bool: {
                   should: [
                     {
-                      match_phrase: {
-                        'kibana.alert.rule.parameters.immutable': 'true',
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Malware Prevention Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Malware Detection Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Ransomware Prevention Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Ransomware Detection Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
                       },
                     },
                   ],
@@ -542,17 +597,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               },
               {
                 bool: {
-                  must_not: {
-                    bool: {
-                      should: [
-                        {
-                          match_phrase: {
-                            'event.module': 'endpoint',
-                          },
-                        },
-                      ],
+                  should: [
+                    {
+                      match_phrase: {
+                        'kibana.alert.rule.parameters.immutable': 'true',
+                      },
                     },
-                  },
+                  ],
                 },
               },
               {

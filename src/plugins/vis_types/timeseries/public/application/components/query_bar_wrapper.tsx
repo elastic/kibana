@@ -8,10 +8,10 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
+import { QueryStringInput, QueryStringInputProps } from '@kbn/unified-search-plugin/public';
 import { CoreStartContext } from '../contexts/query_input_bar_context';
 import type { IndexPatternValue } from '../../../common/types';
 
-import { QueryStringInput, QueryStringInputProps } from '../../../../../../plugins/data/public';
 import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/index_patterns_utils';
 

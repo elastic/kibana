@@ -11,9 +11,9 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 
-import { ExceptionItem } from './';
-import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
+import { ExceptionItem } from '.';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>

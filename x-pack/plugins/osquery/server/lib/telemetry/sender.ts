@@ -9,13 +9,13 @@ import axios from 'axios';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from 'src/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { Logger } from '@kbn/core/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { TelemetryReceiver } from './receiver';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
@@ -59,6 +59,7 @@ export class TelemetryEventsSender {
         (config: OsqueryTelemetryTaskConfig) => {
           const task = new OsqueryTelemetryTask(config, this.logger, this, telemetryReceiver);
           task.register(taskManager);
+
           return task;
         }
       );
@@ -128,6 +129,7 @@ export class TelemetryEventsSender {
 
   public async isTelemetryOptedIn() {
     this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+
     return this.isOptedIn === true;
   }
 
@@ -148,6 +150,7 @@ export class TelemetryEventsSender {
         this.logger.debug(`Telemetry is not opted-in.`);
         this.queue = [];
         this.isSending = false;
+
         return;
       }
 
@@ -183,6 +186,7 @@ export class TelemetryEventsSender {
     } catch (err) {
       this.queue = [];
     }
+
     this.isSending = false;
   }
 
@@ -229,6 +233,7 @@ export class TelemetryEventsSender {
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
+
     return this.getV3UrlFromV2(telemetryUrl.toString(), channel);
   }
 
@@ -242,6 +247,7 @@ export class TelemetryEventsSender {
     } else {
       url.pathname = `/v3-dev/send/${channel}`;
     }
+
     return url.toString();
   }
 

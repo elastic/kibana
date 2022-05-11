@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import SemVer from 'semver/classes/semver';
 
-import { CoreStart, CoreSetup } from '../../../../../src/core/public';
+import { CoreStart, CoreSetup } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common';
 import {
@@ -35,7 +35,7 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications, application } = core;
+  const { i18n, docLinks, notifications, application, executionContext } = core;
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
 
@@ -56,6 +56,7 @@ export const renderApp = (
     toasts: notifications.toasts,
     setBreadcrumbs,
     getUrlForApp: application.getUrlForApp,
+    executionContext,
   };
 
   render(

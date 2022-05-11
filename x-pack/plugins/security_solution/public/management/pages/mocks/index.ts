@@ -7,3 +7,4 @@
 
 export * from './fleet_mocks';
 export * from './trusted_apps_http_mocks';
+export * from './exceptions_list_http_mocks';

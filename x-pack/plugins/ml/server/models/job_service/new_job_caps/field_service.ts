@@ -7,10 +7,10 @@
 
 import { cloneDeep } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
-import type { DataViewsService } from '../../../../../../../src/plugins/data_views/common';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';

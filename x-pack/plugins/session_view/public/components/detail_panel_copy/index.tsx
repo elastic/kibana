@@ -5,15 +5,15 @@
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import { EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DetailPanelListItem } from '../detail_panel_list_item';
-import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from './styles';
 
 interface DetailPanelCopyDeps {
   children: ReactNode;
-  textToCopy: string | number;
+  textToCopy: string;
+  tooltipContent: ReactNode;
   display?: 'inlineBlock' | 'block' | undefined;
 }
 
@@ -28,13 +28,14 @@ interface DetailPanelListItemProps {
 export const DetailPanelCopy = ({
   children,
   textToCopy,
+  tooltipContent,
   display = 'inlineBlock',
 }: DetailPanelCopyDeps) => {
   const styles = useStyles();
 
   const props: DetailPanelListItemProps = {
     copy: (
-      <EuiCopy textToCopy={dataOrDash(textToCopy).toString()} display={display}>
+      <EuiCopy textToCopy={textToCopy} display={display}>
         {(copy) => (
           <EuiButtonIcon
             css={styles.copyButton}
@@ -55,5 +56,11 @@ export const DetailPanelCopy = ({
     props.display = display;
   }
 
-  return <DetailPanelListItem {...props}>{children}</DetailPanelListItem>;
+  return (
+    <DetailPanelListItem {...props}>
+      <EuiToolTip position="top" content={tooltipContent}>
+        <>{children}</>
+      </EuiToolTip>
+    </DetailPanelListItem>
+  );
 };

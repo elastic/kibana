@@ -50,7 +50,6 @@ const apisToIntercept = [
   },
 ];
 
-// Skipping tests since it's flaky.
 describe.skip('Service overview: Time Comparison', () => {
   before(async () => {
     await synthtrace.index(
@@ -71,7 +70,8 @@ describe.skip('Service overview: Time Comparison', () => {
 
   it('enables by default the time comparison feature with Last 24 hours selected', () => {
     cy.visit(serviceOverviewPath);
-    cy.url().should('include', 'comparisonEnabled=true&offset=1d');
+    cy.url().should('include', 'comparisonEnabled=true');
+    cy.url().should('include', 'offset=1d');
   });
 
   describe('when comparison is toggled off', () => {
@@ -92,7 +92,6 @@ describe.skip('Service overview: Time Comparison', () => {
         cy.intercept('GET', endpoint).as(name);
       });
       cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-java');
 
       cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
       const offset = `offset=1d`;
@@ -105,6 +104,8 @@ describe.skip('Service overview: Time Comparison', () => {
           });
         }
       );
+
+      cy.contains('opbeans-java');
 
       // toggles off comparison
       cy.contains('Comparison').click();
@@ -127,32 +128,52 @@ describe.skip('Service overview: Time Comparison', () => {
     cy.visit(serviceOverviewPath);
     cy.contains('opbeans-java');
     // opens the page with "Day before" selected
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
 
     // selects another comparison type
-    cy.get('[data-test-subj="comparisonSelect"]').select('week');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'week');
+    cy.get('[data-test-subj="comparisonSelect"]').select('1w');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
   });
 
   it('changes comparison type when a new time range is selected', () => {
-    cy.visit(serviceOverviewPath);
+    cy.visit(serviceOverviewHref);
     cy.contains('opbeans-java');
     // Time comparison default value
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
     cy.contains('Day before');
     cy.contains('Week before');
+
+    cy.selectAbsoluteTimeRange(
+      '2021-10-10T00:00:00.000Z',
+      '2021-10-20T00:00:00.000Z'
+    );
+
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+
+    cy.get('[data-test-subj="comparisonSelect"]').should(
+      'have.value',
+      '864000000ms'
+    );
+    cy.get('[data-test-subj="comparisonSelect"]').should(
+      'not.contain.text',
+      'Day before'
+    );
+    cy.get('[data-test-subj="comparisonSelect"]').should(
+      'not.contain.text',
+      'Week before'
+    );
 
     cy.changeTimeRange('Today');
     cy.contains('Day before');
     cy.contains('Week before');
 
     cy.changeTimeRange('Last 24 hours');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
     cy.contains('Day before');
     cy.contains('Week before');
 
     cy.changeTimeRange('Last 7 days');
-    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'week');
+    cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
     cy.get('[data-test-subj="comparisonSelect"]').should(
       'contain.text',
       'Week before'
@@ -162,20 +183,6 @@ describe.skip('Service overview: Time Comparison', () => {
       'Day before'
     );
     cy.contains('Week before');
-
-    cy.changeTimeRange('Last 30 days');
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'have.value',
-      'period'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Day before'
-    );
-    cy.get('[data-test-subj="comparisonSelect"]').should(
-      'not.contain.text',
-      'Week before'
-    );
   });
 
   it('hovers over throughput chart shows previous and current period', () => {

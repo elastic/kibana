@@ -7,7 +7,7 @@
  */
 import { uniq } from 'lodash';
 
-import type { Datatable } from '../../../../expressions/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { ActiveCursorSyncOption, DateHistogramSyncOption } from './types';
 import type { ActiveCursorPayload } from './types';
 

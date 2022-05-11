@@ -6,9 +6,7 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 
-export const cspRuleAssetSavedObjectType = 'csp_rule';
-
-// TODO: needs to be shared with kubebeat
+// TODO: needs to be shared with cloudbeat
 export const cspRuleSchema = rt.object({
   id: rt.string(),
   name: rt.string(),
@@ -18,9 +16,12 @@ export const cspRuleSchema = rt.object({
   default_value: rt.string(),
   remediation: rt.string(),
   benchmark: rt.object({ name: rt.string(), version: rt.string() }),
+  rego_rule_id: rt.string(),
   tags: rt.arrayOf(rt.string()),
   enabled: rt.boolean(),
   muted: rt.boolean(),
+  package_policy_id: rt.string(),
+  policy_id: rt.string(),
 });
 
 export type CspRuleSchema = TypeOf<typeof cspRuleSchema>;

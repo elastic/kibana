@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { isValidUrl } from '@kbn/presentation-util-plugin/common/lib';
 import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
-import { isValidUrl } from '../../../../../../src/plugins/presentation_util/common/lib';
 
 interface Output extends ContainerStyle {
   type: 'containerStyle';

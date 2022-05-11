@@ -12,7 +12,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter } from '@kbn/es-query';
-import { Query, TimeRange } from 'src/plugins/data/public';
+import { Query, TimeRange } from '@kbn/data-plugin/public';
 import { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
@@ -58,6 +58,7 @@ import {
   autoFitToBounds,
   syncDataForAllLayers,
   syncDataForLayerDueToDrawing,
+  syncDataForLayerId,
 } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
@@ -119,9 +120,7 @@ export function updateCustomIcons(customIcons: CustomIcon[]) {
   return {
     type: UPDATE_MAP_SETTING,
     settingKey: 'customIcons',
-    settingValue: customIcons.map((icon) => {
-      return { ...icon, svg: Buffer.from(icon.svg).toString('base64') };
-    }),
+    settingValue: customIcons,
   };
 }
 
@@ -396,7 +395,7 @@ export function setEditLayerToSelectedLayer() {
 }
 
 export function updateEditLayer(layerId: string | null) {
-  return (dispatch: Dispatch) => {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     if (layerId !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
     }
@@ -408,6 +407,7 @@ export function updateEditLayer(layerId: string | null) {
       type: UPDATE_EDIT_STATE,
       editState: layerId ? { layerId } : undefined,
     });
+    dispatch(syncDataForLayerId(layerId, false));
   };
 }
 

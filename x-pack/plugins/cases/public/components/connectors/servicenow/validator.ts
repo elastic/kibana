@@ -15,10 +15,18 @@ import { CaseActionConnector } from '../../types';
 export const connectorValidator = (
   connector: CaseActionConnector
 ): ReturnType<ValidationConfig['validator']> => {
-  const {
-    config: { usesTableApi },
-  } = connector;
-  if (usesTableApi) {
+  /**
+   * It is not possible to know if a preconfigured connector
+   * is deprecated or not as the config property of a
+   * preconfigured connector is not returned by the
+   * actions framework
+   */
+
+  if (connector.isPreconfigured || connector.config == null) {
+    return;
+  }
+
+  if (connector.config?.usesTableApi) {
     return {
       message: 'Deprecated connector',
     };

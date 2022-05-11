@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Screensaver Plist File Modified by Unexpected Process",
-  "note": "## Triage and analysis\n\n- Analyze the plist file modification event to identify whether the change was expected or not\n- Investigate the process that modified the plist file for malicious code or other suspicious behavior\n- Identify if any suspicious or known malicious screensaver (.saver) files were recently written to or modified on the host",
+  "note": "## Triage and analysis\n\n- Analyze the plist file modification event to identify whether the change was expected or not\n- Investigate the process that modified the plist file for malicious code or other suspicious behavior\n- Identify if any suspicious or known malicious screensaver (.saver) files were recently written to or modified on the host\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type != \"deletion\" and\n  file.name: \"com.apple.screensaver.*.plist\" and\n  file.path : (\n    \"/Users/*/Library/Preferences/ByHost/*\",\n    \"/Library/Managed Preferences/*\",\n    \"/System/Library/Preferences/*\"\n    ) and\n  /* Filter OS processes modifying screensaver plist files */\n  not process.executable : (\n    \"/usr/sbin/cfprefsd\",\n    \"/usr/libexec/xpcproxy\",\n    \"/System/Library/CoreServices/ManagedClient.app/Contents/Resources/MCXCompositor\",\n    \"/System/Library/CoreServices/ManagedClient.app/Contents/MacOS/ManagedClient\"\n    )\n",
   "references": [
     "https://posts.specterops.io/saving-your-access-d562bf5bf90b",
@@ -46,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

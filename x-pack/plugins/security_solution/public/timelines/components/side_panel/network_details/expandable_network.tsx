@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
@@ -22,12 +23,11 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../../common/lib/keury';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { OverviewEmpty } from '../../../../overview/components/overview_empty';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useNetworkDetails } from '../../../../network/containers/details';
 import { networkModel } from '../../../../network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
+import { LandingCards } from '../../../../common/components/landing_cards';
 
 interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTarget };
@@ -141,6 +141,6 @@ export const ExpandableNetworkDetails = ({
       narrowDateRange={narrowDateRange}
     />
   ) : (
-    <OverviewEmpty />
+    <LandingCards />
   );
 };

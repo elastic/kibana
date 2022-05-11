@@ -1,0 +1,111 @@
+[[manage-osquery-integration]]
+== Manage the integration
+
+[float]
+=== System requirements
+
+* {fleet-guide}/fleet-overview.html[Fleet] is enabled on your cluster, and
+one or more {fleet-guide}/elastic-agent-installation.html[Elastic Agents] is enrolled.
+* The https://docs.elastic.co/en/integrations/osquery_manager[*Osquery Manager*] integration
+has been added and configured
+for an agent policy through Fleet.
+This integration supports x64 architecture on Windows, MacOS, and Linux platforms,
+and ARM64 architecture on Linux.
+
+[NOTE]
+=========================
+
+* The original {filebeat-ref}/filebeat-module-osquery.html[Filebeat Osquery module]
+and the https://docs.elastic.co/en/integrations/osquery[Osquery]
+integration collect logs from self-managed Osquery deployments.
+The *Osquery Manager* integration manages Osquery deployments
+and supports running and scheduling queries from {kib}.
+
+* *Osquery Manager* cannot be integrated with an Elastic Agent in standalone mode.
+=========================
+
+[float]
+=== Customize Osquery sub-feature privileges
+
+Depending on your https://www.elastic.co/subscriptions[subscription level],
+you can further customize the sub-feature privileges
+for *Osquery Manager*. These include options to grant specific access for running live queries,
+running saved queries, saving queries, and scheduling packs. For example,
+you can create roles for users who can only run live or saved queries, but who cannot save or schedule queries.
+This is useful for teams who need in-depth and detailed control.
+
+[float]
+=== Customize Osquery configuration
+experimental[] By default, all Osquery Manager integrations share the same osquery configuration. However, you can customize how Osquery is configured by editing the Osquery Manager integration for each agent policy
+you want to adjust. The custom configuration is then applied to all agents in the policy.
+This powerful feature allows you to configure
+https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring[File Integrity Monitoring], https://osquery.readthedocs.io/en/stable/deployment/process-auditing[Process auditing],
+and https://osquery.readthedocs.io/en/stable/deployment/configuration/#configuration-specification[others].
+
+[IMPORTANT]
+=========================
+
+* Take caution when editing this configuration. The changes you make are distributed to all agents in the policy.
+
+* Take caution when editing `packs` using the Advanced *Osquery config* field.
+Any changes you make to `packs` from this field are not reflected in the UI on the Osquery *Packs* page in {kib}, however, these changes are deployed to agents in the policy.
+While this allows you to use advanced Osquery functionality like pack discovery queries, you do lose the ability to manage packs defined this way from the Osquery *Packs* page.
+=========================
+
+. From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
+
+. Click the name of the agent policy where you want to adjust the Osquery configuration. The configuration changes you make only apply to the policy you select.
+
+. Click the name of the *Osquery Manager* integration, or add the integration first if the agent policy does not yet have it.
+
+. From the *Edit Osquery Manager integration* page, expand the *Advanced* section.
+
+. Edit the *Osquery config* JSON field to apply your preferred Osquery configuration. Note the following:
+
+* The field may already have content if you have scheduled packs for this agent policy. To keep these packs scheduled, do not remove the `packs` section.
+
+* Refer to the https://osquery.readthedocs.io/en/stable/[Osquery documentation] for configuration options.
+
+* Some fields are protected and cannot be set. A warning is displayed with details about which fields should be removed.
+
+* (Optional) To load a full configuration file, drag and drop an Osquery `.conf` file into the area at the bottom of the page.
+
+. Click *Save integration* to apply the custom configuration to all agents in the policy.
++
+As an example, the following configuration disables two tables.
++
+```ts
+{
+   "options":{
+      "disable_tables":"curl,process_envs"
+   }
+}
+```
+
+[float]
+=== Upgrade Osquery versions
+
+The https://github.com/osquery/osquery/releases[Osquery version] available on an Elastic Agent
+is associated to the version of Osquery Beat on the Agent.
+To get the latest version of Osquery Beat,
+https://www.elastic.co/guide/en/fleet/master/upgrade-elastic-agent.html[upgrade your Elastic Agent].
+
+[float]
+=== Debug issues
+If you encounter issues with *Osquery Manager*, find the relevant logs for {elastic-agent}
+and Osquerybeat in the agent directory. Refer to the {fleet-guide}/installation-layout.html[Fleet Installation layout] to find the log file location for your OS.
+
+```ts
+../data/elastic-agent-*/logs/elastic-agent-json.log-*
+../data/elastic-agent-*/logs/default/osquerybeat-json.log
+```
+
+To get more details in the logs, change the agent logging level to debug:
+
+. Open the main menu, and then select **Fleet**.
+
+. Select the agent that you want to debug.
+
+. On the **Logs** tab, change the **Agent logging level** to **debug**, and then click **Apply changes**.
++
+`agent.logging.level` is updated in `fleet.yml`, and the logging level is changed to `debug`.

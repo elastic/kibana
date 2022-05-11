@@ -667,7 +667,8 @@ class TimeseriesChartIntl extends Component {
             return d.lower;
           }
         }
-        return metricValue;
+        // metricValue is undefined for scheduled events when there is no source data.
+        return metricValue || 0;
       });
       yMax = d3.max(combinedData, (d) => {
         let metricValue = d.value;
@@ -675,7 +676,8 @@ class TimeseriesChartIntl extends Component {
           // If an anomaly coincides with a gap in the data, use the anomaly actual value.
           metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
         }
-        return d.upper !== undefined ? Math.max(metricValue, d.upper) : metricValue;
+        // metricValue is undefined for scheduled events when there is no source data.
+        return d.upper !== undefined ? Math.max(metricValue, d.upper) : metricValue || 0;
       });
 
       if (yMax === yMin) {
@@ -701,6 +703,7 @@ class TimeseriesChartIntl extends Component {
         // TODO needs revisiting to be a more robust normalization
         yMax += Math.abs(yMax - yMin) * ((maxLevel + 1) / 5);
       }
+
       this.focusYScale.domain([yMin, yMax]);
     } else {
       // Display 10 unlabelled ticks.
@@ -835,6 +838,10 @@ class TimeseriesChartIntl extends Component {
     scheduledEventMarkers
       .enter()
       .append('rect')
+      .on('mouseover', function (d) {
+        showFocusChartTooltip(d, this);
+      })
+      .on('mouseout', () => hideFocusChartTooltip())
       .attr('width', LINE_CHART_ANOMALY_RADIUS * 2)
       .attr('height', SCHEDULED_EVENT_SYMBOL_HEIGHT)
       .attr('class', 'scheduled-event-marker')
@@ -844,7 +851,10 @@ class TimeseriesChartIntl extends Component {
     // Update all markers to new positions.
     scheduledEventMarkers
       .attr('x', (d) => this.focusXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-      .attr('y', (d) => this.focusYScale(d.value) - 3);
+      .attr('y', (d) => {
+        const focusYValue = this.focusYScale(d.value);
+        return isNaN(focusYValue) ? -focusHeight - 3 : focusYValue - 3;
+      });
 
     // Plot any forecast data in scope.
     if (focusForecastData !== undefined) {
@@ -1652,7 +1662,7 @@ class TimeseriesChartIntl extends Component {
           valueAccessor: 'prediction',
         });
       } else {
-        if (marker.value !== undefined) {
+        if (marker.value !== undefined && marker.value !== null) {
           tooltipData.push({
             label: i18n.translate(
               'xpack.ml.timeSeriesExplorer.timeSeriesChart.withoutAnomalyScore.valueLabel',

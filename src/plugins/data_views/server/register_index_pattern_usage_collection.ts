@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { StartServicesAccessor } from 'src/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { StartServicesAccessor } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { DataViewsContract } from '../common';
-import { SavedObjectsClient } from '../../../core/server';
 import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from './types';
 
 interface CountSummary {

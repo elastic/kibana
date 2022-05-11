@@ -9,13 +9,10 @@ import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
-import {
-  createKbnUrlStateStorage,
-  withNotifyOnErrors,
-} from '../../../../../src/plugins/kibana_utils/public';
-import { useExecutionContext, useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
-import { syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';

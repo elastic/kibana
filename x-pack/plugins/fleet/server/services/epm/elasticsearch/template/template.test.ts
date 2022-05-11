@@ -10,10 +10,10 @@ import path from 'path';
 
 import { safeLoad } from 'js-yaml';
 import { loggerMock } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
-import { appContextService } from '../../../../services';
+import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';

@@ -6,18 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
-} from '../../../../../alerting/common';
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import { RuleType } from '@kbn/alerting-plugin/server';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
-import { RuleType } from '../../../../../alerting/server';
 import { transformHealthServiceProvider } from './transform_health_service';
-import type { PluginSetupContract as AlertingSetup } from '../../../../../alerting/server';
 
 export interface BaseResponse {
   transform_id: string;
@@ -64,7 +64,7 @@ export function registerTransformHealthRuleType(params: RegisterParams) {
 export function getTransformHealthRuleType(): RuleType<
   TransformHealthRuleParams,
   never,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   TransformHealthAlertContext,
   TransformIssue

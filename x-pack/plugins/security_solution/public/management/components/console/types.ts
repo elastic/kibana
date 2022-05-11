@@ -5,15 +5,34 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
-import { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
+import type { ComponentType, ComponentProps } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import type { CommandExecutionState } from './components/console_state/types';
+import type { Immutable } from '../../../../common/endpoint/types';
+import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
 export interface CommandDefinition {
   name: string;
   about: string;
-  validator?: () => Promise<boolean>;
+  /**
+   * The Component that will be used to render the Command
+   */
+  RenderComponent: CommandExecutionComponent;
+  /**
+   * If defined, this command's use of `--help` will be displayed using this component instead of
+   * the console's built in output.
+   */
+  HelpComponent?: CommandExecutionComponent;
+  /**
+   * A store for any data needed when the command is executed.
+   * The entire `CommandDefinition` is passed along to the component
+   * that will handle it, so this data will be available there
+   */
+  meta?: Record<string, unknown>;
+
   /** If all args are optional, but at least one must be defined, set to true */
   mustHaveArgs?: boolean;
+  /** The list of arguments supported by this command */
   args?: {
     [longName: string]: {
       required: boolean;
@@ -27,7 +46,7 @@ export interface CommandDefinition {
       // Selector: Idea is that the schema can plugin in a rich component for the
       // user to select something (ex. a file)
       // FIXME: implement selector
-      selector?: () => unknown;
+      selector?: ComponentType;
     };
   };
 }
@@ -45,20 +64,49 @@ export interface Command {
   commandDefinition: CommandDefinition;
 }
 
-export interface CommandServiceInterface {
-  getCommandList(): CommandDefinition[];
+/**
+ * The component that will handle the Command execution and display the result.
+ */
+export type CommandExecutionComponent = ComponentType<{
+  command: Command;
+  /**
+   * A data store for the command execution to store data in, if needed.
+   * Because the Console could be closed/opened several times, which will cause this component
+   * to be `mounted`/`unmounted` several times, this data store will be beneficial for
+   * persisting data (ex. API response with IDs) that the command can use to determine
+   * if the command has already been executed or if it's a new instance.
+   */
+  store: Immutable<CommandExecutionState['store']>;
+  /** Sets the `store` data above */
+  setStore: (state: CommandExecutionState['store']) => void;
+  /**
+   * The status of the command execution.
+   * Note that the console's UI will show the command as "busy" while the status here is
+   * `pending`. Ensure that once the action processing completes, that this is set to
+   * either `success` or `error`.
+   */
+  status: CommandExecutionState['status'];
+  /** Set the status of the command execution  */
+  setStatus: (status: CommandExecutionState['status']) => void;
+}>;
 
-  executeCommand(command: Command): Promise<{ result: ReactNode }>;
+export type CommandExecutionComponentProps = ComponentProps<CommandExecutionComponent>;
 
+export interface ConsoleProps extends CommonProps {
+  /**
+   * The list of Commands that will be available in the console for the user to execute
+   */
+  commands: CommandDefinition[];
   /**
    * If defined, then the `help` builtin command will display this output instead of the default one
-   * which is generated out of the Command list
+   * which is generated out of the Command list.
    */
-  getHelp?: () => Promise<{ result: ReactNode }>;
-
+  HelpComponent?: CommandExecutionComponent;
+  prompt?: string;
   /**
-   * If defined, then the output of this function will be used to display individual
-   * command help (`--help`)
+   * For internal use only!
+   * Provided by the ConsoleManager to indicate that the console is being managed by it
+   * @private
    */
-  getCommandUsage?: (command: CommandDefinition) => Promise<{ result: ReactNode }>;
+  managedKey?: symbol;
 }

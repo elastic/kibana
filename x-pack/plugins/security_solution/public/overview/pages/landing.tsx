@@ -8,15 +8,12 @@
 import React, { memo } from 'react';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { LandingCards } from '../components/landing_cards';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 export const LandingPage = memo(() => {
   return (
     <>
-      <SecuritySolutionPageWrapper noPadding noTimeline>
-        <LandingCards />
-      </SecuritySolutionPageWrapper>
+      <LandingPageComponent />
       <SpyRoute pageName={SecurityPageName.landing} />
     </>
   );

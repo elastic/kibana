@@ -13,13 +13,6 @@ import { EuiButton, EuiCard } from '@elastic/eui';
 import type { NoDataCardProps } from './types';
 import { NoDataCardStyles } from './no_data_card.styles';
 
-const recommendedLabel = i18n.translate(
-  'sharedUXComponents.pageTemplate.noDataPage.recommendedLabel',
-  {
-    defaultMessage: 'Recommended',
-  }
-);
-
 const defaultDescription = i18n.translate(
   'sharedUXComponents.pageTemplate.noDataCard.description',
   {
@@ -28,7 +21,6 @@ const defaultDescription = i18n.translate(
 );
 
 export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
-  recommended,
   title,
   button,
   description,
@@ -49,7 +41,6 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
     // Default footer action is a button with the provided or default string
     return <EuiButton fill>{button || title}</EuiButton>;
   };
-  const label = recommended ? recommendedLabel : undefined;
   const cardDescription = description || defaultDescription;
 
   return (
@@ -58,7 +49,6 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
       paddingSize="l"
       title={title!}
       description={cardDescription}
-      betaBadgeProps={{ label }}
       footer={footer()}
       isDisabled={isDisabled}
       {...cardRest}

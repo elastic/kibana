@@ -11,7 +11,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockMlJobSummaryResponse,
@@ -131,7 +131,7 @@ describe('Detections Usage and Metrics', () => {
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
       esClient.search.mockResponseOnce(getMockRuleAlertsResponse(800));
-      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse('not_immutable'));
+      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse(false));
       savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
       // Get empty saved object for legacy notification system.
       savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());

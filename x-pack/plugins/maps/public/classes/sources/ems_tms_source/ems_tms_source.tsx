@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { AbstractSource, SourceEditorArgs } from '../source';
 import { ITMSSource } from '../tms_source';

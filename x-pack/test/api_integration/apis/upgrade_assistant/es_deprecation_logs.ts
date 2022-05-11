@@ -11,7 +11,7 @@ import {
   DEPRECATION_LOGS_ORIGIN_FIELD,
   APPS_WITH_DEPRECATION_LOGS,
   API_BASE_PATH,
-} from '../../../../plugins/upgrade_assistant/common/constants';
+} from '@kbn/upgrade-assistant-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initHelpers } from './es_deprecation_logs.helpers';
 

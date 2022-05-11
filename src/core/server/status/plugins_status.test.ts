@@ -285,6 +285,32 @@ describe('PluginStatusService', () => {
       ]);
     });
 
+    it('updates when a plugin status observable emits with the same level but a different summary', async () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies: new Map([['a', []]]),
+      });
+      const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
+      const subscription = service
+        .getAll$()
+        // the first emission happens right after core services emit (see explanation above)
+        .pipe(skip(1))
+        .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
+
+      const aStatus$ = new BehaviorSubject<ServiceStatus>({
+        level: ServiceStatusLevels.available,
+        summary: 'summary initial',
+      });
+      service.set('a', aStatus$);
+      aStatus$.next({ level: ServiceStatusLevels.available, summary: 'summary updated' });
+      subscription.unsubscribe();
+
+      expect(statusUpdates).toEqual([
+        { a: { level: ServiceStatusLevels.available, summary: 'summary initial' } },
+        { a: { level: ServiceStatusLevels.available, summary: 'summary updated' } },
+      ]);
+    });
+
     it('emits an unavailable status if first emission times out, then continues future emissions', async () => {
       const service = new PluginsStatusService(
         {

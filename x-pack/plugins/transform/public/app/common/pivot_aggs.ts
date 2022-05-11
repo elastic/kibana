@@ -7,7 +7,7 @@
 
 import { FC } from 'react';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';

@@ -18,10 +18,10 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
-import { CoreStart } from 'kibana/public';
+import { IndexPattern } from '@kbn/data-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { AllSeries } from '@kbn/observability-plugin/public';
 import { StartDependencies } from './plugin';
-import { AllSeries } from '../../../plugins/observability/public';
 
 export const App = (props: {
   core: CoreStart;

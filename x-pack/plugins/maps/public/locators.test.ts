@@ -6,7 +6,7 @@
  */
 
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../common/constants';
-import { esFilters } from '../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { MapsAppLocatorDefinition } from './locators';
 import { SerializableRecord } from '@kbn/utility-types';
 import { LayerDescriptor } from '../common/descriptor_types';
@@ -100,7 +100,7 @@ describe('visualize url generator', () => {
           },
           query: { query: 'q1' },
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
         },
       ],

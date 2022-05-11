@@ -6,10 +6,11 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
-import { GetListItemByValuesOptions } from '../items';
 import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE, VALUE_2 } from '../../../common/constants.mock';
+
+import { GetListItemByValuesOptions } from '.';
 
 export const getListItemByValuesOptionsMocks = (): GetListItemByValuesOptions => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,

@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
@@ -62,6 +62,7 @@ export async function mountManagementSection(
     application,
     chrome: { docTitle },
     uiSettings,
+    executionContext,
   } = core;
 
   const { url } = startDependencies.share;
@@ -79,6 +80,7 @@ export async function mountManagementSection(
     core: {
       fatalErrors,
       getUrlForApp: application.getUrlForApp,
+      executionContext,
     },
     plugins: {
       usageCollection,

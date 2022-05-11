@@ -7,16 +7,14 @@
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../__fixtures__';
-import { ROUTES } from '../../common/constants';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import { WatchListTestBed } from './helpers/watch_list.helpers';
-
-const { API_ROOT } = ROUTES;
+import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchList;
 
 describe('<WatchList />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchListTestBed;
 
   beforeAll(() => {
@@ -25,7 +23,6 @@ describe('<WatchList />', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   describe('on component mount', () => {
@@ -35,7 +32,7 @@ describe('<WatchList />', () => {
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches: [] });
 
           await act(async () => {
-            testBed = await setup();
+            testBed = await setup(httpSetup);
           });
           testBed.component.update();
         });
@@ -73,7 +70,7 @@ describe('<WatchList />', () => {
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches });
 
           await act(async () => {
-            testBed = await setup();
+            testBed = await setup(httpSetup);
           });
 
           testBed.component.update();
@@ -241,10 +238,10 @@ describe('<WatchList />', () => {
               confirmButton!.click();
             });
 
-            const latestRequest = server.requests[server.requests.length - 1];
-
-            expect(latestRequest.method).toBe('POST');
-            expect(latestRequest.url).toBe(`${API_ROOT}/watches/delete`);
+            expect(httpSetup.post).toHaveBeenLastCalledWith(
+              `${API_BASE_PATH}/watches/delete`,
+              expect.anything()
+            );
           });
         });
       });

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/kibana_exclusive_mb';
+import fixture from './fixtures/kibana_exclusive_mb.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

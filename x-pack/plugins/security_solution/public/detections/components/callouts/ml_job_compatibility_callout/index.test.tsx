@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
 import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { MlJobCompatibilityCallout } from './index';
+import { MlJobCompatibilityCallout } from '.';
 
 jest.mock('../../../../common/components/ml/hooks/use_installed_security_jobs');
 

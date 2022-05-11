@@ -13,7 +13,7 @@ import { mount } from 'enzyme';
 
 import { EuiTable, EuiTableHeaderCell, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 
-import { MetaEnginesSchemaTable } from './';
+import { MetaEnginesSchemaTable } from '.';
 
 describe('MetaEnginesSchemaTable', () => {
   const values = {

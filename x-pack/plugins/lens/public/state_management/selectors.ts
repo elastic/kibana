@@ -6,8 +6,8 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { SavedObjectReference } from 'kibana/server';
-import { FilterManager } from 'src/plugins/data/public';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { SavedObjectReference } from '@kbn/core/public';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -159,14 +159,16 @@ export const selectDatasourceLayers = createSelector(
 
 export const selectFramePublicAPI = createSelector(
   [
-    selectDatasourceStates,
+    selectCurrentDatasourceStates,
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
+    selectResolvedDateRange,
   ],
-  (datasourceStates, activeData, datasourceMap) => {
+  (datasourceStates, activeData, datasourceMap, dateRange) => {
     return {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
       activeData,
+      dateRange,
     };
   }
 );

@@ -6,11 +6,12 @@
  */
 
 import moment from 'moment';
-import { RequestHandler, Logger } from 'src/core/server';
+import { RequestHandler, Logger } from '@kbn/core/server';
 import uuid from 'uuid';
 import { TypeOf } from '@kbn/config-schema';
-import { CommentType } from '../../../../../cases/common';
-import { CasesByAlertId } from '../../../../../cases/common/api/cases/case';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { CasesByAlertId } from '@kbn/cases-plugin/common/api/cases/case';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -19,7 +20,6 @@ import {
   UNISOLATE_HOST_ROUTE,
   failedFleetActionErrorCode,
 } from '../../../../common/endpoint/constants';
-import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
   EndpointAction,
   HostMetadata,
@@ -84,7 +84,7 @@ const createFailedActionResponseEntry = async ({
   logger: Logger;
 }): Promise<void> => {
   // 8.0+ requires internal user to write to system indices
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     await esClient.index<LogsEndpointActionResponse>({
       index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
@@ -178,7 +178,7 @@ export const isolationRequestHandler = function (
     });
 
     // 8.0+ requires internal user to write to system indices
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     // if the new endpoint indices/data streams exists
     // write the action request to the new endpoint index
@@ -190,6 +190,7 @@ export const isolationRequestHandler = function (
             body: {
               ...doc,
             },
+            refresh: 'wait_for',
           },
           { meta: true }
         );
@@ -221,6 +222,7 @@ export const isolationRequestHandler = function (
             timeout: 300, // 5 minutes
             user_id: doc.user.id,
           },
+          refresh: 'wait_for',
         },
         { meta: true }
       );

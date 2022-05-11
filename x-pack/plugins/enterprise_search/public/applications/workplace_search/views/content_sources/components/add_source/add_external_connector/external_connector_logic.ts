@@ -20,7 +20,7 @@ import { AppLogic } from '../../../../../app_logic';
 
 import { getAddPath, getSourcesPath } from '../../../../../routes';
 
-import { AddSourceLogic, SourceConfigData } from '../add_source_logic';
+import { SourceConfigData } from '../add_source_logic';
 
 export interface ExternalConnectorActions {
   fetchExternalSource: () => true;
@@ -48,7 +48,6 @@ export interface ExternalConnectorValues {
   externalConnectorApiKey: string;
   externalConnectorUrl: string;
   urlValid: boolean;
-  sourceConfigData: SourceConfigData | Pick<SourceConfigData, 'name' | 'categories'>;
   insecureUrl: boolean;
   showInsecureUrlCallout: boolean;
 }
@@ -107,12 +106,6 @@ export const ExternalConnectorLogic = kea<
         setShowInsecureUrlCallout: (_, showCallout) => showCallout,
       },
     ],
-    sourceConfigData: [
-      { name: '', categories: [] },
-      {
-        fetchExternalSourceSuccess: (_, sourceConfigData) => sourceConfigData,
-      },
-    ],
     urlValid: [
       true,
       {
@@ -121,8 +114,6 @@ export const ExternalConnectorLogic = kea<
     ],
   },
   listeners: ({ actions, values }) => ({
-    [AddSourceLogic.actionTypes.setSourceConfigData]: (sourceConfigData) =>
-      actions.fetchExternalSourceSuccess(sourceConfigData),
     fetchExternalSource: async () => {
       const route = '/internal/workplace_search/org/settings/connectors/external';
 

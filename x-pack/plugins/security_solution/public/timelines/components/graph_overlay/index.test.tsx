@@ -226,7 +226,9 @@ describe('GraphOverlay', () => {
                 timelineById: {
                   [timelineId]: {
                     ...mockGlobalState.timeline.timelineById[timelineId],
-                    sessionViewId: 'testId',
+                    sessionViewConfig: {
+                      sessionEntityId: 'testId',
+                    },
                   },
                 },
               },

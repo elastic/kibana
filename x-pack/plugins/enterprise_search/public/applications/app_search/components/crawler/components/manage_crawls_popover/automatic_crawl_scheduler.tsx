@@ -29,13 +29,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
 import {
   DAYS_UNIT_LABEL,
   HOURS_UNIT_LABEL,
   MONTHS_UNIT_LABEL,
   WEEKS_UNIT_LABEL,
-} from '../../../../..//shared/constants/units';
-import { CANCEL_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
+} from '../../../../../shared/constants/units';
 
 import { WEB_CRAWLER_DOCS_URL } from '../../../../routes';
 import { CrawlUnits } from '../../types';

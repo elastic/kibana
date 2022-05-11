@@ -1884,9 +1884,9 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ 'data-test-subj'?: string | undefined; target?: string | undefined; iconType?: ",
+          "{ iconType?: ",
           "IconType",
-          " | undefined; rel?: string | undefined; }"
+          " | undefined; 'data-test-subj'?: string | undefined; rel?: string | undefined; target?: string | undefined; }"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,

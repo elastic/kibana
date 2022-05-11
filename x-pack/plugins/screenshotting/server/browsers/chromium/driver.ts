@@ -9,14 +9,15 @@ import { truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { Headers, Logger } from 'src/core/server';
+import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
-} from '../../../../../../src/plugins/screenshot_mode/server';
+} from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '../../config';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
+import { getFooterTemplate, getHeaderTemplate } from './templates';
 
 export type Context = Record<string, unknown>;
 
@@ -153,6 +154,52 @@ export class HeadlessChromiumDriver {
    */
   isPageOpen() {
     return !this.page.isClosed();
+  }
+
+  /**
+   * Despite having "preserveDrawingBuffer": "true" for WebGL driven canvas elements
+   * we may still get a blank canvas in PDFs. As a further mitigation
+   * we convert WebGL backed canvases to images and inline replace the canvas element.
+   * The visual result is identical.
+   *
+   * The drawback is that we are mutating the page and so if anything were to interact
+   * with it after we ran this function it may lead to issues. Ideally, once Chromium
+   * fixes how PDFs are generated we can remove this code. See:
+   *
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=809065
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=137576
+   *
+   * Idea adapted from: https://github.com/puppeteer/puppeteer/issues/1731#issuecomment-864345938
+   */
+  private async workaroundWebGLDrivenCanvases() {
+    const canvases = await this.page.$$('canvas');
+    for (const canvas of canvases) {
+      await canvas.evaluate((thisCanvas: Element) => {
+        if (
+          (thisCanvas as HTMLCanvasElement).getContext('webgl') ||
+          (thisCanvas as HTMLCanvasElement).getContext('webgl2')
+        ) {
+          const newDiv = document.createElement('div');
+          const img = document.createElement('img');
+          img.src = (thisCanvas as HTMLCanvasElement).toDataURL('image/png');
+          newDiv.appendChild(img);
+          thisCanvas.parentNode!.replaceChild(newDiv, thisCanvas);
+        }
+      });
+    }
+  }
+
+  async printA4Pdf({ title, logo }: { title: string; logo?: string }): Promise<Buffer> {
+    await this.workaroundWebGLDrivenCanvases();
+    return this.page.pdf({
+      format: 'a4',
+      preferCSSPageSize: true,
+      scale: 1,
+      landscape: false,
+      displayHeaderFooter: true,
+      headerTemplate: await getHeaderTemplate({ title }),
+      footerTemplate: await getFooterTemplate({ logo }),
+    });
   }
 
   /*
@@ -359,7 +406,7 @@ export class HeadlessChromiumDriver {
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
-    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    // IE: https://feeds.elastic.co/kibana/v8.0.0.json
     const derivedPort = (protocol: string | null, port: string | null, url: string) => {
       if (port) {
         return port;

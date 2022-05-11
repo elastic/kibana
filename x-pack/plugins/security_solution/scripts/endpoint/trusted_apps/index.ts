@@ -6,7 +6,7 @@
  */
 
 import minimist from 'minimist';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { basename } from 'path';

@@ -1,0 +1,36 @@
+@include euiBreakpoint('xs', 's') {
+  .controlsIllustration {
+    display: none;
+  }
+}
+
+.controlsWrapper {
+  &--empty {
+    display: flex;
+    overflow: hidden;
+    margin: 0 $euiSizeS 0 $euiSizeS;
+
+    .addControlButton {
+      text-align: center;
+    }
+
+    @include euiBreakpoint('m', 'l', 'xl') {
+      height: $euiSize * 4;
+
+      .emptyStateText {
+        padding-left: $euiSize * 2;
+      }
+    }
+    @include euiBreakpoint('xs', 's') {
+      min-height: $euiSize * 4;
+
+      .emptyStateText {
+        padding-left: 0;
+        text-align: center;
+      }
+      .controlsIllustration__container {
+        margin-bottom: 0 !important;
+      }
+    }
+  }
+}

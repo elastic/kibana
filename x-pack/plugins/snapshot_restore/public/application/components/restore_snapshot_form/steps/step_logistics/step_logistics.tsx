@@ -33,7 +33,7 @@ import { useCore, useServices } from '../../../../app_context';
 import { orderDataStreamsAndIndices } from '../../../lib';
 import { DataStreamBadge } from '../../../data_stream_badge';
 
-import { StepProps } from '../index';
+import { StepProps } from '..';
 
 import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_out';
 

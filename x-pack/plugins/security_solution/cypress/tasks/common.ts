@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { esArchiverResetKibana } from './es_archiver';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
@@ -65,6 +64,12 @@ export const reload = () => {
 };
 
 export const cleanKibana = () => {
+  deleteAlertsAndRules();
+  deleteCases();
+  deleteTimelines();
+};
+
+export const deleteAlertsAndRules = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
   cy.request({
@@ -74,6 +79,7 @@ export const cleanKibana = () => {
       query: '',
       action: 'delete',
     },
+    failOnStatusCode: false,
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
   });
 
@@ -84,22 +90,6 @@ export const cleanKibana = () => {
           {
             match: {
               type: 'alert',
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  deleteCases();
-
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
-    query: {
-      bool: {
-        filter: [
-          {
-            match: {
-              type: 'siem-ui-timeline',
             },
           },
         ],
@@ -118,8 +108,23 @@ export const cleanKibana = () => {
       },
     }
   );
+};
 
-  esArchiverResetKibana();
+export const deleteTimelines = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'siem-ui-timeline',
+            },
+          },
+        ],
+      },
+    },
+  });
 };
 
 export const deleteCases = () => {

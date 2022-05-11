@@ -12,7 +12,7 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainer,

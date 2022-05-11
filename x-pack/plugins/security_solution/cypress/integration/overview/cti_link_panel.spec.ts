@@ -12,18 +12,17 @@ import {
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
 } from '../../screens/overview';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('CTI Link Panel', () => {
   before(() => {
-    cleanKibana();
+    login();
   });
 
   it('renders disabled threat intel module as expected', () => {
-    loginAndWaitForPage(OVERVIEW_URL);
+    visit(OVERVIEW_URL);
     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL}`).should('exist');
     cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 indicators');
     cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should('exist');
@@ -42,7 +41,7 @@ describe('CTI Link Panel', () => {
     });
 
     it('renders disabled dashboard module as expected when there are no events in the selected time period', () => {
-      loginAndWaitForPage(
+      visit(
         `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
       );
       cy.get(`${OVERVIEW_CTI_LINKS}`).should('exist');
@@ -50,7 +49,8 @@ describe('CTI Link Panel', () => {
     });
 
     it('renders dashboard module as expected when there are events in the selected time period', () => {
-      loginAndWaitForPage(OVERVIEW_URL);
+      visit(OVERVIEW_URL);
+
       cy.get(`${OVERVIEW_CTI_LINKS}`).should('exist');
       cy.get(OVERVIEW_CTI_LINKS).should('not.contain.text', 'Anomali');
       cy.get(OVERVIEW_CTI_LINKS).should('contain.text', 'AbuseCH malware');

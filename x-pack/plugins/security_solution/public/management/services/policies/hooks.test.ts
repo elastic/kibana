@@ -6,11 +6,11 @@
  */
 
 import { useGetEndpointSecurityPackage } from './hooks';
-import { HttpFetchError, HttpSetup } from 'kibana/public';
-import { getFakeHttpService, renderQuery } from '../../hooks/artifacts/test_utils';
+import { HttpFetchError, HttpSetup } from '@kbn/core/public';
+import { getFakeHttpService, renderQuery } from '../../hooks/test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { UseQueryOptions } from 'react-query';
-import { GetPackagesResponse } from '../../../../../fleet/common';
+import { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/lib/kibana');

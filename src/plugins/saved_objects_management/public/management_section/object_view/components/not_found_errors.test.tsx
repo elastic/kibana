@@ -10,7 +10,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NotFoundErrors } from './not_found_errors';
-import { docLinksServiceMock } from '../../../../../../core/public/mocks';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 describe('NotFoundErrors component', () => {
   const mountError = (type: string) =>

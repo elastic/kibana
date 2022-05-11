@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ConsoleProps } from '../../console';
 import { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { ConsoleTestSetup, getConsoleTestSetup } from '../../mocks';
+import { ConsoleProps } from '../../types';
 
 describe('When entering data into the Console input', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;

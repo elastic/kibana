@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { Rules } from './index';
+import { LOADING_STATE_TEST_SUBJECT } from '../../components/csp_page_template';
+import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from 'react-query';
 import { TestProvider } from '../../test/test_provider';
 import { useCspIntegration } from './use_csp_integration';
 import { type RouteComponentProps } from 'react-router-dom';
-import { cspLoadingStateTestId } from '../../components/csp_loading_state';
 import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
@@ -91,7 +91,7 @@ describe('<Rules />', () => {
 
     render(<Component />);
 
-    expect(screen.getByTestId(cspLoadingStateTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
   });
 
   it('displays success state when result request is resolved', async () => {

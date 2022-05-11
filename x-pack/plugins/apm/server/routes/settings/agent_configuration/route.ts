@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { maxSuggestions } from '../../../../../observability/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { createOrUpdateConfiguration } from './create_or_update_configuration';
 import { searchConfigurations } from './search_configurations';
@@ -269,6 +269,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { context, params } = resources;
+    const coreContext = await context.core;
 
     const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -278,7 +279,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
       start,
       end,
     });
-    const size = await context.core.uiSettings.client.get<number>(
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const environments = await getEnvironments({

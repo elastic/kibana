@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -13,6 +13,7 @@ import type {
 import { PolicyData } from '../../../../common/endpoint/types';
 
 export interface ArtifactListPageUrlParams {
+  /** The page number for the list. Must be 1 based. */
   page?: number;
   pageSize?: number;
   filter?: string;

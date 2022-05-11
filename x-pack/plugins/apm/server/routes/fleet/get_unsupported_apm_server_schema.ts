@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { INPUT_VAR_NAME_TO_SCHEMA_PATH } from '../../../common/fleet';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,

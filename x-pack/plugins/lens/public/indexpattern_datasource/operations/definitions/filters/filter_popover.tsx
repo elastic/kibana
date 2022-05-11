@@ -9,9 +9,9 @@ import './filter_popover.scss';
 
 import React from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
+import { Query } from '@kbn/data-plugin/public';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
 import { IndexPattern } from '../../../types';
-import { Query } from '../../../../../../../../src/plugins/data/public';
 import { LabelInput } from '../shared_components';
 import { QueryInput } from '../../../query_input';
 

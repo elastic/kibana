@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiBetaBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -27,6 +27,7 @@ import {
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
 import { CellValueElementProps } from '../cell_rendering';
+import { SessionViewConfig } from '../session_tab_content/use_session_view';
 import {
   getActiveTabSelector,
   getNoteIdsSelector,
@@ -36,14 +37,17 @@ import {
   getEventIdToNoteIdsSelector,
 } from './selectors';
 import * as i18n from './translations';
+import { BETA } from '../../../../common/translations';
 
-const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(({ $isVisible = false }) => ({
-  style: {
-    display: $isVisible ? 'flex' : 'none',
-  },
-}))<{ $isVisible: boolean }>`
+const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
+  ({ $isVisible = false, isOverflowYScroll = false }) => ({
+    style: {
+      display: $isVisible ? 'flex' : 'none',
+      overflow: isOverflowYScroll ? 'hidden scroll' : 'hidden',
+    },
+  })
+)<{ $isVisible: boolean; isOverflowYScroll?: boolean }>`
   flex: 1;
-  overflow: hidden;
 `;
 
 const QueryTabContent = lazy(() => import('../query_tab_content'));
@@ -60,7 +64,7 @@ interface BasicTimelineTab {
   timelineId: TimelineId;
   timelineType: TimelineType;
   graphEventId?: string;
-  sessionViewId?: string | null;
+  sessionViewConfig?: SessionViewConfig | null;
   timelineDescription: string;
 }
 
@@ -197,6 +201,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         )}
         <HideShowContainer
           $isVisible={isGraphOrNotesTabs}
+          isOverflowYScroll={activeTimelineTab === TimelineTabs.session}
           data-test-subj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
@@ -235,7 +240,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineFullScreen,
   timelineType,
   graphEventId,
-  sessionViewId,
+  sessionViewConfig,
   timelineDescription,
 }) => {
   const dispatch = useDispatch();
@@ -351,8 +356,9 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.session}`}
             onClick={setSessionAsActiveTab}
             isSelected={activeTab === TimelineTabs.session}
-            disabled={sessionViewId === null}
+            disabled={sessionViewConfig === null}
             key={TimelineTabs.session}
+            append={<EuiBetaBadge label={BETA} size="s" />}
           >
             {i18n.SESSION_TAB}
           </EuiTab>

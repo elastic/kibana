@@ -8,7 +8,7 @@
 import { useDispatch } from 'react-redux';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import {
   EuiFlexGroup,
   EuiFlexItem,

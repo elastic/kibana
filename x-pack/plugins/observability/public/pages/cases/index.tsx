@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Cases } from './cases';
 
 import { CaseFeatureNoPermissions } from './feature_no_permissions';
@@ -15,7 +16,6 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useHasData } from '../../hooks/use_has_data';
 import { LoadingObservability } from '../overview/loading_observability';
 import { getNoDataConfig } from '../../utils/no_data_config';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityAppServices } from '../../application/types';
 
 export const CasesPage = React.memo(() => {

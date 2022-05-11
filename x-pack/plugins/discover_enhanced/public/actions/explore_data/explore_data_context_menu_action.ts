@@ -5,15 +5,11 @@
  * 2.0.
  */
 import type { Filter } from '@kbn/es-query';
-import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import {
-  EmbeddableContext,
-  EmbeddableInput,
-  IEmbeddable,
-} from '../../../../../../src/plugins/embeddable/public';
-import { Query, TimeRange } from '../../../../../../src/plugins/data/public';
-import { DiscoverAppLocatorParams } from '../../../../../../src/plugins/discover/public';
-import { KibanaLocation } from '../../../../../../src/plugins/share/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Query, TimeRange } from '@kbn/data-plugin/public';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/public';
+import { KibanaLocation } from '@kbn/share-plugin/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 

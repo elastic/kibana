@@ -25,11 +25,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { DocumentCreationLogic } from '..';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 
 import { FLYOUT_ARIA_LABEL_ID } from '../constants';
 import { Errors } from '../creation_response_components';
-import { DocumentCreationLogic } from '../index';
 
 import './paste_json_text.scss';
 

@@ -8,13 +8,13 @@
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../utils/test_helpers';
-import { TimeComparison } from './';
-import * as urlHelpers from '../../shared/links/url_helpers';
+import { TimeComparison } from '.';
+import * as urlHelpers from '../links/url_helpers';
 import moment from 'moment';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';

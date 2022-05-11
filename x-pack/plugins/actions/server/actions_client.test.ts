@@ -13,19 +13,19 @@ import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_regist
 import { ActionsClient } from './actions_client';
 import { ExecutorType, ActionType } from './types';
 import { ActionExecutor, TaskRunnerFactory, ILicenseState } from './lib';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
-import { licensingMock } from '../../licensing/server/mocks';
-import { httpServerMock, loggingSystemMock } from '../../../../src/core/server/mocks';
-import { auditLoggerMock } from '../../security/server/audit/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
-
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
+  httpServerMock,
+  loggingSystemMock,
   elasticsearchServiceMock,
   savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
@@ -36,12 +36,15 @@ import {
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { Logger } from 'kibana/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { Logger } from '@kbn/core/server';
 import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
+import { getOAuthJwtAccessToken } from './builtin_action_types/lib/get_oauth_jwt_access_token';
+import { getOAuthClientCredentialsAccessToken } from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
+import { OAuthParams } from './routes/get_oauth_access_token';
 
-jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
@@ -63,6 +66,13 @@ jest.mock('./authorization/get_authorization_mode_by_source', () => {
   };
 });
 
+jest.mock('./builtin_action_types/lib/get_oauth_jwt_access_token', () => ({
+  getOAuthJwtAccessToken: jest.fn(),
+}));
+jest.mock('./builtin_action_types/lib/get_oauth_client_credentials_access_token', () => ({
+  getOAuthClientCredentialsAccessToken: jest.fn(),
+}));
+
 const defaultKibanaIndex = '.kibana';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -76,6 +86,7 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockTaskManager = taskManagerMock.createSetup();
+const configurationUtilities = actionsConfigMock.create();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -118,6 +129,10 @@ beforeEach(() => {
     usageCounter: mockUsageCounter,
     connectorTokenClient,
   });
+  (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
+  (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
+    `Bearer clienttokentokentoken`
+  );
 });
 
 describe('create()', () => {
@@ -314,6 +329,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -446,6 +462,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -635,6 +652,7 @@ describe('get()', () => {
               test: 'test1',
             },
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -692,6 +710,7 @@ describe('get()', () => {
               test: 'test1',
             },
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -781,6 +800,7 @@ describe('get()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -810,6 +830,7 @@ describe('get()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -824,6 +845,7 @@ describe('get()', () => {
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
+      isDeprecated: false,
       name: 'test',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -879,6 +901,7 @@ describe('getAll()', () => {
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1018,6 +1041,7 @@ describe('getAll()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1031,6 +1055,7 @@ describe('getAll()', () => {
       {
         id: '1',
         isPreconfigured: false,
+        isDeprecated: false,
         name: 'test',
         config: {
           foo: 'bar',
@@ -1042,6 +1067,7 @@ describe('getAll()', () => {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         isPreconfigured: true,
+        isDeprecated: false,
         name: 'test',
         referencedByCount: 2,
       },
@@ -1095,6 +1121,7 @@ describe('getBulk()', () => {
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1228,6 +1255,7 @@ describe('getBulk()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1245,6 +1273,7 @@ describe('getBulk()', () => {
         },
         id: 'testPreconfigured',
         isPreconfigured: true,
+        isDeprecated: false,
         name: 'test',
         secrets: {},
       },
@@ -1256,9 +1285,296 @@ describe('getBulk()', () => {
         id: '1',
         isMissingSecrets: false,
         isPreconfigured: false,
+        isDeprecated: false,
         name: 'test',
       },
     ]);
+  });
+});
+
+describe('getOAuthAccessToken()', () => {
+  function getOAuthAccessToken(
+    requestBody: OAuthParams
+  ): ReturnType<ActionsClient['getOAuthAccessToken']> {
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+    });
+    return actionsClient.getOAuthAccessToken(requestBody, logger, configurationUtilities);
+  }
+
+  describe('authorization', () => {
+    test('ensures user is authorised to get the type of action', async () => {
+      await getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      });
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to update actions`));
+
+      await expect(
+        getOAuthAccessToken({
+          type: 'jwt',
+          options: {
+            tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+            config: {
+              clientId: 'abc',
+              jwtKeyId: 'def',
+              userIdentifierValue: 'userA',
+            },
+            secrets: {
+              clientSecret: 'iamasecret',
+              privateKey: 'xyz',
+            },
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to update actions]`);
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    });
+  });
+
+  test('throws when tokenUrl is not using http or https', async () => {
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'ftp://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must use http or https]`);
+
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+  });
+
+  test('throws when tokenUrl does not contain hostname', async () => {
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: '/path/to/myfile',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must contain hostname]`);
+
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+  });
+
+  test('throws when tokenUrl is not in allowed hosts', async () => {
+    configurationUtilities.ensureUriAllowed.mockImplementationOnce(() => {
+      throw new Error('URI not allowed');
+    });
+
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: URI not allowed]`);
+
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+      `https://testurl.service-now.com/oauth_token.do`
+    );
+  });
+
+  test('calls getOAuthJwtAccessToken when type="jwt"', async () => {
+    const result = await getOAuthAccessToken({
+      type: 'jwt',
+      options: {
+        tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+        config: {
+          clientId: 'abc',
+          jwtKeyId: 'def',
+          userIdentifierValue: 'userA',
+        },
+        secrets: {
+          clientSecret: 'iamasecret',
+          privateKey: 'xyz',
+        },
+      },
+    });
+    expect(result).toEqual({
+      accessToken: 'Bearer jwttokentokentoken',
+    });
+    expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+      logger,
+      configurationUtilities,
+      credentials: {
+        config: {
+          clientId: 'abc',
+          jwtKeyId: 'def',
+          userIdentifierValue: 'userA',
+        },
+        secrets: {
+          clientSecret: 'iamasecret',
+          privateKey: 'xyz',
+        },
+      },
+      tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+    });
+    expect(getOAuthClientCredentialsAccessToken).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Successfully retrieved access token using JWT OAuth with tokenUrl https://testurl.service-now.com/oauth_token.do and config {\"clientId\":\"abc\",\"jwtKeyId\":\"def\",\"userIdentifierValue\":\"userA\"}`
+    );
+  });
+
+  test('calls getOAuthClientCredentialsAccessToken when type="client"', async () => {
+    const result = await getOAuthAccessToken({
+      type: 'client',
+      options: {
+        tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+        scope: 'https://graph.microsoft.com/.default',
+        config: {
+          clientId: 'abc',
+          tenantId: 'def',
+        },
+        secrets: {
+          clientSecret: 'iamasecret',
+        },
+      },
+    });
+    expect(result).toEqual({
+      accessToken: 'Bearer clienttokentokentoken',
+    });
+    expect(getOAuthClientCredentialsAccessToken as jest.Mock).toHaveBeenCalledWith({
+      logger,
+      configurationUtilities,
+      credentials: {
+        config: {
+          clientId: 'abc',
+          tenantId: 'def',
+        },
+        secrets: {
+          clientSecret: 'iamasecret',
+        },
+      },
+      tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+      oAuthScope: 'https://graph.microsoft.com/.default',
+    });
+    expect(getOAuthJwtAccessToken).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Successfully retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\"clientId\":\"abc\",\"tenantId\":\"def\"}`
+    );
+  });
+
+  test('throws when getOAuthJwtAccessToken throws error', async () => {
+    (getOAuthJwtAccessToken as jest.Mock).mockRejectedValue(new Error(`Something went wrong!`));
+
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Failed to retrieve access token]`);
+
+    expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Failed to retrieve access token using JWT OAuth with tokenUrl https://testurl.service-now.com/oauth_token.do and config {\"clientId\":\"abc\",\"jwtKeyId\":\"def\",\"userIdentifierValue\":\"userA\"} - Something went wrong!`
+    );
+  });
+
+  test('throws when getOAuthClientCredentialsAccessToken throws error', async () => {
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValue(
+      new Error(`Something went wrong!`)
+    );
+
+    await expect(
+      getOAuthAccessToken({
+        type: 'client',
+        options: {
+          tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+          scope: 'https://graph.microsoft.com/.default',
+          config: {
+            clientId: 'abc',
+            tenantId: 'def',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Failed to retrieve access token]`);
+
+    expect(getOAuthClientCredentialsAccessToken as jest.Mock).toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Failed to retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\"clientId\":\"abc\",\"tenantId\":\"def\"} - Something went wrong!`
+    );
   });
 });
 
@@ -1461,6 +1777,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
       name: 'my name',
@@ -1532,6 +1849,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
       name: 'my name',
@@ -1671,6 +1989,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
       name: 'my name',
@@ -2003,6 +2322,7 @@ describe('isPreconfigured()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -2038,6 +2358,7 @@ describe('isPreconfigured()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',

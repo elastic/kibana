@@ -7,7 +7,7 @@
 
 import { get, isEmpty } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { usersModel } from '../../store';
 import { UsersTableType } from '../../store/model';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
@@ -27,6 +27,7 @@ const TabNameMappedToI18nKey: Record<UsersTableType, string> = {
   [UsersTableType.risk]: i18n.NAVIGATION_RISK_TITLE,
   [UsersTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
   [UsersTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
+  [UsersTableType.risk]: i18n.NAVIGATION_RISK_TITLE,
 };
 
 export const getBreadcrumbs = (

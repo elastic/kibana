@@ -158,6 +158,21 @@
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.hidePrivacyStatement",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidePrivacyStatement",
+            "description": [
+              "Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -647,7 +662,7 @@
         ],
         "signature": [
           "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Omit<",
-          "ClusterStatsResponse",
+          "ClusterStatsStatsResponseBase",
           ", \"cluster_name\" | \"_nodes\">; collection: string; stack_stats: { data: ",
           {
             "pluginId": "telemetry",

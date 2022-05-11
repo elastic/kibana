@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Datafeed, Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -360,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('aggregated or scripted job', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');

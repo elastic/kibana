@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/public';
+import { SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   Datasource,
+  DatasourceLayers,
   DatasourceMap,
-  DatasourcePublicAPI,
   FramePublicAPI,
   InitializationOptions,
   Visualization,
-  VisualizationDimensionGroupConfig,
   VisualizationMap,
   VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
 import {
@@ -63,7 +62,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
   datasourceMap: DatasourceMap
 ) {
-  const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
+  const datasourceLayers: DatasourceLayers = {};
   Object.keys(datasourceMap)
     .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)
     .forEach((id) => {
@@ -197,24 +196,8 @@ export const validateDatasourceAndVisualization = (
   currentVisualizationState: unknown | undefined,
   frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
 ): ErrorMessage[] | undefined => {
-  const layersGroups = currentVisualizationState
-    ? currentVisualization
-        ?.getLayerIds(currentVisualizationState)
-        .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
-          const groups = currentVisualization?.getConfiguration({
-            frame: frameAPI,
-            layerId,
-            state: currentVisualizationState,
-          }).groups;
-          if (groups) {
-            memo[layerId] = groups;
-          }
-          return memo;
-        }, {})
-    : undefined;
-
   const datasourceValidationErrors = currentDatasourceState
-    ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)
+    ? currentDataSource?.getErrorMessages(currentDatasourceState)
     : undefined;
 
   const visualizationValidationErrors = currentVisualizationState

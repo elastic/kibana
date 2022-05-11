@@ -12,7 +12,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
-import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+import { NavigateToAppOptions } from '@kbn/core/public';
 import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';

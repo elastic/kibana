@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { last, cloneDeep } from 'lodash';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { Comparators } from '@elastic/eui';
+import type { ISearchOptions } from '@kbn/data-plugin/common';
 import type {
   DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
@@ -28,7 +29,6 @@ import {
 import type { FieldStats, FieldStatsError } from '../../../../common/types/field_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';
-import type { ISearchOptions } from '../../../../../../../src/plugins/data/common';
 import { getFieldsStats } from '../search_strategy/requests/get_fields_stats';
 import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';

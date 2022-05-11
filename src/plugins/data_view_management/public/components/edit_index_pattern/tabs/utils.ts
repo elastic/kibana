@@ -8,7 +8,7 @@
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField } from '../../../../../../plugins/data_views/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 import { areScriptedFieldsEnabled } from '../../utils';
 

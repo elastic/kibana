@@ -9,7 +9,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindOptionsReference,
   SavedObject,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 import { Tag, TagAttributes, TagWithRelations } from '../../../common/types';
 

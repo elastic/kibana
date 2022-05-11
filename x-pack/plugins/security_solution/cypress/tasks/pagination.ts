@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FIRST_PAGE_SELECTOR, THIRD_PAGE_SELECTOR } from '../screens/pagination';
+import { FIRST_PAGE_SELECTOR, SECOND_PAGE_SELECTOR } from '../screens/pagination';
 
 export const goToFirstPage = () => {
   cy.get(FIRST_PAGE_SELECTOR).last().click({ force: true });
 };
 
-export const goToThirdPage = () => {
-  cy.get(THIRD_PAGE_SELECTOR).last().click({ force: true });
+export const goToSecondPage = () => {
+  cy.get(SECOND_PAGE_SELECTOR).last().click({ force: true });
 };

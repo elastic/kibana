@@ -34,19 +34,19 @@ import {
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
-  [SecurityPageName.overview]: {
-    id: SecurityPageName.overview,
-    name: i18n.OVERVIEW,
-    href: APP_OVERVIEW_PATH,
-    disabled: false,
-    urlKey: 'overview',
-  },
   [SecurityPageName.landing]: {
     id: SecurityPageName.landing,
     name: i18n.GETTING_STARTED,
     href: APP_LANDING_PATH,
     disabled: false,
     urlKey: 'get_started',
+  },
+  [SecurityPageName.overview]: {
+    id: SecurityPageName.overview,
+    name: i18n.OVERVIEW,
+    href: APP_OVERVIEW_PATH,
+    disabled: false,
+    urlKey: 'overview',
   },
   [SecurityPageName.detectionAndResponse]: {
     id: SecurityPageName.detectionAndResponse,

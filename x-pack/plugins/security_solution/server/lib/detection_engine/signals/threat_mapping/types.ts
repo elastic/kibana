@@ -19,13 +19,13 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ListClient } from '../../../../../../lists/server';
+import { ListClient } from '@kbn/lists-plugin/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import {
@@ -57,7 +57,7 @@ export interface CreateThreatSignalsOptions {
   query: string;
   savedId: string | undefined;
   searchAfterSize: number;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPath;
@@ -87,7 +87,7 @@ export interface CreateThreatSignalOptions {
   query: string;
   savedId: string | undefined;
   searchAfterSize: number;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatEnrichment: SignalsEnrichment;
   threatMapping: ThreatMapping;
   tuple: RuleRangeTuple;
@@ -113,7 +113,7 @@ export interface CreateEventSignalOptions {
   query: string;
   savedId: string | undefined;
   searchAfterSize: number;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatEnrichment: SignalsEnrichment;
   tuple: RuleRangeTuple;
   type: Type;
@@ -234,7 +234,7 @@ export interface BuildThreatEnrichmentOptions {
   buildRuleMessage: BuildRuleMessage;
   exceptionItems: ExceptionListItemSchema[];
   logger: Logger;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPath;
@@ -245,7 +245,7 @@ export interface BuildThreatEnrichmentOptions {
 }
 
 export interface EventsOptions {
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   query: string;
   buildRuleMessage: BuildRuleMessage;
   language: ThreatLanguageOrUndefined;

@@ -53,6 +53,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const onShowAlertDetails = jest.fn();
   const handleManageMarkdownEditId = jest.fn();
   const handleSaveComment = jest.fn();
+  const handleDeleteComment = jest.fn();
   const handleManageQuote = jest.fn();
   const handleOutlineComment = jest.fn();
 
@@ -74,6 +75,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     onShowAlertDetails,
     handleManageMarkdownEditId,
     handleSaveComment,
+    handleDeleteComment,
     handleManageQuote,
     handleOutlineComment,
   };

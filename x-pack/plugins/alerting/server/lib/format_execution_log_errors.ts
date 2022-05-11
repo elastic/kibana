@@ -6,25 +6,14 @@
  */
 
 import { get } from 'lodash';
-import { QueryEventsBySavedObjectResult, IValidatedEvent } from '../../../event_log/server';
+import { QueryEventsBySavedObjectResult, IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IExecutionErrors, IExecutionErrorsResult } from '../../common';
 
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 const TIMESTAMP_FIELD = '@timestamp';
 const PROVIDER_FIELD = 'event.provider';
 const MESSAGE_FIELD = 'message';
 const ERROR_MESSAGE_FIELD = 'error.message';
-
-export interface IExecutionErrors {
-  id: string;
-  timestamp: string;
-  type: string;
-  message: string;
-}
-
-export interface IExecutionErrorsResult {
-  totalErrors: number;
-  errors: IExecutionErrors[];
-}
 
 export const EMPTY_EXECUTION_ERRORS_RESULT = {
   totalErrors: 0,

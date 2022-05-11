@@ -7,10 +7,10 @@
  */
 
 import { Observable } from 'rxjs';
-import { ScopedHistory, Capabilities } from 'kibana/public';
-import type { LocatorPublic } from 'src/plugins/share/common';
+import { ScopedHistory, Capabilities } from '@kbn/core/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
-import { ChromeBreadcrumb, CoreTheme } from '../../../core/public/';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {

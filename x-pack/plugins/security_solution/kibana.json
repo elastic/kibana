@@ -13,7 +13,6 @@
     "alerting",
     "cases",
     "data",
-    "dataEnhanced",
     "embeddable",
     "eventLog",
     "features",
@@ -27,6 +26,7 @@
     "timelines",
     "triggersActionsUi",
     "uiActions",
+    "unifiedSearch",
     "sessionView"
   ],
   "optionalPlugins": [
@@ -53,6 +53,7 @@
     "kibanaReact",
     "usageCollection",
     "lists",
-    "ml"
+    "ml",
+    "unifiedSearch"
   ]
 }

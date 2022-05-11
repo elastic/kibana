@@ -17,11 +17,14 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
+    const coreContext = await context.core;
     const isFleetServerSetup = await hasFleetServers(
-      context.core.elasticsearch.client.asInternalUser
+      coreContext.elasticsearch.client.asInternalUser
     );
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
+    const missingOptionalFeatures: GetFleetStatusResponse['missing_optional_features'] = [];
+
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
     }
@@ -30,9 +33,14 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       missingRequirements.push('fleet_server');
     }
 
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      missingOptionalFeatures.push('encrypted_saved_object_encryption_key_required');
+    }
+
     const body: GetFleetStatusResponse = {
       isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
+      missing_optional_features: missingOptionalFeatures,
     };
 
     return response.ok({
@@ -45,8 +53,8 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
 
 export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const soClient = context.fleet.epm.internalSoClient;
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const soClient = (await context.fleet).epm.internalSoClient;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,

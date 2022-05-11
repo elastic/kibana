@@ -5,31 +5,26 @@
  * 2.0.
  */
 
-import { from, Observable } from 'rxjs';
-import { switchMap, mergeMap } from 'rxjs/operators';
+import { from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import type {
   CoreSetup,
   CoreStart,
   Logger,
+  PackageInfo,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+} from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
 import { ConfigType, createConfig } from './config';
-import { ScreenshotResult, Screenshots } from './screenshots';
+import { Screenshots } from './screenshots';
 import { getChromiumPackage } from './utils';
-import {
-  PngScreenshotOptions,
-  PdfScreenshotOptions,
-  PdfScreenshotResult,
-  PngScreenshotResult,
-  toPng,
-  toPdf,
-} from './formats';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
+  cloud?: CloudSetup;
 }
 
 /**
@@ -41,19 +36,19 @@ export interface ScreenshottingStart {
    * @returns Observable with output messages.
    */
   diagnose: HeadlessChromiumDriverFactory['diagnose'];
+
   /**
    * Takes screenshots of multiple pages.
    * @param options Screenshots session options.
    * @returns Observable with screenshotting results.
    */
-  getScreenshots: <O extends PdfScreenshotOptions | PngScreenshotOptions>(
-    options: O
-  ) => Observable<O['format'] extends 'pdf' ? PdfScreenshotResult : PngScreenshotResult>;
+  getScreenshots: Screenshots['getScreenshots'];
 }
 
 export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
   private config: ConfigType;
   private logger: Logger;
+  private packageInfo: PackageInfo;
   private screenshotMode!: ScreenshotModePluginSetup;
   private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory>;
   private screenshots!: Promise<Screenshots>;
@@ -61,9 +56,10 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
   constructor(context: PluginInitializerContext<ConfigType>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.packageInfo = context.env.packageInfo;
   }
 
-  setup({ http }: CoreSetup, { screenshotMode }: SetupDeps) {
+  setup({ http }: CoreSetup, { screenshotMode, cloud }: SetupDeps) {
     this.screenshotMode = screenshotMode;
     this.browserDriverFactory = (async () => {
       const paths = new ChromiumArchivePaths();
@@ -89,9 +85,14 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
 
     this.screenshots = (async () => {
       const browserDriverFactory = await this.browserDriverFactory;
-      const logger = this.logger.get('screenshot');
-
-      return new Screenshots(browserDriverFactory, logger, this.config);
+      return new Screenshots(
+        browserDriverFactory,
+        this.logger,
+        this.packageInfo,
+        http,
+        this.config,
+        cloud
+      );
     })();
     // Already handled in `browserDriverFactory`
     this.screenshots.catch(() => {});
@@ -103,15 +104,10 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     return {
       diagnose: () =>
         from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
-      getScreenshots: (options): Observable<ReturnType<ScreenshottingStart['getScreenshots']>> =>
+      getScreenshots: ((options) =>
         from(this.screenshots).pipe(
-          switchMap((screenshots) => screenshots.getScreenshots(options)),
-          mergeMap<ScreenshotResult, Promise<PngScreenshotResult | PdfScreenshotResult>>(
-            options.format === 'pdf'
-              ? toPdf({ logger: this.logger, logo: options.logo, title: options.title })
-              : toPng
-          )
-        ),
+          switchMap((screenshots) => screenshots.getScreenshots(options))
+        )) as ScreenshottingStart['getScreenshots'],
     };
   }
 

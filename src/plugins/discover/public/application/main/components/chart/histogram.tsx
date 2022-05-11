@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import {
   Axis,
   BrushEndListener,
@@ -32,23 +32,25 @@ import {
   XYBrushEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import {
   CurrentTime,
   Endzones,
   getAdjustedInterval,
   renderEndzoneTooltip,
-} from '../../../../../../charts/public';
+} from '@kbn/charts-plugin/public';
+import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DataCharts$, DataChartsMessage } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../utils/use_data_state';
-import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../charts/common';
+import { GetStateReturn } from '../../services/discover_state';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
+  stateContainer: GetStateReturn;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -64,6 +66,7 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
+  stateContainer,
 }: DiscoverHistogramProps) {
   const { data, theme, uiSettings, fieldFormats } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
@@ -123,8 +126,20 @@ export function DiscoverHistogram({
       from: dateMath.parse(from),
       to: dateMath.parse(to, { roundUp: true }),
     };
-    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)}`;
-  }, [from, to, toMoment]);
+    const intervalText = i18n.translate('discover.histogramTimeRangeIntervalDescription', {
+      defaultMessage: '(interval: {value})',
+      values: {
+        value: `${
+          stateContainer.appStateContainer.getState().interval === 'auto'
+            ? `${i18n.translate('discover.histogramTimeRangeIntervalAuto', {
+                defaultMessage: 'Auto',
+              })} - `
+            : ''
+        }${bucketInterval?.description}`,
+      },
+    });
+    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
+  }, [from, to, toMoment, bucketInterval, stateContainer]);
 
   if (!chartData && fetchStatus === FetchStatus.LOADING) {
     return (

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { GeoPointContentWithMap } from './geo_point_content_with_map';
 import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../stats_table/components/field_data_expanded_row';
 import { NotInDocsContent } from '../not_in_docs_content';
 import { FieldVisConfig } from '../stats_table/types';
-import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
 import { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
 import { LoadingIndicator } from '../loading_indicator';
 import { ErrorMessageContent } from '../stats_table/components/field_data_expanded_row/error_message';

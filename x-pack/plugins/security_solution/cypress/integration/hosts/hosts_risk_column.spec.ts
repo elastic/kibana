@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
@@ -17,6 +17,7 @@ describe('All hosts table', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risky_hosts');
+    login();
   });
 
   after(() => {
@@ -24,7 +25,7 @@ describe('All hosts table', () => {
   });
 
   it('it renders risk column', () => {
-    loginAndWaitForPage(HOSTS_URL);
+    visit(HOSTS_URL);
     kqlSearch('host.name: "siem-kibana" {enter}');
 
     cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');

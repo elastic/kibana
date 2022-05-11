@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart, SavedObjectsFindOptions } from 'src/core/public';
+import { HttpStart, SavedObjectsFindOptions } from '@kbn/core/public';
 import { keysToCamelCaseShallow } from './case_conversion';
 import { SavedObjectWithMetadata } from '../types';
 

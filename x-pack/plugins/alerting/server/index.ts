@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { RulesClient as RulesClientClass } from './rules_client';
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { AlertingPlugin } from './plugin';
 import { configSchema } from './config';
 import { AlertsConfigType } from './types';
@@ -18,12 +18,12 @@ export type {
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
-  AlertExecutorOptions,
-  AlertActionParams,
-  AlertServices,
-  AlertTypeState,
-  AlertTypeParams,
-  PartialAlert,
+  RuleExecutorOptions,
+  RuleExecutorServices,
+  RuleActionParams,
+  RuleTypeState,
+  RuleTypeParams,
+  PartialRule,
   AlertInstanceState,
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
@@ -60,12 +60,8 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
       'xpack.alerting.invalidateApiKeysTask.removalDelay',
       { level: 'warning' }
     ),
-    renameFromRoot(
-      'xpack.alerting.defaultRuleTaskTimeout',
-      'xpack.alerting.rules.execution.timeout',
-      {
-        level: 'warning',
-      }
-    ),
+    renameFromRoot('xpack.alerting.defaultRuleTaskTimeout', 'xpack.alerting.rules.run.timeout', {
+      level: 'warning',
+    }),
   ],
 };

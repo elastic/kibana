@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
-import { QueryState } from '../../../../data/public';
-import { setStateToKbnUrl } from '../../../../kibana_utils/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { QueryState } from '@kbn/data-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { getUISettings } from '../../services';
 import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';
 

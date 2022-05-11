@@ -8,16 +8,13 @@
 import React, { useMemo } from 'react';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SessionsView } from '../../../common/components/sessions_viewer';
-import { filterHostExternalAlertData } from '../../../common/components/visualization_actions/utils';
+import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { AlertsComponentQueryProps } from './types';
 
 export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
   const { pageFilters, filterQuery, ...rest } = alertsProps;
   const hostPageFilters = useMemo(
-    () =>
-      pageFilters != null
-        ? [...filterHostExternalAlertData, ...pageFilters]
-        : filterHostExternalAlertData,
+    () => (pageFilters != null ? [...hostNameExistsFilter, ...pageFilters] : hostNameExistsFilter),
     [pageFilters]
   );
 

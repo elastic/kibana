@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 export interface Comparator {
   text: string;
@@ -13,13 +14,29 @@ export interface Comparator {
   requiredValues: number;
 }
 
-export interface EsQueryAlertParams extends AlertTypeParams {
-  index: string[];
-  timeField?: string;
-  esQuery: string;
+export enum SearchType {
+  esQuery = 'esQuery',
+  searchSource = 'searchSource',
+}
+
+export interface CommonAlertParams<T extends SearchType> extends RuleTypeParams {
   size: number;
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
+}
+
+export type EsQueryAlertParams<T = SearchType> = T extends SearchType.searchSource
+  ? CommonAlertParams<SearchType.searchSource> & OnlySearchSourceAlertParams
+  : CommonAlertParams<SearchType.esQuery> & OnlyEsQueryAlertParams;
+
+export interface OnlyEsQueryAlertParams {
+  esQuery: string;
+  index: string[];
+  timeField: string;
+}
+export interface OnlySearchSourceAlertParams {
+  searchType: 'searchSource';
+  searchConfiguration: SerializedSearchSourceFields;
 }

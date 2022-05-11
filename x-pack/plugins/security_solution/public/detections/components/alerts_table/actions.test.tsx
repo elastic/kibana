@@ -18,7 +18,7 @@ import {
   mockTimelineDetails,
   mockTimelineResult,
   mockAADEcsDataWithAlert,
-} from '../../../common/mock/';
+} from '../../../common/mock';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
 import {
@@ -27,8 +27,8 @@ import {
   TimelineStatus,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -47,7 +47,8 @@ import {
   NAMESPACE_TYPE,
   TIE_BREAKER,
   USER,
-} from '../../../../../lists/common/constants.mock';
+} from '@kbn/lists-plugin/common/constants.mock';
+import { of } from 'rxjs';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -156,9 +157,7 @@ describe('alert actions', () => {
       ...dataPluginMock.createStartContract().search,
       aggs: {} as ISearchStart['aggs'],
       showError: jest.fn(),
-      search: jest
-        .fn()
-        .mockImplementation(() => ({ toPromise: () => ({ data: mockTimelineDetails }) })),
+      search: jest.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
       searchSource: {} as ISearchStart['searchSource'],
     };
 
@@ -312,7 +311,7 @@ describe('alert actions', () => {
             savedObjectId: null,
             selectAll: false,
             selectedEventIds: {},
-            sessionViewId: null,
+            sessionViewConfig: null,
             show: true,
             showCheckboxes: false,
             sort: [
@@ -547,7 +546,7 @@ describe('alert actions', () => {
         });
       });
 
-      test('Exceptions are included', async () => {
+      test('Exceptions and filters are included', async () => {
         mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
         await sendAlertToTimelineAction({
           createTimeline,
@@ -584,6 +583,21 @@ describe('alert actions', () => {
             },
             description: '_id: 1',
             filters: [
+              {
+                meta: {
+                  key: 'host.name',
+                  negate: false,
+                  params: '"{"query":"placeholder"}"',
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'host.name': 'placeholder' } },
+              },
+              {
+                // https://github.com/elastic/kibana/issues/126574 - if the provided filter has no `meta` field
+                // we expect an empty object to be inserted before calling `createTimeline`
+                meta: {},
+                query: { match_all: {} },
+              },
               {
                 meta: {
                   alias: 'Exceptions',
@@ -701,6 +715,21 @@ describe('alert actions', () => {
           ...defaultTimelineProps,
           timeline: {
             ...defaultTimelineProps.timeline,
+            filters: [
+              {
+                meta: {
+                  key: 'host.name',
+                  negate: false,
+                  params: '"{"query":"placeholder"}"',
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'host.name': 'placeholder' } },
+              },
+              {
+                meta: {},
+                query: { match_all: {} },
+              },
+            ],
             dataProviders: [
               {
                 and: [],

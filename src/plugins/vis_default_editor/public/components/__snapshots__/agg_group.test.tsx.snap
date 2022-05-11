@@ -19,6 +19,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
       size="s"
     />
     <eui-droppable
+      className="visEditorSidebar__collapsible--marginBottom"
       droppableId="agg_group_dnd_metrics"
     >
       <EuiDraggable

@@ -10,7 +10,7 @@ import { TestProviders } from '../../../../common/mock';
 import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
 import { Ecs } from '../../../../../common/ecs';
 import * as actions from '../actions';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { SendAlertToTimelineActionProps } from '../types';
 import { InvestigateInTimelineAction } from './investigate_in_timeline_action';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';

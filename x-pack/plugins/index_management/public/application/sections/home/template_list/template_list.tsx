@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
@@ -30,11 +30,12 @@ import {
   PageError,
   attemptToURIDecode,
   reactRouterNavigate,
+  useExecutionContext,
 } from '../../../../shared_imports';
 import { LegacyIndexTemplatesDeprecation } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
-import { useServices } from '../../../app_context';
+import { useAppContext, useServices } from '../../../app_context';
 import {
   getTemplateEditLink,
   getTemplateListLink,
@@ -68,7 +69,16 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   history,
 }) => {
   const { uiMetricService } = useServices();
+  const {
+    core: { executionContext },
+  } = useAppContext();
+
   const { error, isLoading, data: allTemplates, resendRequest: reload } = useLoadIndexTemplates();
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'indexManagementIndexTemplatesTab',
+  });
 
   const [filters, setFilters] = useState<Filters<FilterName>>({
     managed: {

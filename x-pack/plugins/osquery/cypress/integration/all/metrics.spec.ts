@@ -9,10 +9,11 @@ import { navigateTo } from '../../tasks/navigation';
 import { login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { ROLES } from '../../test';
 
 describe('ALL - Metrics', () => {
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
     navigateTo('/app/osquery');
   });
   before(() => {

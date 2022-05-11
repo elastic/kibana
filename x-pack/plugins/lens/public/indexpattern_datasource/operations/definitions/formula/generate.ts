@@ -10,7 +10,7 @@ import {
   FieldBasedIndexPatternColumn,
   GenericOperationDefinition,
   GenericIndexPatternColumn,
-} from '../index';
+} from '..';
 import { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import { unquotedStringRegex } from './util';

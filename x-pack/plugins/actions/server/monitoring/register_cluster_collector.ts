@@ -5,12 +5,12 @@
  * 2.0.
  */
 import stats from 'stats-lite';
-import { MonitoringCollectionSetup } from '../../../monitoring_collection/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
-} from '../../../task_manager/server';
-import { CoreSetup } from '../../../../../src/core/server';
+} from '@kbn/task-manager-plugin/server';
+import { CoreSetup } from '@kbn/core/server';
 import { ActionsPluginsStart } from '../plugin';
 import { ClusterActionsMetric } from './types';
 

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { isOutdated } from '../../migrations/helpers';
 import {
   ALIAS_VERSION_FIELD,

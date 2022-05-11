@@ -7,10 +7,11 @@
  */
 
 import { Position } from '@elastic/charts';
-import { Datatable, DatatableColumn } from '../../../../expressions/common';
-import { SerializedFieldFormat } from '../../../../field_formats/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { PaletteOutput } from '../../../../charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { ChartTypes, ExpressionValuePartitionLabels } from './expression_functions';
 
 export enum EmptySizeRatios {
@@ -52,7 +53,7 @@ interface VisCommonParams {
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
-  legendSize?: number;
+  legendSize?: LegendSize;
   ariaLabel?: string;
 }
 

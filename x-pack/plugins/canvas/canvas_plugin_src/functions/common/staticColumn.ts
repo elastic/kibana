@@ -10,7 +10,7 @@ import {
   ExpressionFunctionDefinition,
   Datatable,
   DatatableColumnType,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

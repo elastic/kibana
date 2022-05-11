@@ -17,7 +17,7 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
-} from '../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';

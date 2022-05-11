@@ -45,6 +45,8 @@ export const RangeSliderPopover: FC<Props> = ({
   fieldFormatter,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [rangeSliderMin, setRangeSliderMin] = useState<number>(-Infinity);
+  const [rangeSliderMax, setRangeSliderMax] = useState<number>(Infinity);
   const rangeRef = useRef<EuiDualRange | null>(null);
   let errorMessage = '';
   let helpText = '';
@@ -79,17 +81,6 @@ export const RangeSliderPopover: FC<Props> = ({
     errorMessage = RangeSliderStrings.errors.getUpperLessThanLowerErrorMessage();
   }
 
-  const rangeSliderMin = Math.min(
-    roundedMin,
-    isNaN(lowerBoundValue) ? Infinity : lowerBoundValue,
-    isNaN(upperBoundValue) ? Infinity : upperBoundValue
-  );
-  const rangeSliderMax = Math.max(
-    roundedMax,
-    isNaN(lowerBoundValue) ? -Infinity : lowerBoundValue,
-    isNaN(upperBoundValue) ? -Infinity : upperBoundValue
-  );
-
   const displayedValue = [
     hasLowerBoundSelection ? String(lowerBoundValue) : hasAvailableRange ? String(roundedMin) : '',
     hasUpperBoundSelection ? String(upperBoundValue) : hasAvailableRange ? String(roundedMax) : '',
@@ -106,11 +97,31 @@ export const RangeSliderPopover: FC<Props> = ({
 
   const button = (
     <button
-      onClick={() => setIsPopoverOpen((openState) => !openState)}
+      onClick={() => {
+        // caches min and max displayed on popover open so the range slider doesn't resize as selections change
+        if (!isPopoverOpen) {
+          setRangeSliderMin(
+            Math.min(
+              roundedMin,
+              isNaN(lowerBoundValue) ? Infinity : lowerBoundValue,
+              isNaN(upperBoundValue) ? Infinity : upperBoundValue
+            )
+          );
+          setRangeSliderMax(
+            Math.max(
+              roundedMax,
+              isNaN(lowerBoundValue) ? -Infinity : lowerBoundValue,
+              isNaN(upperBoundValue) ? -Infinity : upperBoundValue
+            )
+          );
+        }
+
+        setIsPopoverOpen((openState) => !openState);
+      }}
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${id}`}
     >
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
             controlOnly
@@ -178,8 +189,7 @@ export const RangeSliderPopover: FC<Props> = ({
       panelClassName="rangeSlider__panelOverride"
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downCenter"
-      initialFocus={false}
-      repositionOnScroll
+      attachToAnchor={false}
       disableFocusTrap
       onPanelResize={() => {
         if (rangeRef?.current) {
@@ -192,6 +202,7 @@ export const RangeSliderPopover: FC<Props> = ({
         className="rangeSlider__actions"
         gutterSize="none"
         data-test-subj="rangeSlider-control-actions"
+        responsive={false}
       >
         <EuiFlexItem>
           <EuiDualRange

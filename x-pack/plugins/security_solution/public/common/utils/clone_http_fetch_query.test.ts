@@ -6,7 +6,7 @@
  */
 
 import { cloneHttpFetchQuery } from './clone_http_fetch_query';
-import { HttpFetchQuery } from '../../../../../../src/core/public';
+import { HttpFetchQuery } from '@kbn/core/public';
 import { Immutable } from '../../../common/endpoint/types';
 
 describe('cloneHttpFetchQuery', () => {

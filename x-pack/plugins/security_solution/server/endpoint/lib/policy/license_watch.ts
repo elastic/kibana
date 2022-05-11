@@ -14,10 +14,10 @@ import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'src/core/server';
-import { PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
-import { ILicense } from '../../../../../licensing/common/types';
+} from '@kbn/core/server';
+import { PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAccordingToLicenseLevel,

@@ -26,5 +26,6 @@
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

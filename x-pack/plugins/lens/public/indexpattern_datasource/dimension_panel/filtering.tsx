@@ -18,7 +18,7 @@ import {
   EuiPopoverProps,
   EuiIconTip,
 } from '@elastic/eui';
-import type { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/data-plugin/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { validateQuery } from '../operations/definitions/filters';
 import { QueryInput } from '../query_input';
