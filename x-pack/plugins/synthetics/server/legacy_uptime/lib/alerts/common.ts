@@ -8,8 +8,8 @@
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
-import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
 
 export type UpdateUptimeAlertState = (
   state: Record<string, any>,
