@@ -44,6 +44,7 @@ const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
   'filter-sets-enableAllFilters': 'disableFilter',
   'filter-sets-disableAllFilters': 'disableFilter',
   'filter-sets-invertAllFilters': 'negateFilter',
+  'filter-sets-removeAllFilters': 'deleteFilter',
 };
 
 export interface QueryBarMenuPanelsProps {
