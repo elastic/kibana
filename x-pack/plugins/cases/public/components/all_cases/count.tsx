@@ -32,6 +32,11 @@ const CountFlexGroup = styled.div`
       border-radius: ${theme.eui.euiBorderRadius};
       margin: 0 0 ${theme.eui.euiSizeL} 0;
     }
+    @media only screen and (max-width: ${theme.eui.euiBreakpoints.s}) {
+      .euiFlexGroup {
+        padding: ${theme.eui.euiSizeM};
+      }
+    }
   `}
 `;
 
