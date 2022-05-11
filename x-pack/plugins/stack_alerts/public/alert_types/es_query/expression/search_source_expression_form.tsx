@@ -92,7 +92,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       {
         index: searchSource.getField('index')!,
         query: searchSource.getField('query')!,
-        filter: searchSource.getField('filter') as Filter[],
+        filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
         threshold: ruleParams.threshold,
         timeWindowSize: ruleParams.timeWindowSize,
         size: ruleParams.size,
