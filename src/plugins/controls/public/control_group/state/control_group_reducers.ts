@@ -25,6 +25,12 @@ export const controlGroupReducers = {
   ) => {
     state.defaultControlWidth = action.payload;
   },
+  setDefaultControlGrow: (
+    state: WritableDraft<ControlGroupInput>,
+    action: PayloadAction<ControlGroupInput['defaultControlGrow']>
+  ) => {
+    state.defaultControlGrow = action.payload;
+  },
   setControlWidth: (
     state: WritableDraft<ControlGroupInput>,
     action: PayloadAction<{ width: ControlWidth; embeddableId: string }>

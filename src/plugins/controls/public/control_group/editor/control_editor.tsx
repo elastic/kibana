@@ -52,6 +52,7 @@ interface EditControlProps {
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
+  grow: boolean;
   onSave: (type: string) => void;
   onCancel: () => void;
   removeControl?: () => void;
@@ -68,6 +69,7 @@ export const ControlEditor = ({
   isCreate,
   title,
   width,
+  grow,
   onSave,
   onCancel,
   removeControl,
@@ -87,7 +89,7 @@ export const ControlEditor = ({
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
-  const [currentGrow, setCurrentGrow] = useState(true);
+  const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
 
   const getControlTypeEditor = (type: string) => {
@@ -172,7 +174,16 @@ export const ControlEditor = ({
                   }}
                 />
               </EuiFormRow>
-              <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
+              <EuiFormRow
+                label={
+                  <>
+                    {ControlGroupStrings.manageControl.getWidthInputTitle()}
+                    <EuiToolTip content="This width will act as the minimum width when the expand setting is enabled.">
+                      <EuiIcon type="iInCircle" />
+                    </EuiToolTip>
+                  </>
+                }
+              >
                 <EuiButtonGroup
                   color="primary"
                   legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
@@ -198,6 +209,20 @@ export const ControlEditor = ({
                 </EuiFormRow>
               ) : null}
               <EuiSpacer size="l" />
+              {removeControl && (
+                <EuiButtonEmpty
+                  aria-label={`delete-${title}`}
+                  iconType="trash"
+                  flush="left"
+                  color="danger"
+                  onClick={() => {
+                    onCancel();
+                    removeControl();
+                  }}
+                >
+                  {ControlGroupStrings.management.getDeleteButtonTitle()}
+                </EuiButtonEmpty>
+              )}
             </>
           )}
         </EuiForm>
@@ -213,23 +238,6 @@ export const ControlEditor = ({
             >
               {ControlGroupStrings.manageControl.getCancelTitle()}
             </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow />
-          <EuiFlexItem grow={false}>
-            {removeControl && (
-              <EuiButtonEmpty
-                aria-label={`delete-${title}`}
-                iconType="trash"
-                flush="left"
-                color="danger"
-                onClick={() => {
-                  onCancel();
-                  removeControl();
-                }}
-              >
-                {ControlGroupStrings.management.getDeleteButtonTitle()}
-              </EuiButtonEmpty>
-            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

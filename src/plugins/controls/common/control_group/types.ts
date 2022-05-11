@@ -27,7 +27,7 @@ export interface ControlsPanels {
 export interface ControlGroupInput extends EmbeddableInput, ControlInput {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlWidth?: ControlWidth;
-  defaultControlGrow: boolean;
+  defaultControlGrow?: boolean;
   controlStyle: ControlStyle;
   panels: ControlsPanels;
 }

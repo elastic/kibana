@@ -91,6 +91,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         <ControlEditor
           isCreate={false}
           width={panel.width}
+          grow={panel.grow}
           embeddable={embeddable}
           title={embeddable.getTitle()}
           onCancel={() => onCancel(flyoutInstance)}
