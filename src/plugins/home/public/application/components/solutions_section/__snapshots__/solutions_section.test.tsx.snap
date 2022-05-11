@@ -34,6 +34,20 @@ exports[`SolutionsSection renders a single solution 1`] = `
           }
         }
       />
+      <SolutionPanel
+        addBasePath={[Function]}
+        key="kibana"
+        solution={
+          Object {
+            "description": "Never gonna give you up, never gonna let you down.",
+            "icon": "logoKibana",
+            "id": "kibana",
+            "order": 400,
+            "path": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "title": "Rick Roll",
+          }
+        }
+      />
     </EuiFlexGroup>
   </section>
   <EuiHorizontalRule
@@ -115,6 +129,20 @@ exports[`SolutionsSection renders multiple solutions 1`] = `
             "order": 4,
             "path": "path-to-solution-four",
             "title": "Solution four",
+          }
+        }
+      />
+      <SolutionPanel
+        addBasePath={[Function]}
+        key="kibana"
+        solution={
+          Object {
+            "description": "Never gonna give you up, never gonna let you down.",
+            "icon": "logoKibana",
+            "id": "kibana",
+            "order": 400,
+            "path": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "title": "Rick Roll",
           }
         }
       />
