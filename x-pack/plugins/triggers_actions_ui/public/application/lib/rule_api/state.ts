@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { Errors, identity } from 'io-ts';
+import { ruleStateSchema } from '@kbn/alerting-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { RuleTaskState } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { ruleStateSchema } from '../../../../../alerting/common';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteBodyRes: RewriteRequestCase<RuleTaskState> = ({
   rule_type_state: alertTypeState,

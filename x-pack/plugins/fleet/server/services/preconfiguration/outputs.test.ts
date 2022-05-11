@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';

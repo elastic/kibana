@@ -12,16 +12,20 @@ import { TOASTER_BODY } from '../../screens/alerts_detection_rules';
 import { exportFirstRule } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Export rules', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+  });
+
+  beforeEach(() => {
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createCustomRule(getNewRule()).as('ruleResponse');
   });
 

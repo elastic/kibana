@@ -13,10 +13,10 @@ import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
   ReactExpressionRendererProps,
-} from 'src/plugins/expressions/public';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { ExecutionContextSearch } from 'src/plugins/data/public';
-import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
@@ -38,6 +38,7 @@ export interface ExpressionWrapperProps {
   onRender$: () => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   style?: React.CSSProperties;
   className?: string;
@@ -110,6 +111,7 @@ export function ExpressionWrapper({
   onRender$,
   renderMode,
   syncColors,
+  syncTooltips,
   hasCompatibleActions,
   style,
   className,
@@ -138,6 +140,7 @@ export function ExpressionWrapper({
             inspectorAdapters={lensInspector.adapters}
             renderMode={renderMode}
             syncColors={syncColors}
+            syncTooltips={syncTooltips}
             executionContext={executionContext}
             renderError={(errorMessage, error) => {
               onRuntimeError();

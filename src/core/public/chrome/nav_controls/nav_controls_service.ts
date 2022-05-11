@@ -50,7 +50,7 @@ export interface ChromeNavControls {
 
 /** @internal */
 export class NavControlsService {
-  private readonly stop$ = new ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
 
   public start() {
     const navControlsLeft$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());

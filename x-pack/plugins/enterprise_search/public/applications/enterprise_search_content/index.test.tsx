@@ -19,15 +19,16 @@ import { shallow } from 'enzyme';
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
+import { ConnectorSettings } from './components/connector_settings';
+import { CrawlerSettings } from './components/crawler_settings';
 import { ErrorConnecting } from './components/error_connecting';
 import { SearchIndicesRouter } from './components/search_indices';
-import { Settings } from './components/settings';
 
 import {
   EnterpriseSearchContent,
   EnterpriseSearchContentUnconfigured,
   EnterpriseSearchContentConfigured,
-} from './';
+} from '.';
 
 describe('EnterpriseSearchContent', () => {
   it('always renders the Setup Guide', () => {
@@ -80,6 +81,7 @@ describe('EnterpriseSearchContentConfigured', () => {
 
   it('renders engine routes', () => {
     expect(wrapper.find(SearchIndicesRouter)).toHaveLength(1);
-    expect(wrapper.find(Settings)).toHaveLength(1);
+    expect(wrapper.find(ConnectorSettings)).toHaveLength(1);
+    expect(wrapper.find(CrawlerSettings)).toHaveLength(1);
   });
 });

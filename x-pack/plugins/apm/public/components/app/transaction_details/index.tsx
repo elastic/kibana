@@ -30,7 +30,7 @@ export function TransactionDetails() {
     rangeTo,
     transactionType: transactionTypeFromUrl,
     comparisonEnabled,
-    comparisonType,
+    offset,
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
@@ -74,7 +74,7 @@ export function TransactionDetails() {
           transactionName={transactionName}
           isServerlessContext={isServerless}
           comparisonEnabled={comparisonEnabled}
-          comparisonType={comparisonType}
+          offset={offset}
         />
       </ChartPointerEventContextProvider>
 

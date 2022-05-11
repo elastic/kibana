@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { XYDataLayerConfig } from '../../common/expressions';
 import { FramePublicAPI } from '../types';
 import { computeOverallDataDomain, getStaticValue } from './reference_line_helpers';
+import { XYDataLayerConfig } from './types';
 
 function getActiveData(json: Array<{ id: string; rows: Array<Record<string, number | null>> }>) {
   return json.reduce((memo, { id, rows }) => {
@@ -277,6 +277,11 @@ describe('reference_line helpers', () => {
               layerType: 'data',
               xAccessor: 'a',
               accessors: [],
+              type: 'dataLayer',
+              yScaleType: 'linear',
+              xScaleType: 'linear',
+              isHistogram: false,
+              palette: { type: 'palette', name: 'palette1' },
             } as XYDataLayerConfig,
           ],
           'x', // this is influenced by the callback
@@ -300,6 +305,11 @@ describe('reference_line helpers', () => {
               layerType: 'data',
               xAccessor: 'a',
               accessors: [],
+              type: 'dataLayer',
+              yScaleType: 'linear',
+              xScaleType: 'linear',
+              isHistogram: false,
+              palette: { type: 'palette', name: 'palette1' },
             } as XYDataLayerConfig,
           ],
           'x',

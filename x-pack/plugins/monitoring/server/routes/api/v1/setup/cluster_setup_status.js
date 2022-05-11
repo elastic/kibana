@@ -35,7 +35,7 @@ export function clusterSetupStatusRoute(server) {
           // in our testing environment.
           skipLiveData: schema.boolean({ defaultValue: false }),
         }),
-        payload: schema.nullable(
+        body: schema.nullable(
           schema.object({
             ccs: schema.maybe(schema.string()),
             timeRange: schema.object({

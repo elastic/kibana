@@ -6,24 +6,48 @@
  * Side Public License, v 1.
  */
 
-export type LineStyle = 'solid' | 'dashed' | 'dotted';
-export type AnnotationType = 'manual';
-export type KeyType = 'point_in_time';
+import { $Values } from '@kbn/utility-types';
+import { AvailableAnnotationIcons } from './constants';
 
-export interface StyleProps {
+export type LineStyle = 'solid' | 'dashed' | 'dotted';
+export type Fill = 'inside' | 'outside' | 'none';
+export type AnnotationType = 'manual';
+export type KeyType = 'point_in_time' | 'range';
+export type AvailableAnnotationIcon = $Values<typeof AvailableAnnotationIcons>;
+export interface PointStyleProps {
   label: string;
   color?: string;
-  icon?: string;
+  icon?: AvailableAnnotationIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
   textVisibility?: boolean;
   isHidden?: boolean;
 }
 
-export type EventAnnotationConfig = {
+export type PointInTimeEventAnnotationConfig = {
   id: string;
   key: {
-    type: KeyType;
+    type: 'point_in_time';
     timestamp: string;
   };
-} & StyleProps;
+} & PointStyleProps;
+
+export interface RangeStyleProps {
+  label: string;
+  color?: string;
+  outside?: boolean;
+  isHidden?: boolean;
+}
+
+export type RangeEventAnnotationConfig = {
+  id: string;
+  key: {
+    type: 'range';
+    timestamp: string;
+    endTimestamp: string;
+  };
+} & RangeStyleProps;
+
+export type StyleProps = PointStyleProps & RangeStyleProps;
+
+export type EventAnnotationConfig = PointInTimeEventAnnotationConfig | RangeEventAnnotationConfig;

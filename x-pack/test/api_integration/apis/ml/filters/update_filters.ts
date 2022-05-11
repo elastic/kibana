@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateFilterRequestBody);
-      ml.api.assertResponseStatusCode(400, status, body);
+      ml.api.assertResponseStatusCode(404, status, body);
 
       expect(body.message).to.contain('resource_not_found_exception');
     });

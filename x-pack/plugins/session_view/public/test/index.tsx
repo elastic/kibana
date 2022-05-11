@@ -13,10 +13,10 @@ import { Router } from 'react-router-dom';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreStart } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
+import { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -123,7 +123,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
 
   const render: UiRender = (ui, options = {}) => {
     return reactRender(ui, {
-      wrapper: AppWrapper as React.ComponentType,
+      wrapper: AppWrapper,
       ...options,
     });
   };

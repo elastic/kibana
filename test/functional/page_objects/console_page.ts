@@ -83,10 +83,11 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
-  public async promptAutocomplete() {
+  // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
+  public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.clickMouseButton();
-    await textArea.type('b');
+    await textArea.type(letter);
     await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
@@ -101,7 +102,6 @@ export class ConsolePageObject extends FtrService {
   public async enterRequest(request: string = '\nGET _search') {
     const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(request);
-    await textArea.pressKeys(Key.ENTER);
   }
 
   public async enterText(text: string) {

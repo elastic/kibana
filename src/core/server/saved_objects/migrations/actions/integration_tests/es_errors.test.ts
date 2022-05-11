@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '../../../../';
+import { ElasticsearchClient } from '../../../..';
 import { InternalCoreStart } from '../../../../internal_types';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import { Root } from '../../../../root';

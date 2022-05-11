@@ -13,6 +13,4 @@ export const UI_SETTINGS = {
   TARGET_BUCKETS: 'timelion:target_buckets',
   MAX_BUCKETS: 'timelion:max_buckets',
   MIN_INTERVAL: 'timelion:min_interval',
-  GRAPHITE_URL: 'timelion:graphite.url',
-  QUANDL_KEY: 'timelion:quandl.key',
 };

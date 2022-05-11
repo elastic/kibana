@@ -7,10 +7,18 @@
  */
 
 import { Client, ClientOptions } from '@elastic/elasticsearch';
-import { createLogger } from '../../lib/utils/create_logger';
+import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
+import { createLogger, Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 
-export function getCommonServices({ target, cloudId, username, password, logLevel }: RunOptions) {
+export function getLogger({ logLevel }: RunOptions) {
+  return createLogger(logLevel);
+}
+
+export function getCommonServices(
+  { target, cloudId, username, password, logLevel, forceLegacyIndices }: RunOptions,
+  logger?: Logger
+) {
   if (!target && !cloudId) {
     throw Error('target or cloudId needs to be specified');
   }
@@ -19,14 +27,27 @@ export function getCommonServices({ target, cloudId, username, password, logLeve
     username,
     password,
   };
+  // Useful when debugging trough mitmproxy
+  /*
+  options.Connection = HttpConnection;
+  options.proxy = 'http://localhost:8080';
+  options.tls = {
+    rejectUnauthorized: false,
+  };
 
+   */
   const client = new Client(options);
 
-  const logger = createLogger(logLevel);
+  logger = logger ?? createLogger(logLevel);
+
+  const apmEsClient = new ApmSynthtraceEsClient(client, logger, {
+    forceLegacyIndices,
+    refreshAfterIndex: false,
+  });
 
   return {
     logger,
-    client,
+    apmEsClient,
   };
 }
 

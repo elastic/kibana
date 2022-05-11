@@ -13,7 +13,7 @@ import { isNull, isUndefined } from 'lodash';
 import { run } from '@kbn/dev-utils';
 
 import { getInstalledPackages } from './npm';
-import { engines } from '../../package';
+import { engines } from '../../package.json';
 import { LICENSE_OVERRIDES } from './license_checker';
 
 const allDoubleQuoteRE = /"/g;

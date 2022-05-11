@@ -13,7 +13,7 @@ import { EventFiltersListPage } from './event_filters_list_page';
 import { eventFiltersListQueryHttpMock } from '../test_utils';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utils';
 
 // Needed to mock the data services used by the ExceptionItem component
 jest.mock('../../../../common/lib/kibana');

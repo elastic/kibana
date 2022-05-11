@@ -16,10 +16,11 @@ import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
+import { ElasticsearchGuide } from './components/elasticsearch_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
-import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
+import { ROOT_PATH, SETUP_GUIDE_PATH, ELASTICSEARCH_GUIDE_PATH } from './routes';
 
 export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
   access = {},
@@ -55,6 +56,9 @@ export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
     <Switch>
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
+      </Route>
+      <Route exact path={ELASTICSEARCH_GUIDE_PATH}>
+        <ElasticsearchGuide />
       </Route>
       <Route exact path={ROOT_PATH}>
         {showView()}

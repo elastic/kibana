@@ -8,10 +8,10 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ExpressionFunction, ExpressionFunctionParameter, Style } from 'src/plugins/expressions';
+import { ExpressionFunction, ExpressionFunctionParameter, Style } from '@kbn/expressions-plugin';
 
+import { registerExpressionsLanguage } from '@kbn/presentation-util-plugin/public';
 import { ExpressionInput } from '../expression_input';
-import { registerExpressionsLanguage } from '../../../../../../../src/plugins/presentation_util/public';
 
 const content: ExpressionFunctionParameter<'string'> = {
   name: 'content',

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { httpServerMock } from 'src/core/server/mocks';
-import { KibanaRequest } from 'src/core/server';
-
-import { securityMock } from '../../security/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { KibanaRequest } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { getUser } from './get_user';
 

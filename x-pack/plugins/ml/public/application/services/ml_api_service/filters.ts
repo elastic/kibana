@@ -10,7 +10,7 @@
 
 import { http } from '../http_service';
 
-import { basePath } from './index';
+import { basePath } from '.';
 import type { Filter, FilterStats } from '../../../../common/types/filters';
 
 export const filters = {

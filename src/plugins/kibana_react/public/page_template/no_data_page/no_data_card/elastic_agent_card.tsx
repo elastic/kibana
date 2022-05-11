@@ -8,7 +8,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly } from '@elastic/eui';
 import { useKibana } from '../../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';

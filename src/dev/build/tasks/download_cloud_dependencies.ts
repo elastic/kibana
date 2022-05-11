@@ -15,17 +15,15 @@ export const DownloadCloudDependencies: Task = {
   description: 'Downloading cloud dependencies',
 
   async run(config, log, build) {
-    const downloadBeat = async (beat: string, id: string) => {
-      const subdomain = config.isRelease ? 'artifacts' : 'snapshots';
-      const version = config.getBuildVersion();
-      const buildId = id.match(/[0-9]\.[0-9]\.[0-9]-[0-9a-z]{8}/);
-      const buildIdUrl = buildId ? `${buildId[0]}/` : '';
+    const subdomain = config.isRelease ? 'artifacts-staging' : 'artifacts-snapshot';
 
+    const downloadBeat = async (beat: string, id: string) => {
+      const version = config.getBuildVersion();
       const localArchitecture = [process.arch === 'arm64' ? 'arm64' : 'x86_64'];
       const allArchitectures = ['arm64', 'x86_64'];
       const architectures = config.getDockerCrossCompile() ? allArchitectures : localArchitecture;
       const downloads = architectures.map(async (arch) => {
-        const url = `https://${subdomain}-no-kpi.elastic.co/${buildIdUrl}downloads/beats/${beat}/${beat}-${version}-linux-${arch}.tar.gz`;
+        const url = `https://${subdomain}.elastic.co/beats/${id}/downloads/beats/${beat}/${beat}-${version}-linux-${arch}.tar.gz`;
         const checksum = await downloadToString({ log, url: url + '.sha512', expectStatus: 200 });
         const destination = config.resolveFromRepo('.beats', Path.basename(url));
         return downloadToDisk({
@@ -41,17 +39,13 @@ export const DownloadCloudDependencies: Task = {
     };
 
     let buildId = '';
-    if (!config.isRelease) {
-      const manifestUrl = `https://artifacts-api.elastic.co/v1/versions/${config.getBuildVersion()}/builds/latest`;
-      try {
-        const manifest = await Axios.get(manifestUrl);
-        buildId = manifest.data.build.build_id;
-      } catch (e) {
-        log.error(
-          `Unable to find Elastic artifacts for ${config.getBuildVersion()} at ${manifestUrl}.`
-        );
-        throw e;
-      }
+    const buildUrl = `https://${subdomain}.elastic.co/beats/latest/${config.getBuildVersion()}.json`;
+    try {
+      const latest = await Axios.get(buildUrl);
+      buildId = latest.data.build_id;
+    } catch (e) {
+      log.error(`Unable to find Beats artifacts for ${config.getBuildVersion()} at ${buildUrl}.`);
+      throw e;
     }
     await del([config.resolveFromRepo('.beats')]);
 

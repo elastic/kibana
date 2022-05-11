@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-} from '../../../../../../src/plugins/data/server';
-import { APMRouteHandlerResources } from '../../routes/typings';
+import { IndexPatternsFetcher, FieldDescriptor } from '@kbn/data-plugin/server';
+import { APMRouteHandlerResources } from '../typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
@@ -26,14 +23,15 @@ export const getDynamicDataView = ({
   logger,
 }: Pick<APMRouteHandlerResources, 'logger' | 'config' | 'context'>) => {
   return withApmSpan('get_dynamic_data_view', async () => {
+    const coreContext = await context.core;
     const apmIndicies = await getApmIndices({
-      savedObjectsClient: context.core.savedObjects.client,
+      savedObjectsClient: coreContext.savedObjects.client,
       config,
     });
     const dataViewTitle = getApmDataViewTitle(apmIndicies);
 
     const DataViewsFetcher = new IndexPatternsFetcher(
-      context.core.elasticsearch.client.asCurrentUser
+      coreContext.elasticsearch.client.asCurrentUser
     );
 
     // Since `getDynamicDataView` is called in setup_request (and thus by every endpoint)

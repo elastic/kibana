@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
@@ -66,6 +66,7 @@ describe('connectors_selection', () => {
       },
       id: 'testId',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'test pagerduty',
       secrets: {},
     },

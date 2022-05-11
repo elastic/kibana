@@ -6,17 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  transformRawUiCounterObject,
-  transformRawUsageCounterObject,
-  createFetchUiCounters,
-} from './register_ui_counters_collector';
-import { BehaviorSubject } from 'rxjs';
-import { rawUiCounters } from './__fixtures__/ui_counter_saved_objects';
+import { transformRawUsageCounterObject, fetchUiCounters } from './register_ui_counters_collector';
 import { rawUsageCounters } from './__fixtures__/usage_counter_saved_objects';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { UI_COUNTER_SAVED_OBJECT_TYPE } from './ui_counter_saved_object_type';
-import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '../../../../usage_collection/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
 
 describe('transformRawUsageCounterObject', () => {
   it('transforms usage counters savedObject raw entries', () => {
@@ -63,57 +56,13 @@ describe('transformRawUsageCounterObject', () => {
   });
 });
 
-describe('transformRawUiCounterObject', () => {
-  it('transforms ui counters savedObject raw entries', () => {
-    const result = rawUiCounters.map(transformRawUiCounterObject);
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "appName": "Kibana_home",
-          "counterType": "click",
-          "eventName": "different_type",
-          "fromTimestamp": "2020-11-24T00:00:00Z",
-          "lastUpdatedAt": "2020-11-24T11:27:57.067Z",
-          "total": 1,
-        },
-        Object {
-          "appName": "Kibana_home",
-          "counterType": "loaded",
-          "eventName": "intersecting_event",
-          "fromTimestamp": "2020-10-25T00:00:00Z",
-          "lastUpdatedAt": "2020-10-25T11:27:57.067Z",
-          "total": 1,
-        },
-        Object {
-          "appName": "Kibana_home",
-          "counterType": "loaded",
-          "eventName": "intersecting_event",
-          "fromTimestamp": "2020-10-23T00:00:00Z",
-          "lastUpdatedAt": "2020-10-23T11:27:57.067Z",
-          "total": 3,
-        },
-        Object {
-          "appName": "Kibana_home",
-          "counterType": "click",
-          "eventName": "only_reported_in_ui_counters",
-          "fromTimestamp": "2020-11-24T00:00:00Z",
-          "lastUpdatedAt": "2020-11-24T11:27:57.067Z",
-          "total": 1,
-        },
-      ]
-    `);
-  });
-});
-
-describe('createFetchUiCounters', () => {
-  let stopUsingUiCounterIndicies$: BehaviorSubject<boolean>;
+describe('fetchUiCounters', () => {
   const soClientMock = savedObjectsClientMock.create();
   beforeEach(() => {
     jest.clearAllMocks();
-    stopUsingUiCounterIndicies$ = new BehaviorSubject<boolean>(false);
   });
 
-  it('does not query ui_counters saved objects if stopUsingUiCounterIndicies$ is complete', async () => {
+  it('returns saved objects only from usage_counters saved objects', async () => {
     // @ts-expect-error incomplete mock implementation
     soClientMock.find.mockImplementation(async ({ type }) => {
       switch (type) {
@@ -124,35 +73,11 @@ describe('createFetchUiCounters', () => {
       }
     });
 
-    stopUsingUiCounterIndicies$.complete();
     // @ts-expect-error incomplete mock implementation
-    const { dailyEvents } = await createFetchUiCounters(stopUsingUiCounterIndicies$)({
+    const { dailyEvents } = await fetchUiCounters({
       soClient: soClientMock,
     });
-
-    const transforemdUsageCounters = rawUsageCounters.map(transformRawUsageCounterObject);
-    expect(soClientMock.find).toBeCalledTimes(1);
-    expect(dailyEvents).toEqual(transforemdUsageCounters.filter(Boolean));
-  });
-
-  it('merges saved objects from both ui_counters and usage_counters saved objects', async () => {
-    // @ts-expect-error incomplete mock implementation
-    soClientMock.find.mockImplementation(async ({ type }) => {
-      switch (type) {
-        case UI_COUNTER_SAVED_OBJECT_TYPE:
-          return { saved_objects: rawUiCounters };
-        case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
-          return { saved_objects: rawUsageCounters };
-        default:
-          throw new Error(`unexpected type ${type}`);
-      }
-    });
-
-    // @ts-expect-error incomplete mock implementation
-    const { dailyEvents } = await createFetchUiCounters(stopUsingUiCounterIndicies$)({
-      soClient: soClientMock,
-    });
-    expect(dailyEvents).toHaveLength(7);
+    expect(dailyEvents).toHaveLength(4);
     const intersectingEntry = dailyEvents.find(
       ({ eventName, fromTimestamp }) =>
         eventName === 'intersecting_event' && fromTimestamp === '2020-10-23T00:00:00Z'
@@ -179,16 +104,7 @@ describe('createFetchUiCounters', () => {
     expect(invalidCountEntry).toBe(undefined);
     expect(nonUiCountersEntry).toBe(undefined);
     expect(zeroCountEntry).toBe(undefined);
-    expect(onlyFromUICountersEntry).toMatchInlineSnapshot(`
-      Object {
-        "appName": "Kibana_home",
-        "counterType": "click",
-        "eventName": "only_reported_in_ui_counters",
-        "fromTimestamp": "2020-11-24T00:00:00Z",
-        "lastUpdatedAt": "2020-11-24T11:27:57.067Z",
-        "total": 1,
-      }
-    `);
+    expect(onlyFromUICountersEntry).toBe(undefined);
     expect(onlyFromUsageCountersEntry).toMatchInlineSnapshot(`
       Object {
         "appName": "myApp",
@@ -206,7 +122,7 @@ describe('createFetchUiCounters', () => {
         "eventName": "intersecting_event",
         "fromTimestamp": "2020-10-23T00:00:00Z",
         "lastUpdatedAt": "2020-10-23T11:27:57.067Z",
-        "total": 63,
+        "total": 60,
       }
     `);
   });

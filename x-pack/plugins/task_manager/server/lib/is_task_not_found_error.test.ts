@@ -6,7 +6,7 @@
  */
 
 import { isTaskSavedObjectNotFoundError } from './is_task_not_found_error';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import uuid from 'uuid';
 
 describe('isTaskSavedObjectNotFoundError', () => {

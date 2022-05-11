@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
+import { lastValueFrom } from 'rxjs';
 import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import type { DiagnosticResponse } from './';
+import type { DiagnosticResponse } from '.';
 
 const logsToHelpMap = {
   'error while loading shared libraries': i18n.translate(
@@ -34,7 +35,7 @@ const logsToHelpMap = {
   ),
 
   'No usable sandbox': i18n.translate('xpack.reporting.diagnostic.noUsableSandbox', {
-    defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.reporting.capture.browser.chromium.disableSandbox'. Please see {url}`,
+    defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.screenshotting.browser.chromium.disableSandbox'. Please see {url}`,
     values: {
       url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency',
     },
@@ -52,7 +53,7 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
     authorizedUserPreRouting(reporting, async (_user, _context, _req, res) => {
       try {
         const { screenshotting } = await reporting.getPluginStartDeps();
-        const logs = await screenshotting.diagnose().toPromise();
+        const logs = await lastValueFrom(screenshotting.diagnose());
         const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 
         const boundSuccessfully = logs.includes(`DevTools listening on`);

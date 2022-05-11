@@ -23,6 +23,7 @@ import {
   HostRiskScoreQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
+  SessionsTabBody,
 } from './navigation';
 import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 import { TimelineId } from '../../../common/types';
@@ -32,6 +33,7 @@ export const HostsTabs = memo<HostsTabsProps>(
     deleteQuery,
     docValueFields,
     filterQuery,
+    pageFilters,
     from,
     indexNames,
     isInitializing,
@@ -98,10 +100,17 @@ export const HostsTabs = memo<HostsTabsProps>(
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.events})`}>
-          <EventsQueryTabBody {...tabProps} timelineId={TimelineId.hostsPageEvents} />
+          <EventsQueryTabBody
+            {...tabProps}
+            timelineId={TimelineId.hostsPageEvents}
+            pageFilters={pageFilters}
+          />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.alerts})`}>
-          <HostAlertsQueryTabBody {...tabProps} />
+          <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />
+        </Route>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}>
+          <SessionsTabBody {...tabProps} />
         </Route>
       </Switch>
     );

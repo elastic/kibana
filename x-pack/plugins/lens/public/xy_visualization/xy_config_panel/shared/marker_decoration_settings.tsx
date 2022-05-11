@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { IconPosition, YAxisMode } from '../../../../common/expressions/xy_chart';
+import { IconPosition, YAxisMode } from '@kbn/expression-xy-plugin/common';
 
 import { TooltipWrapper } from '../../../shared_components';
 import { hasIcon, IconSelect, IconSet } from './icon_select';
@@ -71,80 +71,106 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
   ];
 }
 
-interface MarkerDecorationConfig {
+export interface MarkerDecorationConfig<T extends string = string> {
   axisMode?: YAxisMode;
-  icon?: string;
+  icon?: T;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
 }
 
-export const MarkerDecorationSettings = ({
+export function TextDecorationSetting<Icon extends string = string>({
+  currentConfig,
+  setConfig,
+  customIconSet,
+}: {
+  currentConfig?: MarkerDecorationConfig<Icon>;
+  setConfig: (config: MarkerDecorationConfig<Icon>) => void;
+  customIconSet?: IconSet<Icon>;
+}) {
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.lineMarker.textVisibility', {
+        defaultMessage: 'Text decoration',
+      })}
+      display="columnCompressed"
+      fullWidth
+    >
+      <EuiButtonGroup
+        legend={i18n.translate('xpack.lens.lineMarker.textVisibility', {
+          defaultMessage: 'Text decoration',
+        })}
+        data-test-subj="lns-lineMarker-text-visibility"
+        name="textVisibilityStyle"
+        buttonSize="compressed"
+        options={[
+          {
+            id: `${idPrefix}none`,
+            label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.none', {
+              defaultMessage: 'None',
+            }),
+            'data-test-subj': 'lnsXY_textVisibility_none',
+          },
+          {
+            id: `${idPrefix}name`,
+            label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.name', {
+              defaultMessage: 'Name',
+            }),
+            'data-test-subj': 'lnsXY_textVisibility_name',
+          },
+        ]}
+        idSelected={`${idPrefix}${Boolean(currentConfig?.textVisibility) ? 'name' : 'none'}`}
+        onChange={(id) => {
+          setConfig({ textVisibility: id === `${idPrefix}name` });
+        }}
+        isFullWidth
+      />
+    </EuiFormRow>
+  );
+}
+
+export function IconSelectSetting<Icon extends string = string>({
+  currentConfig,
+  setConfig,
+  customIconSet,
+  defaultIcon = 'empty',
+}: {
+  currentConfig?: MarkerDecorationConfig<Icon>;
+  setConfig: (config: MarkerDecorationConfig<Icon>) => void;
+  customIconSet: IconSet<Icon>;
+  defaultIcon?: string;
+}) {
+  return (
+    <EuiFormRow
+      display="columnCompressed"
+      fullWidth
+      label={i18n.translate('xpack.lens.xyChart.lineMarker.icon', {
+        defaultMessage: 'Icon decoration',
+      })}
+    >
+      <IconSelect
+        defaultIcon={defaultIcon}
+        customIconSet={customIconSet}
+        value={currentConfig?.icon}
+        onChange={(newIcon) => {
+          setConfig({ icon: newIcon });
+        }}
+      />
+    </EuiFormRow>
+  );
+}
+
+export function MarkerDecorationPosition<Icon extends string = string>({
   currentConfig,
   setConfig,
   isHorizontal,
-  customIconSet,
 }: {
-  currentConfig?: MarkerDecorationConfig;
-  setConfig: (config: MarkerDecorationConfig) => void;
+  currentConfig?: MarkerDecorationConfig<Icon>;
+  setConfig: (config: MarkerDecorationConfig<Icon>) => void;
   isHorizontal: boolean;
-  customIconSet?: IconSet;
-}) => {
+}) {
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.lineMarker.textVisibility', {
-          defaultMessage: 'Text decoration',
-        })}
-        display="columnCompressed"
-        fullWidth
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.lens.lineMarker.textVisibility', {
-            defaultMessage: 'Text decoration',
-          })}
-          data-test-subj="lns-lineMarker-text-visibility"
-          name="textVisibilityStyle"
-          buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}none`,
-              label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.none', {
-                defaultMessage: 'None',
-              }),
-              'data-test-subj': 'lnsXY_textVisibility_none',
-            },
-            {
-              id: `${idPrefix}name`,
-              label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.name', {
-                defaultMessage: 'Name',
-              }),
-              'data-test-subj': 'lnsXY_textVisibility_name',
-            },
-          ]}
-          idSelected={`${idPrefix}${Boolean(currentConfig?.textVisibility) ? 'name' : 'none'}`}
-          onChange={(id) => {
-            setConfig({ textVisibility: id === `${idPrefix}name` });
-          }}
-          isFullWidth
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.xyChart.lineMarker.icon', {
-          defaultMessage: 'Icon decoration',
-        })}
-      >
-        <IconSelect
-          customIconSet={customIconSet}
-          value={currentConfig?.icon}
-          onChange={(newIcon) => {
-            setConfig({ icon: newIcon });
-          }}
-        />
-      </EuiFormRow>
-      {currentConfig?.iconPosition &&
-      (hasIcon(currentConfig?.icon) || currentConfig?.textVisibility) ? (
+      {hasIcon(currentConfig?.icon) || currentConfig?.textVisibility ? (
         <EuiFormRow
           display="columnCompressed"
           fullWidth
@@ -187,4 +213,4 @@ export const MarkerDecorationSettings = ({
       ) : null}
     </>
   );
-};
+}

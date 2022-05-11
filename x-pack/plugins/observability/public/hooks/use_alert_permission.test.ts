@@ -6,7 +6,7 @@
  */
 
 import { getAlertsPermissions, useGetUserAlertsPermissions } from './use_alert_permission';
-import { applicationServiceMock } from 'src/core/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { renderHook } from '@testing-library/react-hooks';
 
 describe('getAlertsPermissions', () => {

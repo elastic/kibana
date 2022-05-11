@@ -1,10 +1,11 @@
 [[document-explorer]]
-== Document Explorer
+== Explore your documents
 
-beta::[]
 
-*Discover* has a *Document Explorer* with resizable columns, better data sorting and comparison,
-and a fullscreen view.
+*Discover* displays your documents in table format, so you can
+best explore your data.
+Use the document table to resize columns, set row height,
+perform multi-column sorting, compare data, and more.
 
 ++++
 <script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
@@ -12,19 +13,13 @@ and a fullscreen view.
 <img
 style="width: 100%; margin: auto; display: block;"
 class="vidyard-player-embed"
-src="https://play.vidyard.com/BgbLpBo3qvPZvtXrwZoNuD.jpg"
-data-uuid="BgbLpBo3qvPZvtXrwZoNuD"
+src="https://play.vidyard.com/KbZQP6Y7msjevAm1JGbKeG.jpg"
+data-uuid="KbZQP6Y7msjevAm1JGbKeG"
 data-v="4"
 data-type="inline"
 />
 </br>
 ++++
-
-To use the *Document Explorer* instead of the classic document table:
-
-. Open *Discover*.
-. In the toolbar, click *Options*, and then click *Try Document Explorer*.
-. Turn off the classic view and save the changes.
 
 [float]
 [[document-explorer-columns]]
@@ -51,7 +46,7 @@ adjust the height to fit the contents, click the row height icon
 image:images/row-height-icon.png[icon to open the Row height pop-up].
 
 [role="screenshot"]
-image::images/document-explorer-row-height.png[Row height settings for Document Explroer, width="75%"]
+image::images/document-explorer-row-height.png[Row height settings for the document table, width="75%"]
 
 
 [float]
@@ -61,33 +56,41 @@ image::images/document-explorer-row-height.png[Row height settings for Document 
 Sort your data by one or more fields, in ascending or descending order.
 The default sort is based on the time field, from new to old.
 
-. In the *Document Explorer*, click and open the *field sorted* options.
+To add or remove a sort on a single field, click the
+column header, and then select the sort order.
+
+To sort by multiple fields:
+
+. In the document table, click the *field sorted* option.
 +
 [role="screenshot"]
-image::images/document-explorer-sort-data.png[Pop-up in Document Explorer for sorting columns, width="75%"]
+image::images/document-explorer-sort-data.png[Pop-up in document table for sorting columns, width="75%"]
 
 . To add more fields to the sort, select from the dropdown menu.
 +
 By default, columns are sorted in the order they are added.
-For example, to sort by `order_date` then `geo.country_iso_code`, make sure `order_date` appears first.
 +
 [role="screenshot"]
-image::images/document-explorer-multi-field.png[Multi field sort in Document Explorer, width="75%"]
+image::images/document-explorer-multi-field.png[Multi field sort in the document table, width="75%"]
 
 . To change the sort order, select a field in the pop-up, and then drag it to the new location.
++
+For example, to sort by `geo.country_iso_code` then `order_date`, make sure `geo.country_iso_code` appears first.
+
 
 [float]
 [[document-explorer-compare-data]]
 === Compare data
 
-Narrow your results to a subset documents.
+Narrow your results to a subset of documents to easily
+compare the data of interest.
 
 . Select the documents you want to compare.
 
-. Click and open the *documents selected* options, and then select *Show selected documents only*.
+. Click the *documents selected* option, and then select *Show selected documents only*.
 +
 [role="screenshot"]
-image::images/document-explorer-compare-data.png[Multi field sort in Document Explorer, width="75%"]
+image::images/document-explorer-compare-data.png[Compare data in the document table, width="75%"]
 
 [float]
 [[document-explorer-expand-documents]]
@@ -99,26 +102,56 @@ the documents that occurred before and after it.
 . Click the expand icon
 image:images/expand-icon-2.png[double arrow icon to open a flyout with the document details].
 +
+You can view the document in two ways. The **Table** view displays the document fields row-by-row.
+The **JSON** (JavaScript Object Notation) view allows you to look at how {es} returns the document.
++
 [role="screenshot"]
-image::images/document-explorer-expand.png[Expanded view in Document Explorer]
-
-. Scan through the fields and their values, or search for a field by name.
+image::images/document-explorer-expand.png[Expanded view of the document table]
++
+. In the *Table* view, scan through the fields and their values, or search for a field by name.
 
 . When you find a field of interest,
 click
 image:images/actions-icon.png[three dots icon in table column] in the *Actions* column
 to:
-.. Filter the view of the data
-.. Toggle the field in or out the document table
-.. Pin the field so it stays at the top
+.. Filter the results to include or exclude specific fields or values.
+.. Toggle the field in or out the document table.
+.. Pin the field so it stays at the top.
 
-. For direct access to a particular document, click <<discover-view-single-document,**Single document**>>.
+. To navigate to the next and previous documents, click the < and > arrows at the top of the view.
 
-. To view documents that occurred before or after the event you are looking at, click <<discover-view-surrounding-documents,**Surrounding documents**>>.
+. To create a view of the document that you can bookmark and share, click **Single document**.
++
+[role="screenshot"]
+image::images/discover-view-single-document.png[Discover single document view]
++
+The link is valid for the time the document is available in Elasticsearch. To create a customized view of the document,
+you can create <<external-plugin-development, your own plugin>>.
+
+. To view documents that occurred before or after the event you are looking at, click **Surrounding documents**.
++
+Documents are displayed using the same set of columns as the *Discover* view from which
+the context was opened. The filters you applied are also carried over. Pinned
+filters remain active, while other filters are copied in a disabled state.
++
+[role="screenshot"]
+image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
+
 
 [float]
 [[document-explorer-full-screen]]
 === View documents in fullscreen
 
 To view as much data as possible and eliminate distractions, click the fullscreen icon
-image:images/fullscreen-icon.png[icon to display the Document Explorer in fullscreen mode].
+image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode]
+in the document table.
+
+[float]
+[[document-explorer-configure-table]]
+=== Configure the number of documents displayed
+
+By default, the document table displays 100 rows per page. To change this number,
+click *Rows per page*.
+
+[role="screenshot"]
+image::images/document-table-rows-per-page.png["Menu with options for setting the number of rows in the document table", width=50%]

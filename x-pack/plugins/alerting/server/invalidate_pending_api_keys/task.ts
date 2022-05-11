@@ -11,14 +11,14 @@ import {
   SavedObjectsFindResponse,
   KibanaRequest,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { InvalidateAPIKeysParams, SecurityPluginStart } from '../../../security/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { InvalidateAPIKeyResult } from '../rules_client';
 import { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';

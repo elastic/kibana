@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { VisualizeServices } from '../types';
 
 export const createVisualizeServicesMock = () => {

@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 
 import * as i18n from './translations';
-import { KqlMode } from '../../../../timelines/store/timeline/model';
+import { KqlMode } from '../../../store/timeline/model';
 
 const AndOrContainer = styled.div`
   position: relative;

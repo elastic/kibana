@@ -7,11 +7,7 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { StaticStyleProperty } from './static_style_property';
-import { VECTOR_STYLES } from '../../../../../common/constants';
-import {
-  HALF_MAKI_ICON_SIZE,
-  // @ts-expect-error
-} from '../symbol_utils';
+import { HALF_MAKI_ICON_SIZE, VECTOR_STYLES } from '../../../../../common/constants';
 import { SizeStaticOptions } from '../../../../../common/descriptor_types';
 
 export class StaticSizeProperty extends StaticStyleProperty<SizeStaticOptions> {

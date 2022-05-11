@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_POLICIES } from '../../tasks/navigation';
-import { addIntegration } from '../../tasks/integrations';
+import { FLEET_AGENT_POLICIES, OLD_OSQUERY_MANAGER } from '../../tasks/navigation';
+import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
 // import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
@@ -15,9 +15,11 @@ import { DEFAULT_POLICY } from '../../screens/fleet';
 
 describe('ALL - Add Integration', () => {
   const integration = 'Osquery Manager';
+
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
   });
+
   beforeEach(() => {
     login();
   });
@@ -26,43 +28,45 @@ describe('ALL - Add Integration', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  // it('should add the old integration and be able to upgrade it', () => {
-  //   cy.visit(OLD_OSQUERY_MANAGER);
-  //   cy.contains(integration).click();
-  //   addIntegration();
-  //   cy.contains('osquery_manager-1');
-  //   cy.visit('app/fleet/policies');
-  //   cy.contains(/^Default Fleet Server policy$/).click();
-  //   cy.contains('Actions').click();
-  //   cy.contains('View policy').click();
-  //   cy.contains('name: osquery_manager-1');
-  //   cy.contains(`version: 0.7.4`);
-  //   cy.contains('Close').click();
-  //   cy.contains(/^Osquery Manager$/).click();
-  //   cy.contains(/^Settings$/).click();
-  //   cy.contains(/^Upgrade to latest version$/).click();
-  //   closeModalIfVisible();
-  //   cy.contains('Updated Osquery Manager and upgraded policies', { timeout: 60000 });
-  //   cy.visit('app/fleet/policies');
-  //   cy.contains(/^Default Fleet Server policy$/).click();
-  //   cy.contains('Actions').click();
-  //   cy.contains('View policy').click();
-  //   cy.contains('name: osquery_manager-1');
-  //   cy.contains(`version: 0.8.1`);
-  //   cy.visit('app/integrations/detail/osquery_manager/policies');
-  //   cy.contains('Loading integration policies').should('exist');
-  //   cy.contains('Loading integration policies').should('not.exist');
-  //   cy.getBySel('integrationPolicyTable')
-  //     .get('.euiTableRow', { timeout: 60000 })
-  //     .should('have.lengthOf.above', 0);
-  //   cy.get('.euiTableCellContent').get('.euiPopover__anchor').get(`[aria-label="Open"]`).click();
-  //   cy.contains(/^Delete integration$/).click();
-  //   closeModalIfVisible();
-  //   cy.contains(/^Settings$/).click();
-  //   cy.contains(/^Uninstall Osquery Manager$/).click();
-  //   closeModalIfVisible();
-  //   cy.contains(/^Successfully uninstalled Osquery Manager$/);
-  // });
+  it('should add the old integration and be able to upgrade it', () => {
+    const oldVersion = '0.7.4';
+
+    cy.visit(OLD_OSQUERY_MANAGER);
+    cy.contains(integration).click();
+    addIntegration();
+    cy.contains('osquery_manager-1');
+    cy.visit('app/fleet/policies');
+    cy.contains(/^Default Fleet Server policy$/).click();
+    cy.contains('Actions').click();
+    cy.contains('View policy').click();
+    cy.contains('name: osquery_manager-1');
+    cy.contains(`version: ${oldVersion}`);
+    cy.contains('Close').click();
+    cy.contains(/^Osquery Manager$/).click();
+    cy.contains(/^Settings$/).click();
+    cy.contains(/^Upgrade to latest version$/).click();
+    closeModalIfVisible();
+    cy.contains('Updated Osquery Manager and upgraded policies', { timeout: 60000 });
+    cy.visit('app/fleet/policies');
+    cy.contains(/^Default Fleet Server policy$/).click();
+    cy.contains('Actions').click();
+    cy.contains('View policy').click();
+    cy.contains('name: osquery_manager-1');
+    cy.contains(`version: ${oldVersion}`).should('not.exist');
+    cy.visit('app/integrations/detail/osquery_manager/policies');
+    cy.contains('Loading integration policies').should('exist');
+    cy.contains('Loading integration policies').should('not.exist');
+    cy.getBySel('integrationPolicyTable')
+      .get('.euiTableRow', { timeout: 60000 })
+      .should('have.lengthOf.above', 0);
+    cy.get('.euiTableCellContent').get('.euiPopover__anchor').get(`[aria-label="Open"]`).click();
+    cy.contains(/^Delete integration$/).click();
+    closeModalIfVisible();
+    cy.contains(/^Settings$/).click();
+    cy.contains(/^Uninstall Osquery Manager$/).click();
+    closeModalIfVisible();
+    cy.contains(/^Successfully uninstalled Osquery Manager$/);
+  });
 
   it('add integration', () => {
     cy.visit(FLEET_AGENT_POLICIES);

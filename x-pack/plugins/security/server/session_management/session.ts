@@ -10,8 +10,8 @@ import nodeCrypto from '@elastic/node-crypto';
 import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { KibanaRequest, Logger } from 'src/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';

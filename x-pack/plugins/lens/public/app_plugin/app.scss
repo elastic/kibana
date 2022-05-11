@@ -10,10 +10,6 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-
-  > .kbnTopNavMenu__wrapper {
-    border-bottom: $euiBorderThin;
-  }
 }
 
 .lnsApp__frame {
@@ -43,7 +39,7 @@
 }
 
 .lensAnnotationIconFill {
-  fill: $euiColorGhost;
+  fill: $euiColorEmptyShade;
 }
 
 // Less-than-ideal styles to add a vertical divider after this button. Consider restructuring markup for better semantics and styling options in the future.

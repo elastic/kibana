@@ -38,13 +38,52 @@ export const OS = i18n.translate('xpack.csp.findings.osLabel', {
   defaultMessage: 'OS',
 });
 
-export const FINDINGS = i18n.translate('xpack.csp.findings.findingsLabel', {
-  defaultMessage: 'Findings',
-});
-
 export const RESOURCE = i18n.translate('xpack.csp.findings.resourceLabel', {
   defaultMessage: 'Resource',
 });
+
+export const GENERAL = i18n.translate('xpack.csp.findings.findingsFlyout.generalTabLabel', {
+  defaultMessage: 'General',
+});
+
+export const JSON = i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabLabel', {
+  defaultMessage: 'JSON',
+});
+
+export const RESOURCE_ID = i18n.translate(
+  'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
+  {
+    defaultMessage: 'Resource ID',
+  }
+);
+
+export const RESULT = i18n.translate(
+  'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
+  {
+    defaultMessage: 'Result',
+  }
+);
+
+export const CLUSTER_ID = i18n.translate(
+  'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
+  {
+    defaultMessage: 'Cluster ID',
+  }
+);
+
+export const CIS_SECTION = i18n.translate(
+  'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
+  {
+    defaultMessage: 'CIS Section',
+  }
+);
+
+export const LAST_CHECKED = i18n.translate(
+  'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
+  {
+    defaultMessage: 'Last Checked',
+  }
+);
 
 export const FILENAME = i18n.translate('xpack.csp.findings.filenameLabel', {
   defaultMessage: 'Filename',
@@ -110,7 +149,14 @@ export const AUDIT = i18n.translate('xpack.csp.findings.auditLabel', {
   defaultMessage: 'Audit',
 });
 
-export const RESULT = i18n.translate('xpack.csp.findings.resultLabel', {
+export const REFERENCES = i18n.translate(
+  'xpack.csp.findings.findingsFlyout.generalTab.referencesLabel',
+  {
+    defaultMessage: 'References',
+  }
+);
+
+export const RESULT_DETAILS = i18n.translate('xpack.csp.findings.resultLabel', {
   defaultMessage: 'Result Details',
 });
 
@@ -148,7 +194,7 @@ export const ID = i18n.translate('xpack.csp.findings.idLabel', {
 });
 
 export const HOST = i18n.translate('xpack.csp.findings.hostLabel', {
-  defaultMessage: 'HOST',
+  defaultMessage: 'Host',
 });
 
 export const ARCHITECTURE = i18n.translate('xpack.csp.findings.architectureLabel', {
@@ -190,3 +236,8 @@ export const PLATFORM = i18n.translate('xpack.csp.findings.platformLabel', {
 export const NO_FINDINGS = i18n.translate('xpack.csp.findings.nonFindingsLabel', {
   defaultMessage: 'There are no Findings',
 });
+
+export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.csp.findings.searchBar.searchPlaceholder',
+  { defaultMessage: 'Search findings (eg. resource.section : "API Server")' }
+);

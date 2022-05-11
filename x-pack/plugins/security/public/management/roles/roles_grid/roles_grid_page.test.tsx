@@ -9,9 +9,9 @@ import { EuiBasicTable, EuiIcon } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { DisabledBadge, ReservedBadge } from '../../badges';
 import { rolesAPIClientMock } from '../index.mock';

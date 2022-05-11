@@ -78,11 +78,12 @@ export const applyBulkActionEditToRule = (
 
     // timeline actions
     case BulkActionEditType.set_timeline:
-      rule.params = {
-        ...rule.params,
-        timelineId: action.value.timeline_id,
-        timelineTitle: action.value.timeline_title,
-      };
+      const timelineId = action.value.timeline_id.trim() || undefined;
+      const timelineTitle = timelineId ? action.value.timeline_title : undefined;
+
+      rule.params.timelineId = timelineId;
+      rule.params.timelineTitle = timelineTitle;
+      break;
   }
 
   return rule;

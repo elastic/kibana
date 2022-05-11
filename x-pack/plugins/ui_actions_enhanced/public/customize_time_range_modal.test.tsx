@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
-import { Embeddable } from '../../../../src/plugins/embeddable/public';
+import { Embeddable } from '@kbn/embeddable-plugin/public';
 import { TimeRangeInput } from './custom_time_range_action';
 
 test("Doesn't display refresh interval options", () => {

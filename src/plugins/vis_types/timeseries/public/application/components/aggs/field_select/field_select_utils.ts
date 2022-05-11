@@ -9,7 +9,7 @@
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { isFieldEnabled } from '../../../../../common/check_ui_restrictions';
 
-import type { SanitizedFieldType } from '../../../../..//common/types';
+import type { SanitizedFieldType } from '../../../../../common/types';
 import type { TimeseriesUIRestrictions } from '../../../../../common/ui_restrictions';
 
 export const INVALID_FIELD_ID = 'INVALID_FIELD';

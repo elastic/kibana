@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createConfigRoute } from './config';
 
 describe('createConfigRoute', () => {

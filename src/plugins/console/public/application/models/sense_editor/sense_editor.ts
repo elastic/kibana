@@ -8,13 +8,13 @@
 
 import _ from 'lodash';
 
-import { XJson } from '../../../../../es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import RowParser from '../../../lib/row_parser';
 import * as utils from '../../../lib/utils';
 
 // @ts-ignore
-import * as es from '../../../lib/es/es';
+import { constructUrl } from '../../../lib/es/es';
 
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
@@ -467,21 +467,22 @@ export class SenseEditor {
         return req;
       }
 
-      const esPath = req.url;
-      const esMethod = req.method;
-      const esData = req.data;
+      const path = req.url;
+      const method = req.method;
+      const data = req.data;
 
       // this is the first url defined in elasticsearch.hosts
-      const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
+      const url = constructUrl(elasticsearchBaseUrl, path);
 
-      let ret = 'curl -X' + esMethod + ' "' + url + '"';
-      if (esData && esData.length) {
-        ret += " -H 'Content-Type: application/json' -d'\n";
-        const dataAsString = collapseLiteralStrings(esData.join('\n'));
+      // Append 'kbn-xsrf' header to bypass (XSRF/CSRF) protections
+      let ret = `curl -X${method.toUpperCase()} "${url}" -H "kbn-xsrf: reporting"`;
+      if (data && data.length) {
+        ret += ` -H "Content-Type: application/json" -d'\n`;
+        const dataAsString = collapseLiteralStrings(data.join('\n'));
 
         // We escape single quoted strings that that are wrapped in single quoted strings
         ret += dataAsString.replace(/'/g, "'\\''");
-        if (esData.length > 1) {
+        if (data.length > 1) {
           ret += '\n';
         } // end with a new line
         ret += "'";

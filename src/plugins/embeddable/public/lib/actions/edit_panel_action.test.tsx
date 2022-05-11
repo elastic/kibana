@@ -11,7 +11,7 @@ import { Embeddable, EmbeddableInput, SavedObjectEmbeddableInput } from '../embe
 import { ViewMode } from '../types';
 import { ContactCardEmbeddable } from '../test_samples';
 import { embeddablePluginMock } from '../../mocks';
-import { applicationServiceMock } from '../../../../../core/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { of } from 'rxjs';
 
 const { doStart } = embeddablePluginMock.createInstance();

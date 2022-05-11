@@ -227,12 +227,14 @@ export const getSummaryRows = ({
   timelineId,
   eventId,
   isDraggable = false,
+  isReadOnly = false,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   timelineId: string;
   eventId: string;
   isDraggable?: boolean;
+  isReadOnly?: boolean;
 }) => {
   const eventCategories = getEventCategoriesFromData(data);
 
@@ -280,6 +282,7 @@ export const getSummaryRows = ({
             field,
           }),
           isDraggable,
+          isReadOnly,
         };
 
         if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {

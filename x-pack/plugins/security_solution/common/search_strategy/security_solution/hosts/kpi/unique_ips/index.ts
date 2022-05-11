@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { Inspect, Maybe } from '../../../../common';
 import { RequestBasicOptions } from '../../..';
 import { HostsKpiHistogramData } from '../common';

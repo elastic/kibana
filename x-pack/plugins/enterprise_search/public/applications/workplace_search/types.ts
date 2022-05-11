@@ -30,8 +30,6 @@ export interface Group {
   createdAt: string;
   updatedAt: string;
   contentSources: ContentSource[];
-  users: User[];
-  usersCount: number;
   color?: string;
 }
 
@@ -74,24 +72,21 @@ export interface Configuration {
 
 export interface SourceDataItem {
   name: string;
-  iconName: string;
   categories?: string[];
   serviceType: string;
+  baseServiceType?: string;
   configuration: Configuration;
-  configured?: boolean;
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
   accountContextOnly: boolean;
-  internalConnectorAvailable?: boolean;
-  externalConnectorAvailable?: boolean;
-  customConnectorAvailable?: boolean;
   isBeta?: boolean;
 }
 
 export interface ContentSource {
   id: string;
   serviceType: string;
+  baseServiceType?: string;
   name: string;
 }
 

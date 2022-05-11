@@ -153,12 +153,15 @@ export const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
 });
 
+export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
+
 export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
+export type BulkCreateCommentRequest = rt.TypeOf<typeof BulkCreateCommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
 export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;

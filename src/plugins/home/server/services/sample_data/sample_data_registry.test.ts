@@ -7,14 +7,14 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup } from '../../../../../core/server';
+import { CoreSetup } from '@kbn/core/server';
 
-import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
-import { customIntegrationsMock } from '../../../../custom_integrations/server/mocks';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 import { SampleDataRegistry } from './sample_data_registry';
-import { usageCollectionPluginMock } from '../../../../usage_collection/server/mocks';
-import { UsageCollectionSetup } from '../../../../usage_collection/server/plugin';
-import { coreMock } from '../../../../../core/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server/plugin';
+import { coreMock } from '@kbn/core/server/mocks';
 
 describe('SampleDataRegistry', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;

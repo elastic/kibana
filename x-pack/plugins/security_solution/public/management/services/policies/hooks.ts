@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   GetAgentPoliciesResponse,
-} from '../../../../../fleet/common';
-import { useHttp } from '../../../common/lib/kibana/hooks';
+  GetPackagesResponse,
+} from '@kbn/fleet-plugin/common';
+import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import { sendGetAgentPolicyList } from '../../pages/policy/store/services/ingest';
+import { sendGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
 import { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import { ServerApiError } from '../../../common/types';
@@ -39,11 +40,11 @@ export function useGetEndpointSpecificPolicies(
         },
       });
     },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      onError,
-    }
+    onError
+      ? {
+          onError,
+        }
+      : undefined
   );
 }
 
@@ -55,7 +56,7 @@ export function useGetEndpointSpecificPolicies(
  */
 export function useGetAgentCountForPolicy({
   policyIds,
-  customQueryOptions = {},
+  customQueryOptions,
 }: {
   policyIds: string[];
   customQueryOptions?: UseQueryOptions<GetAgentPoliciesResponse, HttpFetchError>;
@@ -71,10 +72,24 @@ export function useGetAgentCountForPolicy({
         },
       });
     },
-    {
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: false,
-      ...customQueryOptions,
-    }
+    customQueryOptions
+  );
+}
+
+/**
+ * This hook returns the endpoint security package which contains endpoint version info
+ */
+export function useGetEndpointSecurityPackage({
+  customQueryOptions,
+}: {
+  customQueryOptions?: UseQueryOptions<GetPackagesResponse['items'][number], HttpFetchError>;
+}): QueryObserverResult<GetPackagesResponse['items'][number], HttpFetchError> {
+  const http = useHttp();
+  return useQuery<GetPackagesResponse['items'][number], HttpFetchError>(
+    ['endpointPackageVersion', customQueryOptions],
+    () => {
+      return sendGetEndpointSecurityPackage(http);
+    },
+    customQueryOptions
   );
 }

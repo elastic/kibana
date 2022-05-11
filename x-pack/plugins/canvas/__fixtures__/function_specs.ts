@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { functions as browserFns } from '../canvas_plugin_src/functions/browser';
-import { ExpressionFunction } from '../../../../src/plugins/expressions';
+import { ExpressionFunction } from '@kbn/expressions-plugin';
+import { functionSpecs as shapeFunctionSpecs } from '@kbn/expression-shape-plugin/__fixtures__';
+import { functionSpecs as imageFunctionSpecs } from '@kbn/expression-image-plugin/__fixtures__';
+import { functionSpecs as metricFunctionSpecs } from '@kbn/expression-metric-plugin/__fixtures__';
 import { initFunctions } from '../public/functions';
-import { functionSpecs as shapeFunctionSpecs } from '../../../../src/plugins/expression_shape/__fixtures__';
-import { functionSpecs as imageFunctionSpecs } from '../../../../src/plugins/expression_image/__fixtures__';
-import { functionSpecs as metricFunctionSpecs } from '../../../../src/plugins/expression_metric/__fixtures__';
+import { functions as browserFns } from '../canvas_plugin_src/functions/browser';
 
 export const functionSpecs = browserFns
   .concat(...(initFunctions({} as any) as any))

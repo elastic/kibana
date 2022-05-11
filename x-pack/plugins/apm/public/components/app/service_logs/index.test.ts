@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getInfrastructureKQLFilter } from './';
+import { getInfrastructureKQLFilter } from '.';
 
 describe('service logs', () => {
   const serviceName = 'opbeans-node';

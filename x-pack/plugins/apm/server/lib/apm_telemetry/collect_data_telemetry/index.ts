@@ -6,12 +6,12 @@
  */
 
 import { merge } from 'lodash';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
 import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import { APMDataTelemetry } from '../types';

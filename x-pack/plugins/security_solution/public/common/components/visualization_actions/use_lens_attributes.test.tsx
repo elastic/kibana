@@ -18,7 +18,7 @@ import {
 } from '../../mock';
 import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
 import { useLensAttributes } from './use_lens_attributes';
-import { filterHostExternalAlertData, getHostDetailsPageFilter, getIndexFilters } from './utils';
+import { hostNameExistsFilter, getHostDetailsPageFilter, getIndexFilters } from './utils';
 import { createStore, State } from '../../store';
 
 jest.mock('../../containers/sourcerer', () => ({
@@ -80,7 +80,7 @@ describe('useLensAttributes', () => {
     store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
-  it('should should add query', () => {
+  it('should add query', () => {
     const wrapper = ({ children }: { children: React.ReactElement }) => (
       <TestProviders store={store}>{children}</TestProviders>
     );
@@ -96,7 +96,7 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state.query).toEqual({ query: 'host.name: *', language: 'kql' });
   });
 
-  it('should should add filters', () => {
+  it('should add filters', () => {
     const wrapper = ({ children }: { children: React.ReactElement }) => (
       <TestProviders store={store}>{children}</TestProviders>
     );
@@ -113,12 +113,12 @@ describe('useLensAttributes', () => {
       ...getExternalAlertLensAttributes().state.filters,
       ...filterFromSearchBar,
       ...getHostDetailsPageFilter('mockHost'),
-      ...filterHostExternalAlertData,
+      ...hostNameExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
     ]);
   });
 
-  it('should should add data view id to references', () => {
+  it('should add data view id to references', () => {
     const wrapper = ({ children }: { children: React.ReactElement }) => (
       <TestProviders store={store}>{children}</TestProviders>
     );

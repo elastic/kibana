@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
+import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { rulesClientMock } from './rules_client.mock';
-import { PluginSetupContract, PluginStartContract } from './plugin';
-import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
-} from '../../../../src/core/server/mocks';
+  httpServerMock,
+} from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { rulesClientMock } from './rules_client.mock';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { Alert, AlertFactoryDoneUtils } from './alert';
 import { AlertInstanceContext, AlertInstanceState } from './types';
 
 export { rulesClientMock };
@@ -94,7 +96,7 @@ const createAbortableSearchServiceMock = () => {
   };
 };
 
-const createAlertServicesMock = <
+const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
@@ -111,13 +113,18 @@ const createAlertServicesMock = <
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
+    searchSourceClient: Promise.resolve(
+      dataPluginMock
+        .createStartContract()
+        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
+    ),
   };
 };
-export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
+export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
 
 export const alertsMock = {
   createAlertFactory: createAlertFactoryMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
-  createAlertServices: createAlertServicesMock,
+  createRuleExecutorServices: createRuleExecutorServicesMock,
 };

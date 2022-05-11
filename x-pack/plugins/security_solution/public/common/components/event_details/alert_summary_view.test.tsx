@@ -82,6 +82,15 @@ describe('AlertSummaryView', () => {
     expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
   });
 
+  test('it does NOT render the action cell when readOnly is passed', () => {
+    const { queryAllByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...{ ...props, isReadOnly: true }} />
+      </TestProviders>
+    );
+    expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+  });
+
   test("render no investigation guide if it doesn't exist", async () => {
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       rule: {

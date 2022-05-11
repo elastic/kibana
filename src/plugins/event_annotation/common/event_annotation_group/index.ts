@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EventAnnotationOutput } from '../manual_event_annotation/types';
 
@@ -35,7 +35,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     }),
     args: {
       annotations: {
-        types: ['manual_event_annotation'],
+        types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
           defaultMessage: 'Annotation configs',
         }),

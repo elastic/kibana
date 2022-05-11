@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IToasts, FatalErrorsSetup } from 'src/core/public';
+import { IToasts, FatalErrorsSetup } from '@kbn/core/public';
 
 let _toasts: IToasts;
 let _fatalErrors: FatalErrorsSetup;

@@ -87,8 +87,8 @@ export function waitUntilWatchIsReady(stream: NodeJS.EventEmitter, opts: IWatchO
   stream.once('error', onErrorListener);
   stream.on('data', onDataListener);
 
-  return Rx.race(getWatchHandlers(buildOutput$, opts))
-    .pipe(
+  return Rx.firstValueFrom(
+    Rx.race(getWatchHandlers(buildOutput$, opts)).pipe(
       mergeMap((whenReady) => whenReady),
       finalize(() => {
         stream.removeListener('data', onDataListener);
@@ -98,5 +98,5 @@ export function waitUntilWatchIsReady(stream: NodeJS.EventEmitter, opts: IWatchO
         buildOutput$.complete();
       })
     )
-    .toPromise();
+  );
 }

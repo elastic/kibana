@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import semver from 'semver';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { AGENTS_INDEX } from '../../../../plugins/fleet/common';
 import { testUsers } from '../test_users';
 
 const makeSnapshotVersion = (version: string) => {

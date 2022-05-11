@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Subject } from 'rxjs';
 import type {
   PluginInitializerContext,
@@ -19,8 +19,9 @@ import type {
   OpsMetrics,
   Logger,
   CoreUsageDataStart,
-} from 'src/core/server';
-import { SavedObjectsClient, EventLoopDelaysMonitor } from '../../../core/server';
+} from '@kbn/core/server';
+import { SavedObjectsClient, EventLoopDelaysMonitor } from '@kbn/core/server';
+import { registerEbtCounters } from './ebt_counters';
 import {
   startTrackingEventLoopDelaysUsage,
   startTrackingEventLoopDelaysThreshold,
@@ -37,8 +38,6 @@ import {
   registerCoreUsageCollector,
   registerLocalizationUsageCollector,
   registerUiCountersUsageCollector,
-  registerUiCounterSavedObjectType,
-  registerUiCountersRollups,
   registerConfigUsageCollector,
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
@@ -70,6 +69,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+    registerEbtCounters(coreSetup.analytics, usageCollection);
     usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
@@ -125,9 +125,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
 
-    registerUiCounterSavedObjectType(coreSetup.savedObjects);
-    registerUiCountersRollups(this.logger.get('ui-counters'), pluginStop$, getSavedObjectsClient);
-    registerUiCountersUsageCollector(usageCollection, pluginStop$);
+    registerUiCountersUsageCollector(usageCollection);
 
     registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);
     registerUsageCountersUsageCollector(usageCollection);

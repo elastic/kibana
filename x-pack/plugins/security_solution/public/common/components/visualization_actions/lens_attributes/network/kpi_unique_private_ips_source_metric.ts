@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SOURCE_CHART_LABEL } from '../../translations';
 import { LensAttributes } from '../../types';
 
 export const kpiUniquePrivateIpsSourceMetricLensAttributes: LensAttributes = {
@@ -20,7 +19,7 @@ export const kpiUniquePrivateIpsSourceMetricLensAttributes: LensAttributes = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: SOURCE_CHART_LABEL,
+                label: '',
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'source.ip',

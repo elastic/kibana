@@ -32,7 +32,7 @@ export const registerDeleteRoute = (router: IRouter, { coreUsageData }: RouteDep
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { force } = req.query;
-      const { getClient } = context.core.savedObjects;
+      const { getClient } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});

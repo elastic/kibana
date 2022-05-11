@@ -8,12 +8,12 @@ import React, { FC } from 'react';
 import { EuiBadge, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type {
   AllocatedModel,
   NodeDeploymentStatsResponse,
 } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface AllocatedModelsProps {
   models: NodeDeploymentStatsResponse['allocated_models'];
@@ -35,7 +35,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.nodeNameHeader', {
         defaultMessage: 'Node name',
       }),
-      width: '200px',
+      width: '150px',
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableNodeName',
@@ -46,7 +46,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelNameHeader', {
         defaultMessage: 'Name',
       }),
-      width: '300px',
+      width: '250px',
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableName',
@@ -63,13 +63,16 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       },
     },
     {
-      field: 'state',
-      name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelStateHeader', {
-        defaultMessage: 'State',
-      }),
+      field: 'node.throughput_last_minute',
+      name: i18n.translate(
+        'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteHeader',
+        {
+          defaultMessage: 'Throughput',
+        }
+      ),
       width: '100px',
       truncateText: false,
-      'data-test-subj': 'mlAllocatedModelsTableState',
+      'data-test-subj': 'mlAllocatedModelsTableThroughput',
     },
     {
       name: i18n.translate(
@@ -117,7 +120,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       width: '200px',
       'data-test-subj': 'mlAllocatedModelsTableInferenceCount',
       render: (v: AllocatedModel) => {
-        return dateFormatter(v.node.last_access);
+        return v.node.last_access ? dateFormatter(v.node.last_access) : '-';
       },
     },
     {

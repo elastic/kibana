@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
-import { toMountPoint, wrapWithTheme } from '../../../../kibana_react/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { getUrlTracker } from '../../kibana_services';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 

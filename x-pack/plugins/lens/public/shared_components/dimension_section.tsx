@@ -19,7 +19,7 @@ export const DimensionEditorSection = ({
     <div className="lnsDimensionEditorSection">
       <div className="lnsDimensionEditorSection__border" />
       {title && (
-        <EuiTitle size="xxs" className="lnsXyConfigHeading">
+        <EuiTitle size="xxs" className="lnsDimensionEditorSection__heading">
           <h3>{title}</h3>
         </EuiTitle>
       )}

@@ -30,3 +30,9 @@ export const getInferenceQuerySchema = schema.object({
 export const putTrainedModelQuerySchema = schema.object({
   defer_definition_decompression: schema.maybe(schema.boolean()),
 });
+
+export const inferTrainedModelQuery = schema.object({ timeout: schema.maybe(schema.string()) });
+export const inferTrainedModelBody = schema.object({
+  docs: schema.any(),
+  inference_config: schema.maybe(schema.any()),
+});

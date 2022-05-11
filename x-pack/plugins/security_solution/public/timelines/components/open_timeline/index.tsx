@@ -10,12 +10,12 @@ import { useDispatch } from 'react-redux';
 
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SortFieldTimeline, TimelineId } from '../../../../common/types/timeline';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { TimelineModel } from '../../store/timeline/model';
+import { timelineSelectors } from '../../store/timeline';
 import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
-} from '../../../timelines/store/timeline/actions';
+} from '../../store/timeline/actions';
 
 import { useGetAllTimeline } from '../../containers/all';
 

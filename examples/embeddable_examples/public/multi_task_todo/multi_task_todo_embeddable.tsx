@@ -14,7 +14,7 @@ import {
   EmbeddableInput,
   IContainer,
   EmbeddableOutput,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { MultiTaskTodoEmbeddableComponent } from './multi_task_todo_component';
 
 export const MULTI_TASK_TODO_EMBEDDABLE = 'MULTI_TASK_TODO_EMBEDDABLE';

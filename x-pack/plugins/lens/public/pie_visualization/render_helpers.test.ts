@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Datatable } from 'src/plugins/expressions/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 
 import { checkTableForContainsSmallValues, shouldShowValuesInLegend } from './render_helpers';
 import { PieLayerState, PieChartTypes } from '../../common';

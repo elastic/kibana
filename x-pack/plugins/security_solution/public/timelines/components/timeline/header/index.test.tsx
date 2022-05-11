@@ -8,10 +8,10 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { mockIndexPattern } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 

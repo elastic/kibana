@@ -14,21 +14,16 @@ const end = '2021-10-10T00:15:00.000Z';
 
 const serviceInventoryHref = url.format({
   pathname: '/app/apm/services',
-  query: { rangeFrom: start, rangeTo: end },
+  query: {
+    comparisonEnabled: 'true',
+    environment: 'ENVIRONMENT_ALL',
+    rangeFrom: start,
+    rangeTo: end,
+    offset: '1d',
+  },
 });
 
-const apisToIntercept = [
-  {
-    endpoint: '/internal/apm/service?*',
-    name: 'servicesMainStatistics',
-  },
-  {
-    endpoint: '/internal/apm/services/detailed_statistics?*',
-    name: 'servicesDetailedStatistics',
-  },
-];
-
-describe('Home page', () => {
+describe.skip('Home page', () => {
   before(async () => {
     await synthtrace.index(
       opbeans({
@@ -46,12 +41,12 @@ describe('Home page', () => {
     cy.loginAsReadOnlyUser();
   });
 
-  it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
+  it('Redirects to service page with comparisonEnabled, environment, rangeFrom, rangeTo and offset added to the URL', () => {
     cy.visit('/app/apm');
 
     cy.url().should(
       'include',
-      'app/apm/services?rangeFrom=now-15m&rangeTo=now'
+      'app/apm/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now&offset=1d'
     );
   });
 
@@ -65,17 +60,11 @@ describe('Home page', () => {
 
   describe('navigations', () => {
     it('navigates to service overview page with transaction type', () => {
-      apisToIntercept.map(({ endpoint, name }) => {
-        cy.intercept('GET', endpoint).as(name);
-      });
-
       cy.visit(serviceInventoryHref);
 
       cy.contains('Services');
+      cy.contains('opbeans-rum').click({ force: true });
 
-      cy.get('[data-test-subj="serviceLink_rum-js"]').then((element) => {
-        element[0].click();
-      });
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'page-load'

@@ -12,8 +12,8 @@ import type { Location } from 'history';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { disableFilter } from '@kbn/es-query';
-import { FilterManager } from '../../../data/public';
-import { url } from '../../../kibana_utils/common';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { url } from '@kbn/kibana-utils-plugin/common';
 import { useDiscoverServices } from './use_discover_services';
 
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };

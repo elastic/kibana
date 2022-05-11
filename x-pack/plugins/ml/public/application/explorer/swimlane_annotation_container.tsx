@@ -9,8 +9,8 @@ import React, { FC, useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
 import { i18n } from '@kbn/i18n';
-import { formatHumanReadableDateTimeSeconds } from '../../../common/util/date_utils';
-import { AnnotationsTable } from '../../../common/types/annotations';
+import moment from 'moment';
+import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
 import { useCurrentEuiTheme } from '../components/color_range_legend';
 
@@ -68,7 +68,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         )
         .attr('x', Y_AXIS_LABEL_WIDTH - Y_AXIS_LABEL_PADDING)
         .attr('y', ANNOTATION_CONTAINER_HEIGHT / 2)
-        .attr('alignment-baseline', 'middle')
+        .attr('dominant-baseline', 'middle')
         .style('fill', euiTheme.euiTextSubduedColor)
         .style('font-size', euiTheme.euiFontSizeXS);
 
@@ -83,17 +83,54 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         .style('fill', 'none')
         .style('stroke-width', 1);
 
+      // Merging overlapping annotations into bigger blocks
+      let mergedAnnotations: Array<{ start: number; end: number; annotations: Annotation[] }> = [];
+      const sortedAnnotationsData = [...annotationsData].sort((a, b) => a.timestamp - b.timestamp);
+
+      if (sortedAnnotationsData.length > 0) {
+        let lastEndTime =
+          sortedAnnotationsData[0].end_timestamp ?? sortedAnnotationsData[0].timestamp;
+
+        mergedAnnotations = [
+          {
+            start: sortedAnnotationsData[0].timestamp,
+            end: lastEndTime,
+            annotations: [sortedAnnotationsData[0]],
+          },
+        ];
+
+        for (let i = 1; i < sortedAnnotationsData.length; i++) {
+          if (sortedAnnotationsData[i].timestamp < lastEndTime) {
+            const itemToMerge = mergedAnnotations.pop();
+            if (itemToMerge) {
+              const newMergedItem = {
+                ...itemToMerge,
+                end: lastEndTime,
+                annotations: [...itemToMerge.annotations, sortedAnnotationsData[i]],
+              };
+              mergedAnnotations.push(newMergedItem);
+            }
+          } else {
+            lastEndTime =
+              sortedAnnotationsData[i].end_timestamp ?? sortedAnnotationsData[i].timestamp;
+
+            mergedAnnotations.push({
+              start: sortedAnnotationsData[i].timestamp,
+              end: lastEndTime,
+              annotations: [sortedAnnotationsData[i]],
+            });
+          }
+        }
+      }
+
       // Add annotation marker
-      annotationsData.forEach((d) => {
+      mergedAnnotations.forEach((d) => {
         const annotationWidth = Math.max(
-          d.end_timestamp
-            ? xScale(Math.min(d.end_timestamp, domain.max)) -
-                Math.max(xScale(d.timestamp), startingXPos)
-            : 0,
+          d.end ? xScale(Math.min(d.end, domain.max)) - Math.max(xScale(d.start), startingXPos) : 0,
           ANNOTATION_MIN_WIDTH
         );
 
-        const xPos = d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos;
+        const xPos = d.start >= domain.min ? xScale(d.start) : startingXPos;
         svg
           .append('rect')
           .classed('mlAnnotationRect', true)
@@ -103,42 +140,74 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
           .attr('height', ANNOTATION_CONTAINER_HEIGHT)
           .attr('width', annotationWidth)
           .on('mouseover', function () {
-            const startingTime = formatHumanReadableDateTimeSeconds(d.timestamp);
-            const endingTime =
-              d.end_timestamp !== undefined
-                ? formatHumanReadableDateTimeSeconds(d.end_timestamp)
-                : undefined;
+            const tooltipData: Array<{
+              label: string;
+              seriesIdentifier: { key: string; specId: string } | { key: string; specId: string };
+              valueAccessor: string;
+              skipHeader?: boolean;
+              value?: string;
+            }> = [];
+            if (Array.isArray(d.annotations)) {
+              const hasMergedAnnotations = d.annotations.length > 1;
+              if (hasMergedAnnotations) {
+                // @ts-ignore skipping header so it doesn't have other params
+                tooltipData.push({ skipHeader: true });
+              }
+              d.annotations.forEach((item) => {
+                let timespan = moment(item.timestamp).format('MMMM Do YYYY, HH:mm');
 
-            const timeLabel = endingTime ? `${startingTime} - ${endingTime}` : startingTime;
+                if (typeof item.end_timestamp !== 'undefined') {
+                  timespan += ` - ${moment(item.end_timestamp).format(
+                    hasMergedAnnotations ? 'HH:mm' : 'MMMM Do YYYY, HH:mm'
+                  )}`;
+                }
 
-            const tooltipData = [
-              {
-                label: `${d.annotation}`,
-                seriesIdentifier: {
-                  key: 'anomaly_timeline',
-                  specId: d._id ?? `${d.annotation}-${d.timestamp}-label`,
-                },
-                valueAccessor: 'label',
-              },
-              {
-                label: `${timeLabel}`,
-                seriesIdentifier: {
-                  key: 'anomaly_timeline',
-                  specId: d._id ?? `${d.annotation}-${d.timestamp}-ts`,
-                },
-                valueAccessor: 'time',
-              },
-            ];
-            if (d.partition_field_name !== undefined && d.partition_field_value !== undefined) {
-              tooltipData.push({
-                label: `${d.partition_field_name}: ${d.partition_field_value}`,
-                seriesIdentifier: {
-                  key: 'anomaly_timeline',
-                  specId: d._id
-                    ? `${d._id}-partition`
-                    : `${d.partition_field_name}-${d.partition_field_value}-label`,
-                },
-                valueAccessor: 'partition',
+                if (hasMergedAnnotations) {
+                  tooltipData.push({
+                    label: timespan,
+                    value: `${item.annotation}`,
+                    seriesIdentifier: {
+                      key: 'anomaly_timeline',
+                      specId: item._id ?? `${item.annotation}-${item.timestamp}-label`,
+                    },
+                    valueAccessor: 'annotation',
+                  });
+                } else {
+                  tooltipData.push(
+                    {
+                      label: `${item.annotation}`,
+                      seriesIdentifier: {
+                        key: 'anomaly_timeline',
+                        specId: item._id ?? `${item.annotation}-${item.timestamp}-label`,
+                      },
+                      valueAccessor: 'label',
+                    },
+                    {
+                      label: `${timespan}`,
+                      seriesIdentifier: {
+                        key: 'anomaly_timeline',
+                        specId: item._id ?? `${item.annotation}-${item.timestamp}-ts`,
+                      },
+                      valueAccessor: 'time',
+                    }
+                  );
+                }
+
+                if (
+                  item.partition_field_name !== undefined &&
+                  item.partition_field_value !== undefined
+                ) {
+                  tooltipData.push({
+                    label: `${item.partition_field_name}: ${item.partition_field_value}`,
+                    seriesIdentifier: {
+                      key: 'anomaly_timeline',
+                      specId: item._id
+                        ? `${item._id}-partition`
+                        : `${item.partition_field_name}-${item.partition_field_value}-label`,
+                    },
+                    valueAccessor: 'partition',
+                  });
+                }
               });
             }
             // @ts-ignore we don't need all the fields for tooltip to show

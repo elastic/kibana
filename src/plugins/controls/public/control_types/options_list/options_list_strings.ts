@@ -28,10 +28,6 @@ export const OptionsListStrings = {
       }),
   },
   editor: {
-    getIndexPatternTitle: () =>
-      i18n.translate('controls.optionsList.editor.indexPatternTitle', {
-        defaultMessage: 'Index pattern',
-      }),
     getDataViewTitle: () =>
       i18n.translate('controls.optionsList.editor.dataViewTitle', {
         defaultMessage: 'Data view',

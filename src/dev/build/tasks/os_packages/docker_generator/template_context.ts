@@ -16,15 +16,15 @@ export interface TemplateContext {
   artifactsDir: string;
   dockerPush: boolean;
   dockerTagQualifier: string | null;
+  dockerCrossCompile: boolean;
   imageTag: string;
   dockerBuildDir: string;
   dockerTargetFilename: string;
-  baseOSImage: string;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   publicArtifactSubdomain: string;
-  ubi?: boolean;
-  ubuntu?: boolean;
+  baseImage: 'none' | 'ubi' | 'ubuntu';
+  baseImageName: string;
   cloud?: boolean;
   metricbeatTarball?: string;
   filebeatTarball?: string;

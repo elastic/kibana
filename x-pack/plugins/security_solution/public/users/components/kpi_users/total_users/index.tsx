@@ -61,7 +61,7 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const { toggleStatus } = useQueryToggle(UsersQueries.kpiTotalUsers);
+  const { toggleStatus } = useQueryToggle(QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
@@ -71,7 +71,7 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
       factoryQueryType: UsersQueries.kpiTotalUsers,
       initialResult: { users: 0, usersHistogram: [] },
       errorMessage: i18n.ERROR_USERS_KPI,
-      skip: querySkip,
+      abort: querySkip,
     });
 
   useEffect(() => {

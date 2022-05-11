@@ -9,8 +9,8 @@ import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiToolTip } from 
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
-import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {

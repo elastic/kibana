@@ -19,34 +19,41 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
-} from '../../../../../src/core/server';
-import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
-import {
-  Alert as Rule,
-  PartialAlert as PartialRule,
-  RawRule,
-  RuleTypeRegistry,
-  AlertAction as RuleAction,
-  IntervalSchedule,
-  SanitizedAlert as SanitizedRule,
-  RuleTaskState,
-  AlertSummary,
-  AlertExecutionStatusValues as RuleExecutionStatusValues,
-  AlertNotifyWhenType as RuleNotifyWhenType,
-  AlertTypeParams as RuleTypeParams,
-  ResolvedSanitizedRule,
-  AlertWithLegacyId as RuleWithLegacyId,
-  SanitizedRuleWithLegacyId,
-  PartialAlertWithLegacyId as PartialRuleWithLegacyId,
-  RawAlertInstance as RawAlert,
-} from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
+} from '@kbn/core/server';
+import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../../security/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+} from '@kbn/security-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  IEvent,
+  IEventLogClient,
+  IEventLogger,
+  SAVED_OBJECT_REL_PRIMARY,
+} from '@kbn/event-log-plugin/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
+import {
+  Rule,
+  PartialRule,
+  RawRule,
+  RuleTypeRegistry,
+  RuleAction,
+  IntervalSchedule,
+  SanitizedRule,
+  RuleTaskState,
+  AlertSummary,
+  RuleExecutionStatusValues,
+  RuleNotifyWhenType,
+  RuleTypeParams,
+  ResolvedSanitizedRule,
+  RuleWithLegacyId,
+  SanitizedRuleWithLegacyId,
+  PartialRuleWithLegacyId,
+  RawAlertInstance as RawAlert,
+} from '../types';
+import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
@@ -57,15 +64,8 @@ import {
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
-import {
-  IEvent,
-  IEventLogClient,
-  IEventLogger,
-  SAVED_OBJECT_REL_PRIMARY,
-} from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
-import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -88,10 +88,11 @@ import { AlertingRulesConfig } from '../config';
 import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
-  IExecutionLogResult,
 } from '../lib/get_execution_log_aggregation';
+import { IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
+import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -132,6 +133,12 @@ export interface RuleAggregation {
       doc_count: number;
     }>;
   };
+  tags: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
 }
 
 export interface ConstructorOptions {
@@ -143,7 +150,7 @@ export interface ConstructorOptions {
   ruleTypeRegistry: RuleTypeRegistry;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  spaceId?: string;
+  spaceId: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
@@ -199,6 +206,7 @@ export interface AggregateResult {
   ruleEnabledStatus?: { enabled: number; disabled: number };
   ruleMutedStatus?: { muted: number; unmuted: number };
   ruleSnoozedStatus?: { snoozed: number };
+  ruleTags?: string[];
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -280,7 +288,7 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
 export class RulesClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
-  private readonly spaceId?: string;
+  private readonly spaceId: string;
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -401,7 +409,7 @@ export class RulesClient {
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawRule: RawRule = {
       ...data,
@@ -622,7 +630,6 @@ export class RulesClient {
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
@@ -688,7 +695,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogWithErrorsResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -725,23 +732,47 @@ export class RulesClient {
 
     const eventLogClient = await this.getEventLogClient();
 
-    const results = await eventLogClient.aggregateEventsBySavedObjectIds(
-      'alert',
-      [id],
-      {
-        start: parsedDateStart.toISOString(),
-        end: parsedDateEnd.toISOString(),
-        filter,
-        aggs: getExecutionLogAggregation({
-          page,
-          perPage,
-          sort,
-        }),
-      },
-      rule.legacyId !== null ? [rule.legacyId] : undefined
-    );
+    try {
+      const [aggResult, errorResult] = await Promise.all([
+        eventLogClient.aggregateEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            start: parsedDateStart.toISOString(),
+            end: parsedDateEnd.toISOString(),
+            filter,
+            aggs: getExecutionLogAggregation({
+              page,
+              perPage,
+              sort,
+            }),
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+        eventLogClient.findEventsBySavedObjectIds(
+          'alert',
+          [id],
+          {
+            start: parsedDateStart.toISOString(),
+            end: parsedDateEnd.toISOString(),
+            per_page: 500,
+            filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
+            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+          },
+          rule.legacyId !== null ? [rule.legacyId] : undefined
+        ),
+      ]);
 
-    return formatExecutionLogResult(results);
+      return {
+        ...formatExecutionLogResult(aggResult),
+        ...formatExecutionErrorsResult(errorResult),
+      };
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   public async find<Params extends RuleTypeParams = never>({
@@ -897,6 +928,9 @@ export class RulesClient {
         muted: {
           terms: { field: 'alert.attributes.muteAll' },
         },
+        tags: {
+          terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+        },
         snoozed: {
           date_range: {
             field: 'alert.attributes.snoozeEndTime',
@@ -965,6 +999,9 @@ export class RulesClient {
     ret.ruleSnoozedStatus = {
       snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
     };
+
+    const tagsBuckets = resp.aggregations.tags?.buckets || [];
+    ret.ruleTags = tagsBuckets.map((bucket) => bucket.key);
 
     return ret;
   }
@@ -1176,7 +1213,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({
@@ -2116,12 +2153,15 @@ export class RulesClient {
       executionStatus,
       schedule,
       actions,
+      snoozeEndTime,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
+    const snoozeEndTimeDate = snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime;
+    const includeSnoozeEndTime = snoozeEndTimeDate !== undefined && !excludeFromPublicApi;
     const rule = {
       id,
       notifyWhen,
@@ -2131,6 +2171,7 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
+      ...(includeSnoozeEndTime ? { snoozeEndTime: snoozeEndTimeDate } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),

@@ -6,6 +6,8 @@
  */
 
 import chunk from 'lodash/fp/chunk';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { getThreatList, getThreatListCount } from './get_threat_list';
 import {
   CreateThreatSignalsOptions,
@@ -19,6 +21,7 @@ import { buildExecutionIntervalValidator, combineConcurrentResults } from './uti
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
+import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
 
 export const createThreatSignals = async ({
   alertId,
@@ -89,6 +92,16 @@ export const createThreatSignals = async ({
     return results;
   }
 
+  let threatPitId: OpenPointInTimeResponse['id'] = (
+    await services.scopedClusterClient.asCurrentUser.openPointInTime({
+      index: threatIndex,
+      keep_alive: THREAT_PIT_KEEP_ALIVE,
+    })
+  ).id;
+  const reassignThreatPitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
+    if (newPitId) threatPitId = newPitId;
+  };
+
   const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
@@ -115,6 +128,8 @@ export const createThreatSignals = async ({
     threatIndicatorPath,
     threatLanguage,
     threatQuery,
+    pitId: threatPitId,
+    reassignPitId: reassignThreatPitId,
   });
 
   const createSignals = async ({
@@ -188,8 +203,8 @@ export const createThreatSignals = async ({
           buildRuleMessage,
           bulkCreate,
           completeRule,
-          currentResult: results,
           currentEventList: slicedChunk,
+          currentResult: results,
           eventsTelemetry,
           exceptionItems,
           filters: allEventFilters,
@@ -199,21 +214,21 @@ export const createThreatSignals = async ({
           logger,
           outputIndex,
           query,
+          reassignThreatPitId,
           savedId,
           searchAfterSize,
           services,
           threatEnrichment,
+          threatFilters: allThreatFilters,
+          threatIndex,
+          threatIndicatorPath,
+          threatLanguage,
           threatMapping,
+          threatPitId,
+          threatQuery,
           tuple,
           type,
           wrapHits,
-          threatQuery,
-          threatFilters: allThreatFilters,
-          threatLanguage,
-          threatIndex,
-          threatListConfig,
-          threatIndicatorPath,
-          perPage,
         }),
     });
   } else {
@@ -232,6 +247,8 @@ export const createThreatSignals = async ({
           buildRuleMessage,
           perPage,
           threatListConfig,
+          pitId: threatPitId,
+          reassignPitId: reassignThreatPitId,
         }),
 
       createSignal: (slicedChunk) =>
@@ -261,6 +278,15 @@ export const createThreatSignals = async ({
           wrapHits,
         }),
     });
+  }
+
+  try {
+    await services.scopedClusterClient.asCurrentUser.closePointInTime({ id: threatPitId });
+  } catch (error) {
+    // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
+    logger.warn(
+      `Error trying to close point in time: "${threatPitId}", it will expire within "${THREAT_PIT_KEEP_ALIVE}". Error is: "${error}"`
+    );
   }
 
   logger.debug(buildRuleMessage('Indicator matching rule has completed'));

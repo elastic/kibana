@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpServiceSetup, StartServicesAccessor } from 'kibana/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { HttpServiceSetup, StartServicesAccessor } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IndexPatternsFetcher } from './fetcher';
 import { routes } from './rest_api_routes';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
@@ -56,7 +56,7 @@ export function registerRoutes(
       },
     },
     async (context, request, response) => {
-      const { asCurrentUser } = context.core.elasticsearch.client;
+      const { asCurrentUser } = (await context.core).elasticsearch.client;
       const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 

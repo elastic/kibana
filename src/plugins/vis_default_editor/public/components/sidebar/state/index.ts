@@ -9,11 +9,11 @@
 import { useReducer, useCallback } from 'react';
 import { EventEmitter } from 'events';
 
-import { Vis } from 'src/plugins/visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction } from './actions';
-import { useKibana } from '../../../../../kibana_react/public';
 import { VisDefaultEditorKibanaServices } from '../../../types';
 
 export * from './editor_form_state';

@@ -7,10 +7,10 @@
  */
 
 import React, { lazy } from 'react';
-import { IUiSettingsClient } from 'kibana/public';
-import { UiActionsStart } from '../../../../../ui_actions/public';
-import { FieldFormatsStart } from '../../../../../field_formats/public';
-import { DatatableColumn } from '../../../../../expressions/common/expression_types/specs';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 
 const DataViewComponent = lazy(() => import('./data_view'));
 

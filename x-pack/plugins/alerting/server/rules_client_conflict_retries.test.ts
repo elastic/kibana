@@ -8,17 +8,17 @@
 import { cloneDeep } from 'lodash';
 
 import { RulesClient, ConstructorOptions } from './rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsClientMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../actions/server';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
-import { TaskStatus } from '../../task_manager/server/task';
+import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
 
 let rulesClient: RulesClient;
@@ -294,14 +294,13 @@ function setupRawAlertMocks(
   encryptedSavedObjects.getDecryptedAsInternalUser.mockReset();
 
   // splitting this out as it's easier to set a breakpoint :-)
-  // eslint-disable-next-line prettier/prettier
-  unsecuredSavedObjectsClient.get.mockImplementation(async () =>
-    cloneDeep(rawAlert)
-  );
+  unsecuredSavedObjectsClient.get.mockImplementation(async () => {
+    return cloneDeep(rawAlert);
+  });
 
-  encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () =>
-    cloneDeep(decryptedRawAlert)
-  );
+  encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () => {
+    return cloneDeep(decryptedRawAlert);
+  });
 }
 
 // setup for each test

@@ -7,12 +7,7 @@
  */
 
 import { ChartsServerPlugin } from './plugin';
-export type {
-  PaletteOutput,
-  CustomPaletteArguments,
-  CustomPaletteState,
-  SystemPaletteArguments,
-} from '../common';
+export type { CustomPaletteArguments, CustomPaletteState, SystemPaletteArguments } from '../common';
 export { paletteIds } from '../common';
 
 export const plugin = () => new ChartsServerPlugin();

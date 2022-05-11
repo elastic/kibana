@@ -7,8 +7,12 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormLabel, EuiSpacer } from '@elastic/eui';
-import { OperationDefinition } from './index';
-import { ReferenceBasedIndexPatternColumn, GenericIndexPatternColumn } from './column_types';
+import { OperationDefinition } from '.';
+import {
+  ReferenceBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  ValueFormatConfig,
+} from './column_types';
 import type { IndexPattern } from '../../types';
 import { useDebouncedValue } from '../../../shared_components';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
@@ -37,12 +41,7 @@ export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatter
   operationType: 'static_value';
   params: {
     value?: string;
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
+    format?: ValueFormatConfig;
   };
 }
 

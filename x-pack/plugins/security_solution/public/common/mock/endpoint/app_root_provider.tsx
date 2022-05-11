@@ -12,11 +12,11 @@ import { Router } from 'react-router-dom';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import { Store } from 'redux';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { RouteCapture } from '../../components/endpoint/route_capture';
 import { StartPlugins } from '../../../types';
-import { CoreStart } from '../../../../../../../src/core/public';
 
 /**
  * Provides the context for rendering the endpoint app

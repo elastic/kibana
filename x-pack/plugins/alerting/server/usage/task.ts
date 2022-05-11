@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from 'kibana/server';
+import { Logger, CoreSetup } from '@kbn/core/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 
 import {
   getTotalCountAggregations,
@@ -144,6 +144,13 @@ export function telemetryTaskRunner(
                   avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
                   avg_total_search_duration_by_type_per_day:
                     dailyExecutionCounts.avgTotalSearchDurationByType,
+                  percentile_num_generated_actions_per_day:
+                    dailyExecutionCounts.generatedActionsPercentiles,
+                  percentile_num_generated_actions_by_type_per_day:
+                    dailyExecutionCounts.generatedActionsPercentilesByType,
+                  percentile_num_alerts_per_day: dailyExecutionCounts.alertsPercentiles,
+                  percentile_num_alerts_by_type_per_day:
+                    dailyExecutionCounts.alertsPercentilesByType,
                 },
                 runAt: getNextMidnight(),
               };

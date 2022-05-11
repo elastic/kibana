@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import moment from 'moment-timezone';
 import * as helpers from './helpers';
 

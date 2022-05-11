@@ -42,38 +42,10 @@ export const UNKNOWN = i18n.translate(
   }
 );
 
-export const FAILURE_HISTORY_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.failureHistoryTab',
+export const RULE_EXECUTION_LOGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLogsTab',
   {
-    defaultMessage: 'Failure History',
-  }
-);
-
-export const LAST_FIVE_ERRORS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.lastFiveErrorsTitle',
-  {
-    defaultMessage: 'Last five errors',
-  }
-);
-
-export const COLUMN_STATUS_TYPE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.statusTypeColumn',
-  {
-    defaultMessage: 'Type',
-  }
-);
-
-export const COLUMN_FAILED_AT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.statusFailedAtColumn',
-  {
-    defaultMessage: 'Failed at',
-  }
-);
-
-export const COLUMN_FAILED_MSG = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.statusFailedMsgColumn',
-  {
-    defaultMessage: 'Failed message',
+    defaultMessage: 'Rule execution logs ',
   }
 );
 

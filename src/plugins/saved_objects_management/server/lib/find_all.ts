@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
   SavedObject,
   SavedObjectsCreatePointInTimeFinderOptions,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 export const findAll = async (
   client: SavedObjectsClientContract,

@@ -16,7 +16,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from './index';
+} from '.';
 
 describe('UtilityBar', () => {
   test('it renders', () => {

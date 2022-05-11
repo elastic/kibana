@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { startCase } from 'lodash/fp';
-import { AlertAction } from '../../../../../../alerting/common';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 
-const ActionsDescription = ({ actions }: { actions: AlertAction[] }) => {
+const ActionsDescription = ({ actions }: { actions: RuleAction[] }) => {
   if (!actions.length) return null;
 
   return (
@@ -21,12 +21,12 @@ const ActionsDescription = ({ actions }: { actions: AlertAction[] }) => {
   );
 };
 
-export const buildActionsDescription = (actions: AlertAction[], title: string) => ({
+export const buildActionsDescription = (actions: RuleAction[], title: string) => ({
   title: actions.length ? title : '',
   description: <ActionsDescription actions={actions} />,
 });
 
-const getActionTypeName = (actionTypeId: AlertAction['actionTypeId']) => {
+const getActionTypeName = (actionTypeId: RuleAction['actionTypeId']) => {
   if (!actionTypeId) return '';
   const actionType = actionTypeId.split('.')[1];
 

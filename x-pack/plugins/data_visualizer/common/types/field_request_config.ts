@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JobFieldType } from './index';
+import type { JobFieldType } from '.';
 
 export interface Percentile {
   percent: number;
@@ -17,6 +17,7 @@ export interface FieldRequestConfig {
   fieldName: string;
   type: JobFieldType;
   cardinality: number;
+  existsInDocs: boolean;
 }
 
 export interface DocumentCountBuckets {

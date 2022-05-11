@@ -1,0 +1,129 @@
+[[cases-api-update-configuration]]
+== Update case configuration API
+++++
+<titleabbrev>Update configuration</titleabbrev>
+++++
+
+Updates external connection details, such as the closure type and default
+connector for cases.
+
+=== {api-request-title}
+
+`PATCH <kibana host>:<port>/api/cases/configure/<configuration_id>`
+
+`PATCH <kibana host>:<port>/s/<space_id>/api/cases/configure/<configuration_id>`
+
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the case configuration.
+
+=== {api-description-title}
+
+Connectors are used to interface with external systems. You must create a
+connector before you can it in your cases. Refer to <<add-case-connectors>>.
+
+=== {api-path-parms-title}
+
+`<configuration_id>`::
+The identifier for the configuration. To retrieve the configuration IDs, use
+<<cases-get-configuration>>.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== Request body
+
+`closure_type`::
+(Optional, string) Determines whether a case is automatically closed when it is
+pushed to external systems. Valid values are:
++
+--
+* `close-by-pushing`: Cases are automatically closed when they
+are pushed.
+* `close-by-user`: Cases are not automatically closed.
+--
+
+`connector`::
+(Optional, object) An object that contains the connector configuration.
++
+.Properties of `connector`
+[%collapsible%open]
+====
+`fields`::
+(Required, object) An object that contains the connector fields.
++
+--
+TIP: The fields specified in the case configuration are not used and are not
+propagated to individual cases, therefore it is recommended to set it to `null`.
+--
+
+`id`::
+(Required, string) The identifier for the connector. To retrieve connector IDs,
+use <<cases-api-find-connectors>>.
+
+`name`::
+(Required, string) The name of the connector.
+
+`type`::
+(Required, string) The type of the connector. Valid values are: `.servicenow`,
+`.servicenow-sir`, `.jira`, `.resilient`, `.swimlane`, and `.none`.
+====
+
+`version`::
+(Required, string) The version of the connector. To retrieve the version value,
+use <<cases-get-configuration>>.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+Change the closure type configuration option:
+
+[source,sh]
+--------------------------------------------------
+PATCH api/cases/configure/3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
+{
+  "closure_type": "close-by-pushing",
+  "version": "WzIwMiwxXQ=="
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,json]
+--------------------------------------------------
+{
+  "closure_type": "close-by-user",
+  "owner": "cases",
+  "created_at": "2022-04-06T20:57:40.746Z",
+  "created_by": {
+    "email": "admin@hms.gov.uk",
+    "full_name": "Ms Admin",
+    "username": "admin"
+  },
+  "updated_at": "2022-04-12T22:41:09.262Z",
+  "updated_by": {
+    "email": "admin@hms.gov.uk",
+    "full_name": "Ms Admin",
+    "username": "admin"
+  },
+  "connector": {
+    "id": "none",
+    "name": "none",
+    "type": ".none",
+    "fields": null
+    },
+  "mappings": [],
+  "version": "WzkwNiw1XQ==",
+  "error": null,
+  "id": "3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9"
+}
+--------------------------------------------------

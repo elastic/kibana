@@ -5,8 +5,10 @@
  * 2.0.
  */
 import { keyBy, last } from 'lodash';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import util from 'util';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { maybe } from '../../../../common/utils/maybe';
 import { ProfileStackFrame } from '../../../../typings/es_schemas/ui/profile';
 import {
@@ -15,13 +17,11 @@ import {
   getValueTypeConfig,
 } from '../../../../common/profiling';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   PROFILE_STACK,
   PROFILE_TOP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { Setup } from '../../../lib/helpers/setup_request';

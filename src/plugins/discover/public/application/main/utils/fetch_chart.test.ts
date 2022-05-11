@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 import { of, throwError as throwErrorRx } from 'rxjs';
-import { RequestAdapter } from '../../../../../inspector';
+import { RequestAdapter } from '@kbn/inspector-plugin';
 import { savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchChart, updateSearchSource } from './fetch_chart';
-import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
+import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/public';
+import { calculateBounds, IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FetchDeps } from './fetch_all';
 

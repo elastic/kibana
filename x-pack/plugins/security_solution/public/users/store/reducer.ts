@@ -19,11 +19,20 @@ import { setUsersPageQueriesActivePageToZero } from './helpers';
 import { UsersTableType, UsersModel } from './model';
 import { Direction } from '../../../common/search_strategy/common';
 import { RiskScoreFields } from '../../../common/search_strategy';
+import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
 export const initialUsersState: UsersModel = {
   page: {
     queries: {
       [UsersTableType.allUsers]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: UsersFields.lastSeen,
+          direction: Direction.desc,
+        },
+      },
+      [UsersTableType.authentications]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },

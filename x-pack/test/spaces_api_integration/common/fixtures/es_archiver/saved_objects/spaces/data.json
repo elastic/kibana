@@ -437,6 +437,25 @@
 {
   "type": "doc",
   "value": {
+    "id": "sharedtype:space_1_only_matching_origin",
+    "index": ".kibana",
+    "source": {
+      "originId": "space_1_only",
+      "sharedtype": {
+        "title": "This object only exists to test the second assertion for spacesWithMatchingOrigins in get_shareable_references"
+      },
+      "type": "sharedtype",
+      "namespaces": ["other_space"],
+      "references": [],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "sharedtype:space_2_only",
     "index": ".kibana",
     "source": {
@@ -448,6 +467,25 @@
       "references": [
         { "type": "sharedtype", "id": "each_space", "name": "refname" }
       ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:space_2_only_matching_origin",
+    "index": ".kibana",
+    "source": {
+      "originId": "space_2_only",
+      "sharedtype": {
+        "title": "This object only exists to test the third assertion for spacesWithMatchingOrigins in get_shareable_references"
+      },
+      "type": "sharedtype",
+      "namespaces": ["*"],
+      "references": [],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"

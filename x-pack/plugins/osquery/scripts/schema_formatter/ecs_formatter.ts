@@ -40,7 +40,7 @@ const RESTRICTED_FIELDS = [
 
 run(
   async ({ flags }) => {
-    const schemaPath = path.resolve(`public/common/schemas/ecs/`);
+    const schemaPath = path.resolve(`../../public/common/schemas/ecs/`);
     const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
 

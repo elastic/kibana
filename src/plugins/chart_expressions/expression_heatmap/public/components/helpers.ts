@@ -5,61 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import type { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
-import type { CustomPaletteParams, ColorStop } from '../../common';
+
 import {
+  PaletteOutput,
+  PaletteRegistry,
+  CustomPaletteParams,
+  getPaletteStops,
+  reversePalette,
+  ColorStop,
   CUSTOM_PALETTE,
-  defaultPaletteParams,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
-} from '../constants';
+} from '@kbn/coloring';
 
-// very simple heuristic: pick last two stops and compute a new stop based on the same distance
-// if the new stop is above max, then reduce the step to reach max, or if zero then just 1.
-//
-// it accepts two series of stops as the function is used also when computing stops from colorStops
-export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[], max: number) {
-  const length = newColorStops.length;
-  // workout the steps from the last 2 items
-  const dataStep = newColorStops[length - 1].stop - newColorStops[length - 2].stop || 1;
-  let step = Number(dataStep.toFixed(2));
-  if (max < colorStops[length - 1].stop + step) {
-    const diffToMax = max - colorStops[length - 1].stop;
-    // if the computed step goes way out of bound, fallback to 1, otherwise reach max
-    step = diffToMax > 0 ? diffToMax : 1;
-  }
-  return step;
-}
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 
-// Need to shift the Custom palette in order to correctly visualize it when in display mode
-function shiftPalette(stops: ColorStop[], max: number) {
-  // shift everything right and add an additional stop at the end
-  const result = stops.map((entry, i, array) => ({
-    ...entry,
-    stop: i + 1 < array.length ? array[i + 1].stop : max,
-  }));
-  if (stops[stops.length - 1].stop === max) {
-    // extends the range by a fair amount to make it work the extra case for the last stop === max
-    const computedStep = getStepValue(stops, result, max) || 1;
-    // do not go beyond the unit step in this case
-    const step = Math.min(1, computedStep);
-    result[stops.length - 1].stop = max + step;
-  }
-  return result;
-}
-
-function getOverallMinMax(
-  params: CustomPaletteParams | undefined,
-  dataBounds: { min: number; max: number }
-) {
-  const { min: dataMin, max: dataMax } = getDataMinMax(params?.rangeType, dataBounds);
-  const minStopValue = params?.colorStops?.[0]?.stop ?? Infinity;
-  const maxStopValue = params?.colorStops?.[params.colorStops.length - 1]?.stop ?? -Infinity;
-  const overallMin = Math.min(dataMin, minStopValue);
-  const overallMax = Math.max(dataMax, maxStopValue);
-  return { min: overallMin, max: overallMax };
-}
+import { defaultPaletteParams } from '../constants';
 
 export function getDataMinMax(
   rangeType: CustomPaletteParams['rangeType'] | undefined,
@@ -85,63 +46,6 @@ export function remapStopsByNewInterval(
       stop: newMin + ((stop - oldMin) * newInterval) / oldInterval,
     };
   });
-}
-/**
- * This is a generic function to compute stops from the current parameters.
- */
-export function getPaletteStops(
-  palettes: PaletteRegistry,
-  activePaletteParams: CustomPaletteParams,
-  // used to customize color resolution
-  {
-    prevPalette,
-    dataBounds,
-    mapFromMinValue,
-    defaultPaletteName,
-  }: {
-    prevPalette?: string;
-    dataBounds: { min: number; max: number };
-    mapFromMinValue?: boolean;
-    defaultPaletteName?: string;
-  }
-) {
-  const { min: minValue, max: maxValue } = getOverallMinMax(activePaletteParams, dataBounds);
-  const interval = maxValue - minValue;
-  const { stops: currentStops, ...otherParams } = activePaletteParams || {};
-
-  if (activePaletteParams.name === 'custom' && activePaletteParams?.colorStops) {
-    // need to generate the palette from the existing controlStops
-    return shiftPalette(activePaletteParams.colorStops, maxValue);
-  }
-  // generate a palette from predefined ones and customize the domain
-  const colorStopsFromPredefined = palettes
-    .get(
-      prevPalette || activePaletteParams?.name || defaultPaletteName || defaultPaletteParams.name
-    )
-    .getCategoricalColors(defaultPaletteParams.steps, otherParams);
-
-  const newStopsMin = mapFromMinValue ? minValue : interval / defaultPaletteParams.steps;
-
-  const stops = remapStopsByNewInterval(
-    colorStopsFromPredefined.map((color, index) => ({ color, stop: index })),
-    {
-      newInterval: interval,
-      oldInterval: colorStopsFromPredefined.length,
-      newMin: newStopsMin,
-      oldMin: 0,
-    }
-  );
-  return stops;
-}
-
-export function reversePalette(paletteColorRepresentation: ColorStop[] = []) {
-  const stops = paletteColorRepresentation.map(({ stop }) => stop);
-  return paletteColorRepresentation
-    .map(({ color }, i) => ({
-      color,
-      stop: stops[paletteColorRepresentation.length - i - 1],
-    }))
-    .reverse();
 }
 
 /**
@@ -169,7 +73,7 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   // make a copy of it as they have to be manipulated later on
   let displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
     dataBounds,
-    defaultPaletteName: activePalette?.name,
+    defaultPaletteName: activePalette?.name ?? defaultPaletteParams.name,
   });
 
   if (activePalette?.params?.reverse && activePalette?.params?.name !== CUSTOM_PALETTE) {
@@ -220,6 +124,7 @@ export const findMinMaxByColumnId = (
   }
   return minMax;
 };
+
 interface SourceParams {
   order?: string;
   orderBy?: string;

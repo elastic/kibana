@@ -5,45 +5,73 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { generatePath } from 'react-router-dom';
 
-import { EuiBasicTable, EuiButton, EuiButtonIcon, HorizontalAlignment } from '@elastic/eui';
+import { useValues, useActions } from 'kea';
+
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  HorizontalAlignment,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
+import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
+import { GettingStartedSteps } from '../../../shared/getting_started_steps';
+import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 
-import { SEARCH_INDEX_OVERVIEW_PATH } from '../../routes';
+import { SEARCH_INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
+import { SearchIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-interface IndexItem {
-  name: string;
-  indexSlug: string;
-  source_type: string;
-  elasticsearch_index_name: string;
-  search_engines: string;
-  docs: {
-    count: number;
-  };
-}
+import { SearchIndicesLogic } from './search_indices_logic';
+
+export const baseBreadcrumbs = [
+  i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
+    defaultMessage: 'Content',
+  }),
+  i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.breadcrumb', {
+    defaultMessage: 'Search indices',
+  }),
+];
+
 export const SearchIndices: React.FC = () => {
+  const { initPage, searchEnginesLoadSuccess, searchIndicesLoadSuccess } =
+    useActions(SearchIndicesLogic);
+  const { searchIndices, searchEngines } = useValues(SearchIndicesLogic);
+
+  useEffect(() => {
+    initPage();
+  }, []);
+
+  // TODO This is for easy testing until we have the backend, please remove this before the release
+  // @ts-ignore
+  window.contentActions = {
+    initPage,
+    searchIndicesLoadSuccess,
+    searchEnginesLoadSuccess,
+  };
+
   // TODO: Replace with a real list of indices
   const columns = [
     {
       field: 'name',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.name.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
         defaultMessage: 'Search index name',
       }),
       sortable: true,
       truncateText: true,
-      // TypeScript does not like 'string' as a type for the 'name' render param. Not sure why.
-      // The linter states it is looking for an 'IndexItem' type here. Falling back to it makes
-      // the linter happy. We can revisit once we have an API and live data instead of the mock.
-      render: (name: string | IndexItem) => (
+      render: (name: string, { indexSlug }: SearchIndex) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
-          to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug: 'foo123' })}
+          to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })}
         >
           {name}
         </EuiLinkTo>
@@ -51,7 +79,7 @@ export const SearchIndices: React.FC = () => {
     },
     {
       field: 'source_type',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.sourceType.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.sourceType.columnTitle', {
         defaultMessage: 'Source type',
       }),
       sortable: true,
@@ -60,7 +88,7 @@ export const SearchIndices: React.FC = () => {
     {
       field: 'elasticsearch_index_name',
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchIndices.elasticsearchIndexName.columnTitle',
+        'xpack.enterpriseSearch.content.searchIndices.elasticsearchIndexName.columnTitle',
         {
           defaultMessage: 'Elasticsearch index name',
         }
@@ -70,14 +98,17 @@ export const SearchIndices: React.FC = () => {
     },
     {
       field: 'search_engines',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.searchEngines.columnTitle', {
-        defaultMessage: 'Attached search engines',
-      }),
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.searchEngines.columnTitle',
+        {
+          defaultMessage: 'Attached search engines',
+        }
+      ),
       truncateText: true,
     },
     {
-      field: 'docs.count',
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.docsCount.columnTitle', {
+      field: 'document_count',
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
         defaultMessage: 'Documents',
       }),
       sortable: true,
@@ -85,16 +116,16 @@ export const SearchIndices: React.FC = () => {
       align: 'right' as HorizontalAlignment,
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.searchIndices.actions.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
         defaultMessage: 'Actions',
       }),
       actions: [
         {
-          render: () => (
-            <EuiButtonIcon
+          render: ({ indexSlug }: SearchIndex) => (
+            <EuiButtonIconTo
               iconType="eye"
               data-test-subj="view-search-index-button"
-              href={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug: 'foo123' })}
+              to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })}
             />
           ),
         },
@@ -102,72 +133,82 @@ export const SearchIndices: React.FC = () => {
     },
   ];
 
-  const indices = [
-    {
-      name: 'Our API Index',
-      indexSlug: 'index-1',
-      source_type: 'API',
-      elasticsearch_index_name: 'ent-search-api-one',
-      search_engines: 'Search Engine One, Search Engine Two',
-      docs: {
-        count: 100,
-      },
-    },
-    {
-      name: 'Customer Feedback',
-      indexSlug: 'index-2',
-      source_type: 'Elasticsearch Index',
-      elasticsearch_index_name: 'es-index-two',
-      search_engines: 'Search Engine One',
-      docs: {
-        count: 100,
-      },
-    },
-    {
-      name: 'Dharma Crawler',
-      indexSlug: 'index-3',
-      source_type: 'Crawler',
-      elasticsearch_index_name: 'ent-search-crawler-one',
-      search_engines: 'Search Engine One, Search Engine Two',
-      docs: {
-        count: 100,
-      },
-    },
-  ] as IndexItem[];
-
   const createNewIndexButton = (
-    <EuiLinkTo
-      data-test-subj="create-new-index-button"
-      to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug: 'new' })}
-    >
+    <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
       <EuiButton iconType="plusInCircle" color="primary" fill>
-        {i18n.translate('xpack.enterpriseSearch.searchIndices.create.buttonTitle', {
+        {i18n.translate('xpack.enterpriseSearch.content.searchIndices.create.buttonTitle', {
           defaultMessage: 'Create new index',
         })}
       </EuiButton>
     </EuiLinkTo>
   );
 
-  return (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={[
-        i18n.translate('xpack.enterpriseSearch.searchIndices.content.breadcrumb', {
+  const engineSteps = (
+    <>
+      <EuiTitle>
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle', {
+            defaultMessage: 'Build beautiful search experiences with Enterprise Search',
+          })}
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <GettingStartedSteps step={searchIndices.length === 0 ? 'first' : 'second'} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ElasticsearchResources />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+
+  const pageTitle =
+    searchIndices.length !== 0
+      ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
           defaultMessage: 'Content',
-        }),
-        i18n.translate('xpack.enterpriseSearch.searchIndices.searchIndices.breadcrumb', {
-          defaultMessage: 'Search indices',
-        }),
-      ]}
-      pageViewTelemetry="Search indices"
-      isLoading={false}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.searchIndices.searchIndices.pageTitle', {
-          defaultMessage: 'Search indices',
-        }),
-        rightSideItems: [createNewIndexButton],
-      }}
-    >
-      <EuiBasicTable items={indices} columns={columns} />
-    </EnterpriseSearchContentPageTemplate>
+        })
+      : i18n.translate(
+          'xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle',
+          {
+            defaultMessage: 'Welcome to Enterprise Search',
+          }
+        );
+
+  return (
+    <>
+      <EnterpriseSearchContentPageTemplate
+        pageChrome={baseBreadcrumbs}
+        pageViewTelemetry="Search indices"
+        isLoading={false}
+        pageHeader={{
+          pageTitle,
+          rightSideItems: [createNewIndexButton],
+        }}
+      >
+        {searchIndices.length !== 0 ? (
+          <>
+            <EuiTitle>
+              <h2>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle',
+                  {
+                    defaultMessage: 'Search Indices',
+                  }
+                )}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="l" />
+            <EuiBasicTable items={searchIndices} columns={columns} />
+          </>
+        ) : (
+          <AddContentEmptyPrompt />
+        )}
+        <EuiSpacer size="xxl" />
+        {(searchEngines.length === 0 || searchIndices.length === 0) && engineSteps}
+      </EnterpriseSearchContentPageTemplate>
+      )
+    </>
   );
 };

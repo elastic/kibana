@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { getStats } from './get_usage_collector';
-import type { SavedObjectsClientContract } from '../../../../core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 const defaultMockSavedObjects = [
   {

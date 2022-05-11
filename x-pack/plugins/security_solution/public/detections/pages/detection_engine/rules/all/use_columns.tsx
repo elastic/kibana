@@ -346,7 +346,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
                               href={`${docLinks.links.siem.troubleshootGaps}`}
                               target="_blank"
                             >
-                              {'see documentation'}
+                              {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
                             </EuiLink>
                           ),
                         }}

@@ -18,7 +18,6 @@ import uuid from 'uuid';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -70,23 +69,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { query } = useApmParams('/services/{serviceName}/overview');
 
-  const {
-    environment,
-    kuery,
-    rangeFrom,
-    rangeTo,
-    comparisonType,
-    comparisonEnabled,
-  } = query;
+  const { environment, kuery, rangeFrom, rangeTo, offset, comparisonEnabled } =
+    query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
@@ -134,8 +120,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       pageIndex,
       direction,
       field,
-      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
-      comparisonType,
+      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
+      offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
     ]
@@ -163,8 +149,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 groupIds: JSON.stringify(
                   items.map(({ groupId: groupId }) => groupId).sort()
                 ),
-                comparisonStart,
-                comparisonEnd,
+                offset: comparisonEnabled ? offset : undefined,
               },
             },
           }

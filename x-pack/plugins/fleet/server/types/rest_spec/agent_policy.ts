@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { NewAgentPolicySchema } from '../models';
 
-import { ListWithKuerySchema } from './index';
+import { ListWithKuerySchema } from '.';
 
 export const GetAgentPoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
@@ -59,5 +59,13 @@ export const GetFullAgentPolicyRequestSchema = {
     download: schema.maybe(schema.boolean()),
     standalone: schema.maybe(schema.boolean()),
     kubernetes: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const GetK8sManifestRequestSchema = {
+  query: schema.object({
+    download: schema.maybe(schema.boolean()),
+    fleetServer: schema.maybe(schema.string()),
+    enrolToken: schema.maybe(schema.string()),
   }),
 };

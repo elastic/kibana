@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { Schema, VisualizationsSetup, VisualizationsStart } from './';
-import { Schemas } from './vis_types';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { coreMock, applicationServiceMock } from '@kbn/core/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
+import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
+import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { VisualizationsPlugin } from './plugin';
-import { spacesPluginMock } from '../../../../x-pack/plugins/spaces/public/mocks';
-import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
-import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
-import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
-import { dataPluginMock } from '../../../plugins/data/public/mocks';
-import { dataViewPluginMocks } from '../../../plugins/data_views/public/mocks';
-import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
-import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
-import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
-import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
-import { urlForwardingPluginMock } from '../../../plugins/url_forwarding/public/mocks';
-import { navigationPluginMock } from '../../../plugins/navigation/public/mocks';
-import { presentationUtilPluginMock } from '../../../plugins/presentation_util/public/mocks';
-import { savedObjectTaggingOssPluginMock } from '../../saved_objects_tagging_oss/public/mocks';
-import { screenshotModePluginMock } from '../../screenshot_mode/public/mocks';
+import { Schemas } from './vis_types';
+import { Schema, VisualizationsSetup, VisualizationsStart } from '.';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),

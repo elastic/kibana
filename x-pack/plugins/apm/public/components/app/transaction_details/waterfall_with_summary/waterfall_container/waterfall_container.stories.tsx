@@ -9,7 +9,7 @@ import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
-import { WaterfallContainer } from './index';
+import { WaterfallContainer } from '.';
 import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
 import {
   inferredSpans,

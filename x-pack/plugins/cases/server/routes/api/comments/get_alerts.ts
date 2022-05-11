@@ -23,7 +23,8 @@ export const getAllAlertsAttachedToCaseRoute = createCasesRoute({
     try {
       const caseId = request.params.case_id;
 
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
 
       return response.ok({
         body: await casesClient.attachments.getAllAlertsAttachToCase({ caseId }),

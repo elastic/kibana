@@ -133,6 +133,22 @@ describe('SaveConfig', () => {
       expect(steps.dive().find(ConfigDocsLinks)).toHaveLength(1);
     });
 
+    it('renders empty ApiKeys', () => {
+      setMockValues({
+        ...values,
+        sourceConfigData: {
+          ...values.sourceConfigData,
+          configuredFields: {},
+        },
+      });
+
+      const wrapper = shallow(<SaveConfig {...publicProps} />);
+      const steps = wrapper.find(EuiSteps);
+
+      expect(steps.dive().find(ApiKey).at(0).prop('apiKey')).toEqual('');
+      expect(steps.dive().find(ApiKey).at(1).prop('apiKey')).toEqual('');
+    });
+
     it('handles Base URI change', () => {
       const wrapper = shallow(<SaveConfig {...publicProps} />);
       const steps = wrapper.find(EuiSteps);

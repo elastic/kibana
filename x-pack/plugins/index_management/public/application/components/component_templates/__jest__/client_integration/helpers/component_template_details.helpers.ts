@@ -6,7 +6,7 @@
  */
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateDetailsFlyoutContent } from '../../../component_template_details';
 

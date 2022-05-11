@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IInterpreterRenderHandlers, RenderMode } from 'src/plugins/expressions';
+import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin';
 import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData } from './services';

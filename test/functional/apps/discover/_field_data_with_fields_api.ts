@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/127905
-    describe.skip('field data', function () {
+    describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
         await retry.try(async function () {
@@ -92,12 +91,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hash.replace('columns:!()', 'columns:!(relatedContent)'),
           { useActualUrl: true }
         );
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function tryingForTime() {
           expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
-        });
 
-        const field = await PageObjects.discover.getDocTableIndex(1);
-        expect(field).to.contain('relatedContent.url');
+          const field = await PageObjects.discover.getDocTableIndex(1);
+          expect(field).to.contain('relatedContent.url');
+        });
 
         const marks = await PageObjects.discover.getMarks();
         expect(marks.length).to.be.above(0);

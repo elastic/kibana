@@ -30,6 +30,7 @@
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
+    { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

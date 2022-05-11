@@ -29,6 +29,7 @@ export const useFetchStatus = () => {
           }
         });
     };
+
     fetchStatus();
   }, [http]);
 

@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
-import { savedObjectsServiceMock } from 'src/core/public/mocks';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 
 import { DataViewSavedObjectConflictError } from '../common';
 

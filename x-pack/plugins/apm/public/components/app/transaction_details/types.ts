@@ -8,6 +8,7 @@
 import { XYBrushEvent } from '@elastic/charts';
 
 import type { TraceSample } from '../../../hooks/use_transaction_trace_samples_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 export interface TabContentProps {
   clearChartSelection: () => void;
@@ -16,4 +17,5 @@ export interface TabContentProps {
   sampleRangeTo?: number;
   selectSampleFromChartSelection: (selection: XYBrushEvent) => void;
   traceSamples: TraceSample[];
+  traceSamplesStatus: FETCH_STATUS;
 }

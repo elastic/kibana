@@ -10,10 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 import mockAnalyticsListItem from '../analytics_list/__mocks__/analytics_list_item.json';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  coreMock as mockCoreServices,
-  i18nServiceMock,
-} from '../../../../../../../../../../src/core/public/mocks';
+import { coreMock as mockCoreServices, i18nServiceMock } from '@kbn/core/public/mocks';
 
 import { DeleteActionName } from './delete_action_name';
 import { DeleteActionModal } from './delete_action_modal';
@@ -24,7 +21,7 @@ jest.mock('../../../../../capabilities/check_capabilities', () => ({
   createPermissionFailureMessage: jest.fn(),
 }));
 
-jest.mock('../../../../../../application/util/dependency_cache', () => ({
+jest.mock('../../../../../util/dependency_cache', () => ({
   getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
 }));
 

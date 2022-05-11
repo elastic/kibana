@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import {
+  EuiButton,
   EuiFormControlLayout,
   EuiFieldText,
   EuiPopover,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiFocusTrap,
   keys,
   EuiSelectable,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  DEFAULT_CUSTOM_ICON_CUTOFF,
+  DEFAULT_CUSTOM_ICON_RADIUS,
+} from '../../../../../../common/constants';
 import { SymbolIcon } from '../legend/symbol_icon';
 import { SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
+import { CustomIconModal } from './custom_icon_modal';
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
@@ -26,14 +35,46 @@ function isKeyboardEvent(event) {
 export class IconSelect extends Component {
   state = {
     isPopoverOpen: false,
+    isModalVisible: false,
+  };
+
+  _handleSave = ({ symbolId, svg, cutoff, radius, label }) => {
+    const icons = [
+      ...this.props.customIcons.filter((i) => {
+        return i.symbolId !== symbolId;
+      }),
+      {
+        symbolId,
+        svg,
+        label,
+        cutoff,
+        radius,
+      },
+    ];
+    this.props.onCustomIconsChange(icons);
+    this._hideModal();
   };
 
   _closePopover = () => {
     this.setState({ isPopoverOpen: false });
   };
 
+  _hideModal = () => {
+    this.setState({ isModalVisible: false });
+  };
+
   _openPopover = () => {
     this.setState({ isPopoverOpen: true });
+  };
+
+  _showModal = () => {
+    this.setState({ isModalVisible: true });
+  };
+
+  _toggleModal = () => {
+    this.setState((prevState) => ({
+      isModalVisible: !prevState.isModalVisible,
+    }));
   };
 
   _togglePopover = () => {
@@ -59,12 +100,14 @@ export class IconSelect extends Component {
     });
 
     if (selectedOption) {
-      this.props.onChange(selectedOption.value);
+      const { key } = selectedOption;
+      this.props.onChange({ selectedIconId: key });
     }
     this._closePopover();
   };
 
   _renderPopoverButton() {
+    const { value, svg, label } = this.props.icon;
     return (
       <EuiFormControlLayout
         icon={{ type: 'arrowDown', side: 'right' }}
@@ -77,15 +120,16 @@ export class IconSelect extends Component {
         <EuiFieldText
           onClick={this._togglePopover}
           onKeyDown={this._handleKeyboardActivity}
-          value={this.props.value}
+          value={label || value}
           compressed
           readOnly
           fullWidth
           prepend={
             <SymbolIcon
-              key={this.props.value}
+              key={value}
               className="mapIconSelectSymbol__inputButton"
-              symbolId={this.props.value}
+              symbolId={value}
+              svg={svg}
               fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             />
           }
@@ -95,26 +139,69 @@ export class IconSelect extends Component {
   }
 
   _renderIconSelectable() {
-    const options = SYMBOL_OPTIONS.map(({ value, label }) => {
+    const makiOptions = [
+      {
+        label: i18n.translate('xpack.maps.styles.vector.iconSelect.kibanaIconsGroupLabel', {
+          defaultMessage: 'Kibana icons',
+        }),
+        isGroupLabel: true,
+      },
+      ...SYMBOL_OPTIONS.map(({ value, label, svg }) => {
+        return {
+          key: value,
+          label,
+          prepend: (
+            <SymbolIcon
+              key={value}
+              symbolId={value}
+              fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+              svg={svg}
+            />
+          ),
+        };
+      }),
+    ];
+
+    const customOptions = this.props.customIcons.map(({ symbolId, label, svg }) => {
       return {
-        value,
+        key: symbolId,
         label,
         prepend: (
           <SymbolIcon
-            key={value}
-            symbolId={value}
+            key={symbolId}
+            symbolId={symbolId}
+            svg={svg}
             fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
           />
         ),
       };
     });
 
+    if (customOptions.length)
+      customOptions.splice(0, 0, {
+        label: i18n.translate('xpack.maps.styles.vector.iconSelect.customIconsGroupLabel', {
+          defaultMessage: 'Custom icons',
+        }),
+        isGroupLabel: true,
+      });
+
+    const options = [...customOptions, ...makiOptions];
+
     return (
-      <EuiSelectable searchable options={options} onChange={this._onIconSelect}>
+      <EuiSelectable searchable options={options} onChange={this._onIconSelect} compressed={true}>
         {(list, search) => (
           <div style={{ width: '300px' }}>
             <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
+            <EuiPopoverFooter>
+              {' '}
+              <EuiButton fullWidth size="s" onClick={this._toggleModal}>
+                <FormattedMessage
+                  id="xpack.maps.styles.vector.iconSelect.addCustomIconButtonLabel"
+                  defaultMessage="Add custom icon"
+                />
+              </EuiButton>
+            </EuiPopoverFooter>
           </div>
         )}
       </EuiSelectable>
@@ -123,17 +210,28 @@ export class IconSelect extends Component {
 
   render() {
     return (
-      <EuiPopover
-        ownFocus
-        button={this._renderPopoverButton()}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        anchorPosition="downLeft"
-        panelPaddingSize="s"
-        display="block"
-      >
-        <EuiFocusTrap clickOutsideDisables={true}>{this._renderIconSelectable()}</EuiFocusTrap>
-      </EuiPopover>
+      <Fragment>
+        <EuiPopover
+          ownFocus
+          button={this._renderPopoverButton()}
+          isOpen={this.state.isPopoverOpen}
+          closePopover={this._closePopover}
+          anchorPosition="downLeft"
+          panelPaddingSize="s"
+          display="block"
+        >
+          <EuiFocusTrap clickOutsideDisables={true}>{this._renderIconSelectable()}</EuiFocusTrap>
+        </EuiPopover>
+        {this.state.isModalVisible ? (
+          <CustomIconModal
+            title="Add custom Icon"
+            cutoff={DEFAULT_CUSTOM_ICON_CUTOFF}
+            radius={DEFAULT_CUSTOM_ICON_RADIUS}
+            onSave={this._handleSave}
+            onCancel={this._hideModal}
+          />
+        ) : null}
+      </Fragment>
     );
   }
 }

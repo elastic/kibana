@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+import type { NavigateToAppOptions } from '@kbn/core/public';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import {
   BulkAction,
@@ -79,25 +79,6 @@ export const executeRulesBulkAction = async ({
     setLoadingRules?.({ ids: [], action: null });
     onFinish?.();
   }
-};
-
-export const initRulesBulkAction = (params: Omit<ExecuteRulesBulkActionArgs, 'search'>) => {
-  const byQuery = (query: string) =>
-    executeRulesBulkAction({
-      ...params,
-      search: { query },
-    });
-
-  const byIds = (ids: string[]) =>
-    executeRulesBulkAction({
-      ...params,
-      search: { ids },
-    });
-
-  return {
-    byQuery,
-    byIds,
-  };
 };
 
 function defaultErrorHandler(toasts: UseAppToasts, action: BulkAction, error: HTTPError) {

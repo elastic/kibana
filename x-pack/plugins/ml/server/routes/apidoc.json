@@ -171,6 +171,7 @@
     "StopTrainedModelDeployment",
     "PutTrainedModel",
     "DeleteTrainedModel",
+    "InferTrainedModelDeployment",
 
     "Alerting",
     "PreviewAlert"

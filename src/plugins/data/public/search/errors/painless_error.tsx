@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { IEsError, isEsError } from './types';
 import { EsError } from './es_error';
 import { getRootCause } from './utils';

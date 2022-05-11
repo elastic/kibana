@@ -26,41 +26,91 @@ describe('<UseField />', () => {
     jest.useRealTimers();
   });
 
-  test('should read the default value from the prop and fallback to the config object', () => {
-    const onFormData = jest.fn();
+  describe('defaultValue', () => {
+    test('should read the default value from the prop and fallback to the config object', () => {
+      const onFormData = jest.fn();
 
-    const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
-      const { form } = useForm();
-      const { subscribe } = form;
+      const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
+        const { form } = useForm();
+        const { subscribe } = form;
 
-      useEffect(() => subscribe(onData).unsubscribe, [subscribe, onData]);
+        useEffect(() => subscribe(onData).unsubscribe, [subscribe, onData]);
 
-      return (
-        <Form form={form}>
-          <UseField path="name" config={{ defaultValue: 'John' }} />
-          <UseField
-            path="lastName"
-            defaultValue="Snow"
-            config={{ defaultValue: 'Will be Overridden' }}
-          />
-        </Form>
-      );
-    };
+        return (
+          <Form form={form}>
+            <UseField path="name" config={{ defaultValue: 'John' }} />
+            <UseField
+              path="lastName"
+              defaultValue="Snow"
+              config={{ defaultValue: 'Will be Overridden' }}
+            />
+          </Form>
+        );
+      };
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onData: onFormData },
-      memoryRouter: { wrapComponent: false },
+      const setup = registerTestBed(TestComp, {
+        defaultProps: { onData: onFormData },
+        memoryRouter: { wrapComponent: false },
+      });
+
+      setup();
+
+      const [{ data }] = onFormData.mock.calls[
+        onFormData.mock.calls.length - 1
+      ] as Parameters<OnUpdateHandler>;
+
+      expect(data.internal).toEqual({
+        name: 'John',
+        lastName: 'Snow',
+      });
     });
 
-    setup();
+    test('should update the form.defaultValue when a field defaultValue is provided through prop', () => {
+      let formHook: FormHook | null = null;
 
-    const [{ data }] = onFormData.mock.calls[
-      onFormData.mock.calls.length - 1
-    ] as Parameters<OnUpdateHandler>;
+      const TestComp = () => {
+        const [isFieldVisible, setIsFieldVisible] = useState(true);
+        const { form } = useForm();
+        formHook = form;
 
-    expect(data.internal).toEqual({
-      name: 'John',
-      lastName: 'Snow',
+        return (
+          <Form form={form}>
+            {isFieldVisible && (
+              <>
+                <UseField path="name" defaultValue="John" />
+                <UseField path="myArray[0].name" defaultValue="John" />
+                <UseField path="myArray[0].lastName" defaultValue="Snow" />
+                <UseField path="myArray[1].name" defaultValue="Foo" />
+                <UseField path="myArray[1].lastName" defaultValue="Bar" />
+              </>
+            )}
+            <button data-test-subj="unmountField" onClick={() => setIsFieldVisible(false)}>
+              Unmount field
+            </button>
+          </Form>
+        );
+      };
+
+      const setup = registerTestBed(TestComp, {
+        memoryRouter: { wrapComponent: false },
+      });
+
+      const { find } = setup();
+
+      expect(formHook!.__getFormDefaultValue()).toEqual({
+        name: 'John',
+        myArray: [
+          { name: 'John', lastName: 'Snow' },
+          { name: 'Foo', lastName: 'Bar' },
+        ],
+      });
+
+      // Unmounts the field and make sure the form.defaultValue has been updated
+      act(() => {
+        find('unmountField').simulate('click');
+      });
+
+      expect(formHook!.__getFormDefaultValue()).toEqual({});
     });
   });
 
@@ -205,7 +255,7 @@ describe('<UseField />', () => {
 
   describe('validation', () => {
     let formHook: FormHook | null = null;
-    let fieldHook: FieldHook | null = null;
+    let fieldHook: FieldHook<string> | null = null;
 
     beforeEach(() => {
       formHook = null;
@@ -216,17 +266,22 @@ describe('<UseField />', () => {
       formHook = form;
     };
 
-    const onFieldHook = (field: FieldHook) => {
+    const onFieldHook = (field: FieldHook<string>) => {
       fieldHook = field;
     };
 
-    const getTestComp = (fieldConfig: FieldConfig) => {
+    const getTestComp = (fieldConfig?: FieldConfig<string>) => {
       const TestComp = () => {
-        const { form } = useForm<any>();
+        const { form } = useForm();
         const [isFieldActive, setIsFieldActive] = useState(true);
+        const [fieldPath, setFieldPath] = useState('name');
 
         const unmountField = () => {
           setIsFieldActive(false);
+        };
+
+        const changeFieldPath = () => {
+          setFieldPath('newPath');
         };
 
         useEffect(() => {
@@ -236,16 +291,12 @@ describe('<UseField />', () => {
         return (
           <Form form={form}>
             {isFieldActive && (
-              <UseField path="name" config={fieldConfig}>
+              <UseField<string> path={fieldPath} config={fieldConfig}>
                 {(field) => {
                   onFieldHook(field);
 
                   return (
-                    <input
-                      value={field.value as string}
-                      onChange={field.onChange}
-                      data-test-subj="myField"
-                    />
+                    <input value={field.value} onChange={field.onChange} data-test-subj="myField" />
                   );
                 }}
               </UseField>
@@ -253,20 +304,23 @@ describe('<UseField />', () => {
             <button onClick={unmountField} data-test-subj="unmountFieldBtn">
               Unmount field
             </button>
+            <button onClick={changeFieldPath} data-test-subj="changeFieldPathBtn">
+              Change field path
+            </button>
           </Form>
         );
       };
       return TestComp;
     };
 
-    const setup = (fieldConfig: FieldConfig) => {
+    const setup = (fieldConfig?: FieldConfig<string>) => {
       return registerTestBed(getTestComp(fieldConfig), {
         memoryRouter: { wrapComponent: false },
       })() as TestBed;
     };
 
     test('should update the form validity whenever the field value changes', async () => {
-      const fieldConfig: FieldConfig = {
+      const fieldConfig: FieldConfig<string> = {
         defaultValue: '', // empty string, which is not valid
         validations: [
           {
@@ -317,7 +371,7 @@ describe('<UseField />', () => {
     });
 
     test('should not update the state if the field has unmounted while validating', async () => {
-      const fieldConfig: FieldConfig = {
+      const fieldConfig: FieldConfig<string> = {
         validations: [
           {
             validator: () => {
@@ -367,6 +421,40 @@ describe('<UseField />', () => {
       expect(spyConsoleError.mock.calls.length).toBe(0);
 
       console.error = originalConsoleError; // eslint-disable-line no-console
+    });
+
+    test('should not validate the field if the "path" changes but the value has not changed', async () => {
+      // This happens with the UseArray. When we delete an item from the array the path for
+      // the remaining items are recalculated and thus changed for every <UseField path={...} /> inside
+      // the array. We should not re-run the validation when adding/removing array items.
+
+      const validator = jest.fn();
+      const fieldConfig: FieldConfig<string> = {
+        validations: [
+          {
+            validator,
+          },
+        ],
+      };
+
+      const {
+        find,
+        form: { setInputValue },
+      } = setup(fieldConfig);
+
+      await act(async () => {
+        setInputValue('myField', 'changedValue');
+      });
+
+      expect(validator).toHaveBeenCalledTimes(1);
+      validator.mockReset();
+
+      await act(async () => {
+        // Change the field path
+        find('changeFieldPathBtn').simulate('click');
+      });
+
+      expect(validator).not.toHaveBeenCalled();
     });
 
     describe('dynamic data', () => {
@@ -708,32 +796,54 @@ describe('<UseField />', () => {
   });
 
   describe('change handlers', () => {
+    const onChange = jest.fn();
     const onError = jest.fn();
 
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
-    const getTestComp = (fieldConfig: FieldConfig) => {
+    const getTestComp = (fieldConfig?: FieldConfig) => {
       const TestComp = () => {
         const { form } = useForm<any>();
 
         return (
           <Form form={form}>
-            <UseField path="name" config={fieldConfig} data-test-subj="myField" onError={onError} />
+            <UseField
+              path="name"
+              config={fieldConfig}
+              data-test-subj="myField"
+              onChange={onChange}
+              onError={onError}
+            />
           </Form>
         );
       };
       return TestComp;
     };
 
-    const setup = (fieldConfig: FieldConfig) => {
+    const setup = (fieldConfig?: FieldConfig) => {
       return registerTestBed(getTestComp(fieldConfig), {
         memoryRouter: { wrapComponent: false },
       })() as TestBed;
     };
 
-    it('calls onError when validation state changes', async () => {
+    test('calls onChange() prop when value state changes', async () => {
+      const {
+        form: { setInputValue },
+      } = setup();
+
+      expect(onChange).toBeCalledTimes(0);
+
+      await act(async () => {
+        setInputValue('myField', 'foo');
+      });
+
+      expect(onChange).toBeCalledTimes(1);
+      expect(onChange).toBeCalledWith('foo');
+    });
+
+    test('calls onError() prop when validation state changes', async () => {
       const {
         form: { setInputValue },
       } = setup({

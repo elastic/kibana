@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

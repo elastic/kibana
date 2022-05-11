@@ -14,11 +14,11 @@ import type {
   VisualizeEmbeddableContract,
   IEditorController,
   EditorRenderProps,
-} from 'src/plugins/visualizations/public';
+} from '@kbn/visualizations-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getUISettings, getI18n, getCoreStart, getDataViewsStart } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
 import type { TimeseriesVisParams } from '../types';
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 export const TSVB_EDITOR_NAME = 'tsvbEditor';
 

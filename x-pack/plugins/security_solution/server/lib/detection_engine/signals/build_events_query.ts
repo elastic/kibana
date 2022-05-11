@@ -193,6 +193,7 @@ export const buildEqlSearchRequest = (
     lists: exceptionLists,
     excludeExceptions: true,
     chunkSize: 1024,
+    alias: null,
   });
 
   const rangeFilter = buildTimeRangeFilter({ to, from, timestampOverride });

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { IExternalUrl } from 'kibana/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import type { IExternalUrl } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
 import { VegaParser } from '../data_model/vega_parser';
 import { createVegaStateRestorer } from '../lib/vega_state_restorer';

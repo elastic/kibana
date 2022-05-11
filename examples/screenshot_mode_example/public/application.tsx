@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '../../../src/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
 import { ScreenshotModeExampleApp } from './components/app';
 

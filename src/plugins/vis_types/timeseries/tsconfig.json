@@ -24,5 +24,6 @@
     { "path": "../../kibana_utils/tsconfig.json" },
     { "path": "../../kibana_react/tsconfig.json" },
     { "path": "../../usage_collection/tsconfig.json" },
+    { "path": "../../unified_search/tsconfig.json" }
   ]
 }

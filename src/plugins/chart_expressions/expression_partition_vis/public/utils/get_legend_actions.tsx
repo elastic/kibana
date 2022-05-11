@@ -11,11 +11,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
-import { DataPublicPluginStart } from '../../../../data/public';
-import { Datatable } from '../../../../expressions/public';
-import { getFormatByAccessor, getAccessor } from '../../../../visualizations/common/utils';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { getFormatByAccessor, getAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { PartitionVisParams } from '../../common/types';
-import { FieldFormatsStart } from '../../../../field_formats/public';
 import { FilterEvent } from '../types';
 
 export const getLegendActions = (

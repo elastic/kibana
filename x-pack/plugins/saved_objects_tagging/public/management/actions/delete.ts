@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart } from 'kibana/public';
+import { NotificationsStart, OverlayStart } from '@kbn/core/public';
 import { TagWithRelations } from '../../../common';
 import { ITagInternalClient } from '../../services/tags';
 import { TagAction } from './types';

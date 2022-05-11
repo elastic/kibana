@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as Either from './either.js';
-import * as Maybe from './maybe.js';
-import { always, id, noop, pink, pipe, ccMark } from './utils.js';
+import * as Either from './either';
+import * as Maybe from './maybe';
+import { always, id, noop, pink, pipe, ccMark } from './utils';
 import execa from 'execa';
 import { resolve } from 'path';
 

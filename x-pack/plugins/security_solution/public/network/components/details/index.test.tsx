@@ -20,7 +20,7 @@ import {
 import { createStore, State } from '../../../common/store';
 import { networkModel } from '../../store';
 
-import { IpOverview } from './index';
+import { IpOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
 import { NarrowDateRange } from '../../../common/components/ml/types';

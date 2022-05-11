@@ -6,9 +6,9 @@
  */
 
 import { adminTestUser } from '@kbn/test';
+import { AuthenticatedUser, Role } from '@kbn/security-plugin/common/model';
+import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { FtrService } from '../ftr_provider_context';
-import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
-import type { UserFormValues } from '../../../plugins/security/public/management/users/edit_user/user_form';
 
 interface LoginOptions {
   expectSpaceSelector?: boolean;

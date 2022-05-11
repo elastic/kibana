@@ -14,8 +14,8 @@ import type {
   DeprecationsDetails,
   ElasticsearchClient,
   GetDeprecationsContext,
-} from 'src/core/server';
-import { ReportingCore } from '../';
+} from '@kbn/core/server';
+import { ReportingCore } from '..';
 import { deprecations } from '../lib/deprecations';
 
 const REPORTING_USER_ROLE_NAME = 'reporting_user';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 
 type HttpResponse = Record<string, any> | any[];
@@ -94,11 +94,14 @@ const registerHttpRequestMockHelpers = (
   const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates`, response, error);
 
-  const setUpdateTemplateResponse = (
-    templateId: string,
-    response?: HttpResponse,
-    error?: ResponseError
-  ) => mockResponse('PUT', `${API_BASE_PATH}/index_templates/${templateId}`, response, error);
+  const setLoadIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/settings/:name`, response, error);
+
+  const setLoadIndexMappingResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/mapping/:name`, response, error);
+
+  const setLoadIndexStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/stats/:name`, response, error);
 
   const setUpdateIndexSettingsResponse = (
     indexName: string,
@@ -128,7 +131,9 @@ const registerHttpRequestMockHelpers = (
     setDeleteTemplateResponse,
     setLoadTemplateResponse,
     setCreateTemplateResponse,
-    setUpdateTemplateResponse,
+    setLoadIndexSettingsResponse,
+    setLoadIndexMappingResponse,
+    setLoadIndexStatsResponse,
     setUpdateIndexSettingsResponse,
     setSimulateTemplateResponse,
     setLoadComponentTemplatesResponse,

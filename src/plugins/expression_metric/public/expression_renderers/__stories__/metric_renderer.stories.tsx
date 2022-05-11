@@ -8,9 +8,9 @@
 
 import React, { CSSProperties } from 'react';
 import { storiesOf } from '@storybook/react';
-import { Style } from 'src/plugins/expressions';
+import { Style } from '@kbn/expressions-plugin';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getMetricRenderer } from '../metric_renderer';
-import { Render } from '../../../../presentation_util/public/__stories__';
 import { MetricRendererConfig } from '../../../common';
 
 const labelFontSpec: CSSProperties = {

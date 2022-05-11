@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView } from 'src/plugins/data_views/public';
-import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
-import { Query } from 'src/plugins/data/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { DatatableRow, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/public';
+import { Query } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES, MultiFieldKey } from '@kbn/data-plugin/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
 import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
@@ -26,6 +27,7 @@ interface FilterParams {
 interface TSVBColumns {
   id: number;
   name: string;
+  fields?: string[];
   isMetric: boolean;
   type: string;
   params?: FilterParams[];
@@ -42,7 +44,12 @@ export const addMetaToColumns = (
     let params: unknown = {
       field: field?.spec.name,
     };
-    if (column.type === BUCKET_TYPES.FILTERS && column.params) {
+    if (column.type === DATA_PLUGIN_BUCKET_TYPES.MULTI_TERMS) {
+      params = {
+        fields: column.fields,
+        otherBucket: true,
+      };
+    } else if (column.type === BUCKET_TYPES.FILTERS && column.params) {
       const filters = column.params.map((col) => ({
         input: col.filter,
         label: col.label,
@@ -129,12 +136,15 @@ export const convertSeriesToDataTable = async (
 
       // Adds an extra column, if the layer is split by terms or filters aggregation
       if (isGroupedByTerms) {
+        const fieldsForTerms = getFieldsForTerms(layer.terms_field);
         id++;
         columns.push({
           id,
-          name: getMultiFieldLabel(getFieldsForTerms(layer.terms_field)),
+          name: getMultiFieldLabel(fieldsForTerms),
+          fields: fieldsForTerms,
           isMetric: false,
-          type: BUCKET_TYPES.TERMS,
+          type:
+            fieldsForTerms.length > 1 ? DATA_PLUGIN_BUCKET_TYPES.MULTI_TERMS : BUCKET_TYPES.TERMS,
         });
       } else if (isGroupedByFilters) {
         id++;
@@ -151,15 +161,24 @@ export const convertSeriesToDataTable = async (
     const filtersColumn = columns.find((col) => col.type === BUCKET_TYPES.FILTERS);
     let rows: DatatableRow[] = [];
     for (let j = 0; j < seriesPerLayer.length; j++) {
-      const data = seriesPerLayer[j].data.map((rowData) => {
-        const row: DatatableRow = [rowData[0], rowData[1]];
-        // If the layer is split by terms aggregation, the data array should also contain the split value.
+      const { data, label, isSplitByTerms, termsSplitKey } = seriesPerLayer[j];
+      const seriesData = data.map((rowData) => {
+        let rowId = X_ACCESSOR_INDEX;
+        const rowsData = { [rowId++]: rowData[0], [rowId++]: rowData[1] };
+
+        let splitValue;
         if (isGroupedByTerms || filtersColumn) {
-          row.push([seriesPerLayer[j].label].flat()[0]);
+          const termsValue = Array.isArray(termsSplitKey)
+            ? new MultiFieldKey({ key: termsSplitKey })
+            : termsSplitKey;
+          splitValue = {
+            [rowId]: isSplitByTerms && termsValue !== undefined ? termsValue : [label].flat()[0],
+          };
         }
-        return row;
+
+        return splitValue ? { ...rowsData, ...splitValue } : rowsData;
       });
-      rows = [...rows, ...data];
+      rows = [...rows, ...seriesData];
     }
     tables[layer.id] = {
       type: 'datatable',

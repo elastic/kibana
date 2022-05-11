@@ -10,10 +10,10 @@ import './table_visualization.scss';
 import React, { useEffect } from 'react';
 import classNames from 'classnames';
 
-import { CoreStart } from 'kibana/public';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import type { PersistedState } from 'src/plugins/visualizations/public';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TableVisConfig, TableVisData } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';

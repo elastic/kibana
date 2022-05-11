@@ -4,7 +4,7 @@
     "Gary Blackwell",
     "Austin Songer"
   ],
-  "description": "Identifies when a new Inbox forwarding rule is created in Microsoft 365. Inbox rules process messages in the Inbox based on conditions and take actions. In this case, the rules will forward the emails to a defined address. Attackers can abuse Inbox Rules to intercept and exfiltrate email data while not requiring organization-wide configuration changes nor privileges to set those.",
+  "description": "Identifies when a new Inbox forwarding rule is created in Microsoft 365. Inbox rules process messages in the Inbox based on conditions and take actions. In this case, the rules will forward the emails to a defined address. Attackers can abuse Inbox Rules to intercept and exfiltrate email data without making organization-wide configuration changes or having the corresponding privileges.",
   "false_positives": [
     "Users and Administrators can create inbox rules for legitimate purposes. Verify if it complies with the company policy and done with the user's consent. Exceptions can be added to this rule to filter expected behavior."
   ],
@@ -61,5 +61,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

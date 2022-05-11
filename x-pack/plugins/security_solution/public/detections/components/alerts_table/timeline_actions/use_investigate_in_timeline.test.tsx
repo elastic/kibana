@@ -11,8 +11,9 @@ import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
 import { Ecs } from '../../../../../common/ecs';
 import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 import * as actions from '../actions';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { SendAlertToTimelineActionProps } from '../types';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -29,6 +30,7 @@ const ecsRowData: Ecs = {
 };
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../actions');
 
 const props = {
@@ -52,6 +54,9 @@ describe('use investigate in timeline hook', () => {
           query: jest.fn(),
         },
       },
+    });
+    (useAppToasts as jest.Mock).mockReturnValue({
+      addError: jest.fn(),
     });
   });
   afterEach(() => {

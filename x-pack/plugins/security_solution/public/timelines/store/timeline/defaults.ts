@@ -65,6 +65,7 @@ export const timelineDefaults: SubsetTimelineModel &
   savedObjectId: null,
   selectAll: false,
   selectedEventIds: {},
+  sessionViewConfig: null,
   show: false,
   showCheckboxes: false,
   sort: [

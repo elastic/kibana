@@ -7,7 +7,7 @@
 
 import querystring from 'querystring';
 import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
 
 import type {
@@ -17,13 +17,13 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
-} from 'src/core/server';
-import type { Capabilities as UICapabilities } from 'src/core/types';
-
+} from '@kbn/core/server';
+import type { Capabilities as UICapabilities } from '@kbn/core/types';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../../features/server';
+} from '@kbn/features-plugin/server';
+
 import { APPLICATION_PREFIX } from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
@@ -178,7 +178,7 @@ export class AuthorizationService {
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
         const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
-        const body = renderToStaticMarkup(
+        const body = renderToString(
           <ResetSessionPage
             buildNumber={buildNumber}
             basePath={http.basePath}
