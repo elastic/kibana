@@ -74,7 +74,7 @@ export const DataLayers: FC<Props> = ({
       {layers.flatMap((layer) =>
         layer.accessors.map((accessor, accessorIndex) => {
           const { seriesType, columnToLabel, layerId, table } = layer;
-          const yColumnId = accessor && getAccessorByDimension(accessor, table.columns);
+          const yColumnId = getAccessorByDimension(accessor, table.columns);
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};

@@ -118,24 +118,15 @@ export const getFormattedTable = (
   table: Datatable,
   formatFactory: FormatFactory,
   xAccessor: string | ExpressionValueVisDimension | undefined,
-  splitAccessor: string | ExpressionValueVisDimension | undefined,
   accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): { table: Datatable; formattedColumns: Record<string, true> } => {
-  const xColumnId = xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined;
-  const splitColumnId = splitAccessor
-    ? getAccessorByDimension(splitAccessor, table.columns)
-    : undefined;
   const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
     (formatters, { id, meta }) => {
-      let accessor: string | ExpressionValueVisDimension | undefined;
-      if (id === xColumnId) {
-        accessor = xColumnId;
-      } else if (id === splitColumnId) {
-        accessor = splitAccessor;
-      } else {
-        accessor = accessors.find((a) => getAccessorByDimension(a, table.columns) === id);
-      }
+      const accessor: string | ExpressionValueVisDimension | undefined = accessors.find(
+        (a) => getAccessorByDimension(a, table.columns) === id
+      );
+
       return {
         ...formatters,
         [id]: formatFactory(accessor ? getFormatByAccessor(accessor, table.columns) : meta.params),
@@ -153,7 +144,7 @@ export const getFormattedTable = (
         row,
         table.columns,
         columnsFormatters,
-        xColumnId,
+        xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
         xScaleType
       );
       return {
@@ -184,8 +175,9 @@ export const getFormattedTablesByLayers = (
         table,
         formatFactory,
         xAccessor,
-        splitAccessor,
-        accessors,
+        [xAccessor, splitAccessor, ...accessors].filter<string | ExpressionValueVisDimension>(
+          (a): a is string | ExpressionValueVisDimension => a !== undefined
+        ),
         xScaleType
       ),
     }),
