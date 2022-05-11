@@ -63,7 +63,6 @@ describe('Create Layout', () => {
         "viewport": Object {
           "height": 1200,
           "width": 1950,
-          "zoom": 1,
         },
         "zoom": 1,
       }

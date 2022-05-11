@@ -6,6 +6,7 @@
  */
 
 import { HeadlessChromiumDriver } from '../browsers';
+import { Layout } from '../layouts';
 import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import type { Screenshot } from './types';
@@ -13,7 +14,8 @@ import type { Screenshot } from './types';
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
   eventLogger: EventLogger,
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[]
+  elementsPositionAndAttributes: ElementsPositionAndAttribute[],
+  layout: Layout
 ): Promise<Screenshot[]> => {
   const { kbnLogger } = eventLogger;
   kbnLogger.info(`taking screenshots`);
@@ -31,6 +33,7 @@ export const getScreenshots = async (
         {
           width: boundingClientRect.left + scroll.x + boundingClientRect.width,
           height: boundingClientRect.top + scroll.y + boundingClientRect.height,
+          zoom: layout.getBrowserZoom(),
         },
         eventLogger.kbnLogger
       );

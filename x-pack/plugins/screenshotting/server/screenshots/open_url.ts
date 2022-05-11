@@ -36,7 +36,7 @@ export const openUrl = async (
           window.addEventListener('resize', () => {
             // eslint-disable-next-line no-console
             console.log(
-              `Detected a viewport resize: width=${window.innerWidth} height=${window.innerHeight}`
+              `Detected a viewport resize: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
             );
           });
         },

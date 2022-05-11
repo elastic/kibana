@@ -38,10 +38,9 @@ import { getMetrics, PerformanceMetrics } from './metrics';
 interface CreatePageOptions {
   browserTimezone?: string;
   defaultViewport: {
-    /** Size in pixels */
-    width?: number;
-    /** Size in pixels */
-    height?: number;
+    width: number;
+    height: number;
+    deviceScaleFactor: number;
   };
   openUrlTimeout: number;
 }
@@ -63,10 +62,9 @@ interface ClosePageResult {
   metrics?: PerformanceMetrics;
 }
 
-export const DEFAULT_VIEWPORT = {
+export const DEFAULT_VIEWPORT: Pick<puppeteer.Viewport, 'width' | 'height'> = {
   width: 1950,
   height: 1200,
-  zoom: 1,
 };
 
 // Default args used by pptr
@@ -143,7 +141,9 @@ export class HeadlessChromiumDriverFactory {
       // NOTE: _.defaults assigns to the target object, so we copy it.
       // NOTE NOTE: _.defaults is not the same as { ...DEFAULT_VIEWPORT, ...defaultViewport }
       const viewport = _.defaults({ ...defaultViewport }, DEFAULT_VIEWPORT);
-      logger.debug(`Launching with viewport: width=${viewport.width} height=${viewport.height}`);
+      logger.debug(
+        `Launching with viewport: width=${viewport.width} height=${viewport.height} scaleFactor=${viewport.deviceScaleFactor}`
+      );
 
       (async () => {
         let browser: Browser | undefined;

@@ -261,7 +261,7 @@ export class ScreenshotObservableHandler {
                   this.getTitle(data.timeRange),
                   (this.options as PdfScreenshotOptions).logo
                 )
-              : await getScreenshots(this.driver, this.eventLogger, elements);
+              : await getScreenshots(this.driver, this.eventLogger, elements, this.layout);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }
