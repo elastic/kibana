@@ -19,7 +19,7 @@ import { ApiToken } from '../types';
 
 import { Key } from './key';
 
-import { CredentialsList } from './';
+import { CredentialsList } from '.';
 
 describe('CredentialsList', () => {
   const apiToken: ApiToken = {

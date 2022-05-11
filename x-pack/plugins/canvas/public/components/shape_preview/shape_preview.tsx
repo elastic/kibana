@@ -14,8 +14,8 @@ import {
   SvgConfig,
   ShapeRef,
   ViewBoxParams,
-} from '../../../../../../src/plugins/expression_shape/public';
-import { withSuspense } from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/expression-shape-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 
 interface Props {
   shape?: string;

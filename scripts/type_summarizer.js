@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
+require('../src/setup_node_env/no_transpilation');
 require('source-map-support/register');
-require('../packages/kbn-type-summarizer/src/bazel_cli');
+require('@kbn/type-summarizer/target_node/bazel_cli');

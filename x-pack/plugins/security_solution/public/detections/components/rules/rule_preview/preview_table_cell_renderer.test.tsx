@@ -15,7 +15,7 @@ import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../com
 import { PreviewTableCellRenderer } from './preview_table_cell_renderer';
 import { getColumnRenderer } from '../../../../timelines/components/timeline/body/renderers/get_column_renderer';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
-import { BrowserFields } from '../../../../../../timelines/common/search_strategy';
+import { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
 import { Ecs } from '../../../../../common/ecs';
 import { columnRenderers } from '../../../../timelines/components/timeline/body/renderers';
 

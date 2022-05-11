@@ -7,8 +7,8 @@
  */
 
 import { Filter, Query } from '@kbn/es-query';
-import { TimeRange } from '../../data/common';
-import { EmbeddableInput } from '../../embeddable/common/types';
+import { TimeRange } from '@kbn/data-plugin/common';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
 export type ControlWidth = 'auto' | 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';
@@ -26,4 +26,9 @@ export type ControlInput = EmbeddableInput & {
   timeRange?: TimeRange;
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
+};
+
+export type DataControlInput = ControlInput & {
+  fieldName: string;
+  dataViewId: string;
 };

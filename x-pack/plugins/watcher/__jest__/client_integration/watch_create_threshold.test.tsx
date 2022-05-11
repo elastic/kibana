@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { WATCH_ID } from './helpers/jest_constants';
 import { getExecuteDetails } from '../../__fixtures__';
 import { WATCH_TYPES, API_BASE_PATH } from '../../common/constants';

@@ -11,7 +11,7 @@ import { EuiCode, EuiInputPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { QueryStringInput } from '../../../../../../../../../src/plugins/unified_search/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
 import { SearchItems } from '../../../../hooks/use_search_items';
 

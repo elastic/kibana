@@ -14,7 +14,7 @@ import { TestProviders } from '../../../mock';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/kibana');
 
 const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();

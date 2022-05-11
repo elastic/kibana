@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
+import { getListResponseMock } from '@kbn/lists-plugin/common/schemas/response/list_schema.mock';
 import { useDeleteList, useFindLists } from '@kbn/securitysolution-list-hooks';
 import { exportList } from '@kbn/securitysolution-list-api';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';

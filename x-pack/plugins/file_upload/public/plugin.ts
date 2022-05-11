@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin } from '../../../../src/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   FileUploadStartApi,
   FileUploadComponent,
@@ -17,7 +18,6 @@ import {
   analyzeFile,
 } from './api';
 import { setStartServices } from './kibana_services';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

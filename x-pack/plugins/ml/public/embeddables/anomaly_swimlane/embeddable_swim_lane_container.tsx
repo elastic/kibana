@@ -9,8 +9,9 @@ import React, { FC, useCallback, useState, useEffect } from 'react';
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
@@ -22,6 +23,7 @@ import { AppStateSelectedCells } from '../../application/explorer/explorer_utils
 import { MlDependencies } from '../../application/app';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
@@ -52,6 +54,13 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   onLoading,
   onError,
 }) => {
+  useEmbeddableExecutionContext<AnomalySwimlaneEmbeddableInput>(
+    services[0].executionContext,
+    embeddableInput,
+    ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    id
+  );
+
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const [fromPage, setFromPage] = useState<number>(1);

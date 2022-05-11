@@ -7,10 +7,10 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ExpressionsServiceSetup } from 'src/plugins/expressions';
-import { ExpressionsServiceFork } from 'src/plugins/expressions/common/service/expressions_fork';
-import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '../../../src/core/public';
-import type { DeveloperExamplesSetup } from '../../developer_examples/public';
+import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin';
+import { ExpressionsServiceFork } from '@kbn/expressions-plugin/common/service/expressions_fork';
+import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { App, ExpressionsContext } from './app';
 import { countEvent, getEvents, pluck } from './functions';
 

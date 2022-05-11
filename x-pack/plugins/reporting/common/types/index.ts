@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { PdfScreenshotResult, PngScreenshotResult } from '../../../screenshotting/server';
+import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
 export type { JobParamsPNGDeprecated } from './export_types/png';
@@ -156,6 +156,7 @@ export interface JobSummary {
   status: JobStatus;
   jobtype: ReportSource['jobtype'];
   title: ReportSource['payload']['title'];
+  errorCode?: ReportOutput['error_code'];
   maxSizeReached: TaskRunResult['max_size_reached'];
   csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
 }

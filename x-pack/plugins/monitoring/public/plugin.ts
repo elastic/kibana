@@ -13,14 +13,11 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
@@ -48,6 +45,7 @@ interface MonitoringSetupPluginDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
+
 export class MonitoringPlugin
   implements
     Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
@@ -79,7 +77,7 @@ export class MonitoringPlugin
         icon,
         path: '/app/monitoring',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         description: i18n.translate('xpack.monitoring.featureCatalogueDescription', {
           defaultMessage: 'Track the real-time health and performance of your deployment.',
         }),

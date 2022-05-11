@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   StatsGetter,
   StatsCollectionContext,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';

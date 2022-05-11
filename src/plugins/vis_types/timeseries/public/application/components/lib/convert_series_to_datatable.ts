@@ -5,16 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView } from 'src/plugins/data_views/public';
-import { DatatableRow, DatatableColumn, DatatableColumnType } from 'src/plugins/expressions/public';
-import { Query } from 'src/plugins/data/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { DatatableRow, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/public';
+import { Query } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES, MultiFieldKey } from '@kbn/data-plugin/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
 import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';
-import {
-  BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES,
-  MultiFieldKey,
-} from '../../../../../../data/common';
 import { BUCKET_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import { getDataStart, getDataViewsStart } from '../../../services';

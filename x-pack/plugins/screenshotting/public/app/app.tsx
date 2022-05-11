@@ -15,8 +15,8 @@ import {
   EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
-import type { ExpressionRendererParams } from 'src/plugins/expressions/public';
-import { useExpressionRenderer } from '../../../../../src/plugins/expressions/public';
+import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
+import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { SCREENSHOTTING_EXPRESSION, SCREENSHOTTING_EXPRESSION_INPUT } from '../../common';
 import { ScreenshotModeContext } from './screenshot_mode_context';
 

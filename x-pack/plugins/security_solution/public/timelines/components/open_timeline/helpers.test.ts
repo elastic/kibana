@@ -52,7 +52,7 @@ import {
 import { resolveTimeline } from '../../containers/api';
 
 jest.mock('../../../common/store/inputs/actions');
-jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../common/components/url_state/normalize_time_range');
 jest.mock('../../store/timeline/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {

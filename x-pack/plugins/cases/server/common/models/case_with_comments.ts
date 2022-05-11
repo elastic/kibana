@@ -11,7 +11,7 @@ import {
   SavedObjectReference,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   CaseResponse,
   CaseResponseRt,

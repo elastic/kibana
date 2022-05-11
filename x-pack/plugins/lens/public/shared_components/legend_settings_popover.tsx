@@ -15,11 +15,12 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { ToolbarPopover } from '../shared_components';
+import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { ToolbarPopover } from '.';
 import { LegendLocationSettings } from './legend_location_settings';
 import { ColumnsNumberSetting } from './columns_number_setting';
 import { LegendSizeSettings } from './legend_size_settings';
-import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { useDebouncedValue } from './debounced_value';
 
 export interface LegendSettingsPopoverProps {
@@ -58,11 +59,11 @@ export interface LegendSettingsPopoverProps {
   /**
    * Sets the vertical alignment for legend inside chart
    */
-  verticalAlignment?: VerticalAlignment;
+  verticalAlignment?: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
   /**
    * Sets the vertical alignment for legend inside chart
    */
-  horizontalAlignment?: HorizontalAlignment;
+  horizontalAlignment?: typeof HorizontalAlignment.Left | typeof HorizontalAlignment.Right;
   /**
    * Callback on horizontal alignment option change
    */
@@ -122,11 +123,16 @@ export interface LegendSettingsPopoverProps {
   /**
    * Legend size in pixels
    */
-  legendSize?: number;
+  legendSize?: LegendSize;
   /**
    * Callback on legend size change
    */
-  onLegendSizeChange: (size?: number) => void;
+  onLegendSizeChange: (size?: LegendSize) => void;
+  /**
+   * Whether to show auto legend size option. Should only be true for pre 8.3 visualizations that already had it as their setting.
+   * (We're trying to get people to stop using it so it can eventually be removed.)
+   */
+  showAutoLegendSizeOption: boolean;
 }
 
 const DEFAULT_TRUNCATE_LINES = 1;
@@ -185,6 +191,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   onTruncateLegendChange = () => {},
   legendSize,
   onLegendSizeChange,
+  showAutoLegendSizeOption,
 }) => {
   return (
     <ToolbarPopover
@@ -225,13 +232,16 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             position={position}
             onPositionChange={onPositionChange}
           />
-          <LegendSizeSettings
-            legendSize={legendSize}
-            onLegendSizeChange={onLegendSizeChange}
-            isVerticalLegend={
-              !position || position === Position.Left || position === Position.Right
-            }
-          />
+          {location !== 'inside' && (
+            <LegendSizeSettings
+              legendSize={legendSize}
+              onLegendSizeChange={onLegendSizeChange}
+              isVerticalLegend={
+                !position || position === Position.Left || position === Position.Right
+              }
+              showAutoOption={showAutoLegendSizeOption}
+            />
+          )}
           {location && (
             <ColumnsNumberSetting
               floatingColumns={floatingColumns}

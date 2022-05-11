@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IExternalUrlPolicy } from 'src/core/server/types';
+import { IExternalUrlPolicy } from '../../server/types';
 
-import { CoreService } from 'src/core/types';
+import { CoreService } from '../../types';
 import { IExternalUrl } from './types';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { Sha256 } from '../utils';

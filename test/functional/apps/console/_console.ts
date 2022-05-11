@@ -106,5 +106,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
     });
+
+    describe('with kbn: prefix in request', () => {
+      before(async () => {
+        await PageObjects.console.clearTextArea();
+      });
+      it('it should send successful request to Kibana API', async () => {
+        const expectedResponseContains = 'default space';
+        await PageObjects.console.enterRequest('\n GET kbn:/api/spaces/space');
+        await PageObjects.console.clickPlay();
+        await retry.try(async () => {
+          const actualResponse = await PageObjects.console.getResponse();
+          log.debug(actualResponse);
+          expect(actualResponse).to.contain(expectedResponseContains);
+        });
+      });
+    });
   });
 }

@@ -8,18 +8,18 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { LensEmbeddableInput, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { AllSeries, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
-import { LensEmbeddableInput, LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import { DataViewState } from '../hooks/use_app_data_view';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
-import { ViewMode } from '../../../../../../../../src/plugins/embeddable/common';
 import { observabilityFeatureId } from '../../../../../common';
 import { SingleMetric, SingleMetricOptions } from './single_metric';
 

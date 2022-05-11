@@ -6,15 +6,15 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ElasticsearchClientMock } from '../../../../../src/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
-} from 'src/plugins/usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
-import { FeaturesAvailability } from './';
+import { FeaturesAvailability } from '.';
 import {
   getReportingUsageCollector,
   registerReportingUsageCollector,

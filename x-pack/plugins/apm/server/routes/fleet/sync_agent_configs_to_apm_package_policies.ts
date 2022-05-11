@@ -9,7 +9,7 @@ import {
   CoreSetup,
   CoreStart,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { TelemetryUsageCounter } from '../typings';
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';

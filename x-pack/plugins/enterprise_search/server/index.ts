@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
 import { EnterpriseSearchPlugin } from './plugin';
 

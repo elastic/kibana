@@ -12,7 +12,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
 >
   <div>
     <div
-      className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
+      className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed euiFormRow--horizontal"
       id="generated-id-row"
     >
       <div
@@ -93,7 +93,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
         className="euiFlexItem"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -181,7 +181,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
         className="euiFlexItem"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -269,7 +269,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
         className="euiFlexItem"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div

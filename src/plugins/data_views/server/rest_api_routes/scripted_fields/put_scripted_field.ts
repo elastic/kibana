@@ -7,9 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchema } from '../util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -42,8 +42,9 @@ export const registerPutScriptedFieldRoute = (
     },
     router.handleLegacyErrors(
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const core = await ctx.core;
+        const savedObjectsClient = core.savedObjects.client;
+        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { aggSumFnName } from './sum_fn';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
 
 const sumTitle = i18n.translate('data.search.aggs.metrics.sumTitle', {

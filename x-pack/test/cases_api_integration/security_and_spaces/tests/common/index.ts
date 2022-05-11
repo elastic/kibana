@@ -31,13 +31,13 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/tags/get_tags'));
     loadTestFile(require.resolve('./user_actions/get_all_user_actions'));
     loadTestFile(require.resolve('./configure/get_configure'));
-    loadTestFile(require.resolve('./configure/get_connectors'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
     loadTestFile(require.resolve('./metrics/get_case_metrics'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_alerts'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_actions'));
     loadTestFile(require.resolve('./metrics/get_case_metrics_connectors'));
+    loadTestFile(require.resolve('./metrics/get_cases_metrics'));
 
     /**
      * Internal routes

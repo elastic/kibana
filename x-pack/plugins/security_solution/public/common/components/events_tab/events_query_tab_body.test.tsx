@@ -12,7 +12,7 @@ import { HostsType } from '../../../hosts/store/model';
 import { TestProviders } from '../../mock';
 import { EventsQueryTabBody, EventsQueryTabBodyComponentProps } from './events_query_tab_body';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import * as tGridActions from '../../../../../timelines/public/store/t_grid/actions';
+import * as tGridActions from '@kbn/timelines-plugin/public/store/t_grid/actions';
 
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');

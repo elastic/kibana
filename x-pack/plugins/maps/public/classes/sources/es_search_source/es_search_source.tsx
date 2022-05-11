@@ -10,8 +10,10 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
-import type { DataViewField, DataView } from 'src/plugins/data/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { SortDirection, SortDirectionNumeric, TimeRange } from '@kbn/data-plugin/common';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -52,12 +54,6 @@ import {
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import {
-  SortDirection,
-  SortDirectionNumeric,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, IMvtVectorSource, SourceStatus } from '../vector_source';
@@ -185,8 +181,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
-        hasJoins={sourceEditorArgs.hasJoins}
-        clearJoins={sourceEditorArgs.clearJoins}
+        numberOfJoins={sourceEditorArgs.numberOfJoins}
       />
     );
   }
@@ -762,10 +757,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
       reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
         defaultMessage: 'Joins are not supported when scaling by clusters',
-      });
-    } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
-      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
-        defaultMessage: 'Joins are not supported when scaling by vector tiles',
       });
     } else {
       reason = null;

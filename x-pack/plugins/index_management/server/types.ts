@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
 

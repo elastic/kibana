@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DatatableColumn } from '../../../../../../src/plugins/expressions/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { OriginalColumn, RenameColumnsExpressionFunction } from './types';
 
 function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColumn) {

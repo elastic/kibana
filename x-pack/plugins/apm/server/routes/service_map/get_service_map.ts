@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery, termsQuery } from '../../../../observability/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,

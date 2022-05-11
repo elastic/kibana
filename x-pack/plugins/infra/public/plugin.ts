@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
+import { AppMountParameters, PluginInitializerContext } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';

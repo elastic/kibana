@@ -10,7 +10,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common';
 import {

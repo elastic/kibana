@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 
 import type { PackagePolicy } from '../../../../common';

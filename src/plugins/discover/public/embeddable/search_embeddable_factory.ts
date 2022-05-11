@@ -7,14 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   EmbeddableFactoryDefinition,
   Container,
   ErrorEmbeddable,
-} from '../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 
-import { TimeRange } from '../../../data/public';
+import { TimeRange } from '@kbn/data-plugin/public';
 
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';

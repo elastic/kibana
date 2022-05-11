@@ -10,21 +10,21 @@ import 'brace';
 import { of } from 'rxjs';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
-import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   ISearchStart,
-} from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public');
-jest.mock('../../../../../../../src/plugins/es_ui_shared/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/es-ui-shared-plugin/public', () => ({
   XJson: {
     useXJsonMode: jest.fn().mockReturnValue({
       convertToJson: jest.fn(),
@@ -44,8 +44,8 @@ jest.mock('../../../../../../../src/plugins/es_ui_shared/public', () => ({
     />
   ),
 }));
-jest.mock('../../../../../triggers_actions_ui/public', () => {
-  const original = jest.requireActual('../../../../../triggers_actions_ui/public');
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
     getIndexPatterns: () => {

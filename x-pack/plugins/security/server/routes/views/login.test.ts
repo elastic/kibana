@@ -13,9 +13,9 @@ import type {
   HttpResourcesRequestHandler,
   RequestHandler,
   RouteConfig,
-} from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import type { SecurityLicense } from '../../../common/licensing';
 import type { LoginSelectorProvider } from '../../../common/login_state';

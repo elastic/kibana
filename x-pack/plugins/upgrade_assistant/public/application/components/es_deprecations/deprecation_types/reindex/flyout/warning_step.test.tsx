@@ -19,7 +19,7 @@ const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 jest.mock('../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual(
-    '../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
+    '@kbn/core/public/doc_links/doc_links_service.mock'
   );
 
   return {

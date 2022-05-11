@@ -13,18 +13,19 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { KibanaExecutionContext } from 'kibana/public';
-import { Container, Embeddable } from '../../../embeddable/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { Container, Embeddable } from '@kbn/embeddable-plugin/public';
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '@kbn/data-plugin/public';
+import { ISearchSource, Query, TimeRange, FilterStateStore } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SavedSearch } from '../services/saved_searches';
-import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { APPLY_FILTER_TRIGGER, FilterManager, generateFilters } from '../../../data/public';
 import { DiscoverServices } from '../build_services';
-import { ISearchSource, Query, TimeRange, FilterStateStore } from '../../../data/public';
-import { DataView, DataViewField } from '../../../data_views/public';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
-import { UiActionsStart } from '../../../ui_actions/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -44,7 +45,6 @@ import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { ElasticSearchHit } from '../types';
-import { KibanaContextProvider, KibanaThemeProvider } from '../../../kibana_react/public';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {

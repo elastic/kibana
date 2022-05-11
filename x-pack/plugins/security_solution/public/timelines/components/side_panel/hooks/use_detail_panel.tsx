@@ -7,8 +7,8 @@
 
 import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import type { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import type { EntityType } from '../../../../../../timelines/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { activeTimeline } from '../../../containers/active_timeline_context';

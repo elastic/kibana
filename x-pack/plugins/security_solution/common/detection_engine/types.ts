@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleAction } from '../../../alerting/common';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 
 export type RuleAlertAction = Omit<RuleAction, 'actionTypeId'> & {
   action_type_id: string;

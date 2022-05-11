@@ -21,7 +21,7 @@ import { ProductCard } from '../product_card';
 import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
-import { ProductSelector } from './';
+import { ProductSelector } from '.';
 
 const props = {
   access: {},

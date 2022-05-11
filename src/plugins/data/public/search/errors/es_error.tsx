@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KbnError } from '../../../../kibana_utils/common';
+import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import { IEsError } from './types';
 import { getRootCause } from './utils';
 

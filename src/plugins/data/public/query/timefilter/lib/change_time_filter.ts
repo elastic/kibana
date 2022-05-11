@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { keys } from 'lodash';
 import { RangeFilter } from '@kbn/es-query';
-import { TimefilterContract } from '../../timefilter';
+import { TimefilterContract } from '..';
 import { TimeRange } from '../../../../common';
 
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {

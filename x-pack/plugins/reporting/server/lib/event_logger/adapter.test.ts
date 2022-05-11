@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LogMeta } from 'kibana/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { LogMeta } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { EcsLogAdapter } from './adapter';
 
 describe('EcsLogAdapter', () => {

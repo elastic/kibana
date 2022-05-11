@@ -7,8 +7,8 @@
 
 import { cloneDeep } from 'lodash';
 import { firstValueFrom, Observable } from 'rxjs';
-import { CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
-import { ILicense } from '../../../../licensing/common/types';
+import { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import { MlCapabilities, basicLicenseMlCapabilities } from '../../../common/types/capabilities';
 

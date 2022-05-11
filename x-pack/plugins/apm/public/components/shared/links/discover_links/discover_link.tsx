@@ -7,7 +7,7 @@
 
 import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import rison, { RisonValue } from 'rison-node';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { TELEMETRY_CHANNEL_SAVED_QUERIES } from '../constants';
 import { templateSavedQueries } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
@@ -43,6 +43,7 @@ export function createTelemetrySavedQueriesTaskConfig() {
 
       if (!savedQueriesResponse?.total) {
         logger.debug('no saved queries found');
+
         return 0;
       }
 

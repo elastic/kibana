@@ -12,7 +12,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   LensDocShape715,
   LensDocShape810,
@@ -21,6 +21,7 @@ import {
   VisStatePre715,
   VisState810,
   VisState820,
+  VisState830,
 } from './types';
 import { layerTypes, MetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
@@ -2064,6 +2065,7 @@ describe('Lens migrations', () => {
       expect(layer2Columns['4'].params).toHaveProperty('includeEmptyRows', true);
     });
   });
+
   describe('8.3.0 old metric visualization defaults', () => {
     const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
@@ -2111,6 +2113,123 @@ describe('Lens migrations', () => {
       expect(visState.textAlign).toBe('right');
       expect(visState.titlePosition).toBe('top');
       expect(visState.size).toBe('s');
+    });
+  });
+
+  describe('8.3.0 - convert legend sizes to strings', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const migrate = migrations['8.3.0'];
+
+    const autoLegendSize = 'auto';
+    const largeLegendSize = 'large';
+    const largeLegendSizePx = 180;
+
+    it('works for XY visualization and heatmap', () => {
+      const getDoc = (type: string, legendSize: number | undefined) =>
+        ({
+          attributes: {
+            visualizationType: type,
+            state: {
+              visualization: {
+                legend: {
+                  legendSize,
+                },
+              },
+            },
+          },
+        } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>);
+
+      expect(
+        migrate(getDoc('lnsXY', undefined), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(autoLegendSize);
+      expect(
+        migrate(getDoc('lnsXY', largeLegendSizePx), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(largeLegendSize);
+
+      expect(
+        migrate(getDoc('lnsHeatmap', undefined), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(autoLegendSize);
+      expect(
+        migrate(getDoc('lnsHeatmap', largeLegendSizePx), context).attributes.state.visualization
+          .legend.legendSize
+      ).toBe(largeLegendSize);
+    });
+
+    it('works for pie visualization', () => {
+      const pieVisDoc = {
+        attributes: {
+          visualizationType: 'lnsPie',
+          state: {
+            visualization: {
+              layers: [
+                {
+                  legendSize: undefined,
+                },
+                {
+                  legendSize: largeLegendSizePx,
+                },
+              ],
+            },
+          },
+        },
+      } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+      expect(migrate(pieVisDoc, context).attributes.state.visualization.layers).toEqual([
+        { legendSize: autoLegendSize },
+        { legendSize: largeLegendSize },
+      ]);
+    });
+  });
+
+  describe('8.3.0 valueLabels in XY', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: {
+            valueLabels: 'inside',
+            legend: {},
+          },
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('migrates valueLabels from `inside` to `show`', () => {
+      const result = migrations['8.3.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const visState = result.attributes.state.visualization as VisState830;
+      expect(visState.valueLabels).toBe('show');
+    });
+
+    it("doesn't migrate valueLabels with `hide` value", () => {
+      const result = migrations['8.3.0'](
+        {
+          ...example,
+          attributes: {
+            ...example.attributes,
+            state: {
+              ...example.attributes.state,
+              visualization: {
+                ...(example.attributes.state.visualization as Record<string, unknown>),
+                valueLabels: 'hide',
+              },
+            },
+          },
+        },
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
+      const visState = result.attributes.state.visualization as VisState830;
+      expect(visState.valueLabels).toBe('hide');
     });
   });
 });

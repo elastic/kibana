@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { triggersActionsUiMock } from '../../../triggers_actions_ui/public/mocks';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { getConnectorIcon, isDeprecatedConnector } from './utils';
 
 describe('Utils', () => {
@@ -82,6 +82,17 @@ describe('Utils', () => {
           config: { usesTableApi: true },
         })
       ).toBe(true);
+    });
+
+    it('returns false if the connector preconfigured', () => {
+      expect(isDeprecatedConnector({ ...connector, isPreconfigured: true })).toBe(false);
+    });
+
+    it('returns false if the config is undefined', () => {
+      expect(
+        // @ts-expect-error
+        isDeprecatedConnector({ ...connector, config: undefined })
+      ).toBe(false);
     });
   });
 });

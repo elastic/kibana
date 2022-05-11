@@ -7,8 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { HttpFetchError } from '../../../../../../src/core/public';
-import type { DataView } from '../../../../../../src/plugins/data_views/public';
+import { HttpFetchError } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -40,7 +40,7 @@ import {
   GroupByConfigWithUiSupport,
   PivotAggsConfig,
   PivotGroupByConfig,
-} from './';
+} from '.';
 
 export interface SimpleQuery {
   query_string: {

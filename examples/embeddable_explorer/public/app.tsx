@@ -12,21 +12,21 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
-import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
   SavedObjectsStart,
   IUiSettingsClient,
   OverlayStart,
-} from '../../../src/core/public';
+} from '@kbn/core/public';
+import { EmbeddableExamplesStart } from '@kbn/embeddable-examples-plugin/public/plugin';
 import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
-import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface PageDef {
   title: string;

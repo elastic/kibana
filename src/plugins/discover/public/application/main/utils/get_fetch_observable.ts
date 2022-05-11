@@ -8,12 +8,12 @@
 import { merge } from 'rxjs';
 import { debounceTime, filter, skip, tap } from 'rxjs/operators';
 
-import { FetchStatus } from '../../types';
 import type {
   AutoRefreshDoneFn,
   DataPublicPluginStart,
   ISearchSource,
-} from '../../../../../data/public';
+} from '@kbn/data-plugin/public';
+import { FetchStatus } from '../../types';
 import { DataMain$, DataRefetch$ } from './use_saved_search';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 

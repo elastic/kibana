@@ -8,7 +8,7 @@
 import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs/operators';
 import { set } from '@elastic/safer-lodash-set';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';

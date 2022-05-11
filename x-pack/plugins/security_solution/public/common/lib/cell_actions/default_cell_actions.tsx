@@ -9,13 +9,13 @@ import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import type { TimelineNonEcsData } from '../../../../../timelines/common/search_strategy';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   ColumnHeaderOptions,
   DataProvider,
   TGridCellAction,
-} from '../../../../../timelines/common/types';
-import { getPageRowIndex } from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/common/types';
+import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import { Ecs } from '../../../../common/ecs';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';

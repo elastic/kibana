@@ -6,8 +6,8 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { deprecationsServiceMock } from 'src/core/public/mocks';
-import type { DeprecationsServiceStart } from 'kibana/public';
+import { deprecationsServiceMock } from '@kbn/core/public/mocks';
+import type { DeprecationsServiceStart } from '@kbn/core/public';
 
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';

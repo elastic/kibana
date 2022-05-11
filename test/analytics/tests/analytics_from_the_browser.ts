@@ -7,10 +7,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { TelemetryCounter } from 'src/core/server';
+import type { TelemetryCounter } from '@kbn/core/server';
+import { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
 import { FtrProviderContext } from '../services';
-import { Action } from '../__fixtures__/plugins/analytics_plugin_a/server/custom_shipper';
-import '../__fixtures__/plugins/analytics_plugin_a/public/types';
+import '@kbn/analytics-plugin-a-plugin/public/types';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
@@ -72,6 +72,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(context).to.have.property('user_agent');
       expect(context.user_agent).to.be.a('string');
 
+      // Some context providers emit very early. We are OK with that.
+      const initialContext = actions[2].meta[0].context;
+
       const reportEventContext = actions[2].meta[1].context;
       expect(reportEventContext).to.have.property('user_agent');
       expect(reportEventContext.user_agent).to.be.a('string');
@@ -85,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               timestamp: actions[2].meta[0].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context: {},
+              context: initialContext,
               properties: { plugin: 'analyticsPluginA', step: 'setup' },
             },
             {
@@ -103,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           timestamp: actions[2].meta[0].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context: {},
+          context: initialContext,
           properties: { plugin: 'analyticsPluginA', step: 'setup' },
         },
         {

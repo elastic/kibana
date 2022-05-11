@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../../common';
-import { AxisExtentConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../src/plugins/field_formats/common';
 import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {

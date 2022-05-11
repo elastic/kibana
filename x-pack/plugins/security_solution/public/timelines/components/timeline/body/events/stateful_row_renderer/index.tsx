@@ -13,7 +13,7 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
-} from '../../../../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { RowRenderer } from '../../../../../../../common/types';
 import { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';

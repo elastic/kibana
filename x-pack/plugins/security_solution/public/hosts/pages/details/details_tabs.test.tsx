@@ -18,7 +18,7 @@ import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 import { HostsTableType } from '../../store/model';
-import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
@@ -36,7 +36,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../common/components/url_state/normalize_time_range');
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],

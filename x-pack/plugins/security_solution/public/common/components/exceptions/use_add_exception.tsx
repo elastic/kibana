@@ -12,7 +12,7 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
-import { HttpStart } from '../../../../../../../src/core/public';
+import { HttpStart } from '@kbn/core/public';
 
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';

@@ -11,11 +11,11 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
 import { registerOpsStatsCollector } from '.';
-import { OpsMetrics } from '../../../../../core/server';
-import { loggingSystemMock, metricsServiceMock } from '../../../../../core/server/mocks';
+import { OpsMetrics } from '@kbn/core/server';
+import { loggingSystemMock, metricsServiceMock } from '@kbn/core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
 

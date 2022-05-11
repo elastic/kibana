@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { getUiSettingFn as getCommonUiSettingFn } from '../../common';
 
 export function getUiSettingFn({ getStartServices }: Pick<CoreSetup, 'getStartServices'>) {

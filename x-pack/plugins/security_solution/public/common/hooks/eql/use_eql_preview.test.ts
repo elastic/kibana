@@ -11,15 +11,15 @@ import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 import * as i18n from '../translations';
-import type { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { useEqlPreview } from '.';
 import { getMockEqlResponse } from './eql_search_response.mock';
 import { useAppToasts } from '../use_app_toasts';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 jest.mock('../use_app_toasts');
 
 describe('useEqlPreview', () => {

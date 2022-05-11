@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { JOB_FIELD_TYPES } from '../../../../common/constants';
-import { DataViewField } from '../../../../../../../src/plugins/data_views/public';
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
 export const getJobTypeLabel = (type: string) => {
   return type in jobTypeLabels ? jobTypeLabels[type as keyof typeof jobTypeLabels] : null;

@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { Datatable } from 'src/plugins/expressions/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableColumn, DatatableColumnType, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 

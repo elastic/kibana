@@ -6,12 +6,12 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
   EQL_SEARCH_STRATEGY,
-} from '../../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 import {
   getValidationErrors,
   isErrorResponse,

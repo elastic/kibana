@@ -11,7 +11,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
-import { useKibana } from '../../lib/kibana';
 import {
   BrowserField,
   BrowserFields,
@@ -19,8 +18,9 @@ import {
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '../../../../../timelines/common';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+} from '@kbn/timelines-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 

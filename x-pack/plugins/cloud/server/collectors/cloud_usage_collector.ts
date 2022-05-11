@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 interface Config {
   isCloudEnabled: boolean;

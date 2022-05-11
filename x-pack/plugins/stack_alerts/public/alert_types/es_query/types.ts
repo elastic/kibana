@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '../../../../alerting/common';
-import { SerializedSearchSourceFields } from '../../../../../../src/plugins/data/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 export interface Comparator {
   text: string;

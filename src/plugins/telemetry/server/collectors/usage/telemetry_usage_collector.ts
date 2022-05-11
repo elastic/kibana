@@ -11,7 +11,7 @@ import { safeLoad } from 'js-yaml';
 import { dirname, join } from 'path';
 import { Observable, firstValueFrom } from 'rxjs';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { TelemetryConfigType } from '../../config';
 

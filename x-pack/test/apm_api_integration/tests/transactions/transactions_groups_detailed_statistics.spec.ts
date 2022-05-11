@@ -8,9 +8,9 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { first, isEmpty, last, meanBy } from 'lodash';
 import moment from 'moment';
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { asPercent } from '../../../../plugins/apm/common/utils/formatters';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { asPercent } from '@kbn/apm-plugin/common/utils/formatters';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 

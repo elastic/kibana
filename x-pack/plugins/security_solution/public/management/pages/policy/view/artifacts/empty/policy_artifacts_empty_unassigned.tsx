@@ -12,8 +12,7 @@ import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
-import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
+import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 interface CommonProps {
   policyId: string;
   policyName: string;
@@ -21,10 +20,7 @@ interface CommonProps {
   labels: typeof POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS;
   getPolicyArtifactsPath: (policyId: string) => string;
   getArtifactPath: (
-    location?:
-      | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
-      | Partial<HostIsolationExceptionsPageLocation>
+    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
   ) => string;
 }
 

@@ -7,7 +7,7 @@
 
 import React, { Fragment, useCallback } from 'react';
 import { EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CommonAlertParamDetails } from '../../../../common/types/alerts';

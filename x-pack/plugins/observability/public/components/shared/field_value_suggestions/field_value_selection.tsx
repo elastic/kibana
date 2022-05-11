@@ -20,8 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { isEqual, map } from 'lodash';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FieldValueSelectionProps, ListItem } from './types';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 const Counter = euiStyled.div`
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};

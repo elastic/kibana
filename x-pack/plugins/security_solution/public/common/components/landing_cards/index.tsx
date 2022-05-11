@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import endpointPng from '../../images/endpoint.png';
+import endpointSvg from '../../images/endpoint.svg';
 import siemPng from '../../images/siem.png';
 import videoSvg from '../../images/video.svg';
 import { ADD_DATA_PATH } from '../../../../common/constants';
@@ -27,7 +27,7 @@ import { useKibana } from '../../lib/kibana';
 const imgUrls = {
   siem: siemPng,
   video: videoSvg,
-  endpoint: endpointPng,
+  endpoint: endpointSvg,
 };
 
 const StyledEuiCard = styled(EuiCard)`

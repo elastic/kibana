@@ -8,8 +8,8 @@
 import React, { useCallback, useState } from 'react';
 import { EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AxesSettingsConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { LabelMode, useDebouncedValue, VisLabel } from './';
+import { AxesSettingsConfig } from '@kbn/expression-xy-plugin/common';
+import { LabelMode, useDebouncedValue, VisLabel } from '.';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 

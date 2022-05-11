@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import {
-  DiscoverAppLocatorParams,
-  SearchInput,
-} from '../../../../../../src/plugins/discover/public';
-import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/unified_search/public';
-import { extractTimeRange } from '../../../../../../src/plugins/data/public';
-import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { KibanaLocation } from '../../../../../../src/plugins/share/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { DiscoverAppLocatorParams, SearchInput } from '@kbn/discover-plugin/public';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { extractTimeRange } from '@kbn/data-plugin/public';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { KibanaLocation } from '@kbn/share-plugin/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 

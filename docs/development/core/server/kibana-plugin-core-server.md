@@ -60,6 +60,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigDeprecationDetails](./kibana-plugin-core-server.configdeprecationdetails.md) |  |
 |  [ContextSetup](./kibana-plugin-core-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CorePreboot](./kibana-plugin-core-server.corepreboot.md) | Context passed to the <code>setup</code> method of <code>preboot</code> plugins. |
+|  [CoreRequestHandlerContext](./kibana-plugin-core-server.corerequesthandlercontext.md) | The <code>core</code> context provided to route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the <code>setup</code> method of <code>standard</code> plugins. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. |
@@ -133,7 +134,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PrebootPlugin](./kibana-plugin-core-server.prebootplugin.md) | The interface that should be returned by a <code>PluginInitializer</code> for a <code>preboot</code> plugin. |
 |  [PrebootServicePreboot](./kibana-plugin-core-server.prebootservicepreboot.md) | Kibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met. |
 |  [RegisterDeprecationsConfig](./kibana-plugin-core-server.registerdeprecationsconfig.md) |  |
-|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
+|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Base context passed to a route handler. |
+|  [RequestHandlerContextBase](./kibana-plugin-core-server.requesthandlercontextbase.md) | \* |
 |  [ResolveCapabilitiesOptions](./kibana-plugin-core-server.resolvecapabilitiesoptions.md) | Defines a set of additional options for the <code>resolveCapabilities</code> method of [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md)<!-- -->. |
 |  [RouteConfig](./kibana-plugin-core-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md) | Additional route options. |
@@ -262,6 +264,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResult](./kibana-plugin-core-server.authresult.md) |  |
 |  [CapabilitiesProvider](./kibana-plugin-core-server.capabilitiesprovider.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
+|  [CustomRequestHandlerContext](./kibana-plugin-core-server.customrequesthandlercontext.md) |  |
 |  [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md) |  |
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
 |  [DocLinksServiceStart](./kibana-plugin-core-server.doclinksservicestart.md) |  |

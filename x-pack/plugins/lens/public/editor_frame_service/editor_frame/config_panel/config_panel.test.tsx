@@ -17,7 +17,7 @@ import {
 import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';

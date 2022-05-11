@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   indexName: schema.string(),
@@ -25,7 +25,7 @@ export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDepen
   router.get(
     { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none' as const,

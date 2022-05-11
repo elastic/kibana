@@ -6,19 +6,19 @@
  */
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { finished, Writable } from 'stream';
 import { promisify } from 'util';
-import { getContentStream } from '../';
-import type { ReportingCore } from '../../';
 import type {
   RunContext,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
+import { getContentStream } from '..';
+import type { ReportingCore } from '../..';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
@@ -35,7 +35,7 @@ import {
   REPORTING_EXECUTE_TYPE,
   ReportTaskParams,
   TaskRunResult,
-} from './';
+} from '.';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;

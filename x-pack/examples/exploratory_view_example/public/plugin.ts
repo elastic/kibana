@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { ObservabilityPublicStart } from '../../../plugins/observability/public';
-import type { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
+import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
 
 export interface SetupDependencies {

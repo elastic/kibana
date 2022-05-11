@@ -29,7 +29,7 @@ export const BackToInvestigatedAlert = ({
   return (
     <div css={styles.container}>
       <EuiBadge
-        color={styles.buttonBackgroundColor}
+        style={styles.buttonStyle}
         css={styles.jumpBackBadge}
         iconType={isDisplayedAbove ? 'arrowUp' : 'arrowDown'}
         iconSide="right"

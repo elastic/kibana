@@ -11,9 +11,9 @@ import './timeseries_visualization.scss';
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { IUiSettingsClient } from 'src/core/public';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { PersistedState } from 'src/plugins/visualizations/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
@@ -37,6 +37,7 @@ interface TimeseriesVisualizationProps {
   visData: TimeseriesVisData;
   uiState: PersistedState;
   syncColors: boolean;
+  syncTooltips: boolean;
 }
 
 function TimeseriesVisualization({
@@ -46,6 +47,7 @@ function TimeseriesVisualization({
   uiState,
   getConfig,
   syncColors,
+  syncTooltips,
 }: TimeseriesVisualizationProps) {
   const [indexPattern, setIndexPattern] = useState<FetchedIndexPattern['indexPattern']>(null);
   const [palettesService, setPalettesService] = useState<PaletteRegistry | null>(null);
@@ -123,7 +125,7 @@ function TimeseriesVisualization({
       const data = getClickFilterData(points, tables, model);
 
       const event = {
-        name: 'filterBucket',
+        name: 'filter',
         data: {
           data,
           negate: false,
@@ -188,6 +190,7 @@ function TimeseriesVisualization({
             onFilterClick={handleFilterClick}
             onUiState={handleUiState}
             syncColors={syncColors}
+            syncTooltips={syncTooltips}
             palettesService={palettesService}
             indexPattern={indexPattern}
             fieldFormatMap={indexPattern?.fieldFormatMap}

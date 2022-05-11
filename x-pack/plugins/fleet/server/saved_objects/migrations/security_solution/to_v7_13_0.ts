@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 import type { PackagePolicy } from '../../../../common';
 import { relativeDownloadUrlFromArtifact } from '../../../services/artifacts/mappings';

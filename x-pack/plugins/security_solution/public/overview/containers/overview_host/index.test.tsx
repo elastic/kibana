@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useHostOverview } from './index';
+import { useHostOverview } from '.';
 
 describe('useHostOverview', () => {
   it('skip = true will cancel any running request', () => {

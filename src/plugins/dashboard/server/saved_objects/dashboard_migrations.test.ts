@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { savedObjectsServiceMock } from '../../../../core/server/mocks';
-import { createEmbeddableSetupMock } from '../../../embeddable/server/mocks';
+import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { createDashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 import { DashboardDoc730ToLatest } from '../../common';
 import {
   createExtract,
   createInject,
 } from '../../common/embeddable/dashboard_container_persistable_state';
-import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 
 const embeddableSetupMock = createEmbeddableSetupMock();

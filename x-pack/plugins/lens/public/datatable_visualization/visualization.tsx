@@ -11,8 +11,9 @@ import { Ast } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
-import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type {
   SuggestionRequest,
   Visualization,
@@ -23,7 +24,6 @@ import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import type { ColumnState, SortingState } from '../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 
@@ -326,7 +326,12 @@ export const getDatatableVisualization = ({
     }
   },
 
-  toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {
+  toExpression(
+    state,
+    datasourceLayers,
+    { title, description } = {},
+    datasourceExpressionsByLayers = {}
+  ): Ast | null {
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, datasourceLayers, state.layerId) || {};
 
@@ -346,9 +351,12 @@ export const getDatatableVisualization = ({
       .filter((columnId) => datasource!.getOperationForColumnId(columnId))
       .map((columnId) => columnMap[columnId]);
 
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
+
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression?.chain ?? []),
         {
           type: 'function',
           function: 'lens_datatable',

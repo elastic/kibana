@@ -10,7 +10,7 @@ import { kbnTestConfig } from '@kbn/test';
 import Url from 'url';
 import abab from 'abab';
 
-import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/server';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import type { ConfigSchema } from './config';
 
 const apiToken = abab.btoa(kbnTestConfig.getUrlParts().auth!);

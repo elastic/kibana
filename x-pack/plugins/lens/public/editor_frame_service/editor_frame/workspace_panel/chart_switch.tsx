@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import {
   Visualization,
   FramePublicAPI,
@@ -30,7 +31,6 @@ import {
 } from '../../../types';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   insertLayer,
   removeLayers,

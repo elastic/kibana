@@ -17,13 +17,13 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
-} from 'src/core/server';
-import type { Capabilities as UICapabilities } from 'src/core/types';
-
+} from '@kbn/core/server';
+import type { Capabilities as UICapabilities } from '@kbn/core/types';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../../features/server';
+} from '@kbn/features-plugin/server';
+
 import { APPLICATION_PREFIX } from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';

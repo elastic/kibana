@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isSortable } from './get_sort';
 import { SortOrder } from '../components/table_header/helpers';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Embeddable, IContainer, ContainerInput } from '../../../../src/plugins/embeddable/public';
-import { TimeRange } from '../../../../src/plugins/data/public';
+import { Embeddable, IContainer, ContainerInput } from '@kbn/embeddable-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { TimeRangeInput } from './custom_time_range_action';
 
 interface ContainerTimeRangeInput extends ContainerInput<TimeRangeInput> {

@@ -10,9 +10,9 @@ import type { MutableRefObject } from 'react';
 import type { monaco } from '@kbn/monaco';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
-import type { ExpressionFunction } from '../../../expressions/common';
+import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
+import { OnSaveProps, SaveModalState } from '@kbn/saved-objects-plugin/public';
 
 interface SaveModalDocumentInfo {
   id?: string;

@@ -8,7 +8,7 @@
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';

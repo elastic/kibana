@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';

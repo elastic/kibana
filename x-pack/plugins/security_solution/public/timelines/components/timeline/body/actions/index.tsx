@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
@@ -19,7 +20,6 @@ import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   setActiveTabTimeline,

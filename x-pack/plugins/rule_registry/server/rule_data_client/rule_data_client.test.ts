@@ -10,9 +10,9 @@ import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { Dataset, RuleDataWriterInitializationError } from '..';
 import { resourceInstallerMock } from '../rule_data_plugin_service/resource_installer.mock';
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
-import { createNoMatchingIndicesError } from '../../../../../src/plugins/data_views/server/fetcher/lib/errors';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { createNoMatchingIndicesError } from '@kbn/data-views-plugin/server/fetcher/lib/errors';
 
 const mockLogger = loggingSystemMock.create().get();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;

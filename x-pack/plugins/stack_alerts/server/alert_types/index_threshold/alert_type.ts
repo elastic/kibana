@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
+import {
+  CoreQueryParamsSchemaProperties,
+  TimeSeriesQuery,
+} from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
-import {
-  CoreQueryParamsSchemaProperties,
-  TimeSeriesQuery,
-} from '../../../../triggers_actions_ui/server';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';

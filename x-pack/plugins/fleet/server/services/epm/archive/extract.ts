@@ -10,7 +10,7 @@ import yauzl from 'yauzl';
 
 import { bufferToStream, streamToBuffer } from '../streams';
 
-import type { ArchiveEntry } from './index';
+import type { ArchiveEntry } from '.';
 
 export async function untarBuffer(
   buffer: Buffer,

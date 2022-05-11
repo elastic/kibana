@@ -12,7 +12,7 @@ import {
   EmbeddableInput,
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from './hello_world_embeddable';
 
 export type HelloWorldEmbeddableFactory = EmbeddableFactory;

@@ -7,12 +7,12 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PackageInfo } from 'kibana/server';
+import { PackageInfo } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
 import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { ISessionsClient, ISessionService } from './session';
 
 export type { ISearchStartSearchSource, SearchUsageCollector };

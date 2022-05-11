@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 
-import { OptionalFieldLabel } from './index';
+import { OptionalFieldLabel } from '.';
 
 describe('OptionalFieldLabel', () => {
   it('renders correctly', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import {
   ExceptionListItemSchema,
@@ -18,13 +18,13 @@ import {
   ExceptionListSchema,
   ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import { getExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
@@ -202,7 +202,7 @@ export type ExceptionsPostCreateListHttpMockInterface = ResponseProvidersInterfa
   exceptionCreateList: (options: HttpFetchOptionsWithPath) => ExceptionListSchema;
 }>;
 /**
- * HTTP mocks that support updating a single Exception
+ * HTTP mock that support creating the list
  */
 export const exceptionsPostCreateListHttpMock =
   httpHandlerMockFactory<ExceptionsPostCreateListHttpMockInterface>([
@@ -220,7 +220,7 @@ export type ExceptionsGetSummaryHttpMockInterface = ResponseProvidersInterface<{
   exceptionsSummary: (options: HttpFetchOptionsWithPath) => ExceptionListSummarySchema;
 }>;
 /**
- * HTTP mocks that support updating a single Exception
+ * HTTP mocks that support the Get Summary api
  */
 export const exceptionsGetSummaryHttpMock =
   httpHandlerMockFactory<ExceptionsGetSummaryHttpMockInterface>([

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {

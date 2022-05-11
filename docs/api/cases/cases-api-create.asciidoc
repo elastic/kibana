@@ -6,26 +6,26 @@
 
 Creates a case.
 
-=== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/cases`
 
 `POST <kibana host>:<port>/s/<space_id>/api/cases`
 
-=== Prerequisite
+=== {api-prereq-title}
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the case you're creating.
 
-=== Path parameters
+=== {api-path-parms-title}
 
 `<space_id>`::
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
-=== Request body
+=== {api-request-body-title}
 
 `connector`::
 (Required, object) An object that contains the connector configuration.
@@ -107,8 +107,8 @@ For {swimlane} connectors, specify:
 
 `id`::
 (Required, string) The identifier for the connector. To create a case without a
-connector, use `none`.
-//To retrieve connector IDs, use <<cases-api-find-connectors>>).
+connector, use `none`. To retrieve connector IDs, use
+<<cases-api-find-connectors>>.
 
 `name`::
 (Required, string) The name of the connector. To create a case without a
@@ -147,12 +147,12 @@ categorize cases. It can be an empty array.
 `title`::
 (Required, string) A title for the case.
 
-=== Response code
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-=== Example
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------

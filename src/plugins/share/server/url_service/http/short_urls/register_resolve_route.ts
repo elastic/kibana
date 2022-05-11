@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { UrlServiceError } from '../../error';
 import { ServerUrlService } from '../../types';
 
@@ -26,7 +26,7 @@ export const registerResolveRoute = (router: IRouter, url: ServerUrlService) => 
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       const slug = req.params.slug;
-      const savedObjects = ctx.core.savedObjects.client;
+      const savedObjects = (await ctx.core).savedObjects.client;
 
       try {
         const shortUrls = url.shortUrls.get({ savedObjects });

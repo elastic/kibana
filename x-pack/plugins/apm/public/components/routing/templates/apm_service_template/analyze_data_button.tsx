@@ -8,9 +8,9 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { createExploratoryViewUrl } from '../../../../../../observability/public';
-import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { ALL_VALUES_SELECTED } from '@kbn/observability-plugin/public';
 import {
   isIosAgentName,
   isRumAgentName,

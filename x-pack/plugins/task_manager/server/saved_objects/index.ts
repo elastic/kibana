@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from 'kibana/server';
+import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';

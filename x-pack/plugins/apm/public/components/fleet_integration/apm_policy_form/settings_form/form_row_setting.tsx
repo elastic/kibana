@@ -16,9 +16,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { FormRowOnChange } from './';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { FormRowOnChange } from '.';
 import { SettingsRow } from '../typings';
-import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const FixedHeightDiv = styled.div`
   height: 300px;

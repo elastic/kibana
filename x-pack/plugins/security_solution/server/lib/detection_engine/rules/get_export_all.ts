@@ -7,9 +7,9 @@
 
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from 'src/core/server';
-import { ExceptionListClient } from '../../../../../lists/server';
-import { RulesClient, RuleExecutorServices } from '../../../../../alerting/server';
+import { Logger } from '@kbn/core/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';
@@ -22,14 +22,13 @@ export const getExportAll = async (
   rulesClient: RulesClient,
   exceptionsClient: ExceptionListClient | undefined,
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
   exceptionLists: string | null;
 }> => {
-  const ruleAlertTypes = await getNonPackagedRules({ rulesClient, isRuleRegistryEnabled });
+  const ruleAlertTypes = await getNonPackagedRules({ rulesClient });
   const alertIds = ruleAlertTypes.map((rule) => rule.id);
 
   // Gather actions

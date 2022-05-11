@@ -11,6 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { NoDataViewsComponent } from '@kbn/shared-ux-components';
 import { EuiFlyoutBody } from '@elastic/eui';
+import { DEFAULT_ASSETS_TO_IGNORE } from '@kbn/data-plugin/common';
 import { useKibana } from '../../shared_imports';
 
 import { MatchedItem, DataViewEditorContext } from '../../types';
@@ -19,7 +20,6 @@ import { getIndices } from '../../lib';
 
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { PromptFooter } from './prompt_footer';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const removeAliases = (mItem: MatchedItem) => !mItem.item.indices;
 
@@ -27,6 +27,7 @@ interface Props {
   onCancel: () => void;
   allSources: MatchedItem[];
   loadSources: () => void;
+  showEmptyPrompt?: boolean;
 }
 
 export function isUserDataIndex(source: MatchedItem) {
@@ -45,7 +46,13 @@ export function isUserDataIndex(source: MatchedItem) {
   return true;
 }
 
-export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {
+export const EmptyPrompts: FC<Props> = ({
+  allSources,
+  onCancel,
+  children,
+  loadSources,
+  showEmptyPrompt,
+}) => {
   const {
     services: { docLinks, application, http, searchClient, dataViews },
   } = useKibana<DataViewEditorContext>();
@@ -93,7 +100,7 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
           <PromptFooter onCancel={onCancel} />
         </>
       );
-    } else {
+    } else if (showEmptyPrompt) {
       // first time
       return (
         <>
@@ -108,6 +115,8 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
           <PromptFooter onCancel={onCancel} />
         </>
       );
+    } else {
+      setGoToForm(true);
     }
   }
 

@@ -6,7 +6,7 @@
  */
 
 import fetch from 'node-fetch';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import ReadPackage from 'read-pkg';
 
 const REGISTRY_URL = 'https://epr-snapshot.elastic.co';

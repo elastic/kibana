@@ -111,10 +111,11 @@ const LogstashInstructionSteps = () => {
               <EuiCodeBlock paddingSize="m">
                 <h5>API Key</h5>
                 {logstashApiKey.apiKey}
-                <EuiCopy textToCopy={logstashApiKey.apiKey}>
-                  {(copy) => (
-                    <div className="euiCodeBlock__controls">
-                      <div className="euiCodeBlock__copyButton">
+
+                <div className="euiCodeBlock__controls">
+                  <div className="euiCodeBlock__copyButton">
+                    <EuiCopy textToCopy={logstashApiKey.apiKey}>
+                      {(copy) => (
                         <EuiButtonIcon
                           onClick={copy}
                           iconType="copyClipboard"
@@ -126,10 +127,10 @@ const LogstashInstructionSteps = () => {
                             }
                           )}
                         />
-                      </div>
-                    </div>
-                  )}
-                </EuiCopy>
+                      )}
+                    </EuiCopy>
+                  </div>
+                </div>
               </EuiCodeBlock>
             ) : (
               <EuiButton
@@ -188,7 +189,7 @@ const LogstashInstructionSteps = () => {
               defaultMessage="Replace the parts between the brackets with your generated SSL certificate file paths. View {documentationLink} to generate the certificates."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href={docLinks.links.fleet.guide}>
+                  <EuiLink external={true} href={docLinks.links.fleet.secureLogstash}>
                     <FormattedMessage
                       id="xpack.fleet.settings.logstashInstructions.ourDocumentationLink"
                       defaultMessage="our documentation"

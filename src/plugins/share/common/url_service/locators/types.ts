@@ -13,7 +13,7 @@ import {
   PersistableState,
   PersistableStateService,
   VersionedState,
-} from 'src/plugins/kibana_utils/common';
+} from '@kbn/kibana-utils-plugin/common';
 import type { FormatSearchParamsOptions } from './redirect';
 
 /**

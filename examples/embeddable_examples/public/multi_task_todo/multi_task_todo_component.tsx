@@ -17,7 +17,7 @@ import {
   EuiListGroup,
   EuiListGroupItem,
 } from '@elastic/eui';
-import { withEmbeddableSubscription } from '../../../../src/plugins/embeddable/public';
+import { withEmbeddableSubscription } from '@kbn/embeddable-plugin/public';
 import {
   MultiTaskTodoEmbeddable,
   MultiTaskTodoOutput,

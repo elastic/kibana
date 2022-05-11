@@ -6,7 +6,7 @@
  */
 
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import type { HeatmapArguments } from '../../../../../src/plugins/chart_expressions/expression_heatmap/common';
+import type { HeatmapArguments } from '@kbn/expression-heatmap-plugin/common';
 import type { LayerType } from '../../common';
 export type ChartShapes = 'heatmap';
 

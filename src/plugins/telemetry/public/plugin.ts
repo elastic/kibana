@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+
 import type {
   Plugin,
   CoreStart,
@@ -16,10 +18,11 @@ import type {
   SavedObjectsBatchResponse,
   ApplicationStart,
   DocLinksStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
@@ -31,7 +34,6 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { HomePublicPluginSetup } from '../../home/public';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**
@@ -151,6 +153,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     getStartServices().then(([{ docLinks }]) => {
       telemetryConstants = getTelemetryConstants(docLinks);
+    });
+
+    analytics.registerShipper(ElasticV3BrowserShipper, {
+      channelName: 'kibana-browser',
+      version: currentKibanaVersion,
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {

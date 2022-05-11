@@ -9,12 +9,12 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '../../../../plugins/apm/typings/common';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 

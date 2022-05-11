@@ -39,7 +39,7 @@ jest.mock('../inspect', () => ({
   InspectButton: jest.fn(() => <div data-test-subj="mock-inspect" />),
 }));
 
-jest.mock('../../components/matrix_histogram/utils', () => ({
+jest.mock('./utils', () => ({
   getBarchartConfigs: jest.fn(),
   getCustomChartData: jest.fn().mockReturnValue(true),
 }));

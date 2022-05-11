@@ -9,7 +9,7 @@
 import { SUGGESTION_TYPE, suggest } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { setIndexPatterns } from '../helpers/plugin_services';
-import { DataViewsContract } from 'src/plugins/data_views/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { ITimelionFunction } from '../../common/types';
 
 describe('Timelion expression suggestions', () => {

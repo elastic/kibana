@@ -9,8 +9,8 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
 import type { Space } from '../../common';
 import { getSpacesContextProviderWrapper } from '../spaces_context';

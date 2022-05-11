@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
-import { AsApiContract, RewriteResponseCase } from '../../../../../actions/common';
+import { HttpSetup } from '@kbn/core/public';
+import { AsApiContract, RewriteResponseCase } from '@kbn/actions-plugin/common';
 import { Rule, RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { transformRule } from './common_transformations';

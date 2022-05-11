@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from 'src/plugins/data_views/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
 import { from } from 'rxjs';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsDataService } from '../data';
 import { ControlsPluginStartDeps } from '../../types';
-import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
 
 export type DataServiceFactory = KibanaPluginServiceFactory<
   ControlsDataService,
@@ -43,7 +43,7 @@ const minMaxAgg = (field?: DataViewField) => {
 
 export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
   const {
-    data: { query: queryPlugin, search, autocomplete },
+    data: { query: queryPlugin, search },
   } = startPlugins;
   const { data } = startPlugins;
 
@@ -95,7 +95,6 @@ export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
       from(fetchFieldRange(dataView, fieldName, input)),
     getDataView: data.dataViews.get,
     getDataView$: (id: string) => from(data.dataViews.get(id)),
-    autocomplete,
     query: queryPlugin,
     searchSource: search.searchSource,
     timefilter: queryPlugin.timefilter.timefilter,

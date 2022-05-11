@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCase,

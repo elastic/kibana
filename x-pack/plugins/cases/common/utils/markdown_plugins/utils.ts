@@ -12,7 +12,7 @@ import remarkStringify from 'remark-stringify';
 import unified from 'unified';
 
 import { SerializableRecord } from '@kbn/utility-types';
-import type { TimeRange } from 'src/plugins/data/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { LENS_ID, LensParser, LensSerializer } from './lens';
 import { TimelineSerializer, TimelineParser } from './timeline';
 

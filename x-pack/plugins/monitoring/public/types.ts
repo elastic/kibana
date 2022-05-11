@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart, AppMountParameters } from 'kibana/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { PluginInitializerContext, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export type { MonitoringConfig } from '../server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
-import { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;

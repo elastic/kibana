@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { IncomingDataList } from '../../../common/types/rest_spec/agent';
 
-import { sendGetAgentIncomingData, useLink } from '../../hooks/index';
+import { sendGetAgentIncomingData, useLink } from '../../hooks';
 
 export interface InstalledIntegrationPolicy {
   name: string;

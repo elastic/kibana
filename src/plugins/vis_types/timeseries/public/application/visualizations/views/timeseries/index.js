@@ -20,6 +20,7 @@ import {
   LineAnnotation,
   TooltipType,
   StackMode,
+  Placement,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -36,7 +37,7 @@ import {
   MULTILAYER_TIME_AXIS_STYLE,
   renderEndzoneTooltip,
   useActiveCursor,
-} from '../../../../../../../charts/public';
+} from '@kbn/charts-plugin/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
@@ -73,6 +74,7 @@ export const TimeSeries = ({
   xAxisFormatter,
   annotations,
   syncColors,
+  syncTooltips,
   palettesService,
   interval,
   isLastBucketDropped,
@@ -213,7 +215,9 @@ export const TimeSeries = ({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
-        externalPointerEvents={{ tooltip: { visible: false } }}
+        externalPointerEvents={{
+          tooltip: { visible: syncTooltips, placement: Placement.Right },
+        }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getNumTopClasses, getNumTopFeatureImportanceValues } from './analytics';
 import { Field } from '../../../../common/types/fields';
 import {
@@ -15,7 +16,6 @@ import {
   isOutlierAnalysis,
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';

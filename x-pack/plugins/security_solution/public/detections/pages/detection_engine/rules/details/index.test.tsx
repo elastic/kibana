@@ -17,7 +17,7 @@ import {
   TestProviders,
   SUB_PLUGINS_REDUCER,
 } from '../../../../../common/mock';
-import { RuleDetailsPage } from './index';
+import { RuleDetailsPage } from '.';
 import { createStore, State } from '../../../../../common/store';
 import { useUserData } from '../../../../components/user_info';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';

@@ -6,8 +6,8 @@
  */
 
 import { getSortingCriteria } from './sorting';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
-import { DatatableColumnType } from 'src/plugins/expressions';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { DatatableColumnType } from '@kbn/expressions-plugin';
 
 function getMockFormatter() {
   return { convert: (v: unknown) => `${v as string}` } as FieldFormat;

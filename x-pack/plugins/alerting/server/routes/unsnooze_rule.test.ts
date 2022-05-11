@@ -6,14 +6,14 @@
  */
 
 import { unsnoozeRuleRoute } from './unsnooze_rule';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
