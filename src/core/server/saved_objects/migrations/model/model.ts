@@ -230,6 +230,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -447,6 +453,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -682,6 +694,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         throwBadResponse(stateP, left);
       }
@@ -937,6 +955,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // continue to timeout and eventually lead to a failed migration.
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
       } else {
         return throwBadResponse(stateP, left);
       }

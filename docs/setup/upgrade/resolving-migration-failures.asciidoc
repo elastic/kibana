@@ -187,3 +187,10 @@ PUT /_cluster/settings
   }
 }
 --------------------------------------------
+
+[float]
+[[cluster-shard-limit-exceeded]]
+==== Elasticsearch cluster shard limit exceeded
+When upgrading, {kib} creates new indices requiring a small number of new shards. If the amount of open {es} shards approaches or exceeds the Elasticsearch `cluster.max_shards_per_node` setting, Kibana is unable to complete the upgrade. Ensure that Kibana is able to add at least 10 more shards by removing indices to clear up resources, or increasing the `cluster.max_shards_per_node` setting.
+
+Refer to the {es} documentation for more information {ref}/allocation-total-shards.
