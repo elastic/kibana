@@ -94,7 +94,7 @@ export const OptionsListEditor = ({
       }
 
       // field type is keyword, check if this field is related to a text mapped field and include it.
-      if (field.aggregatable && field.type === 'string') {
+      else if (field.aggregatable && field.type === 'string') {
         const childField =
           (field.childFieldName && state.dataView?.fields.getByName(field.childFieldName)) ||
           undefined;
