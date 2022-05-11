@@ -8,19 +8,7 @@
 import Semver from 'semver';
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import {
-  omit,
-  isEqual,
-  map,
-  uniq,
-  pick,
-  truncate,
-  trim,
-  mapValues,
-  set,
-  get,
-  cloneDeep,
-} from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -92,7 +80,12 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { mapSortField, validateOperationOnAttributes, retryIfBulkEditConflicts } from './lib';
+import {
+  mapSortField,
+  validateOperationOnAttributes,
+  retryIfBulkEditConflicts,
+  applyBulkEditOperation,
+} from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -216,7 +209,7 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags'>;
+export type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags'>;
 
 export type BulkEditOperation =
   | {
@@ -1552,10 +1545,10 @@ export class RulesClient {
               switch (operation.field) {
                 case 'actions':
                   await this.validateActions(ruleType, operation.value);
-                  ruleActions = this.applyBulkEditOperation(operation, ruleActions);
+                  ruleActions = applyBulkEditOperation(operation, ruleActions);
                   break;
                 default:
-                  attributes = this.applyBulkEditOperation(operation, attributes);
+                  attributes = applyBulkEditOperation(operation, attributes);
               }
             }
 
@@ -2757,51 +2750,6 @@ export class RulesClient {
       alertAttributes.meta.versionApiKeyLastmodified = this.kibanaVersion;
     }
     return alertAttributes;
-  }
-
-  private applyBulkEditOperation<R extends object>(operation: BulkEditOperation, rule: R) {
-    const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
-      Array.from(new Set([...arr, ...items]));
-
-    const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
-      const itemsSet = new Set(items);
-      return arr.filter((item) => !itemsSet.has(item));
-    };
-
-    switch (operation.operation) {
-      case 'set':
-        set(rule, operation.field, operation.value);
-        break;
-
-      case 'add':
-        // typescript complains on set value typings
-        if (operation.field === 'actions') {
-          set(
-            rule,
-            operation.field,
-            addItemsToArray(get(rule, operation.field) ?? [], operation.value)
-          );
-        } else {
-          set(
-            rule,
-            operation.field,
-            addItemsToArray(get(rule, operation.field) ?? [], operation.value)
-          );
-        }
-
-        break;
-
-      case 'delete':
-        set(
-          rule,
-          operation.field,
-          deleteItemsFromArray(get(rule, operation.field) ?? [], operation.value)
-        );
-
-        break;
-    }
-
-    return rule;
   }
 }
 
