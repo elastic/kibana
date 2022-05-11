@@ -18,8 +18,6 @@ import {
   EuiTabbedContent,
   EuiText,
 } from '@elastic/eui';
-// @ts-ignore
-import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import {

@@ -19,18 +19,22 @@ import { PlatformSelector } from '../..';
 
 import { getInstallCommandForPlatform } from '../utils';
 
+import type { DeploymentMode } from './set_deployment_mode';
+
 export function getInstallFleetServerStep({
   isFleetServerReady,
   disabled,
   serviceToken,
   fleetServerHost,
   fleetServerPolicyId,
+  deploymentMode,
 }: {
   isFleetServerReady: boolean;
   disabled: boolean;
   serviceToken?: string;
   fleetServerHost?: string;
   fleetServerPolicyId?: string;
+  deploymentMode: DeploymentMode;
 }): EuiStepProps {
   return {
     title: i18n.translate('xpack.fleet.fleetServerFlyout.installFleetServerTitle', {
@@ -42,6 +46,7 @@ export function getInstallFleetServerStep({
         serviceToken={serviceToken}
         fleetServerHost={fleetServerHost}
         fleetServerPolicyId={fleetServerPolicyId}
+        deploymentMode={deploymentMode}
       />
     ),
   };
@@ -51,7 +56,8 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
   serviceToken?: string;
   fleetServerHost?: string;
   fleetServerPolicyId?: string;
-}> = ({ serviceToken, fleetServerHost, fleetServerPolicyId }) => {
+  deploymentMode: DeploymentMode;
+}> = ({ serviceToken, fleetServerHost, fleetServerPolicyId, deploymentMode }) => {
   const kibanaVersion = useKibanaVersion();
   const { output } = useDefaultOutput();
 
@@ -63,7 +69,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         serviceToken ?? '',
         fleetServerPolicyId,
         fleetServerHost,
-        false,
+        deploymentMode === 'production',
         output?.ca_trusted_fingerprint,
         kibanaVersion
       );
