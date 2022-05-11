@@ -650,7 +650,7 @@ describe('bulkEdit()', () => {
             version: '123',
             error: {
               error: 'test failure',
-              statusCode: 409,
+              statusCode: 500,
               message: 'test failure',
             },
           },
