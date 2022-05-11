@@ -54,6 +54,10 @@ export interface DataViewEditorProps {
    * to data view creation.
    */
   showEmptyPrompt?: boolean;
+  /**
+   * if set to true data view will not be saved into a saved object automatically
+   */
+  skipSave?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

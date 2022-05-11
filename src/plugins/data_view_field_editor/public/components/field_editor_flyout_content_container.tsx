@@ -158,7 +158,17 @@ export const FieldEditorFlyoutContentContainer = ({
           dataView.deleteFieldFormat(updatedField.name);
         }
 
-        await dataViews.updateSavedObject(dataView).then(() => {
+        if (dataView.isPersisted()) {
+          await dataViews.updateSavedObject(dataView).then(() => {
+            const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+              defaultMessage: "Saved '{fieldName}'",
+              values: { fieldName: updatedField.name },
+            });
+            notifications.toasts.addSuccess(message);
+            setIsSaving(false);
+            onSave(editedField);
+          });
+        } else {
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
             defaultMessage: "Saved '{fieldName}'",
             values: { fieldName: updatedField.name },
@@ -166,7 +176,7 @@ export const FieldEditorFlyoutContentContainer = ({
           notifications.toasts.addSuccess(message);
           setIsSaving(false);
           onSave(editedField);
-        });
+        }
       } catch (e) {
         const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
           defaultMessage: 'Failed to save field changes',

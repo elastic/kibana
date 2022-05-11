@@ -19,6 +19,7 @@ const IndexPatternFlyoutContentContainer = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   showEmptyPrompt = true,
+  skipSave = false,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications },
@@ -26,7 +27,9 @@ const IndexPatternFlyoutContentContainer = ({
 
   const onSaveClick = async (dataViewSpec: DataViewSpec) => {
     try {
-      const indexPattern = await dataViews.createAndSave(dataViewSpec);
+      const indexPattern = skipSave
+        ? await dataViews.create(dataViewSpec)
+        : await dataViews.createAndSave(dataViewSpec);
 
       const message = i18n.translate('indexPatternEditor.saved', {
         defaultMessage: "Saved '{indexPatternTitle}'",
