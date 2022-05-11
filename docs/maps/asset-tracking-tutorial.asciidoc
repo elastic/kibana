@@ -33,7 +33,7 @@ To get to the fun of visualizing and alerting on Portland buses, you must first 
 ==== Step 1: Set up an Elasticsearch index
 
 . In Kibana, open the main menu, then click *Dev Tools*.
-. In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days at the end of which moves the data to the warm phase, after 365 days in the warm phase the data is deleted. 
+. In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days. The data then moves to the warm phase. After 365 days in the warm phase, the data is deleted. 
 +
 [source,js]
 ----------------------------------
