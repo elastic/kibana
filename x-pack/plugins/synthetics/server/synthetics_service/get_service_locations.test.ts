@@ -6,7 +6,8 @@
  */
 import axios from 'axios';
 import { getServiceLocations } from './get_service_locations';
-import { BandwidthLimitKey } from '../../common/runtime_types';
+
+import { BandwidthLimitKey, LocationStatus } from '../../common/runtime_types';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -26,13 +27,21 @@ describe('getServiceLocations', function () {
             name: 'US Central',
             location: { lat: 41.25, lon: -95.86 },
           },
-          status: 'beta',
+          status: LocationStatus.GA,
+        },
+        us_east: {
+          url: 'https://local.dev',
+          geo: {
+            name: 'US East',
+            location: { lat: 41.25, lon: -95.86 },
+          },
+          status: LocationStatus.EXPERIMENTAL,
         },
       },
     },
   });
 
-  it('should return parsed locations and throttling', async () => {
+  it('should return parsed GA locations and throttling', async () => {
     const locations = await getServiceLocations({
       config: {
         service: {
@@ -60,6 +69,53 @@ describe('getServiceLocations', function () {
           label: 'US Central',
           url: 'https://local.dev',
           isServiceManaged: true,
+          status: LocationStatus.GA,
+        },
+      ],
+    });
+  });
+
+  it('should return parsed experimental locations and throttling with `showExperimentalLocations` flag', async () => {
+    const locations = await getServiceLocations({
+      config: {
+        service: {
+          manifestUrl: 'http://local.dev',
+          showExperimentalLocations: true,
+        },
+      },
+      // @ts-ignore
+      logger: {
+        error: jest.fn(),
+      },
+    });
+
+    expect(locations).toEqual({
+      throttling: {
+        [BandwidthLimitKey.DOWNLOAD]: 100,
+        [BandwidthLimitKey.UPLOAD]: 50,
+      },
+      locations: [
+        {
+          geo: {
+            lat: 41.25,
+            lon: -95.86,
+          },
+          id: 'us_central',
+          label: 'US Central',
+          url: 'https://local.dev',
+          isServiceManaged: true,
+          status: LocationStatus.GA,
+        },
+        {
+          geo: {
+            lat: 41.25,
+            lon: -95.86,
+          },
+          id: 'us_east',
+          label: 'US East',
+          url: 'https://local.dev',
+          isServiceManaged: true,
+          status: LocationStatus.EXPERIMENTAL,
         },
       ],
     });

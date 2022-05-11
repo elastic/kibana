@@ -13,6 +13,7 @@ import {
   Locations,
   ThrottlingOptions,
   BandwidthLimitKey,
+  LocationStatus,
 } from '../../common/runtime_types';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
@@ -22,6 +23,7 @@ export const getDevLocation = (devUrl: string): ServiceLocation => ({
   geo: { lat: 0, lon: 0 },
   url: devUrl,
   isServiceManaged: true,
+  status: LocationStatus.EXPERIMENTAL,
 });
 
 export async function getServiceLocations(server: UptimeServerSetup) {
@@ -41,13 +43,20 @@ export async function getServiceLocations(server: UptimeServerSetup) {
       locations: Record<string, ManifestLocation>;
     }>(server.config.service!.manifestUrl!);
 
-    Object.entries(data.locations).forEach(([locationId, location]) => {
+    const availableLocations = server.config.service?.showExperimentalLocations
+      ? Object.entries(data.locations)
+      : Object.entries(data.locations).filter(([_, location]) => {
+          return location.status === LocationStatus.GA;
+        });
+
+    availableLocations.forEach(([locationId, location]) => {
       locations.push({
         id: locationId,
         label: location.geo.name,
         geo: location.geo.location,
         url: location.url,
         isServiceManaged: true,
+        status: location.status,
       });
     });
 
