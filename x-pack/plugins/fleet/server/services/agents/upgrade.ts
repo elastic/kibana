@@ -29,7 +29,7 @@ import {
 } from './crud';
 import { searchHitToAgent } from './helpers';
 
-const MINIMUM_EXECUTION_DURATION_SECONDS = 600; // 10m
+const MINIMUM_EXECUTION_DURATION_SECONDS = 1800; // 30m
 
 function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
