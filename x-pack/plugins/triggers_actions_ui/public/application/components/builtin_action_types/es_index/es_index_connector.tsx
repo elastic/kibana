@@ -204,7 +204,9 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       <UseField
         path="config.refresh"
         component={ToggleField}
-        defaultValue={false}
+        config={{
+          defaultValue: false,
+        }}
         componentProps={{
           euiFieldProps: {
             label: (
