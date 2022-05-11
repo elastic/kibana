@@ -18,21 +18,15 @@ import {
   EuiTableActionsColumnType,
   SearchFilterConfig,
 } from '@elastic/eui';
+import type { AnalyticsClient } from '@kbn/analytics-client';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ThemeServiceStart,
-  HttpFetchError,
-  ToastsStart,
-  ApplicationStart,
-  CoreStart,
-  AnalyticsServiceStart,
-} from '@kbn/core/public';
+import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
-import { useKibana } from '..';
+import { useKibana } from '../context';
 
 export interface TableListViewProps<V> {
   createItem?(): void;
@@ -92,7 +86,7 @@ class TableListView<V extends {}> extends React.Component<
   TableListViewState<V>
 > {
   private pagination = {};
-  private analytics: AnalyticsServiceStart;
+  private analytics: AnalyticsClient;
   private _isMounted = false;
 
   constructor(props: TableListViewProps<V>) {
@@ -100,8 +94,8 @@ class TableListView<V extends {}> extends React.Component<
 
     const {
       services: { analytics },
-    } = useKibana<CoreStart>();
-    this.analytics = analytics;
+    } = useKibana();
+    this.analytics = analytics as AnalyticsClient;
 
     this.pagination = {
       initialPageIndex: 0,
