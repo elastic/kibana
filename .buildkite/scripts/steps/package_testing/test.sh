@@ -48,4 +48,4 @@ export TEST_ES_URL="http://elastic:changeme@192.168.56.1:9200"
 cd x-pack
 
 echo "--- FTR - Reporting"
-node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke
+node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
