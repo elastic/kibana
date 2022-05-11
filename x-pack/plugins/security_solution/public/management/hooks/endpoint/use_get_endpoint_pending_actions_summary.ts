@@ -19,9 +19,9 @@ export const useGetEndpointPendingActionsSummary = (
   endpointAgentIds: string[],
   options: UseQueryOptions<PendingActionsResponse, HttpFetchError> = {}
 ): QueryObserverResult<PendingActionsResponse, HttpFetchError> => {
-  return useQuery<PendingActionsResponse, HttpFetchError>(
-    ['fetch-endpoint-pending-actions-summary', ...endpointAgentIds],
-    () => fetchPendingActionsByAgentId(endpointAgentIds),
-    { ...options }
-  );
+  return useQuery<PendingActionsResponse, HttpFetchError>({
+    queryKey: ['fetch-endpoint-pending-actions-summary', ...endpointAgentIds],
+    ...options,
+    queryFn: () => fetchPendingActionsByAgentId(endpointAgentIds),
+  });
 };

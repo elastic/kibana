@@ -19,13 +19,13 @@ export const useGetActionDetails = (
 ): UseQueryResult<ActionDetailsApiResponse, HttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<ActionDetailsApiResponse, HttpFetchError>(
-    ['get-action-detail', actionId],
-    () => {
+  return useQuery<ActionDetailsApiResponse, HttpFetchError>({
+    queryKey: ['get-action-details', actionId],
+    ...options,
+    queryFn: () => {
       return http.get<ActionDetailsApiResponse>(
         resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId ?? 'undefined' })
       );
     },
-    { ...options }
-  );
+  });
 };

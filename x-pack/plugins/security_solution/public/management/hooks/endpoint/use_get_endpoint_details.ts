@@ -23,13 +23,13 @@ export const useGetEndpointDetails = (
 ): UseQueryResult<HostInfo, HttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<HostInfo, HttpFetchError>(
-    ['get-endpoint-host-info', endpointId],
-    () => {
+  return useQuery<HostInfo, HttpFetchError>({
+    queryKey: ['get-endpoint-host-info', endpointId],
+    ...options,
+    queryFn: () => {
       return http.get<HostInfo>(
         resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId ?? 'undefined' })
       );
     },
-    { ...options }
-  );
+  });
 };
