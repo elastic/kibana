@@ -10,7 +10,7 @@ import { getRuleStatusDropdownLazy } from '../../../common/get_rule_status_dropd
 
 export const RuleStatusDropdownSandbox: React.FC<{}> = () => {
   const [enabled, setEnabled] = useState(true);
-  const [isSnoozedUntil, setIsSnoozedUntil] = useState<string | null>(null);
+  const [isSnoozedUntil, setIsSnoozedUntil] = useState<Date | null>(null);
   const [muteAll, setMuteAll] = useState(false);
 
   return getRuleStatusDropdownLazy({
@@ -30,7 +30,7 @@ export const RuleStatusDropdownSandbox: React.FC<{}> = () => {
         setIsSnoozedUntil(null);
         setMuteAll(true);
       } else {
-        setIsSnoozedUntil(new Date(time).toISOString());
+        setIsSnoozedUntil(new Date(time));
         setMuteAll(false);
       }
     },
