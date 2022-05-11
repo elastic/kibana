@@ -72,7 +72,7 @@ fields.getAll = () => {
   return fields;
 };
 
-const indexPattern = {
+const dataView = {
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
   metaFields: ['_index', '_score'],
@@ -85,6 +85,6 @@ const indexPattern = {
   getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
 } as unknown as DataView;
 
-indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
+dataView.isTimeBased = () => !!dataView.timeFieldName;
 
-export const indexPatternMock = indexPattern;
+export const dataViewMock = dataView;

@@ -11,7 +11,7 @@ import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { getDocId } from './discover_grid_document_selection';
@@ -23,7 +23,7 @@ function getProps() {
   return {
     ariaLabelledBy: '',
     columns: [],
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     isLoading: false,
     expandedDoc: undefined,
     onAddColumn: jest.fn(),

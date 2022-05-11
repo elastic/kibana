@@ -12,7 +12,7 @@ import { FilterStateStore } from '@kbn/data-plugin/public';
 import { DiscoverAppLocatorDefinition } from './locator';
 import { SerializableRecord } from '@kbn/utility-types';
 
-const indexPatternId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
+const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
 
 interface SetupParams {
@@ -58,12 +58,12 @@ describe('Discover url generator', () => {
   test('can specify specific index pattern', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
-      indexPatternId,
+      dataViewId,
     });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({
-      index: indexPatternId,
+      index: dataViewId,
     });
     expect(_g).toEqual({});
   });
@@ -229,20 +229,20 @@ describe('Discover url generator', () => {
       test('when using default, sets index pattern ID in the generated URL', async () => {
         const { locator } = await setup();
         const { path } = await locator.getLocation({
-          indexPatternId,
+          dataViewId,
         });
 
-        expect(path.indexOf(indexPatternId) > -1).toBe(true);
+        expect(path.indexOf(dataViewId) > -1).toBe(true);
       });
 
       test('when enabling useHash, does not set index pattern ID in the generated URL', async () => {
         const { locator } = await setup();
         const { path } = await locator.getLocation({
           useHash: true,
-          indexPatternId,
+          dataViewId,
         });
 
-        expect(path.indexOf(indexPatternId) > -1).toBe(false);
+        expect(path.indexOf(dataViewId) > -1).toBe(false);
       });
     });
 
@@ -250,20 +250,20 @@ describe('Discover url generator', () => {
       test('when using default, does not set index pattern ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
-          indexPatternId,
+          dataViewId,
         });
 
-        expect(path.indexOf(indexPatternId) > -1).toBe(false);
+        expect(path.indexOf(dataViewId) > -1).toBe(false);
       });
 
       test('when disabling useHash, sets index pattern ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
           useHash: false,
-          indexPatternId,
+          dataViewId,
         });
 
-        expect(path.indexOf(indexPatternId) > -1).toBe(true);
+        expect(path.indexOf(dataViewId) > -1).toBe(true);
       });
     });
   });

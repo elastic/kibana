@@ -12,7 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { FilterInBtn, FilterOutBtn, buildCellActions } from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';
 
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { esHits } from '../../__mocks__/es_hits';
 import { EuiButton } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -28,7 +28,7 @@ describe('Discover cell actions ', function () {
       setExpanded: jest.fn(),
       rows: esHits,
       onFilter: jest.fn(),
-      indexPattern: indexPatternMock,
+      dataView: dataViewMock,
       isDarkMode: false,
       selectedDocs: [],
       setSelectedDocs: jest.fn(),
@@ -49,7 +49,7 @@ describe('Discover cell actions ', function () {
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
     expect(contextMock.onFilter).toHaveBeenCalledWith(
-      indexPatternMock.fields.getByName('extension'),
+      dataViewMock.fields.getByName('extension'),
       'jpg',
       '+'
     );
@@ -60,7 +60,7 @@ describe('Discover cell actions ', function () {
       setExpanded: jest.fn(),
       rows: esHits,
       onFilter: jest.fn(),
-      indexPattern: indexPatternMock,
+      dataView: dataViewMock,
       isDarkMode: false,
       selectedDocs: [],
       setSelectedDocs: jest.fn(),
@@ -81,7 +81,7 @@ describe('Discover cell actions ', function () {
     const button = findTestSubject(component, 'filterOutButton');
     await button.simulate('click');
     expect(contextMock.onFilter).toHaveBeenCalledWith(
-      indexPatternMock.fields.getByName('extension'),
+      dataViewMock.fields.getByName('extension'),
       'jpg',
       '-'
     );

@@ -54,24 +54,24 @@ export function getLeadControlColumns() {
 export function buildEuiGridColumn(
   columnName: string,
   columnWidth: number | undefined = 0,
-  indexPattern: DataView,
+  dataView: DataView,
   defaultColumns: boolean,
   isSortEnabled: boolean
 ) {
-  const indexPatternField = indexPattern.getFieldByName(columnName);
+  const dataViewField = dataView.getFieldByName(columnName);
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(indexPatternField?.type),
-    isSortable: isSortEnabled && indexPatternField?.sortable === true,
+    schema: getSchemaByKbnType(dataViewField?.type),
+    isSortable: isSortEnabled && dataViewField?.sortable === true,
     display:
       columnName === '_source'
         ? i18n.translate('discover.grid.documentHeader', {
             defaultMessage: 'Document',
           })
-        : indexPatternField?.displayName,
+        : dataViewField?.displayName,
     actions: {
       showHide:
-        defaultColumns || columnName === indexPattern.timeFieldName
+        defaultColumns || columnName === dataView.timeFieldName
           ? false
           : {
               label: i18n.translate('discover.removeColumnLabel', {
@@ -83,10 +83,10 @@ export function buildEuiGridColumn(
       showMoveRight: !defaultColumns,
       additional: columnName === '_source' ? undefined : [buildCopyColumnNameButton(columnName)],
     },
-    cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
+    cellActions: dataViewField ? buildCellActions(dataViewField) : [],
   };
 
-  if (column.id === indexPattern.timeFieldName) {
+  if (column.id === dataView.timeFieldName) {
     const primaryTimeAriaLabel = i18n.translate(
       'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
       { defaultMessage: 'Primary time field.' }
@@ -100,7 +100,7 @@ export function buildEuiGridColumn(
 
     column.display = (
       <Fragment>
-        {indexPatternField?.customLabel ?? indexPattern.timeFieldName}{' '}
+        {dataViewField?.customLabel ?? dataView.timeFieldName}{' '}
         <EuiIconTip
           iconProps={{ tabIndex: -1 }}
           type="clock"
@@ -120,28 +120,28 @@ export function buildEuiGridColumn(
 export function getEuiGridColumns(
   columns: string[],
   settings: DiscoverGridSettings | undefined,
-  indexPattern: DataView,
+  dataView: DataView,
   showTimeCol: boolean,
   defaultColumns: boolean,
   isSortEnabled: boolean
 ) {
-  const timeFieldName = indexPattern.timeFieldName;
+  const timeFieldName = dataView.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
-  if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
-    const usedColumns = [indexPattern.timeFieldName, ...columns];
+  if (showTimeCol && dataView.timeFieldName && !columns.find((col) => col === timeFieldName)) {
+    const usedColumns = [dataView.timeFieldName, ...columns];
     return usedColumns.map((column) =>
-      buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
+      buildEuiGridColumn(column, getColWidth(column), dataView, defaultColumns, isSortEnabled)
     );
   }
 
   return columns.map((column) =>
-    buildEuiGridColumn(column, getColWidth(column), indexPattern, defaultColumns, isSortEnabled)
+    buildEuiGridColumn(column, getColWidth(column), dataView, defaultColumns, isSortEnabled)
   );
 }
 
-export function getVisibleColumns(columns: string[], indexPattern: DataView, showTimeCol: boolean) {
-  const timeFieldName = indexPattern.timeFieldName;
+export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
+  const timeFieldName = dataView.timeFieldName;
 
   if (showTimeCol && !columns.find((col) => col === timeFieldName)) {
     return [timeFieldName, ...columns];

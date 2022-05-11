@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
 import { savedSearchMock } from '../../__mocks__/saved_search';
@@ -23,11 +23,11 @@ setHeaderActionMenuMounter(jest.fn());
 
 describe('DiscoverMainApp', () => {
   test('renders', () => {
-    const indexPatternList = [indexPatternMock].map((ip) => {
+    const dataViewList = [dataViewMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
     }) as unknown as Array<SavedObject<DataViewAttributes>>;
     const props = {
-      indexPatternList,
+      dataViewList,
       savedSearch: savedSearchMock,
     };
     const history = createMemoryHistory({
@@ -43,6 +43,6 @@ describe('DiscoverMainApp', () => {
     );
 
     expect(component.find(DiscoverTopNav).exists()).toBe(true);
-    expect(component.find(DiscoverTopNav).prop('indexPattern')).toEqual(indexPatternMock);
+    expect(component.find(DiscoverTopNav).prop('dataView')).toEqual(dataViewMock);
   });
 });

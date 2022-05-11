@@ -13,12 +13,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../utils/use_index_pattern';
+import { useDataView } from '../../utils/use_index_pattern';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface ContextUrlParams {
-  indexPatternId: string;
+  dataViewId: string;
   id: string;
 }
 
@@ -26,7 +26,7 @@ export function ContextAppRoute() {
   const services = useDiscoverServices();
   const { chrome } = services;
 
-  const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const { dataViewId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
   const breadcrumb = useMainRouteBreadcrumb();
 
@@ -41,7 +41,7 @@ export function ContextAppRoute() {
     ]);
   }, [chrome, breadcrumb]);
 
-  const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { dataView, error } = useDataView(services.dataViews, dataViewId);
 
   if (error) {
     return (
@@ -57,17 +57,17 @@ export function ContextAppRoute() {
         body={
           <FormattedMessage
             id="discover.singleDocRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {indexPatternId}"
-            values={{ indexPatternId }}
+            defaultMessage="No matching index pattern for id {dataViewId}"
+            values={{ dataViewId }}
           />
         }
       />
     );
   }
 
-  if (!indexPattern) {
+  if (!dataView) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={anchorId} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={anchorId} dataView={dataView} />;
 }

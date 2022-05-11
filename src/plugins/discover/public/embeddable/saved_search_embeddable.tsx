@@ -65,7 +65,7 @@ interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
   editUrl: string;
   editPath: string;
-  indexPatterns?: DataView[];
+  dataViews?: DataView[];
   editable: boolean;
   filterManager: FilterManager;
   services: DiscoverServices;
@@ -98,7 +98,7 @@ export class SavedSearchEmbeddable
       savedSearch,
       editUrl,
       editPath,
-      indexPatterns,
+      dataViews,
       editable,
       filterManager,
       services,
@@ -114,7 +114,7 @@ export class SavedSearchEmbeddable
         editUrl,
         editPath,
         editApp: 'discover',
-        indexPatterns,
+        dataViews,
         editable,
       },
       parent
@@ -149,7 +149,7 @@ export class SavedSearchEmbeddable
 
     updateSearchSource(
       searchSource,
-      this.searchProps!.indexPattern,
+      this.searchProps!.dataView,
       this.searchProps!.sort,
       useNewFieldsApi,
       {
@@ -222,21 +222,21 @@ export class SavedSearchEmbeddable
   private initializeSearchEmbeddableProps() {
     const { searchSource } = this.savedSearch;
 
-    const indexPattern = searchSource.getField('index');
+    const dataView = searchSource.getField('index');
 
-    if (!indexPattern) {
+    if (!dataView) {
       return;
     }
 
     if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
-      this.savedSearch.sort = this.getDefaultSort(indexPattern);
+      this.savedSearch.sort = this.getDefaultSort(dataView);
     }
 
     const props: SearchProps = {
       columns: this.savedSearch.columns,
-      indexPattern,
+      dataView,
       isLoading: false,
-      sort: this.getDefaultSort(indexPattern),
+      sort: this.getDefaultSort(dataView),
       rows: [],
       searchDescription: this.savedSearch.description,
       description: this.savedSearch.description,
@@ -282,7 +282,7 @@ export class SavedSearchEmbeddable
           field,
           value,
           operator,
-          indexPattern.id!
+          dataView.id!
         );
         filters = filters.map((filter) => ({
           ...filter,
@@ -306,7 +306,7 @@ export class SavedSearchEmbeddable
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
       if (!this.searchProps || !this.input.timeRange) return;
-      return this.services.timefilter.createFilter(indexPattern, this.input.timeRange);
+      return this.services.timefilter.createFilter(dataView, this.input.timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();
@@ -344,7 +344,7 @@ export class SavedSearchEmbeddable
     const savedSearchSort =
       this.savedSearch.sort && this.savedSearch.sort.length
         ? this.savedSearch.sort
-        : this.getDefaultSort(this.searchProps?.indexPattern);
+        : this.getDefaultSort(this.searchProps?.dataView);
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
@@ -395,7 +395,7 @@ export class SavedSearchEmbeddable
       this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
       this.savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
       searchProps.services &&
-      searchProps.indexPattern &&
+      searchProps.dataView &&
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
@@ -403,7 +403,7 @@ export class SavedSearchEmbeddable
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
               <FieldStatisticsTable
-                indexPattern={searchProps.indexPattern}
+                dataView={searchProps.dataView}
                 columns={searchProps.columns}
                 savedSearch={this.savedSearch}
                 filters={this.input.filters}

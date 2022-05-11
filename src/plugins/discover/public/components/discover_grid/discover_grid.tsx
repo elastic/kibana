@@ -77,7 +77,7 @@ export interface DiscoverGridProps {
   /**
    * The used index pattern
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Determines if data is currently loaded
    */
@@ -174,7 +174,7 @@ const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
-  indexPattern,
+  dataView,
   isLoading,
   expandedDoc,
   onAddColumn,
@@ -202,7 +202,7 @@ export const DiscoverGrid = ({
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
-  const displayedColumns = getDisplayedColumns(columns, indexPattern);
+  const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {
@@ -278,9 +278,9 @@ export const DiscoverGrid = ({
   const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
 
   const fieldsToShow = useMemo(() => {
-    const indexPatternFields = indexPattern.fields.getAll().map((fld) => fld.name);
-    return getFieldsToShow(indexPatternFields, indexPattern, showMultiFields);
-  }, [indexPattern, showMultiFields]);
+    const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+    return getFieldsToShow(dataViewFields, dataView, showMultiFields);
+  }, [dataView, showMultiFields]);
 
   /**
    * Cell rendering
@@ -288,18 +288,18 @@ export const DiscoverGrid = ({
   const renderCellValue = useMemo(
     () =>
       getRenderCellValueFn(
-        indexPattern,
+        dataView,
         displayedRows,
         displayedRows
           ? displayedRows.map((hit) =>
-              flattenHit(hit, indexPattern, { includeIgnoredValues: true })
+              flattenHit(hit, dataView, { includeIgnoredValues: true })
             )
           : [],
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
       ),
-    [indexPattern, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
+    [dataView, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
   );
 
   /**
@@ -313,12 +313,12 @@ export const DiscoverGrid = ({
       getEuiGridColumns(
         displayedColumns,
         settings,
-        indexPattern,
+        dataView,
         showTimeCol,
         defaultColumns,
         isSortEnabled
       ),
-    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns, isSortEnabled]
+    [displayedColumns, dataView, showTimeCol, settings, defaultColumns, isSortEnabled]
   );
 
   const hideTimeColumn = useMemo(
@@ -328,12 +328,12 @@ export const DiscoverGrid = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
-      visibleColumns: getVisibleColumns(displayedColumns, indexPattern, showTimeCol) as string[],
+      visibleColumns: getVisibleColumns(displayedColumns, dataView, showTimeCol) as string[],
       setVisibleColumns: (newColumns: string[]) => {
         onSetColumns(newColumns, hideTimeColumn);
       },
     }),
-    [displayedColumns, indexPattern, showTimeCol, hideTimeColumn, onSetColumns]
+    [displayedColumns, dataView, showTimeCol, hideTimeColumn, onSetColumns]
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {
@@ -433,7 +433,7 @@ export const DiscoverGrid = ({
         setExpanded: setExpandedDoc,
         rows: displayedRows,
         onFilter,
-        indexPattern,
+        dataView,
         isDarkMode: services.uiSettings.get('theme:darkMode'),
         selectedDocs: usedSelectedDocs,
         setSelectedDocs: (newSelectedDocs) => {
@@ -504,7 +504,7 @@ export const DiscoverGrid = ({
         )}
         {expandedDoc && (
           <DiscoverGridFlyout
-            indexPattern={indexPattern}
+            dataView={dataView}
             hit={expandedDoc}
             hits={displayedRows}
             // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them

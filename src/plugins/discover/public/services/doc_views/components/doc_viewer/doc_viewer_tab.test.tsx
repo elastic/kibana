@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from '../../../../types';
 
 describe('DocViewerTab', () => {
@@ -22,7 +22,7 @@ describe('DocViewerTab', () => {
       renderProps: {
         hit: {} as ElasticSearchHit,
         columns: ['test'],
-        indexPattern: indexPatternMock,
+        dataView: dataViewMock,
       },
     };
 
@@ -33,7 +33,7 @@ describe('DocViewerTab', () => {
       renderProps: {
         hit: {} as ElasticSearchHit,
         columns: ['test2'],
-        indexPattern: indexPatternMock,
+        dataView: dataViewMock,
       },
     };
 

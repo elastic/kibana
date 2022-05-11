@@ -27,7 +27,7 @@ export type DocViewFilterFn = (
 
 export interface DocViewRenderProps {
   hit: ElasticSearchHit;
-  indexPattern: DataView;
+  dataView: DataView;
   columns?: string[];
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;

@@ -10,7 +10,7 @@ import { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { sha256 } from 'js-sha256';
 import type { Rule } from '@kbn/alerting-plugin/common';
-import { getTime, IndexPattern } from '@kbn/data-plugin/common';
+import { getTime, dataView } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/data-plugin/public';
 import { DiscoverAppLocatorParams } from '../../locator';
 import { useDiscoverServices } from '../../utils/use_discover_services';
@@ -26,7 +26,7 @@ const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntr
 };
 
 const buildTimeRangeFilter = (
-  dataView: IndexPattern,
+  dataView: dataView,
   fetchedAlert: Rule<SearchThresholdAlertParams>,
   timeFieldName: string
 ) => {
@@ -103,7 +103,7 @@ export function ViewAlertRoute() {
         : buildTimeRangeFilter(dataView, fetchedAlert, timeFieldName);
       const state: DiscoverAppLocatorParams = {
         query: fetchedSearchSource.getField('query') || data.query.queryString.getDefaultQuery(),
-        indexPatternId: dataView.id,
+        dataViewId: dataView.id,
         timeRange,
       };
 

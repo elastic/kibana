@@ -58,7 +58,7 @@ fields.getAll = () => {
   return fields;
 };
 
-const indexPattern = {
+const dataView = {
   id: 'index-pattern-with-timefield-id',
   title: 'index-pattern-with-timefield',
   metaFields: ['_index', '_score'],
@@ -72,6 +72,6 @@ const indexPattern = {
   popularizeField: () => {},
 } as unknown as DataView;
 
-indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
+dataView.isTimeBased = () => !!dataView.timeFieldName;
 
-export const indexPatternWithTimefieldMock = indexPattern;
+export const dataViewWithTimefieldMock = dataView;

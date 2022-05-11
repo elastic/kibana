@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -31,7 +31,7 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
 
   return {
     stateContainer: {} as GetStateReturn,
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     savedSearch: savedSearchMock,
     navigateTo: jest.fn(),
     query: {} as Query,
@@ -41,7 +41,7 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     searchSource: {} as ISearchSource,
     resetSavedSearch: () => {},
     onEditRuntimeField: jest.fn(),
-    onChangeIndexPattern: jest.fn(),
+    onChangeDataView: jest.fn(),
   };
 }
 

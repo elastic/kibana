@@ -37,7 +37,7 @@ describe('context successors', function () {
   let dataPluginMock: DataPublicPluginStart;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
-  const indexPattern = {
+  const dataView = {
     id: 'INDEX_PATTERN_ID',
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
@@ -59,14 +59,14 @@ describe('context successors', function () {
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = {
           _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
+            [dataView.timeFieldName!]: timeValIso,
           },
           sort: [timeValNr, tieBreakerValue],
         };
 
         return fetchSurroundingDocs(
           SurrDocType.SUCCESSORS,
-          indexPattern,
+          dataView,
           anchor as EsHitRecord,
           tieBreakerField,
           SortDirection.desc,
@@ -195,14 +195,14 @@ describe('context successors', function () {
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
         const anchor = {
           _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
+            [dataView.timeFieldName!]: timeValIso,
           },
           sort: [timeValNr, tieBreakerValue],
         };
 
         return fetchSurroundingDocs(
           SurrDocType.SUCCESSORS,
-          indexPattern,
+          dataView,
           anchor as EsHitRecord,
           tieBreakerField,
           SortDirection.desc,

@@ -16,7 +16,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../common';
-import { indexPatternMock } from '../__mocks__/index_pattern';
+import { dataViewMock } from '../__mocks__/index_pattern';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
@@ -43,7 +43,7 @@ describe('getSharingData', () => {
   });
 
   test('returns valid data for sharing', async () => {
-    const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
     const result = await getSharingData(searchSourceMock, { columns: [] }, services);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -54,7 +54,7 @@ describe('getSharingData', () => {
   });
 
   test('returns valid data for sharing when columns are selected', async () => {
-    const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
     const result = await getSharingData(
       searchSourceMock,
       { columns: ['column_a', 'column_b'] },
@@ -72,7 +72,7 @@ describe('getSharingData', () => {
   });
 
   test('getSearchSource does not add fields to the searchSource', async () => {
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(searchSourceMock, {}, services);
@@ -98,7 +98,7 @@ describe('getSharingData', () => {
         return originalGet(key, ...args);
       },
     } as unknown as IUiSettingsClient;
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(
@@ -128,7 +128,7 @@ describe('getSharingData', () => {
   });
 
   test('getSearchSource does add fields to the searchSource when columns are selected', async () => {
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(
@@ -157,7 +157,7 @@ describe('getSharingData', () => {
   });
 
   test('fields have prepended timeField', async () => {
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 
     const searchSourceMock = createSearchSourceMock({ index });
@@ -201,7 +201,7 @@ describe('getSharingData', () => {
       },
     } as unknown as IUiSettingsClient;
 
-    const index = { ...indexPatternMock } as DataView;
+    const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 
     const searchSourceMock = createSearchSourceMock({ index });

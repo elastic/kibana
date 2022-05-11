@@ -19,7 +19,7 @@ import { useDiscoverServices } from './use_discover_services';
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
 
 export interface UseNavigationProps {
-  indexPatternId: string;
+  dataViewId: string;
   rowIndex: string;
   rowId: string;
   columns: string[];
@@ -70,7 +70,7 @@ export const useMainRouteBreadcrumb = () => {
 };
 
 export const useNavigationProps = ({
-  indexPatternId,
+  dataViewId,
   rowIndex,
   rowId,
   columns,
@@ -92,13 +92,13 @@ export const useNavigationProps = ({
    */
   if (!!history) {
     const isContextRoute = matchPath(history.location.pathname, {
-      path: '/context/:indexPatternId/:id',
+      path: '/context/:dataViewId/:id',
       exact: true,
     });
 
     const onOpenSingleDoc = () => {
       history.push({
-        pathname: `/doc/${indexPatternId}/${rowIndex}`,
+        pathname: `/doc/${dataViewId}/${rowIndex}`,
         search: `?id=${encodeURIComponent(rowId)}`,
         state: {
           breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
@@ -108,7 +108,7 @@ export const useNavigationProps = ({
 
     const onOpenSurrDocs = () =>
       history.push({
-        pathname: `/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
+        pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
           String(rowId)
         )}`,
         search: `?${contextSearchHash}`,
@@ -127,12 +127,12 @@ export const useNavigationProps = ({
   return {
     singleDocProps: {
       href: addBasePath(
-        `/app/discover#/doc/${indexPatternId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
+        `/app/discover#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
       ),
     },
     surrDocsProps: {
       href: addBasePath(
-        `/app/discover#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
+        `/app/discover#/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
           rowId
         )}?${contextSearchHash}`
       ),

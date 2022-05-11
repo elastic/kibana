@@ -21,7 +21,7 @@ import { SavedObject } from '@kbn/core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
-import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -30,12 +30,12 @@ import { FetchStatus } from '../../../types';
 import { AvailableFields$ } from '../../utils/use_saved_search';
 
 function getCompProps(): DiscoverSidebarProps {
-  const indexPattern = stubLogstashIndexPattern;
+  const dataView = stubLogstashDataView;
   const hits = each(cloneDeep(realHits), (hit) =>
-    flattenHit(hit, indexPattern)
+    flattenHit(hit, dataView)
   ) as unknown as ElasticSearchHit[];
 
-  const indexPatternList = [
+  const dataViewList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
     { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
     { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
@@ -44,7 +44,7 @@ function getCompProps(): DiscoverSidebarProps {
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
-    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
+    for (const key of Object.keys(flattenHit(hit, dataView))) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
@@ -57,12 +57,12 @@ function getCompProps(): DiscoverSidebarProps {
     columns: ['extension'],
     fieldCounts,
     documents: hits,
-    indexPatternList,
-    onChangeIndexPattern: jest.fn(),
+    dataViewList,
+    onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    selectedIndexPattern: indexPattern,
+    selectedDataView: dataView,
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),

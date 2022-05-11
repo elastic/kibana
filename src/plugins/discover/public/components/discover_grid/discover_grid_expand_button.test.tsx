@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridContext } from './discover_grid_context';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { esHits } from '../../__mocks__/es_hits';
 
 const baseContextMock = {
@@ -19,7 +19,7 @@ const baseContextMock = {
   setExpanded: jest.fn(),
   rows: esHits,
   onFilter: jest.fn(),
-  indexPattern: indexPatternMock,
+  dataView: dataViewMock,
   isDarkMode: false,
   selectedDocs: [],
   setSelectedDocs: jest.fn(),

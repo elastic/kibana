@@ -30,7 +30,7 @@ export interface SearchInput extends EmbeddableInput {
 
 export interface SearchOutput extends EmbeddableOutput {
   editUrl: string;
-  indexPatterns?: DataView[];
+  dataViews?: DataView[];
   editable: boolean;
 }
 

@@ -7,15 +7,15 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { indexPatternMock } from './index_pattern';
+import { dataViewMock } from './index_pattern';
 
-export const indexPatternsMock = {
+export const dataViewsMock = {
   getCache: async () => {
-    return [indexPatternMock];
+    return [dataViewMock];
   },
   get: async (id: string) => {
     if (id === 'the-index-pattern-id') {
-      return Promise.resolve(indexPatternMock);
+      return Promise.resolve(dataViewMock);
     } else if (id === 'invalid-index-pattern-id') {
       return Promise.reject('Invald');
     }

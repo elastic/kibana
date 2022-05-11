@@ -24,11 +24,11 @@ type RequestBody = Pick<estypes.SearchRequest, 'body'>;
  */
 export function buildSearchBody(
   id: string,
-  indexPattern: DataView,
+  dataView: DataView,
   useNewFieldsApi: boolean,
   requestAllFields?: boolean
 ): RequestBody | undefined {
-  const computedFields = indexPattern.getComputedFields();
+  const computedFields = dataView.getComputedFields();
   const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
   const request: RequestBody = {
     body: {
@@ -65,7 +65,7 @@ export function buildSearchBody(
 export function useEsDocSearch({
   id,
   index,
-  indexPattern,
+  dataView,
   requestSource,
 }: DocProps): [ElasticRequestState, ElasticSearchHit | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
@@ -79,7 +79,7 @@ export function useEsDocSearch({
         data.search.search({
           params: {
             index,
-            body: buildSearchBody(id, indexPattern, useNewFieldsApi, requestSource)?.body,
+            body: buildSearchBody(id, dataView, useNewFieldsApi, requestSource)?.body,
           },
         })
       );
@@ -94,14 +94,14 @@ export function useEsDocSearch({
       }
     } catch (err) {
       if (err.savedObjectId) {
-        setStatus(ElasticRequestState.NotFoundIndexPattern);
+        setStatus(ElasticRequestState.NotFoundDataView);
       } else if (err.status === 404) {
         setStatus(ElasticRequestState.NotFound);
       } else {
         setStatus(ElasticRequestState.Error);
       }
     }
-  }, [id, index, indexPattern, data.search, useNewFieldsApi, requestSource]);
+  }, [id, index, dataView, data.search, useNewFieldsApi, requestSource]);
 
   useEffect(() => {
     requestData();

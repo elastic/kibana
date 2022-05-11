@@ -31,7 +31,7 @@ export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
   row: DocTableRow;
-  indexPattern: DataView;
+  dataView: DataView;
   useNewFieldsApi: boolean;
   fieldsToShow: string[];
   onAddColumn?: (column: string) => void;
@@ -42,7 +42,7 @@ export const TableRow = ({
   columns,
   filter,
   row,
-  indexPattern,
+  dataView,
   useNewFieldsApi,
   fieldsToShow,
   onAddColumn,
@@ -63,10 +63,10 @@ export const TableRow = ({
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
   const flattenedRow = useMemo(
-    () => flattenHit(row, indexPattern, { includeIgnoredValues: true }),
-    [indexPattern, row]
+    () => flattenHit(row, dataView, { includeIgnoredValues: true }),
+    [dataView, row]
   );
-  const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
+  const mapping = useMemo(() => dataView.fields.getByName, [dataView]);
 
   // toggle display of the rows details, a full list of the fields from each row
   const toggleRow = () => setOpen((prevOpen) => !prevOpen);
@@ -78,14 +78,14 @@ export const TableRow = ({
     // If we're formatting the _source column, don't use the regular field formatter,
     // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+      return formatRow(row, dataView, fieldsToShow, maxEntries, fieldFormats);
     }
 
     const formattedField = formatFieldValue(
       flattenedRow[fieldName],
       row,
       fieldFormats,
-      indexPattern,
+      dataView,
       mapping(fieldName)
     );
 
@@ -97,14 +97,14 @@ export const TableRow = ({
   };
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
-      const field = indexPattern.fields.getByName(column);
+      const field = dataView.fields.getByName(column);
       filter(field!, flattenedRow[column], type);
     },
-    [filter, flattenedRow, indexPattern.fields]
+    [filter, flattenedRow, dataView.fields]
   );
 
   const { singleDocProps, surrDocsProps } = useNavigationProps({
-    indexPatternId: indexPattern.id!,
+    dataViewId: dataView.id!,
     rowIndex: row._index,
     rowId: row._id,
     filterManager,
@@ -132,21 +132,21 @@ export const TableRow = ({
     </td>,
   ];
 
-  if (indexPattern.timeFieldName && !hideTimeColumn) {
+  if (dataView.timeFieldName && !hideTimeColumn) {
     rowCells.push(
       <TableCell
-        key={indexPattern.timeFieldName}
+        key={dataView.timeFieldName}
         timefield={true}
-        formatted={displayField(indexPattern.timeFieldName)}
-        filterable={Boolean(mapping(indexPattern.timeFieldName)?.filterable && filter)}
-        column={indexPattern.timeFieldName}
+        formatted={displayField(dataView.timeFieldName)}
+        filterable={Boolean(mapping(dataView.timeFieldName)?.filterable && filter)}
+        column={dataView.timeFieldName}
         inlineFilter={inlineFilter}
       />
     );
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+    const formatted = formatRow(row, dataView, fieldsToShow, maxEntries, fieldFormats);
 
     rowCells.push(
       <TableCell
@@ -173,7 +173,7 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={true}
-            formatted={formatTopLevelObject(row, innerColumns, indexPattern, maxEntries)}
+            formatted={formatTopLevelObject(row, innerColumns, dataView, maxEntries)}
             filterable={false}
             column={column}
             inlineFilter={inlineFilter}
@@ -211,7 +211,7 @@ export const TableRow = ({
         <TableRowDetails
           open={open}
           colLength={(columns.length || 1) + 2}
-          isTimeBased={indexPattern.isTimeBased()}
+          isTimeBased={dataView.isTimeBased()}
           singleDocProps={singleDocProps}
           surrDocsProps={surrDocsProps}
         >
@@ -219,7 +219,7 @@ export const TableRow = ({
             columns={columns}
             filter={filter}
             hit={row}
-            indexPattern={indexPattern}
+            dataView={dataView}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
           />

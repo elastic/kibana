@@ -20,8 +20,8 @@ function onFilterCell(
   mode: '+' | '-'
 ) {
   const row = context.rows[rowIndex];
-  const flattened = flattenHit(row, context.indexPattern);
-  const field = context.indexPattern.fields.getByName(columnId);
+  const flattened = flattenHit(row, context.dataView);
+  const field = context.dataView.fields.getByName(columnId);
 
   if (flattened && field) {
     context.onFilter(field, flattened[columnId], mode);

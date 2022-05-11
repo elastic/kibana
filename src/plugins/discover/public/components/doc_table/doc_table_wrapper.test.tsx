@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { DocTableWrapper } from './doc_table_wrapper';
 import { DocTableRow } from './components/table_row';
 import { discoverServiceMock } from '../../__mocks__/services';
@@ -18,7 +18,7 @@ describe('Doc table component', () => {
   const mountComponent = (rows?: DocTableRow[]) => {
     const props = {
       columns: ['_source'],
-      indexPattern: indexPatternMock,
+      dataView: dataViewMock,
       rows: rows || [
         {
           _index: 'mock_index',

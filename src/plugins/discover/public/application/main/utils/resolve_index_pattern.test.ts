@@ -6,40 +6,33 @@
  * Side Public License, v 1.
  */
 
-import {
-  loadIndexPattern,
-  getFallbackIndexPatternId,
-  IndexPatternSavedObject,
-} from './resolve_index_pattern';
-import { indexPatternsMock } from '../../../__mocks__/index_patterns';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { loadDataView, getFallbackDataViewId, DataViewSavedObject } from './resolve_index_pattern';
+import { dataViewsMock } from '../../../__mocks__/index_patterns';
+import { dataViewMock } from '../../../__mocks__/index_pattern';
 import { configMock } from '../../../__mocks__/config';
 
 describe('Resolve index pattern tests', () => {
   test('returns valid data for an existing index pattern', async () => {
-    const indexPatternId = 'the-index-pattern-id';
-    const result = await loadIndexPattern(indexPatternId, indexPatternsMock, configMock);
-    expect(result.loaded).toEqual(indexPatternMock);
+    const dataViewId = 'the-index-pattern-id';
+    const result = await loadDataView(dataViewId, dataViewsMock, configMock);
+    expect(result.loaded).toEqual(dataViewMock);
     expect(result.stateValFound).toEqual(true);
-    expect(result.stateVal).toEqual(indexPatternId);
+    expect(result.stateVal).toEqual(dataViewId);
   });
   test('returns fallback data for an invalid index pattern', async () => {
-    const indexPatternId = 'invalid-id';
-    const result = await loadIndexPattern(indexPatternId, indexPatternsMock, configMock);
-    expect(result.loaded).toEqual(indexPatternMock);
+    const dataViewId = 'invalid-id';
+    const result = await loadDataView(dataViewId, dataViewsMock, configMock);
+    expect(result.loaded).toEqual(dataViewMock);
     expect(result.stateValFound).toBe(false);
-    expect(result.stateVal).toBe(indexPatternId);
+    expect(result.stateVal).toBe(dataViewId);
   });
-  test('getFallbackIndexPatternId with an empty indexPatterns array', async () => {
-    const result = await getFallbackIndexPatternId([], '');
+  test('getFallbackDataViewId with an empty dataViews array', async () => {
+    const result = await getFallbackDataViewId([], '');
     expect(result).toBe('');
   });
-  test('getFallbackIndexPatternId with an indexPatterns array', async () => {
-    const list = await indexPatternsMock.getCache();
-    const result = await getFallbackIndexPatternId(
-      list as unknown as IndexPatternSavedObject[],
-      ''
-    );
+  test('getFallbackDataViewId with an dataViews array', async () => {
+    const list = await dataViewsMock.getCache();
+    const result = await getFallbackDataViewId(list as unknown as DataViewSavedObject[], '');
     expect(result).toBe('the-index-pattern-id');
   });
 });

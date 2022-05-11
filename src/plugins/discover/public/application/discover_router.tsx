@@ -23,18 +23,18 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
     <EuiErrorBoundary>
       <Router history={history} data-test-subj="discover-react-router">
         <Switch>
-          <Route path="/context/:indexPatternId/:id">
+          <Route path="/context/:dataViewId/:id">
             <ContextAppRoute />
           </Route>
           <Route
-            path="/doc/:indexPattern/:index/:type"
+            path="/doc/:dataView/:index/:type"
             render={(props) => (
               <Redirect
-                to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
+                to={`/doc/${props.match.params.dataView}/${props.match.params.index}`}
               />
             )}
           />
-          <Route path="/doc/:indexPatternId/:index">
+          <Route path="/doc/:dataViewId/:index">
             <SingleDocRoute />
           </Route>
           <Route path="/viewAlert/:id">

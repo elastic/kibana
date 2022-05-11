@@ -30,14 +30,14 @@ const createError = (statusKey: string, reason: FailureReason, error?: Error) =>
 
 export interface ContextAppFetchProps {
   anchorId: string;
-  indexPattern: DataView;
+  dataView: DataView;
   appState: AppState;
   useNewFieldsApi: boolean;
 }
 
 export function useContextAppFetch({
   anchorId,
-  indexPattern,
+  dataView,
   appState,
   useNewFieldsApi,
 }: ContextAppFetchProps) {
@@ -54,8 +54,8 @@ export function useContextAppFetch({
     return data.search.searchSource.createEmpty();
   }, [data.search.searchSource]);
   const tieBreakerField = useMemo(
-    () => getFirstSortableField(indexPattern, config.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),
-    [config, indexPattern]
+    () => getFirstSortableField(dataView, config.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),
+    [config, dataView]
   );
 
   const [fetchedState, setFetchedState] = useState<ContextFetchState>(
@@ -92,10 +92,10 @@ export function useContextAppFetch({
     try {
       setState({ anchorStatus: { value: LoadingStatus.LOADING } });
       const sort = [
-        { [indexPattern.timeFieldName!]: SortDirection.desc },
+        { [dataView.timeFieldName!]: SortDirection.desc },
         { [tieBreakerField]: SortDirection.desc },
       ];
-      const anchor = await fetchAnchor(anchorId, indexPattern, searchSource, sort, useNewFieldsApi);
+      const anchor = await fetchAnchor(anchorId, dataView, searchSource, sort, useNewFieldsApi);
       setState({ anchor, anchorStatus: { value: LoadingStatus.LOADED } });
       return anchor;
     } catch (error) {
@@ -109,7 +109,7 @@ export function useContextAppFetch({
     tieBreakerField,
     setState,
     toastNotifications,
-    indexPattern,
+    dataView,
     anchorId,
     searchSource,
     useNewFieldsApi,
@@ -132,7 +132,7 @@ export function useContextAppFetch({
         setState({ [statusKey]: { value: LoadingStatus.LOADING } });
         const rows = await fetchSurroundingDocs(
           type,
-          indexPattern,
+          dataView,
           anchor as EsHitRecord,
           tieBreakerField,
           SortDirection.desc,
@@ -158,7 +158,7 @@ export function useContextAppFetch({
       fetchedState.anchor,
       tieBreakerField,
       setState,
-      indexPattern,
+      dataView,
       toastNotifications,
       useNewFieldsApi,
       theme$,

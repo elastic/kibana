@@ -18,7 +18,7 @@ import {
   mockPredecessorHits,
   mockSuccessorHits,
 } from '../__mocks__/use_context_app_fetch';
-import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -31,8 +31,8 @@ jest.mock('../services/context', () => {
   return {
     ...originalModule,
 
-    fetchSurroundingDocs: (type: string, indexPattern: DataView) => {
-      if (!indexPattern || !indexPattern.id) {
+    fetchSurroundingDocs: (type: string, dataView: DataView) => {
+      if (!dataView || !dataView.id) {
         throw new Error();
       }
       return type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits;
@@ -41,15 +41,15 @@ jest.mock('../services/context', () => {
 });
 
 jest.mock('../services/anchor', () => ({
-  fetchAnchor: (anchorId: string, indexPattern: DataView) => {
-    if (!indexPattern.id || !anchorId) {
+  fetchAnchor: (anchorId: string, dataView: DataView) => {
+    if (!dataView.id || !anchorId) {
       throw new Error();
     }
     return mockAnchorHit;
   },
 }));
 
-const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pattern-id') => {
+const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-index-pattern-id') => {
   const dangerNotification = jest.fn();
   const mockSearchSource = createContextSearchSourceStub('timestamp');
 
@@ -81,7 +81,7 @@ const initDefaults = (tieBreakerFields: string[], indexPatternId = 'the-index-pa
     dangerNotification,
     props: {
       anchorId: 'mock_anchor_id',
-      indexPattern: { ...indexPatternWithTimefieldMock, id: indexPatternId },
+      dataView: { ...dataViewWithTimefieldMock, id: dataViewId },
       appState: {
         predecessorCount: 2,
         successorCount: 2,
@@ -136,7 +136,7 @@ describe('test useContextAppFetch', () => {
     expect(result.current.fetchedState.successors).toEqual([]);
   });
 
-  it('should set anchorStatus to failed when invalid indexPatternId provided', async () => {
+  it('should set anchorStatus to failed when invalid dataViewId provided', async () => {
     const { result, dangerNotification } = initDefaults(['_doc'], '');
 
     expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.UNINITIALIZED);
@@ -169,7 +169,7 @@ describe('test useContextAppFetch', () => {
     expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
   });
 
-  it('should set context rows statuses to failed when invalid indexPatternId provided', async () => {
+  it('should set context rows statuses to failed when invalid dataViewId provided', async () => {
     const { result, dangerNotification } = initDefaults(['_doc'], '');
 
     expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);

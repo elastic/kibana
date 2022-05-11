@@ -80,7 +80,7 @@ export class SearchEmbeddableFactory
 
       await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
-      const indexPattern = savedSearch.searchSource.getField('index');
+      const dataView = savedSearch.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
       const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
         './saved_search_embeddable'
@@ -92,7 +92,7 @@ export class SearchEmbeddableFactory
           editPath: url,
           filterManager,
           editable: services.capabilities.discover.save as boolean,
-          indexPatterns: indexPattern ? [indexPattern] : [],
+          dataViews: dataView ? [dataView] : [],
           services,
         },
         input,

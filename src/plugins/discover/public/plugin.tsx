@@ -81,7 +81,7 @@ export interface DiscoverSetup {
    * ```ts
    * await plugins.discover.locator.navigate({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   dataViewId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
    *     to: 'now',
    *     from: 'now-15m',
@@ -95,7 +95,7 @@ export interface DiscoverSetup {
    * ```ts
    * const location = await plugins.discover.locator.getLocation({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   dataViewId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
    *     to: 'now',
    *     from: 'now-15m',
@@ -115,7 +115,7 @@ export interface DiscoverStart {
    * ```ts
    * await plugins.discover.locator.navigate({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   dataViewId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
    *     to: 'now',
    *     from: 'now-15m',
@@ -129,7 +129,7 @@ export interface DiscoverStart {
    * ```ts
    * const location = await plugins.discover.locator.getLocation({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   dataViewId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
    *     to: 'now',
    *     from: 'now-15m',
@@ -231,7 +231,7 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, indexPattern }) => (
+      component: ({ hit, dataView }) => (
         <React.Suspense
           fallback={
             <DeferredSpinner>
@@ -242,7 +242,7 @@ export class DiscoverPlugin
           <SourceViewer
             index={hit._index}
             id={hit._id}
-            indexPattern={indexPattern}
+            dataView={dataView}
             hasLineNumbers
           />
         </React.Suspense>
@@ -284,7 +284,7 @@ export class DiscoverPlugin
         );
 
         // make sure the index pattern list is up to date
-        await discoverStartPlugins.data.indexPatterns.clearCache();
+        await discoverStartPlugins.data.dataViews.clearCache();
 
         const { renderApp } = await import('./application');
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
@@ -305,7 +305,7 @@ export class DiscoverPlugin
     plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
       const urlParts = path.split('/');
       // take care of urls containing legacy url, those split in the following way
-      // ["", "context", indexPatternId, _type, id + params]
+      // ["", "context", dataViewId, _type, id + params]
       if (urlParts[4]) {
         // remove _type part
         const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');

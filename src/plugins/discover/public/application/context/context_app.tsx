@@ -31,13 +31,13 @@ import { useDiscoverServices } from '../../utils/use_discover_services';
 const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
-  indexPattern: DataView;
+  dataView: DataView;
   anchorId: string;
 }
 
-export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
+export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
   const services = useDiscoverServices();
-  const { uiSettings, capabilities, indexPatterns, navigation, filterManager, core } = services;
+  const { uiSettings, capabilities, dataViews, navigation, filterManager, core } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -45,7 +45,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'context',
-    id: indexPattern.id || '',
+    id: dataView.id || '',
   });
 
   /**
@@ -60,7 +60,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const { fetchedState, fetchContextRows, fetchAllRows, fetchSurroundingRows, resetFetchedState } =
     useContextAppFetch({
       anchorId,
-      indexPattern,
+      dataView,
       appState,
       useNewFieldsApi,
     });
@@ -101,8 +101,8 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
     capabilities,
     config: uiSettings,
-    indexPattern,
-    indexPatterns,
+    dataView,
+    dataViews,
     state: appState,
     useNewFieldsApi,
     setAppState,
@@ -118,14 +118,14 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
 
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
-      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern.id!);
+      const newFilters = generateFilters(filterManager, field, values, operation, dataView.id!);
       filterManager.addFilters(newFilters);
-      if (indexPatterns) {
+      if (dataViews) {
         const fieldName = typeof field === 'string' ? field : field.name;
-        await popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
+        await popularizeField(dataView, fieldName, dataViews, capabilities);
       }
     },
-    [filterManager, indexPatterns, indexPattern, capabilities]
+    [filterManager, dataViews, dataView, capabilities]
   );
 
   const TopNavMenu = navigation.ui.TopNavMenu;
@@ -138,7 +138,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
       showFilterBar: true,
       showSaveQuery: false,
       showDatePicker: false,
-      indexPatterns: [indexPattern],
+      dataViews: [dataView],
       useDefaultBehaviors: true,
     };
   };
@@ -164,7 +164,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
               </EuiText>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
-                indexPattern={indexPattern}
+                dataView={dataView}
                 useNewFieldsApi={useNewFieldsApi}
                 isLegacy={isLegacy}
                 columns={columns}

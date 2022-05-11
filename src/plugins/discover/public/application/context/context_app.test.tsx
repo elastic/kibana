@@ -12,10 +12,10 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { ContextApp } from './context_app';
 import { DiscoverServices } from '../../build_services';
-import { indexPatternsMock } from '../../__mocks__/index_patterns';
+import { dataViewsMock } from '../../__mocks__/index_patterns';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -38,11 +38,11 @@ describe('ContextApp test', () => {
       discover: {
         save: true,
       },
-      indexPatterns: {
+      dataViews: {
         save: true,
       },
     },
-    indexPatterns: indexPatternsMock,
+    dataViews: dataViewsMock,
     toastNotifications: { addDanger: () => {} },
     navigation: mockNavigationPlugin,
     core: {
@@ -63,7 +63,7 @@ describe('ContextApp test', () => {
   } as unknown as DiscoverServices;
 
   const defaultProps = {
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
   };
 
@@ -75,7 +75,7 @@ describe('ContextApp test', () => {
     showFilterBar: true,
     showSaveQuery: false,
     showDatePicker: false,
-    indexPatterns: [indexPatternMock],
+    dataViews: [dataViewMock],
     useDefaultBehaviors: true,
   };
 
@@ -116,7 +116,7 @@ describe('ContextApp test', () => {
         query: { match_phrase: { message: '2021-06-08T07:52:19.000Z' } },
       },
     ]);
-    expect(indexPatternsMock.updateSavedObject.mock.calls.length).toBe(1);
-    expect(indexPatternsMock.updateSavedObject.mock.calls[0]).toEqual([indexPatternMock, 0, true]);
+    expect(dataViewsMock.updateSavedObject.mock.calls.length).toBe(1);
+    expect(dataViewsMock.updateSavedObject.mock.calls[0]).toEqual([dataViewMock, 0, true]);
   });
 });

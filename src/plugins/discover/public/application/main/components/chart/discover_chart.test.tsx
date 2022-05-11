@@ -90,7 +90,7 @@ async function mountComponent(isTimeBased: boolean = false) {
   }) as DataCharts$;
 
   const props = {
-    indexPattern: {
+    dataView: {
       isTimeBased: () => isTimeBased,
       id: '123',
       getFieldByName: () => ({ type: 'date', name: 'timefield', visualizable: true }),
@@ -169,7 +169,7 @@ describe('Discover chart', () => {
     component.find('[data-test-subj="discoverEditVisualization"]').first().simulate('click');
     expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
-        indexPatternId: '123',
+        dataViewId: '123',
         fieldName: 'timefield',
       })
     );

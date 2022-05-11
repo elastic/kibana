@@ -46,7 +46,7 @@ function getComponent({
     });
 
   const props = {
-    indexPattern: stubDataView,
+    dataView: stubDataView,
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
     onAddFilter: jest.fn(),

@@ -12,12 +12,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
-import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
@@ -39,7 +39,7 @@ import { DiscoverServices } from '../../../../build_services';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
+function mountComponent(dataView: DataView, prevSidebarClosed?: boolean) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
     ...discoverServiceMock,
@@ -51,7 +51,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const indexPatternList = [indexPattern].map((ip) => {
+  const dataViewList = [dataView].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
   }) as unknown as Array<SavedObject<DataViewAttributes>>;
 
@@ -133,11 +133,11 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
   };
 
   const props = {
-    indexPattern,
-    indexPatternList,
+    dataView,
+    dataViewList,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: jest.fn(),
-    onChangeIndexPattern: jest.fn(),
+    onChangeDataView: jest.fn(),
     onUpdateQuery: jest.fn(),
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
@@ -165,28 +165,28 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
 
 describe('Discover component', () => {
   test('selected index pattern without time field displays no chart toggle', () => {
-    const component = mountComponent(indexPatternMock);
+    const component = mountComponent(dataViewMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
 
   test('selected index pattern with time field displays chart toggle', () => {
-    const component = mountComponent(indexPatternWithTimefieldMock);
+    const component = mountComponent(dataViewWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', () => {
-      const component = mountComponent(indexPatternWithTimefieldMock, undefined);
+      const component = mountComponent(dataViewWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be opened if discover:sidebarClosed is false', () => {
-      const component = mountComponent(indexPatternWithTimefieldMock, false);
+      const component = mountComponent(dataViewWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be closed if discover:sidebarClosed is true', () => {
-      const component = mountComponent(indexPatternWithTimefieldMock, true);
+      const component = mountComponent(dataViewWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
     });
   });

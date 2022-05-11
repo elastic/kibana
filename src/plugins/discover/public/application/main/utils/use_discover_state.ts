@@ -12,7 +12,7 @@ import { getState } from '../services/discover_state';
 import { getStateDefaults } from './get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
-import { loadIndexPattern } from './resolve_index_pattern';
+import { loadDataView } from './resolve_index_pattern';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
@@ -22,7 +22,7 @@ import {
 } from '../../../../common';
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
-import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
+import { getDataViewAppState } from './get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../types';
 
@@ -37,16 +37,16 @@ export function useDiscoverState({
   history: History;
   setExpandedDoc: (doc?: ElasticSearchHit) => void;
 }) {
-  const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
+  const { uiSettings: config, data, filterManager, dataViews, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
 
-  const indexPattern = savedSearch.searchSource.getField('index')!;
+  const dataView = savedSearch.searchSource.getField('index')!;
 
   const searchSource = useMemo(() => {
-    savedSearch.searchSource.setField('index', indexPattern);
+    savedSearch.searchSource.setField('index', dataView);
     return savedSearch.searchSource.createChild();
-  }, [savedSearch, indexPattern]);
+  }, [savedSearch, dataView]);
 
   const stateContainer = useMemo(
     () =>
@@ -109,11 +109,11 @@ export function useDiscoverState({
    * or dataView / savedSearch switch
    */
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+    const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
     setState(stateContainer.appStateContainer.getState());
 
     return () => stopSync();
-  }, [stateContainer, filterManager, data, indexPattern]);
+  }, [stateContainer, filterManager, data, dataView]);
 
   /**
    * Track state changes that should trigger a fetch
@@ -125,17 +125,17 @@ export function useDiscoverState({
       const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
       const chartIntervalChanged = nextState.interval !== interval;
       const docTableSortChanged = !isEqual(nextState.sort, sort);
-      const indexPatternChanged = !isEqual(nextState.index, index);
+      const dataViewChanged = !isEqual(nextState.index, index);
       // NOTE: this is also called when navigating from discover app to context app
-      if (nextState.index && indexPatternChanged) {
+      if (nextState.index && dataViewChanged) {
         /**
          *  Without resetting the fetch state, e.g. a time column would be displayed when switching
          *  from a index pattern without to a index pattern with time filter for a brief moment
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
-        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
+        const nextDataView = await loadDataView(nextState.index, dataViews, config);
+        savedSearch.searchSource.setField('index', nextDataView.loaded);
 
         reset();
       }
@@ -148,7 +148,7 @@ export function useDiscoverState({
     return () => unsubscribe();
   }, [
     config,
-    indexPatterns,
+    dataViews,
     appStateContainer,
     setState,
     state,
@@ -169,8 +169,8 @@ export function useDiscoverState({
         spaces: services.spaces,
       });
 
-      const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
-      newSavedSearch.searchSource.setField('index', newIndexPattern);
+      const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
+      newSavedSearch.searchSource.setField('index', newDataView);
       const newAppState = getStateDefaults({
         config,
         data,
@@ -180,19 +180,19 @@ export function useDiscoverState({
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [services, indexPattern, config, data, storage, stateContainer]
+    [services, dataView, config, data, storage, stateContainer]
   );
 
   /**
    * Function triggered when user changes index pattern in the sidebar
    */
-  const onChangeIndexPattern = useCallback(
+  const onChangeDataView = useCallback(
     async (id: string) => {
-      const nextIndexPattern = await indexPatterns.get(id);
-      if (nextIndexPattern && indexPattern) {
-        const nextAppState = getSwitchIndexPatternAppState(
-          indexPattern,
-          nextIndexPattern,
+      const nextDataView = await dataViews.get(id);
+      if (nextDataView && dataView) {
+        const nextAppState = getDataViewAppState(
+          dataView,
+          nextDataView,
           state.columns || [],
           (state.sort || []) as SortPairArr[],
           config.get(MODIFY_COLUMNS_ON_SWITCH),
@@ -202,7 +202,7 @@ export function useDiscoverState({
       }
       setExpandedDoc(undefined);
     },
-    [config, indexPattern, indexPatterns, setExpandedDoc, state.columns, state.sort, stateContainer]
+    [config, dataView, dataViews, setExpandedDoc, state.columns, state.sort, stateContainer]
   );
   /**
    * Function triggered when the user changes the query in the search bar
@@ -218,21 +218,21 @@ export function useDiscoverState({
   );
 
   /**
-   * Trigger data fetching on indexPattern or savedSearch changes
+   * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
-    if (indexPattern) {
+    if (dataView) {
       refetch$.next(undefined);
     }
-  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+  }, [initialFetchStatus, refetch$, dataView, savedSearch.id]);
 
   return {
     data$,
-    indexPattern,
+    dataView,
     inspectorAdapters,
     refetch$,
     resetSavedSearch,
-    onChangeIndexPattern,
+    onChangeDataView,
     onUpdateQuery,
     searchSource,
     setState,

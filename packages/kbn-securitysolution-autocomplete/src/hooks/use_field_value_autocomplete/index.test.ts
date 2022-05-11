@@ -20,7 +20,7 @@ import { DataViewFieldBase } from '@kbn/es-query';
 
 // Copied from "src/plugins/data/common/index_patterns/index_pattern.stub.ts"
 // TODO: Remove this in favor of the above if/when it is ported, https://github.com/elastic/kibana/issues/100715
-export const stubIndexPatternWithFields = {
+export const stubDataViewWithFields = {
   id: '1234',
   title: 'logstash-*',
   fields: [
@@ -80,7 +80,7 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: stubDataViewWithFields,
           operatorType: OperatorTypeEnum.EXISTS,
           query: '',
           selectedField: getField('machine.os'),
@@ -107,7 +107,7 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: stubDataViewWithFields,
           operatorType: OperatorTypeEnum.EXISTS,
           query: '',
           selectedField: undefined,
@@ -169,7 +169,7 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: suggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: stubDataViewWithFields,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: { ...selectedField, name: 'child' },
@@ -213,7 +213,7 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: stubDataViewWithFields,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: getField('ssl'),
@@ -244,7 +244,7 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: suggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: stubDataViewWithFields,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: getField('bytes'),
@@ -274,7 +274,7 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: stubDataViewWithFields,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: getField('@tags'),
@@ -293,7 +293,7 @@ describe('use_field_value_autocomplete', () => {
 
       expect(getValueSuggestionsMock).toHaveBeenCalledWith({
         field: getField('@tags'),
-        indexPattern: stubIndexPatternWithFields,
+        indexPattern: stubDataViewWithFields,
         query: '',
         signal,
       });
@@ -313,7 +313,7 @@ describe('use_field_value_autocomplete', () => {
             getValueSuggestions: getValueSuggestionsMock,
           },
           fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
+          indexPattern: stubDataViewWithFields,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
           selectedField: getField('@tags'),
@@ -330,7 +330,7 @@ describe('use_field_value_autocomplete', () => {
       if (result.current[3] != null) {
         result.current[3]({
           fieldSelected: getField('@tags'),
-          patterns: stubIndexPatternWithFields,
+          patterns: stubDataViewWithFields,
           searchQuery: '',
           value: 'hello',
         });

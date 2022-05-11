@@ -39,7 +39,7 @@ describe('context predecessors', function () {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
-  const indexPattern = {
+  const dataView = {
     id: 'INDEX_PATTERN_ID',
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
@@ -60,14 +60,14 @@ describe('context predecessors', function () {
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
         const anchor = {
           _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
+            [dataView.timeFieldName!]: timeValIso,
           },
           sort: [timeValNr, tieBreakerValue],
         };
 
         return fetchSurroundingDocs(
           SurrDocType.PREDECESSORS,
-          indexPattern,
+          dataView,
           anchor as EsHitRecord,
           tieBreakerField,
           SortDirection.desc,
@@ -202,14 +202,14 @@ describe('context predecessors', function () {
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
         const anchor = {
           _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
+            [dataView.timeFieldName!]: timeValIso,
           },
           sort: [timeValNr, tieBreakerValue],
         };
 
         return fetchSurroundingDocs(
           SurrDocType.PREDECESSORS,
-          indexPattern,
+          dataView,
           anchor as EsHitRecord,
           tieBreakerField,
           SortDirection.desc,

@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { flattenHit } from '@kbn/data-plugin/public';
 import { ElasticSearchHit } from '../../types';
 
@@ -68,13 +68,13 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
 ];
 
 const flatten = (hit: ElasticSearchHit): Record<string, unknown> => {
-  return flattenHit(hit, indexPatternMock);
+  return flattenHit(hit, dataViewMock);
 };
 
 describe('Discover grid cell rendering', function () {
   it('renders bytes column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource,
       rowsSource.map(flatten),
       false,
@@ -99,7 +99,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders bytes column correctly using _source when details is true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource,
       rowsSource.map(flatten),
       false,
@@ -124,7 +124,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders bytes column correctly using fields when details is true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFields,
       rowsFields.map(flatten),
       false,
@@ -149,7 +149,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders _source column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource,
       rowsSource.map(flatten),
       false,
@@ -223,7 +223,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders _source column correctly when isDetails is set to true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource,
       rowsSource.map(flatten),
       false,
@@ -266,7 +266,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders fields-based column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFields,
       rowsFields.map(flatten),
       true,
@@ -344,7 +344,7 @@ describe('Discover grid cell rendering', function () {
 
   it('limits amount of rendered items', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFields,
       rowsFields.map(flatten),
       true,
@@ -423,7 +423,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders fields-based column correctly when isDetails is set to true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFields,
       rowsFields.map(flatten),
       true,
@@ -471,7 +471,7 @@ describe('Discover grid cell rendering', function () {
 
   it('collect object fields and renders them like _source', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
@@ -511,9 +511,9 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('collect object fields and renders them like _source with fallback for unmapped', () => {
-    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
@@ -554,7 +554,7 @@ describe('Discover grid cell rendering', function () {
 
   it('collect object fields and renders them as json in details', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
@@ -587,9 +587,9 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('does not collect subfields when the the column is unmapped but part of fields response', () => {
-    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
@@ -623,7 +623,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders correctly when invalid row is given', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource,
       rowsSource.map(flatten),
       false,
@@ -648,7 +648,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders correctly when invalid column is given', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource,
       rowsSource.map(flatten),
       false,
@@ -672,7 +672,7 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('renders unmapped fields correctly', () => {
-    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
     const rowsFieldsUnmapped: ElasticSearchHit[] = [
       {
         _id: '1',
@@ -686,7 +686,7 @@ describe('Discover grid cell rendering', function () {
       },
     ];
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsUnmapped,
       rowsFieldsUnmapped.map(flatten),
       true,

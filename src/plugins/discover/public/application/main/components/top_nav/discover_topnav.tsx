@@ -17,7 +17,7 @@ import { GetStateReturn } from '../../services/discover_state';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
-  'indexPattern' | 'navigateTo' | 'savedSearch' | 'searchSource'
+  'dataView' | 'navigateTo' | 'savedSearch' | 'searchSource'
 > & {
   onOpenInspector: () => void;
   query?: Query;
@@ -25,13 +25,13 @@ export type DiscoverTopNavProps = Pick<
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
-  onChangeIndexPattern: (indexPattern: string) => void;
+  onChangeDataView: (dataView: string) => void;
   onEditRuntimeField: () => void;
   useNewFieldsApi?: boolean;
 };
 
 export const DiscoverTopNav = ({
-  indexPattern,
+  dataView,
   onOpenInspector,
   query,
   savedQuery,
@@ -41,14 +41,14 @@ export const DiscoverTopNav = ({
   navigateTo,
   savedSearch,
   resetSavedSearch,
-  onChangeIndexPattern,
+  onChangeDataView,
   onEditRuntimeField,
   useNewFieldsApi = false,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
-    () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
-    [indexPattern]
+    () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
+    [dataView]
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
@@ -89,11 +89,11 @@ export const DiscoverTopNav = ({
     () =>
       canEditDataViewField
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            if (indexPattern?.id) {
-              const indexPatternInstance = await data.dataViews.get(indexPattern.id);
+            if (dataView?.id) {
+              const dataViewInstance = await data.dataViews.get(dataView.id);
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {
-                  dataView: indexPatternInstance,
+                  dataView: dataViewInstance,
                 },
                 fieldName,
                 onSave: async () => {
@@ -103,13 +103,7 @@ export const DiscoverTopNav = ({
             }
           }
         : undefined,
-    [
-      canEditDataViewField,
-      indexPattern?.id,
-      data.dataViews,
-      dataViewFieldEditor,
-      onEditRuntimeField,
-    ]
+    [canEditDataViewField, dataView?.id, data.dataViews, dataViewFieldEditor, onEditRuntimeField]
   );
 
   const addField = useMemo(
@@ -118,23 +112,23 @@ export const DiscoverTopNav = ({
   );
 
   const createNewDataView = useCallback(() => {
-    const indexPatternFieldEditPermission = dataViewEditor.userPermissions.editDataView;
-    if (!indexPatternFieldEditPermission) {
+    const dataViewFieldEditPermission = dataViewEditor.userPermissions.editDataView;
+    if (!dataViewFieldEditPermission) {
       return;
     }
     closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onChangeIndexPattern(dataView.id);
+      onSave: async (nextDataView) => {
+        if (nextDataView.id) {
+          onChangeDataView(nextDataView.id);
         }
       },
     });
-  }, [dataViewEditor, onChangeIndexPattern]);
+  }, [dataViewEditor, onChangeDataView]);
 
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
-        indexPattern,
+        dataView,
         navigateTo,
         savedSearch,
         services,
@@ -144,7 +138,7 @@ export const DiscoverTopNav = ({
         onOpenSavedSearch,
       }),
     [
-      indexPattern,
+      dataView,
       navigateTo,
       savedSearch,
       services,
@@ -174,21 +168,21 @@ export const DiscoverTopNav = ({
 
   const dataViewPickerProps = {
     trigger: {
-      label: indexPattern?.title || '',
+      label: dataView?.title || '',
       'data-test-subj': 'discover-dataView-switch-link',
-      title: indexPattern?.title || '',
+      title: dataView?.title || '',
     },
-    currentDataViewId: indexPattern?.id,
+    currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
+    onChangeDataView: (newDataViewId: string) => onChangeDataView(newDataViewId),
   };
 
   return (
     <TopNavMenu
       appName="discover"
       config={topNavMenu}
-      indexPatterns={[indexPattern]}
+      indexPatterns={[dataView]}
       onQuerySubmit={updateQuery}
       onSavedQueryIdChange={updateSavedQueryId}
       query={query}

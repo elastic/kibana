@@ -21,7 +21,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const filterManager = createFilterManagerMock();
 const defaultProps = {
-  indexPatternId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+  dataViewId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
   rowIndex: 'kibana_sample_data_ecommerce',
   rowId: 'QmsYdX0BQ6gV8MTfoPYE',
   columns: ['customer_first_name', 'products.manufacturer'],
@@ -32,16 +32,16 @@ const basePathPrefix = 'localhost:5601/xqj';
 
 const getSearch = () => {
   return `?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
-  &_a=(columns:!(${defaultProps.columns.join()}),filters:!(),index:${defaultProps.indexPatternId}
+  &_a=(columns:!(${defaultProps.columns.join()}),filters:!(),index:${defaultProps.dataViewId}
   ,interval:auto,query:(language:kuery,query:''),sort:!(!(order_date,desc)))`;
 };
 
 const getSingeDocRoute = () => {
-  return `/doc/${defaultProps.indexPatternId}/${defaultProps.rowIndex}`;
+  return `/doc/${defaultProps.dataViewId}/${defaultProps.rowIndex}`;
 };
 
 const getContextRoute = () => {
-  return `/context/${defaultProps.indexPatternId}/${defaultProps.rowId}`;
+  return `/context/${defaultProps.dataViewId}/${defaultProps.rowId}`;
 };
 
 const render = (withRouter = true, props?: Partial<UseNavigationProps>) => {

@@ -5,7 +5,7 @@ exports[`Source Viewer component renders error state 1`] = `
   hasLineNumbers={true}
   id="1"
   index="index1"
-  indexPattern={
+  dataView={
     Object {
       "getComputedFields": [Function],
     }
@@ -181,7 +181,7 @@ exports[`Source Viewer component renders json code editor 1`] = `
   hasLineNumbers={true}
   id="1"
   index="index1"
-  indexPattern={
+  dataView={
     Object {
       "getComputedFields": [Function],
     }
@@ -438,7 +438,7 @@ exports[`Source Viewer component renders loading state 1`] = `
   hasLineNumbers={true}
   id="1"
   index="index1"
-  indexPattern={
+  dataView={
     Object {
       "getComputedFields": [Function],
     }

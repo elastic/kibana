@@ -13,9 +13,9 @@ import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
  * index pattern, returns a new state object
  */
-export function getSwitchIndexPatternAppState(
-  currentIndexPattern: DataView,
-  nextIndexPattern: DataView,
+export function getDataViewAppState(
+  currentDataView: DataView,
+  nextDataView: DataView,
   currentColumns: string[],
   currentSort: SortPairArr[],
   modifyColumns: boolean = true,
@@ -24,7 +24,7 @@ export function getSwitchIndexPatternAppState(
   const nextColumns = modifyColumns
     ? currentColumns.filter(
         (column) =>
-          nextIndexPattern.fields.getByName(column) || !currentIndexPattern.fields.getByName(column)
+          nextDataView.fields.getByName(column) || !currentDataView.fields.getByName(column)
       )
     : currentColumns;
   const columns = nextColumns.length ? nextColumns : [];
@@ -33,26 +33,26 @@ export function getSwitchIndexPatternAppState(
   // filter out sorting by timeField in case it is set. index patterns without timeField don't
   // prepend this field in the table, so in legacy grid you would need to add this column to
   // remove sorting
-  let nextSort = getSortArray(currentSort, nextIndexPattern).filter((value) => {
-    return nextIndexPattern.timeFieldName || value[0] !== currentIndexPattern.timeFieldName;
+  let nextSort = getSortArray(currentSort, nextDataView).filter((value) => {
+    return nextDataView.timeFieldName || value[0] !== currentDataView.timeFieldName;
   });
 
-  if (nextIndexPattern.isTimeBased() && !nextSort.length) {
+  if (nextDataView.isTimeBased() && !nextSort.length) {
     // set default sorting if it was not set
-    nextSort = [[nextIndexPattern.timeFieldName, sortDirection]];
+    nextSort = [[nextDataView.timeFieldName, sortDirection]];
   } else if (
-    nextIndexPattern.isTimeBased() &&
-    currentIndexPattern.isTimeBased() &&
-    nextIndexPattern.timeFieldName !== currentIndexPattern.timeFieldName
+    nextDataView.isTimeBased() &&
+    currentDataView.isTimeBased() &&
+    nextDataView.timeFieldName !== currentDataView.timeFieldName
   ) {
     // switch time fields
     nextSort = nextSort.map((cur) =>
-      cur[0] === currentIndexPattern.timeFieldName ? [nextIndexPattern.timeFieldName, cur[1]] : cur
+      cur[0] === currentDataView.timeFieldName ? [nextDataView.timeFieldName, cur[1]] : cur
     );
   }
 
   return {
-    index: nextIndexPattern.id,
+    index: nextDataView.id,
     columns,
     sort: nextSort,
   };

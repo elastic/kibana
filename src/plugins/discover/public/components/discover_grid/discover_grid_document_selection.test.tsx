@@ -14,7 +14,7 @@ import {
   SelectButton,
 } from './discover_grid_document_selection';
 import { esHits } from '../../__mocks__/es_hits';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { DiscoverGridContext } from './discover_grid_context';
 
 const baseContextMock = {
@@ -22,7 +22,7 @@ const baseContextMock = {
   setExpanded: jest.fn(),
   rows: esHits,
   onFilter: jest.fn(),
-  indexPattern: indexPatternMock,
+  dataView: dataViewMock,
   isDarkMode: false,
   selectedDocs: [],
   setSelectedDocs: jest.fn(),

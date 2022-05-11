@@ -11,7 +11,7 @@ import { formatRow, formatTopLevelObject } from './row_formatter';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DiscoverServices } from '../../../build_services';
-import { stubbedSavedObjectIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { stubbedSavedObjectDataView } from '@kbn/data-plugin/common/stubs';
 
 describe('Row formatter', () => {
   const hit = {
@@ -28,13 +28,13 @@ describe('Row formatter', () => {
   };
   let services: DiscoverServices;
 
-  const createIndexPattern = () => {
+  const createDataView = () => {
     const id = 'my-index';
     const {
       type,
       version,
       attributes: { timeFieldName, fields, title },
-    } = stubbedSavedObjectIndexPattern(id);
+    } = stubbedSavedObjectDataView(id);
 
     return new DataView({
       spec: { id, type, version, timeFieldName, fields: JSON.parse(fields), title },
@@ -44,9 +44,9 @@ describe('Row formatter', () => {
     });
   };
 
-  const indexPattern = createIndexPattern();
+  const dataView = createDataView();
 
-  const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
+  const fieldsToShow = dataView.fields.getAll().map((fld) => fld.name);
 
   beforeEach(() => {
     services = {
@@ -58,7 +58,7 @@ describe('Row formatter', () => {
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, indexPattern, fieldsToShow, 100, services.fieldFormats))
+    expect(formatRow(hit, dataView, fieldsToShow, 100, services.fieldFormats))
       .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
@@ -103,7 +103,7 @@ describe('Row formatter', () => {
         getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
       },
     } as unknown as DiscoverServices;
-    expect(formatRow(hit, indexPattern, [], 1, services.fieldFormats)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, dataView, [], 1, services.fieldFormats)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -141,7 +141,7 @@ describe('Row formatter', () => {
     expect(
       formatRow(
         { ...hit, highlight: { number: ['42'] } },
-        indexPattern,
+        dataView,
         fieldsToShow,
         100,
         services.fieldFormats
@@ -181,10 +181,10 @@ describe('Row formatter', () => {
   });
 
   it('formats top level objects using formatter', () => {
-    indexPattern.getFieldByName = jest.fn().mockReturnValue({
+    dataView.getFieldByName = jest.fn().mockReturnValue({
       name: 'subfield',
     });
-    indexPattern.getFormatterForField = jest.fn().mockReturnValue({
+    dataView.getFormatterForField = jest.fn().mockReturnValue({
       convert: () => 'formatted',
     });
     expect(
@@ -198,7 +198,7 @@ describe('Row formatter', () => {
           'object.value': [5, 10],
           getByName: jest.fn(),
         },
-        indexPattern,
+        dataView,
         100
       )
     ).toMatchInlineSnapshot(`
@@ -216,17 +216,17 @@ describe('Row formatter', () => {
   });
 
   it('formats top level objects in alphabetical order', () => {
-    indexPattern.getFieldByName = jest.fn().mockReturnValue({
+    dataView.getFieldByName = jest.fn().mockReturnValue({
       name: 'subfield',
     });
-    indexPattern.getFormatterForField = jest.fn().mockReturnValue({
+    dataView.getFormatterForField = jest.fn().mockReturnValue({
       convert: () => 'formatted',
     });
     const formatted = ReactDOM.renderToStaticMarkup(
       formatTopLevelObject(
         { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
         { 'a.zzz': [100], 'a.ccc': [50], getByName: jest.fn() },
-        indexPattern,
+        dataView,
         100
       )
     );
@@ -234,10 +234,10 @@ describe('Row formatter', () => {
   });
 
   it('formats top level objects with subfields and highlights', () => {
-    indexPattern.getFieldByName = jest.fn().mockReturnValue({
+    dataView.getFieldByName = jest.fn().mockReturnValue({
       name: 'subfield',
     });
-    indexPattern.getFormatterForField = jest.fn().mockReturnValue({
+    dataView.getFormatterForField = jest.fn().mockReturnValue({
       convert: () => 'formatted',
     });
     expect(
@@ -256,7 +256,7 @@ describe('Row formatter', () => {
           'object.keys': ['a', 'b'],
           getByName: jest.fn(),
         },
-        indexPattern,
+        dataView,
         100
       )
     ).toMatchInlineSnapshot(`
@@ -278,8 +278,8 @@ describe('Row formatter', () => {
   });
 
   it('formats top level objects, converting unknown fields to string', () => {
-    indexPattern.getFieldByName = jest.fn();
-    indexPattern.getFormatterForField = jest.fn();
+    dataView.getFieldByName = jest.fn();
+    dataView.getFormatterForField = jest.fn();
     expect(
       formatTopLevelObject(
         {
@@ -291,7 +291,7 @@ describe('Row formatter', () => {
           'object.value': [5, 10],
           getByName: jest.fn(),
         },
-        indexPattern,
+        dataView,
         100
       )
     ).toMatchInlineSnapshot(`

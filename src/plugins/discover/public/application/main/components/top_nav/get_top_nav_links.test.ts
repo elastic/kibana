@@ -8,7 +8,7 @@
 
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { getTopNavLinks } from './get_top_nav_links';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
@@ -28,7 +28,7 @@ const state = {} as unknown as GetStateReturn;
 
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
     savedSearch: savedSearchMock,

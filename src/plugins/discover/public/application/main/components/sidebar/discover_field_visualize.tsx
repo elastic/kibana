@@ -17,21 +17,21 @@ import { DiscoverFieldVisualizeInner } from './discover_field_visualize_inner';
 
 interface Props {
   field: DataViewField;
-  indexPattern: DataView;
+  dataView: DataView;
   details: FieldDetails;
   multiFields?: DataViewField[];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
-  ({ field, indexPattern, details, trackUiMetric, multiFields }) => {
+  ({ field, dataView, details, trackUiMetric, multiFields }) => {
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
 
     useEffect(() => {
-      getVisualizeInformation(field, indexPattern.id, details.columns, multiFields).then(
+      getVisualizeInformation(field, dataView.id, details.columns, multiFields).then(
         setVisualizeInfo
       );
-    }, [details.columns, field, indexPattern, multiFields]);
+    }, [details.columns, field, dataView, multiFields]);
 
     if (!visualizeInfo) {
       return null;
@@ -41,7 +41,7 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
       // regular link click. let the uiActions code handle the navigation and show popup if needed
       event.preventDefault();
       trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-      triggerVisualizeActions(visualizeInfo.field, indexPattern.id, details.columns);
+      triggerVisualizeActions(visualizeInfo.field, dataView.id, details.columns);
     };
 
     return (

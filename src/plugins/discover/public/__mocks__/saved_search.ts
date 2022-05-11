@@ -8,15 +8,15 @@
 
 import { SavedSearch } from '../services/saved_searches';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { indexPatternMock } from './index_pattern';
-import { indexPatternWithTimefieldMock } from './index_pattern_with_timefield';
+import { dataViewMock } from './index_pattern';
+import { dataViewWithTimefieldMock } from './index_pattern_with_timefield';
 
 export const savedSearchMock = {
   id: 'the-saved-search-id',
-  searchSource: createSearchSourceMock({ index: indexPatternMock }),
+  searchSource: createSearchSourceMock({ index: dataViewMock }),
 } as unknown as SavedSearch;
 
 export const savedSearchMockWithTimeField = {
   id: 'the-saved-search-id-with-timefield',
-  searchSource: createSearchSourceMock({ index: indexPatternWithTimefieldMock }),
+  searchSource: createSearchSourceMock({ index: dataViewWithTimefieldMock }),
 } as unknown as SavedSearch;

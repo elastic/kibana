@@ -30,7 +30,7 @@ const services = {
   },
 };
 
-const indexPattern = {
+const dataView = {
   fields: {
     getAll: () => [
       {
@@ -69,8 +69,8 @@ const indexPattern = {
   getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
 } as unknown as DataView;
 
-indexPattern.fields.getByName = (name: string) => {
-  return indexPattern.fields.getAll().find((field) => field.name === name);
+dataView.fields.getByName = (name: string) => {
+  return dataView.fields.getAll().find((field) => field.name === name);
 };
 
 const mountComponent = (props: DocViewRenderProps, overrides?: Partial<DiscoverServices>) => {
@@ -115,7 +115,7 @@ describe('DocViewTable at Discover', () => {
   const props = {
     hit,
     columns: ['extension'],
-    indexPattern,
+    dataView,
     filter: jest.fn(),
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
@@ -214,7 +214,7 @@ describe('DocViewTable at Discover Context', () => {
   const props = {
     hit,
     columns: ['extension'],
-    indexPattern,
+    dataView,
     filter: jest.fn(),
   };
 
@@ -259,7 +259,7 @@ describe('DocViewTable at Discover Doc', () => {
   // here no action buttons are rendered
   const props = {
     hit,
-    indexPattern,
+    dataView,
   };
   const component = mountComponent(props);
   const foundLength = findTestSubject(component, 'addInclusiveFilterButton').length;
@@ -270,7 +270,7 @@ describe('DocViewTable at Discover Doc', () => {
 });
 
 describe('DocViewTable at Discover Doc with Fields API', () => {
-  const indexPatterneCommerce = {
+  const dataViewCommerce = {
     fields: {
       getAll: () => [
         {
@@ -366,8 +366,8 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
   } as unknown as DataView;
 
-  indexPatterneCommerce.fields.getByName = (name: string) => {
-    return indexPatterneCommerce.fields.getAll().find((field) => field.name === name);
+  dataViewCommerce.fields.getByName = (name: string) => {
+    return dataViewCommerce.fields.getAll().find((field) => field.name === name);
   };
 
   const fieldsHit = {
@@ -387,7 +387,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
   const props = {
     hit: fieldsHit,
     columns: ['Document'],
-    indexPattern: indexPatterneCommerce,
+    dataView: dataViewCommerce,
     filter: jest.fn(),
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),

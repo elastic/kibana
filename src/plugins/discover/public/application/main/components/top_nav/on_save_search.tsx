@@ -17,14 +17,14 @@ import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { persistSavedSearch } from '../../utils/persist_saved_search';
 
 async function saveDataSource({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   saveOptions,
   services,
   state,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
@@ -73,7 +73,7 @@ async function saveDataSource({
     });
   }
   return persistSavedSearch(savedSearch, {
-    indexPattern,
+    dataView,
     onError,
     onSuccess,
     saveOptions,
@@ -83,13 +83,13 @@ async function saveDataSource({
 }
 
 export async function onSaveSearch({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   services,
   state,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -117,7 +117,7 @@ export async function onSaveSearch({
       isTitleDuplicateConfirmed,
     };
     const response = await saveDataSource({
-      indexPattern,
+      dataView,
       saveOptions,
       services,
       navigateTo,

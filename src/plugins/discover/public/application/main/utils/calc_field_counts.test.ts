@@ -7,7 +7,7 @@
  */
 
 import { calcFieldCounts } from './calc_field_counts';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from '../../../types';
 
 describe('calcFieldCounts', () => {
@@ -16,7 +16,7 @@ describe('calcFieldCounts', () => {
       { _id: 1, _source: { message: 'test1', bytes: 20 } },
       { _id: 2, _source: { name: 'test2', extension: 'jpg' } },
     ] as unknown as ElasticSearchHit[];
-    const result = calcFieldCounts(rows, indexPatternMock);
+    const result = calcFieldCounts(rows, dataViewMock);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_index": 2,
@@ -33,7 +33,7 @@ describe('calcFieldCounts', () => {
       { _id: 1, _source: { message: 'test1', bytes: 20 } },
       { _id: 2, _source: { name: 'test2', extension: 'jpg' } },
     ] as unknown as ElasticSearchHit[];
-    const result = calcFieldCounts(rows, indexPatternMock);
+    const result = calcFieldCounts(rows, dataViewMock);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "_index": 2,

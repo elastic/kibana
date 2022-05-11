@@ -16,11 +16,11 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-const mockIndexPattern = {
+const mochDataView = {
   getComputedFields: () => [],
 } as never;
-const getMock = jest.fn(() => Promise.resolve(mockIndexPattern));
-const mockIndexPatternService = {
+const getMock = jest.fn(() => Promise.resolve(mochDataView));
+const mochDataViewService = {
   get: getMock,
 } as unknown as DataView;
 const services = {
@@ -32,7 +32,7 @@ const services = {
     },
   },
   data: {
-    indexPatternService: mockIndexPatternService,
+    dataViewService: mochDataViewService,
   },
 };
 
@@ -45,7 +45,7 @@ describe('Source Viewer component', () => {
         <DocViewerSource
           id={'1'}
           index={'index1'}
-          indexPattern={mockIndexPattern}
+          dataView={mochDataView}
           width={123}
           hasLineNumbers={true}
         />
@@ -64,7 +64,7 @@ describe('Source Viewer component', () => {
         <DocViewerSource
           id={'1'}
           index={'index1'}
-          indexPattern={mockIndexPattern}
+          dataView={mochDataView}
           width={123}
           hasLineNumbers={true}
         />
@@ -105,7 +105,7 @@ describe('Source Viewer component', () => {
         <DocViewerSource
           id={'1'}
           index={'index1'}
-          indexPattern={mockIndexPattern}
+          dataView={mochDataView}
           width={123}
           hasLineNumbers={true}
         />

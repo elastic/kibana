@@ -66,7 +66,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
-const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
+const migrateDataView: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
@@ -111,7 +111,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
 const setNewReferences: SavedObjectMigrationFn<any, any> = (doc, context) => {
   doc.references = doc.references || [];
   // Migrate index pattern
-  return migrateIndexPattern(doc, context);
+  return migrateDataView(doc, context);
 };
 
 const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) => {

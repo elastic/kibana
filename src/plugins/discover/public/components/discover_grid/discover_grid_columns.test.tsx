@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/index_pattern';
 import { getEuiGridColumns } from './discover_grid_columns';
-import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
+import { dataViewWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 
 describe('Discover grid columns', function () {
   it('returns eui grid columns without time column', async () => {
     const actual = getEuiGridColumns(
       ['extension', 'message'],
       {},
-      indexPatternMock,
+      dataViewMock,
       false,
       false,
       true
@@ -89,7 +89,7 @@ describe('Discover grid columns', function () {
     const actual = getEuiGridColumns(
       ['extension', 'message'],
       {},
-      indexPatternWithTimefieldMock,
+      dataViewWithTimefieldMock,
       false,
       true,
       true
@@ -160,7 +160,7 @@ describe('Discover grid columns', function () {
     const actual = getEuiGridColumns(
       ['extension', 'message'],
       {},
-      indexPatternWithTimefieldMock,
+      dataViewWithTimefieldMock,
       true,
       false,
       true
@@ -194,7 +194,7 @@ describe('Discover grid columns', function () {
           ],
           "display": <React.Fragment>
             timestamp
-             
+
             <EuiIconTip
               aria-label="Primary time field."
               content="This field represents the time that events occurred."

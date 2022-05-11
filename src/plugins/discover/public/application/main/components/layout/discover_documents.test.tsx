@@ -17,7 +17,7 @@ import { DataDocuments$ } from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { dataViewMock } from '../../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -36,7 +36,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
 
   const props = {
     expandedDoc: undefined,
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     onAddFilter: jest.fn(),
     savedSearch: savedSearchMock,
     documents$,

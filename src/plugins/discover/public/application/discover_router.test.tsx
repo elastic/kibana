@@ -40,11 +40,11 @@ describe('Discover router', () => {
     expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute />);
   });
 
-  it('should show SingleDocRoute component for /doc/:indexPatternId/:index route', () => {
-    expect(pathMap['/doc/:indexPatternId/:index']).toMatchObject(<SingleDocRoute />);
+  it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {
+    expect(pathMap['/doc/:dataViewId/:index']).toMatchObject(<SingleDocRoute />);
   });
 
-  it('should show ContextAppRoute component for /context/:indexPatternId/:id route', () => {
-    expect(pathMap['/context/:indexPatternId/:id']).toMatchObject(<ContextAppRoute />);
+  it('should show ContextAppRoute component for /context/:dataViewId/:id route', () => {
+    expect(pathMap['/context/:dataViewId/:id']).toMatchObject(<ContextAppRoute />);
   });
 });

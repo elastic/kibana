@@ -127,7 +127,7 @@ export interface GetStateReturn {
    * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
-    indexPattern: DataView,
+    dataView: DataView,
     filterManager: FilterManager,
     data: DataPublicPluginStart
   ) => () => void;
@@ -254,13 +254,13 @@ export function getState({
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     initializeAndSync: (
-      indexPattern: DataView,
+      dataView: DataView,
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {
-      if (appStateContainer.getState().index !== indexPattern.id) {
+      if (appStateContainer.getState().index !== dataView.id) {
         // used index pattern is different than the given by url/state which is invalid
-        setState(appStateContainerModified, { index: indexPattern.id });
+        setState(appStateContainerModified, { index: dataView.id });
       }
       // sync initial app filters from state to filterManager
       const filters = appStateContainer.getState().filters;
@@ -396,7 +396,7 @@ function createUrlGeneratorState({
   const appState = appStateContainer.get();
   return {
     filters: data.query.filterManager.getFilters(),
-    indexPatternId: appState.index,
+    dataViewId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
     timeRange: shouldRestoreSearchSession

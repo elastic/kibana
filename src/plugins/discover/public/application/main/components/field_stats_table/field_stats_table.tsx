@@ -50,7 +50,7 @@ export interface FieldStatisticsTableProps {
   /**
    * The used index pattern
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Saved search description
    */
@@ -93,7 +93,7 @@ export interface FieldStatisticsTableProps {
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
     availableFields$,
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     columns,
@@ -148,7 +148,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
-        dataView: indexPattern,
+        dataView: dataView,
         savedSearch,
         query,
         filters,
@@ -161,7 +161,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     }
   }, [
     embeddable,
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     columns,
@@ -194,7 +194,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
-            dataView: indexPattern,
+            dataView: dataView,
             savedSearch,
             query,
             showPreviewByDefault,

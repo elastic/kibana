@@ -61,12 +61,12 @@ const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
 export function DiscoverLayout({
-  indexPattern,
-  indexPatternList,
+  dataView,
+  dataViewList,
   inspectorAdapters,
   expandedDoc,
   navigateTo,
-  onChangeIndexPattern,
+  onChangeDataView,
   onUpdateQuery,
   setExpandedDoc,
   savedSearchRefetch$,
@@ -80,7 +80,7 @@ export function DiscoverLayout({
   const {
     trackUiMetric,
     capabilities,
-    indexPatterns,
+    dataViews,
     data,
     uiSettings,
     filterManager,
@@ -128,8 +128,8 @@ export function DiscoverLayout({
   // representation of those documents does not have the time field that _field_caps
   // reports us.
   const isTimeBased = useMemo(() => {
-    return indexPattern.type !== DataViewType.ROLLUP && indexPattern.isTimeBased();
-  }, [indexPattern]);
+    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
+  }, [dataView]);
 
   const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
@@ -161,8 +161,8 @@ export function DiscoverLayout({
   const { columns, onAddColumn, onRemoveColumn } = useColumns({
     capabilities,
     config: uiSettings,
-    indexPattern,
-    indexPatterns,
+    dataView,
+    dataViews,
     setAppState: stateContainer.setAppState,
     state,
     useNewFieldsApi,
@@ -171,20 +171,20 @@ export function DiscoverLayout({
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
-      popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
+      popularizeField(dataView, fieldName, dataViews, capabilities);
       const newFilters = generateFilters(
         filterManager,
         field,
         values,
         operation,
-        String(indexPattern.id)
+        String(dataView.id)
       );
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, indexPattern, indexPatterns, trackUiMetric, capabilities]
+    [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
   const onEditRuntimeField = useCallback(() => {
@@ -207,16 +207,16 @@ export function DiscoverLayout({
   const onDataViewCreated = useCallback(
     (dataView: DataView) => {
       if (dataView.id) {
-        onChangeIndexPattern(dataView.id);
+        onChangeDataView(dataView.id);
       }
     },
-    [onChangeIndexPattern]
+    [onChangeDataView]
   );
 
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <TopNavMemoized
-        indexPattern={indexPattern}
+        dataView={dataView}
         onOpenInspector={onOpenInspector}
         query={state.query}
         navigateTo={navigateTo}
@@ -226,7 +226,7 @@ export function DiscoverLayout({
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
-        onChangeIndexPattern={onChangeIndexPattern}
+        onChangeDataView={onChangeDataView}
         onEditRuntimeField={onEditRuntimeField}
         useNewFieldsApi={useNewFieldsApi}
       />
@@ -253,12 +253,12 @@ export function DiscoverLayout({
             <SidebarMemoized
               columns={columns}
               documents$={savedSearchData$.documents$}
-              indexPatternList={indexPatternList}
+              dataViewList={dataViewList}
               onAddField={onAddColumn}
               onAddFilter={onAddFilter}
               onRemoveField={onRemoveColumn}
-              onChangeIndexPattern={onChangeIndexPattern}
-              selectedIndexPattern={indexPattern}
+              onChangeDataView={onChangeDataView}
+              selectedDataView={dataView}
               state={state}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
@@ -328,7 +328,7 @@ export function DiscoverLayout({
                       savedSearchDataChart$={charts$}
                       savedSearchDataTotalHits$={totalHits$}
                       stateContainer={stateContainer}
-                      indexPattern={indexPattern}
+                      dataView={dataView}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
                       hideChart={state.hideChart}
@@ -340,7 +340,7 @@ export function DiscoverLayout({
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}
-                      indexPattern={indexPattern}
+                      dataView={dataView}
                       navigateTo={navigateTo}
                       onAddFilter={onAddFilter as DocViewFilterFn}
                       savedSearch={savedSearch}
@@ -352,7 +352,7 @@ export function DiscoverLayout({
                     <FieldStatisticsTableMemoized
                       availableFields$={savedSearchData$.availableFields$}
                       savedSearch={savedSearch}
-                      indexPattern={indexPattern}
+                      dataView={dataView}
                       query={state.query}
                       filters={state.filters}
                       columns={columns}

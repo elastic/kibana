@@ -30,7 +30,7 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  * Fetch successor or predecessor documents of a given anchor document
  *
  * @param {SurrDocType} type - `successors` or `predecessors`
- * @param {DataView} indexPattern
+ * @param {DataView} dataView
  * @param {EsHitRecord} anchor - anchor record
  * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
  * @param {SortDirection} sortDir - direction of sorting
@@ -41,7 +41,7 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  */
 export async function fetchSurroundingDocs(
   type: SurrDocType,
-  indexPattern: DataView,
+  dataView: DataView,
   anchor: EsHitRecord,
   tieBreakerField: string,
   sortDir: SortDirection,
@@ -53,12 +53,12 @@ export async function fetchSurroundingDocs(
   if (typeof anchor !== 'object' || anchor === null || !size) {
     return [];
   }
-  const timeField = indexPattern.timeFieldName!;
+  const timeField = dataView.timeFieldName!;
   const searchSource = data.search.searchSource.createEmpty();
-  updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));
+  updateSearchSource(searchSource, dataView, filters, Boolean(useNewFieldsApi));
   const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
 
-  const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
+  const nanos = dataView.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
   const timeValueMillis =
     nanos !== '' ? convertIsoToMillis(anchor.fields[timeField][0]) : anchor.sort[0];
 
@@ -106,7 +106,7 @@ export async function fetchSurroundingDocs(
 
 export function updateSearchSource(
   searchSource: ISearchSource,
-  indexPattern: DataView,
+  dataView: DataView,
   filters: Filter[],
   useNewFieldsApi: boolean
 ) {
@@ -116,7 +116,7 @@ export function updateSearchSource(
   }
   return searchSource
     .setParent(undefined)
-    .setField('index', indexPattern)
+    .setField('index', dataView)
     .setField('filter', filters)
     .setField('trackTotalHits', false);
 }

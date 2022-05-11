@@ -86,8 +86,8 @@ export function updateSearchSource(
   interval: string,
   data: DataPublicPluginStart
 ) {
-  const indexPattern = searchSource.getField('index')!;
-  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
+  const dataView = searchSource.getField('index')!;
+  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
   searchSource.setField('size', 0);
   searchSource.setField('trackTotalHits', true);
   const chartAggConfigs = getChartAggConfigs(searchSource, interval, data);

@@ -215,7 +215,7 @@ function getTopLevelObjectPairs(
         formatter.convert(val, 'html', {
           field: subField,
           hit: row,
-          indexPattern: dataView,
+          dataView: dataView,
         })
       )
       .join(', ');

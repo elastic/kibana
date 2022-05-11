@@ -80,7 +80,7 @@ export function fetchAll(
   };
 
   try {
-    const indexPattern = searchSource.getField('index')!;
+    const dataView = searchSource.getField('index')!;
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
@@ -90,7 +90,7 @@ export function fetchAll(
 
     // Update the base searchSource, base for all child fetches
     updateSearchSource(searchSource, false, {
-      indexPattern,
+      dataView,
       services,
       sort: sort as SortOrder[],
       useNewFieldsApi,
@@ -103,7 +103,7 @@ export function fetchAll(
     sendLoadingMsg(dataSubjects.charts$);
 
     const isChartVisible =
-      !hideChart && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP;
+      !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
 
     // Start fetching all required requests
     const documents = fetchDocuments(searchSource.createCopy(), fetchDeps);

@@ -13,13 +13,13 @@ import { ElasticSearchHit } from '../../../types';
  * This function is calculating stats of the available fields, for usage in sidebar and sharing
  * Note that this values aren't displayed, but used for internal calculations
  */
-export function calcFieldCounts(rows?: ElasticSearchHit[], indexPattern?: DataView) {
+export function calcFieldCounts(rows?: ElasticSearchHit[], dataView?: DataView) {
   const counts: Record<string, number> = {};
-  if (!rows || !indexPattern) {
+  if (!rows || !dataView) {
     return {};
   }
   for (const hit of rows) {
-    const fields = Object.keys(flattenHit(hit, indexPattern, { includeIgnoredValues: true }));
+    const fields = Object.keys(flattenHit(hit, dataView, { includeIgnoredValues: true }));
     for (const fieldName of fields) {
       counts[fieldName] = (counts[fieldName] || 0) + 1;
     }

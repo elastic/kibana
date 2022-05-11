@@ -16,7 +16,7 @@ export interface GridContext {
   setExpanded: (hit?: ElasticSearchHit) => void;
   rows: ElasticSearchHit[];
   onFilter: DocViewFilterFn;
-  indexPattern: DataView;
+  dataView: DataView;
   isDarkMode: boolean;
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;

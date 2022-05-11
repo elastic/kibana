@@ -63,7 +63,7 @@ export interface DiscoverServices {
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
@@ -105,7 +105,7 @@ export const buildServices = memoize(function (
     fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
-    indexPatterns: plugins.data.dataViews,
+    dataViews: plugins.data.dataViews,
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,

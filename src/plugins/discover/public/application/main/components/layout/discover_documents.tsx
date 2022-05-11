@@ -42,7 +42,7 @@ const DataGridMemoized = React.memo(DiscoverGrid);
 function DiscoverDocumentsComponent({
   documents$,
   expandedDoc,
-  indexPattern,
+  dataView,
   onAddFilter,
   savedSearch,
   setExpandedDoc,
@@ -51,7 +51,7 @@ function DiscoverDocumentsComponent({
 }: {
   documents$: DataDocuments$;
   expandedDoc?: ElasticSearchHit;
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
@@ -59,7 +59,7 @@ function DiscoverDocumentsComponent({
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
-  const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
+  const { capabilities, dataViews, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -73,8 +73,8 @@ function DiscoverDocumentsComponent({
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities,
     config: uiSettings,
-    indexPattern,
-    indexPatterns,
+    dataView,
+    dataViews,
     setAppState: stateContainer.setAppState,
     state,
     useNewFieldsApi,
@@ -108,8 +108,8 @@ function DiscoverDocumentsComponent({
   );
 
   const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
-    [uiSettings, indexPattern.timeFieldName]
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
+    [uiSettings, dataView.timeFieldName]
   );
 
   if (
@@ -139,7 +139,7 @@ function DiscoverDocumentsComponent({
           <DocumentExplorerCallout />
           <DocTableInfiniteMemoized
             columns={columns}
-            indexPattern={indexPattern}
+            dataView={dataView}
             rows={rows}
             sort={state.sort || []}
             isLoading={isLoading}
@@ -163,7 +163,7 @@ function DiscoverDocumentsComponent({
               ariaLabelledBy="documentsAriaLabel"
               columns={columns}
               expandedDoc={expandedDoc}
-              indexPattern={indexPattern}
+              dataView={dataView}
               isLoading={isLoading}
               rows={rows}
               sort={(state.sort as SortPairArr[]) || []}

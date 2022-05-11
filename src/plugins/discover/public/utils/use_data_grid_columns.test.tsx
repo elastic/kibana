@@ -8,9 +8,9 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useColumns } from './use_data_grid_columns';
-import { indexPatternMock } from '../__mocks__/index_pattern';
+import { dataViewMock } from '../__mocks__/index_pattern';
 import { configMock } from '../__mocks__/config';
-import { indexPatternsMock } from '../__mocks__/index_patterns';
+import { dataViewsMock } from '../__mocks__/index_patterns';
 import { AppState } from '../application/context/services/context_state';
 import { Capabilities } from '@kbn/core/types';
 
@@ -18,8 +18,8 @@ describe('useColumns', () => {
   const defaultProps = {
     capabilities: { discover: { save: true } } as unknown as Capabilities,
     config: configMock,
-    indexPattern: indexPatternMock,
-    indexPatterns: indexPatternsMock,
+    dataView: dataViewMock,
+    dataViews: dataViewsMock,
     setAppState: () => {},
     state: {
       columns: ['Time', 'message'],

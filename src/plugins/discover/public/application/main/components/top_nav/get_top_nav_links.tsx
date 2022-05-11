@@ -24,7 +24,7 @@ import { openAlertsPopover } from './open_alerts_popover';
  * Helper function to build the top nav links
  */
 export const getTopNavLinks = ({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   services,
@@ -33,7 +33,7 @@ export const getTopNavLinks = ({
   searchSource,
   onOpenSavedSearch,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -102,7 +102,7 @@ export const getTopNavLinks = ({
     testId: 'discoverSaveButton',
     iconType: 'save',
     emphasize: true,
-    run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
+    run: () => onSaveSearch({ savedSearch, services, dataView, navigateTo, state }),
   };
 
   const openSearch = {
