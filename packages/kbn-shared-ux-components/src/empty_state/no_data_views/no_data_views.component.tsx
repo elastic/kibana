@@ -27,13 +27,6 @@ const createDataViewText = i18n.translate('sharedUXComponents.noDataViewsPrompt.
   defaultMessage: 'Create Data View',
 });
 
-const noPermissionTitle = i18n.translate(
-  'sharedUXComponents.noDataViewsPrompt.elasticAgentCard.noPermission.title',
-  {
-    defaultMessage: `Contact your administrator`,
-  }
-);
-
 // Using raw value because it is content dependent
 const MAX_WIDTH = 830;
 
@@ -88,19 +81,7 @@ export const NoDataViews = ({
       `}
       color={emptyPromptColor}
       icon={<DataViewIllustration />}
-      title={
-        <h2>
-          <FormattedMessage
-            id="sharedUXComponents.noDataViews.youHaveData"
-            defaultMessage="You have data in Elasticsearch."
-          />
-          <br />
-          <FormattedMessage
-            id="sharedUXComponents.noDataViews.nowCreate"
-            defaultMessage="Now, create a data view."
-          />
-        </h2>
-      }
+      title={title}
       body={
         <p>
           <FormattedMessage
