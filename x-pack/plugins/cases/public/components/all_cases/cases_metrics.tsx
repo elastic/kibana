@@ -25,7 +25,7 @@ import { MTTR_DESCRIPTION, MTTR_STAT } from './translations';
 interface CountProps {
   refresh?: number;
 }
-const CountFlexGroup = styled.div`
+const MetricsFlexGroup = styled.div`
   ${({ theme }) => css`
     .euiFlexGroup {
       border: ${theme.eui.euiBorderThin};
@@ -40,7 +40,7 @@ const CountFlexGroup = styled.div`
   `}
 `;
 
-export const Count: FunctionComponent<CountProps> = ({ refresh }) => {
+export const CasesMetrics: FunctionComponent<CountProps> = ({ refresh }) => {
   const {
     countOpenCases,
     countInProgressCases,
@@ -64,8 +64,8 @@ export const Count: FunctionComponent<CountProps> = ({ refresh }) => {
   }, [fetchCasesMetrics, fetchCasesStatus, refresh]);
 
   return (
-    <CountFlexGroup>
-      <EuiFlexGroup responsive={true} data-test-subj="cases-count-stats">
+    <MetricsFlexGroup>
+      <EuiFlexGroup responsive={true} data-test-subj="cases-metrics-stats">
         <EuiFlexItem grow={true}>
           <StatusStats
             dataTestSubj="openStatsHeader"
@@ -113,7 +113,7 @@ export const Count: FunctionComponent<CountProps> = ({ refresh }) => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </CountFlexGroup>
+    </MetricsFlexGroup>
   );
 };
-Count.displayName = 'Count';
+CasesMetrics.displayName = 'CasesMetrics';

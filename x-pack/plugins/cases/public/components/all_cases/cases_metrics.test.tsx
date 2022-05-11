@@ -10,7 +10,7 @@ import React from 'react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
-import { Count } from './count';
+import { CasesMetrics } from './cases_metrics';
 
 jest.mock('../../containers/use_get_cases_metrics');
 jest.mock('../../containers/use_get_cases_status');
@@ -40,8 +40,8 @@ describe('Count stats', () => {
   });
 
   it('renders the correct stats', () => {
-    const result = appMockRenderer.render(<Count refresh={1} />);
-    expect(result.getByTestId('cases-count-stats')).toBeTruthy();
+    const result = appMockRenderer.render(<CasesMetrics refresh={1} />);
+    expect(result.getByTestId('cases-metrics-stats')).toBeTruthy();
     expect(within(result.getByTestId('openStatsHeader')).getByText(2)).toBeTruthy();
     expect(within(result.getByTestId('inProgressStatsHeader')).getByText(3)).toBeTruthy();
     expect(within(result.getByTestId('closedStatsHeader')).getByText(4)).toBeTruthy();

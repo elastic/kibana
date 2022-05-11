@@ -27,7 +27,7 @@ import { EuiBasicTableOnChange } from './types';
 import { CasesTable } from './table';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { Count } from './count';
+import { CasesMetrics } from './cases_metrics';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -213,7 +213,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           className="essentialAnimation"
           $isShow={(isCasesLoading || isLoading) && !isDataEmpty}
         />
-        <Count refresh={refresh} />
+        <CasesMetrics refresh={refresh} />
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}
