@@ -27,7 +27,7 @@ export const DashboardRoutes = () => (
 );
 
 export const ManageRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.manageLanding}>
+  <TrackApplicationView viewId={SecurityPageName.administration}>
     <ManageLandingPage />
   </TrackApplicationView>
 );
