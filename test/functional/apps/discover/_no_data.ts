@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -43,9 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('when no data opens integrations', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const selector = await testSubjects.find('kibanaChrome');
-      const content = await selector.findByCssSelector('.kbnNoDataPageContents');
-      expect(content).not.to.be(null);
 
       const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
       await addIntegrations.click();
