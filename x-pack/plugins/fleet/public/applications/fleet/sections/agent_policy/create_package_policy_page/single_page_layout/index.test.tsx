@@ -9,10 +9,10 @@ import { Route, useLocation, useHistory } from 'react-router-dom';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
-import type { MockedFleetStartServices, TestRenderer } from '../../../../../mock';
-import { createFleetTestRendererMock } from '../../../../../mock';
-import { FLEET_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../constants';
-import type { CreatePackagePolicyRouteState } from '../../../types';
+import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../mock';
+import { FLEET_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../../constants';
+import type { CreatePackagePolicyRouteState } from '../../../../types';
 
 import {
   sendCreatePackagePolicy,
@@ -21,13 +21,13 @@ import {
   useIntraAppState,
   useStartServices,
   useGetPackageInfoByKey,
-} from '../../../hooks';
+} from '../../../../hooks';
 
 import { CreatePackagePolicyPage } from '.';
 
-jest.mock('../../../hooks', () => {
+jest.mock('../../../../hooks', () => {
   return {
-    ...jest.requireActual('../../../hooks'),
+    ...jest.requireActual('../../../../hooks'),
     useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
     sendGetStatus: jest
       .fn()

@@ -19,10 +19,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { WithHeaderLayout } from '../../../../layouts';
-import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
-import { PackageIcon } from '../../../../components';
-import type { EditPackagePolicyFrom } from '../types';
+import { WithHeaderLayout } from '../../../../../layouts';
+import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import { PackageIcon } from '../../../../../components';
+import type { EditPackagePolicyFrom } from '../../types';
 
 const AgentPolicyName = styled(EuiDescriptionListDescription)`
   margin-left: auto;

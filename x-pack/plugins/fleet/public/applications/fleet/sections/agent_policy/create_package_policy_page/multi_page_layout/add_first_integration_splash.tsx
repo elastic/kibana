@@ -22,11 +22,11 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
-import { IntegrationBreadcrumb } from '..';
-import { pkgKeyFromPackageInfo } from '../../../../../services';
-import { WithHeaderLayout } from '../../../../../layouts';
-import { useStartServices } from '../../../../../hooks';
+import type { RegistryPolicyTemplate, PackageInfo } from '../../../../types';
+import { IntegrationBreadcrumb } from '../components';
+import { pkgKeyFromPackageInfo } from '../../../../services';
+import { WithHeaderLayout } from '../../../../layouts';
+import { useStartServices } from '../../../../hooks';
 
 const PaddedCentralTitle = styled('h1')`
   text-align: center;

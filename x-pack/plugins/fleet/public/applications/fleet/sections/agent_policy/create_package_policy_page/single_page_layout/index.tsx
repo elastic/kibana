@@ -24,7 +24,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
-import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../common';
+import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../../common';
 import type {
   AgentPolicy,
   NewAgentPolicy,
@@ -32,7 +32,7 @@ import type {
   PackagePolicy,
   CreatePackagePolicyRouteState,
   OnSaveQueryParamKeys,
-} from '../../../types';
+} from '../../../../types';
 import {
   useLink,
   sendCreatePackagePolicy,
@@ -41,21 +41,22 @@ import {
   sendGetAgentStatus,
   useGetPackageInfoByKey,
   sendCreateAgentPolicy,
-} from '../../../hooks';
-import { Loading, Error } from '../../../components';
-import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../components';
-import { useIntraAppState, useUIExtension } from '../../../hooks';
-import { ExtensionWrapper } from '../../../components';
-import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+} from '../../../../hooks';
+import { Loading, Error } from '../../../../components';
 
-import {
-  CreatePackagePolicyPageLayout,
-  CreatePackagePolicyPageStepsLayout,
-  PostInstallAddAgentModal,
-  IntegrationBreadcrumb,
-} from './components';
-import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
+import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
+import { useIntraAppState, useUIExtension } from '../../../../hooks';
+import { ExtensionWrapper } from '../../../../components';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
+import { pkgKeyFromPackageInfo } from '../../../../services';
+
+import type { EditPackagePolicyFrom, PackagePolicyFormState } from '../types';
+
+import { IntegrationBreadcrumb } from '../components';
+
+import { CreatePackagePolicyMultiPageLayout } from '../multi_page_layout';
+
+import { CreatePackagePolicyPageLayout, PostInstallAddAgentModal } from './components';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
 import { appendOnSaveQueryParamsToPath } from './utils';
@@ -623,7 +624,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     );
   }
 
-  const Cmp = useStepsLayout ? CreatePackagePolicyPageStepsLayout : CreatePackagePolicyPageLayout;
+  const Cmp = useStepsLayout ? CreatePackagePolicyMultiPageLayout : CreatePackagePolicyPageLayout;
   return (
     <Cmp {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>

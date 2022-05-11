@@ -11,7 +11,7 @@ import type {
   OnSaveQueryParamOpts,
   PackagePolicy,
   OnSaveQueryParamKeys,
-} from '../../../../types';
+} from '../../../../../types';
 
 export function appendOnSaveQueryParamsToPath({
   path,

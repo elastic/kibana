@@ -21,7 +21,7 @@ import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
-import type { RegistryVarsEntry } from '../../../../types';
+import type { RegistryVarsEntry } from '../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
 

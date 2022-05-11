@@ -18,11 +18,11 @@ import React, { memo } from 'react';
 //   EuiSpacer,
 // } from '@elastic/eui';
 
-import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
-import type { EditPackagePolicyFrom } from '../../types';
+import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
+import type { EditPackagePolicyFrom } from '../types';
 
 import { AddFirstIntegrationSplashScreen } from './add_first_integration_splash';
-export const CreatePackagePolicyPageStepsLayout: React.FunctionComponent<{
+export const CreatePackagePolicyMultiPageLayout: React.FunctionComponent<{
   from: EditPackagePolicyFrom;
   cancelUrl: string;
   onCancel?: React.ReactEventHandler;
