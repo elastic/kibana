@@ -73,7 +73,7 @@ PUT _ilm/policy/tri_met_tracks
   }
 }
 ----------------------------------
-. In *Console*, create the `tri_met_tracks` index template which is configured to use Datastreams:
+. In *Console*, create the `tri_met_tracks` index template, which is configured to use datastreams:
 +
 [source,js]
 ----------------------------------
