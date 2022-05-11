@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useRef, useEffect, useContext } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -31,6 +31,7 @@ import {
   useBreadcrumbs,
   useKibanaVersion,
   useStartServices,
+  useFlyoutContext,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
@@ -45,11 +46,10 @@ import {
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
-import { agentFlyoutContext } from '..';
-
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
+import { Tags } from './components/tags';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
 
@@ -98,14 +98,21 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Status for filtering
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
   const isUsingFilter =
-    search.trim() || selectedAgentPolicies.length || selectedStatus.length || showUpgradeable;
+    search.trim() ||
+    selectedAgentPolicies.length ||
+    selectedStatus.length ||
+    selectedTags.length ||
+    showUpgradeable;
 
   const clearFilters = useCallback(() => {
     setDraftKuery('');
     setSearch('');
     setSelectedAgentPolicies([]);
     setSelectedStatus([]);
+    setSelectedTags([]);
     setShowUpgradeable(false);
   }, [setSearch, setDraftKuery, setSelectedAgentPolicies, setSelectedStatus, setShowUpgradeable]);
 
@@ -117,7 +124,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     isOpen: false,
   });
 
-  const flyoutContext = useContext(agentFlyoutContext);
+  const flyoutContext = useFlyoutContext();
 
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
@@ -135,6 +142,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         .map((agentPolicy) => `"${agentPolicy}"`)
         .join(' or ')})`;
     }
+
+    if (selectedTags.length) {
+      kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
+        .map((tag) => `"${tag}"`)
+        .join(' or ')})`;
+    }
+
     if (selectedStatus.length) {
       const kueryStatus = selectedStatus
         .map((status) => {
@@ -164,7 +178,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     return kueryBuilder;
-  }, [selectedStatus, selectedAgentPolicies, search]);
+  }, [search, selectedAgentPolicies, selectedTags, selectedStatus]);
 
   const showInactive = useMemo(() => {
     return selectedStatus.includes('inactive');
@@ -174,6 +188,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentsStatus, setAgentsStatus] = useState<
     { [key in SimplifiedAgentStatus]: number } | undefined
   >();
+  const [allTags, setAllTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
@@ -224,6 +239,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
+        // Only set tags on the first request - we don't want the list of tags to update based
+        // on the returned set of agents from the API
+        if (allTags === undefined) {
+          const newAllTags = Array.from(
+            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
+          );
+
+          setAllTags(newAllTags);
+        }
+
         setAgents(agentsRequest.data.items);
         setTotalAgents(agentsRequest.data.total);
         setTotalInactiveAgents(agentsRequest.data.totalInactive);
@@ -237,7 +262,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       setIsLoading(false);
     }
     fetchDataAsync();
-  }, [pagination, kuery, showInactive, showUpgradeable, notifications.toasts]);
+  }, [
+    pagination.currentPage,
+    pagination.pageSize,
+    kuery,
+    showInactive,
+    showUpgradeable,
+    allTags,
+    notifications.toasts,
+  ]);
 
   // Send request to get agent list and status
   useEffect(() => {
@@ -296,7 +329,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
   const onClickAddFleetServer = useCallback(() => {
-    flyoutContext?.openFleetServerFlyout();
+    flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
 
   const columns = [
@@ -318,6 +351,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Status',
       }),
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
+    },
+    {
+      field: 'tags',
+      width: '240px',
+      name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
+        defaultMessage: 'Tags',
+      }),
+      render: (tags: string[] = [], agent: any) => <Tags tags={tags} />,
     },
     {
       field: 'policy_id',
@@ -481,6 +522,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onSelectedStatusChange={setSelectedStatus}
         showUpgradeable={showUpgradeable}
         onShowUpgradeableChange={setShowUpgradeable}
+        tags={allTags ?? []}
+        selectedTags={selectedTags}
+        onSelectedTagsChange={setSelectedTags}
         totalAgents={totalAgents}
         totalInactiveAgents={totalInactiveAgents}
         selectionMode={selectionMode}
