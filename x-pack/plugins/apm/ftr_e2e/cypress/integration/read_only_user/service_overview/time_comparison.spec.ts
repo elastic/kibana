@@ -75,6 +75,10 @@ describe('Service overview: Time Comparison', () => {
   });
 
   describe('when comparison is toggled off', () => {
+    beforeEach(() => {
+      cy.loginAsReadOnlyUser();
+    });
+
     it('disables select box', () => {
       cy.visit(serviceOverviewHref);
       cy.contains('opbeans-java');
