@@ -23,9 +23,16 @@ export interface Props {
   emptyPromptColor?: EuiEmptyPromptProps['color'];
 }
 
-const createDataViewText = i18n.translate('sharedUXComponents.noDataViewsPage.addDataViewText', {
+const createDataViewText = i18n.translate('sharedUXComponents.noDataViewsPrompt.addDataViewText', {
   defaultMessage: 'Create Data View',
 });
+
+const noPermissionTitle = i18n.translate(
+  'sharedUXComponents.noDataViewsPrompt.elasticAgentCard.noPermission.title',
+  {
+    defaultMessage: `Contact your administrator`,
+  }
+);
 
 // Using raw value because it is content dependent
 const MAX_WIDTH = 830;
@@ -50,12 +57,34 @@ export const NoDataViews = ({
     </EuiButton>
   );
 
+  const title = canCreateNewDataView ? (
+    <h2>
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.youHaveData"
+        defaultMessage="You have data in Elasticsearch."
+      />
+      <br />
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.nowCreate"
+        defaultMessage="Now, create a data view."
+      />
+    </h2>
+  ) : (
+    <h2>
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.noPermission.title"
+        defaultMessage="Contact your administrator"
+      />
+    </h2>
+  );
+
   return (
     <EuiEmptyPrompt
       data-test-subj="noDataViewsPrompt"
       layout="horizontal"
       css={css`
         max-width: ${MAX_WIDTH}px !important; // Necessary to override EuiEmptyPrompt to fit content
+        flex-grow: 0;
       `}
       color={emptyPromptColor}
       icon={<DataViewIllustration />}
