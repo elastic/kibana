@@ -66,7 +66,10 @@ export interface Command<TDefinition extends CommandDefinition = CommandDefiniti
   commandDefinition: TDefinition;
 }
 
-export interface CommandExecutionComponentProps<TStore = Record<string, unknown>, TMeta = any> {
+export interface CommandExecutionComponentProps<
+  TStore extends object = Record<string, unknown>,
+  TMeta = any
+> {
   command: Command<CommandDefinition<TMeta>>;
 
   /**
@@ -76,12 +79,12 @@ export interface CommandExecutionComponentProps<TStore = Record<string, unknown>
    * persisting data (ex. API response with IDs) that the command can use to determine
    * if the command has already been executed or if it's a new instance.
    */
-  store: Immutable<TStore>;
+  store: Immutable<Partial<TStore>>;
 
   /**
    * Sets the `store` data above. Function will be called the latest (prevState) store data
    */
-  setStore: (updateStoreFn: (prevState: TStore) => TStore) => void;
+  setStore: (updateStoreFn: (prevState: Immutable<Partial<TStore>>) => TStore) => void;
 
   /**
    * The status of the command execution.
@@ -99,7 +102,7 @@ export interface CommandExecutionComponentProps<TStore = Record<string, unknown>
  * The component that will handle the Command execution and display the result.
  */
 export type CommandExecutionComponent<
-  TStore = Record<string, unknown>,
+  TStore extends object = Record<string, unknown>,
   TMeta = any
 > = ComponentType<CommandExecutionComponentProps<TStore, TMeta>>;
 

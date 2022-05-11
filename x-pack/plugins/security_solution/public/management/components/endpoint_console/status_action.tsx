@@ -25,7 +25,7 @@ import { FormattedError } from '../formatted_error';
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<
     {
-      apiCalled: boolean;
+      apiCalled?: boolean;
       endpointDetails?: HostInfo;
       detailsFetchError?: HttpFetchError;
       endpointPendingActions?: PendingActionsResponse;
