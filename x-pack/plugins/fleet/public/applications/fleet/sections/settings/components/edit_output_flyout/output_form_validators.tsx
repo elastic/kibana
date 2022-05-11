@@ -80,21 +80,20 @@ export function validateLogstashHosts(value: string[]) {
         throw new Error('Invalid host');
       }
     } catch (error) {
-        if (val.length === 0) {
-          res.push({
-            message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostRequiredError', {
-              defaultMessage: 'Host is required',
-            }),
-            index: idx,
-          });
-        }
-      else {
-         res.push({
-            message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostError', {
-              defaultMessage: 'Invalid Host',
-            }),
-            index: idx,
-         });
+      if (val.length === 0) {
+        res.push({
+          message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostRequiredError', {
+            defaultMessage: 'Host is required',
+          }),
+          index: idx,
+        });
+      } else {
+        res.push({
+          message: i18n.translate('xpack.fleet.settings.outputForm.logstashHostError', {
+            defaultMessage: 'Invalid Host',
+          }),
+          index: idx,
+        });
       }
     }
 
