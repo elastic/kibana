@@ -63,6 +63,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     return dimensions.metrics.reduce(
       (acc: MetricOptions[], metric: string | ExpressionValueVisDimension) => {
         const column = getColumnByAccessor(metric, table?.columns);
+        const colIndex = table?.columns.indexOf(column!);
         const formatter = getFormatService().deserialize(
           getFormatByAccessor(metric, table.columns)
         );
@@ -89,6 +90,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             bgColor: shouldBrush && (style.bgColor ?? false) ? color : undefined,
             lightText: shouldBrush && (style.bgColor ?? false) && needsLightText(color),
             rowIndex,
+            colIndex,
           };
         });
 
@@ -98,20 +100,21 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     );
   }
 
-  private filterBucket = (row: number) => {
+  private filterColumn = (row: number, metricColIndex: number) => {
     const { dimensions } = this.props.visParams;
-    if (!dimensions.bucket) {
-      return;
-    }
 
     const table = this.props.visData;
+    let column = dimensions.bucket ? getAccessor(dimensions.bucket) : metricColIndex;
+    if (typeof column === 'object' && 'id' in column) {
+      column = table.columns.indexOf(column);
+    }
     this.props.fireEvent({
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         data: [
           {
             table,
-            column: getAccessor(dimensions.bucket),
+            column,
             row,
           },
         ],
@@ -144,9 +147,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}
-        onFilter={
-          this.props.visParams.dimensions.bucket ? () => this.filterBucket(index) : undefined
-        }
+        onFilter={() => this.filterColumn(metric.rowIndex, metric.colIndex)}
         autoScale={this.props.visParams.metric.autoScale}
         colorFullBackground={this.props.visParams.metric.colorFullBackground}
         labelConfig={this.props.visParams.metric.labels}
