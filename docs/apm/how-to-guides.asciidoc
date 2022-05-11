@@ -11,6 +11,7 @@ Learn how to perform common APM app tasks.
 * <<filters>>
 * <<correlations>>
 * <<machine-learning-integration>>
+* <<apm-spaces>>
 * <<advanced-queries>>
 * <<transactions-annotations>>
 
@@ -26,6 +27,8 @@ include::filters.asciidoc[]
 include::correlations.asciidoc[]
 
 include::machine-learning.asciidoc[]
+
+include::apm-spaces.asciidoc[]
 
 include::advanced-queries.asciidoc[]
 

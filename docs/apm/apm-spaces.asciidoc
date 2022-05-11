@@ -1,0 +1,96 @@
+[role="xpack"]
+[[apm-spaces]]
+=== Space-specific APM data
+
+Starting in version 8.2.0, APM indices are <<xpack-spaces,{kib} Space-aware>>.
+This means you can query and display different APM data in different Kibana Spaces.
+
+[float]
+[[apm-spaces-example]]
+=== Example: separate staging and production data
+
+It can be helpful to separate your staging and production data--either
+to remove noise when troubleshooting a production issue,
+or to create more granular access control for certain data.
+
+To do this, we'll take advantage of {apm-guide-ref}/apm-data-streams.html[APM data streams].
+While the APM integration defines certain aspects of data streams,
+the namespace is your opportunity to customize how different types of data are stored in {es}.
+
+[float]
+==== Configure the APM integration
+
+If you already have multiple streams of data flowing into {es}, great! You can skip this step.
+If not, you'll need to edit your APM integrations to channel your APM data into different data streams.
+
+In this example, we'll set our staging policy to use the `staging` namespace,
+and our production policy to use the `prod` namespace.
+This will send production data to `*apm-prod` data streams, and staging data to `*apm-staging` data streams.
+
+[role="screenshot"]
+image::./images/apm-integration-config.png[APM integration settings]
+
+To learn more about configuring the APM integration, see {apm-guide-ref}/input-apm.html[APM input settings].
+
+[float]
+==== Create {kib} spaces
+
+Next, you'll need to create a {Kib} space for each namespace.
+In this example, we've created two Kibana spaces, one named prod and one named staging.
+
+See <<spaces-managing>> for more information.
+
+[float]
+==== Create {kib} access roles
+
+In {kib}, navigate to **Stack Management** > **Roles** and click **Create role**.
+
+You'll need to create two roles, one for staging users and one for production users.
+For example, for staging, create a role named something like, `apm-staging-reader`.
+Assign this role the following privileges:
+
+**Index privileges**
+
+* Indices: `*apm-staging`
+* Privileges: `read`
+
+**Kibana privileges**
+
+* Spaces: `staging`
+* Feature privileges: `APM and User Experience: read`
+
+[role="screenshot"]
+image::./images/apm-roles-config.png[APM role config example]
+
+[float]
+==== Update APM index settings
+
+This step will change the default indices that the APM app queries.
+
+For each space, open the APM app and navigate to **Settings** > **Indices**.
+Use the table below to update your settings for each space.
+
+[options="header"]
+|====
+| Index setting        | `prod` space       | `staging` space
+| Error indices        | `logs-apm-prod`    | `logs-apm-staging`
+| Span indices         | `traces-apm-prod`  | `traces-apm-staging`
+| Transaction indices  | `traces-apm-prod`  | `traces-apm-staging`
+| Metrics indices      | `metrics-apm-prod` | `metrics-apm-staging`
+|====
+
+[role="screenshot"]
+image::settings/images/apm-settings.png[APM app settings in Kibana]
+
+[float]
+==== Assign users to roles
+
+The last thing to do is assign users to the newly created roles above.
+Users will only have access to the data within the spaces that they are granted.
+
+For more information, see <<tutorial-secure-access-to-kibana>>.
+
+[float]
+==== Marvel
+
+That's it! Head back to the APM app and marvel at your space-specific data.
