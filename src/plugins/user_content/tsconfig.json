@@ -13,7 +13,6 @@
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../saved_objects/tsconfig.json" },
     { "path": "../metadata_events_streams/tsconfig.json" }
   ]
 }
