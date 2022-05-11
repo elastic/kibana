@@ -27,7 +27,8 @@ describe('Count stats', () => {
     fetchCasesStatus: jest.fn(),
   });
   useGetCasesMetricsMock.mockReturnValue({
-    mttr: 5,
+    //  600 seconds = 10m
+    mttr: 600,
     isLoading: false,
     fetchCasesMetrics: jest.fn(),
   });
@@ -44,6 +45,6 @@ describe('Count stats', () => {
     expect(within(result.getByTestId('openStatsHeader')).getByText(2)).toBeTruthy();
     expect(within(result.getByTestId('inProgressStatsHeader')).getByText(3)).toBeTruthy();
     expect(within(result.getByTestId('closedStatsHeader')).getByText(4)).toBeTruthy();
-    expect(within(result.getByTestId('mttrStatsHeader')).getByText(5)).toBeTruthy();
+    expect(within(result.getByTestId('mttrStatsHeader')).getByText('10m')).toBeTruthy();
   });
 });

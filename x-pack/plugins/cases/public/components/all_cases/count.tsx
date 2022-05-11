@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import prettyMilliseconds from 'pretty-ms';
 import { CaseStatuses } from '../../../common/api';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { StatusStats } from '../status/status_stats';
@@ -44,6 +45,11 @@ export const Count: FunctionComponent<CountProps> = ({ refresh }) => {
   } = useGetCasesStatus();
 
   const { mttr, isLoading: isCasesMetricsLoading, fetchCasesMetrics } = useGetCasesMetrics();
+
+  const mttrValue = useMemo(
+    () => (mttr ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : 'N/A'),
+    [mttr]
+  );
 
   useEffect(() => {
     if (refresh != null) {
@@ -95,7 +101,7 @@ export const Count: FunctionComponent<CountProps> = ({ refresh }) => {
                 description: isCasesMetricsLoading ? (
                   <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
                 ) : (
-                  mttr ?? 'N/A'
+                  mttrValue
                 ),
               },
             ]}
