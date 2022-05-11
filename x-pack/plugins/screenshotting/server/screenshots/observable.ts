@@ -164,14 +164,9 @@ export class ScreenshotObservableHandler {
     const waitTimeout = toNumber(this.config.capture.timeouts.waitForElements);
 
     return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
-      mergeMap(async (itemsCount) => {
-        // set the viewport to include the elements to capture, before checking for readiness of visualizations.
-        await driver.setViewport(
-          this.layout.getViewport(itemsCount) ?? DEFAULT_VIEWPORT,
-          this.eventLogger.kbnLogger
-        );
-        await waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout);
-      }),
+      mergeMap((itemsCount) =>
+        waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout)
+      ),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
   }

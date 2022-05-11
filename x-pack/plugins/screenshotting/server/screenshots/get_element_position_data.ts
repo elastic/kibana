@@ -56,12 +56,7 @@ export const getElementPositionAndAttributes = async (
           const results: ElementsPositionAndAttribute[] = [];
 
           for (const element of elements) {
-            // scroll to the element: screenshotting can not capture items outside of the viewport
-            element.scrollIntoView(); // FIXME: this breaks Canvas full-page layout PDF
-
-            // find the coords of the element on the screen
             const boundingClientRect = element.getBoundingClientRect() as DOMRect;
-
             results.push({
               position: {
                 boundingClientRect: {
