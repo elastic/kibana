@@ -13,8 +13,8 @@ import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configura
 import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import moment from 'moment';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { addAgentConfigMetrics } from './agent_configuration/add_agent_config_metrics';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { addAgentConfigMetrics } from './add_agent_config_metrics';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
