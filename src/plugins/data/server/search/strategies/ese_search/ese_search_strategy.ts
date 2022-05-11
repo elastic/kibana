@@ -95,8 +95,8 @@ export const enhancedEsSearchStrategyProvider = (
     };
 
     return pollSearch(search, cancel, {
-        ...options,
-        analytics
+      ...options,
+      analytics,
     }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
