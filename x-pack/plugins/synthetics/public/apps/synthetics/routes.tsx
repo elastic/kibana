@@ -52,7 +52,7 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
 const getRoutes = (): RouteProps[] => {
   return [
     {
-      title: i18n.translate('xpack.synthetics.overviewRoute.title', {
+      title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
         values: { baseTitle },
       }),
@@ -64,7 +64,7 @@ const getRoutes = (): RouteProps[] => {
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.synthetics.overview.pageHeader.title"
+                id="xpack.synthetics.gettingStarted.pageHeader.title"
                 defaultMessage="Synthetics Getting started"
               />
             </EuiFlexItem>
