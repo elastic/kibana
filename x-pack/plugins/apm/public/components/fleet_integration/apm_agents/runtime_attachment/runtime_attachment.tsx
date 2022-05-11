@@ -26,6 +26,7 @@ import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DiscoveryRule } from './discovery_rule';
 import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
@@ -84,6 +85,9 @@ export function RuntimeAttachment({
   onChangeVersion,
   isValidVersion,
 }: Props) {
+  const {
+    services: { docLinks },
+  } = useKibana();
   return (
     <div>
       {showUnsavedWarning && (
@@ -137,7 +141,7 @@ export function RuntimeAttachment({
                   values={{
                     versionLink: (
                       <EuiLink
-                        href="https://www.elastic.co/guide/en/apm/agent/java/current/release-notes.html"
+                        href={`${docLinks?.ELASTIC_WEBSITE_URL}/guide/en/apm/agent/java/current/release-notes.html`}
                         target="_blank"
                       >
                         {i18n.translate(
