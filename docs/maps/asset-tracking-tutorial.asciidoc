@@ -213,7 +213,6 @@ PUT _index_template/tri_met_tracks
 [source,js]
 ----------------------------------
 PUT _ingest/pipeline/tri_met_tracks
-PUT _ingest/pipeline/tri_met_tracks
 {
   "processors": [
     {
