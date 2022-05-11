@@ -8,7 +8,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   const getManageRulesPageHref = async () => {
     const manageRulesPageButton = await testSubjects.find('manageRulesPageButton');
