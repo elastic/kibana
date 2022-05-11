@@ -12,13 +12,14 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+
 import {
   AxisExtentModes,
   FillStyles,
   FittingFunctions,
   IconPositions,
   LayerTypes,
-  MULTITABLE,
   LineStyles,
   SeriesTypes,
   ValueLabelModes,
@@ -203,6 +204,8 @@ export interface XYArgs extends DataLayerArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
 
 export interface LayeredXYArgs {
@@ -235,10 +238,10 @@ export interface XYProps {
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
-  valueLabels: ValueLabelMode;
-  layers: CommonXYLayerConfig[];
   endValue?: EndValue;
   emphasizeFitting?: boolean;
+  valueLabels: ValueLabelMode;
+  layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -249,6 +252,8 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
 
 export interface AnnotationLayerArgs {
@@ -295,15 +300,6 @@ export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult
   | ExtendedAnnotationLayerConfigResult;
-
-export interface LensMultiTable {
-  type: typeof MULTITABLE;
-  tables: Record<string, Datatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
 
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
   type: typeof REFERENCE_LINE_LAYER;
