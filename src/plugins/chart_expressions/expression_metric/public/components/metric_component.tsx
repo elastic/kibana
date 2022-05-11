@@ -28,6 +28,7 @@ import './metric.scss';
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
   visData: Datatable;
+  filterable: boolean[];
   fireEvent: (event: any) => void;
   renderComplete: () => void;
 }
@@ -147,7 +148,11 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}
-        onFilter={() => this.filterColumn(metric.rowIndex, metric.colIndex)}
+        onFilter={
+          this.props.filterable[index]
+            ? () => this.filterColumn(metric.rowIndex, metric.colIndex)
+            : undefined
+        }
         autoScale={this.props.visParams.metric.autoScale}
         colorFullBackground={this.props.visParams.metric.colorFullBackground}
         labelConfig={this.props.visParams.metric.labels}
