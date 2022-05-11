@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -23,23 +23,20 @@ import {
   EuiHorizontalRule,
   EuiTabbedContent,
 } from '@elastic/eui';
-import { ActionGroup } from '@kbn/alerting-plugin/common';
-import { AlertStatusValues } from '@kbn/alerting-plugin/common';
-import { AlertStatus } from '@kbn/triggers-actions-ui-plugin/public';
+
 import {
   enableRule,
   disableRule,
   snoozeRule,
   unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  AlertListItem,
   RuleDetailsPathParams,
   EVENT_ERROR_LOG_TAB,
   EVENT_LOG_LIST_TAB,
   ALERT_LIST_TAB,
 } from './types';
+
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -69,13 +66,12 @@ export function RuleDetailsPage() {
     features,
     ruleId,
   });
-  const { isLoadingRuleSummary, ruleSummary, errorRuleSummary, reloadRuleSummary } =
-    useFetchRuleSummary({ ruleId, http });
+  //  *** Wil be used laster ***
+  // const { isLoadingRuleSummary, ruleSummary, errorRuleSummary, reloadRuleSummary } =
+  //   useFetchRuleSummary({ ruleId, http });
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
-
-  const [alerts, setAlerts] = useState<AlertListItem[]>([]);
 
   useEffect(() => {
     if (ruleType && rule) {
@@ -84,16 +80,6 @@ export function RuleDetailsPage() {
       } else setFeatures(rule.consumer);
     }
   }, [ruleType, rule]);
-
-  useEffect(() => {
-    if (!errorRuleSummary && ruleSummary?.alerts) {
-      const durationEpoch = Date.now();
-      const sortedAlerts = Object.entries(ruleSummary.alerts)
-        .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
-        .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
-      setAlerts(sortedAlerts);
-    }
-  }, [ruleSummary, errorRuleSummary, http, rule, ruleType]);
 
   useBreadcrumbs([
     {
@@ -110,6 +96,32 @@ export function RuleDetailsPage() {
       text: rule && rule.name,
     },
   ]);
+
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
+  const canSaveRule =
+    rule &&
+    hasAllPrivilege(rule, ruleType) &&
+    // if the rule has actions, can the user save the rule's action params
+    (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
+
+  const hasEditButton =
+    // can the user save the rule
+    canSaveRule &&
+    // is this rule type editable from within Rules Management
+    (ruleTypeRegistry.has(rule.ruleTypeId)
+      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
+      : false);
+
+  const getRuleConditionsWording = () => (
+    <>
+      {rule?.params.criteria ? String((rule?.params.criteria as any[]).length) : 0}{' '}
+      {/* TODO:  Add [s] to the conditions word based on how many conditions */}
+      {i18n.translate('xpack.observability.ruleDetails.conditions', {
+        defaultMessage: 'conditions',
+      })}
+    </>
+  );
+
   const tabs = [
     {
       id: EVENT_LOG_LIST_TAB,
@@ -136,31 +148,6 @@ export function RuleDetailsPage() {
       content: <EuiText>Error log</EuiText>,
     },
   ];
-
-  const canExecuteActions = hasExecuteActionsCapability(capabilities);
-  const canSaveRule =
-    rule &&
-    hasAllPrivilege(rule, ruleType) &&
-    // if the rule has actions, can the user save the rule's action params
-    (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
-
-  const hasEditButton =
-    // can the user save the rule
-    canSaveRule &&
-    // is this rule type editable from within Rules Management
-    (ruleTypeRegistry.has(rule.ruleTypeId)
-      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-      : false);
-
-  const getRuleConditionsWording = () => (
-    <>
-      {rule?.params.criteria ? String((rule?.params.criteria as any[]).length) : 0}{' '}
-      {/* TODO:  Add [s] to the conditions word based on how many conditions */}
-      {i18n.translate('xpack.observability.ruleDetails.conditions', {
-        defaultMessage: 'conditions',
-      })}
-    </>
-  );
 
   if (isLoadingRule && !errorRule) return <EuiText>Loading</EuiText>;
   if (errorRule) return toasts.addDanger({ title: errorRule });
@@ -397,59 +384,4 @@ export function RuleDetailsPage() {
       </ObservabilityPageTemplate>
     )
   );
-}
-
-const ACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active',
-  { defaultMessage: 'Active' }
-);
-
-const INACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive',
-  { defaultMessage: 'Recovered' }
-);
-function getActionGroupName(ruleType: RuleType, actionGroupId?: string): string | undefined {
-  actionGroupId = actionGroupId || ruleType.defaultActionGroupId;
-  const actionGroup = ruleType?.actionGroups?.find(
-    (group: ActionGroup<string>) => group.id === actionGroupId
-  );
-  return actionGroup?.name;
-}
-
-export function alertToListItem(
-  durationEpoch: number,
-  // ruleType: RuleType,
-  alertId: string,
-  alert: AlertStatus
-): AlertListItem {
-  const isMuted = !!alert?.muted;
-  const status =
-    alert?.status === 'Active'
-      ? {
-          label: ACTIVE_LABEL,
-          // actionGroup: getActionGroupName(ruleType, alert?.actionGroupId),
-          healthColor: 'primary',
-        }
-      : { label: INACTIVE_LABEL, healthColor: 'subdued' };
-  const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
-  const duration = start ? durationEpoch - start.valueOf() : 0;
-  const sortPriority = getSortPriorityByStatus(alert?.status);
-  return {
-    alert: alertId,
-    status,
-    start,
-    duration,
-    isMuted,
-    sortPriority,
-  };
-}
-
-function getSortPriorityByStatus(status?: AlertStatusValues): number {
-  switch (status) {
-    case 'Active':
-      return 0;
-    case 'OK':
-      return 1;
-  }
-  return 2;
 }

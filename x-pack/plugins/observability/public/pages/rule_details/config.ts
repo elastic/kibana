@@ -6,6 +6,7 @@
  */
 
 import { RuleType, Rule } from '@kbn/triggers-actions-ui-plugin/public';
+
 type Capabilities = Record<string, any>;
 
 export type InitialRule = Partial<Rule> &
