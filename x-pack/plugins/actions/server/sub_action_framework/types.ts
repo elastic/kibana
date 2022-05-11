@@ -11,7 +11,7 @@ import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeParams, Services } from '../types';
-import { BasicConnector } from './basic';
+import { SubActionConnector } from './sub_action_connector';
 
 export interface ServiceParams<Config, Secrets> {
   /**
@@ -28,7 +28,7 @@ export interface ServiceParams<Config, Secrets> {
 
 export type IService<Config, Secrets> = new (
   params: ServiceParams<Config, Secrets>
-) => BasicConnector<Config, Secrets>;
+) => SubActionConnector<Config, Secrets>;
 
 export interface SubActionConnectorType<Config, Secrets> {
   id: string;

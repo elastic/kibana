@@ -20,7 +20,7 @@ const isObject = (v: unknown): v is Record<string, unknown> => {
 
 const isAxiosError = (error: unknown): error is AxiosError => (error as AxiosError).isAxiosError;
 
-export abstract class BasicConnector<Config, Secrets> {
+export abstract class SubActionConnector<Config, Secrets> {
   [k: string]: ((params: unknown) => unknown) | unknown;
   private axiosInstance: AxiosInstance;
   private validProtocols: string[] = ['http:', 'https:'];

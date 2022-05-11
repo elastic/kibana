@@ -11,7 +11,7 @@ import {
   PushToServiceParams,
   PushToServiceResponse,
 } from './types';
-import { BasicConnector } from './basic';
+import { SubActionConnector } from './sub_action_connector';
 import { ServiceParams } from './types';
 
 export interface CaseConnectorInterface {
@@ -35,7 +35,7 @@ export interface CaseConnectorInterface {
 }
 
 export abstract class CaseConnector<Config, Secrets>
-  extends BasicConnector<Config, Secrets>
+  extends SubActionConnector<Config, Secrets>
   implements CaseConnectorInterface
 {
   constructor(params: ServiceParams<Config, Secrets>) {

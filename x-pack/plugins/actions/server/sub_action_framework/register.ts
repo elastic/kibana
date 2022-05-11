@@ -9,7 +9,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { BasicConnector } from './basic';
+import { SubActionConnector } from './sub_action_connector';
 import { CaseConnector } from './case';
 import { ActionTypeConfig, ActionTypeSecrets } from '../types';
 import { buildExecutor } from './executor';
@@ -19,10 +19,10 @@ import { buildValidators } from './validators';
 const validateService = <Config, Secrets>(Service: IService<Config, Secrets>) => {
   if (
     !(Service.prototype instanceof CaseConnector) &&
-    !(Service.prototype instanceof BasicConnector)
+    !(Service.prototype instanceof SubActionConnector)
   ) {
     throw new Error(
-      'Service must be extend one of the abstract classes: BasicConnector or CaseConnector'
+      'Service must be extend one of the abstract classes: SubActionConnector or CaseConnector'
     );
   }
 };

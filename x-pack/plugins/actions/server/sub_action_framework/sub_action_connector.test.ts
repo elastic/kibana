@@ -31,7 +31,7 @@ const createAxiosError = (): AxiosError => {
   return error;
 };
 
-describe('BasicConnector', () => {
+describe('SubActionConnector', () => {
   const axiosInstanceMock = jest.fn();
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;

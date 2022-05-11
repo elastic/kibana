@@ -55,7 +55,7 @@ export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
 
-export { BasicConnector } from './sub_action_framework/basic';
+export { SubActionConnector } from './sub_action_framework/sub_action_connector';
 export { CaseConnector } from './sub_action_framework/case';
 
 export const config: PluginConfigDescriptor<ActionsConfig> = {

@@ -8,7 +8,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
-import { BasicConnector } from './basic';
+import { SubActionConnector } from './sub_action_connector';
 import { CaseConnector } from './case';
 import { ExternalServiceIncidentResponse, ServiceParams } from './types';
 
@@ -25,7 +25,7 @@ interface ErrorSchema {
   errorCode: number;
 }
 
-export class TestBasicConnector extends BasicConnector<TestConfig, TestSecrets> {
+export class TestBasicConnector extends SubActionConnector<TestConfig, TestSecrets> {
   constructor(params: ServiceParams<TestConfig, TestSecrets>) {
     super(params);
     this.registerSubAction({
@@ -51,13 +51,13 @@ export class TestBasicConnector extends BasicConnector<TestConfig, TestSecrets> 
   }
 }
 
-export class TestNoSubActions extends BasicConnector<TestConfig, TestSecrets> {
+export class TestNoSubActions extends SubActionConnector<TestConfig, TestSecrets> {
   protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
     return `Error`;
   }
 }
 
-export class TestExecutor extends BasicConnector<TestConfig, TestSecrets> {
+export class TestExecutor extends SubActionConnector<TestConfig, TestSecrets> {
   public notAFunction: string = 'notAFunction';
 
   constructor(params: ServiceParams<TestConfig, TestSecrets>) {
