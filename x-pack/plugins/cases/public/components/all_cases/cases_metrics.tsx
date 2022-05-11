@@ -52,7 +52,7 @@ export const CasesMetrics: FunctionComponent<CountProps> = ({ refresh }) => {
   const { mttr, isLoading: isCasesMetricsLoading, fetchCasesMetrics } = useGetCasesMetrics();
 
   const mttrValue = useMemo(
-    () => (mttr ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : 'N/A'),
+    () => (mttr ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : '-'),
     [mttr]
   );
 

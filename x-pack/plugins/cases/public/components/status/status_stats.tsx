@@ -30,7 +30,7 @@ const StatusStatsComponent: React.FC<Props> = ({
         description: isLoading ? (
           <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-loading-spinner`} />
         ) : (
-          caseCount ?? 'N/A'
+          caseCount ?? '-'
         ),
       },
     ],
