@@ -2,6 +2,7 @@
   height: 100%;
 }
 
+// only apply truncation inside of a table cell (not within popover)
 [data-test-subj='dataGridRowCell'] .lnsTableCell {
   @include euiTextTruncate;
 }
