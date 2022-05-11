@@ -11,7 +11,7 @@ import { getNewRule } from '../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
 import { addExceptionFromFirstAlert, goToClosedAlerts, goToOpenedAlerts } from '../../tasks/alerts';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -39,11 +39,10 @@ describe('Adds rule exception', () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createCustomRule(
+    createCustomRuleEnabled(
       { ...getNewRule(), customQuery: 'agent.name:*', index: ['exceptions*'] },
       'rule_testing',
-      '5s',
-      true
+      '1s'
     );
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();

@@ -18,4 +18,8 @@ export type {
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
 } from './application';
-export type { ResultLink } from './application/common/components/results_links';
+export type {
+  GetAdditionalLinksParams,
+  ResultLink,
+  GetAdditionalLinks,
+} from './application/common/components/results_links';

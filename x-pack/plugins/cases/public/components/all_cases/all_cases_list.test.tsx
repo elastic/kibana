@@ -17,7 +17,7 @@ import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -204,6 +204,11 @@ describe('AllCasesListGeneric', () => {
           .childAt(0)
           .prop('value')
       ).toBe(useGetCasesMockState.data.cases[0].createdAt);
+
+      expect(
+        wrapper.find(`[data-test-subj="case-table-column-severity"]`).first().text().toLowerCase()
+      ).toBe(useGetCasesMockState.data.cases[0].severity);
+
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
       );
@@ -223,6 +228,7 @@ describe('AllCasesListGeneric', () => {
             createdAt: null,
             createdBy: null,
             status: null,
+            severity: null,
             tags: null,
             title: null,
             totalComment: null,
@@ -560,6 +566,8 @@ describe('AllCasesListGeneric', () => {
           username: 'lknope',
         },
         description: 'Security banana Issue',
+        severity: CaseSeverity.LOW,
+        duration: null,
         externalService: {
           connectorId: '123',
           connectorName: 'connector name',

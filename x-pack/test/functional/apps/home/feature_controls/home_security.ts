@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows the "Manage" action item', async () => {
-        await testSubjects.existOrFail('homManagementActionItem', {
+        await testSubjects.existOrFail('homeManage', {
           timeout: 2000,
         });
       });
@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show the "Manage" action item', async () => {
-        await testSubjects.missingOrFail('homManagementActionItem', {
+        await testSubjects.missingOrFail('homeManage', {
           timeout: 2000,
         });
       });

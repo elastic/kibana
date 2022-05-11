@@ -36,6 +36,18 @@ describe('buildDefaultSettings', () => {
           name: 'field2Boolean',
           type: 'boolean',
         },
+        {
+          name: 'field3Text',
+          type: 'text',
+        },
+        {
+          name: 'field4MatchOnlyText',
+          type: 'match_only_text',
+        },
+        {
+          name: 'field5Wildcard',
+          type: 'wildcard',
+        },
       ],
     });
 
@@ -49,6 +61,9 @@ describe('buildDefaultSettings', () => {
           "query": Object {
             "default_field": Array [
               "field1Keyword",
+              "field3Text",
+              "field4MatchOnlyText",
+              "field5Wildcard",
             ],
           },
         },
