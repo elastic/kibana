@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -22,24 +21,6 @@ import type { FileChunkDocument } from '../mappings';
 const REQUEST_SPAN_SIZE_IN_BYTES = 1024;
 
 type Callback = (error?: Error) => void;
-type SearchRequest = estypes.SearchRequest;
-
-// interface ContentStreamDocument {
-//   id: string;
-//   index: string;
-//   if_primary_term?: number;
-//   if_seq_no?: number;
-// }
-
-// interface ChunkOutput {
-//   chunk: number;
-//   content: string;
-// }
-
-// interface ChunkSource {
-//   parent_id: string;
-//   output: ChunkOutput;
-// }
 
 export type ContentStreamEncoding = 'base64' | 'raw';
 
@@ -128,34 +109,6 @@ export class ContentStream extends Duplex {
     return this.maxChunkSize;
   }
 
-  // private async readHead() {
-  //   if (!this.id) {
-  //     throw new Error('No document to read from');
-  //   }
-  //   const body: SearchRequest['body'] = {
-  //     _source: { includes: ['content'] },
-  //     query: {
-  //       constant_score: {
-  //         filter: {
-  //           bool: {
-  //             must: [{ term: { _id: this.id } }],
-  //           },
-  //         },
-  //       },
-  //     },
-  //     size: 1,
-  //   };
-
-  //   this.logger.debug(`Reading file contents.`);
-
-  //   const response = await this.client.search<FileChunkDocument>({ body, index: this.index });
-  //   const hits = response?.hits?.hits?.[0];
-
-  //   this.jobSize = hits?._source?.output?.size;
-
-  //   return hits?._source?.output?.content;
-  // }
-
   private async readChunk() {
     if (!this.id) {
       throw new Error('No document ID provided. Cannot read chunk.');
@@ -232,21 +185,6 @@ export class ContentStream extends Duplex {
       },
     });
   }
-
-  // private async writeHead(content: string) {
-  //   this.logger.debug(`Updating file contents.`);
-
-  //   const body = await this.client.update<FileChunkDocument>({
-  //     ...this.document,
-  //     body: {
-  //       doc: {
-  //         content,
-  //       },
-  //     },
-  //   });
-
-  //   ({ _primary_term: this.primaryTerm, _seq_no: this.seqNo } = body);
-  // }
 
   public getId(): undefined | string {
     return this.id;
