@@ -25,7 +25,7 @@ import { EuiPanelStyled } from './solution_grouped_nav_panel.styles';
 import { PortalNavItem } from './solution_grouped_nav_item';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 
-interface SolutionGroupedNavPanelProps {
+export interface SolutionGroupedNavPanelProps {
   onClose: () => void;
   title: string;
   items: PortalNavItem[];
@@ -80,6 +80,7 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
                       <Fragment key={id}>
                         <EuiDescriptionListTitle>
                           <a
+                            data-test-subj={`groupedNavPanelLink-${id}`}
                             href={href}
                             onClick={(ev) => {
                               onClose();

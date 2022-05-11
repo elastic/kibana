@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiListGroupItem } from '@elastic/eui';
-import { useNavigation } from '../../../lib/kibana';
 import { useGetSecuritySolutionLinkProps } from '../../links';
 import { SecurityPageName } from '../../../../../common/constants';
 
@@ -60,6 +58,7 @@ export const useNavItems: () => NavItem[] = () => {
           description: 'The description goes here',
           ...getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.detectionAndResponse }),
         },
+        // TODO: add the cloudPostureFindings to the config here
         // {
         //   id: SecurityPageName.cloudPostureFindings,
         //   label: 'Cloud Posture Findings',
@@ -184,63 +183,6 @@ export const useNavItems: () => NavItem[] = () => {
 };
 
 export const useFooterNavItems: () => NavItem[] = () => {
-  const { getAppUrl, navigateTo } = useNavigation();
-
-  const getOnClick =
-    (deepLinkId: string): React.MouseEventHandler =>
-    (ev) => {
-      ev.preventDefault();
-      navigateTo({ deepLinkId });
-    };
-
-  return [
-    {
-      id: 'get_started',
-      render: () => (
-        <EuiLink href="/get_started">
-          <EuiListGroupItem label=" GET STARTED" size="xs" color="text" />
-        </EuiLink>
-      ),
-    },
-    {
-      id: 'management',
-      label: 'Manage',
-      href: getAppUrl({ deepLinkId: 'management' }),
-      onClick: getOnClick('management'),
-      categories: [
-        { label: 'SIEM', itemIds: ['rules', 'exceptions'] },
-        { label: 'ENDPOINTS', itemIds: ['endpoints', 'event_filters'] },
-      ],
-      items: [
-        {
-          id: 'rules',
-          label: 'Rules',
-          description: 'The description goes here',
-          href: getAppUrl({ deepLinkId: 'rules' }),
-          onClick: getOnClick('rules'),
-        },
-        {
-          id: 'exceptions',
-          label: 'Rule exceptions',
-          description: 'The description goes here',
-          href: getAppUrl({ deepLinkId: 'exceptions' }),
-          onClick: getOnClick('exceptions'),
-        },
-        {
-          id: 'endpoints',
-          label: 'Endpoints',
-          description: 'The description goes here',
-          href: getAppUrl({ deepLinkId: 'endpoints' }),
-          onClick: getOnClick('endpoints'),
-        },
-        {
-          id: 'event_filters',
-          label: 'Event filters',
-          description: 'The description goes here',
-          href: getAppUrl({ deepLinkId: 'event_filters' }),
-          onClick: getOnClick('event_filters'),
-        },
-      ],
-    },
-  ];
+  // TODO: implement footer items
+  return [];
 };

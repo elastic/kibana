@@ -6,13 +6,11 @@
  */
 
 import React from 'react';
-// import React from '@emotion/react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
-import { SolutionGroupedNav } from '.';
 import { TestProviders } from '../../../mock';
 import { NavItem } from './solution_grouped_nav_item';
-import { SolutionGroupedNavProps } from './solution_grouped_nav';
+import { SolutionGroupedNav, SolutionGroupedNavProps } from './solution_grouped_nav';
 
 const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
 jest.mock('../../../utils/timeline/use_show_timeline', () => ({
@@ -89,7 +87,7 @@ describe('SolutionGroupedNav', () => {
   });
 
   describe('panel button toggle', () => {
-    it('should render   the group button only for grouped items', () => {
+    it('should render the group button only for grouped items', () => {
       const result = renderNav();
       expect(
         result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`)

@@ -49,7 +49,6 @@ export const usePrimaryNavigation = ({
   }, [pageName, navTabs, mapLocationToTab, selectedTabId]);
 
   const navLinkItems = useNavItems();
-  // const footerNavLinkItems = useFooterNavItems();
   const navItems = usePrimaryNavigationItems({
     navTabs,
     selectedTabId,
@@ -66,13 +65,7 @@ export const usePrimaryNavigation = ({
     icon: 'logoSecurity',
     ...(isGroupedNavigationEnabled
       ? {
-          children: (
-            <SolutionGroupedNav
-              items={navLinkItems}
-              // footerItems={footerNavLinkItems} // TODO
-              selectedId={selectedTabId}
-            />
-          ),
+          children: <SolutionGroupedNav items={navLinkItems} selectedId={selectedTabId} />,
           closeFlyoutButtonPosition: 'inside',
         }
       : { items: navItems }),

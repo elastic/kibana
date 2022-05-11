@@ -76,14 +76,14 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
+   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
    */
-  blocklist = 'blocklist',
-  case = 'cases',
-  caseConfigure = 'cases_configure',
-  caseCreate = 'cases_create',
+  case = 'cases', // must match `CasesDeepLinkId.cases`
+  caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
+  caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
