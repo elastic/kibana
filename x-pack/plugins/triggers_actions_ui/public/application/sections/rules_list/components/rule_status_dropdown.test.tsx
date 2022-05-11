@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RuleStatusDropdown, ComponentOpts } from './rule_status_dropdown';
 
 const NOW_STRING = '2020-03-01T00:00:00.000Z';
-const SNOOZE_UNTIL = '2020-03-04T00:00:00.000Z';
+const SNOOZE_UNTIL = new Date('2020-03-04T00:00:00.000Z');
 
 describe('RuleStatusDropdown', () => {
   const enableRule = jest.fn();

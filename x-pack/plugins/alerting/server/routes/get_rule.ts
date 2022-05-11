@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState, getRuleSnoozeEndTime } from '../lib';
+import { ILicenseState } from '../lib';
 import { verifyAccessAndContext, RewriteResponseCase } from './lib';
 import {
   RuleTypeParams,
@@ -36,6 +36,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   actions,
   scheduledTaskId,
   snoozeSchedule,
+  isSnoozedUntil,
   ...rest
 }) => ({
   ...rest,
@@ -48,6 +49,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   notify_when: notifyWhen,
   muted_alert_ids: mutedInstanceIds,
   mute_all: muteAll,
+  ...(isSnoozedUntil !== undefined ? { is_snoozed_until: isSnoozedUntil } : {}),
   // Remove this object spread boolean check after snooze props is added to the public API
   ...(snoozeSchedule !== undefined ? { snooze_schedule: snoozeSchedule } : {}),
   scheduled_task_id: scheduledTaskId,
@@ -62,9 +64,6 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     params,
     connector_type_id: actionTypeId,
   })),
-  ...(snoozeSchedule != null
-    ? { is_snoozed_until: getRuleSnoozeEndTime({ snoozeSchedule, muteAll })?.toISOString() }
-    : {}),
 });
 
 interface BuildGetRulesRouteParams {
