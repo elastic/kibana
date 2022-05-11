@@ -19305,7 +19305,7 @@ cmdShim.ifExists = cmdShimIfExists
 
 var fs = __webpack_require__("../../node_modules/graceful-fs/graceful-fs.js")
 
-var mkdir = __webpack_require__("../../node_modules/cmd-shim/node_modules/mkdirp/index.js")
+var mkdir = __webpack_require__("../../node_modules/mkdirp/index.js")
   , path = __webpack_require__("path")
   , toBatchSyntax = __webpack_require__("../../node_modules/cmd-shim/lib/to-batch-syntax.js")
   , shebangExpr = /^#\!\s*(?:\/usr\/bin\/env)?\s*([^ \t]+=[^ \t]+\s+)*\s*([^ \t]+)(.*)$/
@@ -19596,112 +19596,6 @@ function replaceDollarWithPercentPair(value) {
 }
 
 
-
-
-/***/ }),
-
-/***/ "../../node_modules/cmd-shim/node_modules/mkdirp/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-var path = __webpack_require__("path");
-var fs = __webpack_require__("fs");
-var _0777 = parseInt('0777', 8);
-
-module.exports = mkdirP.mkdirp = mkdirP.mkdirP = mkdirP;
-
-function mkdirP (p, opts, f, made) {
-    if (typeof opts === 'function') {
-        f = opts;
-        opts = {};
-    }
-    else if (!opts || typeof opts !== 'object') {
-        opts = { mode: opts };
-    }
-    
-    var mode = opts.mode;
-    var xfs = opts.fs || fs;
-    
-    if (mode === undefined) {
-        mode = _0777 & (~process.umask());
-    }
-    if (!made) made = null;
-    
-    var cb = f || function () {};
-    p = path.resolve(p);
-    
-    xfs.mkdir(p, mode, function (er) {
-        if (!er) {
-            made = made || p;
-            return cb(null, made);
-        }
-        switch (er.code) {
-            case 'ENOENT':
-                if (path.dirname(p) === p) return cb(er);
-                mkdirP(path.dirname(p), opts, function (er, made) {
-                    if (er) cb(er, made);
-                    else mkdirP(p, opts, cb, made);
-                });
-                break;
-
-            // In the case of any other error, just see if there's a dir
-            // there already.  If so, then hooray!  If not, then something
-            // is borked.
-            default:
-                xfs.stat(p, function (er2, stat) {
-                    // if the stat fails, then that's super weird.
-                    // let the original error be the failure reason.
-                    if (er2 || !stat.isDirectory()) cb(er, made)
-                    else cb(null, made);
-                });
-                break;
-        }
-    });
-}
-
-mkdirP.sync = function sync (p, opts, made) {
-    if (!opts || typeof opts !== 'object') {
-        opts = { mode: opts };
-    }
-    
-    var mode = opts.mode;
-    var xfs = opts.fs || fs;
-    
-    if (mode === undefined) {
-        mode = _0777 & (~process.umask());
-    }
-    if (!made) made = null;
-
-    p = path.resolve(p);
-
-    try {
-        xfs.mkdirSync(p, mode);
-        made = made || p;
-    }
-    catch (err0) {
-        switch (err0.code) {
-            case 'ENOENT' :
-                made = sync(path.dirname(p), opts, made);
-                sync(p, opts, made);
-                break;
-
-            // In the case of any other error, just see if there's a dir
-            // there already.  If so, then hooray!  If not, then something
-            // is borked.
-            default:
-                var stat;
-                try {
-                    stat = xfs.statSync(p);
-                }
-                catch (err1) {
-                    throw err0;
-                }
-                if (!stat.isDirectory()) throw err0;
-                break;
-        }
-    }
-
-    return made;
-};
 
 
 /***/ }),
@@ -36302,6 +36196,112 @@ function isNumber (x) {
 function isConstructorOrProto (obj, key) {
     return key === 'constructor' && typeof obj[key] === 'function' || key === '__proto__';
 }
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+var path = __webpack_require__("path");
+var fs = __webpack_require__("fs");
+var _0777 = parseInt('0777', 8);
+
+module.exports = mkdirP.mkdirp = mkdirP.mkdirP = mkdirP;
+
+function mkdirP (p, opts, f, made) {
+    if (typeof opts === 'function') {
+        f = opts;
+        opts = {};
+    }
+    else if (!opts || typeof opts !== 'object') {
+        opts = { mode: opts };
+    }
+    
+    var mode = opts.mode;
+    var xfs = opts.fs || fs;
+    
+    if (mode === undefined) {
+        mode = _0777 & (~process.umask());
+    }
+    if (!made) made = null;
+    
+    var cb = f || function () {};
+    p = path.resolve(p);
+    
+    xfs.mkdir(p, mode, function (er) {
+        if (!er) {
+            made = made || p;
+            return cb(null, made);
+        }
+        switch (er.code) {
+            case 'ENOENT':
+                if (path.dirname(p) === p) return cb(er);
+                mkdirP(path.dirname(p), opts, function (er, made) {
+                    if (er) cb(er, made);
+                    else mkdirP(p, opts, cb, made);
+                });
+                break;
+
+            // In the case of any other error, just see if there's a dir
+            // there already.  If so, then hooray!  If not, then something
+            // is borked.
+            default:
+                xfs.stat(p, function (er2, stat) {
+                    // if the stat fails, then that's super weird.
+                    // let the original error be the failure reason.
+                    if (er2 || !stat.isDirectory()) cb(er, made)
+                    else cb(null, made);
+                });
+                break;
+        }
+    });
+}
+
+mkdirP.sync = function sync (p, opts, made) {
+    if (!opts || typeof opts !== 'object') {
+        opts = { mode: opts };
+    }
+    
+    var mode = opts.mode;
+    var xfs = opts.fs || fs;
+    
+    if (mode === undefined) {
+        mode = _0777 & (~process.umask());
+    }
+    if (!made) made = null;
+
+    p = path.resolve(p);
+
+    try {
+        xfs.mkdirSync(p, mode);
+        made = made || p;
+    }
+    catch (err0) {
+        switch (err0.code) {
+            case 'ENOENT' :
+                made = sync(path.dirname(p), opts, made);
+                sync(p, opts, made);
+                break;
+
+            // In the case of any other error, just see if there's a dir
+            // there already.  If so, then hooray!  If not, then something
+            // is borked.
+            default:
+                var stat;
+                try {
+                    stat = xfs.statSync(p);
+                }
+                catch (err1) {
+                    throw err0;
+                }
+                if (!stat.isDirectory()) throw err0;
+                break;
+        }
+    }
+
+    return made;
+};
 
 
 /***/ }),
@@ -60672,17 +60672,6 @@ async function installBazelTools(repoRootPath) {
 
 
 
-async function isVaultAvailable() {
-  try {
-    await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__[/* spawn */ "a"])('vault', ['--version'], {
-      stdio: 'pipe'
-    });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 async function isElasticCommitter() {
   try {
     const {
@@ -60696,21 +60685,13 @@ async function isElasticCommitter() {
   }
 }
 
-async function migrateToNewServersIfNeeded(settingsPath) {
+async function upToDate(settingsPath) {
   if (!(await Object(_fs__WEBPACK_IMPORTED_MODULE_5__[/* isFile */ "d"])(settingsPath))) {
     return false;
   }
 
   const readSettingsFile = await Object(_fs__WEBPACK_IMPORTED_MODULE_5__[/* readFile */ "f"])(settingsPath, 'utf8');
-  const newReadSettingsFile = readSettingsFile.replace(/cloud\.buildbuddy\.io/g, 'remote.buildbuddy.io');
-
-  if (newReadSettingsFile === readSettingsFile) {
-    return false;
-  }
-
-  Object(_fs__WEBPACK_IMPORTED_MODULE_5__[/* writeFile */ "i"])(settingsPath, newReadSettingsFile);
-  _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info(`[bazel_tools] upgrade remote cache settings to use new server address`);
-  return true;
+  return readSettingsFile.startsWith('# V2 ');
 }
 
 async function setupRemoteCache(repoRootPath) {
@@ -60720,52 +60701,19 @@ async function setupRemoteCache(repoRootPath) {
   }
 
   _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].debug(`[bazel_tools] setting up remote cache settings if necessary`);
-  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade the servers used on .bazelrc.cache
-  //
-  // NOTE: this can be removed in the future once everyone is migrated into the new servers
+  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade or install the config file
 
-  if (await migrateToNewServersIfNeeded(settingsPath)) {
-    return;
-  }
-
-  if (Object(fs__WEBPACK_IMPORTED_MODULE_1__["existsSync"])(settingsPath)) {
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].debug(`[bazel_tools] remote cache settings already exist, skipping`);
-    return;
-  }
-
-  if (!(await isVaultAvailable())) {
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] vault is not available, unable to setup remote cache settings.');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] use the following guide or reach out to Operations for assistance');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] https://github.com/elastic/infra/tree/master/docs/vault');
-    return;
-  }
-
-  let apiKey = '';
-
-  try {
-    const {
-      stdout
-    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__[/* spawn */ "a"])('vault', ['read', '-field=readonly-key', 'secret/ui-team/kibana-bazel-remote-cache'], {
-      stdio: 'pipe'
-    });
-    apiKey = stdout.trim();
-  } catch (ex) {
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] unable to read bazel remote cache key from vault, are you authenticated?');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info('[bazel_tools] reach out to Operations if you need assistance with this.');
-    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info(`[bazel_tools] ${ex}`);
+  if (await upToDate(settingsPath)) {
+    _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].debug(`[bazel_tools] remote cache config already exists and is up-to-date, skipping`);
     return;
   }
 
   const contents = dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-    # V1 - This file is automatically generated by 'yarn kbn bootstrap'
+    # V2 - This file is automatically generated by 'yarn kbn bootstrap'
     # To regenerate this file, delete it and run 'yarn kbn bootstrap' again.
-    build --bes_results_url=https://app.buildbuddy.io/invocation/
-    build --bes_backend=grpcs://remote.buildbuddy.io
-    build --remote_cache=grpcs://remote.buildbuddy.io
-    build --remote_timeout=3600
-    build --remote_header=${apiKey}
+    build --remote_cache=https://storage.googleapis.com/kibana-local-bazel-remote-cache
+    build --noremote_upload_local_results
+    build --incompatible_remote_results_ignore_disk
   `;
   Object(fs__WEBPACK_IMPORTED_MODULE_1__["writeFileSync"])(settingsPath, contents);
   _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].info(`[bazel_tools] remote cache settings written to ${settingsPath}`);

@@ -51,11 +51,11 @@ export function getAssets(
 
 // ASK: Does getAssetsData need an installSource now?
 // if so, should it be an Installation vs InstallablePackage or add another argument?
-export async function getAssetsData(
+export function getAssetsData(
   packageInfo: Pick<PackageInfo, 'version' | 'name'>,
   filter = (path: string): boolean => true,
   datasetName?: string
-): Promise<ArchiveEntry[]> {
+): ArchiveEntry[] {
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, datasetName);
   const entries: ArchiveEntry[] = assets.map((path) => {
