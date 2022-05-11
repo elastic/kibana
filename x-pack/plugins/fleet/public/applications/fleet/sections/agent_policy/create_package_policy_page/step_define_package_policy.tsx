@@ -208,9 +208,9 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
           {/* Required vars */}
           {requiredVars.map((varDef) => {
-            const { name: varName, type: varType } = varDef;
-            if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
-            const value = packagePolicy.vars[varName].value;
+            const { name: varName, type: varType, default: defaultValue } = varDef;
+            const value = packagePolicy.vars?.[varName]?.value ?? defaultValue;
+
             return (
               <EuiFlexItem key={varName}>
                 <PackagePolicyInputVarField
