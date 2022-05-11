@@ -113,6 +113,18 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getSplitColumnAccessorHelp: () =>
+    i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
+      defaultMessage: 'Specifies split column of the xy chart',
+    }),
+  getSplitRowAccessorHelp: () =>
+    i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
+      defaultMessage: 'Specifies split row of the xy chart',
+    }),
+  getLayersHelp: () =>
+    i18n.translate('expressionXY.layeredXyVis.layers.help', {
+      defaultMessage: 'Layers of visual series',
+    }),
   getDataLayerFnHelp: () =>
     i18n.translate('expressionXY.dataLayer.help', {
       defaultMessage: `Configure a layer in the xy chart`,

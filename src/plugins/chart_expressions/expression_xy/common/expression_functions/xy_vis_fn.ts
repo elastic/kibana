@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
+import {
+  Dimension,
+  prepareLogTable,
+  validateAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
@@ -37,6 +41,9 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
 });
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
+  validateAccessor(args.splitRowAccessor, data.columns);
+  validateAccessor(args.splitColumnAccessor, data.columns);
+
   const {
     referenceLineLayers = [],
     annotationLayers = [],

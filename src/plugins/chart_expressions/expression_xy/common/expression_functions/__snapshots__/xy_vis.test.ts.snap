@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xyVis it should throw error if splitColumnAccessor is pointing to the absent column 1`] = `"Provided column name or index is invalid: absent-accessor"`;
+
+exports[`xyVis it should throw error if splitRowAccessor is pointing to the absent column 1`] = `"Provided column name or index is invalid: absent-accessor"`;
