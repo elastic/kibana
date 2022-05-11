@@ -53,8 +53,8 @@ const ExceptionsViewerPaginationComponent = ({
   const items = useMemo((): ReactElement[] => {
     return pagination.pageSizeOptions.map((rows) => (
       <EuiContextMenuItem
+        icon={rows === pagination.pageSize ? 'check' : 'empty'}
         key={rows}
-        icon="empty"
         onClick={() => {
           onPaginationChange({
             pagination: {
