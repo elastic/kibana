@@ -9,7 +9,6 @@ import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/c
 
 import { BlobStorageService } from './blob_storage_service';
 import { InternalFileService } from './file_service';
-import { fileObjectType } from './saved_objects';
 
 export class FilesPlugin implements Plugin {
   private readonly logger: Logger;
