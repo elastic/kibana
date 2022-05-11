@@ -19,7 +19,7 @@ import { useStyles } from '../detail_panel_process_tab/styles';
 import { useStyles as useStylesChild } from './styles';
 import { getHostData, getContainerData, getOrchestratorData } from './helpers';
 
-interface DetailPanelHostTabDeps {
+interface DetailPanelMetadataTabDeps {
   processHost?: ProcessEventHost;
   processContainer?: ProcessEventContainer;
   processOrchestrator?: ProcessEventOrchestrator;
@@ -28,11 +28,11 @@ interface DetailPanelHostTabDeps {
 /**
  * Host Panel of  session view detail panel.
  */
-export const DetailPanelHostTab = ({
+export const DetailPanelMetadataTab = ({
   processHost,
   processContainer,
   processOrchestrator,
-}: DetailPanelHostTabDeps) => {
+}: DetailPanelMetadataTabDeps) => {
   const styles = useStyles();
   const stylesChild = useStylesChild();
   const hostData = useMemo(() => getHostData(processHost), [processHost]);

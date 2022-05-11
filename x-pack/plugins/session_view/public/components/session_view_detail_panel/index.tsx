@@ -11,7 +11,7 @@ import { EuiTabProps } from '../../types';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { getSelectedTabContent } from './helpers';
 import { DetailPanelProcessTab } from '../detail_panel_process_tab';
-import { DetailPanelHostTab } from '../detail_panel_host_tab';
+import { DetailPanelMetadataTab } from '../detail_panel_metadata_tab';
 import { useStyles } from './styles';
 import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
@@ -61,7 +61,7 @@ export const SessionViewDetailPanel = ({
           defaultMessage: 'Metadata',
         }),
         content: (
-          <DetailPanelHostTab
+          <DetailPanelMetadataTab
             processHost={selectedProcess?.events[0]?.host}
             processContainer={selectedProcess?.events[0]?.container}
             processOrchestrator={selectedProcess?.events[0]?.orchestrator}

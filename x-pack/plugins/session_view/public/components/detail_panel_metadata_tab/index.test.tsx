@@ -12,7 +12,7 @@ import {
   ProcessEventContainer,
   ProcessEventOrchestrator,
 } from '../../../common/types/process_tree';
-import { DetailPanelHostTab } from '.';
+import { DetailPanelMetadataTab } from '.';
 
 const TEST_ARCHITECTURE = 'x86_64';
 const TEST_HOSTNAME = 'host-james-fleet-714-2';
@@ -89,7 +89,7 @@ const TEST_ORCHESTRATOR: ProcessEventOrchestrator = {
   },
 };
 
-describe('DetailPanelHostTab component', () => {
+describe('DetailPanelMetadataTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
@@ -98,9 +98,9 @@ describe('DetailPanelHostTab component', () => {
     mockedContext = createAppRootMockRenderer();
   });
 
-  describe('When DetailPanelHostTab is mounted', () => {
-    it('renders DetailPanelHostTab correctly (non cloud environment)', async () => {
-      renderResult = mockedContext.render(<DetailPanelHostTab processHost={TEST_HOST} />);
+  describe('When DetailPanelMetadataTab is mounted', () => {
+    it('renders DetailPanelMetadataTab correctly (non cloud environment)', async () => {
+      renderResult = mockedContext.render(<DetailPanelMetadataTab processHost={TEST_HOST} />);
 
       expect(renderResult.queryByText('architecture')).toBeVisible();
       expect(renderResult.queryByText('hostname')).toBeVisible();
@@ -135,9 +135,9 @@ describe('DetailPanelHostTab component', () => {
       expect(renderResult.queryByText('Orchestrator')).toBeNull();
     });
 
-    it('renders DetailPanelHostTab correctly (cloud environment)', async () => {
+    it('renders DetailPanelMetadataTab correctly (cloud environment)', async () => {
       renderResult = mockedContext.render(
-        <DetailPanelHostTab
+        <DetailPanelMetadataTab
           processHost={TEST_HOST}
           processContainer={TEST_CONTAINER}
           processOrchestrator={TEST_ORCHESTRATOR}
