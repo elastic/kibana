@@ -70,6 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'observability',
           'securitySolution',
           'kibana',
+          'kibana',
         ]);
       });
 
