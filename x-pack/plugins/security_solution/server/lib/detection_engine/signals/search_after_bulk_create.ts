@@ -173,47 +173,47 @@ export const searchAfterAndBulkCreate = async ({
           } = await bulkCreate(wrappedDocs);
 
           logger.debug(`---- wrappedDocs ----- ${JSON.stringify(createdItems.length)}`);
-          if (createdItems.length > 0) {
-            const threatFilter = buildThreatMappingFilter({
-              threatMapping: Array(9)
-                .fill(0)
-                .map((item, index) => ({
-                  entries: [
-                    {
-                      field: 'indicator_value',
-                      type: 'mapping',
-                      value: `alert_data.threat_${index}.keyword`,
-                    },
-                  ],
-                })),
-              threatList: createdItems.map((item) => ({
-                ...item,
-                fields: { indicator_value: [item?.indicator_value] },
-              })),
-              entryKey: 'field',
-            });
+          // if (createdItems.length > 0) {
+          //   const threatFilter = buildThreatMappingFilter({
+          //     threatMapping: Array(9)
+          //       .fill(0)
+          //       .map((item, index) => ({
+          //         entries: [
+          //           {
+          //             field: 'indicator_value',
+          //             type: 'mapping',
+          //             value: `alert_data.threat_${index}.keyword`,
+          //           },
+          //         ],
+          //       })),
+          //     threatList: createdItems.map((item) => ({
+          //       ...item,
+          //       fields: { indicator_value: [item?.indicator_value] },
+          //     })),
+          //     entryKey: 'field',
+          //   });
 
-            const threatListHits = await getAllThreatListHits({
-              esClient: services.scopedClusterClient.asCurrentUser,
-              exceptionItems: [],
-              threatFilters: [threatFilter],
-              query: '*:*',
-              language: 'kuery',
-              index: ['threat-indicator'],
-              logger,
-              buildRuleMessage,
-              threatListConfig: {
-                _source: [`threat.indicator.*`, 'threat.feed.*'],
-                fields: undefined,
-              },
-              pitId: threatPitId,
-              reassignPitId: reassignThreatPitId,
-            });
-            logger.debug(`---- threats -----`);
-            // logger.debug(`---- threatFilter ----- ${JSON.stringify(threatFilter)} `);
-            logger.debug(`---- threatListHits ----- ${threatListHits.length} `);
-            logger.debug(`---- threats -----`);
-          }
+          //   const threatListHits = await getAllThreatListHits({
+          //     esClient: services.scopedClusterClient.asCurrentUser,
+          //     exceptionItems: [],
+          //     threatFilters: [threatFilter],
+          //     query: '*:*',
+          //     language: 'kuery',
+          //     index: ['threat-indicator'],
+          //     logger,
+          //     buildRuleMessage,
+          //     threatListConfig: {
+          //       _source: [`threat.indicator.*`, 'threat.feed.*'],
+          //       fields: undefined,
+          //     },
+          //     pitId: threatPitId,
+          //     reassignPitId: reassignThreatPitId,
+          //   });
+          //   logger.debug(`---- threats -----`);
+          //   // logger.debug(`---- threatFilter ----- ${JSON.stringify(threatFilter)} `);
+          //   logger.debug(`---- threatListHits ----- ${threatListHits.length} `);
+          //   logger.debug(`---- threats -----`);
+          // }
 
           toReturn = mergeReturns([
             toReturn,
