@@ -29,7 +29,7 @@ const QuestionInput: FC<{
     <EuiFormRow
       fullWidth
       label={i18n.translate(
-        'xpack.ml.trainedModels.testModelsFlyout.textClassification.classNamesInput',
+        'xpack.ml.trainedModels.testModelsFlyout.questionAnswering.questionInput',
         {
           defaultMessage: 'Question',
         }
