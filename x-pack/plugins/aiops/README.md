@@ -1,6 +1,6 @@
 # aiops
 
-The Kibana AIOps plugin provides APIs and components for the "Explain log rate spikes" UI.
+The plugin provides APIs and components for AIOps features, including the “Explain log rate spikes” UI, maintained by the ML team.
 
 ---
 
