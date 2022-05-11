@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import {
@@ -32,7 +32,6 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import {
@@ -201,7 +200,9 @@ export const ControlEditor = ({
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
             <FieldPicker
-              showFields={Object.keys(state.fieldRegistry ?? {})}
+              filterPredicate={(field: DataViewField) => {
+                return state.fieldRegistry ? Boolean(state.fieldRegistry[field.name]) : false;
+              }}
               selectedFieldName={selectedField}
               dataView={dataView}
               onSelectField={(field) => {

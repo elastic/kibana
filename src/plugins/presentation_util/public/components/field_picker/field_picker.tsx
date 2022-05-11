@@ -21,14 +21,16 @@ import './field_picker.scss';
 export interface FieldPickerProps {
   dataView?: DataView;
   selectedFieldName?: string;
-  showFields?: string[];
+  // showFields?: string[];
+  filterPredicate?: (f: DataViewField) => boolean;
   onSelectField?: (selectedField: DataViewField) => void;
 }
 
 export const FieldPicker = ({
   dataView,
   onSelectField,
-  showFields,
+  // showFields,
+  filterPredicate,
   selectedFieldName,
 }: FieldPickerProps) => {
   const [nameFilter, setNameFilter] = useState<string>('');
@@ -42,7 +44,7 @@ export const FieldPicker = ({
               f.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
               (typesFilter.length === 0 || typesFilter.includes(f.type as string))
           )
-          .filter((f) => (showFields ? showFields.includes(f.name) : true)),
+          .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
       )
     : [];
