@@ -6,10 +6,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
+import { useBreadcrumbs } from '../../../../legacy_uptime/hooks/use_breadcrumbs';
 import { fetchServiceLocationsAction } from '../../state/monitor_management/service_locations';
 import { SimpleMonitorForm } from './simple_monitor_form';
+import { MONITORING_OVERVIEW_LABEL } from '../../../../legacy_uptime/routes';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
@@ -18,16 +22,22 @@ export const GettingStartedPage = () => {
     dispatch(fetchServiceLocationsAction({}));
   }, [dispatch]);
 
+  useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
+
   return (
-    <>
+    <Wrapper>
       <EuiEmptyPrompt
-        title={<h2>Create a single page browser monitor</h2>}
+        title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
         layout="horizontal"
         color="plain"
         body={
           <>
             <EuiText size="s">
-              Or select a different monitor type to get started with Elastic Synthetics Monitoring
+              {OR_LABEL}{' '}
+              <EuiLink href="/synthetics/monitors/add-new">{SELECT_DIFFERENT_MONITOR}</EuiLink>
+              {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
+                defaultMessage: ' to get started with Elastic Synthetics Monitoring',
+              })}
             </EuiText>
             <EuiSpacer />
             <SimpleMonitorForm />
@@ -35,15 +45,52 @@ export const GettingStartedPage = () => {
         }
         footer={
           <>
-            <EuiTitle size="xxs">
-              <span>For more information, read our</span>
-            </EuiTitle>{' '}
-            <EuiLink href="#" target="_blank">
-              Getting Started Guide
+            <EuiText size="s" color="subdued" className="eui-displayInlineBlock">
+              {FOR_MORE_INFO_LABEL}
+            </EuiText>{' '}
+            <EuiLink href="#" target="_blank" className="eui-displayInline">
+              {GETTING_STARTED_LABEL}
             </EuiLink>
           </>
         }
       />
-    </>
+    </Wrapper>
   );
 };
+
+const Wrapper = styled.div`
+  &&& {
+    .euiEmptyPrompt__content {
+      max-width: 40em;
+    }
+  }
+`;
+
+const FOR_MORE_INFO_LABEL = i18n.translate('xpack.synthetics.gettingStarted.forMoreInfo', {
+  defaultMessage: 'For more information, read our',
+});
+
+const CREATE_SINGLE_PAGE_LABEL = i18n.translate(
+  'xpack.synthetics.gettingStarted.createSinglePageLabel',
+  {
+    defaultMessage: 'Create a single page browser monitor',
+  }
+);
+
+const GETTING_STARTED_LABEL = i18n.translate(
+  'xpack.synthetics.gettingStarted.gettingStartedLabel',
+  {
+    defaultMessage: 'Getting Started Guide',
+  }
+);
+
+const SELECT_DIFFERENT_MONITOR = i18n.translate(
+  'xpack.synthetics.gettingStarted.gettingStartedLabel.selectDifferentMonitor',
+  {
+    defaultMessage: 'select a different monitor type',
+  }
+);
+
+const OR_LABEL = i18n.translate('xpack.synthetics.gettingStarted.orLabel', {
+  defaultMessage: 'Or',
+});

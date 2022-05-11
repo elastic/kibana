@@ -22,7 +22,6 @@ import {
   GETTING_STARTED_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_MANAGEMENT_ROUTE,
-  OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { MonitorManagementPage } from './components/monitor_management/monitor_management_page';
 import { apiService } from '../../utils/api_service';

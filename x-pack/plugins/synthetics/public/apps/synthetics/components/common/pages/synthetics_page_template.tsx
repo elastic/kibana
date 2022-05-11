@@ -11,7 +11,6 @@ import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useNoDataConfig } from '../../../hooks/use_no_data_config';
 import { EmptyStateLoading } from '../../overview/empty_state/empty_state_loading';
 import { EmptyStateError } from '../../overview/empty_state/empty_state_error';
 import { useHasData } from '../../overview/empty_state/use_has_data';

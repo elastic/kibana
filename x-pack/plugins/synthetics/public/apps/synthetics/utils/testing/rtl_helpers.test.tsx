@@ -7,7 +7,6 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 import { of } from 'rxjs';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import {
   render as reactTestLibRender,
   MatcherFunction,
@@ -20,7 +19,6 @@ import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';

@@ -10,6 +10,7 @@ import {
   EncryptedSyntheticsMonitor,
   ServiceLocationErrors,
   SyntheticsMonitor,
+  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { API_URLS } from '../../../../../common/constants';
 
@@ -27,6 +28,6 @@ export const updateMonitorAPI = async ({
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id: string;
-}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
+}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitorWithId> => {
   return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
 };

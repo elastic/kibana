@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './rtl_helpers.test';
+export const syntheticsTestSubjects = {
+  urlsInput: 'urls-input',
+};

@@ -5,70 +5,48 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { byTestId } from '../utils';
 
 journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: any }) => {
-  const name = `Test monitor ${uuid.v4()}`;
-  const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   const createBasicMonitor = async () => {
-    await uptime.createBasicMonitorDetails({
-      name,
-      locations: ['US Central'],
+    await syntheticsApp.fillFirstMonitorDetails({
+      url: 'https://www.elastic.co',
+      locations: ['us_central'],
       apmServiceName: 'synthetics',
     });
-    await uptime.fillByTestSubj('syntheticsUrlField', 'https://www.google.com');
   };
 
   before(async () => {
-    await uptime.waitForLoadingToFinish();
+    await syntheticsApp.waitForLoadingToFinish();
   });
 
   step('Go to monitor-management', async () => {
-    await uptime.navigateToMonitorManagement();
+    await syntheticsApp.navigateToMonitorManagement();
   });
 
   step('login to Kibana', async () => {
-    await uptime.loginToKibana();
+    await syntheticsApp.loginToKibana();
     const invalid = await page.locator(`text=Username or password is incorrect. Please try again.`);
     expect(await invalid.isVisible()).toBeFalsy();
   });
 
+  step('shows validation error on touch', async () => {
+    await page.click(byTestId('urls-input'));
+    await page.click(byTestId('comboBoxInput'));
+    expect(await page.isVisible('text=URL is required')).toBeTruthy();
+  });
+
   step('create basic monitor', async () => {
-    await uptime.enableMonitorManagement();
-    await uptime.clickAddMonitor();
     await createBasicMonitor();
-    await uptime.confirmAndSave();
+    await syntheticsApp.confirmAndSave();
   });
 
-  step(`shows error if name already exists`, async () => {
-    await uptime.navigateToAddMonitor();
-    await uptime.createBasicMonitorDetails({
-      name,
-      locations: ['US Central'],
-      apmServiceName: 'synthetics',
-    });
-    await uptime.fillByTestSubj('syntheticsUrlField', 'https://www.google.com');
-
-    await uptime.assertText({ text: 'Monitor name already exists.' });
-
-    expect(await page.isEnabled(byTestId('monitorTestNowRunBtn'))).toBeFalsy();
-  });
-
-  step(`form becomes valid after change`, async () => {
-    await uptime.createBasicMonitorDetails({
-      name: 'Test monitor 2',
-      locations: ['US Central'],
-      apmServiceName: 'synthetics',
-    });
-
-    expect(await page.isEnabled(byTestId('monitorTestNowRunBtn'))).toBeTruthy();
-  });
-
-  step('delete monitor', async () => {
-    await uptime.navigateToMonitorManagement();
-    await uptime.deleteMonitors();
-    await uptime.enableMonitorManagement(false);
+  step('it navigates to details page after saving', async () => {
+    await page.click('text=Dismiss');
+    expect(await page.isVisible('text=My first monitor')).toBeTruthy();
   });
 });
