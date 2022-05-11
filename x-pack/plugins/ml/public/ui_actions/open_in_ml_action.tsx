@@ -29,9 +29,12 @@ export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServi
       }
 
       try {
-        const { convertLensToADJob } = await import('../application/jobs/new_job/job_from_lens');
+        const [{ convertLensToADJob }, [coreStart]] = await Promise.all([
+          import('../application/jobs/new_job/job_from_lens'),
+          getStartServices(),
+        ]);
 
-        convertLensToADJob(embeddable);
+        convertLensToADJob(embeddable, coreStart);
       } catch (e) {
         return Promise.reject();
       }
@@ -41,10 +44,11 @@ export function createMLADJobAction(getStartServices: MlCoreSetup['getStartServi
         return false;
       }
 
-      const [coreStart, pluginsStart] = await getStartServices();
-      const { canCreateADJob, getJobsItemsFromEmbeddable } = await import(
-        '../application/jobs/new_job/job_from_lens'
-      );
+      const [{ getJobsItemsFromEmbeddable, canCreateADJob }, [coreStart, pluginsStart]] =
+        await Promise.all([
+          import('../application/jobs/new_job/job_from_lens'),
+          getStartServices(),
+        ]);
       const { query, filters, vis } = getJobsItemsFromEmbeddable(context.embeddable);
       return canCreateADJob(vis, query, filters, pluginsStart.data.dataViews, coreStart.uiSettings);
     },

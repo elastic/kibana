@@ -42,6 +42,7 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_CREATE_JOB_ADVANCED: `jobs/new_job/advanced`,
   ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: `jobs/new_job/step/job_type`,
   ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: `jobs/new_job/step/index_or_search`,
+  ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: `jobs/new_job/from_lens`,
   SETTINGS: 'settings',
   CALENDARS_MANAGE: 'settings/calendars_list',
   CALENDARS_NEW: 'settings/calendars_list/new_calendar',
