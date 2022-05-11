@@ -19,36 +19,29 @@ export type InitialNewTermsAggregationResult = ESSearchResponse<
   { body: { aggregations: ReturnType<typeof buildInitialNewTermsAggregation> } }
 >;
 
-const PAGE_SIZE = 1000;
+const PAGE_SIZE = 10000;
 
 export const buildNewTermsAggregation = ({
   newValueWindowStart,
   field,
   timestampField,
-  after,
+  include,
 }: {
   newValueWindowStart: Moment;
   field: string;
   timestampField: string;
-  after: Record<string, string | number | null> | undefined;
+  include: Array<string | number>;
 }) => {
   return {
     new_terms: {
-      composite: {
-        sources: [
-          {
-            [field]: {
-              terms: {
-                field,
-              },
-            },
-          },
-        ],
+      terms: {
+        field,
         size: PAGE_SIZE,
-        after,
+        // include actually accepts strings or numbers, not sure why the TS type says it doesn't
+        include: include as string[],
       },
       aggs: {
-        docs: {
+        /* docs: {
           top_hits: {
             size: 1,
             sort: [
@@ -57,7 +50,7 @@ export const buildNewTermsAggregation = ({
               },
             ],
           },
-        },
+        },*/
         first_seen: {
           min: {
             field: timestampField,

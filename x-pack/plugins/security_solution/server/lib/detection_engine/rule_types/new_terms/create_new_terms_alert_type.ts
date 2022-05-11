@@ -202,47 +202,8 @@ export const createNewTermsAlertType = (
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-
-        const pageFilter = {
-          bool: {
-            should: bucketsForField.map((bucket) => {
-              return {
-                bool: {
-                  filter: Object.entries(bucket.key).map(([key, value]) => {
-                    if (value != null) {
-                      return {
-                        term: {
-                          [key]: value,
-                        },
-                      };
-                    } else {
-                      return {
-                        bool: {
-                          must_not: {
-                            exists: {
-                              field: key,
-                            },
-                          },
-                        },
-                      };
-                    }
-                  }),
-                },
-              };
-            }),
-          },
-        };
-
-        const combinedPageFilter = await getFilter({
-          filters: params.filters ? [...params.filters, pageFilter] : [pageFilter],
-          index: inputIndex,
-          language: params.language,
-          savedId: undefined,
-          services,
-          type: params.type,
-          query: params.query,
-          lists: exceptionItems,
-        });
+        // TODO: fix this up - handle multiple fields, deal with null values
+        const includeValues = bucketsForField.map((bucket) => Object.values(bucket.key)[0]);
 
         const {
           searchResult: pageSearchResult,
@@ -253,7 +214,7 @@ export const createNewTermsAlertType = (
             newValueWindowStart: tuple.from,
             timestampField,
             field: params.newTermsFields[0],
-            after: undefined,
+            include: includeValues as string[],
           }),
           runtimeMappings,
           searchAfterSortIds: undefined,
@@ -261,21 +222,22 @@ export const createNewTermsAlertType = (
           from: parsedHistoryWindowSize.toISOString(),
           to: tuple.to.toISOString(),
           services,
-          filter: combinedPageFilter,
+          filter,
           logger,
           pageSize: 0,
           timestampOverride: params.timestampOverride,
           buildRuleMessage,
         });
 
-        logger.debug(`Time spent on page composite agg: ${pageSearchDuration}`);
+        logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
+        logger.debug(`Reported time on phase 2: ${pageSearchResult.took}`);
 
         const pageSearchResultWithAggs = pageSearchResult as NewTermsAggregationResult;
         if (!pageSearchResultWithAggs.aggregations) {
           throw new Error('expected to find aggregations on page search result');
         }
 
-        const eventsAndTerms: Array<{
+        /* const eventsAndTerms: Array<{
           event: estypes.SearchHit<SignalSource>;
           newTerms: Array<string | number | null>;
         }> = [];
@@ -283,7 +245,7 @@ export const createNewTermsAlertType = (
         bucketsForFieldInPage.forEach((bucket) => {
           eventsAndTerms.push({
             event: bucket.docs.hits.hits[0],
-            newTerms: Object.values(bucket.key),
+            newTerms: [bucket.key],
           });
         });
 
@@ -300,7 +262,7 @@ export const createNewTermsAlertType = (
           params.maxSignals - bulkCreateResults.createdSignalsCount
         );
 
-        bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);
+        bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);*/
       }
 
       return {
