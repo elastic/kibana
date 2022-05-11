@@ -123,7 +123,7 @@ export async function saveArchiveEntries(opts: {
     })
   );
 
-  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody);
+  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody, { refresh: false });
   return results;
 }
 

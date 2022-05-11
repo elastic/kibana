@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -19,21 +18,16 @@ import {
   EuiBadge,
   EuiFlyoutHeader,
   EuiFlyout,
-  EuiSpacer,
   EuiIcon,
   EuiLink,
   EuiPortal,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import type { DataViewField, DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DiscoverIndexPattern } from './discover_index_pattern';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
-import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -92,10 +86,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   /**
-   * Shows index pattern and a button that displays the sidebar in a flyout
-   */
-  useFlyout?: boolean;
-  /**
    * Read from the Fields API
    */
   useNewFieldsApi?: boolean;
@@ -124,13 +114,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const {
-    selectedIndexPattern,
-    onEditRuntimeField,
-    useNewFieldsApi,
-    onChangeIndexPattern,
-    onDataViewCreated,
-  } = props;
+  const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
@@ -291,34 +275,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       )}
       <EuiShowFor sizes={['xs', 's']}>
         <div className="dscSidebar__mobile">
-          <section
-            aria-label={i18n.translate(
-              'discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
-              {
-                defaultMessage: 'Index and fields',
-              }
-            )}
-          >
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={true}>
-                <DiscoverIndexPattern
-                  onChangeIndexPattern={onChangeIndexPattern}
-                  selectedIndexPattern={selectedIndexPattern}
-                  indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DiscoverIndexPatternManagement
-                  selectedIndexPattern={selectedIndexPattern}
-                  editField={editField}
-                  useNewFieldsApi={useNewFieldsApi}
-                  createNewDataView={createNewDataView}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </section>
-
-          <EuiSpacer size="s" />
           <EuiButton
             contentProps={{ className: 'dscSidebar__mobileButton' }}
             fullWidth
@@ -377,6 +333,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   closeFlyout={closeFlyout}
                   editField={editField}
                   createNewDataView={createNewDataView}
+                  showDataViewPicker={true}
                 />
               </div>
             </EuiFlyout>
