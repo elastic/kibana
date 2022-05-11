@@ -6,6 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { chunk } from 'lodash';
 import { performance } from 'perf_hooks';
 import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
@@ -23,10 +24,17 @@ import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas
 import { EventsAndTerms, wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
 import {
   buildInitialNewTermsAggregation,
+  buildNewTermsAggregation,
   InitialNewTermsAggregationResult,
+  NewTermsAggregationResult,
 } from './build_new_terms_aggregation';
 import { buildTimeRangeFilter } from '../../signals/build_events_query';
 import { makeFloatString } from '../../signals/utils';
+import {
+  buildTimestampRuntimeMapping,
+  TIMESTAMP_RUNTIME_FIELD,
+} from './build_timestamp_runtime_mapping';
+import { SignalSource } from '../../signals/types';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -145,6 +153,18 @@ export const createNewTermsAlertType = (
         searchErrors: [],
       };
 
+      // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
+      // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
+      // runtime field, so we just use @timestamp directly.
+      const { timestampField, runtimeMappings } = params.timestampOverride
+        ? {
+            timestampField: TIMESTAMP_RUNTIME_FIELD,
+            runtimeMappings: buildTimestampRuntimeMapping({
+              timestampOverride: params.timestampOverride,
+            }),
+          }
+        : { timestampField: '@timestamp', runtimeMappings: undefined };
+
       while (
         !bulkCreateResults.truncatedAlertsArray &&
         bulkCreateResults.createdSignalsCount < params.maxSignals
@@ -183,195 +203,104 @@ export const createNewTermsAlertType = (
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
 
-        // For each bucket in the composite agg response, make a query that will find only docs in that bucket
-        // *older* than the current rule interval
-        const msearchRequest = bucketsForField.flatMap((bucket) => {
-          return [
-            {},
-            {
-              size: 0,
-              query: {
+        const pageFilter = {
+          bool: {
+            should: bucketsForField.map((bucket) => {
+              return {
                 bool: {
-                  filter: [
-                    ...Object.entries(bucket.key).map(([key, value]) => {
-                      if (value != null) {
-                        return {
-                          term: {
-                            [key]: value,
-                          },
-                        };
-                      } else {
-                        return {
-                          bool: {
-                            must_not: {
-                              exists: {
-                                field: key,
-                              },
+                  filter: Object.entries(bucket.key).map(([key, value]) => {
+                    if (value != null) {
+                      return {
+                        term: {
+                          [key]: value,
+                        },
+                      };
+                    } else {
+                      return {
+                        bool: {
+                          must_not: {
+                            exists: {
+                              field: key,
                             },
                           },
-                        };
-                      }
-                    }),
-                    filter,
-                    buildTimeRangeFilter({
-                      // Looks weird, but is correct: the `from` date of the rule interval becomes the `to` date
-                      // when searching the history
-                      to: tuple.from.toISOString(),
-                      from: parsedHistoryWindowSize.toISOString(),
-                      timestampOverride: params.timestampOverride,
-                    }),
-                  ],
+                        },
+                      };
+                    }
+                  }),
                 },
-              },
-            },
-          ];
-        });
+              };
+            }),
+          },
+        };
 
-        const msearchStart = performance.now();
-        const msearchResponse = await services.scopedClusterClient.asCurrentUser.msearch({
+        const combinedPageFilter = await getFilter({
+          filters: params.filters ? [...params.filters, pageFilter] : [pageFilter],
           index: inputIndex,
-          searches: msearchRequest,
+          language: params.language,
+          savedId: undefined,
+          services,
+          type: params.type,
+          query: params.query,
+          lists: exceptionItems,
         });
-        const msearchEnd = performance.now();
 
-        logger.debug(
-          `Time spent on history msearch: ${makeFloatString(msearchEnd - msearchStart)}`
+        const {
+          searchResult: pageSearchResult,
+          searchDuration: pageSearchDuration,
+          searchErrors: pageSearchErrors,
+        } = await singleSearchAfter({
+          aggregations: buildNewTermsAggregation({
+            newValueWindowStart: tuple.from,
+            timestampField,
+            field: params.newTermsFields[0],
+            after: undefined,
+          }),
+          runtimeMappings,
+          searchAfterSortIds: undefined,
+          index: inputIndex,
+          from: parsedHistoryWindowSize.toISOString(),
+          to: tuple.to.toISOString(),
+          services,
+          filter: combinedPageFilter,
+          logger,
+          pageSize: 0,
+          timestampOverride: params.timestampOverride,
+          buildRuleMessage,
+        });
+
+        logger.debug(`Time spent on page composite agg: ${pageSearchDuration}`);
+
+        const pageSearchResultWithAggs = pageSearchResult as NewTermsAggregationResult;
+        if (!pageSearchResultWithAggs.aggregations) {
+          throw new Error('expected to find aggregations on page search result');
+        }
+
+        const eventsAndTerms: Array<{
+          event: estypes.SearchHit<SignalSource>;
+          newTerms: Array<string | number | null>;
+        }> = [];
+        const bucketsForFieldInPage = pageSearchResultWithAggs.aggregations.new_terms.buckets;
+        bucketsForFieldInPage.forEach((bucket) => {
+          eventsAndTerms.push({
+            event: bucket.docs.hits.hits[0],
+            newTerms: Object.values(bucket.key),
+          });
+        });
+
+        const wrappedAlerts = wrapNewTermsAlerts({
+          eventsAndTerms,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          buildReasonMessage: buildReasonMessageForNewTermsAlert,
+        });
+
+        const bulkCreateResult = await bulkCreate(
+          wrappedAlerts,
+          params.maxSignals - bulkCreateResults.createdSignalsCount
         );
 
-        // Filter the buckets down to the set of buckets that can't be found in historical data, i.e.
-        // the msearch returned no results
-        // TODO: log an error if at least one response has no hits property
-        const filteredBuckets = bucketsForField.filter((_, i) => {
-          const response = msearchResponse.responses[i];
-          if ('hits' in response) {
-            return (
-              (typeof response.hits.total === 'number' && response.hits.total === 0) ||
-              (typeof response.hits.total === 'object' && response.hits.total.value === 0)
-            );
-          } else {
-            return false;
-          }
-        });
-
-        if (filteredBuckets.length > 0) {
-          const sort: estypes.Sort = [];
-          if (params.timestampOverride) {
-            sort.push({
-              [params.timestampOverride]: {
-                order: 'asc',
-                unmapped_type: 'date',
-              },
-            });
-          }
-          sort.push({
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          });
-          const docFields = [
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
-            },
-          ];
-          if (params.timestampOverride) {
-            docFields.push({
-              field: params.timestampOverride,
-              format: 'strict_date_optional_time',
-            });
-          }
-          const documentFetchMsearch = filteredBuckets.flatMap((bucket) => {
-            return [
-              {},
-              {
-                size: 1,
-                sort,
-                fields: [
-                  {
-                    field: '*',
-                    include_unmapped: true,
-                  },
-                  ...docFields,
-                ],
-                query: {
-                  bool: {
-                    filter: [
-                      ...Object.entries(bucket.key).map(([key, value]) => {
-                        if (value != null) {
-                          return {
-                            term: {
-                              [key]: value,
-                            },
-                          };
-                        } else {
-                          return {
-                            bool: {
-                              must_not: {
-                                exists: {
-                                  field: key,
-                                },
-                              },
-                            },
-                          };
-                        }
-                      }),
-                      filter,
-                      buildTimeRangeFilter({
-                        to: tuple.to.toISOString(),
-                        from: tuple.from.toISOString(),
-                        timestampOverride: params.timestampOverride,
-                      }),
-                    ],
-                  },
-                },
-              },
-            ];
-          });
-          const docmsearchStart = performance.now();
-          const documentsMsearchResponse = await services.scopedClusterClient.asCurrentUser.msearch(
-            {
-              index: inputIndex,
-              searches: documentFetchMsearch,
-            }
-          );
-          const docmsearchEnd = performance.now();
-          logger.debug(
-            `Time spent on doc fetch msearch: ${makeFloatString(docmsearchEnd - docmsearchStart)}`
-          );
-
-          const eventsAndTerms = filteredBuckets
-            .map((bucket, i) => {
-              const response = documentsMsearchResponse.responses[i];
-              if ('hits' in response) {
-                return {
-                  newTerms: Object.values(bucket.key),
-                  event: response.hits.hits[0],
-                };
-              } else {
-                // TODO: log an error if at least one response has no hits property
-                return undefined;
-              }
-            })
-            .filter((eventAndTerms): eventAndTerms is EventsAndTerms => eventAndTerms != null);
-
-          // Wrap all candidate alerts - potentially up to a full page from the initial composite agg -
-          // and hand them off to bulkCreate to write the docs
-          const wrappedAlerts = wrapNewTermsAlerts({
-            eventsAndTerms,
-            spaceId,
-            completeRule,
-            mergeStrategy,
-            buildReasonMessage: buildReasonMessageForNewTermsAlert,
-          });
-
-          const bulkCreateResult = await bulkCreate(
-            wrappedAlerts,
-            params.maxSignals - bulkCreateResults.createdSignalsCount
-          );
-
-          bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);
-        }
+        bulkCreateResults = addBulkCreateResults(bulkCreateResults, bulkCreateResult);
       }
 
       return {

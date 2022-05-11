@@ -19,18 +19,18 @@ export type InitialNewTermsAggregationResult = ESSearchResponse<
   { body: { aggregations: ReturnType<typeof buildInitialNewTermsAggregation> } }
 >;
 
+const PAGE_SIZE = 1000;
+
 export const buildNewTermsAggregation = ({
   newValueWindowStart,
   field,
-  maxSignals,
   timestampField,
   after,
 }: {
   newValueWindowStart: Moment;
   field: string;
-  maxSignals: number;
   timestampField: string;
-  after: Record<string, string | number | null>;
+  after: Record<string, string | number | null> | undefined;
 }) => {
   return {
     new_terms: {
@@ -44,7 +44,7 @@ export const buildNewTermsAggregation = ({
             },
           },
         ],
-        size: 1000,
+        size: PAGE_SIZE,
         after,
       },
       aggs: {
@@ -104,7 +104,7 @@ export const buildInitialNewTermsAggregation = ({
             },
           },
         ],
-        size: 5000,
+        size: PAGE_SIZE,
         after,
       },
     },
