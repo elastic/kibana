@@ -57,12 +57,12 @@ describe('getFieldDisplayValueFromFilter', () => {
     jest.resetAllMocks();
   });
 
-  it('returns empty string if the index pattern is not found', () => {
-    const wrongIndexPattern = {
-      title: 'wrong index pattern',
-      id: 'wrong index pattern',
+  it('returns empty string if the data view is not found', () => {
+    const wrongDataView = {
+      title: 'wrong data view',
+      id: 'wrong data view',
     } as DataView;
-    const fieldLabel = getFieldDisplayValueFromFilter(phraseFilter, [wrongIndexPattern]);
+    const fieldLabel = getFieldDisplayValueFromFilter(phraseFilter, [wrongDataView]);
     expect(fieldLabel).toBe('');
   });
 
