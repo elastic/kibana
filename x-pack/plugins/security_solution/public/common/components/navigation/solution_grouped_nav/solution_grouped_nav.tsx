@@ -8,17 +8,15 @@
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiListGroup,
-  EuiListGroupItem,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
   EuiLink,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 
 import classNames from 'classnames';
 import { SolutionGroupedNavPanel } from './solution_grouped_nav_panel';
-import { solutionGroupedNavStyles } from './solution_grouped_nav.styles';
+import { EuiListGroupItemStyled } from './solution_grouped_nav.styles';
 import {
   isCustomNavItem,
   isDefaultNavItem,
@@ -39,8 +37,6 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
   selectedId,
   footerItems = [],
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const styles = solutionGroupedNavStyles(euiTheme);
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
   const [activePortalNavId, setActivePortalNavId] = useState<ActivePortalNav>(null);
@@ -117,9 +113,8 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
           color={isCurrentNav ? 'primary' : 'text'}
           data-test-subj={`groupedNavItemLink-${id}`}
         >
-          <EuiListGroupItem
+          <EuiListGroupItemStyled
             className={itemClassNames}
-            css={styles.sideNavItem}
             isActive={isActive}
             color={isCurrentNav ? 'primary' : 'text'}
             label={label}
@@ -146,7 +141,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
         </EuiLink>
       );
     },
-    [activePortalNavId, isMobileSize, navItemsById, selectedId, styles.sideNavItem]
+    [activePortalNavId, isMobileSize, navItemsById, selectedId]
   );
 
   return (

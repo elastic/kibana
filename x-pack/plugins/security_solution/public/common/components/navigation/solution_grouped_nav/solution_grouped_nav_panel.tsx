@@ -14,16 +14,14 @@ import {
   EuiFlexItem,
   EuiFocusTrap,
   EuiOutsideClickDetector,
-  EuiPanel,
   EuiPortal,
   EuiTitle,
   EuiWindowEvent,
   keys,
-  useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { groupedNavPanelStyles } from './solution_grouped_nav_panel.styles';
+import { EuiPanelStyled } from './solution_grouped_nav_panel.styles';
 import { PortalNavItem } from './solution_grouped_nav_item';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 
@@ -41,9 +39,6 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
   const [hasTimelineBar] = useShowTimeline();
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
   const isTimelineVisible = hasTimelineBar && isLargerBreakpoint;
-  const { euiTheme } = useEuiTheme();
-
-  const styles = groupedNavPanelStyles(euiTheme, isTimelineVisible);
   const panelClasses = classNames('eui-yScroll');
 
   /**
@@ -64,10 +59,10 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
       <EuiPortal>
         <EuiFocusTrap autoFocus>
           <EuiOutsideClickDetector onOutsideClick={() => onClose()}>
-            <EuiPanel
+            <EuiPanelStyled
               className={panelClasses}
               hasShadow={!isTimelineVisible}
-              css={styles.panel}
+              $hasBottomBar={isTimelineVisible}
               borderRadius="none"
               paddingSize="l"
               data-test-subj="groupedNavPanel"
@@ -102,7 +97,7 @@ const SolutionGroupedNavPanelComponent: React.FC<SolutionGroupedNavPanelProps> =
                   </EuiDescriptionList>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPanel>
+            </EuiPanelStyled>
           </EuiOutsideClickDetector>
         </EuiFocusTrap>
       </EuiPortal>
