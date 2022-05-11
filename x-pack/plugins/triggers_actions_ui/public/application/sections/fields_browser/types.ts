@@ -5,9 +5,29 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { BrowserFields } from '../../search_strategy';
-import { ColumnHeaderOptions } from '../timeline/columns';
+import { EuiBasicTableColumn, EuiDataGridColumn } from '@elastic/eui';
+import type { IFieldSubType } from '@kbn/es-query';
+import type {
+  RuntimeField,
+} from '@kbn/data-plugin/common';
+
+export interface BrowserField {
+  aggregatable: boolean;
+  category: string;
+  description: string | null;
+  example: string | number | null;
+  fields: Readonly<Record<string, Partial<BrowserField>>>;
+  format: string;
+  indexes: string[];
+  name: string;
+  searchable: boolean;
+  type: string;
+  subType?: IFieldSubType;
+  readFromDocValues: boolean;
+  runtimeField?: RuntimeField;
+}
+
+export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 /**
  * An item rendered in the table
@@ -42,14 +62,14 @@ export interface FieldBrowserOptions {
 
 export interface FieldBrowserProps {
   /** Selected column headers */
-  columnHeaders: ColumnHeaderOptions[];
+  columnHeaders: EuiDataGridColumn[];
   /** A map of categoryId -> metadata about the fields in that category */
   browserFields: BrowserFields;
   /** The options to customize the field browser, supporting columns rendering and button to create fields */
   options?: FieldBrowserOptions;
   /** The width of the field browser */
   width?: number;
-  onUpdateColumns: (columns: ColumnHeaderOptions[]) => void;
+  onUpdateColumns: (columns: EuiDataGridColumn[]) => void;
   onToggleColumn: (id: string) => void;
-  defaultColumns?: ColumnHeaderOptions[];
+  defaultColumns?: EuiDataGridColumn[];
 }

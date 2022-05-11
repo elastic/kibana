@@ -16,22 +16,16 @@ import {
   EuiBadge,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
+  EuiDataGridColumn,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { getEmptyValue } from '../../../empty_value';
-import { getExampleText, getIconFromType } from '../../../utils/helpers';
-import type { BrowserFields } from '../../../../../common/search_strategy';
-import type {
-  ColumnHeaderOptions,
-  BrowserFieldItem,
-  FieldTableColumns,
-  GetFieldTableColumns,
-} from '../../../../../common/types';
-import { TruncatableText } from '../../../truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
+import { BrowserFieldItem, BrowserFields, FieldTableColumns, GetFieldTableColumns } from './types';
+import { TruncatableText } from './truncatable_text';
+import { getExampleText, getIconFromType } from './helpers';
 
 const TypeIcon = styled(EuiIcon)`
   margin: 0 4px;
@@ -56,7 +50,7 @@ export const getFieldItems = ({
 }: {
   browserFields: BrowserFields;
   selectedCategoryIds: string[];
-  columnHeaders: ColumnHeaderOptions[];
+  columnHeaders: EuiDataGridColumn[];
 }): BrowserFieldItem[] => {
   const categoryIds =
     selectedCategoryIds.length > 0 ? selectedCategoryIds : Object.keys(browserFields);
@@ -83,7 +77,7 @@ export const getFieldItems = ({
     }, [])
   );
 };
-
+const getEmptyValue = () => '—';
 const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {
     field: 'name',

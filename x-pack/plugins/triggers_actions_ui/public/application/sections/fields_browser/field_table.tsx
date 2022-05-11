@@ -7,12 +7,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { EuiInMemoryTable, Pagination, Direction } from '@elastic/eui';
-import { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
+import { EuiInMemoryTable, Pagination, Direction, EuiDataGridColumn } from '@elastic/eui';
 import { getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
-import type { GetFieldTableColumns } from '../../../../../common/types/fields_browser';
 import { FieldTableHeader } from './field_table_header';
+import { BrowserFields, GetFieldTableColumns } from './types';
 
 const DEFAULT_SORTING: { field: string; direction: Direction } = {
   field: '',
@@ -20,7 +19,7 @@ const DEFAULT_SORTING: { field: string; direction: Direction } = {
 } as const;
 
 export interface FieldTableProps {
-  columnHeaders: ColumnHeaderOptions[];
+  columnHeaders: EuiDataGridColumn[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes

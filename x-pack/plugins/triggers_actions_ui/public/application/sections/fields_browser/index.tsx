@@ -9,12 +9,10 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-
-import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import type { FieldBrowserProps } from '../../../../../common/types/fields_browser';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from './helpers';
 import * as i18n from './translations';
+import { BrowserFields, FieldBrowserProps } from './types';
 
 const FIELDS_BUTTON_CLASS_NAME = 'fields-button';
 

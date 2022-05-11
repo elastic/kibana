@@ -18,6 +18,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import {
+  ColumnHeaderOptions,
   HeaderActionProps,
   SortDirection,
   TimelineId,
@@ -183,8 +184,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
           {timelinesUi.getFieldBrowser({
             browserFields,
             columnHeaders,
-            timelineId,
-            options: fieldBrowserOptions,
+            options: {...fieldBrowserOptions, timelineId},
+            onToggleColumn: (id: string) => {},
+            onUpdateColumns: (columns: ColumnHeaderOptions[]) => {}
           })}
         </FieldBrowserContainer>
       </EventsTh>
