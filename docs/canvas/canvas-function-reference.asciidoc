@@ -393,9 +393,9 @@ clog
 ----
 filters
   | demodata
-  | clog 
+  | clog
   | filterrows fn={getCell "age" | gt 70}
-  | clog 
+  | clog
   | pointseries x="time" y="mean(price)"
   | plot defaultStyle={seriesStyle lines=1 fill=1}
   | render
@@ -1851,7 +1851,7 @@ Alias: `expression`
 |`string`
 |An evaluated `TinyMath` expression. See https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html.
 
-|`onError` 
+|`onError`
 
 |`string`
 |In case the `TinyMath` evaluation fails or returns NaN, the return value is specified by onError. For example, `"null"`, `"zero"`, `"false"`, `"throw"`. When `"throw"`, it will throw an exception, terminating expression execution.
@@ -1867,6 +1867,7 @@ Default: `"throw"`
 === `mathColumn`
 
 Adds a column by evaluating `TinyMath` on each row. This function is optimized for math, so it performs better than the <<mapColumn_fn>> with a <<math_fn>>.
+
 *Accepts:* `datatable`
 
 [cols="3*^<"]
