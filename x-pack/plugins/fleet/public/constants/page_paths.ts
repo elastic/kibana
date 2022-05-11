@@ -140,17 +140,10 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({
-    pkgkey,
-    integration,
-    agentPolicyId,
-    useStepsLayout,
-    isFirstTimeAgentUser,
-  }) => {
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, useStepsLayout }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
       ...(useStepsLayout ? { useStepsLayout: null } : {}),
-      ...(useStepsLayout && isFirstTimeAgentUser ? { isFirstTimeAgentUser: null } : {}),
     });
     return [
       FLEET_BASE_PATH,

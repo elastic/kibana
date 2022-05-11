@@ -72,12 +72,12 @@ describe('getInstallPkgRouteOptions', () => {
 
     expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
   });
-  it('should navigate to steps app if isCloud and isExperimentalAddIntegrationPageEnabled', () => {
+  it('should navigate to steps app if isCloud and page enabled and first time agent user', () => {
     const opts = {
       currentPath: 'currentPath',
       integration: 'myintegration',
       pkgkey: 'myintegration-1.0.0',
-      isFirstTimeAgentUser: false,
+      isFirstTimeAgentUser: true,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -99,23 +99,28 @@ describe('getInstallPkgRouteOptions', () => {
 
     expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
   });
-  it('should add isFirstTimeAgent user query param to steps page', () => {
+  it('should not navigate to steps app for apm', () => {
     const opts = {
       currentPath: 'currentPath',
       integration: 'myintegration',
-      pkgkey: 'myintegration-1.0.0',
+      pkgkey: 'apm-1.0.0',
       isFirstTimeAgentUser: true,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
 
-    const expectedRedirectURl = '/detail/myintegration-1.0.0/policies?integration=myintegration';
+    const expectedRedirectURl = '/detail/apm-1.0.0/policies?integration=myintegration';
 
     const expectedOptions = {
-      path: '/integrations/myintegration-1.0.0/add-integration/myintegration?isFirstTimeAgentUser&useStepsLayout',
+      path: '/integrations/apm-1.0.0/add-integration/myintegration',
       state: {
         onCancelUrl: 'currentPath',
-        onCancelNavigateTo: expectedOnCancelNavigateTo,
+        onCancelNavigateTo: [
+          'integrations',
+          {
+            path: '/detail/apm-1.0.0/overview?integration=myintegration',
+          },
+        ],
         onSaveNavigateTo: ['integrations', { path: expectedRedirectURl }],
         onSaveQueryParams: {
           showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
@@ -126,23 +131,28 @@ describe('getInstallPkgRouteOptions', () => {
 
     expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
   });
-  it('should not add isFirstTimeAgent user query param to legacy page', () => {
+  it('should not navigate to steps app for endpoint', () => {
     const opts = {
       currentPath: 'currentPath',
       integration: 'myintegration',
-      pkgkey: 'myintegration-1.0.0',
+      pkgkey: 'endpoint-1.0.0',
       isFirstTimeAgentUser: true,
-      isCloud: false,
-      isExperimentalAddIntegrationPageEnabled: false,
+      isCloud: true,
+      isExperimentalAddIntegrationPageEnabled: true,
     };
 
-    const expectedRedirectURl = '/detail/myintegration-1.0.0/policies?integration=myintegration';
+    const expectedRedirectURl = '/detail/endpoint-1.0.0/policies?integration=myintegration';
 
     const expectedOptions = {
-      path: '/integrations/myintegration-1.0.0/add-integration/myintegration',
+      path: '/integrations/endpoint-1.0.0/add-integration/myintegration',
       state: {
         onCancelUrl: 'currentPath',
-        onCancelNavigateTo: expectedOnCancelNavigateTo,
+        onCancelNavigateTo: [
+          'integrations',
+          {
+            path: '/detail/endpoint-1.0.0/overview?integration=myintegration',
+          },
+        ],
         onSaveNavigateTo: ['integrations', { path: expectedRedirectURl }],
         onSaveQueryParams: {
           showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
