@@ -315,6 +315,8 @@
       "@kbn/features-plugin/*": ["x-pack/plugins/features/*"],
       "@kbn/file-upload-plugin": ["x-pack/plugins/file_upload"],
       "@kbn/file-upload-plugin/*": ["x-pack/plugins/file_upload/*"],
+      "@kbn/files-plugin": ["x-pack/plugins/files"],
+      "@kbn/files-plugin/*": ["x-pack/plugins/files/*"],
       "@kbn/fleet-plugin": ["x-pack/plugins/fleet"],
       "@kbn/fleet-plugin/*": ["x-pack/plugins/fleet/*"],
       "@kbn/global-search-bar-plugin": ["x-pack/plugins/global_search_bar"],

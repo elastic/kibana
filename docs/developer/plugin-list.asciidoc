@@ -447,6 +447,10 @@ activities.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/files/README.md[files]
+|Bringing blob storage to Kibana
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
 |WARNING: Missing README.
 
