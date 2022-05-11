@@ -13,6 +13,8 @@ import {
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
+import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function getLinkedParentsOfSpan({
@@ -34,7 +36,7 @@ export async function getLinkedParentsOfSpan({
 
   const response = await apmEventClient.search('get_linked_parents_of_span', {
     apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      events: [processorEvent],
     },
     _source: [SPAN_LINKS],
     body: {
@@ -55,5 +57,7 @@ export async function getLinkedParentsOfSpan({
     },
   });
 
-  return response.hits.hits?.[0]?._source?.span?.links || [];
+  const source = response.hits.hits?.[0]?._source as TransactionRaw | SpanRaw;
+
+  return source?.span?.links || [];
 }

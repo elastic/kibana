@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      after(() => synthtraceEsClient.clean());
+      // after(() => synthtraceEsClient.clean());
 
       describe('Span links count on traces', () => {
         async function fetchTraces({ traceId }: { traceId: string }) {

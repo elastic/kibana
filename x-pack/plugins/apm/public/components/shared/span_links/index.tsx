@@ -21,6 +21,7 @@ import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 interface Props {
   spanLinksCount: SpanLinksCount;
@@ -29,7 +30,7 @@ interface Props {
   processorEvent: ProcessorEvent;
 }
 
-type LinkType = 'incoming' | 'outgoing';
+type LinkType = 'children' | 'parents';
 
 export function SpanLinks({
   spanLinksCount,
@@ -43,14 +44,17 @@ export function SpanLinks({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
-    spanLinksCount.linkedChildren ? 'incoming' : 'outgoing'
+    spanLinksCount.linkedChildren ? 'children' : 'parents'
   );
+
+  const [spanLinksCalloutDismissed, setSpanLinksCalloutDismissed] =
+    useLocalStorage('apm.spanLinksCalloutDismissed', false);
 
   const [kuery, setKuery] = useState('');
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (selectedLinkType === 'incoming') {
+      if (selectedLinkType === 'children') {
         return callApmApi(
           'GET /internal/apm/traces/{traceId}/span_links/{spanId}/children',
           {
@@ -77,16 +81,16 @@ export function SpanLinks({
   const selectOptions: EuiSelectOption[] = useMemo(
     () => [
       {
-        value: 'incoming',
-        text: i18n.translate('xpack.apm.spanLinks.combo.incomingLinks', {
+        value: 'children',
+        text: i18n.translate('xpack.apm.spanLinks.combo.childrenLinks', {
           defaultMessage: 'Incoming links ({linkedChildren})',
           values: { linkedChildren: spanLinksCount.linkedChildren },
         }),
         disabled: !spanLinksCount.linkedChildren,
       },
       {
-        value: 'outgoing',
-        text: i18n.translate('xpack.apm.spanLinks.combo.outgoingLinks', {
+        value: 'parents',
+        text: i18n.translate('xpack.apm.spanLinks.combo.parentsLinks', {
           defaultMessage: 'Outgoing links ({linkedParents})',
           values: { linkedParents: spanLinksCount.linkedParents },
         }),
@@ -110,9 +114,15 @@ export function SpanLinks({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem>
-        <SpanLinksCallout />
-      </EuiFlexItem>
+      {!spanLinksCalloutDismissed && (
+        <EuiFlexItem>
+          <SpanLinksCallout
+            dismissCallout={() => {
+              setSpanLinksCalloutDismissed(true);
+            }}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>

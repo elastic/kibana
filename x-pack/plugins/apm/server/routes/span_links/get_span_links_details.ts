@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { chunk, isEmpty } from 'lodash';
+import { chunk, compact, isEmpty, keyBy } from 'lodash';
 import {
   SERVICE_NAME,
   SPAN_ID,
@@ -49,27 +49,6 @@ async function fetchSpanLinksDetails({
     end,
   });
 
-  const spanIdsMap: Record<string, boolean> = {};
-  const should = spanLinks.map((item) => {
-    spanIdsMap[item.span.id] = true;
-    return {
-      bool: {
-        filter: [
-          { term: { [TRACE_ID]: item.trace.id } },
-          {
-            bool: {
-              should: [
-                { term: { [SPAN_ID]: item.span.id } },
-                { term: { [TRANSACTION_ID]: item.span.id } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    };
-  });
-
   const response = await apmEventClient.search('get_span_links_details', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
@@ -96,16 +75,39 @@ async function fetchSpanLinksDetails({
             ...rangeQuery(startWithBuffer, endWithBuffer),
             ...kqlQuery(kuery),
             {
-              bool: { should, minimum_should_match: 1 },
+              bool: {
+                should: spanLinks.map((item) => {
+                  return {
+                    bool: {
+                      filter: [
+                        { term: { [TRACE_ID]: item.trace.id } },
+                        {
+                          bool: {
+                            should: [
+                              { term: { [SPAN_ID]: item.span.id } },
+                              { term: { [TRANSACTION_ID]: item.span.id } },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
+                  };
+                }),
+                minimum_should_match: 1,
+              },
             },
           ],
         },
       },
     },
   });
+
+  const spanIdsMap = keyBy(spanLinks, 'span.id');
+
   return response.hits.hits.filter(({ _source: source }) => {
-    // if span we need to guarantee that span.id is the same as the span links ids
-    // the query might return other spans children of the same transaction
+    // The above query might return other spans from the same transaction because siblings spans share the same transaction.id
+    // so, if it is a span we need to guarantee that the span.id is the same as the span links ids
     if (source.processor.event === ProcessorEvent.span) {
       const span = source as SpanRaw;
       const hasSpanId = spanIdsMap[span.span.id] || false;
@@ -134,7 +136,7 @@ export async function getSpanLinksDetails({
 
   // chunk span links to avoid too_many_nested_clauses problem
   const spanLinksChunks = chunk(spanLinks, 500);
-  const chunckedResponses = await Promise.all(
+  const chunkedResponses = await Promise.all(
     spanLinksChunks.map((spanLinksChunk) =>
       fetchSpanLinksDetails({
         setup,
@@ -146,7 +148,7 @@ export async function getSpanLinksDetails({
     )
   );
 
-  const linkedSpans = chunckedResponses.flat();
+  const linkedSpans = chunkedResponses.flat();
 
   // Creates a map for all span links details found
   const spanLinksDetailsMap = linkedSpans.reduce<
@@ -190,17 +192,21 @@ export async function getSpanLinksDetails({
     return acc;
   }, {});
 
-  // When kuery is set, returns only the items found in the uery
-  if (!isEmpty(kuery)) {
-    return Object.values(spanLinksDetailsMap);
-  }
-
   // It's important to keep the original order of the span links,
   // so loops trough the original list merging external links and links with details.
   // external links are links that the details were not found in the ES query.
-  return spanLinks.map((item) => {
-    const key = `${item.trace.id}:${item.span.id}`;
-    const details = spanLinksDetailsMap[key];
-    return details ? details : { traceId: item.trace.id, spanId: item.span.id };
-  });
+  return compact(
+    spanLinks.map((item) => {
+      const key = `${item.trace.id}:${item.span.id}`;
+      const details = spanLinksDetailsMap[key];
+      if (details) {
+        return details;
+      }
+
+      // When kuery is not set, returns external links, if not hides this item.
+      return isEmpty(kuery)
+        ? { traceId: item.trace.id, spanId: item.span.id }
+        : undefined;
+    })
+  );
 }

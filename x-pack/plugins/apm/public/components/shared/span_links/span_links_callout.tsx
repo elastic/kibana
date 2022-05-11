@@ -8,16 +8,12 @@ import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 
-export function SpanLinksCallout() {
-  const [spanLinksCalloutDismissed, setSpanLinksCalloutDismissed] =
-    useLocalStorage('apm.spanLinksCalloutDismissed', false);
+interface Props {
+  dismissCallout: () => void;
+}
 
-  if (spanLinksCalloutDismissed) {
-    return null;
-  }
-
+export function SpanLinksCallout({ dismissCallout }: Props) {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.apm.spanLinks.callout.title', {
@@ -33,7 +29,7 @@ export function SpanLinksCallout() {
       </p>
       <EuiButton
         onClick={() => {
-          setSpanLinksCalloutDismissed(true);
+          dismissCallout();
         }}
       >
         {i18n.translate('xpack.apm.spanLinks.callout.dimissButton', {

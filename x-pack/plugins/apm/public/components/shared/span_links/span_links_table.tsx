@@ -31,9 +31,9 @@ interface Props {
 }
 
 export function SpanLinksTable({ items }: Props) {
-  const { link } = useApmRouter();
+  const router = useApmRouter();
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, comparisonEnabled },
   } = useApmParams('/services/{serviceName}/transactions/view');
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<
     string | undefined
@@ -57,7 +57,7 @@ export function SpanLinksTable({ items }: Props) {
                 rangeTo,
                 kuery: '',
                 serviceGroup: '',
-                comparisonEnabled: true,
+                comparisonEnabled,
                 environment: details.environment || 'ENVIRONMENT_ALL',
               }}
             />
@@ -99,7 +99,7 @@ export function SpanLinksTable({ items }: Props) {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink
-                  href={link('/link-to/transaction/{transactionId}', {
+                  href={router.link('/link-to/transaction/{transactionId}', {
                     path: { transactionId: details.transactionId || spanId },
                     query: { waterfallItemId: spanId },
                   })}
@@ -151,11 +151,11 @@ export function SpanLinksTable({ items }: Props) {
             }}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              {details && (
+              {details?.transactionId && (
                 <EuiFlexItem>
                   <EuiLink
-                    href={link('/link-to/transaction/{transactionId}', {
-                      path: { transactionId: details.transactionId || spanId },
+                    href={router.link('/link-to/transaction/{transactionId}', {
+                      path: { transactionId: details.transactionId },
                     })}
                   >
                     {i18n.translate(
@@ -183,11 +183,11 @@ export function SpanLinksTable({ items }: Props) {
                   )}
                 </EuiCopy>
               </EuiFlexItem>
-              {details && (
+              {details?.transactionId && (
                 <EuiFlexItem>
                   <EuiLink
-                    href={link('/link-to/transaction/{transactionId}', {
-                      path: { transactionId: details.transactionId || spanId },
+                    href={router.link('/link-to/transaction/{transactionId}', {
+                      path: { transactionId: details.transactionId },
                       query: { waterfallItemId: spanId },
                     })}
                   >

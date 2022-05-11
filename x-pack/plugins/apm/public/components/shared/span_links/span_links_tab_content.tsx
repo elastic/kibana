@@ -25,7 +25,7 @@ export function getSpanLinksTabContent({
   processorEvent,
 }: Props) {
   if (!spanLinksCount.linkedChildren && !spanLinksCount.linkedParents) {
-    return;
+    return undefined;
   }
 
   return {
