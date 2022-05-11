@@ -49,7 +49,7 @@ import {
 } from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper, EuiButtonWithTooltip } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/single_page_layout/components';
+import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { PackagePolicyValidationResults } from '../create_package_policy_page/single_page_layout/services';
 import {
   validatePackagePolicy,
@@ -568,7 +568,7 @@ export const EditPackagePolicyForm = memo<{
   );
 
   return (
-    <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="editPackagePolicy">
+    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
@@ -682,7 +682,7 @@ export const EditPackagePolicyForm = memo<{
           </>
         )}
       </EuiErrorBoundary>
-    </CreatePackagePolicyPageLayout>
+    </CreatePackagePolicySinglePageLayout>
   );
 });
 

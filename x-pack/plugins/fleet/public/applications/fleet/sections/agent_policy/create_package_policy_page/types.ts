@@ -21,3 +21,9 @@ export type PackagePolicyFormState =
   | 'LOADING'
   | 'SUBMITTED'
   | 'SUBMITTED_NO_AGENTS';
+
+export interface AddToPolicyParams {
+  pkgkey: string;
+  integration?: string;
+  policyId?: string;
+}

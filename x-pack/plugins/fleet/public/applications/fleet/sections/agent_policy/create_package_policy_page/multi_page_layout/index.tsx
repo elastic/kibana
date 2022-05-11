@@ -4,54 +4,50 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
-// import { FormattedMessage } from '@kbn/i18n-react';
-// import styled from 'styled-components';
-// import {
-//   EuiFlexGroup,
-//   EuiFlexItem,
-//   EuiText,
-//   EuiDescriptionList,
-//   EuiDescriptionListTitle,
-//   EuiDescriptionListDescription,
-//   EuiButtonEmpty,
-//   EuiSpacer,
-// } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { useRouteMatch } from 'react-router-dom';
 
-import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
-import type { EditPackagePolicyFrom } from '../types';
+import { splitPkgKey } from '../../../../../../../common';
 
-import { AddFirstIntegrationSplashScreen } from './add_first_integration_splash';
-export const CreatePackagePolicyMultiPageLayout: React.FunctionComponent<{
-  from: EditPackagePolicyFrom;
-  cancelUrl: string;
-  onCancel?: React.ReactEventHandler;
-  agentPolicy?: AgentPolicy;
-  packageInfo?: PackageInfo;
-  integrationInfo?: RegistryPolicyTemplate;
-  'data-test-subj'?: string;
-  tabs?: Array<{
-    title: string;
-    isSelected: boolean;
-    onClick: React.ReactEventHandler;
-  }>;
-}> = memo(
-  ({
-    from,
-    cancelUrl,
-    onCancel,
-    agentPolicy,
-    packageInfo,
-    integrationInfo,
-    children,
-    'data-test-subj': dataTestSubj,
-    tabs = [],
-  }) => {
-    return (
-      <AddFirstIntegrationSplashScreen
-        integrationInfo={integrationInfo}
-        packageInfo={packageInfo}
-      />
-    );
-  }
-);
+import { useGetPackageInfoByKey } from '../../../../hooks';
+
+// import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
+import type { AddToPolicyParams } from '../types';
+
+import { AddFirstIntegrationSplashScreen } from './components/add_first_integration_splash';
+export const CreatePackagePolicyMultiPage: React.FunctionComponent = () => {
+  const { params } = useRouteMatch<AddToPolicyParams>();
+
+  const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
+
+  const {
+    data: packageInfoData,
+    error: packageInfoError,
+    isLoading: isPackageInfoLoading,
+  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+
+  const packageInfo = useMemo(() => {
+    if (packageInfoData && packageInfoData.item) {
+      return packageInfoData.item;
+    }
+  }, [packageInfoData]);
+
+  const integrationInfo = useMemo(
+    () =>
+      (params as AddToPolicyParams).integration
+        ? packageInfo?.policy_templates?.find(
+            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
+          )
+        : undefined,
+    [packageInfo?.policy_templates, params]
+  );
+
+  return (
+    <AddFirstIntegrationSplashScreen
+      isLoading={isPackageInfoLoading}
+      error={packageInfoError}
+      integrationInfo={integrationInfo}
+      packageInfo={packageInfo}
+    />
+  );
+};

@@ -32,7 +32,7 @@ const AgentPolicyName = styled(EuiDescriptionListDescription)`
   overflow: hidden;
 `;
 
-export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
+export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
   from: EditPackagePolicyFrom;
   cancelUrl: string;
   onCancel?: React.ReactEventHandler;

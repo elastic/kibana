@@ -22,11 +22,12 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import type { RegistryPolicyTemplate, PackageInfo } from '../../../../types';
-import { IntegrationBreadcrumb } from '../components';
-import { pkgKeyFromPackageInfo } from '../../../../services';
-import { WithHeaderLayout } from '../../../../layouts';
-import { useStartServices } from '../../../../hooks';
+import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
+import { IntegrationBreadcrumb } from '../../components';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
+import { WithHeaderLayout } from '../../../../../layouts';
+import { useStartServices } from '../../../../../hooks';
+import type { RequestError } from '../../../../../hooks';
 
 const PaddedCentralTitle = styled('h1')`
   text-align: center;
@@ -212,8 +213,10 @@ const InstallBottomBar = () => (
 
 export const AddFirstIntegrationSplashScreen: React.FC<{
   integrationInfo?: RegistryPolicyTemplate;
+  error: RequestError | null;
   packageInfo?: PackageInfo;
-}> = ({ integrationInfo, packageInfo }) => {
+  isLoading: boolean;
+}> = ({ integrationInfo, packageInfo, isLoading, error }) => {
   const topContent = (
     <EuiTitle size="l">
       <PaddedCentralTitle>
