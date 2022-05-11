@@ -6,13 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { ArgumentType } from '@kbn/expressions-plugin/common';
 import { SeriesTypes, XScaleTypes, YScaleTypes, Y_CONFIG } from '../constants';
 import { strings } from '../i18n';
-import { DataLayerFn, ExtendedDataLayerFn } from '../types';
+import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
-type CommonDataLayerFn = DataLayerFn | ExtendedDataLayerFn;
+type CommonDataLayerArgs = ExtendedDataLayerArgs | DataLayerArgs;
+type CommonDataLayerFnArgs = {
+  [key in keyof CommonDataLayerArgs]: ArgumentType<CommonDataLayerArgs[key]>;
+};
 
-export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
+export const commonDataLayerArgs: CommonDataLayerFnArgs = {
   hide: {
     types: ['boolean'],
     default: false,
@@ -23,6 +27,7 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
     help: strings.getXAccessorHelp(),
   },
   seriesType: {
+    aliases: ['_'],
     types: ['string'],
     options: [...Object.values(SeriesTypes)],
     help: strings.getSeriesTypeHelp(),
