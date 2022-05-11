@@ -26,7 +26,7 @@ export function buildSchema(spec: EcsNestedSchema) : GroupSchema {
   return schema;
 }
 
-function validateExampleFieldtype(fieldName: string, example: string) {
+function validateExampleFieldtype(fieldName: string, example: any) {
   if (example !== undefined && typeof example !== 'string' && typeof example !== 'number' && typeof example !== 'boolean') {
     console.error(`ERROR: ${fieldName} has invalid example type`);
   }

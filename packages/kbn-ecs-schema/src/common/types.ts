@@ -6,39 +6,22 @@
  * Side Public License, v 1.
  */
 
-/**
- * Represents the top-level structure of the ecs_nested.yml.
- */
 export type EcsNestedSchema = Record<string, GroupDetails>;
 export type GroupSchema = Record<string, FieldDetails>;
 
 export const TOP_LEVEL_NAME = 'topLevel';
 export const TOP_LEVEL_GROUPS = ['base', 'tracing'];
 
-/**
- * Metadata for each of the top-level items in the EcsSpec.
- */
 export type GroupDetails = {
-  description: string;
   fields: Record<string, FieldDetails>;
-  footnote?: string;
-  group: number;
-  prefix: string;
-  root?: boolean;
-  short: string;
-  title: string;
-  type: string;
 };
 
-/**
- * Metadata for each field in a EcsGroupSpec.
- */
 export interface FieldDetails {
   dashed_name: string;
   description: string;
-  example: string;
+  example: string | number | boolean;
   flat_name: string;
-  ignore_above: number;
+  ignore_above?: number;
   level: 'core' | 'extended';
   name: string;
   normalize: string[];
