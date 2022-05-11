@@ -308,7 +308,7 @@ cloud.auth: <username:password>
 /bin/filebeat -c filebeat.yml
 ----------------------------------
 
-. Wait for Filebeat to start shipping data to Elastic Cloud, filebeat shouldn't produce any output to stdout. 
+. Wait for Filebeat to start shipping data to Elastic Cloud. Filebeat should not produce any output to stdout. 
 
 . Leave the terminal window open and Filebeat running throughout this tutorial.
 
