@@ -82,21 +82,9 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.management.flyoutTitle', {
         defaultMessage: 'Control settings',
       }),
-    getDefaultWidthTitle: () =>
-      i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
-        defaultMessage: 'Default width',
-      }),
-    getDefaultGrowTitle: () =>
-      i18n.translate('controls.controlGroup.management.defaultWidthTitle', {
-        defaultMessage: 'Expand width to fit available space',
-      }),
     getDeleteButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
-      }),
-    getSetAllWidthsToDefaultTitle: () =>
-      i18n.translate('controls.controlGroup.management.setAllWidths', {
-        defaultMessage: 'Set all controls to default width',
       }),
     getDeleteAllButtonTitle: () =>
       i18n.translate('controls.controlGroup.management.deleteAll', {
