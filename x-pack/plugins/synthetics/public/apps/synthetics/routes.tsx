@@ -62,6 +62,7 @@ const getRoutes = (): RouteProps[] => {
       template: 'centeredBody',
       pageContentProps: {
         paddingSize: 'none',
+        hasShadow: false,
       },
     },
     {
