@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '../../../utils/testing/rtl_helpers';
+import { render } from '../../../utils/testing/rtl_helpers.test';
 import { ActionMenuContent } from './action_menu_content';
 
 describe('ActionMenuContent', () => {

@@ -8,7 +8,7 @@
 // app.test.js
 import React from 'react';
 import 'jest-styled-components';
-import { render } from '../../../utils/testing/rtl_helpers';
+import { render } from '../../../utils/testing/rtl_helpers.test';
 import { SyntheticsPageTemplateComponent } from './synthetics_page_template';
 import { OVERVIEW_ROUTE } from '../../../../../../common/constants';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
