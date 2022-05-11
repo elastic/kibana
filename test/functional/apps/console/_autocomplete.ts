@@ -44,8 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add a comma after previous non empty line', async () => {
-        const conApp1 = await find.byCssSelector('.conApp');
-        const firstInnerHtml = await conApp1.getAttribute('innerHTML');
         await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);
         await PageObjects.console.pressEnter();
         await PageObjects.console.pressEnter();
@@ -53,11 +51,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.promptAutocomplete();
         await PageObjects.console.pressEnter();
         await retry.try(async () => {
-          const conApp2 = await find.byCssSelector('.conApp');
-          const secondInnerHtml = await conApp2.getAttribute('innerHTML');
-          return firstInnerHtml !== secondInnerHtml;
+          let conApp = await find.byCssSelector('.conApp');
+          const firstInnerHtml = await conApp.getAttribute('innerHTML');
+          await PageObjects.common.sleep(500);
+          conApp = await find.byCssSelector('.conApp');
+          const secondInnerHtml = await conApp.getAttribute('innerHTML');
+          return firstInnerHtml === secondInnerHtml;
         });
         const textAreaString = await PageObjects.console.getAllVisibleText();
+        log.debug('Text Area String Value==================\n');
+        log.debug(textAreaString);
         expect(textAreaString).to.contain(',');
         const text = await PageObjects.console.getVisibleTextAt(LINE_NUMBER);
         const lastChar = text.charAt(text.length - 1);
