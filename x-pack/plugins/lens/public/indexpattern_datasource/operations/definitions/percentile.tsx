@@ -8,8 +8,13 @@
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { AggFunctionsMapping, METRIC_TYPES } from '@kbn/data-plugin/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionAstExpressionBuilder,
+} from '@kbn/expressions-plugin/public';
+import { AggExpressionFunctionArgs } from '@kbn/data-plugin/common';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -142,6 +147,92 @@ export const percentileOperation: OperationDefinition<
         timeShift: column.filter ? undefined : column.timeShift,
       }
     ).toAst();
+  },
+  // TODO - there may be a way to get around including aggExpressionToEsAggsIdMap
+  optimizeEsAggs: (aggs, esAggsIdMap, aggExpressionToEsAggsIdMap) => {
+    const percentileExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
+
+    aggs.forEach((expressionBuilder) => {
+      const {
+        functions: [fnBuilder],
+      } = expressionBuilder;
+      if (fnBuilder.name === 'aggSinglePercentile') {
+        const field = fnBuilder.getArgument('field')?.[0];
+        if (!(field in percentileExpressionsByArgs)) {
+          percentileExpressionsByArgs[field] = [];
+        }
+
+        percentileExpressionsByArgs[field].push(expressionBuilder);
+      }
+    });
+
+    Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
+      const [first, ...rest] = expressionBuilders;
+
+      if (!rest.length) {
+        // don't need to optimize if there's only one
+        return;
+      }
+
+      const {
+        functions: [firstFnBuilder],
+      } = first;
+
+      const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
+      const aggPercentilesConfig: AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES> = {
+        id: esAggsColumnId,
+        enabled: firstFnBuilder.getArgument('enabled')?.[0],
+        schema: firstFnBuilder.getArgument('schema')?.[0],
+        field: firstFnBuilder.getArgument('field')?.[0],
+        percents: firstFnBuilder.getArgument('percentile'),
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+      };
+
+      const siblingPercentiles = rest.map(
+        ({ functions: [fnBuilder] }) => fnBuilder.getArgument('percentile')![0]
+      ) as number[];
+
+      aggPercentilesConfig.percents = [
+        ...(aggPercentilesConfig.percents ?? []),
+        ...siblingPercentiles,
+      ];
+
+      const multiPercentilesAst = buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>(
+        'aggPercentiles',
+        aggPercentilesConfig
+      ).toAst();
+
+      aggs = [
+        ...aggs.filter((aggBuilder) => ![first, ...rest].includes(aggBuilder)),
+        buildExpression({
+          type: 'expression',
+          chain: [multiPercentilesAst],
+        }),
+      ];
+
+      expressionBuilders.forEach((expressionBuilder) => {
+        const currentEsAggsId = aggExpressionToEsAggsIdMap.get(expressionBuilder);
+        if (currentEsAggsId === undefined) {
+          throw new Error('Could not find current column ID for percentile agg expression builder');
+        }
+        // esAggs appends the percent number to the agg id to make distinct column IDs in the resulting datatable.
+        // We're anticipating that here by adding the `.<percentile>`.
+        // The agg index ('?') will be assigned when we update all the indices in the ID map based on the agg order.
+        const newEsAggsId = `col-?-${esAggsColumnId}.${
+          expressionBuilder.functions[0].getArgument('percentile')![0]
+        }`;
+
+        esAggsIdMap[newEsAggsId] = esAggsIdMap[currentEsAggsId];
+
+        delete esAggsIdMap[currentEsAggsId];
+      });
+    });
+
+    return {
+      esAggsIdMap,
+      aggs,
+    };
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
