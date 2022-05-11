@@ -44,7 +44,7 @@ describe('useSecurityJobsHelpers', () => {
         isElasticJob: true,
         isInstalled: false,
         isSingleMetricViewerJob: false,
-        jobState: '',
+        jobState: 'closed',
         jobTags: {},
         memory_status: '',
         moduleId: 'siem_auditbeat',
