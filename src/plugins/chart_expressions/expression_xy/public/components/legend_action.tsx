@@ -8,15 +8,12 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
-import {
-  getFormatByAccessor,
-  getAccessorByDimension,
-} from '@kbn/visualizations-plugin/common/utils';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
 import type { FormatFactory } from '../types';
 import { LegendActionPopover } from './legend_action_popover';
-import { DatatablesWithFormatInfo } from '../helpers';
+import { DatatablesWithFormatInfo, getFormat } from '../helpers';
 
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],
@@ -47,7 +44,7 @@ export const getLegendAction = (
 
     const { table } = layer;
     const accessor = getAccessorByDimension(layer.splitAccessor, table.columns);
-    const formatter = formatFactory(getFormatByAccessor(layer.splitAccessor, table.columns));
+    const formatter = formatFactory(accessor ? getFormat(table, layer.splitAccessor) : undefined);
 
     const rowIndex = table.rows.findIndex((row) => {
       if (formattedDatatables[layer.layerId]?.formattedColumns[accessor]) {

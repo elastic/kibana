@@ -35,6 +35,7 @@ import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
+import { getFormat } from './format';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
@@ -129,7 +130,7 @@ export const getFormattedTable = (
 
       return {
         ...formatters,
-        [id]: formatFactory(accessor ? getFormatByAccessor(accessor, table.columns) : meta.params),
+        [id]: formatFactory(accessor ? getFormat(table, accessor) : meta.params),
       };
     },
     {}

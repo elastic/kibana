@@ -11,9 +11,11 @@ import {
   prepareLogTable,
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
-import { appendLayerIds } from '../helpers';
-import { DataLayerConfigResult, XYLayerConfig, XyVisFn } from '../types';
+import { appendLayerIds, getAccessors } from '../helpers';
+import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
 import { getLayerDimensions } from '../utils';
 import {
   hasAreaLayer,
@@ -24,12 +26,28 @@ import {
   validateValueLabels,
 } from './validate';
 
+const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => ({
+  type: DATA_LAYER,
+  seriesType: args.seriesType,
+  hide: args.hide,
+  columnToLabel: args.columnToLabel,
+  yScaleType: args.yScaleType,
+  xScaleType: args.xScaleType,
+  isHistogram: args.isHistogram,
+  palette: args.palette,
+  yConfig: args.yConfig,
+  layerType: LayerTypes.DATA,
+  table,
+  ...getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table),
+});
+
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const {
     referenceLineLayers = [],
     annotationLayers = [],
+    // data_layer args
     seriesType,
-    accessors = [],
+    accessors,
     xAccessor,
     hide,
     splitAccessor,
@@ -42,28 +60,11 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     ...restArgs
   } = args;
 
-  const dataLayer: DataLayerConfigResult = {
-    type: DATA_LAYER,
-    seriesType,
-    accessors,
-    xAccessor,
-    hide,
-    splitAccessor,
-    columnToLabel,
-    yScaleType,
-    xScaleType,
-    isHistogram,
-    palette,
-    yConfig,
-    layerType: LayerTypes.DATA,
-    table: data,
-  };
+  validateAccessor(xAccessor, data.columns);
+  validateAccessor(splitAccessor, data.columns);
+  accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
 
-  validateAccessor(dataLayer.xAccessor, dataLayer.table.columns);
-  validateAccessor(dataLayer.splitAccessor, dataLayer.table.columns);
-  dataLayer.accessors.forEach((accessor) => validateAccessor(accessor, dataLayer.table.columns));
-
-  const dataLayers: DataLayerConfigResult[] = [dataLayer];
+  const dataLayers: DataLayerConfigResult[] = [createDataLayer(args, data)];
 
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),

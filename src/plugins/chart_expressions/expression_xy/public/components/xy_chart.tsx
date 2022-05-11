@@ -34,7 +34,6 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
-  getFormatByAccessor,
   getAccessorByDimension,
   getColumnByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
@@ -51,6 +50,7 @@ import {
   Series,
   getFormattedTablesByLayers,
   validateExtent,
+  getFormat,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -177,7 +177,7 @@ export function XYChart({
     [dataLayers, formatFactory]
   );
 
-  if (filteredLayers.length === 0) {
+  if (dataLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(
       getDataLayers(layers)?.[0]?.seriesType || SeriesTypes.BAR
     );
@@ -190,9 +190,7 @@ export function XYChart({
     : undefined;
 
   const xAxisFormatter = formatFactory(
-    dataLayers[0].xAccessor
-      ? getFormatByAccessor(dataLayers[0].xAccessor, dataLayers[0]?.table.columns)
-      : undefined
+    dataLayers[0].xAccessor ? getFormat(dataLayers[0].table, dataLayers[0].xAccessor) : undefined
   );
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
@@ -397,9 +395,7 @@ export function XYChart({
     const xAccessor = layer.xAccessor ? getAccessorByDimension(layer.xAccessor, table.columns) : '';
     const currentXFormatter =
       layer.xAccessor && formattedDatatables[layer.layerId]?.formattedColumns[xAccessor] && xColumn
-        ? formatFactory(
-            layer.xAccessor ? getFormatByAccessor(layer.xAccessor, table.columns) : undefined
-          )
+        ? formatFactory(layer.xAccessor ? getFormat(table, layer.xAccessor) : undefined)
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
@@ -427,7 +423,7 @@ export function XYChart({
         : '';
 
       const splitFormatter = formatFactory(
-        layer.splitAccessor ? getFormatByAccessor(layer.splitAccessor, table.columns) : undefined
+        layer.splitAccessor ? getFormat(table, layer.splitAccessor) : undefined
       );
 
       points.push({

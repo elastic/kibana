@@ -7,10 +7,11 @@
  */
 
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { ExtendedDataLayerFn } from '../types';
+import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
 import { commonDataLayerArgs } from './common_data_layer_args';
+import { getAccessors } from '../helpers';
 
 export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   name: EXTENDED_DATA_LAYER,
@@ -44,17 +45,17 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   },
   fn(input, args) {
     const table = args.table ?? input;
-    const accessors = args.accessors ?? [];
+    const accessors = getAccessors<string, ExtendedDataLayerArgs>(args, table);
 
-    validateAccessor(args.xAccessor, table.columns);
-    validateAccessor(args.splitAccessor, table.columns);
-    accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
+    validateAccessor(accessors.xAccessor, table.columns);
+    validateAccessor(accessors.splitAccessor, table.columns);
+    accessors.accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
 
     return {
       type: EXTENDED_DATA_LAYER,
       ...args,
       layerType: LayerTypes.DATA,
-      accessors,
+      ...accessors,
       table,
     };
   },

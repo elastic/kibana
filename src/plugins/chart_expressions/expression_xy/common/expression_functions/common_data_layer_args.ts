@@ -26,6 +26,7 @@ export const commonDataLayerArgs: Omit<
     help: strings.getHideHelp(),
   },
   seriesType: {
+    aliases: ['_'],
     types: ['string'],
     options: [...Object.values(SeriesTypes)],
     help: strings.getSeriesTypeHelp(),

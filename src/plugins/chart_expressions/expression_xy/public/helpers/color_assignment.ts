@@ -8,13 +8,11 @@
 
 import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
-import {
-  getFormatByAccessor,
-  getAccessorByDimension,
-} from '@kbn/visualizations-plugin/common/utils';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
+import { getFormat } from './format';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -53,8 +51,7 @@ export function getColorAssignments(
       }
       const splitAccessor = getAccessorByDimension(layer.splitAccessor, layer.table.columns);
       const column = layer.table.columns?.find(({ id }) => id === splitAccessor);
-      const columnFormatter =
-        column && formatFactory(getFormatByAccessor(layer.splitAccessor, layer.table.columns));
+      const columnFormatter = column && formatFactory(getFormat(layer.table, layer.splitAccessor));
       const splits =
         !column || !layer.table
           ? []
