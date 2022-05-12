@@ -49,48 +49,4 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha, abortSignal?:
       runner.on('end', respond);
     }
   });
-
-
-  // async checkLinks() {
-  //   // let url;
-  //   const urls = new Set([]);
-
-  //   // change this to test "if tests are running?"
-  //   while (!runComplete) {
-
-  //     const linkList = await this.find.allByCssSelector('a', 100);
-  //     this.log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
-
-  //     const links = await Promise.all(
-  //       linkList.map(async (link) => {
-  //         try {
-  //           const url = await link.getAttribute('href');
-  //           // if url is NOT in urls, add it and test it
-  //           if (urls.has(url)) {
-  //             this.log.debug(`----- ${url} is already in set`);
-  //           } else {
-  //             urls.add(url);
-  //             try {
-  //               const response = await request.head(url);
-  //               this.log.debug(`${url} response: ${response.status}`);
-  //               return { url, code: response.status };
-  //             } catch (err) {
-  //               this.log.debug(err);
-  //             }
-  //           }
-  //         } catch (err) {
-  //           // this should catch the stale element exceptions that happen
-  //           // when the page changes after we get the 'a' elements when we try to get the 'href's.
-  //         }
-  //       })
-  //     );
-  //     await this.sleep(1000);
-  //   }
-
-  //   const deadlinks = links.filter((l) => l.code !== 200);
-  //   if (deadlinks.length > 0) {
-  //     deadlinks.forEach((l) => this.log.debug(`${l.url} response: is ${l.code} but 200 expected`));
-  //     throw new Error('Dead links found');
-  //   }
-
 }
