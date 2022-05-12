@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -16,6 +16,7 @@ import {
   throwIfSubActionIsNotSupported,
   getAxiosInstance,
 } from './utils';
+import type { ResponseError } from './types';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
@@ -73,7 +74,7 @@ describe('utils', () => {
       const axiosError = {
         message: 'An error occurred',
         response: { data: { error: { message: 'Denied', detail: 'no access' } } },
-      } as AxiosError;
+      } as ResponseError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: Denied: no access'
@@ -84,7 +85,7 @@ describe('utils', () => {
       const axiosError = {
         message: 'An error occurred',
         response: { data: { error: null } },
-      } as AxiosError;
+      } as ResponseError;
 
       expect(createServiceError(axiosError, 'Unable to do action').message).toBe(
         '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: no error in error response'

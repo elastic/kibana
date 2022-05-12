@@ -134,7 +134,11 @@ export const getAxiosInstance = ({
           tokenUrl: `${snServiceUrl}/oauth_token.do`,
           connectorTokenClient,
         });
-        axiosConfig.headers.Authorization = accessToken;
+
+        if (accessToken) {
+          axiosConfig.headers = { ...axiosConfig.headers, Authorization: accessToken };
+        }
+
         return axiosConfig;
       },
       (error) => {
