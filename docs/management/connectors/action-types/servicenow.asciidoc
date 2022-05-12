@@ -116,7 +116,9 @@ image::management/connectors/images/servicenow-jwt-endpoint.png[Shows applicatio
 image::management/connectors/images/servicenow-new-application.png[Shows new application form in ServiceNow]
 --
 
+--
 IMPORTANT: Remember the selected user field. You will use this as the *User Identifier Value* when creating the connector. For example, if you selected *Email* for *User field*, you will use the user's email for the *User Identifier Value*.
+--
 
 . Click *Submit* to create the application. You will be redirected to the list of applications.
 . Select the application you just created.
