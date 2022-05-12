@@ -1,7 +1,7 @@
+// offset the vertical line and the phase icons to align with the phase toggle
 .ilm-phases-timeline [class*='euiTimelineItemIcon-top'] {
   padding-top: $euiSize;
 }
-
 .ilm-phases-timeline [class*='euiTimelineItemIcon-top']::before {
   top: $euiSizeL;
 }
