@@ -267,7 +267,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
           <UseField<ActionType | null> path="actionType" defaultValue={null}>
             {(field) => {
               const { setValue } = field;
-              if (actionType != null) {
+              if (field.value != null) {
                 return null;
               }
 

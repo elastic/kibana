@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, ReactNode } from 'react';
 import { EuiFieldPassword, EuiFormRow } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
@@ -35,10 +35,16 @@ const getFieldConfig = ({ label }: { label: string }) => ({
 interface PasswordFieldProps {
   path: string;
   label: string;
+  helpText?: string | ReactNode;
   [key: string]: any;
 }
 
-const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({ path, label, ...rest }) => {
+const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
+  path,
+  label,
+  helpText,
+  ...rest
+}) => {
   return (
     <UseField<string> path={path} config={getFieldConfig({ label })}>
       {(field) => {
@@ -48,7 +54,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({ path, label, ...
           <EuiFormRow
             label={field.label}
             labelAppend={field.labelAppend}
-            helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+            helpText={helpText}
             error={errorMessage}
             isInvalid={isInvalid}
             fullWidth

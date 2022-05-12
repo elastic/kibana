@@ -7,6 +7,83 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const USERNAME_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+  {
+    defaultMessage: 'Username',
+  }
+);
+
+export const PASSWORD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+  {
+    defaultMessage: 'Password',
+  }
+);
+
+export const FROM_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
+  {
+    defaultMessage: 'Sender',
+  }
+);
+
+export const SERVICE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
+  {
+    defaultMessage: 'Service',
+  }
+);
+
+export const TENANT_ID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.tenantIdFieldLabel',
+  {
+    defaultMessage: 'Tenant ID',
+  }
+);
+
+export const CLIENT_ID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.clientIdFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
+
+export const CLIENT_SECRET_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client Secret',
+  }
+);
+
+export const HOST_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const PORT_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
+  {
+    defaultMessage: 'Port',
+  }
+);
+
+export const SECURE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
+  {
+    defaultMessage: 'Secure',
+  }
+);
+
+export const HAS_AUTH_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hasAuthSwitchLabel',
+  {
+    defaultMessage: 'Require authentication for this server',
+  }
+);
+
 export const SENDER_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredFromText',
   {

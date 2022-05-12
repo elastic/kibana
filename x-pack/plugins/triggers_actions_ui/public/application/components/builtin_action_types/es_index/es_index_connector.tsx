@@ -77,24 +77,19 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
     watch: ['config.executionTimeField', 'config.index', '__internal__.hasTimeFieldCheckbox'],
   });
 
-  const { executionTimeField, index } = config ?? { executionTimeField: null, index: null };
-
-  const [showTimeFieldCheckbox, setShowTimeFieldCheckboxState] = useState<boolean>(
-    executionTimeField != null
-  );
+  const { index } = config ?? { index: null };
 
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState<TimeFieldOptions[]>([]);
   const [areIndiciesLoading, setAreIndicesLoading] = useState<boolean>(false);
 
   const hasTimeFieldCheckbox = __internal__ != null ? __internal__.hasTimeFieldCheckbox : false;
+  const showTimeFieldCheckbox = index && timeFieldOptions.length > 0;
 
   const setTimeFields = (fields: TimeFieldOptions[]) => {
     if (fields.length > 0) {
-      setShowTimeFieldCheckboxState(true);
       setTimeFieldOptions([firstFieldOption, ...fields]);
     } else {
-      setShowTimeFieldCheckboxState(false);
       setTimeFieldOptions([]);
     }
   };
