@@ -8,11 +8,9 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 
 import {
-  aiopsExampleStreamSchema,
-  updateProgressAction,
-  addToEntityAction,
-  deleteEntityAction,
-} from '../../common/api/example_stream';
+  aiopsExplainLogRateSpikesSchema,
+  addFieldsAction,
+} from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
 
 import { streamFactory } from './stream_factory';
@@ -20,14 +18,13 @@ import { streamFactory } from './stream_factory';
 export const defineExplainLogRateSpikesRoute = (router: IRouter, logger: Logger) => {
   router.post(
     {
-      path: API_ENDPOINT.EXAMPLE_STREAM,
+      path: API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES,
       validate: {
-        body: aiopsExampleStreamSchema,
+        body: aiopsExplainLogRateSpikesSchema,
       },
     },
     async (context, request, response) => {
-      const maxTimeoutMs = request.body.timeout ?? 250;
-      const simulateError = request.body.simulateErrors ?? false;
+      // const index = request.body.index;
 
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
@@ -37,70 +34,33 @@ export const defineExplainLogRateSpikesRoute = (router: IRouter, logger: Logger)
         shouldStop = true;
       });
 
-      const { delimiter, stream, streamPush } =
-        streamFactory<typeof API_ENDPOINT.EXAMPLE_STREAM>(logger);
+      const { stream, streamPush } =
+        streamFactory<typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES>(logger);
 
-      const entities = [
-        'kimchy',
-        's1monw',
-        'martijnvg',
-        'jasontedor',
-        'nik9000',
-        'javanna',
-        'rjernst',
-        'jrodewig',
-      ];
+      setTimeout(() => {
+        if (shouldStop) {
+          stream.push(null);
+          return;
+        }
+        streamPush(addFieldsAction(['firstField']));
+      }, 0);
 
-      const actions = [...Array(19).fill('add'), 'delete'];
+      setTimeout(() => {
+        if (shouldStop) {
+          stream.push(null);
+          return;
+        }
+        streamPush(addFieldsAction(['secondField', 'thirdField']));
+      }, 500);
 
-      if (simulateError) {
-        actions.push('server-only-error');
-        actions.push('server-to-client-error');
-        actions.push('client-error');
-      }
-
-      let progress = 0;
-
-      async function pushStreamUpdate() {
-        setTimeout(() => {
-          try {
-            progress++;
-
-            if (progress > 100 || shouldStop) {
-              stream.push(null);
-              return;
-            }
-
-            streamPush(updateProgressAction(progress));
-
-            const randomEntity = entities[Math.floor(Math.random() * entities.length)];
-            const randomAction = actions[Math.floor(Math.random() * actions.length)];
-
-            if (randomAction === 'add') {
-              const randomCommits = Math.floor(Math.random() * 100);
-              streamPush(addToEntityAction(randomEntity, randomCommits));
-            } else if (randomAction === 'delete') {
-              streamPush(deleteEntityAction(randomEntity));
-            } else if (randomAction === 'server-to-client-error') {
-              // Throw an error. It should not crash Kibana!
-              throw new Error('There was a (simulated) server side error!');
-            } else if (randomAction === 'client-error') {
-              // Return not properly encoded JSON to the client.
-              stream.push(`{body:'Not valid JSON${delimiter}`);
-            }
-
-            pushStreamUpdate();
-          } catch (error) {
-            stream.push(
-              `${JSON.stringify({ type: 'error', payload: error.toString() })}${delimiter}`
-            );
-            stream.push(null);
-          }
-        }, Math.floor(Math.random() * maxTimeoutMs));
-      }
-
-      // do not call this using `await` so it will run asynchronously while we return the stream already.
-      pushStreamUpdate();
+      setTimeout(() => {
+        if (shouldStop) {
+          stream.push(null);
+          return;
+        }
+        streamPush(addFieldsAction(['last_field']));
+        stream.push(null);
+      }, 3000);
 
       return response.ok({
         body: stream,

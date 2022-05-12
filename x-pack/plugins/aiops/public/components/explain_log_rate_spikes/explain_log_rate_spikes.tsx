@@ -7,14 +7,14 @@
 
 import React, { useEffect, FC } from 'react';
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiSpacer } from '@elastic/eui';
 
 import {
   API_ACTION_NAME,
   AiopsExplainLogRateSpikesApiAction,
-} from '../../common/api/explain_log_rate_spikes';
+} from '../../../common/api/explain_log_rate_spikes';
 
-import { useStreamFetchReducer } from './use_stream_fetch_reducer';
+import { useStreamFetchReducer } from '../../hooks/use_stream_fetch_reducer';
 
 interface StreamState {
   fields: string[];
@@ -43,7 +43,7 @@ function streamReducer(
 }
 
 export const ExplainLogRateSpikes: FC = () => {
-  const { start, data } = useStreamFetchReducer(
+  const { start, data, isRunning } = useStreamFetchReducer(
     '/internal/aiops/explain_log_rate_spikes',
     streamReducer,
     initialState,
@@ -57,14 +57,11 @@ export const ExplainLogRateSpikes: FC = () => {
 
   return (
     <>
-      <p>ALL THE FIELDS</p>
+      <p>{isRunning ? 'Loading fields ...' : 'Loaded all fields.'}</p>
+      <EuiSpacer />
       {data.fields.map((field) => (
         <EuiBadge>{field}</EuiBadge>
       ))}
     </>
   );
 };
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default ExplainLogRateSpikes;

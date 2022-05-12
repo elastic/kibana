@@ -23,9 +23,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { useStreamFetchReducer } from '../../hooks/use_stream_fetch_reducer';
+
 import { getStatusMessage } from './get_status_message';
 import { initialState, resetStream, streamReducer } from './stream_reducer';
-import { useStreamFetchReducer } from './use_stream_fetch_reducer';
 
 export const SingleEndpointStreamingDemo: FC = () => {
   const { notifications } = useKibana();
@@ -132,7 +133,3 @@ export const SingleEndpointStreamingDemo: FC = () => {
     </EuiText>
   );
 };
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default SingleEndpointStreamingDemo;
