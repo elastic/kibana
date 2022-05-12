@@ -113,7 +113,17 @@ export class DataViewsService {
   private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
+  /**
+   *  Handler for service notifications
+   * @param toastInputFields notification content in toast format
+   * @param key used to indicate uniqueness of the notification
+   */
   private onNotification: OnNotification;
+  /*
+   *   Handler for service errors
+   * @param error notification content in toast format
+   * @param key used to indicate uniqueness of the error
+   */
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
   public getCanSave: () => Promise<boolean>;
