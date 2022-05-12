@@ -13,21 +13,35 @@ interface Props {
   tags: string[];
 }
 
+// Number of tags displayed before "+ N more" is displayed
 const MAX_TAGS_TO_DISPLAY = 3;
+
+// Number of characters to display for each tag before truncation
+const MAX_TAG_DISPLAY_LENGTH = 20;
+
+function truncateTag(tag: string) {
+  return tag.length > MAX_TAG_DISPLAY_LENGTH
+    ? `${tag.substring(0, MAX_TAG_DISPLAY_LENGTH)}...`
+    : tag;
+}
 
 export const Tags: React.FunctionComponent<Props> = ({ tags }) => {
   return (
     <>
       {tags.length > MAX_TAGS_TO_DISPLAY ? (
         <>
-          <EuiToolTip content={<span data-test-subj="agentTagsTooltip">{tags.join(', ')}</span>}>
+          <EuiToolTip
+            content={
+              <span data-test-subj="agentTagsTooltip">{tags.map(truncateTag).join(', ')}</span>
+            }
+          >
             <span data-test-subj="agentTags">
-              {take(tags, 3).join(', ')} + {tags.length - MAX_TAGS_TO_DISPLAY} more
+              {take(tags, 3).map(truncateTag).join(', ')} + {tags.length - MAX_TAGS_TO_DISPLAY} more
             </span>
           </EuiToolTip>
         </>
       ) : (
-        <span data-test-subj="agentTags">{tags.join(', ')}</span>
+        <span data-test-subj="agentTags">{tags.map(truncateTag).join(', ')}</span>
       )}
     </>
   );
