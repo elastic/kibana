@@ -77,8 +77,14 @@ describe('Rules', () => {
       });
 
       it('creates a rule', () => {
+        cy.intercept('GET', '/internal/alerting/rules/_find?*').as(
+          'alertingRequest'
+        );
+        cy.intercept('POST', '/api/alerting/rule').as('createRuleRequest');
         // Go to stack management
         cy.visit('/app/management/insightsAndAlerting/triggersActions/rules');
+
+        cy.wait('@alertingRequest', { requestTimeout: 10000 });
 
         // Create a rule
         cy.contains('button', 'Create rule').click();
@@ -93,6 +99,7 @@ describe('Rules', () => {
         // Save, with no actions
         cy.contains('button:not(:disabled)', 'Save').click();
         cy.get(confirmModalButtonSelector).click();
+        cy.wait('@createRuleRequest');
 
         cy.contains(`Created rule "${ruleName}`);
       });

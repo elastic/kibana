@@ -85,7 +85,7 @@ describe('Dependencies', () => {
           backendName: 'postgresql',
         })}`
       );
-      cy.wait('@upstreamRequest');
+      cy.wait('@upstreamRequest', { requestTimeout: 10000 });
       cy.contains('h1', 'postgresql');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
