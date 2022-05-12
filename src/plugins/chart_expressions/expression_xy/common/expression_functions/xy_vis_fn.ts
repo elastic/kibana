@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import {
+  Dimension,
+  prepareLogTable,
+  validateAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
-import { appendLayerIds } from '../helpers';
-import { DataLayerConfigResult, XYLayerConfig, XyVisFn } from '../types';
+import { appendLayerIds, getAccessors } from '../helpers';
+import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
 import { getLayerDimensions } from '../utils';
 import {
   hasAreaLayer,
@@ -20,12 +25,31 @@ import {
   validateValueLabels,
 } from './validate';
 
+const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => ({
+  type: DATA_LAYER,
+  seriesType: args.seriesType,
+  hide: args.hide,
+  columnToLabel: args.columnToLabel,
+  yScaleType: args.yScaleType,
+  xScaleType: args.xScaleType,
+  isHistogram: args.isHistogram,
+  palette: args.palette,
+  yConfig: args.yConfig,
+  layerType: LayerTypes.DATA,
+  table,
+  ...getAccessors(args, table),
+});
+
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
+  validateAccessor(args.splitRowAccessor, data.columns);
+  validateAccessor(args.splitColumnAccessor, data.columns);
+
   const {
     referenceLineLayers = [],
     annotationLayers = [],
+    // data_layer args
     seriesType,
-    accessors = [],
+    accessors,
     xAccessor,
     hide,
     splitAccessor,
@@ -37,24 +61,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     palette,
     ...restArgs
   } = args;
-  const dataLayers: DataLayerConfigResult[] = [
-    {
-      type: DATA_LAYER,
-      seriesType,
-      accessors,
-      xAccessor,
-      hide,
-      splitAccessor,
-      columnToLabel,
-      yScaleType,
-      xScaleType,
-      isHistogram,
-      palette,
-      yConfig,
-      layerType: LayerTypes.DATA,
-      table: data,
-    },
-  ];
+
+  const dataLayers: DataLayerConfigResult[] = [createDataLayer(args, data)];
+
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
     ...appendLayerIds(referenceLineLayers, 'referenceLineLayers'),
@@ -62,6 +71,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   ];
 
   if (handlers.inspectorAdapters.tables) {
+    handlers.inspectorAdapters.tables.reset();
+    handlers.inspectorAdapters.tables.allowCsvExport = true;
+
     const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
       if (layer.layerType === LayerTypes.ANNOTATIONS) {
         return dimensions;
