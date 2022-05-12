@@ -92,7 +92,7 @@ describe('StepDefinePackagePolicy', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () =>
+  const render = ({ isUpdate } = { isUpdate: false }) =>
     (renderResult = testRenderer.render(
       <StepDefinePackagePolicy
         agentPolicy={agentPolicy}
@@ -101,6 +101,7 @@ describe('StepDefinePackagePolicy', () => {
         updatePackagePolicy={mockUpdatePackagePolicy}
         validationResults={validationResults}
         submitAttempted={false}
+        isUpdate={isUpdate}
       />
     ));
 
@@ -203,6 +204,25 @@ describe('StepDefinePackagePolicy', () => {
 
     waitFor(() => {
       expect(renderResult.getByDisplayValue('apache-11')).toBeInTheDocument();
+    });
+  });
+
+  describe('update', () => {
+    describe('when package vars are introduced in a new package version', () => {
+      it('should display new package vars', () => {
+        render({ isUpdate: true });
+
+        waitFor(async () => {
+          expect(renderResult.getByDisplayValue('showUserVarVal')).toBeInTheDocument();
+          expect(renderResult.getByText('Required var')).toBeInTheDocument();
+
+          await act(async () => {
+            fireEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+          });
+
+          expect(renderResult.getByText('Advanced var')).toBeInTheDocument();
+        });
+      });
     });
   });
 });
