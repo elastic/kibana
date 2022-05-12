@@ -7,9 +7,10 @@
  */
 
 import { History } from 'history';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
 import {
@@ -22,6 +23,7 @@ import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { DashboardAppEmpty } from './dashboard_app_empty';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -37,6 +39,8 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
     useKibana<DashboardAppServices>().services;
+
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -57,6 +61,8 @@ export function DashboardApp({
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
     history,
+    showNoDataPage,
+    setShowNoDataPage,
     savedDashboardId,
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
@@ -117,7 +123,8 @@ export function DashboardApp({
 
   return (
     <>
-      {isCompleteDashboardAppState(dashboardAppState) && (
+      {showNoDataPage && <DashboardAppEmpty onDataViewCreated={() => setShowNoDataPage(false)} />}
+      {!showNoDataPage && isCompleteDashboardAppState(dashboardAppState) && (
         <>
           <DashboardTopNav
             printMode={printMode}
