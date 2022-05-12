@@ -36,7 +36,6 @@ describe('Discover cell actions ', function () {
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
-
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterInBtn
@@ -58,7 +57,6 @@ describe('Discover cell actions ', function () {
     );
   });
   it('triggers filter function when FilterOutBtn is clicked', async () => {
-
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterOutBtn
