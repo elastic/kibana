@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function statusPage({ loadTestFile }: FtrProviderContext) {
   describe('Status page', function statusPageTestSuite() {
-    this.tags('ciGroup4');
-
     loadTestFile(require.resolve('./status_page'));
   });
 }

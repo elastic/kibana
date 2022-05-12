@@ -7,20 +7,20 @@
 
 import { useEffect, useReducer, useCallback, useRef } from 'react';
 
-import { CaseMetrics, CaseMetricsFeature } from './types';
+import { SingleCaseMetrics, SingleCaseMetricsFeature } from './types';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
-import { getCaseMetrics } from './api';
+import { getSingleCaseMetrics } from './api';
 
 interface CaseMeticsState {
-  metrics: CaseMetrics | null;
+  metrics: SingleCaseMetrics | null;
   isLoading: boolean;
   isError: boolean;
 }
 
 type Action =
   | { type: 'FETCH_INIT'; payload: { silent: boolean } }
-  | { type: 'FETCH_SUCCESS'; payload: CaseMetrics }
+  | { type: 'FETCH_SUCCESS'; payload: SingleCaseMetrics }
   | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: CaseMeticsState, action: Action): CaseMeticsState => {
@@ -59,7 +59,7 @@ export interface UseGetCaseMetrics extends CaseMeticsState {
 
 export const useGetCaseMetrics = (
   caseId: string,
-  features: CaseMetricsFeature[]
+  features: SingleCaseMetricsFeature[]
 ): UseGetCaseMetrics => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     metrics: null,
@@ -81,7 +81,7 @@ export const useGetCaseMetrics = (
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: { silent } });
 
-        const response: CaseMetrics = await getCaseMetrics(
+        const response: SingleCaseMetrics = await getSingleCaseMetrics(
           caseId,
           features,
           abortCtrlRef.current.signal
