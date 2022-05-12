@@ -22,8 +22,6 @@ import {
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { buildThreatMappingFilter } from './threat_mapping/build_threat_mapping_filter';
-import { getAllThreatListHits } from './threat_mapping/get_threat_list';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../common/cti/constants';
 
 // search_after through documents and re-index using bulk endpoint.
