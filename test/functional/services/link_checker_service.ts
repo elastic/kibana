@@ -24,22 +24,22 @@ export function LinkCheckerServiceProvider({ getService }: FtrProviderContext) {
     // let url;
 
     const linkList = await find.allByCssSelector('a', 100);
-    log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
+    log.debug(`-----link found ${linkList.length} links`);
 
     await asyncForEachWithLimit(linkList, 20, async (link) => {
       try {
         const url = await link.getAttribute('href');
         // if url is NOT in urls, add it and test it
         if (seenUrls.has(url)) {
-          log.debug(`----- ${url} is already in set`);
+          // log.debug(`-----link ${url} was previously tested`);
         } else {
           seenUrls.add(url);
           try {
             const response = await request.head(url);
-            log.debug(`${url} response: ${response.status}`);
+            log.debug(`-----link ${url} response: ${response.status}`);
             if (response.status >= 400) {
               badLinks.push(url);
-              log.error(`bad url found ${url} response: ${response.status}`);
+              log.error(`-----link bad url found ${url} response: ${response.status}`);
             }
           } catch (err) {
             log.debug(err);
@@ -77,10 +77,11 @@ export function LinkCheckerServiceProvider({ getService }: FtrProviderContext) {
     if (currentTimer) {
       clearTimeout(currentTimer);
     }
-    if (badLinks.length) {
+    if (badLinks.length === 0) {
+      log.debug('-----link - no bad links found');
       return;
     }
-    log.error(`${badLinks.length} bad links: ${badLinks.join('\n')} `);
-    throw new Error('bad links were found');
+    log.error(`-----link ${badLinks.length} bad links: ${badLinks.join('\n')} `);
+    throw new Error('-----link bad links were found');
   });
 }
