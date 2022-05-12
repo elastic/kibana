@@ -34,6 +34,7 @@ import {
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
+import { getHealthColor } from '../rules/config';
 import {
   RuleDetailsPathParams,
   EVENT_ERROR_LOG_TAB,
@@ -49,7 +50,7 @@ import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from '
 import { useKibana } from '../../utils/kibana_react';
 // import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
 import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
-import { formatInterval, getColorStatusBased } from './utils';
+import { formatInterval } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 
 export function RuleDetailsPage() {
@@ -249,7 +250,7 @@ export function RuleDetailsPage() {
           {/* Left side of Rule Summary */}
           <EuiFlexItem grow={1}>
             <EuiPanel
-              color={getColorStatusBased(rule.executionStatus.status)}
+              color={getHealthColor(rule.executionStatus.status)}
               hasBorder={false}
               paddingSize={'l'}
             >
@@ -258,7 +259,7 @@ export function RuleDetailsPage() {
                   <EuiTitle size="s">
                     <EuiHealth
                       textSize="inherit"
-                      color={getColorStatusBased(rule.executionStatus.status)}
+                      color={getHealthColor(rule.executionStatus.status)}
                     >
                       {rule.executionStatus.status.charAt(0).toUpperCase() +
                         rule.executionStatus.status.slice(1)}
