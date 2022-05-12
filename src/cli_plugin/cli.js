@@ -23,7 +23,7 @@ program
   );
 
 listCommand(program);
-installCommand(program);
+  installCommand(program);
 removeCommand(program);
 
 program
