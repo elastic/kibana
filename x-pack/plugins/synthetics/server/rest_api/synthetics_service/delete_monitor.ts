@@ -7,6 +7,8 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  ConfigKey,
+  MonitorFields,
   EncryptedSyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
@@ -66,7 +68,13 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       sendTelemetryEvents(
         logger,
         telemetry,
-        formatTelemetryDeleteEvent(monitor, kibanaVersion, new Date().toISOString(), errors)
+        formatTelemetryDeleteEvent(
+          monitor,
+          kibanaVersion,
+          new Date().toISOString(),
+          Boolean((normalizedMonitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+          errors
+        )
       );
 
       if (errors && errors.length > 0) {

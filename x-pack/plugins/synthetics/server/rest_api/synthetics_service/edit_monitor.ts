@@ -79,24 +79,25 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         return response.badRequest({ body: { message, attributes: { details, ...payload } } });
       }
 
-      const monitorWithRevision = formatSecrets({
+      const monitorWithRevision = {
         ...editedMonitor,
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
-      });
+      };
+      const formattedMonitor = formatSecrets(monitorWithRevision);
 
-      const editMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
+      const updatedMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
         await savedObjectsClient.update<MonitorFields>(
           syntheticsMonitorType,
           monitorId,
-          monitor.type === 'browser' ? { ...monitorWithRevision, urls: '' } : monitorWithRevision
+          monitor.type === 'browser' ? { ...formattedMonitor, urls: '' } : formattedMonitor
         );
 
       const errors = await syntheticsService.pushConfigs([
         {
           ...editedMonitor,
-          id: editMonitor.id,
+          id: updatedMonitor.id,
           fields: {
-            config_id: editMonitor.id,
+            config_id: updatedMonitor.id,
           },
           fields_under_root: true,
         },
@@ -105,7 +106,13 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       sendTelemetryEvents(
         logger,
         telemetry,
-        formatTelemetryUpdateEvent(editMonitor, previousMonitor, kibanaVersion, errors)
+        formatTelemetryUpdateEvent(
+          updatedMonitor,
+          previousMonitor,
+          kibanaVersion,
+          Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+          errors
+        )
       );
 
       // Return service sync errors in OK response
@@ -115,7 +122,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         });
       }
 
-      return editMonitor;
+      return updatedMonitor;
     } catch (updateErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
