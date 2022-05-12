@@ -26,6 +26,11 @@ import './alerts_table.scss';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
+const GridStyles: EuiDataGridStyle = {
+  border: 'horizontal',
+  header: 'underline',
+};
+
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
@@ -135,7 +140,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         leadingControlColumns={leadingControlColumns}
         rowCount={alertsCount}
         renderCellValue={handleRenderCellValue}
-        gridStyle={{ rowClasses }}
+        gridStyle={{ ...GridStyles, rowClasses }}
         sorting={{ columns: sortingColumns, onSort }}
         pagination={{
           ...pagination,

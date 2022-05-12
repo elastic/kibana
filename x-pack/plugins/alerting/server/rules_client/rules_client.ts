@@ -94,13 +94,6 @@ import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 
-
-type BulkUpdateActionsFields = pick<keyof Alert, 'tags'>;
-export interface BulkUpdateOptions<Params extends AlertTypeParams> {
-  filter: KueryNode;
-  actions: Array<{ type: 'add' | 'delete' | 'set', field: BulkUpdateActionsFields, preValidation: (obj: Rule[BulkUpdateActionsFields], field, ) => void, onAfterValidation: (obj: Rule[BulkUpdateActionsFields]) => void, value: string[] }>[]
-}
-
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }

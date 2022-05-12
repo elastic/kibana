@@ -6,9 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+
 import { Case } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
-import { getManualAlertIds, getFeatureIdsFromAlertIndices } from '../../user_actions/helpers';
+import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
+import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
 
 interface CaseViewAlertsProps {
   caseData: Case;
@@ -24,21 +26,28 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     }),
     [caseData.comments]
   );
-  const alertFeatureId = useMemo(
-    () => getFeatureIdsFromAlertIndices(caseData.comments),
+  const alertRegistrationContexts = useMemo(
+    () => getRegistrationContextFromAlerts(caseData.comments),
     [caseData.comments]
   );
 
+  const alertFeatureIds = useGetFeatureIds(alertRegistrationContexts);
+
   const alertStateProps = useMemo(() => {
-    const configurationId = alertFeatureId.includes('siem') ? 'securitySolution' : 'observability';
+    const configurationId = caseData.owner;
     return {
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId,
       id: `case-details-alerts-${configurationId}`,
-      featureIds: alertFeatureId,
+      featureIds: alertFeatureIds,
       query: alertIdsQuery,
     };
-  }, [alertFeatureId, triggersActionsUi.alertsTableConfigurationRegistry, alertIdsQuery]);
+  }, [
+    caseData.owner,
+    triggersActionsUi.alertsTableConfigurationRegistry,
+    alertFeatureIds,
+    alertIdsQuery,
+  ]);
 
   return <>{triggersActionsUi.getAlertsStateTable(alertStateProps)}</>;
 };

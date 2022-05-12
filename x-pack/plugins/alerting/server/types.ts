@@ -123,7 +123,6 @@ export type ExecutorType<
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
-  validateMutatedParams?: (mutatedOject: unknown, origObject?: unknown) => Params;
 }
 
 export interface RuleType<

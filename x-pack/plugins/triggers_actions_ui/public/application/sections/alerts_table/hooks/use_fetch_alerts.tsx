@@ -19,6 +19,7 @@ import type {
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
+import * as i18n from './translations';
 
 const defaultSort: estypes.SortCombinations[] = [
   {
@@ -212,7 +213,7 @@ const useFetchAlerts = ({
                 } else if (isErrorResponse(response)) {
                   dispatch({ type: 'loading', loading: false });
                   // TODO add i118n
-                  data.search.showError(new Error('i18n.ERROR_FETCH_ALERTS'));
+                  data.search.showError(new Error(i18n.ERROR_FETCH_ALERTS));
                   searchSubscription$.current.unsubscribe();
                 }
               },
@@ -256,7 +257,7 @@ const useFetchAlerts = ({
   }, [featureIds, fields, pagination, query, sort]);
 
   useEffect(() => {
-    if (!deepEqual(alertRequest, prevAlertRequest.current)) {
+    if (alertRequest.featureIds.length > 0 && !deepEqual(alertRequest, prevAlertRequest.current)) {
       fetchAlerts(alertRequest);
     }
   }, [alertRequest, fetchAlerts]);

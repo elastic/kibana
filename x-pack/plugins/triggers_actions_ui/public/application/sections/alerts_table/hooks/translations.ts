@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-// TODO Implements ;)
-export const useStateFetchAlerts = () => {};
+import { i18n } from '@kbn/i18n';
+
+export const ERROR_FETCH_ALERTS = i18n.translate(
+  'xpack.triggersActionsUI.components.alertTable.useFetchAlerts.errorMessageText',
+  {
+    defaultMessage: `An error has occurred on alerts search`,
+  }
+);

@@ -18,7 +18,8 @@ import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/c
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useFetchAlerts } from './hooks';
 import { AlertsTable } from './alerts_table';
-import { RenderCellValueProps } from '../../../types';
+import { AlertsTableConfigurationRegistry, RenderCellValueProps } from '../../../types';
+import { TypeRegistry } from '../../type_registry';
 
 const DefaultPagination = {
   pageSize: 10,
