@@ -56,15 +56,36 @@ export function InfraTabs() {
   const podNames = data?.infrastructureData.podNames;
   const hostNames = data?.infrastructureData.hostNames;
 
+  const { data: containersData, status: containersStatus } = useFetcher(
+    (callApmApi) => {
+      if (containerIds && containerIds.length > 0) {
+        return callApmApi('GET /internal/apm/container/host_names', {
+          params: {
+            query: {
+              start,
+              end,
+              containerIds: JSON.stringify(containerIds),
+            },
+          },
+        });
+      }
+    },
+    [containerIds, start, end]
+  );
+
   const tabs = useTabs({
     containerIds: containerIds || [],
     podNames: podNames || [],
     hostNames: hostNames || [],
+    containersHostNames: containersData?.hostNames || [],
     start,
     end,
   });
 
-  if (status === FETCH_STATUS.LOADING) {
+  if (
+    status === FETCH_STATUS.LOADING ||
+    containersStatus === FETCH_STATUS.LOADING
+  ) {
     return (
       <div style={{ textAlign: 'center' }}>
         <EuiLoadingSpinner size="l" />
@@ -112,12 +133,14 @@ function useTabs({
   containerIds,
   podNames,
   hostNames,
+  containersHostNames,
   start,
   end,
 }: {
   containerIds: string[];
   podNames: string[];
   hostNames: string[];
+  containersHostNames: string[];
   start: string;
   end: string;
 }) {
@@ -139,18 +162,19 @@ function useTabs({
     (): QueryDslQueryContainer => ({
       bool: {
         should: [
-          { terms: { 'host.name': hostNames } },
           {
             terms: {
-              'container.id': containerIds,
+              'host.name':
+                containersHostNames.length > 0
+                  ? containersHostNames
+                  : hostNames,
             },
           },
-          { terms: { 'kubernetes.pod.name': podNames } },
         ],
         minimum_should_match: 1,
       },
     }),
-    [hostNames, containerIds, podNames]
+    [containersHostNames, hostNames]
   );
   const podsFilter = useMemo(
     () => ({
