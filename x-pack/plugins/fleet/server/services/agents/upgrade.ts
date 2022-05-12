@@ -6,6 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import moment from 'moment';
 
 import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '..';
@@ -27,6 +28,8 @@ import {
   getAgentPolicyForAgent,
 } from './crud';
 import { searchHitToAgent } from './helpers';
+
+const MINIMUM_EXECUTION_DURATION_SECONDS = 1800; // 30m
 
 function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
@@ -78,6 +81,7 @@ export async function sendUpgradeAgentsActions(
     version: string;
     sourceUri?: string | undefined;
     force?: boolean;
+    upgradeDurationSeconds?: number;
   }
 ) {
   // Full set of agents
@@ -158,12 +162,21 @@ export async function sendUpgradeAgentsActions(
     source_uri: options.sourceUri,
   };
 
+  const rollingUpgradeOptions = options?.upgradeDurationSeconds
+    ? {
+        start_time: now,
+        minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+        expiration: moment().add(options?.upgradeDurationSeconds, 'seconds').toISOString(),
+      }
+    : {};
+
   await createAgentAction(esClient, {
     created_at: now,
     data,
     ack_data: data,
     type: 'UPGRADE',
     agents: agentsToUpdate.map((agent) => agent.id),
+    ...rollingUpgradeOptions,
   });
 
   await bulkUpdateAgents(
