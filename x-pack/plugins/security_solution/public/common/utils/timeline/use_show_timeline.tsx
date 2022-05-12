@@ -6,8 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { matchPath } from 'react-router-dom';
-import { useRouteSpy } from '../route/use_route_spy';
+import { matchPath, useLocation } from 'react-router-dom';
 
 import { getLinksWithHiddenTimeline } from '../../links';
 import { useIsGroupedNavigationEnabled } from '../../components/navigation/helpers';
@@ -34,15 +33,15 @@ const isTimelineHidden = (currentPath: string, isGroupedNavigationEnabled: boole
 
 export const useShowTimeline = () => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
-  const [{ pathName }] = useRouteSpy();
+  const { pathname } = useLocation();
 
   const [showTimeline, setShowTimeline] = useState(
-    !isTimelineHidden(pathName, isGroupedNavigationEnabled)
+    !isTimelineHidden(pathname, isGroupedNavigationEnabled)
   );
 
   useEffect(() => {
-    setShowTimeline(!isTimelineHidden(pathName, isGroupedNavigationEnabled));
-  }, [pathName, isGroupedNavigationEnabled]);
+    setShowTimeline(!isTimelineHidden(pathname, isGroupedNavigationEnabled));
+  }, [pathname, isGroupedNavigationEnabled]);
 
   return [showTimeline];
 };
