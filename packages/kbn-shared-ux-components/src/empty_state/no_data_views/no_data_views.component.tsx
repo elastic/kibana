@@ -24,7 +24,7 @@ export interface Props {
 }
 
 const createDataViewText = i18n.translate('sharedUXComponents.noDataViewsPrompt.addDataViewText', {
-  defaultMessage: 'Create Data View',
+  defaultMessage: 'Create data view',
 });
 
 // Using raw value because it is content dependent
