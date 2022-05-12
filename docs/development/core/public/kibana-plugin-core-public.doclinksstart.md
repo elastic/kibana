@@ -18,3 +18,4 @@ export interface DocLinksStart
 |  [DOC\_LINK\_VERSION](./kibana-plugin-core-public.doclinksstart.doc_link_version.md) | string |  |
 |  [ELASTIC\_WEBSITE\_URL](./kibana-plugin-core-public.doclinksstart.elastic_website_url.md) | string |  |
 |  [links](./kibana-plugin-core-public.doclinksstart.links.md) | DocLinks |  |
+

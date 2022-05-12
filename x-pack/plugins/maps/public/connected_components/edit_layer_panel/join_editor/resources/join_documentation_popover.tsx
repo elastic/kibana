@@ -38,31 +38,39 @@ export class JoinDocumentationPopover extends Component<{}, State> {
           <p>
             <FormattedMessage
               id="xpack.maps.joinDocs.intro"
-              defaultMessage="A term join adds properties to vector features for data-driven styling."
+              defaultMessage="Term joins augment layers with properties for data driven styling. Term joins work as follows:"
             />
           </p>
+          <ul>
+            <li>
+              <FormattedMessage
+                id="xpack.maps.joinDocs.sharedKey"
+                defaultMessage="A shared key combines vector features, the left source, with the results of an Elasticsearch aggregation, the right source."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.maps.joinDocs.termsAggregation"
+                defaultMessage="The terms aggregation creates a bucket for each unique shared key."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.maps.joinDocs.metrics"
+                defaultMessage="Metrics are calculated for all documents in a bucket."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.maps.joinDocs.join"
+                defaultMessage="The join adds metrics for each terms aggregation bucket with the corresponding shared key."
+              />
+            </li>
+          </ul>
           <p>
             <FormattedMessage
-              id="xpack.maps.joinDocs.intro"
-              defaultMessage="A term join uses a shared key to combine vector features with the results of an Elasticsearch terms aggregation."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.maps.joinDocs.intro"
-              defaultMessage="The terms aggregation creates a bucket for each unique shared key. Metrics are calculated for all documents in a bucket."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.maps.joinDocs.intro"
-              defaultMessage="The join adds metrics for each terms aggregation bucket to the feature with the corresponding shared key. Features without a corresponding terms aggregation bucket are not visible on the map."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.maps.joinDocs.exmaple"
-              defaultMessage="For example, you can use a term join to add web log traffic count to world countries, then shade the countries by web log traffic."
+              id="xpack.maps.joinDocs.noMatches"
+              defaultMessage="Features that do have have a corresponding terms aggregation bucket are not visible on the map."
             />
           </p>
           <EuiLink href={getDocLinks().links.maps.termJoinsExample} target="_blank" external={true}>

@@ -11,7 +11,6 @@ import uuid from 'uuid/v4';
 import { EuiTitle, EuiSpacer, EuiTextAlign, EuiCallOut } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { Join } from './resources/join';
 import { JoinDocumentationPopover } from './resources/join_documentation_popover';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
