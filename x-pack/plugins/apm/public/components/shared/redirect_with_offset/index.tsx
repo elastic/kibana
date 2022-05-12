@@ -13,6 +13,7 @@ import { isRouteWithTimeRange } from '../is_route_with_time_range';
 import {
   TimeRangeComparisonEnum,
   dayAndWeekBeforeToOffset,
+  ComparisonOptionEnum,
 } from '../time_comparison/get_comparison_options';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getComparisonEnabled } from '../time_comparison/get_comparison_enabled';
@@ -33,11 +34,14 @@ export function RedirectWithOffset({
   // or when 'comparisonEnabled' is not set as it's now required
   if (
     matchesRoute &&
-    ('comparisonType' in query || !('comparisonEnabled' in query))
+    ('comparisonType' in query ||
+      !('comparisonEnabled' in query) ||
+      !('comparison' in query))
   ) {
     const {
       comparisonType,
       comparisonEnabled: urlComparisonEnabled,
+      comparison,
       ...queryRest
     } = query;
 
@@ -59,14 +63,12 @@ export function RedirectWithOffset({
         to={qs.stringifyUrl({
           url: location.pathname,
           query: {
-            comparison: getComparisonEnabled({
-              core,
-              urlComparisonEnabled: urlComparisonEnabled
-                ? toBoolean(urlComparisonEnabled as string)
-                : undefined,
-            })
-              ? 'time'
-              : 'FALSE',
+            comparison:
+              query.comparison ??
+              (comparisonEnabled
+                ? ComparisonOptionEnum.Time
+                : ComparisonOptionEnum.False),
+            // @todo: remove without page blanking
             comparisonEnabled,
             ...(dayOrWeekOffset ? { offset: dayOrWeekOffset } : {}),
             ...queryRest,

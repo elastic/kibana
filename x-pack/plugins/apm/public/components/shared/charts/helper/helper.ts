@@ -22,6 +22,7 @@ export const onBrushEnd = ({
     const end = x[1];
 
     const currentSearch = toQuery(history.location.search);
+
     const nextSearch = {
       rangeFrom: new Date(start).toISOString(),
       rangeTo: new Date(end).toISOString(),

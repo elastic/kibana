@@ -44,7 +44,7 @@ export function TimeComparison() {
     [start, end]
   );
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
-    ({ value }) => value === offset
+    ({ value }) => value === offset || value === ComparisonOptionEnum.MlBounds
   );
 
   // Replaces type when current one is no longer available in the select options
@@ -86,6 +86,8 @@ export function TimeComparison() {
                   },
                 });
               } else {
+                // By default, if comparison is turned on
+                // We show time comparisons instead of ML expected model bounds
                 urlHelpers.push(history, {
                   query: {
                     comparison: ComparisonOptionEnum.Time,
