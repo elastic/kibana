@@ -38,6 +38,11 @@ export const createQueryAlertType = (
 
           validateImmutable(mutatedRuleParams.immutable);
 
+          // TODO: unify me
+          if (mutatedRuleParams.index?.length === 0) {
+            throw Error("Index pattern can't be empty");
+          }
+
           return mutatedRuleParams;
         },
       },

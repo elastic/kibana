@@ -29,6 +29,7 @@ import {
   createLegacyRuleAction,
   getLegacyActionSO,
   installPrePackagedRules,
+  getSimpleMlRule,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -608,22 +609,89 @@ export default ({ getService }: FtrProviderContext): void => {
           .send();
         const immutableRule = findBody.data[0];
 
-        const { body } = await postBulkAction().send({
-          ids: [immutableRule.id],
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
+        const { body } = await postBulkAction()
+          .send({
+            ids: [immutableRule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_tags,
+                value: ['new-tag'],
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message: "Mutated params invalid: Elastic rule can't be edited",
+          rules: [
             {
-              type: BulkActionEditType.add_tags,
-              value: ['new-tag'],
+              id: immutableRule.id,
+              name: immutableRule.name,
             },
           ],
         });
+      });
+
+      it('should return error if index patterns action is applied to machine learning rule', async () => {
+        const mlRule = await createRule(supertest, log, getSimpleMlRule());
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [mlRule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['index-*'],
+              },
+            ],
+          })
+          .expect(500);
 
         expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
-        expect(body.attributes.errors[0].message).to.be(
-          "Mutated params invalid: Elastic rule can't be edited"
-        );
-        expect(body.attributes.errors[0].rules[0].id).to.be(immutableRule.id);
+        expect(body.attributes.errors[0]).to.eql({
+          message:
+            "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
+          rules: [
+            {
+              id: mlRule.id,
+              name: mlRule.name,
+            },
+          ],
+        });
+      });
+
+      it('should return error if all index patterns removed from a rule', async () => {
+        const rule = await createRule(supertest, log, {
+          ...getSimpleRule(),
+          index: ['simple-index-*'],
+        });
+
+        const { body } = await postBulkAction()
+          .send({
+            ids: [rule.id],
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['simple-index-*'],
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+        expect(body.attributes.errors[0]).to.eql({
+          message: "Mutated params invalid: Index pattern can't be empty",
+          rules: [
+            {
+              id: rule.id,
+              name: rule.name,
+            },
+          ],
+        });
       });
     });
 
