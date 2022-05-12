@@ -15,6 +15,7 @@ import {
   BarSeries,
   Fit,
   GeometryValue,
+  GroupBy,
   HorizontalAlignment,
   LayoutDirection,
   LineAnnotation,
@@ -24,6 +25,7 @@ import {
   ScaleType,
   SeriesNameFn,
   Settings,
+  SmallMultiples,
   VerticalAlignment,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
@@ -57,6 +59,7 @@ import {
 } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { Annotations } from './annotations';
+import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 const onClickValue = jest.fn();
@@ -760,6 +763,29 @@ describe('XYChart component', () => {
     expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
   });
 
+  test('it renders empty placeholder for no results with references layer', () => {
+    const { data, args } = sampleArgsWithReferenceLine();
+    const emptyDataLayers = args.layers.map((layer) => {
+      if (layer.type === 'dataLayer') {
+        return { ...layer, table: { ...data, rows: [] } };
+      } else {
+        return layer;
+      }
+    });
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: emptyDataLayers,
+        }}
+      />
+    );
+
+    expect(component.find(BarSeries)).toHaveLength(0);
+    expect(component.find(EmptyPlaceholder).prop('icon')).toBeDefined();
+  });
+
   test('onBrushEnd returns correct context data for date histogram data', () => {
     const { args } = sampleArgs();
 
@@ -776,7 +802,7 @@ describe('XYChart component', () => {
 
     expect(onSelectRange).toHaveBeenCalledWith({
       column: 0,
-      table: dateHistogramData.tables.timeLayer,
+      table: dateHistogramData,
       range: [1585757732783, 1585758880838],
     });
   });
@@ -972,7 +998,7 @@ describe('XYChart component', () => {
         {
           column: 0,
           row: 0,
-          table: dateHistogramData.tables.timeLayer,
+          table: dateHistogramData,
           value: 1585758120000,
         },
       ],
@@ -2699,6 +2725,96 @@ describe('XYChart component', () => {
 
       expect(lineAnnotations.length).toEqual(2);
       expect(rectAnnotations.length).toEqual(1);
+    });
+  });
+
+  describe('split chart', () => {
+    const SPLIT_COLUMN = '__split_column__';
+    const SPLIT_ROW = '__split_row__';
+
+    it('should render split chart if splitRowAccessor is specified', () => {
+      const { args } = sampleArgs();
+      const splitRowAccessor = 'b';
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitRowAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitRowAccessor')).toEqual(splitRowAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_ROW);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+    });
+
+    it('should render split chart if splitColumnAccessor is specified', () => {
+      const { args } = sampleArgs();
+      const splitColumnAccessor = 'b';
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitColumnAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitColumnAccessor')).toEqual(splitColumnAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
+    });
+
+    it('should render split chart if both, splitRowAccessor and splitColumnAccessor are specified', () => {
+      const { args } = sampleArgs();
+      const splitColumnAccessor = 'b';
+      const splitRowAccessor = 'c';
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            splitColumnAccessor,
+            splitRowAccessor,
+          }}
+        />
+      );
+      expect(component).toMatchSnapshot();
+
+      const splitChart = component.find(SplitChart);
+
+      expect(splitChart.prop('splitRowAccessor')).toEqual(splitRowAccessor);
+      expect(splitChart.prop('splitColumnAccessor')).toEqual(splitColumnAccessor);
+
+      const groupBy = splitChart.dive().find(GroupBy);
+      const smallMultiples = splitChart.dive().find(SmallMultiples);
+
+      expect(groupBy.at(0).prop('id')).toEqual(SPLIT_COLUMN);
+      expect(groupBy.at(1).prop('id')).toEqual(SPLIT_ROW);
+
+      expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
+      expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
     });
   });
 });
