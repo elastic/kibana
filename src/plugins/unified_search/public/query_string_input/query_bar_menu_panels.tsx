@@ -249,10 +249,10 @@ export function QueryBarMenuPanels({
     {
       name: savedQuery
         ? i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
-            defaultMessage: 'Load other filter set',
+            defaultMessage: 'Load other saved query',
           })
         : i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-            defaultMessage: 'Load filter set',
+            defaultMessage: 'Load saved query',
           }),
       panel: 4,
       width: 350,
@@ -266,7 +266,7 @@ export function QueryBarMenuPanels({
             defaultMessage: 'Save as new',
           })
         : i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
-            defaultMessage: 'Save filter set',
+            defaultMessage: 'Save saved query',
           }),
       icon: 'save',
       disabled:
@@ -331,7 +331,13 @@ export function QueryBarMenuPanels({
                 size="s"
                 data-test-subj="savedQueryTitle"
               >
-                <strong>{savedQuery ? savedQuery.attributes.title : 'Filter set'}</strong>
+                <strong>
+                  {savedQuery
+                    ? savedQuery.attributes.title
+                    : i18n.translate('unifiedSearch.search.searchBar.savedQuery', {
+                        defaultMessage: 'Saved query',
+                      })}
+                </strong>
               </EuiText>
             </EuiFlexItem>
             {savedQuery && savedQueryHasChanged && Boolean(showSaveQuery) && hasFiltersOrQuery && (
@@ -397,7 +403,7 @@ export function QueryBarMenuPanels({
     {
       id: 1,
       title: i18n.translate('unifiedSearch.filter.options.saveCurrentFilterSetLabel', {
-        defaultMessage: 'Save current filter set',
+        defaultMessage: 'Save current saved query',
       }),
       disabled: !Boolean(showSaveQuery),
       content: <div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>,
@@ -483,7 +489,7 @@ export function QueryBarMenuPanels({
     {
       id: 4,
       title: i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-        defaultMessage: 'Load filter set',
+        defaultMessage: 'Load saved query',
       }),
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
