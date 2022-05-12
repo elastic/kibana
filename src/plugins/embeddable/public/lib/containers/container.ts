@@ -146,14 +146,12 @@ export abstract class Container<
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(newType);
       }
-
-      newExplicitInput.id = id;
       this.updateInput({
         panels: {
           ...this.input.panels,
           [id]: {
             ...this.input.panels[id],
-            explicitInput: newExplicitInput,
+            explicitInput: { ...newExplicitInput, id },
             type: newType,
           },
         },
