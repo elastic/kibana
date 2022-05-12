@@ -144,6 +144,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     if (selectedTags.length) {
+      if (kueryBuilder) {
+        kueryBuilder = `(${kueryBuilder}) and`;
+      }
       kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
         .map((tag) => `"${tag}"`)
         .join(' or ')})`;
