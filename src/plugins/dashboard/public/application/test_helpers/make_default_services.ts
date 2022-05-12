@@ -12,6 +12,7 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
+import { userContentMock } from '@kbn/user-content-plugin/public/mocks';
 import { PluginInitializerContext, ScopedHistory } from '@kbn/core/public';
 import { chromeServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
@@ -91,5 +92,6 @@ export function makeDefaultServices(): DashboardAppServices {
     initializerContext,
     savedDashboards,
     core,
+    userContent: userContentMock.createStart(),
   };
 }

@@ -11,6 +11,7 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ToastsStart } from '@kbn/core/public';
 import React from 'react';
 import { themeServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
+import { userContentMock } from '@kbn/user-content-plugin/public/mocks';
 import { TableListView } from './table_list_view';
 
 const requiredProps = {
@@ -27,6 +28,8 @@ const requiredProps = {
   findItems: jest.fn(() => Promise.resolve({ total: 0, hits: [] })),
   theme: themeServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  userContent: userContentMock.createStart(),
+  contentType: 'dashboard',
 };
 
 describe('TableListView', () => {

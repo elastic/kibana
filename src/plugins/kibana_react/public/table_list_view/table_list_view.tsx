@@ -65,10 +65,10 @@ export interface TableListViewProps<V> {
    */
   tableCaption: string;
   contentType?: string;
+  userContent?: UserContentPluginStart;
   searchFilters?: SearchFilterConfig[];
   theme: ThemeServiceStart;
   application: ApplicationStart;
-  userContent: UserContentPluginStart;
 }
 
 export interface TableListViewState<V> {
@@ -177,6 +177,9 @@ class TableListView<V extends {}> extends React.Component<
 
   fetchUserContentTypes = async () => {
     const { userContent } = this.props;
+    if (!userContent) {
+      return;
+    }
     const userContentTypes = await userContent.getUserContentTypes();
 
     // If this is a user generated content we set the default value of the "Views day range"
@@ -186,6 +189,9 @@ class TableListView<V extends {}> extends React.Component<
   };
 
   loadUserContentTableColumnDefinition = async () => {
+    if (!this.props.userContent) {
+      return;
+    }
     const userContentColumnDefinition =
       await this.props.userContent.ui.getUserContentTableColumnsDefinitions({
         contentType: this.props.contentType ?? '',
