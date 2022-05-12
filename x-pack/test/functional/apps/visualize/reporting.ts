@@ -29,7 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visEditor',
   ]);
 
-  describe('Visualize Reporting Screenshots', () => {
+  describe('Visualize Reporting Screenshots', function () {
+    this.tags(['smoke']);
     before(async () => {
       await browser.setWindowSize(1600, 850);
     });
