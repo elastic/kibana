@@ -24,7 +24,7 @@ export const SingleEndpointStreamingDemoPage: FC = () => {
       <MlPageHeader>
         <FormattedMessage
           id="xpack.ml.singleEndpointStreamingDemo.pageHeader"
-          defaultMessage="Explain log rate spikes"
+          defaultMessage="Single endpoint streaming demo"
         />
       </MlPageHeader>
       <SingleEndpointStreamingDemo />
