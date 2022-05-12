@@ -15,8 +15,10 @@ After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or late
 * Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
 * Create a {sn} integration user and assign it the appropriate roles.
 * Create a Cross-Origin Resource Sharing (CORS) rule.
-* (If using OAuth) Create an RSA keypair and add an X.509 Certificate.
-* (If using OAuth) Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map.
+
+*If using OAuth*
+* Create an RSA keypair and add an X.509 Certificate.
+* Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map.
 
 *Create a {sn} integration user*
 
@@ -53,46 +55,67 @@ This step is required to use OAuth for authentication between Elastic and {sn}.
 
 To create an RSA keypair:
 
-. Use OpenSSL[https://www.openssl.org/docs/man1.0.2/man1/genrsa.html] to generate an RSA private key:
+. Use https://www.openssl.org/docs/man1.0.2/man1/genrsa.html[OpenSSL] to generate an RSA private key:
 
 [source,sh]
 ----
 openssl genrsa -out example-private-key.pem 3072
 openssl genrsa -passout pass:foobar -out example-private-key-with-password.pem 3072 <1>
 ----
-<1> Use the `passout` option to set a password on your private key. This is optional but remember your password if you use one!
+<1> Use the `passout` option to set a password on your private key. This is optional but remember your password if you set one.
 
-. Use OpenSSL[https://www.openssl.org/docs/man1.0.2/man1/req.html] to generate the matching public key:
+
+. Use https://www.openssl.org/docs/man1.0.2/man1/req.html[OpenSSL] to generate the matching public key:
 
 [source,sh]
 ----
 openssl req -new -x509 -key example-private-key.pem -out example-sn-cert.pem -days 360
 ----
 
-. In your {sn} instance, go to *Certificates*.
-. Click *New*.
+. In your {sn} instance, go to *Certificates* and select *New*.
 . Configure the certificate as follows:
 * *Name*: Name the certificate.
-* *PEM Certificate*: Copy the generated public key into this text field. 
+* *PEM Certificate*: Copy the generated public key into this text field.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-new-certificate.png[Shows new certificate form in ServiceNow]
+
 . Click *Submit* to create the certificate.
 
 *Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map*
 
 This step is required to use OAuth for authentication between Elastic and {sn}.
 
-. In your {sn} instance, go to *Application Registry*.
-. Click *New*.
+. In your {sn} instance, go to *Application Registry* and select *New*.
 . Select *Create an OAuth JWT API endpoint for external clients* from the list of options.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-jwt-endpoint.png[Shows application type selection]
+
 . Configure the application as follows:
 * *Name*: Name the application.
 * *User field*: Select the field to use as the user identifier.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-new-application.png[Shows new application form in ServiceNow]
+
+. Remember the selected user field. You will use this as the *User Identifier Value* when creating the connector. For example, if you selected *Email* for *User field*, you will use the user's email for the *User Identifier Value*.
+
 . Click *Submit* to create the application. You will be redirected to the list of applications.
 . Select the application you just created.
 . Find the *Jwt Verifier Maps* tab and click *New*.
 . Configure the new record as follows:
 * *Name*: Name the JWT verifier map.
+* *Sys certificate*: Click the search icon and select the name of the certificate created in the previous step.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-new-jwt-verifier-map.png[Shows new JWT Verifier Map form in ServiceNow]
+
 . Click *Submit* to create the application.
-. Retrieve the *Client ID*, *Client Secret* and *JWT Key ID*. You will need these values to create your {sn} connector.
+. Note the *Client ID*, *Client Secret* and *JWT Key ID*. You will need these values to create your {sn} connector.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-oauth-values.png[Shows where to find OAuth values in ServiceNow]
 
 [float]
 [[servicenow-sir-connector-update]]
