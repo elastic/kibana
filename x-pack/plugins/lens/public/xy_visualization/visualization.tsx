@@ -514,8 +514,6 @@ export const getXyVisualization = ({
     );
   },
 
-  shouldBuildDatasourceExpressionManually: () => true,
-
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,
