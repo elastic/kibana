@@ -62,6 +62,9 @@ export const getOAuthClientCredentialsAccessToken = async ({
   }
 
   if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
+    // Save the time before requesting token so we can use it to calculate expiration
+    const requestTokenStart = Date.now();
+
     // request access token with jwt assertion
     const tokenResult = await requestOAuthClientCredentialsToken(
       tokenUrl,
@@ -82,6 +85,7 @@ export const getOAuthClientCredentialsAccessToken = async ({
           connectorId,
           token: connectorToken,
           newToken: accessToken,
+          tokenRequestDate: requestTokenStart,
           expiresInSec: tokenResult.expiresIn,
           deleteExisting: hasErrors,
         });
