@@ -109,7 +109,7 @@ export function Detail() {
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
   const isCloud = true || !!services?.cloud?.cloudId; // TODO: Remove true|| before PR
-  const { addIntegrationStepsPage: isExperimentalAddIntegrationPageEnabled } =
+  const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
     ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
 

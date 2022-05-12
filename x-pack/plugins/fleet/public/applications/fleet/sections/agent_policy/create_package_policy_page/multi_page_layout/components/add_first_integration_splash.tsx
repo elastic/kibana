@@ -24,6 +24,7 @@ import {
 
 import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
 import { IntegrationBreadcrumb } from '../../components';
+import { Error } from '../../../../../components';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 import { WithHeaderLayout } from '../../../../../layouts';
 import { useStartServices } from '../../../../../hooks';
@@ -185,13 +186,18 @@ const CenteredDocLink = () => (
   </EuiFlexGroup>
 );
 
-// TODO: make buttons work
-const InstallBottomBar = () => (
+const InstallBottomBar: React.FC<{
+  isLoading: boolean;
+  cancelClickHandler: React.ReactEventHandler;
+  cancelUrl: string;
+  onNext: () => void;
+}> = ({ isLoading, onNext, cancelClickHandler, cancelUrl }) => (
   <CenteredRoundedBottomBar>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="ghost" size="s" onClick={() => {}}>
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
             <FormattedMessage
               id="xpack.fleet.addFirstIntegrationSplash.backButton"
               defaultMessage="Go back"
@@ -200,11 +206,18 @@ const InstallBottomBar = () => (
         </EuiFlexItem>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton color="primary" fill size="m">
-          <FormattedMessage
-            id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
-            defaultMessage="Install Elastic Agent"
-          />
+        <EuiButton color="primary" fill size="m" isLoading={isLoading} onClick={onNext}>
+          {isLoading ? (
+            <FormattedMessage
+              id="xpack.fleet.addFirstIntegrationSplash.loading"
+              defaultMessage="Loading..."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.addFirstIntegrationSplash.installAgentButton"
+              defaultMessage="Install Elastic Agent"
+            />
+          )}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -216,7 +229,31 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
   error: RequestError | null;
   packageInfo?: PackageInfo;
   isLoading: boolean;
-}> = ({ integrationInfo, packageInfo, isLoading, error }) => {
+  cancelClickHandler: React.ReactEventHandler;
+  cancelUrl: string;
+  onNext: () => void;
+}> = ({
+  integrationInfo,
+  packageInfo,
+  isLoading,
+  error,
+  cancelUrl,
+  cancelClickHandler,
+  onNext,
+}) => {
+  if (error) {
+    return (
+      <Error
+        title={
+          <FormattedMessage
+            id="xpack.fleet.addFirstIntegrationSplash.errorLoadingPackageTitle"
+            defaultMessage="Error loading package information"
+          />
+        }
+        error={error}
+      />
+    );
+  }
   const topContent = (
     <EuiTitle size="l">
       <PaddedCentralTitle>
@@ -238,7 +275,12 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
         <NotObscuredByBottomBar>
           <CenteredDocLink />
         </NotObscuredByBottomBar>
-        <InstallBottomBar />
+        <InstallBottomBar
+          cancelUrl={cancelUrl}
+          cancelClickHandler={cancelClickHandler}
+          isLoading={isLoading}
+          onNext={onNext}
+        />
         {packageInfo && (
           <IntegrationBreadcrumb
             pkgTitle={integrationInfo?.title || packageInfo.title}
