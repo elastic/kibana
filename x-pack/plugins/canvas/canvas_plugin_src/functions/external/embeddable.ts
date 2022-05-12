@@ -163,10 +163,12 @@ export function embeddableFunctionFactory({
         return state;
       },
 
-      migrations: mapValues<
-        MigrateFunctionsObject,
-        MigrateFunction<ExpressionAstFunction, ExpressionAstFunction>
-      >(embeddablePersistableStateService.getAllMigrations(), migrateByValueEmbeddable),
+      migrations: () => {
+        return mapValues<
+          MigrateFunctionsObject,
+          MigrateFunction<ExpressionAstFunction, ExpressionAstFunction>
+        >(embeddablePersistableStateService.getAllMigrations(), migrateByValueEmbeddable);
+      },
     };
   };
 }
