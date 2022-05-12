@@ -10,7 +10,7 @@ import { Controller, FieldErrors, Control } from 'react-hook-form';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import { ServiceLocations } from '../../../../../../common/runtime_types';
+import { SimpleFormData } from '../simple_monitor_form';
 import { serviceLocationsSelector } from '../../../state/monitor_management/service_locations';
 import { ConfigKey } from '../../../../../../common/constants/monitor_management';
 
@@ -19,13 +19,7 @@ export const ServiceLocationsField = ({
   control,
 }: {
   errors: FieldErrors;
-  control: Control<
-    {
-      urls: string;
-      locations: ServiceLocations;
-    },
-    any
-  >;
+  control: Control<SimpleFormData, any>;
 }) => {
   const locations = useSelector(serviceLocationsSelector);
 

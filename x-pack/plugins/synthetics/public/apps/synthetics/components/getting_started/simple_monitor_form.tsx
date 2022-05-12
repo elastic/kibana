@@ -14,20 +14,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSimpleMonitor } from './use_simple_monitor';
 import { ServiceLocationsField } from './form_fields/service_locations';
-import { kibanaService } from '../../../../utils/kibana_service';
-import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
-import { createMonitorAPI } from '../../state/monitor_management/api';
-import {
-  ConfigKey,
-  DataStream,
-  ServiceLocations,
-  SyntheticsMonitorWithId,
-} from '../../../../../common/runtime_types';
+import { ConfigKey, ServiceLocations } from '../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../hooks/use_form_wrapped';
 
 export interface SimpleFormData {
@@ -48,47 +39,13 @@ export const SimpleMonitorForm = () => {
     defaultValues: { urls: '', locations: [] as ServiceLocations },
   });
 
-  const { application } = useKibana().services;
-
-  const [monitorData, setMonitorData] = useState<SimpleFormData>({
-    urls: '',
-    locations: [],
-  });
+  const [monitorData, setMonitorData] = useState<SimpleFormData | undefined>();
 
   const onSubmit = (data: SimpleFormData) => {
     setMonitorData(data);
   };
 
-  const { data, loading } = useFetcher(() => {
-    if (!monitorData.urls || monitorData.locations.length < 1) {
-      return new Promise<undefined>((resolve) => resolve(undefined));
-    }
-    const { urls, locations } = monitorData;
-
-    return createMonitorAPI({
-      monitor: {
-        ...monitorData,
-        ...DEFAULT_FIELDS.browser,
-        'source.inline.script': `step('Go to ${urls}', async () => {
-                                    await page.goto('${urls}');
-                                });`,
-        [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-        [ConfigKey.NAME]: MY_FIRST_MONITOR,
-        [ConfigKey.LOCATIONS]: locations,
-      },
-    });
-  }, [monitorData]);
-
-  useEffect(() => {
-    const newMonitor = data as SyntheticsMonitorWithId;
-    if (!loading && newMonitor?.id) {
-      kibanaService.toasts.addSuccess({
-        title: MONITOR_SUCCESS_LABEL,
-        toastLifeTimeMs: 3000,
-      });
-      application?.navigateToApp('uptime', { path: `/monitor/${btoa(newMonitor.id)}` });
-    }
-  }, [application, data, loading]);
+  const { loading } = useSimpleMonitor({ monitorData });
 
   const hasURLError = !!errors?.[ConfigKey.URLS];
 
