@@ -8,17 +8,14 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type {
   ClusterGetComponentTemplateResponse,
-  IndicesGetAliasResponse,
-  IndicesGetDataStreamResponse,
   IndicesGetIndexTemplateResponse,
-  IndicesGetMappingResponse,
   IndicesGetTemplateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { parse } from 'query-string';
 import type { RouteDependencies } from '../../..';
 import { API_BASE_PATH } from '../../../../../common/constants';
 
-export interface Settings {
+interface Settings {
   indices: boolean;
   fields: boolean;
   templates: boolean;
@@ -29,17 +26,7 @@ async function retrieveSettings(
   esClient: IScopedClusterClient,
   settingsKey: keyof Settings,
   settings: Settings
-): Promise<
-  | IndicesGetMappingResponse
-  | IndicesGetAliasResponse
-  | IndicesGetDataStreamResponse
-  | [
-      IndicesGetTemplateResponse,
-      IndicesGetIndexTemplateResponse,
-      ClusterGetComponentTemplateResponse
-    ]
-  | void
-> {
+) {
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settings[settingsKey]) {
     switch (settingsKey) {
@@ -59,12 +46,8 @@ async function retrieveSettings(
         return Promise.resolve({});
     }
   } else {
-    if (!settings[settingsKey]) {
-      // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return Promise.resolve({});
-    } else {
-      return Promise.resolve();
-    }
+    // If the user doesn't want autocomplete suggestions, then clear any that exist
+    return Promise.resolve({});
   }
 }
 
@@ -98,14 +81,25 @@ export function registerGetRoute({ router }: RouteDependencies) {
         const mappings = await getMappings(esClient, settings);
         const aliases = await getAliases(esClient, settings);
         const dataStreams = await getDataStreams(esClient, settings);
-        const templates = await getTemplates(esClient, settings);
+        const [legacyTemplates, indexTemplates, componentTemplates] = (await getTemplates(
+          esClient,
+          settings
+        )) as [
+          IndicesGetTemplateResponse,
+          IndicesGetIndexTemplateResponse,
+          ClusterGetComponentTemplateResponse
+        ];
 
         return response.ok({
           body: {
             mappings,
             aliases,
             dataStreams,
-            templates,
+            templates: {
+              legacyTemplates,
+              indexTemplates,
+              componentTemplates,
+            },
           },
         });
       } catch (e) {

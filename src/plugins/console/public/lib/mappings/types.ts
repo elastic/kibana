@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { Alias } from './alias';
-export { Mapping, getTypes } from './mapping';
-export { DataStream } from './data_stream';
-export { LegacyTemplate } from './legacy_template';
-export { IndexTemplate } from './index_template';
-export { ComponentTemplate } from './component_template';
+export interface Field {
+  name: string;
+  type: string;
+}
+
+export interface FieldMapping {
+  enabled?: boolean;
+  path?: string;
+  properties?: Record<string, FieldMapping>;
+  type?: string;
+  index_name?: string;
+  fields?: FieldMapping[];
+}

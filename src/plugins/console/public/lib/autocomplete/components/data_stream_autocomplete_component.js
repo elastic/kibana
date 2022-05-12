@@ -10,7 +10,7 @@ import { ListComponent } from './list_component';
 import { getAutocompleteInfo } from '../../../services';
 
 function ListGenerator() {
-  return getAutocompleteInfo().dataStreams.get();
+  return getAutocompleteInfo().dataStream.get();
 }
 
 export class DataStreamAutocompleteComponent extends ListComponent {
