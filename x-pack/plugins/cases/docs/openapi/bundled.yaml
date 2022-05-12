@@ -318,6 +318,13 @@ paths:
                       advertising cheap holidays for underpaid civil servants.
                       Operation bubblegum is active. Repeat - operation
                       bubblegum is now active
+                  duration:
+                    type: integer
+                    description: >-
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If an error occurs or the case has
+                      not been closed, the duration is set to null.
+                    example: 120
                   external_service:
                     type: object
                     properties:
@@ -732,6 +739,13 @@ paths:
                       advertising cheap holidays for underpaid civil servants.
                       Operation bubblegum is active. Repeat - operation
                       bubblegum is now active
+                  duration:
+                    type: integer
+                    description: >-
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If an error occurs or the case has
+                      not been closed, the duration is set to null.
+                    example: 120
                   external_service:
                     type: object
                     properties:
@@ -1117,6 +1131,13 @@ paths:
                       advertising cheap holidays for underpaid civil servants.
                       Operation bubblegum is active. Repeat - operation
                       bubblegum is now active
+                  duration:
+                    type: integer
+                    description: >-
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If an error occurs or the case has
+                      not been closed, the duration is set to null.
+                    example: 120
                   external_service:
                     type: object
                     properties:
@@ -1533,6 +1554,13 @@ paths:
                       advertising cheap holidays for underpaid civil servants.
                       Operation bubblegum is active. Repeat - operation
                       bubblegum is now active
+                  duration:
+                    type: integer
+                    description: >-
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If an error occurs or the case has
+                      not been closed, the duration is set to null.
+                    example: 120
                   external_service:
                     type: object
                     properties:
