@@ -111,5 +111,18 @@ export default function ({
 
       expect(result?.rows?.[0]?.count).to.be(1194);
     });
+
+    it('should support `kibana_context` time range on input', async () => {
+      const expression = `
+        kibana_context timeRange={timerange from="2006-09-21T00:00:00Z" to="2015-09-22T00:00:00Z"}
+        | essql query='select count(*) as count from "logstash-*"' timeField="@timestamp"
+      `;
+      const result = await expectExpression(
+        'essql_kibana_context_timerange',
+        expression
+      ).getResponse();
+
+      expect(result?.rows?.[0]?.count).to.be(9375);
+    });
   });
 }

@@ -19,7 +19,10 @@ import {
 
 import { map, zipObject } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
+import { getTime } from '../../query';
 import { UiSettingsCommon } from '../..';
 import {
   ISearchGeneric,
@@ -38,6 +41,7 @@ interface Arguments {
   parameter: Array<string | number | boolean>;
   count: number;
   timezone: string;
+  timeField?: string;
 }
 
 export type EssqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -52,6 +56,7 @@ interface EssqlFnArguments {
 }
 
 interface EssqlStartDependencies {
+  nowProvider?: NowProviderPublicContract;
   search: ISearchGeneric;
   uiSettings: UiSettingsCommon;
 }
@@ -116,9 +121,16 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
             'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
         }),
       },
+      timeField: {
+        aliases: ['timeField'],
+        types: ['string'],
+        help: i18n.translate('data.search.essql.timeField.help', {
+          defaultMessage: 'The time field to use in the time range filter set in the context.',
+        }),
+      },
     },
-    async fn(input, { parameter, timezone, count, query }, { getKibanaRequest }) {
-      const { search, uiSettings } = await getStartDependencies(() => {
+    async fn(input, { count, parameter, query, timeField, timezone }, { getKibanaRequest }) {
+      const { nowProvider, search, uiSettings } = await getStartDependencies(() => {
         const request = getKibanaRequest?.();
         if (!request) {
           throw new Error(
@@ -142,10 +154,17 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         const esQueryConfigs = getEsQueryConfig(
           uiSettings as Parameters<typeof getEsQueryConfig>[0]
         );
+        const timeFilter =
+          input.timeRange &&
+          getTime(undefined, input.timeRange, {
+            fieldName: timeField,
+            forceNow: nowProvider?.get(),
+          });
+
         params.filter = buildEsQuery(
           undefined,
           input.query || [],
-          input.filters || [],
+          [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
           esQueryConfigs
         );
       }

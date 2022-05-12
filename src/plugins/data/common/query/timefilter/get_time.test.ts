@@ -80,6 +80,23 @@ describe('get_time', () => {
       });
       clock.restore();
     });
+
+    test('build range filter when a data view is omitted', () => {
+      const filter = getTime(
+        undefined,
+        { from: 'now-60y', to: 'now' },
+        { fieldName: 'something' }
+      ) as RangeFilter;
+
+      expect(filter).toHaveProperty(
+        'query.range.something',
+        expect.objectContaining({
+          gte: expect.any(String),
+          lte: expect.any(String),
+          format: 'strict_date_optional_time',
+        })
+      );
+    });
   });
   describe('getRelativeTime', () => {
     test('do not coerce relative time to absolute time when given flag', () => {

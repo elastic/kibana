@@ -35,11 +35,12 @@ export function getEssql({
         { uiSettings },
         ,
         {
+          nowProvider,
           search: { search },
         },
       ] = await getStartServices();
 
-      return { search, uiSettings: uiSettings as unknown as UiSettingsCommon };
+      return { nowProvider, search, uiSettings: uiSettings as unknown as UiSettingsCommon };
     },
   });
 }
