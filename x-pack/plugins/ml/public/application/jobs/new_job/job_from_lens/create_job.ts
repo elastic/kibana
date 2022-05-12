@@ -19,6 +19,7 @@ import type {
   GenericIndexPatternColumn,
   IndexPatternLayer,
   TermsIndexPatternColumn,
+  SeriesType,
 } from '@kbn/lens-plugin/public';
 
 import type { JobCreatorType } from '../common/job_creator';
@@ -29,7 +30,7 @@ import { createAbsoluteTimeRange } from '../../../../../common/util/date_utils';
 import { createQueries, getDefaultQuery } from '../utils/new_job_utils';
 import { lensOperationToMlFunction } from './utils';
 
-const COMPATIBLE_SERIES_TYPES = [
+const COMPATIBLE_SERIES_TYPES: SeriesType[] = [
   'line',
   'bar',
   'bar_stacked',
@@ -41,7 +42,7 @@ const COMPATIBLE_SERIES_TYPES = [
   'area_percentage_stacked',
 ];
 
-const COMPATIBLE_LAYER_TYPE = 'data';
+const COMPATIBLE_LAYER_TYPE: XYDataLayerConfig['layerType'] = 'data';
 
 export async function canCreateAndStashADJob(
   vis: LensSavedObjectAttributes,
