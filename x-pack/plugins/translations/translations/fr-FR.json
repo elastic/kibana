@@ -5370,7 +5370,6 @@
     "sharedUXComponents.noDataPage.elasticAgentCard.noPermission.description": "Cette intégration n'est pas encore activée. Votre administrateur possède les autorisations requises pour l’activer.",
     "sharedUXComponents.noDataPage.elasticAgentCard.noPermission.title": "Contactez votre administrateur",
     "sharedUXComponents.noDataPage.elasticAgentCard.title": "Ajouter Elastic Agent",
-    "sharedUXComponents.noDataViews.dataViewExplanation": "Kibana a besoin d'une vue de données pour identifier les flux de données, les index et les alias d'index que vous souhaitez explorer. Une vue de données peut pointer vers un index spécifique, par exemple, vos données de log de la veille ou tous les index contenant vos données de log.",
     "sharedUXComponents.noDataViews.learnMore": "Envie d'en savoir plus ?",
     "sharedUXComponents.noDataViews.readDocumentation": "Lisez les documents",
     "sharedUXComponents.pageTemplate.noDataCard.description": "Continuer sans collecter de données",

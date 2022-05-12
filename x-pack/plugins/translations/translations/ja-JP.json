@@ -5475,7 +5475,6 @@
     "sharedUXComponents.noDataPage.elasticAgentCard.noPermission.description": "この統合はまだ有効ではありません。管理者にはオンにするために必要なアクセス権があります。",
     "sharedUXComponents.noDataPage.elasticAgentCard.noPermission.title": "管理者にお問い合わせください",
     "sharedUXComponents.noDataPage.elasticAgentCard.title": "Elasticエージェントの追加",
-    "sharedUXComponents.noDataViews.dataViewExplanation": "Kibanaでは、探索するデータストリーム、インデックス、インデックスエイリアスを特定するためにデータビューが必要です。データビューは、昨日のログデータなど特定のインデックス、またはログデータを含むすべてのインデックスを参照できます。",
     "sharedUXComponents.noDataViews.learnMore": "詳細について",
     "sharedUXComponents.noDataViews.readDocumentation": "<b>ドキュメント</b><b>を読む</b>",
     "sharedUXComponents.pageTemplate.noDataCard.description": "データを収集せずに続行",

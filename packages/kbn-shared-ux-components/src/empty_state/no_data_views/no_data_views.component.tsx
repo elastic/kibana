@@ -66,9 +66,25 @@ export const NoDataViews = ({
     <h2>
       <FormattedMessage
         id="sharedUXComponents.noDataViewsPrompt.noPermission.title"
-        defaultMessage="Contact your administrator"
+        defaultMessage="Create a data view by contacting your administrator"
       />
     </h2>
+  );
+
+  const body = canCreateNewDataView ? (
+    <p>
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.dataViewExplanation"
+        defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data."
+      />
+    </p>
+  ) : (
+    <p>
+      <FormattedMessage
+        id="sharedUXComponents.noDataViewsPrompt.noPermission.dataViewExplanation"
+        defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data. For more information, contact your administrator."
+      />
+    </p>
   );
 
   return (
@@ -82,17 +98,7 @@ export const NoDataViews = ({
       color={emptyPromptColor}
       icon={<DataViewIllustration />}
       title={title}
-      body={
-        <p>
-          <FormattedMessage
-            id="sharedUXComponents.noDataViews.dataViewExplanation"
-            defaultMessage="Kibana requires a data view to identify which data streams,
-            indices, and index aliases you want to explore. A data view can point to a
-            specific index, for example, your log data from yesterday, or all indices
-            that contain your log data."
-          />
-        </p>
-      }
+      body={body}
       actions={createNewButton}
       footer={dataViewsDocLink && <DocumentationLink href={dataViewsDocLink} />}
     />
