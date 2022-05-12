@@ -20,6 +20,8 @@ export class FilesPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup) {
+    InternalFileService.setup(core.savedObjects);
+
     this.readyPromise = core.getStartServices().then(async ([coreStart]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const blobStorageService = new BlobStorageService(
@@ -27,12 +29,10 @@ export class FilesPlugin implements Plugin {
         this.logger.get('blob-storage-service')
       );
       this.fileService = new InternalFileService(
-        core.savedObjects,
         coreStart.savedObjects,
         blobStorageService,
         this.logger.get('files-service')
       );
-      this.fileService.setup();
     });
 
     return {};
