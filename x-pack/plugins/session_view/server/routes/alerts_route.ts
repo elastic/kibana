@@ -93,8 +93,8 @@ export const searchAlerts = async (
     track_total_hits: true,
     size,
     index: indices.join(','),
-    sort: { '@timestamp': 'asc' },
-    lastSortIds: cursor ? [cursor] : undefined,
+    sort: [{ '@timestamp': 'asc' }],
+    search_after: cursor ? [cursor] : undefined,
   });
 
   // if an alert is being investigated, fetch it on it's own, as it's not guaranteed to come back in the above request.
