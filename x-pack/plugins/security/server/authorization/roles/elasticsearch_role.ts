@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaFeature } from '../../../../features/common';
 import type { Logger } from '../../../../../../src/core/server';
-
+import type { KibanaFeature } from '../../../../features/common';
 import {
   GLOBAL_RESOURCE,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
