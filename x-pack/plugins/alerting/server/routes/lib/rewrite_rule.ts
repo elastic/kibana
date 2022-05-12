@@ -21,6 +21,7 @@ export const rewriteRule = ({
   executionStatus,
   actions,
   scheduledTaskId,
+  snoozeSchedule,
   isSnoozedUntil,
   ...rest
 }: SanitizedRule<RuleTypeParams>) => ({
@@ -35,6 +36,8 @@ export const rewriteRule = ({
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
+  // Remove this object spread boolean check after snooze props is added to the public API
+  ...(snoozeSchedule != null ? { snooze_schedule: snoozeSchedule } : {}),
   ...(isSnoozedUntil != null ? { is_snoozed_until: isSnoozedUntil } : {}),
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
