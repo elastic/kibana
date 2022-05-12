@@ -12,7 +12,6 @@ import { transformRule } from './common_transformations';
 
 export async function loadRule({
   http,
-
   ruleId,
 }: {
   http: HttpSetup;
