@@ -12,7 +12,6 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
   COMPARE_ALL_OPTIONS,
-  IFieldSubTypeMulti,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
