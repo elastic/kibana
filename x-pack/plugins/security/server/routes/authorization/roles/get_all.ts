@@ -11,7 +11,11 @@ import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import type { ElasticsearchRole } from './model';
 import { transformElasticsearchRoleToRole } from './model';
 
-export function defineGetAllRolesRoutes({ router, authz }: RouteDefinitionParams) {
+export function defineGetAllRolesRoutes({
+  router,
+  authz,
+  logger,
+}: RouteDefinitionParams) {
   router.get(
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -29,7 +33,8 @@ export function defineGetAllRolesRoutes({ router, authz }: RouteDefinitionParams
                 // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
                 elasticsearchRole,
                 roleName,
-                authz.applicationName
+                authz.applicationName,
+                logger
               )
             )
             .sort((roleA, roleB) => {
