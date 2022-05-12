@@ -13,6 +13,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
+import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
 
 export async function findExactConfiguration({
   service,
@@ -51,5 +52,15 @@ export async function findExactConfiguration({
     return;
   }
 
-  return convertConfigSettingsToString(hit);
+  const configsAppliedToAgentsThroughFleet =
+    await getConfigsAppliedToAgentsThroughFleet({ setup });
+
+  return {
+    id: hit._id,
+    ...convertConfigSettingsToString(hit)._source,
+    applied_by_agent:
+      hit._source.applied_by_agent ||
+      (hit._source.etag !== undefined &&
+        configsAppliedToAgentsThroughFleet.hasOwnProperty(hit._source.etag)),
+  };
 }

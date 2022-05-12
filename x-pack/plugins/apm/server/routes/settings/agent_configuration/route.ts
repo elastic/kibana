@@ -25,7 +25,6 @@ import {
 } from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
-import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
@@ -40,29 +39,9 @@ const agentConfigurationRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
 
-    const [configsAppliedToAgentsThroughFleet, configurations] =
-      await Promise.all([
-        getConfigsAppliedToAgentsThroughFleet({ setup }),
-        listConfigurations({ setup }),
-      ]);
+    const configurations = await listConfigurations({ setup });
 
-    const updatedConfigs = configurations.map(
-      (
-        agentConfig
-      ): import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration => {
-        return {
-          ...agentConfig,
-          applied_by_agent:
-            agentConfig.applied_by_agent ||
-            (agentConfig.etag !== undefined &&
-              configsAppliedToAgentsThroughFleet.hasOwnProperty(
-                agentConfig.etag
-              )),
-        };
-      }
-    );
-
-    return { configurations: updatedConfigs };
+    return { configurations };
   },
 });
 
@@ -94,7 +73,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
       throw Boom.notFound();
     }
 
-    return config._source;
+    return config;
   },
 });
 
@@ -125,11 +104,11 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     }
 
     logger.info(
-      `Deleting config ${service.name}/${service.environment} (${config._id})`
+      `Deleting config ${service.name}/${service.environment} (${config.id})`
     );
 
     const deleteConfigurationResult = await deleteConfiguration({
-      configurationId: config._id,
+      configurationId: config.id,
       setup,
     });
 
@@ -185,7 +164,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     );
 
     await createOrUpdateConfiguration({
-      configurationId: config?._id,
+      configurationId: config?.id,
       configurationIntake: body,
       setup,
     });
