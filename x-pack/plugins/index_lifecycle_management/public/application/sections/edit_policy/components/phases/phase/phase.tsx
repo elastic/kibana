@@ -10,11 +10,9 @@ import React, { FunctionComponent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiText,
   EuiAccordion,
   EuiSpacer,
-  EuiBadge,
   EuiTimelineItem,
   EuiSplitPanel,
   EuiHorizontalRule,
@@ -22,20 +20,18 @@ import {
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PhaseExceptDelete } from '../../../../../../../common/types';
-import { ToggleField, useFormData } from '../../../../../../shared_imports';
+import { Phase as PhaseType } from '../../../../../../../common/types';
+import { useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
 import { FormInternal } from '../../../types';
-import { UseField } from '../../../form';
-import { MinAgeField } from '../shared_fields';
 import { PhaseIcon } from '../../phase_icon';
 import { PhaseFooter } from '../../phase_footer';
-import { PhaseErrorIndicator } from './phase_error_indicator';
 
 import './phase.scss';
+import { PhaseTitle } from './phase_title';
 
 interface Props {
-  phase: PhaseExceptDelete;
+  phase: PhaseType;
   /**
    * Settings that should always be visible on the phase when it is enabled.
    */
@@ -49,50 +45,14 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
   });
 
   const isHotPhase = phase === 'hot';
+  const isDeletePhase = phase === 'delete';
   // hot phase is always enabled
   const enabled = get(formData, enabledPath) || isHotPhase;
 
-  const phaseTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      {!isHotPhase && (
-        <EuiFlexItem grow={false}>
-          <UseField
-            path={enabledPath}
-            component={ToggleField}
-            componentProps={{
-              euiFieldProps: {
-                'data-test-subj': `enablePhaseSwitch-${phase}`,
-                showLabel: false,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      {isHotPhase && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge className="ilmPhaseRequiredBadge">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.phaseTitle.requiredBadge"
-              defaultMessage="Required"
-            />
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <PhaseErrorIndicator phase={phase} />
-      </EuiFlexItem>
-      {!isHotPhase && enabled && (
-        <EuiFlexItem grow={true}>
-          <MinAgeField phase={phase} />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
+  // delete phase is hidden when disabled
+  if (isDeletePhase && !enabled) {
+    return null;
+  }
 
   return (
     <EuiTimelineItem
@@ -102,7 +62,7 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
     >
       <EuiSplitPanel.Outer color="transparent" hasBorder grow>
         <EuiSplitPanel.Inner color={enabled ? 'transparent' : 'subdued'}>
-          {phaseTitle}
+          <PhaseTitle phase={phase} />
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner>
@@ -132,17 +92,19 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
                     />
                   }
                   buttonClassName="ilmSettingsButton"
-                  extraAction={<PhaseFooter phase={phase} />}
+                  extraAction={!isDeletePhase && <PhaseFooter phase={phase} />}
                 >
                   <EuiSpacer />
                   {children}
                 </EuiAccordion>
               ) : (
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <PhaseFooter phase={phase} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                !isDeletePhase && (
+                  <EuiFlexGroup justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <PhaseFooter phase={phase} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )
               )}
             </>
           )}
