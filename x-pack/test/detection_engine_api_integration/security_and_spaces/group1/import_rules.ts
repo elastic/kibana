@@ -345,7 +345,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
-          rules_count: 1,
+          rules_count: 2,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,

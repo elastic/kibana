@@ -272,6 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
           success: false,
+          rules_count: 1,
           success_count: 0,
           exceptions_errors: [],
           exceptions_success: true,
