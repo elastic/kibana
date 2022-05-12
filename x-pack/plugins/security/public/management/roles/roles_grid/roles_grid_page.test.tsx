@@ -125,7 +125,7 @@ describe('<RolesGridPage />', () => {
     await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
-    expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
+    expect(wrapper.find(PermissionDenied).render()).toMatchSnapshot();
   });
 
   it('renders role actions as appropriate, escaping when necessary', async () => {

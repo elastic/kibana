@@ -56,7 +56,7 @@ const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
-  margin-left: ${({ theme }) => theme.eui.spacerSizes.xl};
+  margin-left: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
 const EuiFlexItemNested = styled(EuiFlexItem)`

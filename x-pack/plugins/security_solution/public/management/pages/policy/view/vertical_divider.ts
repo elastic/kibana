@@ -8,7 +8,7 @@
 import styled from 'styled-components';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
-type SpacingOptions = keyof EuiTheme['eui']['spacerSizes'];
+type SpacingOptions = keyof EuiTheme['eui']['paddingSizes'];
 
 /**
  * A vertical divider - show a vertical line that spans 100% of the height of its parent container.

@@ -48,8 +48,8 @@ import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 
 const SettingsTitleCell = styled.td`
-  padding-right: ${(props) => props.theme.eui.spacerSizes.xl};
-  padding-bottom: ${(props) => props.theme.eui.spacerSizes.m};
+  padding-right: ${(props) => props.theme.eui.euiSizeXL};
+  padding-bottom: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const NoteLabel = () => (

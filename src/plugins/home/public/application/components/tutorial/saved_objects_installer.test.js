@@ -45,7 +45,7 @@ describe('bulkCreate', () => {
     // Ensure the state changes are reflected
     component.update();
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   test('should display error message when bulkCreate request fails', async () => {
@@ -66,7 +66,7 @@ describe('bulkCreate', () => {
     // Ensure the state changes are reflected
     component.update();
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   test('should filter out saved object version before calling bulkCreate', async () => {

@@ -48,7 +48,7 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
                 style={Object {}}
               >
                 <div
-                  className="euiSpacer euiSpacer--m"
+                  className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
                 />
                 <div
                   className="euiText euiText--medium"

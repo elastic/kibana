@@ -39,7 +39,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             Element controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-ghmjhm-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -378,7 +378,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
           />
         </div>
         <div
@@ -390,7 +390,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             Expression controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-ghmjhm-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -415,7 +415,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
           />
         </div>
         <div
@@ -427,7 +427,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             Editor controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-ghmjhm-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -734,7 +734,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
           />
         </div>
         <div
@@ -746,7 +746,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             Presentation controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-ghmjhm-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -907,7 +907,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
           />
         </div>
       </div>

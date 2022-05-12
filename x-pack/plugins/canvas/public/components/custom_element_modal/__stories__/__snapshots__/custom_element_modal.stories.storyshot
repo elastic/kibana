@@ -216,7 +216,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
               />
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
@@ -533,7 +533,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
               />
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned canvasElementCard"
@@ -845,7 +845,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
               />
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
@@ -1154,7 +1154,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
               />
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"

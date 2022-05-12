@@ -88,7 +88,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
             </div>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
           />
           <div
             className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
@@ -123,7 +123,7 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
                     style={Object {}}
                   >
                     <div
-                      className="euiSpacer euiSpacer--m"
+                      className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
                     />
                     <div
                       className="euiText euiText--medium"
@@ -258,7 +258,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
             </div>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
           />
           <div
             className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
@@ -736,7 +736,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
             </div>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
           />
           <div
             className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
