@@ -116,15 +116,17 @@ export function RuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const getRuleConditionsWording = () => (
-    <>
-      {rule?.params.criteria ? String((rule?.params.criteria as any[]).length) : 0}{' '}
-      {/* TODO:  Add [s] to the conditions word based on how many conditions */}
-      {i18n.translate('xpack.observability.ruleDetails.conditions', {
-        defaultMessage: 'conditions',
-      })}
-    </>
-  );
+  const getRuleConditionsWording = () => {
+    const numberOfConditions = rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0;
+    return (
+      <>
+        {numberOfConditions}{' '}
+        {i18n.translate('xpack.observability.ruleDetails.condition', {
+          defaultMessage: numberOfConditions > 1 ? 'conditions' : 'condition',
+        })}
+      </>
+    );
+  };
 
   const tabs = [
     {
