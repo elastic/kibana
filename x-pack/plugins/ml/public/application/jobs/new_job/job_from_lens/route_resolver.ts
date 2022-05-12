@@ -10,7 +10,12 @@ import { Query } from '@kbn/data-plugin/public';
 import { Filter } from '@kbn/es-query';
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { canCreateAndStashADJob } from './create_job';
-import { getUiSettings, getDataViews, getSavedObjectsClient } from '../../../util/dependency_cache';
+import {
+  getUiSettings,
+  getDataViews,
+  getSavedObjectsClient,
+  getTimefilter,
+} from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
 export async function resolver(
@@ -45,8 +50,18 @@ export async function resolver(
 
   const dataViewClient = getDataViews();
   const kibanaConfig = getUiSettings();
+  const timeFilter = getTimefilter();
 
-  await canCreateAndStashADJob(vis, from, to, query, filters, dataViewClient, kibanaConfig);
+  await canCreateAndStashADJob(
+    vis,
+    from,
+    to,
+    query,
+    filters,
+    dataViewClient,
+    kibanaConfig,
+    timeFilter
+  );
 }
 
 async function getLensSavedObject(id: string) {

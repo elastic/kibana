@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
-import { Query } from '@kbn/data-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { Filter, Query, DataViewBase } from '@kbn/es-query';
 
 import type {
   LensSavedObjectAttributes,
@@ -21,12 +22,12 @@ import type {
   TermsIndexPatternColumn,
   SeriesType,
 } from '@kbn/lens-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
-import { createAbsoluteTimeRange } from '../../../../../common/util/date_utils';
 import { createQueries, getDefaultQuery } from '../utils/new_job_utils';
 import { lensOperationToMlFunction } from './utils';
 
@@ -51,7 +52,8 @@ export async function canCreateAndStashADJob(
   query: Query,
   filters: Filter[],
   dataViewClient: DataViewsContract,
-  kibanaConfig: IUiSettingsClient
+  kibanaConfig: IUiSettingsClient,
+  timeFilter: TimefilterContract
 ) {
   try {
     const { jobConfig, datafeedConfig, createdBy } = await createADJobFromLensSavedObject(
@@ -71,9 +73,9 @@ export async function canCreateAndStashADJob(
       // if start and end values cannot be determined
       // instruct the job cloning code to auto-select the
       // full time range for the index.
-      const range = createAbsoluteTimeRange({ to: endString, from: startString });
-      start = range?.from;
-      end = range?.to;
+      const { min, max } = timeFilter.calculateBounds({ to: endString, from: startString });
+      start = min?.valueOf();
+      end = max?.valueOf();
 
       if (start === undefined || end === undefined || isNaN(start) || isNaN(end)) {
         throw Error('Incompatible time range');
@@ -141,14 +143,14 @@ async function createADJobFromLensSavedObject(
   const jobConfig = createEmptyJob();
   const datafeedConfig = createEmptyDatafeed(dataView.title);
 
-  const mainQuery = query?.query !== '' ? query : vis.state.query;
-
-  const { combinedQuery } = createQueries(
-    { query: mainQuery, filter: filters },
+  const combinedFiltersAndQueries = combineQueriesAndFilters(
+    { query, filters },
+    { query: vis.state.query, filters: vis.state.filters },
     dataView,
     kibanaConfig
   );
-  datafeedConfig.query = combinedQuery;
+
+  datafeedConfig.query = combinedFiltersAndQueries;
 
   jobConfig.analysis_config.detectors = createDetectors(fields, splitField);
 
@@ -212,6 +214,10 @@ async function extractFields(vis: LensSavedObjectAttributes, dataViewClient: Dat
     throw Error('Selected split field contains more than one field');
   }
 
+  if (splitField !== null && isStringField(splitField) === false) {
+    throw Error('Selected split field type must be string');
+  }
+
   const dataView = await getDataViewFromLens(vis.references, layerId, dataViewClient);
   if (dataView === null) {
     throw Error('No data views can be found in the visualization.');
@@ -269,16 +275,45 @@ function getColumns(layer: Omit<IndexPatternLayer, 'indexPatternId'>) {
   return columns as Record<string, FieldBasedIndexPatternColumn>;
 }
 
-export function hasSourceField(
-  column: GenericIndexPatternColumn
-): column is FieldBasedIndexPatternColumn {
+function hasSourceField(column: GenericIndexPatternColumn): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;
 }
 
-export function isTermsField(column: GenericIndexPatternColumn): column is TermsIndexPatternColumn {
+function isTermsField(column: GenericIndexPatternColumn): column is TermsIndexPatternColumn {
   return column.operationType === 'terms' && 'params' in column;
 }
 
-export function hasIncompatibleProperties(column: GenericIndexPatternColumn) {
+function isStringField(column: GenericIndexPatternColumn) {
+  return column.dataType === 'string';
+}
+
+function hasIncompatibleProperties(column: GenericIndexPatternColumn) {
   return 'timeShift' in column || 'filter' in column;
+}
+
+function combineQueriesAndFilters(
+  dashboard: { query: Query; filters: Filter[] },
+  vis: { query: Query; filters: Filter[] },
+  dataView: DataViewBase,
+  kibanaConfig: IUiSettingsClient
+): estypes.QueryDslQueryContainer {
+  const { combinedQuery: dashboardQueries } = createQueries(
+    {
+      query: dashboard.query,
+      filter: dashboard.filters,
+    },
+    dataView,
+    kibanaConfig
+  );
+
+  const { combinedQuery: visQueries } = createQueries(
+    {
+      query: vis.query,
+      filter: vis.filters,
+    },
+    dataView,
+    kibanaConfig
+  );
+
+  return merge(dashboardQueries, visQueries);
 }

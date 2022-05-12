@@ -15,6 +15,7 @@ import {
   buildQueryFromFilters,
   DataViewBase,
 } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
@@ -33,7 +34,7 @@ const DEFAULT_DSL_QUERY: estypes.QueryDslQueryContainer = {
   },
 };
 
-const DEFAULT_QUERY: Query = {
+export const DEFAULT_QUERY: Query = {
   query: '',
   language: 'lucene',
 };
@@ -67,12 +68,12 @@ export function createSearchItems(
 }
 
 export function createQueries(
-  data: { query: Query; filter: any[] },
-  indexPattern: DataViewBase | undefined,
+  data: { query: Query; filter: Filter[] },
+  dataView: DataViewBase | undefined,
   kibanaConfig: IUiSettingsClient
 ) {
   let query = getDefaultQuery();
-  let combinedQuery: any = getDefaultDatafeedQuery();
+  let combinedQuery: estypes.QueryDslQueryContainer = getDefaultDatafeedQuery();
 
   query = data.query;
   const filter = data.filter;
@@ -81,9 +82,9 @@ export function createQueries(
   if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
-      combinedQuery = toElasticsearchQuery(ast, indexPattern);
+      combinedQuery = toElasticsearchQuery(ast, dataView);
     }
-    const filterQuery = buildQueryFromFilters(filters, indexPattern);
+    const filterQuery = buildQueryFromFilters(filters, dataView);
 
     if (combinedQuery.bool === undefined) {
       combinedQuery.bool = {};
@@ -101,19 +102,29 @@ export function createQueries(
 
     if (Array.isArray(combinedQuery.bool.filter) === false) {
       combinedQuery.bool.filter =
-        combinedQuery.bool.filter === undefined ? [] : [combinedQuery.bool.filter];
+        combinedQuery.bool.filter === undefined
+          ? []
+          : [combinedQuery.bool.filter as estypes.QueryDslQueryContainer];
     }
 
     if (Array.isArray(combinedQuery.bool.must_not) === false) {
       combinedQuery.bool.must_not =
-        combinedQuery.bool.must_not === undefined ? [] : [combinedQuery.bool.must_not];
+        combinedQuery.bool.must_not === undefined
+          ? []
+          : [combinedQuery.bool.must_not as estypes.QueryDslQueryContainer];
     }
 
-    combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
-    combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
+    combinedQuery.bool.filter = [
+      ...(combinedQuery.bool.filter as estypes.QueryDslQueryContainer[]),
+      ...filterQuery.filter,
+    ];
+    combinedQuery.bool.must_not = [
+      ...(combinedQuery.bool.must_not as estypes.QueryDslQueryContainer[]),
+      ...filterQuery.must_not,
+    ];
   } else {
     const esQueryConfigs = getEsQueryConfig(kibanaConfig);
-    combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    combinedQuery = buildEsQuery(dataView, [query], filters, esQueryConfigs);
   }
 
   return {
