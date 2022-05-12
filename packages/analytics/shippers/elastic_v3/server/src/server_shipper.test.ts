@@ -129,7 +129,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
@@ -171,7 +171,7 @@ describe('ElasticV3ServerShipper', () => {
       {
         body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
         headers: {
-          'content-type': 'application/x-njson',
+          'content-type': 'application/x-ndjson',
           'x-elastic-cluster-id': 'UNKNOWN',
           'x-elastic-stack-version': '1.2.3',
         },
@@ -208,7 +208,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
@@ -241,7 +241,7 @@ describe('ElasticV3ServerShipper', () => {
               )
               .join(''),
             headers: {
-              'content-type': 'application/x-njson',
+              'content-type': 'application/x-ndjson',
               'x-elastic-cluster-id': 'UNKNOWN',
               'x-elastic-stack-version': '1.2.3',
             },
@@ -284,7 +284,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
@@ -322,7 +322,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
@@ -357,7 +357,7 @@ describe('ElasticV3ServerShipper', () => {
         {
           body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
           headers: {
-            'content-type': 'application/x-njson',
+            'content-type': 'application/x-ndjson',
             'x-elastic-cluster-id': 'UNKNOWN',
             'x-elastic-stack-version': '1.2.3',
           },
