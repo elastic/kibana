@@ -399,7 +399,7 @@ export function RuleDetailsPage() {
                       defaultMessage="Actions"
                     />
                     <EuiFlexItem grow={3}>
-                      <Actions actions={rule.actions} />
+                      <Actions ruleActions={rule.actions} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

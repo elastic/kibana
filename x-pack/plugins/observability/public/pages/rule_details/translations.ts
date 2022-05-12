@@ -12,6 +12,12 @@ export const RULE_LOAD_ERROR = (errorMessage: string) =>
     values: { message: errorMessage },
   });
 
+export const ACTIONS_LOAD_ERROR = (errorMessage: string) =>
+  i18n.translate('xpack.observability.ruleDetails.connectorsLoadError', {
+    defaultMessage: 'Unable to load rule actions connectors. Reason: {message}',
+    values: { message: errorMessage },
+  });
+
 export const TAGS_TITLE = i18n.translate('xpack.observability.ruleDetails.tagsTitle', {
   defaultMessage: 'Tags',
 });

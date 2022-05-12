@@ -31,6 +31,9 @@ export interface FetchRuleSummaryProps {
   ruleId: string;
   http: HttpSetup;
 }
+export interface FetchRuleActionsProps {
+  http: HttpSetup;
+}
 
 export interface FetchRuleSummary {
   isLoadingRuleSummary: boolean;
@@ -60,7 +63,7 @@ export interface ItemValueRuleSummaryProps {
   extraSpace?: boolean;
 }
 export interface ActionsProps {
-  actions: any[];
+  ruleActions: any[];
 }
 
 export const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
