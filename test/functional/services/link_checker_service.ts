@@ -42,7 +42,8 @@ export function LinkCheckerServiceProvider({ getService }: FtrProviderContext) {
               log.error(`-----link bad url found ${url} response: ${response.status}`);
             }
           } catch (err) {
-            log.debug(err);
+            badLinks.push(url);
+            log.debug(`-----link ${url} response: ${err}`);
           }
         }
       } catch (err) {
@@ -50,11 +51,6 @@ export function LinkCheckerServiceProvider({ getService }: FtrProviderContext) {
         // when the page changes after we get the 'a' elements when we try to get the 'href's.
       }
     });
-    // const deadlinks = links.flatMap((l) => (l && l.code >= 400 ? l : []));
-    // if (deadlinks.length > 0) {
-    //   deadlinks.forEach((l) => log.debug(`${l.url} response: is ${l.code} but 200 expected`));
-    //   throw new Error('Dead links found');
-    // }
   }
 
   function tick() {
