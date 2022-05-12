@@ -18,6 +18,7 @@ import type {
   IndexPatternPersistedState,
   GenericIndexPatternColumn,
   IndexPatternLayer,
+  TermsIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 
 import type { JobCreatorType } from '../common/job_creator';
@@ -202,6 +203,14 @@ async function extractFields(vis: LensSavedObjectAttributes, dataViewClient: Dat
     ? columns[firstCompatibleLayer.splitAccessor]
     : null;
 
+  if (
+    splitField !== null &&
+    isTermsField(splitField) &&
+    splitField.params.secondaryFields?.length
+  ) {
+    throw Error('Selected split field contains more than one field');
+  }
+
   const dataView = await getDataViewFromLens(vis.references, layerId, dataViewClient);
   if (dataView === null) {
     throw Error('No data views can be found in the visualization.');
@@ -263,6 +272,10 @@ export function hasSourceField(
   column: GenericIndexPatternColumn
 ): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;
+}
+
+export function isTermsField(column: GenericIndexPatternColumn): column is TermsIndexPatternColumn {
+  return column.operationType === 'terms' && 'params' in column;
 }
 
 export function hasIncompatibleProperties(column: GenericIndexPatternColumn) {
