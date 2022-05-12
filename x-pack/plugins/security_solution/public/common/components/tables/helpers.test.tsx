@@ -14,12 +14,10 @@ import {
   RowItemOverflowComponent,
   getRowItemDraggable,
   OverflowFieldComponent,
-  OverflowItemComponent,
 } from './helpers';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
-import { IS_OPERATOR, QueryOperator } from '../../../../common/types';
 
 jest.mock('../../lib/kibana');
 
@@ -258,36 +256,6 @@ describe('Table Helpers', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
       const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
       expect(wrapper.text()).toBe('This string is exact');
-    });
-  });
-
-  describe('OverflowItemComponent', () => {
-    const id = 'mock id';
-    const rowItem = 'endpoint-dev-es.app.elstc.co';
-    const field = 'destination.ip';
-    const dataProvider = {
-      and: [],
-      enabled: true,
-      id,
-      name: rowItem,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field,
-        value: rowItem,
-        displayValue: rowItem,
-        operator: IS_OPERATOR as QueryOperator,
-      },
-    };
-    const props = {
-      dataProvider,
-      field,
-      rowItem,
-    };
-
-    test('Renders Hover Actions', () => {
-      const wrapper = shallow(<OverflowItemComponent {...props} />);
-      expect(wrapper.find('[data-test-subj="hover-actions"]').exists()).toBeTruthy();
     });
   });
 });

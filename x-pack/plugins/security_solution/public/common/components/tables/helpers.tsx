@@ -4,32 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiLink,
-  EuiPopover,
-  EuiToolTip,
-  EuiText,
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import { HoverActions } from '../hover_actions';
-import { DataProvider } from '../../../../common/types';
-import {
-  DEFAULT_MORE_MAX_HEIGHT,
-  MoreContainer,
-} from '../../../timelines/components/field_renderers/field_renderers';
+
+import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
@@ -160,80 +147,6 @@ export const getRowItemDraggables = ({
   }
 };
 
-export interface OnToggleTopNParams {
-  displayType: 'topN' | null | undefined;
-  selectedItemValue: string | null | undefined;
-}
-interface OverflowItemProps {
-  dataProvider?: DataProvider | DataProvider[] | undefined;
-  dragDisplayValue?: string;
-  field: string;
-  render?: (item: string) => React.ReactNode;
-  rowItem: string;
-  enableOverflowButton?: boolean;
-  onToggleTopN?: (params?: OnToggleTopNParams) => void;
-}
-
-export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
-  dataProvider,
-  dragDisplayValue,
-  field,
-  render,
-  rowItem,
-  enableOverflowButton,
-  onToggleTopN,
-}) => {
-  const [showTopN, setShowTopN] = useState<boolean>(false);
-  const { timelineId: timelineIdFind } = useContext(TimelineContext);
-  const [hoverActionsOwnFocus] = useState<boolean>(false);
-  const toggleTopN = useCallback(() => {
-    if (onToggleTopN) {
-      onToggleTopN({ displayType: 'topN', selectedItemValue: rowItem });
-    }
-
-    setShowTopN((prevShowTopN) => {
-      const newShowTopN = !prevShowTopN;
-      return newShowTopN;
-    });
-  }, [rowItem, onToggleTopN]);
-
-  const closeTopN = useCallback(() => {
-    setShowTopN(false);
-    if (onToggleTopN) {
-      onToggleTopN();
-    }
-  }, [onToggleTopN]);
-
-  return (
-    <EuiFlexGroup
-      gutterSize="none"
-      justifyContent="spaceBetween"
-      direction="row"
-      data-test-subj={`${field}-${dragDisplayValue ?? rowItem}`}
-    >
-      <EuiFlexItem grow={1}>{render ? render(rowItem) : defaultToEmptyTag(rowItem)} </EuiFlexItem>
-      <EuiFlexItem grow={false} data-test-subj="hover-actions">
-        <HoverActions
-          closeTopN={closeTopN}
-          dataProvider={dataProvider}
-          enableOverflowButton={enableOverflowButton}
-          field={field}
-          isObjectArray={false}
-          ownFocus={hoverActionsOwnFocus}
-          showOwnFocus={false}
-          showTopN={showTopN}
-          timelineId={timelineIdFind}
-          toggleTopN={toggleTopN}
-          values={dragDisplayValue ?? rowItem}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-OverflowItemComponent.displayName = 'OverflowItemComponent';
-export const OverflowItem = React.memo(OverflowItemComponent);
-
 interface RowItemOverflowProps {
   attrName: string;
   dragDisplayValue?: string;
@@ -262,7 +175,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
               idPrefix={idPrefix}
               overflowIndexStart={overflowIndexStart}
               rowItems={rowItems}
-              moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+              moreMaxHeight="none"
             />
 
             {rowItems.length > overflowIndexStart + maxOverflowItems && (

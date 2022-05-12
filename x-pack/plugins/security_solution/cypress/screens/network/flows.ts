@@ -25,3 +25,6 @@ export const CLOSE_TOP_N = '[data-test-subj="close"]';
 
 export const DESTINATION_DOMAIN = (testDomain: string) =>
   `[data-test-subj="destination.domain-${testDomain}"]`;
+
+export const OVERFLOW_ITEM =
+  '[data-test-subj="more-container"] [data-test-subj="render-content-destination.domain"]';

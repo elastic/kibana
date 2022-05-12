@@ -16,6 +16,7 @@ import {
   clickOnFilterIn,
   clickOnFilterOut,
   clickOnShowTopN,
+  mouseoverOnToOverflowItem,
   openHoverActions,
 } from '../../tasks/network/flows';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
@@ -41,6 +42,7 @@ describe('Hover actions', () => {
   beforeEach(() => {
     visit(NETWORK_URL, onBeforeLoadCallback);
     openHoverActions();
+    mouseoverOnToOverflowItem();
   });
 
   it('Adds global filter - filter in', () => {

@@ -8,10 +8,9 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, Fragment, useMemo, useState, useContext } from 'react';
+import React, { useCallback, Fragment, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { HostEcs } from '../../../../common/ecs/host';
 import {
   AutonomousSystem,
@@ -30,11 +29,8 @@ import {
 } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../network/components/details/translations';
-import { IS_OPERATOR, QueryOperator, TimelineId } from '../../../../common/types';
-import { OnToggleTopNParams, OverflowItem } from '../../../common/components/tables/helpers';
-import { StatefulTopN } from '../../../common/components/top_n';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { IS_OPERATOR, QueryOperator } from '../../../../common/types';
+import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -277,10 +273,6 @@ interface MoreContainerProps {
   rowItems: RowItemTypes[];
 }
 
-const TextWrapper = styled.span`
-  padding: ${({ theme }) => theme.eui.euiSizeL};
-`;
-
 const isReputationLink = (item: RowItemTypes): item is ReputationLinkSetting =>
   typeof item !== 'string';
 
@@ -295,14 +287,6 @@ export const MoreContainer = React.memo<MoreContainerProps>(
     render,
     rowItems,
   }) => {
-    const [display, setDisplay] = useState<OnToggleTopNParams['displayType']>(null);
-    const [selectedValue, setSelectedValue] =
-      useState<OnToggleTopNParams['selectedItemValue']>(null);
-
-    const onToggleTopN = useCallback((params?: OnToggleTopNParams) => {
-      setDisplay((prev) => (prev == null ? params?.displayType : null));
-      setSelectedValue((prev) => (prev == null ? params?.selectedItemValue : null));
-    }, []);
     const moreItemsWithHoverActions = useMemo(
       () =>
         rowItems.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, rowItem, index) => {
@@ -325,16 +309,14 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                 }
               : undefined;
 
-          if (!isReputationLink(rowItem) && attrName != null) {
+          if (!isReputationLink(rowItem) && dataProvider != null) {
             acc.push(
               <EuiFlexItem key={`${idPrefix}-${id}`}>
-                <OverflowItem
+                <DraggableWrapper
                   dataProvider={dataProvider}
-                  dragDisplayValue={dragDisplayValue}
-                  rowItem={rowItem}
-                  render={render}
-                  field={attrName}
-                  onToggleTopN={onToggleTopN}
+                  isDraggable={false}
+                  render={() => (render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
+                  timelineId={undefined}
                 />
               </EuiFlexItem>
             );
@@ -342,7 +324,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           return acc;
         }, []),
-      [attrName, dragDisplayValue, idPrefix, overflowIndexStart, render, rowItems, onToggleTopN]
+      [attrName, dragDisplayValue, idPrefix, overflowIndexStart, render, rowItems]
     );
 
     const moreItems = useMemo(
@@ -356,34 +338,8 @@ export const MoreContainer = React.memo<MoreContainerProps>(
         }),
       [overflowIndexStart, render, rowItems]
     );
-    const { timelineId: timelineIdFind } = useContext(TimelineContext);
-    const timelineId = timelineIdFind ?? undefined;
-    const activeScope: SourcererScopeName =
-      timelineId === TimelineId.active
-        ? SourcererScopeName.timeline
-        : timelineId != null &&
-          [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
-            timelineId as TimelineId
-          )
-        ? SourcererScopeName.detections
-        : SourcererScopeName.default;
-    const { browserFields, indexPattern } = useSourcererDataView(activeScope);
 
-    return display === 'topN' && attrName != null && selectedValue != null ? (
-      <>
-        <TextWrapper>
-          {render ? render(selectedValue) : defaultToEmptyTag(selectedValue)}
-        </TextWrapper>
-        <StatefulTopN
-          browserFields={browserFields}
-          field={attrName}
-          indexPattern={indexPattern}
-          timelineId={timelineId ?? undefined}
-          toggleTopN={onToggleTopN}
-          value={selectedValue}
-        />
-      </>
-    ) : (
+    return (
       <div
         data-test-subj="more-container"
         style={{
@@ -392,7 +348,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
           paddingRight: '2px',
         }}
       >
-        <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="overflow-items">
+        <EuiFlexGroup gutterSize="xs" direction="column" data-test-subj="overflow-items">
           {attrName != null ? moreItemsWithHoverActions : moreItems}
         </EuiFlexGroup>
       </div>

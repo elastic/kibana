@@ -13,6 +13,7 @@ import {
   IPS_TABLE_LOADED,
   SHOW_TOP_FIELD,
   EXPAND_OVERFLOW_ITEMS,
+  OVERFLOW_ITEM,
 } from '../../screens/network/flows';
 
 export const waitForIpsTableToBeLoaded = () => {
@@ -21,6 +22,10 @@ export const waitForIpsTableToBeLoaded = () => {
 
 export const openHoverActions = () => {
   cy.get(EXPAND_OVERFLOW_ITEMS).first().click({ scrollBehavior: 'center' });
+};
+
+export const mouseoverOnToOverflowItem = () => {
+  cy.get(OVERFLOW_ITEM).first().trigger('mouseover');
 };
 
 export const clickOnFilterIn = () => {
