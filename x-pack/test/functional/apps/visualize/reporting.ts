@@ -25,7 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visEditor',
   ]);
 
-  describe('Visualize Reporting Screenshots', () => {
+  describe('Visualize Reporting Screenshots', function () {
+    this.tags(['smoke']);
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');

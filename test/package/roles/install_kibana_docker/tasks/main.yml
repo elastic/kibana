@@ -24,3 +24,4 @@
       ELASTICSEARCH_HOSTS: http://192.168.56.1:9200
       ELASTICSEARCH_USERNAME: '{{ elasticsearch_username }}'
       ELASTICSEARCH_PASSWORD: '{{ elasticsearch_password }}'
+      XPACK_REPORTING_CAPTURE_BROWSER_CHROMIUM_DISABLESANDBOX: 'true'
