@@ -43,6 +43,7 @@ import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
+import './query_bar.scss';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any

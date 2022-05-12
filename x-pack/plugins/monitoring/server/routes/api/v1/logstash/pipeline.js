@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { notFound } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import { handleError } from '../../../../lib/errors';
+import { handleError, PipelineNotFoundError } from '../../../../lib/errors';
 import { getPipelineVersions } from '../../../../lib/logstash/get_pipeline_versions';
 import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { getPipelineVertex } from '../../../../lib/logstash/get_pipeline_vertex';
@@ -82,6 +83,10 @@ export function logstashPipelineRoute(server) {
           vertex,
         };
       } catch (err) {
+        if (err instanceof PipelineNotFoundError) {
+          req.getLogger().error(err.message);
+          throw notFound(err.message);
+        }
         return handleError(err, req);
       }
     },
