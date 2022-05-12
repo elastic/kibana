@@ -23,8 +23,6 @@ import {
   useGetPackageInfoByKey,
 } from '../../../../hooks';
 
-import { CreatePackagePolicySinglePage } from '.';
-
 jest.mock('../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../hooks'),
@@ -91,7 +89,7 @@ jest.mock('react-router-dom', () => ({
 
 import { CreatePackagePolicySinglePage } from '.';
 
-// mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
+// mock console.debug to prevent noisy logs ifrom ./index.tsx
 let consoleDebugMock: any;
 beforeAll(() => {
   consoleDebugMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
@@ -108,7 +106,7 @@ describe('when on the package policy create page', () => {
   const render = (queryParamsPolicyId?: string) =>
     (renderResult = testRenderer.render(
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <CreatePackagePolicySinglePage from="package" queryParamsPolicyId="agent-policy-1" />
+        <CreatePackagePolicySinglePage from="package" queryParamsPolicyId={queryParamsPolicyId} />
       </Route>
     ));
   let mockPackageInfo: any;

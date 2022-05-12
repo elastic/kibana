@@ -30,7 +30,6 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
     application: { navigateToApp },
   } = useStartServices();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
-
   const { getHref } = useLink();
 
   const cancelClickHandler = useCallback(
@@ -88,10 +87,8 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       }
 
       const packagePolicyPath = getPath('policy_details', { policyId: packagePolicy.policy_id });
-
       if (routeState?.onSaveNavigateTo && policy) {
         const [appId, options] = routeState.onSaveNavigateTo;
-
         if (options?.path) {
           const pathWithQueryString = appendOnSaveQueryParamsToPath({
             // In cases where we want to navigate back to a new/existing policy, we need to override the initial `path`
