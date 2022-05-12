@@ -88,6 +88,7 @@ export const createInitialState = ({
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
+    ignoreUnknownObjects: migrationsConfig.ignoreUnknownObjects === kibanaVersion,
     logs: [],
     unusedTypesQuery: excludeUnusedTypesQuery,
     knownTypes,

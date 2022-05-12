@@ -48,6 +48,7 @@ describe('createInitialState', () => {
       controlState: 'INIT',
       currentAlias: '.kibana_task_manager',
       excludeFromUpgradeFilterHooks: {},
+      ignoreUnknownObjects: false,
       indexPrefix: '.kibana_task_manager',
       kibanaVersion: '8.1.0',
       knownTypes: [],
@@ -271,5 +272,45 @@ describe('createInitialState', () => {
           },
         }
       `);
+  });
+
+  it('initializes the `ignoreUnknownObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig: {
+        ...migrationsConfig,
+        ignoreUnknownObjects: '8.0.0',
+      },
+      typeRegistry,
+      docLinks,
+    });
+
+    expect(initialState.ignoreUnknownObjects).toBeFalsy();
+  });
+
+  it('initializes the `ignoreUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig: {
+        ...migrationsConfig,
+        ignoreUnknownObjects: '8.1.0',
+      },
+      typeRegistry,
+      docLinks,
+    });
+
+    expect(initialState.ignoreUnknownObjects).toBeTruthy();
   });
 });

@@ -39,6 +39,7 @@ describe('checkForUnknownDocs', () => {
 
     const task = checkForUnknownDocs({
       client,
+      ignoreUnknownObjects: false,
       indexName: '.kibana_8.0.0',
       knownTypes,
       unusedTypesQuery,
@@ -58,6 +59,7 @@ describe('checkForUnknownDocs', () => {
 
     const task = checkForUnknownDocs({
       client,
+      ignoreUnknownObjects: false,
       indexName: '.kibana_8.0.0',
       knownTypes,
       unusedTypesQuery,
@@ -69,6 +71,7 @@ describe('checkForUnknownDocs', () => {
     expect(client.search).toHaveBeenCalledWith({
       index: '.kibana_8.0.0',
       body: {
+        size: 1000,
         query: {
           bool: {
             must: unusedTypesQuery,
@@ -90,6 +93,7 @@ describe('checkForUnknownDocs', () => {
 
     const task = checkForUnknownDocs({
       client,
+      ignoreUnknownObjects: false,
       indexName: '.kibana_8.0.0',
       knownTypes,
       unusedTypesQuery,
@@ -101,34 +105,69 @@ describe('checkForUnknownDocs', () => {
     expect((result as Either.Right<any>).right).toEqual({});
   });
 
-  it('resolves with `Either.left` when unknown docs are found', async () => {
-    const client = elasticsearchClientMock.createInternalClient(
-      Promise.resolve({
-        hits: {
-          hits: [
-            { _id: '12', _source: { type: 'foo' } },
-            { _id: '14', _source: { type: 'bar' } },
-          ],
-        },
-      })
-    );
+  describe('when unknown doc types are found', () => {
+    it('resolves with `Either.left` if `ignoreUnknownDocs` is false', async () => {
+      const client = elasticsearchClientMock.createInternalClient(
+        Promise.resolve({
+          hits: {
+            hits: [
+              { _id: '12', _source: { type: 'foo' } },
+              { _id: '14', _source: { type: 'bar' } },
+            ],
+          },
+        })
+      );
 
-    const task = checkForUnknownDocs({
-      client,
-      indexName: '.kibana_8.0.0',
-      knownTypes,
-      unusedTypesQuery,
+      const task = checkForUnknownDocs({
+        client,
+        ignoreUnknownObjects: false,
+        indexName: '.kibana_8.0.0',
+        knownTypes,
+        unusedTypesQuery,
+      });
+
+      const result = await task();
+
+      expect(Either.isLeft(result)).toBe(true);
+      expect((result as Either.Left<any>).left).toEqual({
+        type: 'unknown_docs_found',
+        unknownDocs: [
+          { id: '12', type: 'foo' },
+          { id: '14', type: 'bar' },
+        ],
+      });
     });
 
-    const result = await task();
+    it('resolves with `Either.right` if `ignoreUnknownDocs` is true', async () => {
+      const client = elasticsearchClientMock.createInternalClient(
+        Promise.resolve({
+          hits: {
+            hits: [
+              { _id: '12', _source: { type: 'foo' } },
+              { _id: '14', _source: { type: 'bar' } },
+            ],
+          },
+        })
+      );
 
-    expect(Either.isLeft(result)).toBe(true);
-    expect((result as Either.Left<any>).left).toEqual({
-      type: 'unknown_docs_found',
-      unknownDocs: [
-        { id: '12', type: 'foo' },
-        { id: '14', type: 'bar' },
-      ],
+      const task = checkForUnknownDocs({
+        client,
+        ignoreUnknownObjects: true,
+        indexName: '.kibana_8.0.0',
+        knownTypes,
+        unusedTypesQuery,
+      });
+
+      const result = await task();
+
+      expect(Either.isRight(result)).toBe(true);
+      expect((result as Either.Right<any>).right).toEqual({
+        type: 'unknown_docs_found',
+        unknownDocs: [
+          { id: '12', type: 'foo' },
+          { id: '14', type: 'bar' },
+        ],
+      });
     });
   });
 
@@ -143,6 +182,7 @@ describe('checkForUnknownDocs', () => {
 
     const task = checkForUnknownDocs({
       client,
+      ignoreUnknownObjects: false,
       indexName: '.kibana_8.0.0',
       knownTypes,
       unusedTypesQuery,

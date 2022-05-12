@@ -65,6 +65,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
+        ignoreUnknownObjects: state.ignoreUnknownObjects,
         indexName: state.sourceIndex.value,
         unusedTypesQuery: state.unusedTypesQuery,
         knownTypes: state.knownTypes,

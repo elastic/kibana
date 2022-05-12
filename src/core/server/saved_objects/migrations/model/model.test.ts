@@ -59,6 +59,7 @@ describe('migrations v2 model', () => {
     retryAttempts: 15,
     batchSize: 1000,
     maxBatchSizeBytes: 1e8,
+    ignoreUnknownObjects: false,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -840,6 +841,73 @@ describe('migrations v2 model', () => {
 
         // No log message gets appended
         expect(newState.logs).toEqual([]);
+      });
+
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds but unknown docs were found', () => {
+        const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
+          ...baseState,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
+          sourceIndexMappings: mappingsWithUnknownType,
+        };
+
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
+          type: 'unknown_docs_found',
+          unknownDocs: [
+            { id: 'dashboard:12', type: 'dashboard' },
+            { id: 'foo:17', type: 'foo' },
+          ],
+        });
+        const newState = model(checkUnknownDocumentsSourceState, res);
+
+        expect(newState).toMatchObject({
+          controlState: 'SET_SOURCE_WRITE_BLOCK',
+          sourceIndex: Option.some('.kibana_3'),
+          targetIndex: '.kibana_7.11.0_001',
+        });
+
+        expect(newState.unusedTypesQuery).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "must_not": Array [
+                      Object {
+                        "term": Object {
+                          "type": "unused-fleet-agent-events",
+                        },
+                      },
+                    ],
+                  },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Array [
+                      Object {
+                        "term": Object {
+                          "type": "dashboard",
+                        },
+                      },
+                      Object {
+                        "term": Object {
+                          "type": "foo",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          }
+        `);
+
+        // we should have a warning in the logs about the ignored types
+        expect(
+          newState.logs.find(({ level, message }) => {
+            return level === 'warning' && message.includes('dashboard') && message.includes('foo');
+          })
+        ).toBeDefined();
       });
 
       test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if action fails and unknown docs were found', () => {

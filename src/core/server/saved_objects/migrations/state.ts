@@ -88,6 +88,14 @@ export interface BaseState extends ControlState {
   readonly maxBatchSizeBytes: number;
   readonly logs: MigrationLog[];
   /**
+   * If saved objects exist which have an unknown type they will cause
+   * the migration to fail. If this flag is set to `true`, kibana will
+   * ignore the unknown objects and proceed with the migration.
+   * This can happen, for instance, if a plugin that had registered some
+   * saved objects is disabled.
+   */
+  readonly ignoreUnknownObjects: boolean;
+  /**
    * The current alias e.g. `.kibana` which always points to the latest
    * version index
    */

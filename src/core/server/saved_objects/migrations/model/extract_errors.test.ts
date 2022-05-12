@@ -8,6 +8,7 @@
 
 import {
   extractUnknownDocFailureReason,
+  extractIgnoredUnknownDocs,
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
 } from './extract_errors';
 
@@ -15,6 +16,7 @@ describe('extractUnknownDocFailureReason', () => {
   it('generates the correct error message', () => {
     expect(
       extractUnknownDocFailureReason(
+        'some-url.co',
         [
           {
             id: 'unknownType:12',
@@ -36,7 +38,33 @@ describe('extractUnknownDocFailureReason', () => {
       curl -X POST \\"{elasticsearch}/.kibana_15/_bulk?pretty\\" -H 'Content-Type: application/json' -d'
       { \\"delete\\" : { \\"_id\\" : \\"unknownType:12\\" } }
       { \\"delete\\" : { \\"_id\\" : \\"anotherUnknownType:42\\" } }
-      '"
+      '
+
+      Alternatively, you can configure kibana to ignore unknown saved objects for this migration.
+      Please refer to some-url.co for more information."
+    `);
+  });
+});
+
+describe('extractIgnoredUnknownDocs', () => {
+  it('generates the correct error message', () => {
+    expect(
+      extractIgnoredUnknownDocs([
+        {
+          id: 'unknownType:12',
+          type: 'unknownType',
+        },
+        {
+          id: 'anotherUnknownType:42',
+          type: 'anotherUnknownType',
+        },
+      ])
+    ).toMatchInlineSnapshot(`
+      "Kibana has been configured to ignore unknown documents for this migration.
+      Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:
+      - \\"unknownType:12\\" (type: \\"unknownType\\")
+      - \\"anotherUnknownType:42\\" (type: \\"anotherUnknownType\\")
+      "
     `);
   });
 });

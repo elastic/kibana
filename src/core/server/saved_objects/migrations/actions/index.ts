@@ -158,7 +158,7 @@ export interface ActionErrorTypeMap {
 /**
  * Type guard for narrowing the type of a left
  */
-export function isLeftTypeof<T extends keyof ActionErrorTypeMap>(
+export function isTypeof<T extends keyof ActionErrorTypeMap>(
   res: any,
   typeString: T
 ): res is ActionErrorTypeMap[T] {

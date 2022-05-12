@@ -89,9 +89,8 @@ The dashboard with the `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` ID that belongs to
 [[unknown-saved-object-types]]
 ==== Documents for unknown saved objects
 Migrations will fail if saved objects belong to an unknown
-saved object type. Unknown saved objects are typically caused by
-to the {es} index, or by disabling a plugin that had previously
-created a saved object.
+saved object type. Unknown saved objects are typically caused by performing manual modifications
+to the {es} index, or by disabling a plugin that had previously created a saved object.
 
 We recommend using the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant]
 to discover and remedy any unknown saved object types. {kib} version 7.17.0 deployments containing unknown saved
@@ -107,6 +106,14 @@ If you fail to remedy this, your upgrade to 8.0+ will fail with a message like:
 [source,sh]
 --------------------------------------------
 Unable to complete saved object migrations for the [.kibana] index: Migration failed because documents were found for unknown saved object types. To proceed with the migration, please delete these documents from the ".kibana_7.17.0_001" index.
+--------------------------------------------
+
+In 8.3+ deployments, you also have the possibility to simply ignore the unknown documents and proceed with the upgrade.
+This can be achieved with a new configuration flag `migrations.ignoreUnknownObjects` that must be set to the version you are upgrading to. For instance, for an upgrade to 8.3, you can define the following setting in kibana.yml:
+
+[source,yaml]
+--------------------------------------------
+migrations.ignoreUnknownObjects: "8.3"
 --------------------------------------------
 
 [float]
@@ -181,7 +188,7 @@ PUT /_cluster/settings
 {
   "transient": {
     "cluster.routing.allocation.enable": null
-  }, 
+  },
   "persistent": {
     "cluster.routing.allocation.enable": null
   }

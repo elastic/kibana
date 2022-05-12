@@ -7,6 +7,7 @@
  */
 
 import { gt, valid } from 'semver';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { State } from '../state';
 import { IndexMapping } from '../../mappings';
 import { FetchIndexResponse } from '../actions';
@@ -66,6 +67,17 @@ export function mergeMigrationMappingPropertyHashes(
 export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
+}
+
+export function addFiltersToQuery(
+  query: estypes.QueryDslQueryContainer,
+  filter: estypes.QueryDslQueryContainer
+): estypes.QueryDslQueryContainer {
+  return {
+    bool: {
+      filter: [query, filter],
+    },
+  };
 }
 
 /**

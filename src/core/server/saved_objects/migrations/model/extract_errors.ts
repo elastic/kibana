@@ -36,7 +36,16 @@ export function extractTransformFailuresReason(
   );
 }
 
+export function extractIgnoredUnknownDocs(unknownDocs: CheckForUnknownDocsFoundDoc[]): string {
+  return (
+    `Kibana has been configured to ignore unknown documents for this migration.\n` +
+    `Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:\n` +
+    unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('')
+  );
+}
+
 export function extractUnknownDocFailureReason(
+  resolveMigrationFailuresUrl: string,
   unknownDocs: CheckForUnknownDocsFoundDoc[],
   sourceIndex: string
 ): string {
@@ -48,7 +57,9 @@ export function extractUnknownDocFailureReason(
     `You can delete them using the following command:\n` +
     `curl -X POST "{elasticsearch}/${sourceIndex}/_bulk?pretty" -H 'Content-Type: application/json' -d'\n` +
     unknownDocs.map((doc) => `{ "delete" : { "_id" : "${doc.id}" } }\n`).join('') +
-    `'`
+    `'\n\n` +
+    `Alternatively, you can configure kibana to ignore unknown saved objects for this migration.\n` +
+    `Please refer to ${resolveMigrationFailuresUrl} for more information.`
   );
 }
 

@@ -42,6 +42,24 @@ const DEFAULTS_SETTINGS = {
   migrations: { skip: false },
 };
 
+export function getCurrentKibanaVersion() {
+  const env = Env.createDefault(REPO_ROOT, {
+    configs: [],
+    cliArgs: {
+      dev: false,
+      watch: false,
+      basePath: false,
+      runExamples: false,
+      oss: true,
+      disableOptimizer: true,
+      cache: true,
+      dist: false,
+    },
+  });
+
+  return env.packageInfo.version;
+}
+
 export function createRootWithSettings(
   settings: Record<string, any>,
   cliArgs: Partial<CliArgs> = {}

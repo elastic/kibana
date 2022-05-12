@@ -19,6 +19,7 @@ import {
 /** @internal */
 export interface CheckForUnknownDocsParams {
   client: ElasticsearchClient;
+  ignoreUnknownObjects: boolean;
   indexName: string;
   unusedTypesQuery: estypes.QueryDslQueryContainer;
   knownTypes: string[];
@@ -39,33 +40,39 @@ export interface UnknownDocsFound {
 export const checkForUnknownDocs =
   ({
     client,
+    ignoreUnknownObjects,
     indexName,
     unusedTypesQuery,
     knownTypes,
   }: CheckForUnknownDocsParams): TaskEither.TaskEither<
     RetryableEsClientError | UnknownDocsFound,
-    {}
+    UnknownDocsFound | {}
   > =>
   () => {
     const query = createUnknownDocQuery(unusedTypesQuery, knownTypes);
-
     return client
       .search<SavedObjectsRawDocSource>({
         index: indexName,
         body: {
+          size: 1000,
           query,
         },
       })
       .then((body) => {
         const { hits } = body.hits;
-        if (hits.length) {
-          return Either.left({
-            type: 'unknown_docs_found' as const,
-            unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'unknown' })),
-          });
-        } else {
+        if (!hits.length) {
           return Either.right({});
         }
+
+        const response = {
+          type: 'unknown_docs_found' as const,
+          unknownDocs: hits.map((hit) => ({
+            id: hit._id,
+            type: hit._source?.type ?? 'unknown',
+          })),
+        };
+
+        return ignoreUnknownObjects ? Either.right(response) : Either.left(response);
       })
       .catch(catchRetryableEsClientErrors);
   };

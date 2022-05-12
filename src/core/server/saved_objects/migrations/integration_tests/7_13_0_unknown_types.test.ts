@@ -54,62 +54,78 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it('fails the migration if unknown types are found in the source index', async () => {
-    // Start kibana with foo and space types disabled
-    root = createRoot();
-    esServer = await startES();
-    await root.preboot();
-    await root.setup();
+  describe('when `ignoreUnknownObjects` does not match current kibana version', () => {
+    it('fails the migration if unknown types are found in the source index', async () => {
+      // Start kibana with foo and space types disabled
+      root = createRoot('7.13.0');
+      esServer = await startES();
+      await root.preboot();
+      await root.setup();
 
-    try {
-      await root.start();
-      expect('should have thrown').toEqual('but it did not');
-    } catch (err) {
-      const errorMessage = err.message;
+      try {
+        await root.start();
+        expect('should have thrown').toEqual('but it did not');
+      } catch (err) {
+        const errorMessage = err.message;
 
-      expect(
-        errorMessage.startsWith(
-          'Unable to complete saved object migrations for the [.kibana] index: Migration failed because documents ' +
-            'were found for unknown saved object types. To proceed with the migration, please delete these documents from the ' +
-            '".kibana_7.13.0_001" index.'
-        )
-      ).toBeTruthy();
+        expect(
+          errorMessage.startsWith(
+            'Unable to complete saved object migrations for the [.kibana] index: Migration failed because documents ' +
+              'were found for unknown saved object types. To proceed with the migration, please delete these documents from the ' +
+              '".kibana_7.13.0_001" index.'
+          )
+        ).toBeTruthy();
 
-      const unknownDocs = [
-        { type: 'space', id: 'space:default' },
-        { type: 'space', id: 'space:first' },
-        { type: 'space', id: 'space:second' },
-        { type: 'space', id: 'space:third' },
-        { type: 'space', id: 'space:forth' },
-        { type: 'space', id: 'space:fifth' },
-        { type: 'space', id: 'space:sixth' },
-        { type: 'foo', id: 'P2SQfHkBs3dBRGh--No5' },
-        { type: 'foo', id: 'QGSZfHkBs3dBRGh-ANoD' },
-        { type: 'foo', id: 'QWSZfHkBs3dBRGh-hNob' },
-      ];
+        const unknownDocs = [
+          { type: 'space', id: 'space:default' },
+          { type: 'space', id: 'space:first' },
+          { type: 'space', id: 'space:second' },
+          { type: 'space', id: 'space:third' },
+          { type: 'space', id: 'space:forth' },
+          { type: 'space', id: 'space:fifth' },
+          { type: 'space', id: 'space:sixth' },
+          { type: 'foo', id: 'P2SQfHkBs3dBRGh--No5' },
+          { type: 'foo', id: 'QGSZfHkBs3dBRGh-ANoD' },
+          { type: 'foo', id: 'QWSZfHkBs3dBRGh-hNob' },
+        ];
 
-      unknownDocs.forEach(({ id, type }) => {
-        expect(errorMessage).toEqual(expect.stringContaining(`- "${id}" (type: "${type}")`));
-      });
+        unknownDocs.forEach(({ id, type }) => {
+          expect(errorMessage).toEqual(expect.stringContaining(`- "${id}" (type: "${type}")`));
+        });
 
-      const client = esServer.es.getClient();
-      const { body: response } = await client.indices.getSettings(
-        { index: '.kibana_7.13.0_001' },
-        { meta: true }
-      );
-      const settings = response['.kibana_7.13.0_001'].settings as estypes.IndicesIndexSettings;
-      expect(settings.index).not.toBeUndefined();
-      expect(settings.index!.blocks?.write).not.toEqual('true');
-    }
+        const client = esServer.es.getClient();
+        const { body: response } = await client.indices.getSettings(
+          { index: '.kibana_7.13.0_001' },
+          { meta: true }
+        );
+        const settings = response['.kibana_7.13.0_001'].settings as estypes.IndicesIndexSettings;
+        expect(settings.index).not.toBeUndefined();
+        expect(settings.index!.blocks?.write).not.toEqual('true');
+      }
+    });
+  });
+
+  describe('when `ignoreUnknownObjects` matches current kibana version', () => {
+    const currentVersion = kbnTestServer.getCurrentKibanaVersion();
+
+    it('continues with the migration even when unknown types are found in the source index', async () => {
+      // Start kibana with foo and space types disabled
+      root = createRoot(currentVersion);
+      esServer = await startES();
+      await root.preboot();
+      await root.setup();
+      await expect(root.start()).resolves.not.toThrowError();
+    });
   });
 });
 
-function createRoot() {
+function createRoot(ignoreUnknownObjects?: string) {
   return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
         batchSize: 5,
+        ignoreUnknownObjects,
       },
       logging: {
         appenders: {
