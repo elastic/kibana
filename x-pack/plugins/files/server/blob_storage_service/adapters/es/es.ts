@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Writable, Readable, pipeline as _pipeline } from 'stream';
+import { Readable, pipeline as _pipeline } from 'stream';
 import { promisify } from 'util';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
