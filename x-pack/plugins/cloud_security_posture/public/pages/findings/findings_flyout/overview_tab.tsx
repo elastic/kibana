@@ -26,7 +26,7 @@ import { CodeBlock, Markdown } from './findings_flyout';
 
 const getDetailsList = (data: CspFinding) => [
   {
-    title: TEXT.RULE_EVALUATED_AT,
+    title: TEXT.EVALUATED_AT,
     description: moment(data['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS'),
   },
   {

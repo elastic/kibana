@@ -138,6 +138,10 @@ export const INDEX = i18n.translate('xpack.csp.findings.indexLabel', {
 });
 
 export const RULE_EVALUATED_AT = i18n.translate('xpack.csp.findings.ruleEvaluatedAt', {
+  defaultMessage: 'Rule evaluated at',
+});
+
+export const EVALUATED_AT = i18n.translate('xpack.csp.findings.evaluatedAt', {
   defaultMessage: 'Evaluated at',
 });
 
