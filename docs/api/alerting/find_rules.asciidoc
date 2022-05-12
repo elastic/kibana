@@ -43,7 +43,7 @@ NOTE: Rule `params` are stored as a {ref}/flattened.html[flattened field type] a
   (Optional, array|string) The fields to perform the `simple_query_string` parsed query against.
 
 `fields`::
-  (Optional, array|string) The fields to return in the `attributes` key of the response.
+  (Optional, array of strings) The fields to return in the `attributes` key of the response.
 
 `sort_field`::
   (Optional, string) Sorts the response. Could be a rule field returned in the `attributes` key of the response.
