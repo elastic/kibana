@@ -39,6 +39,7 @@ pageLoadAssetSize:
   logstash: 53548
   management: 46112
   maps: 90000
+  metadataEventsStreams: 10000
   ml: 82187
   monitoring: 80000
   navigation: 37269
@@ -62,6 +63,7 @@ pageLoadAssetSize:
   upgradeAssistant: 81241
   urlForwarding: 32579
   usageCollection: 39762
+  userContent: 10000
   visDefaultEditor: 50178
   visTypeMarkdown: 30896
   visTypeTable: 94934
