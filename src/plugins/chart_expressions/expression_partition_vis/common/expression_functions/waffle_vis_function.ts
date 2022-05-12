@@ -139,6 +139,9 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     };
 
     if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
       const logTable = prepareLogTable(
         context,
         [
