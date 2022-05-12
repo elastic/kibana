@@ -228,6 +228,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           true,
           false
         );
+        const contextMenuPanelTitleButton = await testSubjects.exists(
+          'contextMenuPanelTitleButton'
+        );
+        if (contextMenuPanelTitleButton) {
+          await testSubjects.click('contextMenuPanelTitleButton');
+        }
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
@@ -244,6 +250,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allow saving currently loaded query as a copy', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'ok2',
           'description',

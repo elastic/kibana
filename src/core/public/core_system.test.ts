@@ -34,6 +34,10 @@ import {
   MockCoreApp,
   MockThemeService,
   ThemeServiceConstructor,
+  AnalyticsServiceConstructor,
+  MockAnalyticsService,
+  analyticsServiceStartMock,
+  fetchOptionalMemoryInfoMock,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -56,6 +60,7 @@ const defaultCoreSystemParams = {
       },
       packageInfo: {
         dist: false,
+        version: '1.2.3',
       },
     },
     version: 'version',
@@ -90,6 +95,7 @@ describe('constructor', () => {
     expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
     expect(ThemeServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(AnalyticsServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -145,6 +151,11 @@ describe('#setup()', () => {
 
     return core.setup();
   }
+
+  it('calls analytics#setup()', async () => {
+    await setupCore();
+    expect(MockAnalyticsService.setup).toHaveBeenCalledTimes(1);
+  });
 
   it('calls application#setup()', async () => {
     await setupCore();
@@ -220,6 +231,36 @@ describe('#start()', () => {
     expect(root.innerHTML).toMatchInlineSnapshot(
       `"<div id=\\"kibana-body\\" data-test-subj=\\"kibanaChrome\\"></div><div></div><div></div>"`
     );
+  });
+
+  it('reports the event Loaded Kibana', async () => {
+    await startCore();
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+      kibana_version: '1.2.3',
+    });
+  });
+
+  it('reports the event Loaded Kibana (with memory)', async () => {
+    fetchOptionalMemoryInfoMock.mockReturnValue({
+      memory_js_heap_size_limit: 3,
+      memory_js_heap_size_total: 2,
+      memory_js_heap_size_used: 1,
+    });
+
+    await startCore();
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+      kibana_version: '1.2.3',
+      memory_js_heap_size_limit: 3,
+      memory_js_heap_size_total: 2,
+      memory_js_heap_size_used: 1,
+    });
+  });
+
+  it('calls analytics#start()', async () => {
+    await startCore();
+    expect(MockAnalyticsService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls application#start()', async () => {

@@ -9,7 +9,7 @@ import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ConsoleRegistrationInterface, RegisteredConsoleClient } from './types';
 import { useConsoleManager } from './console_manager';
-import { getCommandServiceMock } from '../../mocks';
+import { getCommandListMock } from '../../mocks';
 
 export const getNewConsoleRegistrationMock = (
   overrides: Partial<ConsoleRegistrationInterface> = {}
@@ -20,7 +20,7 @@ export const getNewConsoleRegistrationMock = (
     meta: { about: 'for unit testing ' },
     consoleProps: {
       'data-test-subj': 'testRunningConsole',
-      commandService: getCommandServiceMock(),
+      commands: getCommandListMock(),
     },
     onBeforeTerminate: jest.fn(),
     ...overrides,

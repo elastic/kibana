@@ -15,6 +15,7 @@ import {
   SortFieldCase,
   StatusAll,
   UpdateByKey,
+  SeverityAll,
 } from './types';
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
@@ -101,6 +102,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
+  severity: SeverityAll,
   reporters: [],
   status: StatusAll,
   tags: [],

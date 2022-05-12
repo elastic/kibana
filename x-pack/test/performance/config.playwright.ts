@@ -63,6 +63,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           performancePhase: process.env.TEST_PERFORMANCE_PHASE,
           journeyName: process.env.JOURNEY_NAME,
           testJobId,
+          testBuildId,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),

@@ -20,6 +20,7 @@ export interface VisTypeOptions {
   showQueryBar: boolean;
   showFilterBar: boolean;
   showIndexSelection: boolean;
+  showQueryInput: boolean;
   hierarchicalData: boolean;
 }
 

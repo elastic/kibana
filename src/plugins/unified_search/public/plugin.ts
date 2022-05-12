@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import './index.scss';
-
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Storage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -58,7 +55,7 @@ export class UnifiedSearchPublicPlugin
 
   public start(
     core: CoreStart,
-    { data, dataViews, uiActions }: UnifiedSearchStartDependencies
+    { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setTheme(core.theme);
     setOverlays(core.overlays);
@@ -71,6 +68,7 @@ export class UnifiedSearchPublicPlugin
       data,
       storage: this.storage,
       usageCollection: this.usageCollection,
+      isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
     });
 
     uiActions.addTriggerAction(
