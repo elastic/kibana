@@ -8,7 +8,5 @@
     "githubTeam": "kibana-app-services"
   },
   "extraPublicDirs": ["common"],
-  "requiredPlugins": [
-    "userContent"
-  ]
+  "requiredBundles": ["userContent"]
 }
