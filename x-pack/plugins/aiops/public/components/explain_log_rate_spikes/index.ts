@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { ExplainLogRateSpikesProps } from './explain_log_rate_spikes';
 import { ExplainLogRateSpikes } from './explain_log_rate_spikes';
 
 // required for dynamic import using React.lazy()

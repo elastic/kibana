@@ -53,6 +53,7 @@ export const ML_PAGES = {
   OVERVIEW: 'overview',
   AIOPS: 'aiops',
   AIOPS_EXPLAIN_LOG_RATE_SPIKES: 'aiops/explain_log_rate_spikes',
+  AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: 'aiops/explain_log_rate_spikes_index_select',
   AIOPS_SINGLE_ENDPOINT_STREAMING_DEMO: 'aiops/single_endpoint_streaming_demo',
 } as const;
 

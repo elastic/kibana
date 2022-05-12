@@ -63,6 +63,7 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT
   | typeof ML_PAGES.AIOPS
   | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES
+  | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT
   | typeof ML_PAGES.AIOPS_SINGLE_ENDPOINT_STREAMING_DEMO,
   MlGenericUrlPageState | undefined
 >;

@@ -7,18 +7,24 @@
 
 import React, { useEffect, FC } from 'react';
 
-import { EuiBadge, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
+
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { useStreamFetchReducer } from '../../hooks/use_stream_fetch_reducer';
 
 import { initialState, streamReducer } from './stream_reducer';
 
-export const ExplainLogRateSpikes: FC = () => {
+export interface ExplainLogRateSpikesProps {
+  dataView: DataView;
+}
+
+export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({ dataView }) => {
   const { start, data, isRunning } = useStreamFetchReducer(
     '/internal/aiops/explain_log_rate_spikes',
     streamReducer,
     initialState,
-    { index: 'my-index' }
+    { index: dataView.title }
   );
 
   useEffect(() => {
@@ -27,12 +33,13 @@ export const ExplainLogRateSpikes: FC = () => {
   }, []);
 
   return (
-    <>
+    <EuiText>
+      <h2>{dataView.title}</h2>
       <p>{isRunning ? 'Loading fields ...' : 'Loaded all fields.'}</p>
-      <EuiSpacer />
+      <EuiSpacer size="xs" />
       {data.fields.map((field) => (
         <EuiBadge>{field}</EuiBadge>
       ))}
-    </>
+    </EuiText>
   );
 };

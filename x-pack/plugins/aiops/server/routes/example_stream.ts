@@ -37,7 +37,7 @@ export const defineExampleStreamRoute = (router: IRouter, logger: Logger) => {
         shouldStop = true;
       });
 
-      const { delimiter, stream, streamPush } =
+      const { DELIMITER, end, push, stream } =
         streamFactory<typeof API_ENDPOINT.EXAMPLE_STREAM>(logger);
 
       const entities = [
@@ -67,34 +67,34 @@ export const defineExampleStreamRoute = (router: IRouter, logger: Logger) => {
             progress++;
 
             if (progress > 100 || shouldStop) {
-              stream.push(null);
+              end();
               return;
             }
 
-            streamPush(updateProgressAction(progress));
+            push(updateProgressAction(progress));
 
             const randomEntity = entities[Math.floor(Math.random() * entities.length)];
             const randomAction = actions[Math.floor(Math.random() * actions.length)];
 
             if (randomAction === 'add') {
               const randomCommits = Math.floor(Math.random() * 100);
-              streamPush(addToEntityAction(randomEntity, randomCommits));
+              push(addToEntityAction(randomEntity, randomCommits));
             } else if (randomAction === 'delete') {
-              streamPush(deleteEntityAction(randomEntity));
+              push(deleteEntityAction(randomEntity));
             } else if (randomAction === 'server-to-client-error') {
               // Throw an error. It should not crash Kibana!
               throw new Error('There was a (simulated) server side error!');
             } else if (randomAction === 'client-error') {
               // Return not properly encoded JSON to the client.
-              stream.push(`{body:'Not valid JSON${delimiter}`);
+              stream.push(`{body:'Not valid JSON${DELIMITER}`);
             }
 
             pushStreamUpdate();
           } catch (error) {
             stream.push(
-              `${JSON.stringify({ type: 'error', payload: error.toString() })}${delimiter}`
+              `${JSON.stringify({ type: 'error', payload: error.toString() })}${DELIMITER}`
             );
-            stream.push(null);
+            end();
           }
         }, Math.floor(Math.random() * maxTimeoutMs));
       }

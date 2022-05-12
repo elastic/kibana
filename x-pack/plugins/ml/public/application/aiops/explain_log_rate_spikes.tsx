@@ -8,6 +8,8 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExplainLogRateSpikes } from '@kbn/aiops-plugin/public';
+
+import { useMlContext } from '../contexts/ml';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 
@@ -18,6 +20,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
     services: { docLinks },
   } = useMlKibana();
 
+  const context = useMlContext();
+
   return (
     <>
       <MlPageHeader>
@@ -26,7 +30,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
           defaultMessage="Explain log rate spikes"
         />
       </MlPageHeader>
-      <ExplainLogRateSpikes />
+      <ExplainLogRateSpikes dataView={context.currentDataView} />
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </>
   );

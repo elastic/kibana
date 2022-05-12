@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import type { IRouter, Logger } from '@kbn/core/server';
+import type { DataRequestHandlerContext, IEsSearchRequest } from '@kbn/data-plugin/server';
 
 import {
   aiopsExplainLogRateSpikesSchema,
@@ -15,7 +18,10 @@ import { API_ENDPOINT } from '../../common/api';
 
 import { streamFactory } from './stream_factory';
 
-export const defineExplainLogRateSpikesRoute = (router: IRouter, logger: Logger) => {
+export const defineExplainLogRateSpikesRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  logger: Logger
+) => {
   router.post(
     {
       path: API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES,
@@ -24,43 +30,53 @@ export const defineExplainLogRateSpikesRoute = (router: IRouter, logger: Logger)
       },
     },
     async (context, request, response) => {
-      // const index = request.body.index;
+      const index = request.body.index;
+
+      const controller = new AbortController();
 
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
         shouldStop = true;
+        controller.abort();
       });
       request.events.completed$.subscribe(() => {
         shouldStop = true;
+        controller.abort();
       });
 
-      const { stream, streamPush } =
+      const search = await context.search;
+      const res = await firstValueFrom(
+        search.search(
+          {
+            params: {
+              index,
+              body: { size: 1 },
+            },
+          } as IEsSearchRequest,
+          { abortSignal: controller.signal }
+        )
+      );
+
+      const doc = res.rawResponse.hits.hits.pop();
+      const fields = Object.keys(doc?._source ?? {});
+
+      const { end, push, stream } =
         streamFactory<typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES>(logger);
 
-      setTimeout(() => {
-        if (shouldStop) {
-          stream.push(null);
-          return;
-        }
-        streamPush(addFieldsAction(['firstField']));
-      }, 0);
+      async function pushField() {
+        setTimeout(() => {
+          const field = fields.pop();
 
-      setTimeout(() => {
-        if (shouldStop) {
-          stream.push(null);
-          return;
-        }
-        streamPush(addFieldsAction(['secondField', 'thirdField']));
-      }, 500);
+          if (field !== undefined) {
+            push(addFieldsAction([field]));
+            pushField();
+          } else {
+            end();
+          }
+        }, Math.random() * 1000);
+      }
 
-      setTimeout(() => {
-        if (shouldStop) {
-          stream.push(null);
-          return;
-        }
-        streamPush(addFieldsAction(['last_field']));
-        stream.push(null);
-      }, 3000);
+      pushField();
 
       return response.ok({
         body: stream,

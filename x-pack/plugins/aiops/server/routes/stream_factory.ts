@@ -16,20 +16,24 @@ class ResponseStream extends Readable {
   _read(): void {}
 }
 
-const delimiter = '\n';
+const DELIMITER = '\n';
 
 export function streamFactory<T extends ApiEndpoint>(logger: Logger) {
   const stream = new ResponseStream();
 
-  function streamPush(d: ApiEndpointActions[T]) {
+  function push(d: ApiEndpointActions[T]) {
     try {
       const line = JSON.stringify(d);
-      stream.push(`${line}${delimiter}`);
+      stream.push(`${line}${DELIMITER}`);
     } catch (error) {
       logger.error('Could not serialize or stream a message.');
       logger.error(error);
     }
   }
 
-  return { delimiter, stream, streamPush };
+  function end() {
+    stream.push(null);
+  }
+
+  return { DELIMITER, end, push, stream };
 }

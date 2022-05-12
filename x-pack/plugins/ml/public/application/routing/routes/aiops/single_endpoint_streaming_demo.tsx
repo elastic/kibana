@@ -37,7 +37,7 @@ export const singleEndpointStreamingDemoRouteFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.AiopsBreadcrumbs.singleEndpointStreamingDemoLabel', {
+      text: i18n.translate('xpack.ml.aiopsBreadcrumbs.singleEndpointStreamingDemoLabel', {
         defaultMessage: 'Single endpoint streaming demo',
       }),
     },
