@@ -66,12 +66,13 @@ export function RuleDetailsPage() {
   const { isLoadingRule, rule, ruleType, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const [features, setFeatures] = useState<string>('');
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
+  const [isPageLoading, setIsPageLoading] = useState(false);
   const { last24hAlerts, isLoadingLast24hAlerts, errorLast24hAlerts } = useFetchLast24hAlerts({
     http,
     features,
     ruleId,
   });
-  //  *** Wil be used laster ***
+  //  *** Wil be used later ***
   // const { isLoadingRuleSummary, ruleSummary, errorRuleSummary, reloadRuleSummary } =
   //   useFetchRuleSummary({ ruleId, http });
 
@@ -157,7 +158,7 @@ export function RuleDetailsPage() {
   ];
   console.log('rule', rule);
 
-  if (isLoadingRule && !errorRule) return <CenterJustifiedSpinner />;
+  if (isPageLoading || (isLoadingRule && !errorRule)) return <CenterJustifiedSpinner />;
   if (errorRule) return toasts.addDanger({ title: errorRule });
   return (
     rule && (
@@ -431,7 +432,9 @@ export function RuleDetailsPage() {
           idsToDelete={ruleToDelete}
           singleTitle={rule.name}
           multipleTitle={rule.name}
-          setIsLoadingState={(isLoading: boolean) => {}}
+          setIsLoadingState={(isLoading: boolean) => {
+            setIsPageLoading(isLoading);
+          }}
         />
       </ObservabilityPageTemplate>
     )
