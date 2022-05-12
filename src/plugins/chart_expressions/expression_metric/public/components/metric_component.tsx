@@ -128,6 +128,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   };
 
   private renderMetric = (metric: MetricOptions, index: number) => {
+    const hasBuckets = this.props.visParams.dimensions.bucket !== undefined;
     const MetricComponent = this.props.visParams.metric.autoScale
       ? AutoScaleMetricVisValue
       : MetricVisValue;
@@ -149,7 +150,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         metric={metric}
         style={this.props.visParams.metric.style}
         onFilter={
-          this.props.filterable[index]
+          hasBuckets || this.props.filterable[index]
             ? () => this.filterColumn(metric.rowIndex, metric.colIndex)
             : undefined
         }
