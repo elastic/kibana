@@ -97,7 +97,7 @@ describe('<PolicyList />', () => {
       await actions.clickPolicyAt(2);
 
       expect(find('includeGlobalState.value').text()).toEqual('Yes');
-      expect(find('policyFeatureStatesSummary.value').text()).toEqual('From all features');
+      expect(find('policyFeatureStatesSummary.value').text()).toEqual('All features');
     });
   });
 });

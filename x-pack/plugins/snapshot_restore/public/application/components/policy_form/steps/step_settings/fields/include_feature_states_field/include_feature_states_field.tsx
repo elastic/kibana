@@ -77,7 +77,7 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.includeFeatureStatesDescription"
-          defaultMessage="Stores the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
+          defaultMessage="Includes the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
         />
       }
       fullWidth

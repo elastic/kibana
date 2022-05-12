@@ -45,7 +45,7 @@ export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig>
           {hasAllFeatureStates && (
             <FormattedMessage
               id="xpack.snapshotRestore.summary.policyAllFeatureStatesLabel"
-              defaultMessage="From all features"
+              defaultMessage="All features"
             />
           )}
           {!hasNoFeatureStates && !hasAllFeatureStates && (
