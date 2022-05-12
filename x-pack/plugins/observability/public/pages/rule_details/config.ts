@@ -20,3 +20,4 @@ export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.execute;
 
 export const RULES_PAGE_LINK = '/app/observability/alerts/rules';
+export const ALERT_PAGE_LINK = '/app/observability/alerts';
