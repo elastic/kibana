@@ -94,7 +94,7 @@ export function QueryBarMenu({
   };
 
   const buttonLabel = i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
-    defaultMessage: 'Filter set menu',
+    defaultMessage: 'Saved query menu',
   });
 
   const button = (
