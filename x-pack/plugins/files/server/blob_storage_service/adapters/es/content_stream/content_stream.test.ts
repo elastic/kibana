@@ -191,6 +191,14 @@ describe('ContentStream', () => {
       expect(client.update).not.toHaveBeenCalled();
     });
 
+    it('should provide a document ID after writing to a destination', async () => {
+      stream = new ContentStream(client, undefined, 'somewhere', logger);
+      expect(stream.getDocumentId()).toBe(undefined);
+      stream.end('some data');
+      await new Promise((resolve) => stream.once('finish', resolve));
+      expect(stream.getDocumentId()).toEqual(expect.any(String));
+    });
+
     it('should send the contents when stream ends', async () => {
       stream.write('123');
       stream.write('456');
