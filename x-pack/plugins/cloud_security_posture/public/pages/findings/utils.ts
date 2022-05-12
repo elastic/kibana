@@ -35,10 +35,9 @@ export const getEuiSortFromEs = <T extends unknown>(
   return { sort: { field: field as keyof T, direction: direction as SortDirection } };
 };
 
-export const getEsSortFromEui = <T extends unknown>(
-  sort: Criteria<T>['sort']
-): EsQuerySortValue[] | undefined =>
-  sort ? [{ [sort.field]: sort.direction as SortDirection }] : undefined;
+export const getEsSortFromEui = <T>(sort: NonNullable<Criteria<T>['sort']>) => ({
+  sort: [{ [sort.field]: sort.direction as SortDirection }],
+});
 
 export const getEuiPaginationFromEs = <T extends unknown>({
   size: pageSize,
@@ -56,6 +55,7 @@ export const getEuiPaginationFromEs = <T extends unknown>({
   showPerPageOptions: true,
 });
 
-export const getEsPaginationFromEui = (page: Criteria<any>['page']) => ({
-  ...(!!page && { from: page.index * page.size, size: page.size }),
+export const getEsPaginationFromEui = (page: NonNullable<Criteria<unknown>['page']>) => ({
+  from: page.index * page.size,
+  size: page.size,
 });

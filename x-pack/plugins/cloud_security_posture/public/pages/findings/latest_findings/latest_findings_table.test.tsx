@@ -72,8 +72,7 @@ describe('<FindingsTable />', () => {
       error: null,
       sorting: {},
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
-      setSorting: jest.fn(),
-      setPagination: jest.fn(),
+      setTableOptions: jest.fn(),
     };
 
     render(
@@ -95,8 +94,7 @@ describe('<FindingsTable />', () => {
       error: null,
       sorting: {},
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
-      setSorting: jest.fn(),
-      setPagination: jest.fn(),
+      setTableOptions: jest.fn(),
     };
 
     render(

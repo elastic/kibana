@@ -4,21 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Criteria, EuiBasicTableProps } from '@elastic/eui';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import { UseQueryResult } from 'react-query';
 
 export type FindingsGroupByKind = 'default' | 'resource';
-
-export interface Pagination<T = unknown> {
-  pagination: EuiBasicTableProps<T>['pagination'];
-  setPagination(pagination: NonNullable<Criteria<T>['page']>): void;
-}
-
-export interface Sorting<T = unknown> {
-  sorting: EuiBasicTableProps<T>['sorting'];
-  setSorting(sorting: NonNullable<Criteria<T>['sort']>): void;
-}
 
 export interface FindingsBaseURLQuery {
   query: Query;

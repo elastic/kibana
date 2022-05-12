@@ -15,7 +15,7 @@ import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { useLatestFindings } from './use_latest_findings';
 import type { FindingsGroupByNoneQuery } from './use_latest_findings';
-import type { CspFinding, FindingsBaseURLQuery } from '../types';
+import type { FindingsBaseURLQuery } from '../types';
 import { useFindingsCounter } from '../use_findings_count';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import {
@@ -41,6 +41,7 @@ export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQue
 export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
+
   const baseEsQuery = useMemo(
     () => getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
     [dataView, urlQuery.filters, urlQuery.query]
@@ -61,16 +62,10 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
         setQuery={setUrlQuery}
         query={urlQuery.query}
         filters={urlQuery.filters}
-        loading={findingsGroupByNone.isLoading}
+        loading={findingsGroupByNone.isFetching}
       />
       <PageWrapper>
-        <PageTitle>
-          <PageTitleText
-            title={
-              <FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />
-            }
-          />
-        </PageTitle>
+        <LatestFindingsPageTitle />
         <FindingsGroupBySelector type="default" />
         <FindingsDistributionBar
           total={findingsGroupByNone.data?.total || 0}
@@ -83,17 +78,29 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
         <FindingsTable
           data={findingsGroupByNone.data}
           error={findingsGroupByNone.error}
-          loading={findingsGroupByNone.isLoading}
+          loading={findingsGroupByNone.isFetching}
           pagination={getEuiPaginationFromEs({
             size: urlQuery.size,
             from: urlQuery.from,
             total: findingsGroupByNone.data?.total,
           })}
-          setPagination={(page) => setUrlQuery(getEsPaginationFromEui(page))}
           sorting={getEuiSortFromEs(urlQuery.sort)}
-          setSorting={(sort) => setUrlQuery({ sort: getEsSortFromEui<CspFinding>(sort) })}
+          setTableOptions={({ page, sort }) =>
+            setUrlQuery({
+              ...(page && getEsPaginationFromEui(page)),
+              ...(sort && getEsSortFromEui(sort)),
+            })
+          }
         />
       </PageWrapper>
     </div>
   );
 };
+
+const LatestFindingsPageTitle = () => (
+  <PageTitle>
+    <PageTitleText
+      title={<FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />}
+    />
+  </PageTitle>
+);

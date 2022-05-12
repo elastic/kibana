@@ -91,7 +91,11 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
             from: urlQuery.from,
             total: resourceFindings.data?.total,
           })}
-          setPagination={(page) => setUrlQuery(getEsPaginationFromEui(page))}
+          setTableOptions={({ page }) =>
+            setUrlQuery({
+              ...(page && getEsPaginationFromEui(page)),
+            })
+          }
         />
       </PageWrapper>
     </div>

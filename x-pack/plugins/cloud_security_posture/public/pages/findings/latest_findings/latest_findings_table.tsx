@@ -4,18 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import { type Criteria, EuiEmptyPrompt, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import {
+  type Criteria,
+  EuiEmptyPrompt,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiBasicTableProps,
+} from '@elastic/eui';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
-import type { CspFinding, Pagination, Sorting } from '../types';
+import type { CspFinding } from '../types';
 import type { CspFindingsResult } from './use_latest_findings';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { getExpandColumn, getFindingsColumns } from '../layout/findings_layout';
 
-interface BaseFindingsTableProps extends Pagination<CspFinding>, Sorting<CspFinding> {}
+interface BaseFindingsTableProps {
+  pagination: EuiBasicTableProps<CspFinding>['pagination'];
+  sorting: EuiBasicTableProps<CspFinding>['sorting'];
+  setTableOptions(options: Criteria<CspFinding>): void;
+}
 
 type FindingsTableProps = CspFindingsResult & BaseFindingsTableProps;
 
@@ -24,9 +34,8 @@ const FindingsTableComponent = ({
   data,
   loading,
   pagination,
-  setPagination,
   sorting,
-  setSorting,
+  setTableOptions,
 }: FindingsTableProps) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
@@ -36,14 +45,6 @@ const FindingsTableComponent = ({
   ] = useMemo(
     () => [getExpandColumn<CspFinding>({ onClick: setSelectedFinding }), ...getFindingsColumns()],
     []
-  );
-
-  const onTableChange = useCallback(
-    (params: Criteria<CspFinding>) => {
-      setPagination(params.page!);
-      setSorting(params.sort!);
-    },
-    [setPagination, setSorting]
   );
 
   // Show "zero state"
@@ -67,7 +68,7 @@ const FindingsTableComponent = ({
         columns={columns}
         pagination={pagination}
         sorting={sorting}
-        onChange={onTableChange}
+        onChange={setTableOptions}
         hasActions
       />
       {selectedFinding && (
