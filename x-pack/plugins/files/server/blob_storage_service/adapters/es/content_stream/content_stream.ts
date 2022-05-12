@@ -57,8 +57,6 @@ export class ContentStream extends Duplex {
   private maxChunkSize?: number;
   private parameters: Required<ContentStreamParameters>;
   private puid = new Puid();
-  private primaryTerm?: number;
-  private seqNo?: number;
 
   /**
    * The number of bytes written so far.
@@ -288,14 +286,6 @@ export class ContentStream extends Duplex {
     this.flush()
       .then(() => callback())
       .catch(callback);
-  }
-
-  getSeqNo(): number | undefined {
-    return this.seqNo;
-  }
-
-  getPrimaryTerm(): number | undefined {
-    return this.primaryTerm;
   }
 }
 
