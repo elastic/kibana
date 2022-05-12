@@ -43,6 +43,14 @@ export const xyVisFunction: XyVisFn = {
       help: strings.getAnnotationLayerHelp(),
       multi: true,
     },
+    splitColumnAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getSplitColumnAccessorHelp(),
+    },
+    splitRowAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getSplitRowAccessorHelp(),
+    },
   },
   async fn(data, args, handlers) {
     const { xyVisFn } = await import('./xy_vis_fn');

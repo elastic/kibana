@@ -203,6 +203,8 @@ export interface XYArgs extends DataLayerArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
 
 export interface LayeredXYArgs {
@@ -235,10 +237,10 @@ export interface XYProps {
   yLeftExtent: AxisExtentConfigResult;
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
-  valueLabels: ValueLabelMode;
-  layers: CommonXYLayerConfig[];
   endValue?: EndValue;
   emphasizeFitting?: boolean;
+  valueLabels: ValueLabelMode;
+  layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -249,6 +251,8 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  splitRowAccessor?: ExpressionValueVisDimension | string;
+  splitColumnAccessor?: ExpressionValueVisDimension | string;
 }
 
 export interface AnnotationLayerArgs {
