@@ -11,7 +11,6 @@ export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 import expect from '@kbn/expect';
-import { getServiceName } from 'elastic-apm-node';
 import { FtrService } from '../ftr_provider_context';
 
 interface SaveDashboardOptions {
