@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { StepCtx } from '../../services/performance';
 
-export default function manyFieldsDiscover({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   // FAILING: https://github.com/elastic/kibana/issues/130287
   describe.skip('many_fields_discover', () => {
     const performance = getService('performance');

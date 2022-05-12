@@ -7,7 +7,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { serializeApmGlobalLabels } from '../../utils';
 
-export default async function manyFieldsDiscover({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const performanceConfig = await readConfigFile(require.resolve('../base.config'));
 
   const testFiles = [require.resolve('./many_fields_discover')];
