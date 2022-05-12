@@ -46,6 +46,10 @@ export const GENERAL = i18n.translate('xpack.csp.findings.findingsFlyout.general
   defaultMessage: 'General',
 });
 
+export const OVERVIEW = i18n.translate('xpack.csp.findings.findingsFlyout.overviewTabLabel', {
+  defaultMessage: 'Overview',
+});
+
 export const JSON = i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabLabel', {
   defaultMessage: 'JSON',
 });
@@ -134,7 +138,7 @@ export const INDEX = i18n.translate('xpack.csp.findings.indexLabel', {
 });
 
 export const RULE_EVALUATED_AT = i18n.translate('xpack.csp.findings.ruleEvaluatedAt', {
-  defaultMessage: 'Rule evaluated at',
+  defaultMessage: 'Evaluated at',
 });
 
 export const FRAMEWORK_SOURCES = i18n.translate('xpack.csp.findings.frameworkSourcesLabel', {
@@ -171,6 +175,10 @@ export const EVALUATION = i18n.translate('xpack.csp.findings.evaluationLabel', {
 
 export const EXPECTED = i18n.translate('xpack.csp.findings.expectedLabel', {
   defaultMessage: 'Expected',
+});
+
+export const ACTUAL = i18n.translate('xpack.csp.findings.actualLabel', {
+  defaultMessage: 'Actual',
 });
 
 export const EVIDENCE = i18n.translate('xpack.csp.findings.evidenceLabel', {
