@@ -120,9 +120,11 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
 };
 
 export function buildCellActions(field: DataViewField) {
-  if (!field.filterable) {
+  if (field?.type === '_source') {
     return [CopyBtn];
+  } else if(!field.filterable ) {
+    return undefined;
   }
 
-  return [FilterInBtn, FilterOutBtn, CopyBtn];
+  return [FilterInBtn, FilterOutBtn];
 }

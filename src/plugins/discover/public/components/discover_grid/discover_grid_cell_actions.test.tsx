@@ -16,23 +16,25 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { esHits } from '../../__mocks__/es_hits';
 import { EuiButton } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { flattenHit } from '@kbn/data-plugin/common';
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
     expect(buildCellActions({ name: 'foo', filterable: false } as DataViewField)).toBeUndefined();
   });
+  const contextMock = {
+    expanded: undefined,
+    setExpanded: jest.fn(),
+    rows: esHits,
+    rowsFlattened: esHits.map((hit) => flattenHit(hit, indexPatternMock)),
+    onFilter: jest.fn(),
+    indexPattern: indexPatternMock,
+    isDarkMode: false,
+    selectedDocs: [],
+    setSelectedDocs: jest.fn(),
+  };
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
-    const contextMock = {
-      expanded: undefined,
-      setExpanded: jest.fn(),
-      rows: esHits,
-      onFilter: jest.fn(),
-      indexPattern: indexPatternMock,
-      isDarkMode: false,
-      selectedDocs: [],
-      setSelectedDocs: jest.fn(),
-    };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
@@ -55,16 +57,6 @@ describe('Discover cell actions ', function () {
     );
   });
   it('triggers filter function when FilterOutBtn is clicked', async () => {
-    const contextMock = {
-      expanded: undefined,
-      setExpanded: jest.fn(),
-      rows: esHits,
-      onFilter: jest.fn(),
-      indexPattern: indexPatternMock,
-      isDarkMode: false,
-      selectedDocs: [],
-      setSelectedDocs: jest.fn(),
-    };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
