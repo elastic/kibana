@@ -31,7 +31,14 @@ export type {
 } from './types';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-export type { FindResult } from './rules_client';
+export type {
+  FindResult,
+  BulkEditOperation,
+  BulkEditError,
+  BulkEditOptions,
+  BulkEditOptionsFilter,
+  BulkEditOptionsIds,
+} from './rules_client';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
