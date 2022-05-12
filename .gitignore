@@ -55,6 +55,7 @@ selenium
 *.swo
 *.out
 package-lock.json
+!/.buildkite/package-lock.json
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -94,3 +95,4 @@ report.asciidoc
 
 # Exclude renovate config file (we only need it on master)
 renovate.json5
+/packages/kbn-synthetic-package-map/synthetic-packages.json
