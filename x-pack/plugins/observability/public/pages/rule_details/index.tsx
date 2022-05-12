@@ -33,6 +33,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
+import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import {
   RuleDetailsPathParams,
   EVENT_ERROR_LOG_TAB,
@@ -153,7 +154,7 @@ export function RuleDetailsPage() {
   ];
   console.log('rule', rule);
 
-  if (isLoadingRule && !errorRule) return <EuiText>Loading</EuiText>;
+  if (isLoadingRule && !errorRule) return <CenterJustifiedSpinner />;
   if (errorRule) return toasts.addDanger({ title: errorRule });
   return (
     rule && (
