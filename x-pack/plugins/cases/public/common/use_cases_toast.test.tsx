@@ -83,7 +83,7 @@ describe('Use cases toast hook', () => {
         theCase: mockCase,
         attachments: [alertComment as SupportedCaseAttachment],
       });
-      validateTitle('An alert has been added to "Another horrible breach!!');
+      validateTitle('An alert was added to "Another horrible breach!!');
     });
 
     it('should display the alert sync title when called with an alert attachment (multiple alerts)', () => {
@@ -102,7 +102,7 @@ describe('Use cases toast hook', () => {
         theCase: mockCase,
         attachments: [alert],
       });
-      validateTitle('Alerts have been added to "Another horrible breach!!');
+      validateTitle('Alerts were added to "Another horrible breach!!');
     });
 
     it('should display a generic title when called with a non-alert attachament', () => {
