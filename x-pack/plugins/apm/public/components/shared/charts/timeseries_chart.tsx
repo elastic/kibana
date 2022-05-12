@@ -94,6 +94,7 @@ export function TimeseriesChart({
     anomalyTimeseries,
     theme,
   });
+  // console.log('anomalyTimeseries', id, anomalyTimeseries);
 
   const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
