@@ -25,7 +25,7 @@ import {
 import { DataViewsServicePublic } from './data_views_service_public';
 import { HasData } from './services';
 
-import { toastsAddDebounced, toastsErrorDebounced } from './toasts_debounced';
+import { debounceByKey } from './debounce_by_key';
 
 export class DataViewsPublicPlugin
   implements
@@ -53,8 +53,14 @@ export class DataViewsPublicPlugin
   ): DataViewsPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, theme, overlays, application } = core;
 
-    const onNotifDebounced = toastsAddDebounced(notifications, uiSettings);
-    const onErrorDebounced = toastsErrorDebounced(notifications, uiSettings);
+    const onNotifDebounced = debounceByKey(
+      notifications.toasts.add.bind(notifications.toasts),
+      10000
+    );
+    const onErrorDebounced = debounceByKey(
+      notifications.toasts.addError.bind(notifications.toasts),
+      10000
+    );
 
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
@@ -63,11 +69,10 @@ export class DataViewsPublicPlugin
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields, key) => {
-        onNotifDebounced(toastInputFields, key);
+        onNotifDebounced(key)(toastInputFields);
       },
       onError: (error, toastInputFields, key) => {
-        onErrorDebounced(error, toastInputFields, key);
-        // notifications.toasts.addError.bind(notifications.toasts);
+        onErrorDebounced(key)(error, toastInputFields);
       },
       onRedirectNoIndexPattern: onRedirectNoIndexPattern(
         application.capabilities,
