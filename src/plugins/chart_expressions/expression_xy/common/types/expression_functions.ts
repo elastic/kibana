@@ -384,7 +384,7 @@ export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
   Datatable,
   ExtendedDataLayerArgs,
-  ExtendedDataLayerConfigResult
+  Promise<ExtendedDataLayerConfigResult>
 >;
 
 export type ReferenceLineLayerFn = ExpressionFunctionDefinition<

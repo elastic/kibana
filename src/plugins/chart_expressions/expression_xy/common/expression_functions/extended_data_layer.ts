@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
-import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
+import { ExtendedDataLayerFn } from '../types';
+import { EXTENDED_DATA_LAYER } from '../constants';
 import { strings } from '../i18n';
 import { commonDataLayerArgs } from './common_data_layer_args';
-import { getAccessors } from '../helpers';
 
 export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   name: EXTENDED_DATA_LAYER,
@@ -43,20 +41,8 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
       help: strings.getLayerIdHelp(),
     },
   },
-  fn(input, args) {
-    const table = args.table ?? input;
-    const accessors = getAccessors<string, ExtendedDataLayerArgs>(args, table);
-
-    validateAccessor(accessors.xAccessor, table.columns);
-    validateAccessor(accessors.splitAccessor, table.columns);
-    accessors.accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
-
-    return {
-      type: EXTENDED_DATA_LAYER,
-      ...args,
-      layerType: LayerTypes.DATA,
-      ...accessors,
-      table,
-    };
+  async fn(input, args, context) {
+    const { extendedDataLayerFn } = await import('./extended_data_layer_fn');
+    return await extendedDataLayerFn(input, args, context);
   },
 };
