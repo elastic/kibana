@@ -6,43 +6,32 @@
  */
 
 import * as t from 'io-ts';
-import { SavedObjectsClientContract } from '@kbn/core/server';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
-import { APMRouteHandlerResources } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getServiceContainerMetadata } from './container_metadata/get_service_container_metadata';
+import { getMetricIndices } from '../../lib/helpers/get_metric_indices';
 
-async function getMetricIndices(
-  infraPlugin: APMRouteHandlerResources['plugins']['infra'],
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<string | undefined> {
-  if (!infraPlugin) {
-    return;
-  }
-  const infra = await infraPlugin.start();
-  const metricIndices = await infra.getMetricIndices(savedObjectsClient);
-
-  return metricIndices;
-}
-
+// NOT USED ATM
 const serviceContainerRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/container/metadata',
+  endpoint: 'GET /internal/apm/container/{containerId}/metadata',
   params: t.type({
-    query: t.intersection([rangeRt, t.type({ containerId: t.string })]),
+    path: t.type({ containerId: t.string }),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
     const { context, params, plugins } = resources;
-    const { containerId, start, end } = params.query;
+    const { containerId } = params.path;
+    const { start, end } = params.query;
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
-    const metricIndices = await getMetricIndices(
-      plugins.infra,
-      savedObjectsClient
-    );
+    const metricIndices = await getMetricIndices({
+      infraPlugin: plugins.infra,
+      savedObjectsClient,
+    });
 
     return withApmSpan(
       'get_service_container_metadata',

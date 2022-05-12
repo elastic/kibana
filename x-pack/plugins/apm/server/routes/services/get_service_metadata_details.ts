@@ -50,6 +50,7 @@ export interface ServiceMetadataDetails {
   };
   container?: {
     os?: string;
+    id?: string;
     isContainerized?: boolean;
     totalNumberInstances?: number;
     type?: ContainerType;
@@ -184,6 +185,7 @@ export async function getServiceMetadataDetails({
           os: host?.os?.platform,
           type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
           isContainerized: !!container?.id,
+          id: container?.id,
           totalNumberInstances,
         }
       : undefined;

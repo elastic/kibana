@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { uniq } from 'lodash';
+import { uniq, mergeWith } from 'lodash';
 import {
   UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
@@ -19,6 +19,7 @@ import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../../common/profiling';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getMetricIndices } from '../../lib/helpers/get_metric_indices';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
 import { getServices } from './get_services';
@@ -53,7 +54,7 @@ import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filt
 import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/offset_rt';
-
+import { getServiceContainerMetadata } from '../infra/container_metadata/get_service_container_metadata';
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
@@ -240,7 +241,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     import('./get_service_metadata_details').ServiceMetadataDetails
   > => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const { params, context, plugins } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
@@ -252,13 +253,35 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
       kuery: '',
     });
 
-    return getServiceMetadataDetails({
+    const serviceMetadataDetails = await getServiceMetadataDetails({
       serviceName,
       setup,
       searchAggregatedTransactions,
       start,
       end,
     });
+
+    if (serviceMetadataDetails?.container?.id) {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const savedObjectsClient = (await context.core).savedObjects.client;
+
+      const index = await getMetricIndices({
+        infraPlugin: plugins.infra,
+        savedObjectsClient,
+      });
+
+      const containerMetadata = await getServiceContainerMetadata({
+        esClient,
+        index,
+        containerId: serviceMetadataDetails?.container?.id,
+        start,
+        end,
+      });
+
+      return mergeWith(serviceMetadataDetails, containerMetadata);
+    }
+
+    return serviceMetadataDetails;
   },
 });
 
@@ -853,16 +876,40 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       | undefined;
   }> => {
     const setup = await setupRequest(resources);
-    const { serviceName, serviceNodeName } = resources.params.path;
+    const { params, context, plugins } = resources;
+    const { serviceName, serviceNodeName } = params.path;
     const { start, end } = resources.params.query;
 
-    return await getServiceInstanceMetadataDetails({
-      setup,
-      serviceName,
-      serviceNodeName,
-      start,
-      end,
-    });
+    const serviceInstanceMetadataDetails =
+      await getServiceInstanceMetadataDetails({
+        setup,
+        serviceName,
+        serviceNodeName,
+        start,
+        end,
+      });
+
+    if (serviceInstanceMetadataDetails?.container?.id) {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const savedObjectsClient = (await context.core).savedObjects.client;
+
+      const index = await getMetricIndices({
+        infraPlugin: plugins.infra,
+        savedObjectsClient,
+      });
+
+      const containerMetadata = await getServiceContainerMetadata({
+        esClient,
+        index,
+        containerId: serviceInstanceMetadataDetails?.container?.id,
+        start,
+        end,
+      });
+
+      return mergeWith(serviceInstanceMetadataDetails, containerMetadata);
+    }
+
+    return serviceInstanceMetadataDetails;
   },
 });
 

@@ -10,9 +10,15 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   CONTAINER_ID,
   KUBERNETES,
+  KUBERNETES_NODE,
+  NAMESPACE,
+  PHASE,
+  DEPLOYMENT_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 
 type ESResponse = SearchResponse;
+
+export interface ContainerMetadata {}
 
 export const getServiceContainerMetadata = async ({
   esClient,
@@ -29,41 +35,32 @@ export const getServiceContainerMetadata = async ({
 }) => {
   // includeFrozen ?
 
-  if (index) {
-    const should = [
-      { exists: { field: CONTAINER_ID } },
-      { exists: { field: KUBERNETES } },
-    ];
-    const filter = [
-      { term: { [CONTAINER_ID]: containerId } },
-      ...rangeQuery(start, end),
-    ];
+  const should = [
+    { exists: { field: KUBERNETES } },
+    { exists: { field: KUBERNETES_NODE } },
+    { exists: { field: NAMESPACE } },
+    { exists: { field: PHASE } },
+  ];
 
+  if (index) {
     const response = await esClient.search<ESResponse>({
       index: [index],
-      _source: [KUBERNETES],
-      query: { bool: { filter, should } },
-      // query: {
-      //   bool: {
-      //     filter: [
-      //       {
-      //         bool: {
-      //           should: [
-      //             {
-      //               match_phrase: {
-      //                 [CONTAINER_ID]: containerId,
-      //               },
-      //             },
-      //           ],
-      //           minimum_should_match: 1,
-      //         },
-      //       },
-      //       ...rangeQuery(start, end),
-      //     ],
-      //   },
-      // },
+      _source: [KUBERNETES, CONTAINER_ID],
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { [CONTAINER_ID]: containerId },
+            },
+            ...rangeQuery(start, end),
+          ],
+          should,
+        },
+      },
     });
 
-    return { response };
+    const container = response.hits.hits[0]?._source;
+
+    return { kubernetes: container.kubernetes };
   }
 };
