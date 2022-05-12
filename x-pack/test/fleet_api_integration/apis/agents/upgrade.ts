@@ -825,7 +825,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
       });
 
-      it('TESTME enrolled in a hosted agent policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {
+      it('enrolled in a hosted agent policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {
         // update enrolled policy to hosted
         await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
           name: 'Test policy',
@@ -851,7 +851,7 @@ export default function (providerContext: FtrProviderContext) {
             doc: {
               local_metadata: {
                 elastic: {
-                  agent: { upgradeable: true, version: semver.inc(fleetServerVersion, 'patch') },
+                  agent: { upgradeable: true, version: fleetServerVersion },
                 },
               },
             },
