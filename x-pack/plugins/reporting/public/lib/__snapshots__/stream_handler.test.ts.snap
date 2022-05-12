@@ -5,17 +5,7 @@ Object {
   "completed": Array [
     Object {
       "csvContainsFormulas": false,
-      "errorCode": undefined,
       "id": "job-source-mock1",
-      "jobtype": undefined,
-      "maxSizeReached": false,
-      "status": "completed",
-      "title": "specimen",
-    },
-    Object {
-      "csvContainsFormulas": true,
-      "errorCode": undefined,
-      "id": "job-source-mock4",
       "jobtype": undefined,
       "maxSizeReached": false,
       "status": "completed",
@@ -25,7 +15,6 @@ Object {
   "failed": Array [
     Object {
       "csvContainsFormulas": false,
-      "errorCode": undefined,
       "id": "job-source-mock2",
       "jobtype": undefined,
       "maxSizeReached": false,
@@ -44,13 +33,9 @@ Array [
       "reactNode": <React.Fragment>
         <p>
           <FormattedMessage
-            defaultMessage="The report '{reportObjectTitle}' contains characters which spreadsheet applications can interpret as formulas."
+            defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
             id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
-            values={
-              Object {
-                "reportObjectTitle": "Yas",
-              }
-            }
+            values={Object {}}
           />
         </p>
         <p>
@@ -74,11 +59,12 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="{reportType} may contain formulas"
+        defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
         id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
         values={
           Object {
-            "reportType": "yas",
+            "reportObjectTitle": "Yas",
+            "reportObjectType": "yas",
           }
         }
       />,
@@ -97,14 +83,16 @@ Array [
         <EuiCallOut
           color="danger"
           data-test-errorText="this is the failed report error"
+          iconType="alert"
           size="m"
+          title="The reporting job failed"
         >
           this is the failed report error
         </EuiCallOut>
         <EuiSpacer />
         <p>
           <FormattedMessage
-            defaultMessage="Go to {path} for details."
+            defaultMessage="More information is available at {path}."
             id="xpack.reporting.publicNotifier.error.checkManagement"
             values={
               Object {
@@ -112,7 +100,7 @@ Array [
                   href="/#management"
                 >
                   <FormattedMessage
-                    defaultMessage="Stack Management > Kibana > Reporting"
+                    defaultMessage="Management > Kibana > Reporting"
                     id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
                     values={Object {}}
                   />
@@ -125,12 +113,12 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Cannot create {reportType} report for '{reportObjectTitle}'."
+        defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
         values={
           Object {
             "reportObjectTitle": "Yas 7",
-            "reportType": "yas",
+            "reportObjectType": "yas",
           }
         }
       />,
@@ -173,12 +161,12 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Created partial {reportType} for '{reportObjectTitle}'"
+        defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
         id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
         values={
           Object {
             "reportObjectTitle": "Yas",
-            "reportType": "yas",
+            "reportObjectType": "yas",
           }
         }
       />,
@@ -213,12 +201,12 @@ Object {
   },
   "title": MountPoint {
     "reactNode": <FormattedMessage
-      defaultMessage="{reportType} created for '{reportObjectTitle}'"
+      defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
       id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
       values={
         Object {
           "reportObjectTitle": "Yas",
-          "reportType": "yas",
+          "reportObjectType": "yas",
         }
       }
     />,
