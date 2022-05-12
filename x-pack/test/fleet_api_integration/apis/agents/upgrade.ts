@@ -773,7 +773,6 @@ export default function (providerContext: FtrProviderContext) {
           is_managed: true,
         });
 
-        const kibanaVersion = await kibanaServer.version.get();
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
