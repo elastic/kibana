@@ -7,7 +7,6 @@
 
 import sinon from 'sinon';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { EsTestCluster } from '@kbn/test';
 import { Readable } from 'stream';
 import {
   createTestServers,
@@ -20,7 +19,6 @@ import { ElasticsearchBlobStorage, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es'
 describe('Elasticsearch blob storage', () => {
   let manageES: TestElasticsearchUtils;
   let manageKbn: TestKibanaUtils;
-  let es: EsTestCluster;
   let esBlobStorage: ElasticsearchBlobStorage;
   let esClient: ElasticsearchClient;
   const sandbox = sinon.createSandbox();
@@ -29,7 +27,6 @@ describe('Elasticsearch blob storage', () => {
     const { startES, startKibana } = createTestServers({ adjustTimeout: () => 30000 });
     manageES = await startES();
     manageKbn = await startKibana();
-    es = manageES.es;
     esClient = manageKbn.coreStart.elasticsearch.client.asInternalUser;
   });
 
