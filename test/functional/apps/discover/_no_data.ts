@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('when no data opens integrations', async () => {

@@ -67,22 +67,20 @@ export function DiscoverMainRoute() {
     id: id || 'new',
   });
 
-  const checkForDataViews = useCallback(async () => {
-    const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => true);
-    const hasEsData = await data.dataViews.hasData.hasESData().catch(() => true);
-    if (!hasUserDataView || !hasEsData) {
-      setShowNoDataPage(true);
-    }
-    const defaultDataView = await data.dataViews.getDefaultDataView();
-    if (!defaultDataView) {
-      setShowNoDataPage(true);
-    }
-  }, [data.dataViews]);
-
   const loadDefaultOrCurrentIndexPattern = useCallback(
     async (searchSource: ISearchSource) => {
       try {
-        await checkForDataViews();
+        const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
+        const hasEsData = await data.dataViews.hasData.hasESData().catch(() => true);
+        if (!hasUserDataView || !hasEsData) {
+          setShowNoDataPage(true);
+          return;
+        }
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+        if (!defaultDataView) {
+          setShowNoDataPage(true);
+          return;
+        }
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.dataViews, config);
@@ -97,7 +95,7 @@ export function DiscoverMainRoute() {
         setError(e);
       }
     },
-    [checkForDataViews, config, data.dataViews, history, toastNotifications]
+    [config, data.dataViews, history, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {
