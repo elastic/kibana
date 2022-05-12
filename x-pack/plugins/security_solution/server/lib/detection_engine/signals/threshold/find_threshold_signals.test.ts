@@ -22,7 +22,6 @@ const buildRuleMessage = buildRuleMessageFactory({
 const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn();
 
-// Failing with rule registry enabled
 describe('findThresholdSignals', () => {
   let mockService: RuleExecutorServicesMock;
 
