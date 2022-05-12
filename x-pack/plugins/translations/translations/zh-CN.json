@@ -26439,7 +26439,6 @@
     "xpack.securitySolution.inspect.modal.somethingWentWrongDescription": "抱歉，出现问题。",
     "xpack.securitySolution.inspectDescription": "检查",
     "xpack.securitySolution.inspectPatternDifferent": "此元素具有与数据视图设置不同的唯一索引模式。",
-    "xpack.securitySolution.inspectPatternExcludeLogs": "选择 logs-* 索引模式时，会从搜索中排除 Elastic Cloud 日志。",
     "xpack.securitySolution.investigationEnrichment.requestError": "请求威胁情报时发生错误",
     "xpack.securitySolution.ja3.fingerprint.ja3.fingerprintLabel": "ja3",
     "xpack.securitySolution.kpiHost.enableHostRiskText": "启用主机风险模块以查看更多数据",
