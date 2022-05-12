@@ -25,7 +25,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
-import { QueryBarMenu } from '../query_string_input/query_bar_menu';
+import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
@@ -54,6 +54,7 @@ export interface SearchBarOwnProps {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
+  hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
   // Date picker
   isRefreshPaused?: boolean;
   refreshInterval?: number;
@@ -87,6 +88,7 @@ export interface SearchBarOwnProps {
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
   showSubmitButton?: boolean;
+  isScreenshotMode?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -357,13 +359,16 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
   public render() {
     const { theme } = this.props;
+    const isScreenshotMode = this.props.isScreenshotMode === true;
     const styles = searchBarStyles(theme);
     const cssStyles = [
       styles.uniSearchBar,
       this.props.displayStyle && styles[this.props.displayStyle],
+      isScreenshotMode && styles.hidden,
     ];
 
     const classes = classNames('uniSearchBar', {
+      [`uniSearchBar--hidden`]: isScreenshotMode,
       [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
     });
 
@@ -405,6 +410,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
         openQueryBarMenu={this.state.openQueryBarMenu}
         onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
+        hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
         query={this.state.query}
         savedQuery={this.props.savedQuery}
         onClearSavedQuery={this.props.onClearSavedQuery}
@@ -434,6 +440,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
         />
       ) : (
         <FilterBar
@@ -442,6 +449,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           data-test-subj="unifiedFilterBar"
         />
       );
@@ -486,6 +494,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
+          isScreenshotMode={this.props.isScreenshotMode}
         />
       </div>
     );

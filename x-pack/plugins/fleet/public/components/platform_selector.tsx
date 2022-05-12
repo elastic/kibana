@@ -50,6 +50,14 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const commandsByPlatform: Record<PLATFORM_TYPE, string> = {
+    linux: linuxCommand,
+    mac: macCommand,
+    windows: windowsCommand,
+    deb: linuxDebCommand,
+    rpm: linuxRpmCommand,
+  };
+
   return (
     <>
       {isK8s ? (
@@ -67,39 +75,22 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             })}
           />
           <EuiSpacer size="s" />
-          {platform === 'linux' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{linuxCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'mac' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{macCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'windows' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{windowsCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'deb' && (
+          {(platform === 'deb' || platform === 'rpm') && (
             <>
               {systemPackageCallout}
               <EuiSpacer size="m" />
-              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-                <CommandCode>{linuxDebCommand}</CommandCode>
-              </EuiCodeBlock>
             </>
           )}
-          {platform === 'rpm' && (
-            <>
-              {systemPackageCallout}
-              <EuiSpacer size="m" />
-              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-                <CommandCode>{linuxRpmCommand}</CommandCode>
-              </EuiCodeBlock>
-            </>
-          )}
+          <EuiCodeBlock
+            fontSize="m"
+            isCopyable={true}
+            paddingSize="m"
+            css={`
+              max-width: 1100px;
+            `}
+          >
+            <CommandCode>{commandsByPlatform[platform]}</CommandCode>
+          </EuiCodeBlock>
         </>
       )}
     </>

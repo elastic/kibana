@@ -219,15 +219,15 @@ class FilterEditorUI extends Component<Props, State> {
         <EuiFormRow
           fullWidth
           label={this.props.intl.formatMessage({
-            id: 'unifiedSearch.filter.filterEditor.indexPatternSelectLabel',
-            defaultMessage: 'Index Pattern',
+            id: 'unifiedSearch.filter.filterEditor.dateViewSelectLabel',
+            defaultMessage: 'Data view',
           })}
         >
           <IndexPatternComboBox
             fullWidth
             placeholder={this.props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder',
-              defaultMessage: 'Select an index pattern',
+              defaultMessage: 'Select a data view',
             })}
             options={this.props.indexPatterns}
             selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
