@@ -88,8 +88,7 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
-    const autoSelectedType = await this.testSubjects.getVisibleText('control-editor-type');
-    expect(autoSelectedType).to.equal(CONTROL_DISPLAY_NAMES.default);
+    await this.controlEditorVerifyType('default');
   }
 
   /* -----------------------------------------------------------
@@ -259,8 +258,7 @@ export class DashboardPageControls extends FtrService {
 
     if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
 
-    if (fieldName) await this.controlsEditorSetfield(fieldName);
-    await this.controlEditorVerifyType(controlType);
+    if (fieldName) await this.controlsEditorSetfield(fieldName, controlType);
 
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
@@ -410,7 +408,11 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`data-view-picker-${dataViewTitle}`);
   }
 
-  public async controlsEditorSetfield(fieldName: string, shouldSearch: boolean = false) {
+  public async controlsEditorSetfield(
+    fieldName: string,
+    expectedType?: string,
+    shouldSearch: boolean = false
+  ) {
     this.log.debug(`Setting control field to ${fieldName}`);
     if (shouldSearch) {
       await this.testSubjects.setValue('field-search-input', fieldName);
@@ -419,14 +421,13 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.existOrFail(`field-picker-select-${fieldName}`);
     });
     await this.testSubjects.click(`field-picker-select-${fieldName}`);
+    if (expectedType) await this.controlEditorVerifyType(expectedType);
   }
 
   public async controlEditorVerifyType(type: string) {
-    this.log.debug(`Verifying that control type has type ${type}`);
+    this.log.debug(`Verifying that the control editor picked the type ${type}`);
     const autoSelectedType = await this.testSubjects.getVisibleText('control-editor-type');
     expect(autoSelectedType).to.equal(CONTROL_DISPLAY_NAMES[type]);
-
-    // await this.testSubjects.click(`create-${type}-control`);
   }
 
   // Options List editor functions

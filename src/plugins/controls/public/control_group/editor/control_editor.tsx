@@ -56,7 +56,7 @@ interface EditControlProps {
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
-  onSave: (type: string, factory?: IEditableControlFactory) => void;
+  onSave: (type?: string) => void;
   onCancel: () => void;
   removeControl?: () => void;
   updateTitle: (title?: string) => void;
@@ -107,11 +107,10 @@ export const ControlEditor = ({
     embeddable ? embeddable.getInput().fieldName : undefined
   );
 
-  const getCompatibleControlTypes = (dataView?: DataView) => {
-    if (!dataView) return {};
+  const doubleLinkFields = (dataView: DataView) => {
+    // double link the parent-child relationship specifically for case-sensitivity support for options lists
     const fieldRegistry: DataControlFieldRegistry = {};
 
-    // double link the parent-child relationship specifically for case-sensitivity support for options lists
     for (const field of dataView.fields.getAll()) {
       if (!fieldRegistry[field.name]) {
         fieldRegistry[field.name] = { field, compatibleControlTypes: [] };
@@ -127,6 +126,12 @@ export const ControlEditor = ({
         fieldRegistry[parentFieldName].childFieldName = field.name;
       }
     }
+    return fieldRegistry;
+  };
+
+  const getCompatibleControlTypes = (dataView?: DataView) => {
+    if (!dataView) return {};
+    const fieldRegistry: DataControlFieldRegistry = doubleLinkFields(dataView);
 
     const controlFactories = getControlTypes().map(
       (controlType) => getControlFactory(controlType) as IEditableControlFactory
@@ -143,7 +148,6 @@ export const ControlEditor = ({
       }
     });
     setState((s) => ({ ...s, fieldRegistry }));
-    // setSelectedField(Object.keys(fieldRegistry)[0]);
   };
 
   useMount(() => {
@@ -160,12 +164,12 @@ export const ControlEditor = ({
         dataView = await get(initialId);
       }
       if (!mounted) return;
+      getCompatibleControlTypes(dataView);
       setState((s) => ({
         ...s,
         selectedDataView: dataView,
         dataViewListItems,
       }));
-      getCompatibleControlTypes(dataView);
     })();
     return () => {
       mounted = false;
@@ -207,12 +211,14 @@ export const ControlEditor = ({
                 onTypeEditorChange({ dataViewId });
                 setSelectedField(undefined);
                 get(dataViewId).then((newDataView) => {
-                  setState((s) => ({ ...s, selectedDataView: newDataView }));
                   getCompatibleControlTypes(newDataView);
+                  setState((s) => ({ ...s, selectedDataView: newDataView }));
                 });
               }}
               trigger={{
-                label: state.selectedDataView?.title ?? 'Select data view',
+                label:
+                  state.selectedDataView?.title ??
+                  ControlGroupStrings.manageControl.getSelectDataViewMessage(),
               }}
             />
           </EuiFormRow>
@@ -229,11 +235,6 @@ export const ControlEditor = ({
                   parentFieldName: state.fieldRegistry?.[field.name].parentFieldName,
                   childFieldName: state.fieldRegistry?.[field.name].childFieldName,
                 });
-                // console.log('on select field:');
-                // console.log('File registry: ', state.fieldRegistry);
-                // console.log('----> field:  ', field.name);
-                // console.log('----> parent: ', state.fieldRegistry?.[field.name].parentFieldName);
-                // console.log('----> child:  ', state.fieldRegistry?.[field.name].childFieldName);
 
                 const newDefaultTitle = field.displayName ?? field.name;
                 setDefaultTitle(newDefaultTitle);
@@ -322,7 +323,7 @@ export const ControlEditor = ({
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}
-              onClick={() => controlType && onSave(controlType, factory as IEditableControlFactory)}
+              onClick={() => onSave(controlType)}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>

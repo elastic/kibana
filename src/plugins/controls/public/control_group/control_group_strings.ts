@@ -80,6 +80,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.selectFieldMessage', {
         defaultMessage: 'Please select a field',
       }),
+    getSelectDataViewMessage: () =>
+      i18n.translate('controls.controlGroup.manageControl.selectDataViewMessage', {
+        defaultMessage: 'Please select a data view',
+      }),
   },
   management: {
     getAddControlTitle: () =>

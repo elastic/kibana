@@ -73,6 +73,21 @@ export const CreateControlButton = ({
         });
       };
 
+      const onSave = (ref: OverlayRef, type?: string) => {
+        if (!type) {
+          reject();
+          ref.close();
+          return;
+        }
+
+        const factory = getControlFactory(type) as IEditableControlFactory;
+        if (factory.presaveTransformFunction) {
+          inputToReturn = factory.presaveTransformFunction(inputToReturn);
+        }
+        resolve({ type, controlInput: inputToReturn });
+        ref.close();
+      };
+
       const flyoutInstance = openFlyout(
         toMountPoint(
           <PresentationUtilProvider>
@@ -83,16 +98,7 @@ export const CreateControlButton = ({
               width={defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
               updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
               updateWidth={updateDefaultWidth}
-              onSave={(type: string, factory?: IEditableControlFactory) => {
-                if (!factory) {
-                  factory = getControlFactory(type) as IEditableControlFactory;
-                }
-                if (factory.presaveTransformFunction) {
-                  inputToReturn = factory.presaveTransformFunction(inputToReturn);
-                }
-                resolve({ type, controlInput: inputToReturn });
-                flyoutInstance.close();
-              }}
+              onSave={(type) => onSave(flyoutInstance, type)}
               onCancel={() => onCancel(flyoutInstance)}
               onTypeEditorChange={(partialInput) =>
                 (inputToReturn = { ...inputToReturn, ...partialInput })

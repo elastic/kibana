@@ -21,7 +21,6 @@ import './field_picker.scss';
 export interface FieldPickerProps {
   dataView?: DataView;
   selectedFieldName?: string;
-  // showFields?: string[];
   filterPredicate?: (f: DataViewField) => boolean;
   onSelectField?: (selectedField: DataViewField) => void;
 }
@@ -29,12 +28,12 @@ export interface FieldPickerProps {
 export const FieldPicker = ({
   dataView,
   onSelectField,
-  // showFields,
   filterPredicate,
   selectedFieldName,
 }: FieldPickerProps) => {
   const [nameFilter, setNameFilter] = useState<string>('');
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
+
   // Retrieve, filter, and sort fields from data view
   const fields = dataView
     ? sortBy(
@@ -49,7 +48,13 @@ export const FieldPicker = ({
       )
     : [];
 
-  const uniqueTypes = dataView ? uniq(fields.map((f) => f.type as string)) : [];
+  const uniqueTypes = dataView
+    ? uniq(
+        dataView.fields
+          .filter((f) => (filterPredicate ? filterPredicate(f) : true))
+          .map((f) => f.type as string)
+      )
+    : [];
 
   return (
     <EuiFlexGroup

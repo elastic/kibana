@@ -28,8 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const changeFieldType = async (controlId: string, newField: string, expectedType?: string) => {
     await dashboardControls.editExistingControl(controlId);
-    await dashboardControls.controlsEditorSetfield(newField);
-    if (expectedType) await dashboardControls.controlEditorVerifyType(expectedType);
+    await dashboardControls.controlsEditorSetfield(newField, expectedType);
     await dashboardControls.controlEditorSave();
   };
 

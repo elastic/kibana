@@ -103,7 +103,13 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         });
       };
 
-      const onSave = (type: string, ref: OverlayRef) => {
+      const onSave = (ref: OverlayRef, type?: string) => {
+        if (!type) {
+          reject();
+          ref.close();
+          return;
+        }
+
         // if the control now has a new type, need to replace the old factory with
         // one of the correct new type
         if (latestPanelState.current.type !== type) {
@@ -135,7 +141,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
               onTypeEditorChange={(partialInput) => {
                 inputToReturn = { ...inputToReturn, ...partialInput };
               }}
-              onSave={(type) => onSave(type, flyoutInstance)}
+              onSave={(type) => onSave(flyoutInstance, type)}
               removeControl={() => {
                 openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
                   confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
