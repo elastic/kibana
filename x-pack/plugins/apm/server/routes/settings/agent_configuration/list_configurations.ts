@@ -24,5 +24,5 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
 
   return resp.hits.hits
     .map(convertConfigSettingsToString)
-    .map((hit) => ({ ...hit._source, id: hit._id }));
+    .map((hit) => hit._source);
 }

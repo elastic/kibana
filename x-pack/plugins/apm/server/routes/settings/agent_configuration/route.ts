@@ -18,10 +18,7 @@ import { getEnvironments } from './get_environments';
 import { deleteConfiguration } from './delete_configuration';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getAgentNameByService } from './get_agent_name_by_service';
-import {
-  markAppliedByAgent,
-  markAppliedByAgentThroughFleet,
-} from './mark_applied_by_agent';
+import { markAppliedByAgent } from './mark_applied_by_agent';
 import {
   serviceRt,
   agentConfigurationIntakeRt,
@@ -64,12 +61,6 @@ const agentConfigurationRoute = createApmServerRoute({
         };
       }
     );
-
-    markAppliedByAgentThroughFleet({
-      configsAppliedToAgentsThroughFleet,
-      configurations,
-      setup,
-    });
 
     return { configurations: updatedConfigs };
   },

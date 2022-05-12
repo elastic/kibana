@@ -24,7 +24,7 @@ export function createOrUpdateConfiguration({
 }) {
   const { internalClient, indices } = setup;
 
-  const params: APMIndexDocumentParams<Omit<AgentConfiguration, 'id'>> = {
+  const params: APMIndexDocumentParams<AgentConfiguration> = {
     refresh: true,
     index: indices.apmAgentConfigurationIndex,
     body: {
