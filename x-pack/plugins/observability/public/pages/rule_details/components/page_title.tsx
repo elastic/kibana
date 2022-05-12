@@ -26,9 +26,9 @@ export function PageTitle({ rule }: PageHeaderProps) {
       <EuiFlexGroup alignItems="baseline">
         <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="xs">
-            <b>{LAST_UPDATED_MESSAGE}</b> {BY_WORD} {rule.updatedBy} {ON_WORD}{' '}
+            <b>{LAST_UPDATED_MESSAGE}</b> {BY_WORD} {rule.updatedBy} {ON_WORD}&nbsp;
             {moment(rule.updatedAt).format('ll')} &emsp;
-            <b>{CREATED_WORD}</b> {BY_WORD} {rule.createdBy} {ON_WORD}{' '}
+            <b>{CREATED_WORD}</b> {BY_WORD} {rule.createdBy} {ON_WORD}&nbsp;
             {moment(rule.createdAt).format('ll')}
           </EuiText>
         </EuiFlexItem>

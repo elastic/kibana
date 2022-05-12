@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import moment from 'moment';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +33,7 @@ import {
   deleteRules,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import { getHealthColor } from '../rules/config';
@@ -42,7 +43,6 @@ import {
   EVENT_LOG_LIST_TAB,
   ALERT_LIST_TAB,
 } from './types';
-
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -81,9 +81,23 @@ export function RuleDetailsPage() {
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
 
+  const handleClosePopover = useCallback(() => setIsRuleEditPopoverOpen(false), []);
+
+  const handleOpenPopover = useCallback(() => setIsRuleEditPopoverOpen(true), []);
+
+  const handleRemoveRule = useCallback(() => {
+    setIsRuleEditPopoverOpen(false);
+    if (rule) setRuleToDelete([rule.id]);
+  }, [rule]);
+
+  const handleEditRule = useCallback(() => {
+    setIsRuleEditPopoverOpen(false);
+    setEditFlyoutVisible(true);
+  }, []);
+
   useEffect(() => {
     if (ruleType && rule) {
-      if (rule.consumer === 'alerts' && ruleType.producer) {
+      if (rule.consumer === ALERTS_FEATURE_ID && ruleType.producer) {
         setFeatures(ruleType.producer);
       } else setFeatures(rule.consumer);
     }
@@ -124,7 +138,7 @@ export function RuleDetailsPage() {
     const numberOfConditions = rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0;
     return (
       <>
-        {numberOfConditions}{' '}
+        {numberOfConditions}&nbsp;
         {i18n.translate('xpack.observability.ruleDetails.conditions', {
           defaultMessage: 'condition{s}',
           values: { s: numberOfConditions > 1 ? 's' : '' },
@@ -196,26 +210,19 @@ export function RuleDetailsPage() {
                   <EuiPopover
                     id="contextRuleEditMenu"
                     isOpen={isRuleEditPopoverOpen}
-                    closePopover={() => setIsRuleEditPopoverOpen(false)}
+                    closePopover={handleClosePopover}
                     button={
                       <EuiButtonIcon
                         display="base"
                         size="m"
                         iconType="boxesHorizontal"
                         aria-label="More"
-                        onClick={() => setIsRuleEditPopoverOpen(true)}
+                        onClick={handleOpenPopover}
                       />
                     }
                   >
                     <EuiFlexGroup direction="column" alignItems="flexStart">
-                      <EuiButtonEmpty
-                        size="s"
-                        iconType="pencil"
-                        onClick={() => {
-                          setIsRuleEditPopoverOpen(false);
-                          setEditFlyoutVisible(true);
-                        }}
-                      >
+                      <EuiButtonEmpty size="s" iconType="pencil" onClick={handleEditRule}>
                         <EuiSpacer size="s" />
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.editRule', {
@@ -228,10 +235,7 @@ export function RuleDetailsPage() {
                         size="s"
                         iconType="trash"
                         color="danger"
-                        onClick={() => {
-                          setIsRuleEditPopoverOpen(false);
-                          setRuleToDelete([rule.id]);
-                        }}
+                        onClick={handleRemoveRule}
                       >
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.deleteRule', {

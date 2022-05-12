@@ -22,9 +22,9 @@ export interface FetchRuleProps {
 
 export interface FetchRule {
   isRuleLoading: boolean;
-  rule: Rule | undefined;
-  ruleType: RuleType | undefined;
-  errorRule: string | undefined;
+  rule?: Rule;
+  ruleType?: RuleType;
+  errorRule?: string;
 }
 
 export interface FetchRuleSummaryProps {
@@ -37,8 +37,8 @@ export interface FetchRuleActionsProps {
 
 export interface FetchRuleSummary {
   isLoadingRuleSummary: boolean;
-  ruleSummary: RuleSummary | undefined;
-  errorRuleSummary: string | undefined;
+  ruleSummary?: RuleSummary;
+  errorRuleSummary?: string;
 }
 
 export interface AlertListItemStatus {
