@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
-import _ from 'lodash';
 import del from 'del';
 import fs from 'fs';
-import { uniq } from 'lodash';
+import _, { uniq } from 'lodash';
 import path from 'path';
 import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import {
   catchError,
+  concatMap,
   ignoreElements,
   map,
-  concatMap,
   mergeMap,
   reduce,
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import type { Logger } from '@kbn/core/server';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import { ConfigType } from '../../../config';
-import { errors } from '../../../../common';
 import { getChromiumDisconnectedError } from '..';
+import { errors } from '../../../../common';
+import { ConfigType } from '../../../config';
+import { DEFAULT_VIEWPORT } from '../../../layouts';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -61,14 +61,6 @@ interface CreatePageResult {
 interface ClosePageResult {
   metrics?: PerformanceMetrics;
 }
-
-export const DEFAULT_VIEWPORT: Required<
-  Pick<puppeteer.Viewport, 'width' | 'height' | 'deviceScaleFactor'>
-> = {
-  width: 1950,
-  height: 1200,
-  deviceScaleFactor: 1,
-};
 
 // Default args used by pptr
 // https://github.com/puppeteer/puppeteer/blob/13ea347/src/node/Launcher.ts#L168

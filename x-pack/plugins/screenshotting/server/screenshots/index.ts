@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { Optional } from '@kbn/utility-types';
@@ -22,16 +23,15 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
+  errors,
   LayoutParams,
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
-  errors,
 } from '../../common';
+import { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import { systemHasInsufficientMemory } from '../cloud';
-import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import type { ConfigType } from '../config';
 import { durationToNumber } from '../config';
 import {
@@ -42,8 +42,7 @@ import {
   toPdf,
   toPng,
 } from '../formats';
-import type { Layout } from '../layouts';
-import { createLayout } from '../layouts';
+import { createLayout, DEFAULT_VIEWPORT, Layout } from '../layouts';
 import { EventLogger, Transactions } from './event_logger';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';

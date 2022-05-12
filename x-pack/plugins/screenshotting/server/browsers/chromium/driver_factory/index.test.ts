@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
-import type { Logger } from '@kbn/core/server';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { HeadlessChromiumDriverFactory } from '.';
 import { ConfigType } from '../../../config';
-import { HeadlessChromiumDriverFactory, DEFAULT_VIEWPORT } from '.';
+import { DEFAULT_VIEWPORT } from '../../../layouts';
 
 jest.mock('puppeteer');
 
