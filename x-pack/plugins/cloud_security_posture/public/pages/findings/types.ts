@@ -63,13 +63,11 @@ interface CspFindingResult {
 }
 
 interface CspFindingResource {
-  uid: string;
-  filename: string;
-  // gid: string;
-  mode: string;
-  path: string;
+  name: string;
+  sub_type: string;
+  raw: object;
+  id: string;
   type: string;
-  [other_keys: string]: unknown;
 }
 
 interface CspFindingHost {
