@@ -8,15 +8,16 @@
 import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+import { lastValueFrom } from 'rxjs';
 import { asyncForEach } from '@kbn/std';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
-import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { ApmIndicesConfig } from '../../common/typings';
 import { ObservabilityAppServices } from '../application/types';
+import { useAlertIndexNames } from '../hooks/use_alert_index_names';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
@@ -43,9 +44,11 @@ export const HasDataContext = createContext({} as HasDataContextValue);
 const apps: DataContextApps[] = ['apm', 'synthetics', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const { data } = useKibana<ObservabilityAppServices>().services;
   const [forceUpdate, setForceUpdate] = useState('');
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
+
+  const alertIndices = useAlertIndexNames();
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
@@ -128,11 +131,24 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     async function fetchAlerts() {
       try {
-        const alerts = await getObservabilityAlerts({ http });
+        const alerts = await lastValueFrom(
+          data.search.search({
+            params: {
+              index: alertIndices,
+              ignore_unavailable: true,
+              allow_no_indices: true,
+              size: 0,
+              terminate_after: 1,
+              track_total_hits: 1,
+            },
+          })
+        );
+        const hasAlerts = (alerts?.rawResponse.hits.total ?? 0) > 0;
+
         setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
-            hasData: alerts.length > 0,
+            hasData: hasAlerts,
             status: FETCH_STATUS.SUCCESS,
           },
         }));
@@ -148,7 +164,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     }
 
     fetchAlerts();
-  }, [forceUpdate, http]);
+  }, [forceUpdate, alertIndices, data]);
 
   const isAllRequestsComplete = apps.every((app) => {
     const appStatus = hasDataMap[app]?.status;
