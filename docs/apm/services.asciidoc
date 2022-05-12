@@ -33,11 +33,20 @@ Specify a name, color, and description.
 Then, using the <<kuery-query, Kibana Query Language (KQL)>>, specify a query to select services for the group.
 Services that match the query within the last 24 hours will be assigned to the group.
 
-[TIP]
+[NOTE]
 ====
+Once a service group has been saved, this list of services within it is static.
+If a newly added service matches the KQL query, it will not be automatically added to the service group.
+Similarly, if a service stops matching the KQL query, it will not be removed from the group.
+
+To update the list of services within a group,
+edit the service group and click **Refresh** next to the KQL query.
+====
+
+**Examples**
+
 Not sure where to get started? Here are some sample queries you can build from:
 
 * Group services by environment--in this example, "production": `service.environment : "production"`
 * Group services by name--this example groups those that end in "beat": `service.name : *beat` (matches services named "Auditbeat", "Heartbeat", "Filebeat", etc.)
 * Group services with a high transaction duration in the last 24 hours: `transaction.duration.us >= 50000000`
-====
