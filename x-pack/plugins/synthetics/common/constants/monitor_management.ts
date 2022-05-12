@@ -41,7 +41,7 @@ export enum ConfigKey {
   REVISION = 'revision',
   SCHEDULE = 'schedule',
   SCREENSHOTS = 'screenshots',
-  SOURCE_PUSH = 'source.push.content',
+  SOURCE_PUSH = 'source.pushed.content',
   SOURCE_INLINE = 'source.inline.script',
   SOURCE_ZIP_URL = 'source.zip_url.url',
   SOURCE_ZIP_USERNAME = 'source.zip_url.username',

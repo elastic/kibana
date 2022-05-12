@@ -395,12 +395,18 @@ export class SyntheticsService {
       });
     }
 
-    return (monitors ?? []).map((monitor) => ({
-      ...normalizeSecrets(monitor).attributes,
-      id: monitor.attributes.JOURNEY_ID || monitor.id,
-      fields_under_root: true,
-      fields: { config_id: monitor.id },
-    }));
+    return (monitors ?? []).map((monitor) => {
+      const attributes = monitor.attributes as unknown as MonitorFields;
+      const pushBrowserMonitorId = attributes[ConfigKey.IS_PUSH_MONITOR]
+        ? `${attributes[ConfigKey.JOURNEY_ID]}-${attributes[ConfigKey.PROJECT_ID]}`
+        : undefined;
+      return {
+        ...normalizeSecrets(monitor).attributes,
+        id: pushBrowserMonitorId || monitor.id,
+        fields_under_root: true,
+        fields: { config_id: monitor.id },
+      };
+    });
   }
 
   formatConfigs(configs: SyntheticsMonitorWithId[]) {
