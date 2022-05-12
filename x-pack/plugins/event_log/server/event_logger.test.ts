@@ -143,6 +143,15 @@ describe('EventLogger', () => {
     expect(nanosToMillis(duration)).toBeCloseTo(timeStopValue - timeStartValue);
   });
 
+  test('can set specific start time in startTiming', () => {
+    const event: IEvent = {};
+    eventLogger.startTiming(event, new Date('2020-01-01T02:00:00.000Z'));
+
+    const timeStart = event.event!.start!;
+    expect(timeStart).toBeTruthy();
+    expect(timeStart).toEqual('2020-01-01T02:00:00.000Z');
+  });
+
   test('timing method endTiming() method works when startTiming() is not called', async () => {
     const event: IEvent = {};
     eventLogger.stopTiming(event);

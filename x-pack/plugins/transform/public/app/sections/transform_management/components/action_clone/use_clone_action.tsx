@@ -21,8 +21,7 @@ export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {
   const history = useHistory();
   const appDeps = useAppDependencies();
-  const savedObjectsClient = appDeps.savedObjects.client;
-  const dataViews = appDeps.data.dataViews;
+  const dataViewsContract = appDeps.data.dataViews;
   const toastNotifications = useToastNotifications();
 
   const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
@@ -32,7 +31,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        await loadDataViews(savedObjectsClient, dataViews);
+        await loadDataViews(dataViewsContract);
         const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
@@ -57,14 +56,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
         });
       }
     },
-    [
-      history,
-      savedObjectsClient,
-      dataViews,
-      toastNotifications,
-      loadDataViews,
-      getDataViewIdByTitle,
-    ]
+    [history, dataViewsContract, toastNotifications, loadDataViews, getDataViewIdByTitle]
   );
 
   const action: TransformListAction = useMemo(
