@@ -238,7 +238,7 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         <EuiSpacer size="l" />
 
-        <EuiTimeline className="ilm-phases-timeline">
+        <EuiTimeline className="ilmPhases">
           <HotPhase />
 
           <WarmPhase />
