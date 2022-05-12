@@ -67,7 +67,7 @@ export function RuleDetailsPage() {
   const [features, setFeatures] = useState<string>('');
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
   const [isPageLoading, setIsPageLoading] = useState(false);
-  const { last24hAlerts, isLoadingLast24hAlerts, errorLast24hAlerts } = useFetchLast24hAlerts({
+  const { last24hAlerts } = useFetchLast24hAlerts({
     http,
     features,
     ruleId,
@@ -156,10 +156,9 @@ export function RuleDetailsPage() {
       content: <EuiText>Error log</EuiText>,
     },
   ];
-  console.log('rule', rule);
 
   if (isPageLoading || (isLoadingRule && !errorRule)) return <CenterJustifiedSpinner />;
-  if (errorRule) return toasts.addDanger({ title: errorRule });
+
   return (
     rule && (
       <ObservabilityPageTemplate
@@ -436,6 +435,7 @@ export function RuleDetailsPage() {
             setIsPageLoading(isLoading);
           }}
         />
+        {errorRule && toasts.addDanger({ title: errorRule })}
       </ObservabilityPageTemplate>
     )
   );
