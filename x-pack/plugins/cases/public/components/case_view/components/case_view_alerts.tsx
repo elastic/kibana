@@ -33,21 +33,13 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
 
   const alertFeatureIds = useGetFeatureIds(alertRegistrationContexts);
 
-  const alertStateProps = useMemo(() => {
-    const configurationId = caseData.owner;
-    return {
-      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-      configurationId,
-      id: `case-details-alerts-${configurationId}`,
-      featureIds: alertFeatureIds,
-      query: alertIdsQuery,
-    };
-  }, [
-    caseData.owner,
-    triggersActionsUi.alertsTableConfigurationRegistry,
-    alertFeatureIds,
-    alertIdsQuery,
-  ]);
+  const alertStateProps = {
+    alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
+    configurationId: caseData.owner,
+    id: `case-details-alerts-${caseData.owner}`,
+    featureIds: alertFeatureIds,
+    query: alertIdsQuery,
+  };
 
   return <>{triggersActionsUi.getAlertsStateTable(alertStateProps)}</>;
 };
