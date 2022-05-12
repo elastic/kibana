@@ -87,10 +87,10 @@ export const FilterOutBtn = ({
 
 export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) => {
   const { indexPattern: dataView, rowsFlattened, rows } = useContext(DiscoverGridContext);
-  const { fieldFormats } = useDiscoverServices();
+  const { fieldFormats, toastNotifications } = useDiscoverServices();
 
-  const buttonTitle = i18n.translate('discover.grid.filterOutAria', {
-    defaultMessage: 'Copy value of column {column}',
+  const buttonTitle = i18n.translate('discover.grid.copyClipboardButtonTitle', {
+    defaultMessage: 'Copy value of {column}',
     values: { column: columnId },
   });
 
@@ -106,6 +106,14 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
             ? JSON.stringify(rowFlattened, null, 2)
             : formatFieldValue(value, rows[rowIndex], fieldFormats, dataView, field, 'text');
         copyToClipboard(valueFormatted);
+        const infoTitle = i18n.translate('discover.grid.copyClipboardToastTitle', {
+          defaultMessage: 'Copied value of {column} to clipboard.',
+          values: { column: columnId },
+        });
+
+        toastNotifications.addInfo({
+          title: infoTitle,
+        });
       }}
       iconType="copyClipboard"
       aria-label={buttonTitle}
@@ -122,7 +130,7 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
 export function buildCellActions(field: DataViewField) {
   if (field?.type === '_source') {
     return [CopyBtn];
-  } else if(!field.filterable ) {
+  } else if (!field.filterable) {
     return undefined;
   }
 
