@@ -76,9 +76,7 @@ export function logstashPipelineRoute(server) {
       }
 
       try {
-        const [pipeline, vertex] = await Promise.all(promises).catch((error) => {
-          throw error;
-        });
+        const [pipeline, vertex] = await Promise.all(promises);
         return {
           versions,
           pipeline,
@@ -86,6 +84,7 @@ export function logstashPipelineRoute(server) {
         };
       } catch (err) {
         if (err instanceof PipelineNotFoundError) {
+          req.getLogger().error(err.message);
           throw notFound(err.message);
         }
         return handleError(err, req);
