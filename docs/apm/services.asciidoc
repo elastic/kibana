@@ -40,7 +40,7 @@ If a newly added service matches the KQL query, it will not be automatically add
 Similarly, if a service stops matching the KQL query, it will not be removed from the group.
 
 To update the list of services within a group,
-edit the service group and click **Refresh** next to the KQL query.
+edit the service group, click **Refresh** next to the KQL query, and click **Save group**.
 ====
 
 **Examples**
