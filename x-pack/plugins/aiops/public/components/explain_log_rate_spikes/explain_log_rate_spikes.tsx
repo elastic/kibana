@@ -9,38 +9,9 @@ import React, { useEffect, FC } from 'react';
 
 import { EuiBadge, EuiSpacer } from '@elastic/eui';
 
-import {
-  API_ACTION_NAME,
-  AiopsExplainLogRateSpikesApiAction,
-} from '../../../common/api/explain_log_rate_spikes';
-
 import { useStreamFetchReducer } from '../../hooks/use_stream_fetch_reducer';
 
-interface StreamState {
-  fields: string[];
-}
-
-const initialState: StreamState = {
-  fields: [],
-};
-
-function streamReducer(
-  state: StreamState,
-  action: AiopsExplainLogRateSpikesApiAction | AiopsExplainLogRateSpikesApiAction[]
-): StreamState {
-  if (Array.isArray(action)) {
-    return action.reduce(streamReducer, state);
-  }
-
-  switch (action.type) {
-    case API_ACTION_NAME.ADD_FIELDS:
-      return {
-        fields: [...state.fields, ...action.payload],
-      };
-    default:
-      return state;
-  }
-}
+import { initialState, streamReducer } from './stream_reducer';
 
 export const ExplainLogRateSpikes: FC = () => {
   const { start, data, isRunning } = useStreamFetchReducer(
