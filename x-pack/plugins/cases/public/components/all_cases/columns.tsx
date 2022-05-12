@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
@@ -54,10 +55,6 @@ const MediumShadeText = styled.p`
 
 const Spacer = styled.span`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
-
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
 `;
 
 const renderStringField = (field: string, dataTestSubj: string) =>
@@ -205,8 +202,8 @@ export const useCasesColumns = ({
       name: i18n.TAGS,
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
-          return (
-            <TagWrapper>
+          const badges = (
+            <EuiBadgeGroup data-test-subj="case-table-column-tags">
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
@@ -216,7 +213,17 @@ export const useCasesColumns = ({
                   {tag}
                 </EuiBadge>
               ))}
-            </TagWrapper>
+            </EuiBadgeGroup>
+          );
+
+          return (
+            <EuiToolTip
+              data-test-subj="case-table-column-tags-tooltip"
+              position="left"
+              content={badges}
+            >
+              {badges}
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();

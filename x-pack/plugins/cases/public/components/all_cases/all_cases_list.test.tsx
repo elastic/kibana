@@ -215,6 +215,24 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should show a tooltip with all tags when hovered', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.hover(result.queryAllByTestId('case-table-column-tags')[0]);
+
+    await waitFor(() => {
+      expect(result.getByTestId('case-table-column-tags-tooltip')).toBeTruthy();
+    });
+  });
+
   it('should render empty fields', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
