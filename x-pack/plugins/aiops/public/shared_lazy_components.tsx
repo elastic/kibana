@@ -7,7 +7,7 @@
 
 import React, { FC, Suspense } from 'react';
 
-import { EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
 
 const ExplainLogRateSpikesLazy = React.lazy(() => import('./components/explain_log_rate_spikes'));
 const SingleEndpointStreamingDemoLazy = React.lazy(
@@ -16,7 +16,7 @@ const SingleEndpointStreamingDemoLazy = React.lazy(
 
 const LazyWrapper: FC = ({ children }) => (
   <EuiErrorBoundary>
-    <Suspense fallback={<div>LOADING</div>}>{children}</Suspense>
+    <Suspense fallback={<EuiLoadingContent lines={3} />}>{children}</Suspense>
   </EuiErrorBoundary>
 );
 
