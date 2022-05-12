@@ -83,6 +83,8 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     )
   );
 
+  metricVis.addArgument('labelFont', buildExpression(`font size="14" align="center"`));
+
   if (colorsRange && colorsRange.length > 1) {
     const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
     const palette = buildExpressionFunction('palette', {
