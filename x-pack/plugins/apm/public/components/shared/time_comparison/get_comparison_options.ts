@@ -9,6 +9,11 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
+export enum ComparisonOptionEnum {
+  Time = 'time',
+  False = 'false',
+  MlBounds = 'mlBounds',
+}
 export enum TimeRangeComparisonEnum {
   WeekBefore = 'week',
   DayBefore = 'day',
@@ -41,7 +46,7 @@ function formatDate({
   )} - ${previousPeriodEnd.format(dateFormat)}`;
 }
 
-function getSelectOptions({
+function getTimeRangeSelectOptions({
   comparisonTypes,
   start,
   end,
@@ -120,10 +125,19 @@ export function getComparisonOptions({
     comparisonTypes = [TimeRangeComparisonEnum.PeriodBefore];
   }
 
-  return getSelectOptions({
+  const timeComparisonOptions = getTimeRangeSelectOptions({
     comparisonTypes,
     start: momentStart,
     end: momentEnd,
     msDiff,
   });
+  return [
+    ...timeComparisonOptions,
+    {
+      value: ComparisonOptionEnum.MlBounds,
+      text: i18n.translate('xpack.apm.comparison.mlExpectedBounds', {
+        defaultMessage: 'Expected bounds',
+      }),
+    },
+  ];
 }

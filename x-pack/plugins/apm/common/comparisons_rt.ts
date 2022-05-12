@@ -7,6 +7,10 @@
 
 import * as t from 'io-ts';
 
-export const offsetRt = t.partial({
-  offset: t.string,
+export const comparisonRt = t.type({
+  comparison: t.union([
+    t.literal('mlBounds'),
+    t.literal('time'),
+    t.literal('false'),
+  ]),
 });

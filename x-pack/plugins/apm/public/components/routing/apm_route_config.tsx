@@ -10,6 +10,7 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { toBooleanRt } from '@kbn/io-ts-utils';
+import { comparisonRt } from '../../../common/comparisons_rt';
 import { Breadcrumb } from '../app/breadcrumb';
 import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
@@ -94,12 +95,14 @@ const apmRoutes = {
             }),
             t.partial({
               serviceGroup: t.string,
+              comparison: t.string,
             }),
             t.partial({
               refreshPaused: t.union([t.literal('true'), t.literal('false')]),
               refreshInterval: t.string,
             }),
             offsetRt,
+            comparisonRt,
           ]),
         }),
       },

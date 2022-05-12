@@ -15,7 +15,10 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../links/url_helpers';
-import { getComparisonOptions } from './get_comparison_options';
+import {
+  ComparisonOptionEnum,
+  getComparisonOptions,
+} from './get_comparison_options';
 
 const PrependContainer = euiStyled.div`
   display: flex;
@@ -31,19 +34,15 @@ export function TimeComparison() {
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset, mlExpectedBounds },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset, comparison },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const comparisonOptions = useMemo(
-    () => [
-      ...getComparisonOptions({ start, end }),
-      { text: 'Expected bounds', value: 'ml_expected_bounds' },
-    ],
-    []
+    () => getComparisonOptions({ start, end }),
+    [start, end]
   );
-
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
     ({ value }) => value === offset
   );
@@ -51,7 +50,10 @@ export function TimeComparison() {
   // Replaces type when current one is no longer available in the select options
   if (comparisonOptions.length !== 0 && !isSelectedComparisonTypeAvailable) {
     urlHelpers.replace(history, {
-      query: { offset: comparisonOptions[0].value },
+      query: {
+        offset: comparisonOptions[0].value,
+        comparison: ComparisonOptionEnum.Time,
+      },
     });
     return null;
   }
@@ -60,9 +62,9 @@ export function TimeComparison() {
     <EuiSelect
       fullWidth={isSmall}
       data-test-subj="comparisonSelect"
-      disabled={!comparisonEnabled}
+      disabled={comparison === ComparisonOptionEnum.False}
       options={comparisonOptions}
-      value={mlExpectedBounds === true ? 'ml_expected_bounds' : offset}
+      value={comparison === ComparisonOptionEnum.Time ? offset : comparison}
       prepend={
         <PrependContainer>
           <EuiCheckbox
@@ -77,14 +79,18 @@ export function TimeComparison() {
                 trackApmEvent({
                   metric: 'time_comparison_disabled',
                 });
+                urlHelpers.push(history, {
+                  query: {
+                    comparison: ComparisonOptionEnum.False,
+                  },
+                });
+              } else {
+                urlHelpers.push(history, {
+                  query: {
+                    comparison: ComparisonOptionEnum.Time,
+                  },
+                });
               }
-              urlHelpers.push(history, {
-                query: {
-                  comparisonEnabled: Boolean(
-                    nextComparisonEnabledValue
-                  ).toString(),
-                },
-              });
             }}
           />
         </PrependContainer>
@@ -93,17 +99,17 @@ export function TimeComparison() {
         trackApmEvent({
           metric: `time_comparison_type_change_${e.target.value}`,
         });
-        if (e.target.value === 'ml_expected_bounds') {
+        if (e.target.value === ComparisonOptionEnum.MlBounds) {
           urlHelpers.push(history, {
             query: {
-              mlExpectedBounds: 'true',
+              comparison: ComparisonOptionEnum.MlBounds,
             },
           });
         } else {
           urlHelpers.push(history, {
             query: {
               offset: e.target.value,
-              mlExpectedBounds: 'false',
+              comparison: ComparisonOptionEnum.Time,
             },
           });
         }

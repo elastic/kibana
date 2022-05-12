@@ -59,6 +59,14 @@ export function RedirectWithOffset({
         to={qs.stringifyUrl({
           url: location.pathname,
           query: {
+            comparison: getComparisonEnabled({
+              core,
+              urlComparisonEnabled: urlComparisonEnabled
+                ? toBoolean(urlComparisonEnabled as string)
+                : undefined,
+            })
+              ? 'time'
+              : 'FALSE',
             comparisonEnabled,
             ...(dayOrWeekOffset ? { offset: dayOrWeekOffset } : {}),
             ...queryRest,
