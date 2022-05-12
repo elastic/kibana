@@ -53,7 +53,7 @@ import { DEPLOYMENT_STATE, TRAINED_MODEL_TYPE } from '../../../../common/constan
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { MLSavedObjectsSpacesList } from '../../components/ml_saved_objects_spaces_list';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { TestTrainedModelFlyout, isTestable } from './test_models';
+import { TestTrainedModelFlyout, isTestable, isTestEnabled } from './test_models';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -184,10 +184,8 @@ export const ModelsList: FC<Props> = ({
         }
       }
 
-      // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchModelsStats(
-        newItems.filter((v) => v.model_type.includes(TRAINED_MODEL_TYPE.PYTORCH))
-      );
+      // Need to fetch state for all models to enable/disable actions
+      await fetchModelsStats(newItems);
 
       setItems(newItems);
 
@@ -484,6 +482,7 @@ export const ModelsList: FC<Props> = ({
           isPrimary: true,
           available: isTestable,
           onClick: setShowTestFlyout,
+          enabled: isTestEnabled,
         },
       ] as Array<Action<ModelItem>>)
     );

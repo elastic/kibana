@@ -189,6 +189,13 @@ Object {
               '99.0': 26.0,
             },
           },
+          percentileAlerts: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 22.0,
+              '99.0': 22.0,
+            },
+          },
           aggsByType: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
@@ -203,6 +210,13 @@ Object {
                     '99.0': 26.0,
                   },
                 },
+                percentileAlerts: {
+                  values: {
+                    '50.0': 10.0,
+                    '90.0': 22.0,
+                    '99.0': 22.0,
+                  },
+                },
               },
               {
                 key: 'logs.alert.document.count',
@@ -212,6 +226,13 @@ Object {
                     '50.0': 10.0,
                     '90.0': 10.0,
                     '99.0': 10.0,
+                  },
+                },
+                percentileAlerts: {
+                  values: {
+                    '50.0': 5.0,
+                    '90.0': 13.0,
+                    '99.0': 13.0,
                   },
                 },
               },
@@ -281,6 +302,25 @@ Object {
         p99: {
           '__index-threshold': 26,
           logs__alert__document__count: 10,
+        },
+      },
+      alertsPercentiles: {
+        p50: 10,
+        p90: 22,
+        p99: 22,
+      },
+      alertsPercentilesByType: {
+        p50: {
+          '__index-threshold': 10,
+          logs__alert__document__count: 5,
+        },
+        p90: {
+          '__index-threshold': 22,
+          logs__alert__document__count: 13,
+        },
+        p99: {
+          '__index-threshold': 22,
+          logs__alert__document__count: 13,
         },
       },
     });
@@ -387,6 +427,13 @@ Object {
               '99.0': 26.0,
             },
           },
+          percentileAlerts: {
+            values: {
+              '50.0': 3.0,
+              '90.0': 22.0,
+              '99.0': 22.0,
+            },
+          },
         },
         {
           key: 'logs.alert.document.count',
@@ -398,11 +445,25 @@ Object {
               '99.0': 10.0,
             },
           },
+          percentileAlerts: {
+            values: {
+              '50.0': 5.0,
+              '90.0': 16.0,
+              '99.0': 16.0,
+            },
+          },
         },
         {
           key: 'document.test.',
           doc_count: 1,
           percentileScheduledActions: {
+            values: {
+              '50.0': null,
+              '90.0': null,
+              '99.0': null,
+            },
+          },
+          percentileAlerts: {
             values: {
               '50.0': null,
               '90.0': null,
@@ -429,6 +490,23 @@ Object {
         '__index-threshold': 26,
         document__test__: 0,
         logs__alert__document__count: 10,
+      },
+    });
+    expect(parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileAlerts.values')).toEqual({
+      p50: {
+        '__index-threshold': 3,
+        document__test__: 0,
+        logs__alert__document__count: 5,
+      },
+      p90: {
+        '__index-threshold': 22,
+        document__test__: 0,
+        logs__alert__document__count: 16,
+      },
+      p99: {
+        '__index-threshold': 22,
+        document__test__: 0,
+        logs__alert__document__count: 16,
       },
     });
   });

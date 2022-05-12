@@ -31,6 +31,7 @@ export const enableFleetServerIfNecessary = async (esClient: Client, version: st
   await esClient
     .index({
       index: FLEET_SERVER_SERVERS_INDEX,
+      refresh: 'wait_for',
       body: {
         agent: {
           id: '12988155-475c-430d-ac89-84dc84b67cd1',

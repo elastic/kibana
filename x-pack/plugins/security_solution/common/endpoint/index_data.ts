@@ -10,7 +10,6 @@ import seedrandom from 'seedrandom';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
-import { merge } from 'lodash';
 import {
   CreatePackagePolicyResponse,
   EPM_API_ROUTES,
@@ -26,6 +25,7 @@ import {
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
+import { mergeAndAppendArrays } from './data_loaders/utils';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 
@@ -105,7 +105,7 @@ export async function indexHostsAndAlerts(
       generator,
     });
 
-    merge(response, indexedHosts);
+    mergeAndAppendArrays(response, indexedHosts);
 
     await indexAlerts({
       client,

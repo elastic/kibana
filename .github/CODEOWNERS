@@ -79,11 +79,11 @@
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/unified_search/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
-/x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
+/src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
 
 ### Observability Plugins
 
@@ -129,6 +129,7 @@
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
 /src/core/types/elasticsearch @elastic/apm-ui
+/packages/elastic-apm-synthtrace/  @elastic/apm-ui
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
@@ -415,6 +416,7 @@
 /x-pack/plugins/security_solution/cypress/integration/urls @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/event_details @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/events_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting-investigations
@@ -497,6 +499,7 @@
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/common/components/ml_popover @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/components/callouts @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/mitre @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules @elastic/security-detections-response-rules

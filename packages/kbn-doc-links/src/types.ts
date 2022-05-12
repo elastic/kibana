@@ -33,6 +33,7 @@ export interface DocLinks {
     readonly metaData: string;
     readonly overview: string;
     readonly tailSamplingPolicies: string;
+    readonly elasticAgent: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -310,6 +311,9 @@ export interface DocLinks {
     gdalTutorial: string;
   }>;
   readonly monitoring: Record<string, string>;
+  readonly reporting: Readonly<{
+    cloudMinimumRequirements: string;
+  }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
@@ -355,7 +359,6 @@ export interface DocLinks {
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     upgradeElasticAgent: string;
-    upgradeElasticAgent712lower: string;
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;
@@ -400,5 +403,7 @@ export interface DocLinks {
   };
   readonly kibanaUpgradeSavedObjects: {
     readonly resolveMigrationFailures: string;
+    readonly repeatedTimeoutRequests: string;
+    readonly routingAllocationDisabled: string;
   };
 }

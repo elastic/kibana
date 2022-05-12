@@ -16,7 +16,7 @@ export const ACTION_VARIABLES = {
   [MESSAGE]: {
     name: MESSAGE,
     description: i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
+      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.message.description',
       {
         defaultMessage: 'A generated message summarizing the currently down monitors',
       }
@@ -25,7 +25,7 @@ export const ACTION_VARIABLES = {
   [MONITOR_WITH_GEO]: {
     name: MONITOR_WITH_GEO,
     description: i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
+      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
       {
         defaultMessage:
           'A generated summary that shows some or all of the monitors detected as "down" by the alert',
@@ -35,7 +35,7 @@ export const ACTION_VARIABLES = {
   [ALERT_REASON_MSG]: {
     name: ALERT_REASON_MSG,
     description: i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.context.alertReasonMessage.description',
+      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.alertReasonMessage.description',
       {
         defaultMessage: 'A concise description of the reason for the alert',
       }
@@ -44,7 +44,7 @@ export const ACTION_VARIABLES = {
   [VIEW_IN_APP_URL]: {
     name: VIEW_IN_APP_URL,
     description: i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description',
+      'xpack.synthetics.alerts.monitorStatus.actionVariables.context.viewInAppUrl.description',
       {
         defaultMessage:
           'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',

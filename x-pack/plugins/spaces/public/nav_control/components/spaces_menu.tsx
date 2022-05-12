@@ -121,7 +121,6 @@ class SpacesMenuUI extends Component<Props, State> {
         key={`spcMenuList`}
         data-search-term={searchTerm}
         className="spcMenu__spacesList"
-        hasFocus={this.state.allowSpacesListFocus}
         initialFocusedItemIndex={this.state.allowSpacesListFocus ? 0 : undefined}
         items={items}
       />

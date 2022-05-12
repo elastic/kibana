@@ -12,7 +12,6 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
 import { UpdateRulesOptions } from './types';
-import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
@@ -39,7 +38,7 @@ export const updateRules = async ({
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule = {
     name: ruleUpdate.name,
-    tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, existingRule.params.immutable),
+    tags: ruleUpdate.tags ?? [],
     params: {
       author: ruleUpdate.author ?? [],
       buildingBlockType: ruleUpdate.building_block_type,

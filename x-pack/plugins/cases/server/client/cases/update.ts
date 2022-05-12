@@ -50,6 +50,7 @@ import {
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
+import { getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -311,37 +312,29 @@ export const update = async (
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email } = user;
     const updatedDt = new Date().toISOString();
     const updatedCases = await caseService.patchCases({
       cases: updateCases.map(({ updateReq, originalCase }) => {
         // intentionally removing owner from the case so that we don't accidentally allow it to be updated
         const { id: caseId, version, owner, ...updateCaseAttributes } = updateReq;
-        let closedInfo = {};
-        if (updateCaseAttributes.status && updateCaseAttributes.status === CaseStatuses.closed) {
-          closedInfo = {
-            closed_at: updatedDt,
-            closed_by: { email, full_name, username },
-          };
-        } else if (
-          updateCaseAttributes.status &&
-          (updateCaseAttributes.status === CaseStatuses.open ||
-            updateCaseAttributes.status === CaseStatuses['in-progress'])
-        ) {
-          closedInfo = {
-            closed_at: null,
-            closed_by: null,
-          };
-        }
+
         return {
           caseId,
           originalCase,
           updatedAttributes: {
             ...updateCaseAttributes,
-            ...closedInfo,
+            ...getClosedInfoForUpdate({
+              user,
+              closedDate: updatedDt,
+              status: updateCaseAttributes.status,
+            }),
+            ...getDurationForUpdate({
+              status: updateCaseAttributes.status,
+              closedAt: updatedDt,
+              createdAt: originalCase.attributes.created_at,
+            }),
             updated_at: updatedDt,
-            updated_by: { email, full_name, username },
+            updated_by: user,
           },
           version,
         };

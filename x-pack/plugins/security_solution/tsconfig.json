@@ -32,7 +32,6 @@
     { "path": "../actions/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../cases/tsconfig.json" },
-    { "path": "../data_enhanced/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../fleet/tsconfig.json" },

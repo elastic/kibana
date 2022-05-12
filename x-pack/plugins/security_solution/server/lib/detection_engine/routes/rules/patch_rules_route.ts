@@ -27,11 +27,7 @@ import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
 import { PartialFilter } from '../../types';
 
-export const patchRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
-) => {
+export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -122,7 +118,6 @@ export const patchRulesRoute = (
         }
 
         const existingRule = await readRules({
-          isRuleRegistryEnabled,
           rulesClient,
           ruleId,
           id,
@@ -192,11 +187,7 @@ export const patchRulesRoute = (
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleExecutionSummary,
-            isRuleRegistryEnabled
-          );
+          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

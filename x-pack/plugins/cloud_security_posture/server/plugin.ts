@@ -6,13 +6,14 @@
  */
 
 import type {
+  KibanaRequest,
+  RequestHandlerContext,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CspAppService } from './lib/csp_app_services';
@@ -32,7 +33,7 @@ import {
   onPackagePolicyPostCreateCallback,
   onPackagePolicyDeleteCallback,
 } from './fleet_integration/fleet_integration';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 
 export interface CspAppContext {
   logger: Logger;
@@ -81,18 +82,26 @@ export class CspPlugin
       ...plugins.fleet,
     });
 
-    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger).then(
-      (_) => initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger)
-    );
-    plugins.fleet.fleetSetupCompleted().then(() => {
+    plugins.fleet.fleetSetupCompleted().then(async () => {
+      const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
+        CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+      );
+
+      // If package is installed we want to make sure all needed assets are installed
+      if (packageInfo) {
+        // noinspection ES6MissingAwait
+        this.initialize(core);
+      }
+
       plugins.fleet.registerExternalCallback(
         'packagePolicyPostCreate',
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          request: KibanaRequest
+          _: KibanaRequest
         ): Promise<PackagePolicy> => {
-          if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+          if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
+            await this.initialize(core);
             const soClient = (await context.core).savedObjects.client;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
           }
@@ -105,7 +114,7 @@ export class CspPlugin
         'postPackagePolicyDelete',
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
-            if (deletedPackagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+            if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
               await onPackagePolicyDeleteCallback(
                 this.logger,
                 deletedPackagePolicy,
@@ -121,4 +130,10 @@ export class CspPlugin
   }
 
   public stop() {}
+
+  async initialize(core: CoreStart): Promise<void> {
+    this.logger.debug('initialize');
+    await initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+  }
 }

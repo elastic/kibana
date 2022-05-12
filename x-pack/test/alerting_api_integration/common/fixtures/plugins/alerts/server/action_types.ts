@@ -31,8 +31,17 @@ export function defineActionTypes(
       throw new Error('this action is intended to fail');
     },
   };
+  const cappedActionType: ActionType = {
+    id: 'test.capped',
+    name: 'Test: Capped',
+    minimumLicenseRequired: 'gold',
+    async executor() {
+      return { status: 'ok', actionId: '' };
+    },
+  };
   actions.registerType(noopActionType);
   actions.registerType(throwActionType);
+  actions.registerType(cappedActionType);
   actions.registerType(getIndexRecordActionType());
   actions.registerType(getDelayedActionType());
   actions.registerType(getFailingActionType());

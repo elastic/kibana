@@ -54,7 +54,7 @@ journey('MonitorDetails', async ({ page, params }: { page: Page; params: any }) 
         'k5tlHm0B0I9WX_CzaNxm',
         'NZtkHm0B0I9WX_Cz89w9',
         'zJtkHm0B0I9WX_CzftsN',
-      ].map((id) => page.waitForSelector(byTestId(`"xpack.uptime.pingList.ping-${id}"`)))
+      ].map((id) => page.waitForSelector(byTestId(`"xpack.synthetics.pingList.ping-${id}"`)))
     );
   });
 });

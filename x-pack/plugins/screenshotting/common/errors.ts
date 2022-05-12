@@ -13,3 +13,5 @@ export class FailedToSpawnBrowserError extends Error {}
 export class BrowserClosedUnexpectedly extends Error {}
 
 export class FailedToCaptureScreenshot extends Error {}
+
+export class InsufficientMemoryAvailableOnCloudError extends Error {}

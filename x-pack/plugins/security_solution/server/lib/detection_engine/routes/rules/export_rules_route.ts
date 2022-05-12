@@ -25,8 +25,7 @@ import { buildSiemResponse } from '../utils';
 export const exportRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ) => {
   router.post(
     {
@@ -58,7 +57,6 @@ export const exportRulesRoute = (
           });
         } else {
           const nonPackagedRulesCount = await getNonPackagedRulesCount({
-            isRuleRegistryEnabled,
             rulesClient,
           });
           if (nonPackagedRulesCount > exportSizeLimit) {
@@ -76,16 +74,9 @@ export const exportRulesRoute = (
                 exceptionsClient,
                 savedObjectsClient,
                 request.body.objects,
-                logger,
-                isRuleRegistryEnabled
+                logger
               )
-            : await getExportAll(
-                rulesClient,
-                exceptionsClient,
-                savedObjectsClient,
-                logger,
-                isRuleRegistryEnabled
-              );
+            : await getExportAll(rulesClient, exceptionsClient, savedObjectsClient, logger);
 
         const responseBody = request.query.exclude_export_details
           ? exportedRulesAndExceptions.rulesNdjson
