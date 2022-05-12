@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // FAILING: https://github.com/elastic/kibana/issues/132049
-  describe.skip('Dashboard options list integration', () => {
+  describe('Dashboard options list integration', () => {
     before(async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
@@ -267,7 +266,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Selections made in control apply to dashboard', async () => {
         it('Shows available options in options list', async () => {
-          await ensureAvailableOptionsEql(allAvailableOptions);
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+          await retry.try(async () => {
+            await ensureAvailableOptionsEql(allAvailableOptions);
+          });
         });
 
         it('Can search options list for available options', async () => {
@@ -305,9 +310,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
           expect(selectionString).to.be('hiss, grr');
-        });
 
-        after(async () => {
           await dashboardControls.optionsListOpenPopover(controlId);
           await dashboardControls.optionsListPopoverClearSelections();
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
