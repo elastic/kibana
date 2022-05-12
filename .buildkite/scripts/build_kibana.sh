@@ -5,9 +5,9 @@ set -euo pipefail
 export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"
-if [[ "${GITHUB_PR_LABELS:-}" == *"ci:build-all-platforms"* ]]; then
+if is_pr_with_label "ci:build-all-platforms"; then
   node scripts/build --all-platforms --skip-os-packages
-elif [[ "${GITHUB_PR_LABELS:-}" == *"ci:build-os-packages"* ]]; then
+elif is_pr_with_label "ci:build-os-packages"; then
   node scripts/build --all-platforms --docker-cross-compile
 else
   node scripts/build
