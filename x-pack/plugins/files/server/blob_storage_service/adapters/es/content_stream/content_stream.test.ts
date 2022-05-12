@@ -30,11 +30,7 @@ describe('ContentStream', () => {
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
-    client.search.mockResponse(
-      set<any>({}, 'hits.hits.0._source', {
-        content: 'some content',
-      })
-    );
+    client.get.mockResponse(set<any>({}, '_source.content', 'some content'));
   });
 
   describe('read', () => {
@@ -46,14 +42,11 @@ describe('ContentStream', () => {
     it('should perform a search using index and the document id', async () => {
       await new Promise((resolve) => stream.once('data', resolve));
 
-      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(client.get).toHaveBeenCalledTimes(1);
 
-      const [[request]] = client.search.mock.calls;
+      const [[request]] = client.get.mock.calls;
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty(
-        'query.constant_score.filter.bool.must.0.term._id',
-        'something'
-      );
+      expect(request).toHaveProperty('id', 'something');
     });
 
     it('should read the document contents', async () => {
@@ -63,7 +56,7 @@ describe('ContentStream', () => {
     });
 
     it('should be an empty stream on empty response', async () => {
-      client.search.mockResponseOnce({} as any);
+      client.get.mockResponseOnce({} as any);
       const onData = jest.fn();
 
       stream.on('data', onData);
@@ -73,7 +66,7 @@ describe('ContentStream', () => {
     });
 
     it('should emit an error event', async () => {
-      client.search.mockRejectedValueOnce('some error');
+      client.get.mockRejectedValueOnce('some error');
 
       stream.read();
       const error = await new Promise((resolve) => stream.once('error', resolve));
@@ -82,12 +75,8 @@ describe('ContentStream', () => {
     });
 
     it('should decode base64 encoded content', async () => {
-      client.search.mockResponseOnce(
-        set<any>(
-          {},
-          'hits.hits.0._source.content',
-          Buffer.from('encoded content').toString('base64')
-        )
+      client.get.mockResponseOnce(
+        set<any>({}, '_source.content', Buffer.from('encoded content').toString('base64'))
       );
       const data = await new Promise((resolve) => base64Stream.once('data', resolve));
 
@@ -95,9 +84,9 @@ describe('ContentStream', () => {
     });
 
     it('should compound content from multiple chunks', async () => {
-      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.content', '12'));
-      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.content', '34'));
-      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.content', '56'));
+      client.get.mockResponseOnce(set<any>({}, '_source.content', '12'));
+      client.get.mockResponseOnce(set<any>({}, '_source.content', '34'));
+      client.get.mockResponseOnce(set<any>({}, '_source.content', '56'));
       stream = getContentStream({
         params: { encoding: 'raw', size: 6 },
       });
@@ -107,34 +96,22 @@ describe('ContentStream', () => {
       }
 
       expect(data).toEqual('123456');
-      expect(client.search).toHaveBeenCalledTimes(3);
+      expect(client.get).toHaveBeenCalledTimes(3);
 
-      const [[request1], [request2], [request3]] = client.search.mock.calls;
+      const [[request1], [request2], [request3]] = client.get.mock.calls;
 
-      expect(request1).toHaveProperty(
-        'query.constant_score.filter.bool.must.0.term._id',
-        'something'
-      );
+      expect(request1).toHaveProperty('index', 'somewhere');
+      expect(request1).toHaveProperty('id', 'something');
       expect(request2).toHaveProperty('index', 'somewhere');
-      expect(request2).toHaveProperty(
-        'query.constant_score.filter.bool.must.0.term._id',
-        'something.1'
-      );
+      expect(request2).toHaveProperty('id', 'something.1');
       expect(request3).toHaveProperty('index', 'somewhere');
-      expect(request3).toHaveProperty(
-        'query.constant_score.filter.bool.must.0.term._id',
-        'something.2'
-      );
+      expect(request3).toHaveProperty('id', 'something.2');
     });
 
     it('should stop reading on empty chunk', async () => {
-      client.search.mockResponseOnce(
-        set<any>({}, 'hits.hits.0._source', {
-          content: '12',
-        })
-      );
-      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.content', '34'));
-      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.content', ''));
+      client.get.mockResponseOnce(set<any>({}, '_source.content', '12'));
+      client.get.mockResponseOnce(set<any>({}, '_source.content', '34'));
+      client.get.mockResponseOnce(set<any>({}, '_source.content', ''));
       stream = getContentStream({ params: { encoding: 'raw', size: 12 } });
       let data = '';
       for await (const chunk of stream) {
@@ -142,13 +119,13 @@ describe('ContentStream', () => {
       }
 
       expect(data).toEqual('1234');
-      expect(client.search).toHaveBeenCalledTimes(3);
+      expect(client.get).toHaveBeenCalledTimes(3);
     });
 
     it('should read until chunks are present when there is no size', async () => {
-      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.content', '12'));
-      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.content', '34'));
-      client.search.mockResponseOnce({} as any);
+      client.get.mockResponseOnce(set<any>({}, '_source.content', '12'));
+      client.get.mockResponseOnce(set<any>({}, '_source.content', '34'));
+      client.get.mockResponseOnce({} as any);
       stream = getContentStream({ params: { size: undefined, encoding: 'raw' } });
       let data = '';
       for await (const chunk of stream) {
@@ -156,20 +133,20 @@ describe('ContentStream', () => {
       }
 
       expect(data).toEqual('1234');
-      expect(client.search).toHaveBeenCalledTimes(3);
+      expect(client.get).toHaveBeenCalledTimes(3);
     });
 
     it('should decode every chunk separately', async () => {
-      client.search.mockResponseOnce(
-        set<any>({}, 'hits.hits.0._source.content', Buffer.from('12').toString('base64'))
+      client.get.mockResponseOnce(
+        set<any>({}, '_source.content', Buffer.from('12').toString('base64'))
       );
-      client.search.mockResponseOnce(
-        set<any>({}, 'hits.hits.0._source.content', Buffer.from('34').toString('base64'))
+      client.get.mockResponseOnce(
+        set<any>({}, '_source.content', Buffer.from('34').toString('base64'))
       );
-      client.search.mockResponseOnce(
-        set<any>({}, 'hits.hits.0._source.content', Buffer.from('56').toString('base64'))
+      client.get.mockResponseOnce(
+        set<any>({}, '_source.content', Buffer.from('56').toString('base64'))
       );
-      client.search.mockResponseOnce(set<any>({}, 'hits.hits.0._source.content', ''));
+      client.get.mockResponseOnce(set<any>({}, '_source.content', ''));
       base64Stream = getContentStream({ params: { size: 12 } });
       let data = '';
       for await (const chunk of base64Stream) {

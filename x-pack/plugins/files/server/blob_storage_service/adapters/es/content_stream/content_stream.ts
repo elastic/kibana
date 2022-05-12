@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { errors } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults, get } from 'lodash';
@@ -113,34 +113,34 @@ export class ContentStream extends Duplex {
     if (!this.id) {
       throw new Error('No document ID provided. Cannot read chunk.');
     }
-    const id = this.getNextChunkId(this.chunksRead);
+    const id = this.getChunkId(this.chunksRead);
 
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
     try {
-      const response = await this.client.search<FileChunkDocument>({
-        _source_includes: ['content'],
+      const response = await this.client.get<FileChunkDocument>({
+        id,
         index: this.index,
-        query: {
-          constant_score: {
-            filter: {
-              bool: {
-                must: [{ term: { _id: id } }],
-              },
-            },
-          },
-        },
-        size: 1,
+        _source_includes: ['content'],
       });
-      const hits = response?.hits?.hits?.[0];
-
-      return hits?._source?.content;
+      return response?._source?.content;
     } catch (e) {
-      if (e instanceof errors.ResponseError && e.statusCode === 404) {
-        return null;
+      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
+        const readingHeadChunk = this.chunksRead <= 0;
+        if (this.isSizeUnknown() && !readingHeadChunk) {
+          // Assume there is no more content to read.
+          return null;
+        }
+        if (readingHeadChunk) {
+          this.logger.error(`File not found (id: ${this.getHeadChunkId()}).`);
+        }
       }
       throw e;
     }
+  }
+
+  private isSizeUnknown(): boolean {
+    return this.parameters.size < 0;
   }
 
   private isRead() {
@@ -175,11 +175,13 @@ export class ContentStream extends Duplex {
   }
 
   private async removeChunks() {
+    const id = this.getHeadChunkId();
+    this.logger.debug(`Clearing existing chunks for ${id}`);
     await this.client.deleteByQuery({
       index: this.index,
       query: {
         bool: {
-          should: [{ match: { head_chunk_id: this.id } }, { match: { _id: this.id } }],
+          should: [{ match: { head_chunk_id: id } }, { match: { _id: id } }],
           minimum_should_match: 1,
         },
       },
@@ -190,24 +192,33 @@ export class ContentStream extends Duplex {
     return this.id;
   }
 
-  private getNextChunkId(chunkNumber = 0) {
+  public getBytesWritten(): number {
+    return this.bytesWritten;
+  }
+
+  private getHeadChunkId() {
     if (!this.id) {
       this.id = this.puid.generate();
     }
-    return chunkNumber === 0 ? this.id : `${this.id}.${chunkNumber}`;
+    return this.id;
+  }
+
+  private getChunkId(chunkNumber = 0) {
+    const id = this.getHeadChunkId();
+    return chunkNumber === 0 ? id : `${id}.${chunkNumber}`;
   }
 
   private async writeChunk(content: string) {
-    const id = this.getNextChunkId(this.chunksWritten);
+    const chunkId = this.getChunkId(this.chunksWritten);
 
-    this.logger.debug(`Writing chunk #${this.chunksWritten} (${id}).`);
+    this.logger.debug(`Writing chunk #${this.chunksWritten} (${chunkId}).`);
 
     await this.client.index<FileChunkDocument>({
-      id,
+      id: chunkId,
       index: this.index,
       document: {
         content,
-        head_chunk_id: this.chunksWritten > 0 ? this.id : undefined,
+        head_chunk_id: this.chunksWritten > 0 ? this.getHeadChunkId() : undefined,
       },
     });
   }
@@ -312,7 +323,7 @@ function getContentStream({ client, id, index, logger, parameters }: ContentStre
   return new ContentStream(client, id, index, logger, parameters);
 }
 
-type WritableContentStream = Writable & Pick<ContentStream, 'getDocumentId'>;
+type WritableContentStream = Writable & Pick<ContentStream, 'getDocumentId' | 'getBytesWritten'>;
 
 export function getWritableContentStream(args: ContentStreamArgs): WritableContentStream {
   return getContentStream(args);

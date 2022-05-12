@@ -13,18 +13,22 @@ import type { BlobStorage } from '../../types';
 import { mappings } from './mappings';
 import { getWritableContentStream, getReadableContentStream } from './content_stream';
 
-const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
+export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 const pipeline = promisify(_pipeline);
 
 export class ElasticsearchBlobStorage implements BlobStorage {
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
   private readonly indexName = BLOB_STORAGE_SYSTEM_INDEX_NAME;
+  private setupComplete = false;
 
-  // @ts-ignore FIXME: Added this functionality prematurely, not being used anywhere yet
-  private async createIndex() {
+  private async createIndexIfNotExists(): Promise<void> {
+    if (this.setupComplete) {
+      return;
+    }
     if (await this.esClient.indices.exists({ index: this.indexName })) {
       this.logger.debug(`${this.indexName} already exists.`);
+      this.setupComplete = true;
       return;
     }
 
@@ -41,6 +45,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
           mappings,
         },
       });
+      this.setupComplete = true;
     } catch (e) {
       if (e instanceof errors.ResponseError && e.statusCode === 400) {
         this.logger.warn('Unable to create blob storage index, it may have been created already.');
@@ -49,7 +54,14 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  async upload(src: Readable): Promise<{ id: string }> {
+  async upload(src: Readable): Promise<{ id: string; size: number }> {
+    try {
+      await this.createIndexIfNotExists();
+    } catch (e) {
+      this.logger.error(`Could not create ${this.indexName}: ${e}`);
+      throw e;
+    }
+
     try {
       const dest = getWritableContentStream({
         id: undefined, // We are creating a new file
@@ -63,6 +75,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
       await pipeline(src, dest);
       return {
         id: dest.getDocumentId()!,
+        size: dest.getBytesWritten(),
       };
     } catch (e) {
       this.logger.error(`Could not write chunks to Elasticsearch: ${e}`);
@@ -70,7 +83,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
-  async download(id: string): Promise<Readable> {
+  async download({ id, size }: { id: string; size?: number }): Promise<Readable> {
     return getReadableContentStream({
       id,
       client: this.esClient,
@@ -78,6 +91,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
       logger: this.logger,
       parameters: {
         encoding: 'base64',
+        size,
       },
     });
   }

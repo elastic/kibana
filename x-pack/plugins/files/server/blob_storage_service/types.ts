@@ -15,7 +15,7 @@ import type { Readable } from 'stream';
 export interface BlobStorage {
   upload(content: Readable): Promise<{ id: string }>;
 
-  download(id: string): Promise<Readable>;
+  download(args: { id: string; size?: number }): Promise<Readable>;
 
   delete(id: string): Promise<void>;
 }
