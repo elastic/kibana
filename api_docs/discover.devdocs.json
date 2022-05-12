@@ -1224,20 +1224,6 @@
     "misc": [
       {
         "parentPluginId": "discover",
-        "id": "def-common.APP_ID",
-        "type": "string",
-        "tags": [],
-        "label": "APP_ID",
-        "description": [],
-        "signature": [
-          "\"discover\""
-        ],
-        "path": "src/plugins/discover/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
         "id": "def-common.CONTEXT_DEFAULT_SIZE_SETTING",
         "type": "string",
         "tags": [],

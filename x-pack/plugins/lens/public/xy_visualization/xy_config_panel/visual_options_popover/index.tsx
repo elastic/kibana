@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ValidLayer } from '@kbn/expression-xy-plugin/common';
 import { ToolbarPopover, TooltipWrapper, ValueLabelsSettings } from '../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
@@ -67,9 +66,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
     ['area_stacked', 'area', 'area_percentage_stacked'].includes(seriesType)
   );
 
-  const isHistogramSeries = Boolean(
-    hasHistogramSeries(dataLayers as ValidLayer[], datasourceLayers)
-  );
+  const isHistogramSeries = Boolean(hasHistogramSeries(dataLayers, datasourceLayers));
 
   const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
   const isFittingEnabled = hasNonBarSeries;
