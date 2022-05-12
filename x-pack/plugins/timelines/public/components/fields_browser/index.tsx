@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import type { Store } from 'redux';
-import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n-react';
 import { StatefulFieldsBrowser } from '../t_grid/toolbar/fields_browser';
 import { FieldBrowserProps } from '../../../common/types/fields_browser';
@@ -20,22 +18,15 @@ export type {
 
 const EMPTY_BROWSER_FIELDS = {};
 
-export type FieldBrowserWrappedComponentProps = FieldBrowserProps & {
-  store: Store;
-};
-
-export const FieldBrowserWrappedComponent = (props: FieldBrowserWrappedComponentProps) => {
-  const { store, ...restProps } = props;
+export const FieldBrowserWrappedComponent = (props: FieldBrowserProps) => {
   const fieldsBrowseProps = {
-    ...restProps,
-    browserFields: restProps.browserFields ?? EMPTY_BROWSER_FIELDS,
+    ...props,
+    browserFields: props.browserFields ?? EMPTY_BROWSER_FIELDS,
   };
   return (
-    <Provider store={store}>
       <I18nProvider>
         <StatefulFieldsBrowser {...fieldsBrowseProps} />
       </I18nProvider>
-    </Provider>
   );
 };
 

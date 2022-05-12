@@ -16,11 +16,13 @@ import type {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../common/search_strategy';
-import type {
+import {
   ColumnHeaderOptions,
   SortColumnTimeline,
   SortDirection,
+  TimelineId,
 } from '../../../../common/types/timeline';
+import { defaultHeaders } from './column_headers/default_headers';
 
 /**
  * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field
@@ -205,3 +207,8 @@ export const hasCellActions = ({
   columnId: string;
   disabledCellActions: string[];
 }) => !disabledCellActions.includes(columnId);
+
+export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
+  timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
+    ? defaultHeaders.find((c) => c.id === fieldId) ?? {}
+    : {};

@@ -10,8 +10,6 @@ import React from 'react';
 import { TestProviders } from '../../../../mock';
 import { Search } from './search';
 
-const timelineId = 'test';
-
 describe('Search', () => {
   test('it renders the field search input with the expected placeholder text when the searchInput prop is empty', () => {
     const wrapper = mount(
@@ -20,7 +18,6 @@ describe('Search', () => {
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -39,7 +36,6 @@ describe('Search', () => {
           isSearching={false}
           onSearchInputChange={jest.fn()}
           searchInput={searchInput}
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -54,7 +50,6 @@ describe('Search', () => {
           isSearching={true}
           onSearchInputChange={jest.fn()}
           searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );
@@ -71,7 +66,6 @@ describe('Search', () => {
           isSearching={false}
           onSearchInputChange={onSearchInputChange}
           searchInput=""
-          timelineId={timelineId}
         />
       </TestProviders>
     );

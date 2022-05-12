@@ -9,16 +9,8 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders, mockBrowserFields, defaultHeaders } from '../../../../mock';
-import { mockGlobalState } from '../../../../mock/global_state';
-import { tGridActions } from '../../../../store/t_grid';
-
 import { FieldsBrowser, FieldsBrowserComponentProps } from './field_browser';
 
-import { createStore, State } from '../../../../types';
-import { createSecuritySolutionStorageMock } from '../../../../mock/mock_local_storage';
-
-const mockDispatch = jest.fn();
-const timelineId = 'test';
 const onHide = jest.fn();
 const testProps: FieldsBrowserComponentProps = {
   columnHeaders: [],
@@ -36,8 +28,6 @@ const testProps: FieldsBrowserComponentProps = {
   onToggleColumn: jest.fn(),
   onUpdateColumns: jest.fn(),
 };
-const { storage } = createSecuritySolutionStorageMock();
-
 describe('FieldsBrowser', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,13 +72,6 @@ describe('FieldsBrowser', () => {
     );
 
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(mockDispatch).toBeCalledWith(
-      tGridActions.updateColumns({
-        id: timelineId,
-        columns: defaultHeaders,
-      })
-    );
   });
 
   test('it invokes onHide when the user clicks the Reset Fields button', () => {
@@ -167,47 +150,16 @@ describe('FieldsBrowser', () => {
     expect(onSearchInputChange).toBeCalledWith(inputText);
   });
 
-  test('does not render the CreateFieldButton when it is provided but does not have a dataViewId', () => {
+  test('it renders the CreateFieldButton', () => {
     const MyTestComponent = () => <div>{'test'}</div>;
 
     const wrapper = mount(
-      <TestProviders>
         <FieldsBrowser
           {...testProps}
           options={{
             createFieldButton: MyTestComponent,
           }}
         />
-      </TestProviders>
-    );
-
-    expect(wrapper.find(MyTestComponent).exists()).toBeFalsy();
-  });
-
-  test('it renders the CreateFieldButton when it is provided and have a dataViewId', () => {
-    const state: State = {
-      ...mockGlobalState,
-      timelineById: {
-        ...mockGlobalState.timelineById,
-        test: {
-          ...mockGlobalState.timelineById.test,
-          dataViewId: 'security-solution-default',
-        },
-      },
-    };
-    const store = createStore(state, storage);
-
-    const MyTestComponent = () => <div>{'test'}</div>;
-
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <FieldsBrowser
-          {...testProps}
-          options={{
-            createFieldButton: MyTestComponent,
-          }}
-        />
-      </TestProviders>
     );
 
     expect(wrapper.find(MyTestComponent).exists()).toBeTruthy();

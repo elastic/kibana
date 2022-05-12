@@ -150,7 +150,7 @@ export const getFieldColumns = ({
   getFieldTableColumns,
   onHide,
 }: {
-  onToggleColumn: (id: string) => void;
+  onToggleColumn?: (id: string) => void;
   highlight?: string;
   getFieldTableColumns?: GetFieldTableColumns;
   onHide: () => void;
@@ -166,7 +166,7 @@ export const getFieldColumns = ({
           data-test-subj={`field-${name}-checkbox`}
           data-colindex={1}
           id={name}
-          onChange={() => onToggleColumn(name)}
+          onChange={onToggleColumn ? () => onToggleColumn(name) : () => {}}
         />
       </EuiToolTip>
     ),

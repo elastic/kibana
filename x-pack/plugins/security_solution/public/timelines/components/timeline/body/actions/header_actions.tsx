@@ -76,10 +76,8 @@ const ActionsContainer = styled.div`
 `;
 
 const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
-  width,
   browserFields,
   columnHeaders,
-  isEventViewer = false,
   isSelectAllChecked,
   onSelectAll,
   showEventsSelect,

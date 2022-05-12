@@ -75,10 +75,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
         return getLastUpdatedLazy(props);
       },
       getFieldBrowser: (props: FieldBrowserProps) => {
-        return getFieldsBrowserLazy(props, {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          store: this._store!,
-        });
+        return getFieldsBrowserLazy(props);
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;

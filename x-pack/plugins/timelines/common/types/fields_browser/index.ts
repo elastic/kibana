@@ -49,7 +49,7 @@ export interface FieldBrowserProps {
   options?: FieldBrowserOptions;
   /** The width of the field browser */
   width?: number;
-  onUpdateColumns: (columns: ColumnHeaderOptions[]) => void;
-  onToggleColumn: (id: string) => void;
+  onUpdateColumns?: (columns: ColumnHeaderOptions[]) => void;
+  onToggleColumn?: (id: string) => void;
   defaultColumns?: ColumnHeaderOptions[];
 }

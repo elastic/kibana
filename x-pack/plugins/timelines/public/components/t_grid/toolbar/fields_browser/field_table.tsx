@@ -30,7 +30,7 @@ export interface FieldTableProps {
   /** when true, show only the the selected field */
   filterSelectedEnabled: boolean;
   onFilterSelectedChange: (enabled: boolean) => void;
-  onToggleColumn: (id: string) => void;
+  onToggleColumn?: (id: string) => void;
   /**
    * Optional function to customize field table columns
    */
