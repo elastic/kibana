@@ -37,6 +37,20 @@ export interface FleetAuthz {
     executePackageAction: boolean;
     readPackageActionResult: boolean;
   };
+
+  packagePrivileges?: {
+    [packageName: string]: {
+      managePackagePolicy: boolean;
+      actions: {
+        [key: string]: {
+          executePackageAction: boolean;
+        };
+      };
+      spaces: {
+        [key: string]: boolean;
+      };
+    };
+  };
 }
 
 export interface FleetPackageAuthz {

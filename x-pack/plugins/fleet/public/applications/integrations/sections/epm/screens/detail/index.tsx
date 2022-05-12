@@ -115,8 +115,8 @@ export function Detail() {
   const getPackageInstallStatus = useGetPackageInstallStatus();
 
   const canInstallPackages =
-    authz.integrations.installPackages || authz.packages?.managePackagePolicy;
-  // || (authz.packages?.managePackagePolicy && authz.packages?.packageName === packageInfo?.name);
+    authz.integrations.installPackages ||
+    (packageInfo?.name && authz.packagePrivileges?.[packageInfo?.name]?.managePackagePolicy);
   const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
 
   const CustomAssets = useUIExtension(packageInfo?.name ?? '', 'package-detail-assets');
