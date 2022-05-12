@@ -22,39 +22,29 @@ export function useFetchRule({ ruleId, http }: FetchRuleProps) {
 
   const fetchRuleSummary = useCallback(async () => {
     try {
-      isCancelledRef.current = false;
-      abortCtrlRef.current.abort();
-      abortCtrlRef.current = new AbortController();
       const [rule, ruleTypes] = await Promise.all([
         loadRule({
           http,
           ruleId,
-          signal: abortCtrlRef.current.signal,
         }),
         loadRuleTypes({ http }),
       ]);
 
-      if (!isCancelledRef.current) {
-        const ruleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
-        setRuleSummary((oldState: FetchRule) => ({
-          ...oldState,
-          isRuleLoading: false,
-          rule,
-          ruleType,
-        }));
-      }
+      const ruleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
+      setRuleSummary((oldState: FetchRule) => ({
+        ...oldState,
+        isRuleLoading: false,
+        rule,
+        ruleType,
+      }));
     } catch (error) {
-      if (!isCancelledRef.current) {
-        if (error.name !== 'AbortError') {
-          setRuleSummary((oldState: FetchRule) => ({
-            ...oldState,
-            isRuleLoading: false,
-            errorRule: RULE_LOAD_ERROR(
-              error instanceof Error ? error.message : typeof error === 'string' ? error : ''
-            ),
-          }));
-        }
-      }
+      setRuleSummary((oldState: FetchRule) => ({
+        ...oldState,
+        isRuleLoading: false,
+        errorRule: RULE_LOAD_ERROR(
+          error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+        ),
+      }));
     }
   }, [ruleId, http]);
   useEffect(() => {
