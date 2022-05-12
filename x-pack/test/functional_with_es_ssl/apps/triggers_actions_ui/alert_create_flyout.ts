@@ -267,6 +267,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
+
+      // and discard changes to continue to next tests
+      await testSubjects.click('cancelSaveRuleButton');
+      await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
     });
 
     it('should successfully test valid es_query alert', async () => {
