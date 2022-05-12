@@ -65,6 +65,11 @@ export const defineExplainLogRateSpikesRoute = (
 
       async function pushField() {
         setTimeout(() => {
+          if (shouldStop) {
+            end();
+            return;
+          }
+
           const field = fields.pop();
 
           if (field !== undefined) {
