@@ -18,10 +18,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
-import {
-  getPerformBulkActionSchemaMock,
-  getPerformBulkActionEditSchemaMock,
-} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
