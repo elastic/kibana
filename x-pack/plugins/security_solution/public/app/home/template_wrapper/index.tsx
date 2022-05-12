@@ -25,6 +25,7 @@ import { useShowTimeline } from '../../../common/utils/timeline/use_show_timelin
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
+import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -33,6 +34,7 @@ import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_
 const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   $isShowingTimelineOverlay?: boolean;
   $isTimelineBottomBarVisible?: boolean;
+  $isPolicySettingsVisible?: boolean;
 }>`
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
@@ -59,6 +61,17 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
       }
     }
   `}
+
+  // If the policy settings bottom bar is visible add padding to the navigation
+  ${({ $isPolicySettingsVisible }) =>
+    $isPolicySettingsVisible &&
+    `
+    @media (min-width: 768px) {
+      .kbnPageTemplateSolutionNav {
+        padding-bottom: ${gutterTimeline};
+      }
+    }
+  `}
 `;
 
 interface SecuritySolutionPageWrapperProps {
@@ -68,6 +81,7 @@ interface SecuritySolutionPageWrapperProps {
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
   React.memo(({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
+    const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
@@ -94,6 +108,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
       <StyledKibanaPageTemplate
         $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
+        $isPolicySettingsVisible={isPolicySettingsVisible}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={
           userHasSecuritySolutionVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
