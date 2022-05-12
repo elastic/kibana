@@ -12,13 +12,16 @@ import { transformRule } from './common_transformations';
 
 export async function loadRule({
   http,
+  signal,
   ruleId,
 }: {
   http: HttpSetup;
+  signal: AbortSignal;
   ruleId: string;
 }): Promise<Rule> {
   const res = await http.get<AsApiContract<Rule>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}`
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}`,
+    { signal }
   );
   return transformRule(res);
 }

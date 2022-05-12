@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
@@ -34,29 +34,44 @@ export function useFetchLast24hAlerts({ http, features, ruleId }: UseFetchLast24
     last24hAlerts: 0,
     errorLast24hAlerts: undefined,
   });
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
   const fetchLast24hAlerts = useCallback(async () => {
+    isCancelledRef.current = false;
+    abortCtrlRef.current.abort();
+    abortCtrlRef.current = new AbortController();
     try {
       if (!features) return;
       const { index } = await fetchIndexNameAPI({
         http,
         features,
       });
-
-      const { error, alertsCount } = await fetchLast24hAlertsAPI({ http, index, ruleId });
+      const { error, alertsCount } = await fetchLast24hAlertsAPI({
+        http,
+        index,
+        ruleId,
+        signal: abortCtrlRef.current.signal,
+      });
       if (error) throw error;
-      setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
-        ...oldState,
-        last24hAlerts: alertsCount,
-        isLoading: false,
-      }));
+      if (!isCancelledRef.current) {
+        setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
+          ...oldState,
+          last24hAlerts: alertsCount,
+          isLoading: false,
+        }));
+      }
     } catch (error) {
-      setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
-        ...oldState,
-        isLoading: false,
-        errorLast24hAlerts: RULE_LOAD_ERROR(
-          error instanceof Error ? error.message : typeof error === 'string' ? error : ''
-        ),
-      }));
+      if (!isCancelledRef.current) {
+        if (error.name !== 'AbortError') {
+          setLast24hAlerts((oldState: FetchLast24hAlerts) => ({
+            ...oldState,
+            isLoading: false,
+            errorLast24hAlerts: RULE_LOAD_ERROR(
+              error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+            ),
+          }));
+        }
+      }
     }
   }, [http, features, ruleId]);
   useEffect(() => {
@@ -88,16 +103,19 @@ export async function fetchLast24hAlertsAPI({
   http,
   index,
   ruleId,
+  signal,
 }: {
   http: HttpSetup;
   index: string;
   ruleId: string;
+  signal: AbortSignal;
 }): Promise<{
   error: string | null;
   alertsCount: number;
 }> {
   try {
     const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+      signal,
       body: JSON.stringify({
         index,
         query: {
