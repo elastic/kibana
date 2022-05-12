@@ -24,9 +24,9 @@ export const FieldBrowserWrappedComponent = (props: FieldBrowserProps) => {
     browserFields: props.browserFields ?? EMPTY_BROWSER_FIELDS,
   };
   return (
-      <I18nProvider>
-        <StatefulFieldsBrowser {...fieldsBrowseProps} />
-      </I18nProvider>
+    <I18nProvider>
+      <StatefulFieldsBrowser {...fieldsBrowseProps} />
+    </I18nProvider>
   );
 };
 

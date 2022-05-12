@@ -55,8 +55,8 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** show the field browser */
   const [show, setShow] = useState(false);
 
-  console.log(columnHeaders)
-  console.log(browserFields)
+  console.log(columnHeaders);
+  console.log(browserFields);
 
   // debounced function to apply the input filter
   // will delay the call to setAppliedFilterInput by INPUT_TIMEOUT ms

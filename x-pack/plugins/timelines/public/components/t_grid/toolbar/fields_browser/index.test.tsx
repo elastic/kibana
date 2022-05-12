@@ -33,10 +33,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should NOT render the fields browser until the Fields button is clicked', () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-          />
+          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
         </TestProviders>
       );
 
@@ -46,10 +43,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should render the fields browser when the Fields button is clicked', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-          />
+          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
         </TestProviders>
       );
       result.getByTestId('show-field-browser').click();
@@ -63,10 +57,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should add a selected category, which creates the category badge', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-          />
+          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
         </TestProviders>
       );
 
@@ -88,10 +79,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should remove a selected category, which deletes the category badge', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-          />
+          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
         </TestProviders>
       );
 
@@ -117,10 +105,7 @@ describe('StatefulFieldsBrowser', () => {
     it('should update the available categories according to the search input', async () => {
       const result = render(
         <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-          />
+          <StatefulFieldsBrowserComponent browserFields={mockBrowserFields} columnHeaders={[]} />
         </TestProviders>
       );
 
@@ -139,5 +124,4 @@ describe('StatefulFieldsBrowser', () => {
       expect(result.queryByTestId('categories-selector-option-client')).toBeInTheDocument();
     });
   });
-
 });
