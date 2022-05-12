@@ -41,7 +41,8 @@
     "embeddable",
     "kibanaReact",
     "kibanaUtils",
-    "lens"
+    "lens",
+    "usageCollection"
   ],
   "extraPublicDirs": [
     "common"
