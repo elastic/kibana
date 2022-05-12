@@ -329,10 +329,7 @@ describe('#setupSavedObjects', () => {
       });
 
       for await (const res of finder.find()) {
-        expect(res.saved_objects[0].error).toHaveProperty(
-          'message',
-          'Decryption error: "Test failure"'
-        );
+        expect(res.saved_objects[0].error).toHaveProperty('message', 'Test failure');
       }
     });
   });

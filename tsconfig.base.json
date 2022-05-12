@@ -295,8 +295,6 @@
       "@kbn/cross-cluster-replication-plugin/*": ["x-pack/plugins/cross_cluster_replication/*"],
       "@kbn/dashboard-enhanced-plugin": ["x-pack/plugins/dashboard_enhanced"],
       "@kbn/dashboard-enhanced-plugin/*": ["x-pack/plugins/dashboard_enhanced/*"],
-      "@kbn/data-enhanced-plugin": ["x-pack/plugins/data_enhanced"],
-      "@kbn/data-enhanced-plugin/*": ["x-pack/plugins/data_enhanced/*"],
       "@kbn/data-visualizer-plugin": ["x-pack/plugins/data_visualizer"],
       "@kbn/data-visualizer-plugin/*": ["x-pack/plugins/data_visualizer/*"],
       "@kbn/discover-enhanced-plugin": ["x-pack/plugins/discover_enhanced"],

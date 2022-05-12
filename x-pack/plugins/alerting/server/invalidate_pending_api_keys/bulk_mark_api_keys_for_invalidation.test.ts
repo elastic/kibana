@@ -47,4 +47,17 @@ describe('bulkMarkApiKeysForInvalidation', () => {
       'Failed to bulk mark list of API keys ["MTIz", "NDU2"] for invalidation: Fail'
     );
   });
+
+  test('should not call savedObjectsClient bulkCreate if list of apiKeys empty', async () => {
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: [] },
+      loggingSystemMock.create().get(),
+      unsecuredSavedObjectsClient
+    );
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+  });
 });

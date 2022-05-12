@@ -33,6 +33,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
+const createAPIKeyMock = jest.fn();
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -42,7 +43,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
+  createAPIKey: createAPIKeyMock,
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -562,7 +563,7 @@ describe('bulkEdit()', () => {
       });
     });
 
-    test('should call bulkMarkApiKeysForInvalidation if apiKey present', async () => {
+    test('should call bulkMarkApiKeysForInvalidation with keys apiKeys to invalidate', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
@@ -581,15 +582,81 @@ describe('bulkEdit()', () => {
       );
     });
 
-    test('should not call bulkMarkApiKeysForInvalidation if apiKey absent', async () => {
+    test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkUpdate failed', async () => {
+      createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [
           {
-            ...existingRule,
-            attributes: { ...existingRule.attributes, apiKey: undefined as unknown as string },
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, enabled: true },
           },
         ],
       });
+
+      unsecuredSavedObjectsClient.bulkUpdate.mockImplementation(() => {
+        throw new Error('Fail');
+      });
+
+      await expect(
+        rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        })
+      ).rejects.toThrow('Fail');
+
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: ['dW5kZWZpbmVkOjExMQ=='] },
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if SO update failed', async () => {
+      createAPIKeyMock.mockReturnValue({ apiKeysEnabled: true, result: { api_key: '111' } });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, enabled: true },
+          },
+        ],
+      });
+
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'alert',
+            attributes: {
+              enabled: true,
+              tags: ['foo'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              params: { index: ['test-index-*'] },
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+            },
+            references: [],
+            version: '123',
+            error: {
+              error: 'test failure',
+              statusCode: 500,
+              message: 'test failure',
+            },
+          },
+        ],
+      });
+
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
@@ -601,7 +668,11 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: ['dW5kZWZpbmVkOjExMQ=='] },
+        expect.any(Object),
+        expect.any(Object)
+      );
     });
 
     test('should not call create apiKey if rule is disabled', async () => {
@@ -722,6 +793,35 @@ describe('bulkEdit()', () => {
       );
       expect(result.errors[0]).toHaveProperty('rule.id', '1');
       expect(result.errors[0]).toHaveProperty('rule.name', 'my rule name');
+    });
+  });
+
+  describe('attributes validation', () => {
+    test('should not update saved object and return error if SO has interval less than minimum configured one when enforce = true', async () => {
+      rulesClient = new RulesClient({
+        ...rulesClientParams,
+        minimumScheduleInterval: { value: '3m', enforce: true },
+      });
+
+      unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [],
+        paramsModifier: async (params) => {
+          params.index = ['test-index-*'];
+
+          return params;
+        },
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.rules).toHaveLength(0);
+      expect(result.errors[0].message).toBe(
+        'Error updating rule: the interval is less than the allowed minimum interval of 3m'
+      );
     });
   });
 

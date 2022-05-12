@@ -5,16 +5,17 @@
  * 2.0.
  */
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { transformActionParams } from './transform_action_params';
-import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
-import { AlertInstanceContext, AlertInstanceState, RuleTypeParams, RuleTypeState } from '../types';
-
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
+import {
+  ActionsCompletion,
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeParams,
+  RuleTypeState,
+} from '../types';
+import { CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 
 export type ExecutionHandler<ActionGroupIds extends string> = (
   options: ExecutionHandlerOptions<ActionGroupIds>
@@ -41,7 +42,7 @@ export function createExecutionHandler<
   apiKey,
   ruleType,
   kibanaBaseUrl,
-  eventLogger,
+  alertingEventLogger,
   request,
   ruleParams,
   supportsEphemeralTasks,
@@ -65,7 +66,7 @@ export function createExecutionHandler<
     actionSubgroup,
     context,
     state,
-    alertExecutionStore,
+    ruleRunMetricsStore,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!ruleTypeActionGroups.has(actionGroup)) {
@@ -109,9 +110,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.incrementNumberOfGeneratedActions(actions.length);
-
-    const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
+    ruleRunMetricsStore.incrementNumberOfGeneratedActions(actions.length);
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
@@ -119,10 +118,10 @@ export function createExecutionHandler<
     for (const action of actions) {
       const { actionTypeId } = action;
 
-      alertExecutionStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 
-      if (alertExecutionStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
-        alertExecutionStore.setTriggeredActionsStatusByConnectorType({
+      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
           actionTypeId,
           status: ActionsCompletion.PARTIAL,
         });
@@ -133,17 +132,17 @@ export function createExecutionHandler<
       }
 
       if (
-        alertExecutionStore.hasReachedTheExecutableActionsLimitByConnectorType({
+        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
           actionTypeId,
           actionsConfigMap,
         })
       ) {
-        if (!alertExecutionStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
+        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
           logger.debug(
             `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
           );
         }
-        alertExecutionStore.setTriggeredActionsStatusByConnectorType({
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
           actionTypeId,
           status: ActionsCompletion.PARTIAL,
         });
@@ -157,8 +156,8 @@ export function createExecutionHandler<
         continue;
       }
 
-      alertExecutionStore.incrementNumberOfTriggeredActions();
-      alertExecutionStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
+      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
@@ -183,8 +182,6 @@ export function createExecutionHandler<
         ],
       };
 
-      // TODO would be nice  to add the action name here, but it's not available
-      const actionLabel = `${actionTypeId}:${action.id}`;
       if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
         ephemeralActionsToSchedule--;
         try {
@@ -198,39 +195,13 @@ export function createExecutionHandler<
         await actionsClient.enqueueExecution(enqueueOptions);
       }
 
-      const event = createAlertEventLogRecordObject({
-        ruleId,
-        ruleType: ruleType as UntypedNormalizedRuleType,
-        consumer: ruleConsumer,
-        action: EVENT_LOG_ACTIONS.executeAction,
-        executionId,
-        spaceId,
-        instanceId: alertId,
-        group: actionGroup,
-        subgroup: actionSubgroup,
-        ruleName,
-        savedObjects: [
-          {
-            type: 'alert',
-            id: ruleId,
-            typeId: ruleType.id,
-            relation: SAVED_OBJECT_REL_PRIMARY,
-          },
-          {
-            type: 'action',
-            id: action.id,
-            typeId: actionTypeId,
-          },
-        ],
-        ...namespace,
-        message: `alert: ${ruleLabel} instanceId: '${alertId}' scheduled ${
-          actionSubgroup
-            ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
-            : `actionGroup: '${actionGroup}'`
-        } action: ${actionLabel}`,
+      alertingEventLogger.logAction({
+        id: action.id,
+        typeId: actionTypeId,
+        alertId,
+        alertGroup: actionGroup,
+        alertSubgroup: actionSubgroup,
       });
-
-      eventLogger.logEvent(event);
     }
   };
 }

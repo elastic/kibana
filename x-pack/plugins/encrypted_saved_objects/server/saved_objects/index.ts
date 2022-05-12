@@ -115,7 +115,7 @@ export function setupSavedObjects({
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
         const savedObject = await internalRepository.get(type, id, options);
 
-        if (service.isRegistered(savedObject.type) === false) {
+        if (!service.isRegistered(savedObject.type)) {
           return savedObject as SavedObject<T>;
         }
 
@@ -145,7 +145,7 @@ export function setupSavedObjects({
             const encryptedSavedObjects = await pMap(
               res.saved_objects,
               async (savedObject) => {
-                if (service.isRegistered(savedObject.type) === false) {
+                if (!service.isRegistered(savedObject.type)) {
                   return savedObject;
                 }
 
@@ -174,11 +174,7 @@ export function setupSavedObjects({
                     descriptor,
                     savedObject.attributes as Record<string, unknown>
                   );
-                  return {
-                    ...savedObject,
-                    attributes: strippedAttrs as T,
-                    error: { ...error, message: `Decryption error: "${error.message}"` },
-                  };
+                  return { ...savedObject, attributes: strippedAttrs as T, error };
                 }
               },
               { concurrency: 50 }

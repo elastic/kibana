@@ -12,6 +12,10 @@ export const bulkMarkApiKeysForInvalidation = async (
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  if (apiKeys.length === 0) {
+    return;
+  }
+
   try {
     const apiKeyIds = apiKeys.map(
       (apiKey) => Buffer.from(apiKey, 'base64').toString().split(':')[0]

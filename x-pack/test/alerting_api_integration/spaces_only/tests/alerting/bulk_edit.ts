@@ -143,5 +143,39 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .send(payload)
         .expect(200, { rules: [], errors: [], total: 0 });
     });
+
+    it('should return mapped params after bulk edit', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({ tags: ['default'], params: { risk_score: 40, severity: 'medium' } })
+        );
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'add',
+            field: 'tags',
+            value: ['tag-1'],
+          },
+        ],
+      };
+
+      const bulkEditResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkEditResponse.body.errors).to.have.length(0);
+      expect(bulkEditResponse.body.rules).to.have.length(1);
+      expect(bulkEditResponse.body.rules[0].mapped_params).to.eql({
+        risk_score: 40,
+        severity: '40-medium',
+      });
+    });
   });
 }

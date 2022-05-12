@@ -7,7 +7,7 @@
 
 export const APM_SERVICE_GROUP_SAVED_OBJECT_TYPE = 'apm-service-group';
 export const SERVICE_GROUP_COLOR_DEFAULT = '#D1DAE7';
-export const MAX_NUMBER_OF_SERVICES_IN_GROUP = 500;
+export const MAX_NUMBER_OF_SERVICE_GROUPS = 500;
 
 export interface ServiceGroup {
   groupName: string;

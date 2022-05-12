@@ -10,27 +10,11 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import { LegendSize, DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 
-enum LegendSizes {
-  AUTO = '0',
-  SMALL = '80',
-  MEDIUM = '130',
-  LARGE = '180',
-  EXTRA_LARGE = '230',
-}
-
-const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
+const legendSizeOptions: Array<{ value: LegendSize; inputDisplay: string }> = [
   {
-    value: LegendSizes.AUTO,
-    inputDisplay: i18n.translate(
-      'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.auto',
-      {
-        defaultMessage: 'Auto',
-      }
-    ),
-  },
-  {
-    value: LegendSizes.SMALL,
+    value: LegendSize.SMALL,
     inputDisplay: i18n.translate(
       'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.small',
       {
@@ -39,7 +23,7 @@ const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
     ),
   },
   {
-    value: LegendSizes.MEDIUM,
+    value: LegendSize.MEDIUM,
     inputDisplay: i18n.translate(
       'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.medium',
       {
@@ -48,7 +32,7 @@ const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
     ),
   },
   {
-    value: LegendSizes.LARGE,
+    value: LegendSize.LARGE,
     inputDisplay: i18n.translate(
       'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.large',
       {
@@ -57,7 +41,7 @@ const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
     ),
   },
   {
-    value: LegendSizes.EXTRA_LARGE,
+    value: LegendSize.EXTRA_LARGE,
     inputDisplay: i18n.translate(
       'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.extraLarge',
       {
@@ -68,15 +52,17 @@ const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
 ];
 
 interface LegendSizeSettingsProps {
-  legendSize?: number;
-  onLegendSizeChange: (size?: number) => void;
+  legendSize?: LegendSize;
+  onLegendSizeChange: (size?: LegendSize) => void;
   isVerticalLegend: boolean;
+  showAutoOption: boolean;
 }
 
 export const LegendSizeSettings = ({
   legendSize,
   onLegendSizeChange,
   isVerticalLegend,
+  showAutoOption,
 }: LegendSizeSettingsProps) => {
   useEffect(() => {
     if (legendSize && !isVerticalLegend) {
@@ -85,16 +71,31 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option) => onLegendSizeChange(Number(option) || undefined),
+    (option) => onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : option),
     [onLegendSizeChange]
   );
+
+  const options = showAutoOption
+    ? [
+        {
+          value: LegendSize.AUTO,
+          inputDisplay: i18n.translate(
+            'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.auto',
+            {
+              defaultMessage: 'Auto',
+            }
+          ),
+        },
+        ...legendSizeOptions,
+      ]
+    : legendSizeOptions;
 
   const legendSizeSelect = (
     <EuiSuperSelect
       fullWidth
       compressed
-      valueOfSelected={legendSize?.toString() ?? LegendSizes.AUTO}
-      options={legendSizeOptions}
+      valueOfSelected={legendSize ?? DEFAULT_LEGEND_SIZE}
+      options={options}
       onChange={onLegendSizeOptionChange}
       disabled={!isVerticalLegend}
     />

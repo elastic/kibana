@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export const APP_ICON = 'discoverApp';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';

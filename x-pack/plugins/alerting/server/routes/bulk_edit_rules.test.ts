@@ -10,6 +10,7 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import { bulkEditInternalRulesRoute } from './bulk_edit_rules';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { SanitizedRule } from '../types';
@@ -163,5 +164,25 @@ describe('bulkEditInternalRulesRoute', () => {
     );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+
+  it('ensures the rule type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    bulkEditInternalRulesRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    rulesClient.bulkEdit.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
+
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
+      'ok',
+      'forbidden',
+    ]);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

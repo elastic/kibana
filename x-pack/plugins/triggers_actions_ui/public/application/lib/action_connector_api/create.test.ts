@@ -18,6 +18,7 @@ describe('createActionConnector', () => {
     const apiResponse = {
       connector_type_id: 'test',
       is_preconfigured: false,
+      is_deprecated: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -28,6 +29,7 @@ describe('createActionConnector', () => {
     const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -40,7 +42,7 @@ describe('createActionConnector', () => {
       Array [
         "/api/actions/connector",
         Object {
-          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"connector_type_id\\":\\"test\\",\\"is_preconfigured\\":false}",
+          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"connector_type_id\\":\\"test\\",\\"is_preconfigured\\":false,\\"is_deprecated\\":false}",
         },
       ]
     `);
