@@ -29,6 +29,7 @@ import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
+import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -75,6 +76,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRuleTagBadge: (props) => {
       return getRuleTagBadgeLazy(props);
+    },
+    getRuleEventLogList: (props) => {
+      return getRuleEventLogListLazy(props);
     },
   };
 }
