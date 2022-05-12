@@ -12,13 +12,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
-import { MonitorAddEditPage } from './components/monitor_add_edit/monitor_add_edit_page';
+import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
+import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { OverviewPage } from './components/overview/overview_page';
 import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
 import { NotFoundPage } from './components/common/pages/not_found';
 import { ServiceAllowedWrapper } from './components/common/wrappers/service_allowed_wrapper';
 import {
   MONITOR_ADD_ROUTE,
+  MONITOR_EDIT_ROUTE,
   MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
@@ -32,6 +34,7 @@ type RouteProps = {
   dataTestSubj: string;
   title: string;
   telemetryId: SyntheticsPage;
+  hideWhenNoData?: boolean;
   pageHeader: {
     pageTitle: string | JSX.Element;
     children?: JSX.Element;
@@ -61,6 +64,7 @@ const getRoutes = (): RouteProps[] => {
       component: () => <OverviewPage />,
       dataTestSubj: 'syntheticsOverviewPage',
       telemetryId: SyntheticsPage.Overview,
+      hideWhenNoData: true,
       pageHeader: {
         pageTitle: (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -114,7 +118,7 @@ const getRoutes = (): RouteProps[] => {
       path: MONITOR_ADD_ROUTE,
       component: () => (
         <ServiceAllowedWrapper>
-          <MonitorAddEditPage />
+          <MonitorAddPage />
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorAddPage',
@@ -127,8 +131,28 @@ const getRoutes = (): RouteProps[] => {
           />
         ),
       },
-      // bottomBar: <MonitorManagementBottomBar />,
-      bottomBarProps: { paddingSize: 'm' as const },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.editMonitorRoute.title', {
+        defaultMessage: 'Edit Monitor | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_EDIT_ROUTE,
+      component: () => (
+        <ServiceAllowedWrapper>
+          <MonitorEditPage />
+        </ServiceAllowedWrapper>
+      ),
+      dataTestSubj: 'syntheticsMonitorEditPage',
+      telemetryId: SyntheticsPage.MonitorAdd,
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.synthetics.editMonitor.pageHeader.title"
+            defaultMessage="Edit Monitor"
+          />
+        ),
+      },
     },
   ];
 };
@@ -161,6 +185,7 @@ export const PageRouter: FC = () => {
           dataTestSubj,
           telemetryId,
           pageHeader,
+          hideWhenNoData,
           ...pageTemplateProps
         }) => (
           <Route path={path} key={telemetryId} exact={true}>
@@ -170,6 +195,7 @@ export const PageRouter: FC = () => {
               <SyntheticsPageTemplateComponent
                 path={path}
                 pageHeader={pageHeader}
+                hideWhenNoData={hideWhenNoData}
                 {...pageTemplateProps}
               >
                 <RouteComponent />

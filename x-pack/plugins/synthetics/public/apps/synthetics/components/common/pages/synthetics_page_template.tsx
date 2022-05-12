@@ -20,6 +20,7 @@ import { useBreakpoints } from '../../../hooks';
 interface Props {
   path: string;
   pageHeader?: EuiPageHeaderProps;
+  hideWhenNoData?: boolean;
 }
 
 const mobileCenteredHeader = `
@@ -32,6 +33,7 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
   path,
   pageHeader,
   children,
+  hideWhenNoData,
   ...pageTemplateProps
 }) => {
   const {
@@ -72,7 +74,7 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
         isMobile={isMobile}
         pageHeader={pageHeader}
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        noDataConfig={!loading ? noDataConfig : undefined}
+        noDataConfig={!loading && hideWhenNoData ? noDataConfig : undefined}
         {...pageTemplateProps}
       >
         {showLoading && <EmptyStateLoading />}
