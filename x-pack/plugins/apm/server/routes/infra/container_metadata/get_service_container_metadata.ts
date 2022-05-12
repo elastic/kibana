@@ -13,12 +13,9 @@ import {
   KUBERNETES_NODE,
   NAMESPACE,
   PHASE,
-  DEPLOYMENT_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 
 type ESResponse = SearchResponse;
-
-export interface ContainerMetadata {}
 
 export const getServiceContainerMetadata = async ({
   esClient,

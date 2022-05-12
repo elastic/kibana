@@ -50,7 +50,6 @@ import {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
 } from '@kbn/fleet-plugin/server';
-import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { APMConfig } from '.';
 import { ApmIndicesConfig } from './routes/settings/apm_indices/get_apm_indices';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -86,7 +85,6 @@ export interface APMPluginSetupDependencies {
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  infra?: InfraPluginSetup;
 }
 
 export interface APMPluginStartDependencies {
@@ -109,5 +107,4 @@ export interface APMPluginStartDependencies {
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
-  infra?: InfraPluginStart;
 }
